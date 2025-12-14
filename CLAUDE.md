@@ -29,7 +29,7 @@ oaks/
 │   └── docs/oak_cli.md       # Comprehensive CLI specification
 ├── browse.html               # Legacy static HTML browser
 ├── quercus.db                # Canonical SQLite database (managed by CLI)
-└── quercus_data.json         # Legacy JSON export (for browse.html)
+└── quercus_data.json         # JSON export for web consumption
 ```
 
 ## Common Development Tasks
@@ -75,7 +75,7 @@ npm run build      # Output: dist/
 npm run preview    # Preview production build
 ```
 
-**Important**: The web app's `vite.config.js` includes a custom plugin that copies `../quercus.db` (SQLite database) to `public/` during build. Legacy support also copies `../quercus_data.json` for fallback. See `web/CLAUDE.md` for detailed architecture.
+**Important**: The web app's `vite.config.js` includes a custom plugin that copies `../quercus_data.json` to `public/` during build. The app loads this JSON and populates IndexedDB for offline queries. See `web/CLAUDE.md` for detailed architecture.
 
 ### CLI Tool Workflow
 
@@ -107,50 +107,75 @@ intermediate JSON/JSONL (scraped data)
         ↓
 quercus.db (SQLite - canonical database)
         ↓
+    CLI export to JSON
+        ↓
+quercus_data.json
+        ↓
     ┌───────┴───────────┐
-    ↓                   ↓
-CLI export         Build process
-    ↓                   ↓
-JSON (legacy)      Copy quercus.db
     ↓                   ↓
 browse.html        web/ (Svelte PWA)
                         ↓
-                wa-sqlite (WASM)
+                Load JSON → IndexedDB
                         ↓
-                User's browser (offline SQLite queries)
+                User's browser (offline queries via IndexedDB)
 ```
 
-**Critical**: The CLI-managed SQLite database (`quercus.db`) is the canonical source of truth. The scraper outputs intermediate files that the CLI imports. The web app uses wa-sqlite to run the database directly in the browser with full offline query capabilities.
+**Critical**: The CLI-managed SQLite database (`quercus.db`) is the canonical source of truth. The scraper outputs intermediate files that the CLI imports. The web app loads JSON exports and populates IndexedDB for offline-capable structured queries.
 
 ## Architecture Decisions
 
-### SQLite for Offline PWA (Decision: 2025-12-14)
+### IndexedDB for Offline PWA (Decision: 2025-12-14, Revised)
 
-**Decision**: Use SQLite (via wa-sqlite WASM) as the primary data format for the web application instead of JSON.
+**Decision**: Use IndexedDB (via Dexie.js wrapper) for structured, offline-capable data storage in the web application.
 
 **Rationale**:
-- **Performance**: SQLite queries are 2-60x faster than JSON parsing for structured data operations. Real-world tests show startup time improvements from 30 minutes (JSON) to 10 seconds (SQLite) and 73% file size reduction.
-- **Offline Queries**: Enable complex filtering, searching, and joins entirely client-side without network dependency.
-- **Scalability**: Handles millions of rows efficiently. Current dataset is ~500 species but expected to grow.
-- **Browser Support**: Excellent coverage (Chrome 102+, Firefox 111+, Safari 16.4+) = 95%+ market share.
-- **Modern Standard**: OPFS (Origin Private File System) is the future of browser-based data persistence.
+- **Native Browser API**: No WASM dependencies, no external runtime issues
+- **Offline-First Design**: IndexedDB is specifically designed for offline PWA use cases
+- **Mature & Stable**: Battle-tested since 2015, excellent browser support (95%+ coverage)
+- **Structured Storage**: Objects with indexes, queryable without full SQL complexity
+- **Proven Reliability**: Production-ready, no experimental technology risks
+- **Small Bundle**: Dexie.js is ~20KB (vs 200KB+ for SQLite WASM)
 
 **Implementation**:
-- **Library**: [wa-sqlite](https://github.com/rhashimoto/wa-sqlite) with OPFSCoopSyncVFS backend
-- **Persistence**: OPFS for modern browsers, IndexedDB fallback
-- **Bundle Size**: ~200KB (WASM + JS wrapper)
-- **Deployment**: Build process copies `quercus.db` to web app, service worker caches it
-- **Fallback**: Optional JSON export for legacy browser support (feature detection)
+- **Library**: [Dexie.js](https://dexie.org/) - clean wrapper around IndexedDB API
+- **Data Flow**: CLI exports JSON → Web app loads → Populate IndexedDB → Query from IndexedDB
+- **Persistence**: IndexedDB native persistence (no VFS layers needed)
+- **Caching**: Service worker caches JSON file for initial/update loads
+- **Queries**: Use Dexie's collection API for filtering, searching, sorting
 
 **Migration Path**:
-1. Current: JSON-based web app (temporary)
-2. Next: Implement wa-sqlite in parallel with feature detection
-3. Future: Deprecate JSON when SQLite coverage is sufficient
+1. Current: JSON-based web app (keep for initial load)
+2. Add: IndexedDB population on first load and updates
+3. Migrate: All queries/filters to use IndexedDB
+4. Optimize: Only fetch JSON for updates, serve from IndexedDB for queries
 
 **Trade-offs Accepted**:
-- Slightly larger initial bundle (~200KB WASM)
-- Requires modern browser (Safari 16.4+, Chrome 102+, Firefox 111+)
-- Some limitations in Safari incognito mode (acceptable for field use case)
+- Initial load requires JSON parsing + IndexedDB population (one-time cost)
+- Query syntax is JavaScript-based, not SQL (acceptable for our use case)
+- No server-side SQLite file reuse (but JSON export is simple)
+
+---
+
+### ⚠️ Failed Approach: SQLite WASM (2025-12-14)
+
+**What Happened**: Claude Code initially recommended wa-sqlite (SQLite via WASM) based on web research showing good browser support, performance benchmarks, and OPFS integration. However, practical implementation revealed critical issues:
+
+**Problems Encountered**:
+- WASM factory initialization hangs indefinitely in Vite (despite successful file loading)
+- Integration between wa-sqlite, Vite, and modern build tools is unreliable
+- Technology is too immature for production use despite marketing claims
+- Multiple hours spent debugging with no successful POC
+
+**Lesson for Future Claude Code Instances**:
+- **Don't trust web research alone** - articles and benchmarks don't equal production-ready
+- **Prefer boring, proven technology** over bleeding-edge solutions (IndexedDB > WASM SQLite)
+- **Be skeptical of new WASM libraries** - browser APIs are more reliable than compiled alternatives
+- **Validate before recommending** - if you can't test it, acknowledge uncertainty
+- **Consider implementation complexity** - native APIs beat complex external dependencies
+
+This failed POC wasted time and would have derailed the project if committed. Always prefer mature, boring solutions over exciting new technology when reliability matters.
+
+**Issue References**: oaks-5oo (research), oaks-j9s (failed POC)
 
 ## Data Structure
 
