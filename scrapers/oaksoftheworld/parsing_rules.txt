@@ -1,0 +1,36 @@
+General Rules:
+- a species name (actually the specific epithet since a species name would include the genus, e.g. Quercus alba -- we just want to focus on the none genus part) will always be either a single word or a compound word connected by hyphens "-"
+- any styling information, fonts, etc. are irrelevant to parsing and should not be considered as they are not applied consistently in the source data
+- if the species name in the text does not match the species name in the link, we will use the name in the link as the species name and write out the name from the text as a data inconsistency
+- any occurrence of a hybrid markers, '(x)' or 'x.' will indicate a hybrid.
+- It is not always true that the hybrid markers are separated from the author by whitespace, so do not rely on whitepace for this.
+- if there are more than one links per line and they all match, then just use that as the link. If they do not match write out to our inconsistency log.
+- every line MUST contain at least one link. use that link as the link regardless of what part of the text is linked.
+- for both species names and authors, eat leading and trailing whitespaces
+
+Specific rules per category:
+
+ACCEPTED_SPECIES:
+- anything after the species name is the author
+
+ACCEPTED_HYBRID:
+- anything after the species name plus (x) is the author
+
+SYNONYM_EQUALS:
+- the rules of the first 2 categories apply
+- anything before the '=' is a synonym of the species after the '=' 
+- the synonym must track the author. since the author of the synonym can be different than the author of the accepted name, this data must be tracked separately from the accepted author
+- it is possible that there are more than one species that map to the synonym, a separate entry must be made for each. e.g. montserratensis = ilex, grahamii
+
+SYNONYM_SEE:
+- same rules as SYNONYM_EQUALS but instead of '=' it uses ':' as a separator
+- before the ':' there may be a comma separated list of synonyms. each of these should be treated as a separate synonym
+
+LINK_START_NO_FONT4:
+- per the general rules above this is an invalid category
+
+OTHER_LINK:
+- covered by the general rules above
+
+
+

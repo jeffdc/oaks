@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oaks of the World - Species Browser</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        header {
+            background: #2c5f2d;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 0.5rem;
+            max-width: 800px;
+        }
+
+        #search-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        #search-button {
+            padding: 0.75rem 1.5rem;
+            background: #4a8f4d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        #search-button:hover {
+            background: #3d7a40;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        #view-container {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .search-info {
+            margin-bottom: 1rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .results-list {
+            list-style: none;
+        }
+
+        .result-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .result-item:hover {
+            background: #f9f9f9;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c5f2d;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-name .genus {
+            font-style: italic;
+        }
+
+        .result-name .species {
+            font-style: italic;
+        }
+
+        .result-name .hybrid-marker {
+            font-style: normal;
+        }
+
+        .result-author {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-match-info {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .detail-view {
+            max-width: 900px;
+        }
+
+        .detail-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #2c5f2d;
+        }
+
+        .detail-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c5f2d;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-name .genus {
+            font-style: italic;
+        }
+
+        .detail-name .species {
+            font-style: italic;
+        }
+
+        .detail-name .hybrid-marker {
+            font-style: normal;
+        }
+
+        .detail-author {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .detail-section {
+            margin-bottom: 2rem;
+        }
+
+        .detail-section h2 {
+            font-size: 1.3rem;
+            color: #2c5f2d;
+            margin-bottom: 0.75rem;
+        }
+
+        .detail-field {
+            margin-bottom: 1rem;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            margin-left: 1rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .synonym-list, .parent-list {
+            list-style: none;
+            margin-left: 1rem;
+        }
+
+        .synonym-list li, .parent-list li {
+            padding: 0.5rem;
+            border-left: 3px solid #4a8f4d;
+            margin-bottom: 0.5rem;
+            background: #f9f9f9;
+        }
+
+        .synonym-name, .parent-name {
+            font-style: italic;
+            font-weight: 600;
+        }
+
+        .other-parent {
+            font-size: 0.9rem;
+            color: #666;
+            margin-left: 0.5rem;
+        }
+
+        .other-parent a {
+            color: #4a8f4d;
+            text-decoration: none;
+            font-style: italic;
+        }
+
+        .other-parent a:hover {
+            text-decoration: underline;
+        }
+
+        .species-link {
+            color: #2c5f2d;
+            text-decoration: none;
+            cursor: pointer;
+            border-bottom: 1px dashed #4a8f4d;
+            transition: all 0.2s;
+        }
+
+        .species-link:hover {
+            color: #4a8f4d;
+            border-bottom-style: solid;
+        }
+
+        .clickable-item {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .clickable-item:hover {
+            background: #e8f5e8;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #2c5f2d;
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .external-link {
+            color: #2c5f2d;
+            word-break: break-all;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #4a8f4d;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+
+        .welcome {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .welcome h2 {
+            color: #2c5f2d;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Oaks of the World - Species Browser</h1>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search species (e.g., 'alb', 'alba', 'rubra')..." />
+            <button id="search-button">Search</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="view-container">
+            <div class="loading">Loading species data...</div>
+        </div>
+    </main>
+
+    <script>
+        // Global state
+        let allSpecies = [];
+        let currentView = 'welcome';
+
+        // Load data on page load
+        async function loadData() {
+            try {
+                const response = await fetch('quercus_data.json');
+                const data = await response.json();
+                // Handle both array and {species: [...]} formats
+                allSpecies = Array.isArray(data) ? data : data.species;
+                console.log(`Loaded ${allSpecies.length} species`);
+
+                // Check URL hash for initial view
+                handleHashChange();
+
+                // If no hash, show welcome
+                if (!window.location.hash) {
+                    showWelcome();
+                }
+            } catch (error) {
+                showError('Failed to load species data: ' + error.message);
+            }
+        }
+
+        // Search functionality
+        function performSearch(query) {
+            if (!query || query.trim().length === 0) {
+                showWelcome();
+                return;
+            }
+
+            query = query.trim().toLowerCase();
+
+            // Search and rank results
+            const results = allSpecies.map(species => {
+                return {
+                    species: species,
+                    score: calculateMatchScore(species, query),
+                    matchInfo: getMatchInfo(species, query)
+                };
+            }).filter(result => result.score > 0);
+
+            // Sort by score (highest first)
+            results.sort((a, b) => b.score - a.score);
+
+            showSearchResults(query, results);
+        }
+
+        function calculateMatchScore(species, query) {
+            let score = 0;
+            const name = species.name.toLowerCase();
+
+            // Name matching
+            if (name === query) {
+                score += 1000; // Exact match
+            } else if (name.startsWith(query)) {
+                score += 500; // Starts with
+            } else if (name.includes(query)) {
+                score += 100; // Contains
+            }
+
+            // Synonym matching
+            if (species.synonyms && species.synonyms.length > 0) {
+                for (const syn of species.synonyms) {
+                    // Handle both string and object formats
+                    const synName = (typeof syn === 'string' ? syn : syn.name).toLowerCase();
+                    if (synName === query) {
+                        score += 800;
+                    } else if (synName.startsWith(query)) {
+                        score += 400;
+                    } else if (synName.includes(query)) {
+                        score += 80;
+                    }
+                }
+            }
+
+            // Parent matching (for hybrids)
+            if (species.parents && species.parents.length > 0) {
+                for (const parent of species.parents) {
+                    const parentName = parent.toLowerCase();
+                    if (parentName === query) {
+                        score += 600;
+                    } else if (parentName.startsWith(query)) {
+                        score += 300;
+                    } else if (parentName.includes(query)) {
+                        score += 60;
+                    }
+                }
+            }
+
+            return score;
+        }
+
+        function getMatchInfo(species, query) {
+            const name = species.name.toLowerCase();
+
+            if (name === query) return 'Exact match';
+            if (name.startsWith(query)) return 'Name starts with query';
+            if (name.includes(query)) return 'Name contains query';
+
+            // Check synonyms
+            if (species.synonyms && species.synonyms.length > 0) {
+                for (const syn of species.synonyms) {
+                    // Handle both string and object formats
+                    const synName = typeof syn === 'string' ? syn : syn.name;
+                    if (synName.toLowerCase() === query || synName.toLowerCase().startsWith(query) || synName.toLowerCase().includes(query)) {
+                        return `Synonym match: ${synName}`;
+                    }
+                }
+            }
+
+            // Check parents
+            if (species.parents && species.parents.length > 0) {
+                for (const parent of species.parents) {
+                    if (parent.toLowerCase().includes(query)) {
+                        return `Parent match: ${parent}`;
+                    }
+                }
+            }
+
+            return '';
+        }
+
+        // View rendering
+        function showWelcome() {
+            const container = document.getElementById('view-container');
+            container.innerHTML = `
+                <div class="welcome">
+                    <h2>Welcome to Oaks of the World</h2>
+                    <p>Search for oak species by name, synonym, or parent species.</p>
+                    <p>Total species in database: ${allSpecies.length}</p>
+                </div>
+            `;
+        }
+
+        function showSearchResults(query, results) {
+            const container = document.getElementById('view-container');
+
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <h2>No results found</h2>
+                        <p>No species matched "${query}"</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="search-info">
+                    Found ${results.length} species matching "${query}"
+                </div>
+                <ul class="results-list">
+            `;
+
+            for (const result of results) {
+                const species = result.species;
+                const hybridMarker = species.is_hybrid ? '×' : '';
+                const authorText = species.author ? species.author : '';
+
+                html += `
+                    <li class="result-item" onclick="navigateToSpecies('${species.name}')">
+                        <div class="result-name">
+                            <span class="genus">Quercus</span>
+                            ${hybridMarker ? '<span class="hybrid-marker">' + hybridMarker + '</span>' : ''}
+                            <span class="species">${species.name}</span>
+                        </div>
+                        ${authorText ? '<div class="result-author">' + authorText + '</div>' : ''}
+                        <div class="result-match-info">${result.matchInfo}</div>
+                    </li>
+                `;
+            }
+
+            html += '</ul>';
+            container.innerHTML = html;
+        }
+
+        function showSpeciesDetail(speciesName) {
+            const species = allSpecies.find(s => s.name === speciesName);
+
+            if (!species) {
+                showError('Species not found: ' + speciesName);
+                return;
+            }
+
+            const container = document.getElementById('view-container');
+            const hybridMarker = species.is_hybrid ? '×' : '';
+
+            let html = `
+                <div class="detail-view">
+                    <a href="#" class="back-link" onclick="history.back(); return false;">← Back to search</a>
+
+                    <div class="detail-header">
+                        <div class="detail-name">
+                            <span class="genus">Quercus</span>
+                            ${hybridMarker ? '<span class="hybrid-marker">' + hybridMarker + '</span>' : ''}
+                            <span class="species">${species.name}</span>
+                        </div>
+                        ${species.author ? '<div class="detail-author">' + species.author + '</div>' : ''}
+                        ${species.is_hybrid ? '<span class="badge">HYBRID</span>' : '<span class="badge">SPECIES</span>'}
+                    </div>
+
+                    <div class="detail-section">
+                        <h2>Basic Information</h2>
+                        <div class="detail-field">
+                            <div class="detail-label">Scientific Name:</div>
+                            <div class="detail-value"><em>Quercus ${hybridMarker} ${species.name}</em> ${species.author || ''}</div>
+                        </div>
+                        <div class="detail-field">
+                            <div class="detail-label">Type:</div>
+                            <div class="detail-value">${species.is_hybrid ? 'Hybrid' : 'Species'}</div>
+                        </div>
+                        ${species.url ? `
+                        <div class="detail-field">
+                            <div class="detail-label">Source URL:</div>
+                            <div class="detail-value"><a href="${species.url}" target="_blank" class="external-link">${species.url}</a></div>
+                        </div>
+                        ` : ''}
+                    </div>
+            `;
+
+            // Parents (for hybrids)
+            if (species.is_hybrid && (species.parent_formula || species.parent1 || species.parent2 || (species.parents && species.parents.length > 0))) {
+                html += '<div class="detail-section"><h2>Parent Species</h2>';
+
+                if (species.parent_formula) {
+                    html += `
+                        <div class="detail-field">
+                            <div class="detail-label">Hybrid Formula:</div>
+                            <div class="detail-value"><em>${species.parent_formula}</em></div>
+                        </div>
+                    `;
+                }
+
+                if (species.parent1) {
+                    html += `
+                        <div class="detail-field">
+                            <div class="detail-label">Parent 1:</div>
+                            <div class="detail-value">
+                    `;
+                    // Extract just the species name from "Quercus alba" format
+                    const parent1Name = species.parent1.replace(/^Quercus\s+/i, '').trim();
+                    html += `
+                                <a href="#species/${encodeURIComponent(parent1Name)}" class="species-link" onclick="navigateToSpecies('${parent1Name.replace(/'/g, "\\'")}'); return false;">
+                                    <em>${species.parent1}</em>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (species.parent2) {
+                    html += `
+                        <div class="detail-field">
+                            <div class="detail-label">Parent 2:</div>
+                            <div class="detail-value">
+                    `;
+                    // Extract just the species name from "Quercus alba" format
+                    const parent2Name = species.parent2.replace(/^Quercus\s+/i, '').trim();
+                    html += `
+                                <a href="#species/${encodeURIComponent(parent2Name)}" class="species-link" onclick="navigateToSpecies('${parent2Name.replace(/'/g, "\\'")}'); return false;">
+                                    <em>${species.parent2}</em>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Alternate format for parents
+                if (species.parents && species.parents.length > 0) {
+                    html += '<ul class="parent-list">';
+                    for (const parent of species.parents) {
+                        html += `
+                            <li class="clickable-item" onclick="navigateToSpecies('${parent.replace(/'/g, "\\'")}')">
+                                <a href="#species/${encodeURIComponent(parent)}" class="species-link" onclick="event.stopPropagation(); navigateToSpecies('${parent.replace(/'/g, "\\'")}'); return false;">
+                                    <span class="parent-name">Quercus ${parent}</span>
+                                </a>
+                            </li>
+                        `;
+                    }
+                    html += '</ul>';
+                }
+
+                html += '</div>';
+            }
+
+            // Conservation Status & Taxonomy
+            if (species.conservation_status || species.taxonomy) {
+                html += '<div class="detail-section"><h2>Classification & Status</h2>';
+
+                if (species.conservation_status) {
+                    html += `
+                        <div class="detail-field">
+                            <div class="detail-label">Conservation Status:</div>
+                            <div class="detail-value"><span class="badge">${species.conservation_status}</span></div>
+                        </div>
+                    `;
+                }
+
+                if (species.taxonomy) {
+                    html += '<div class="detail-field"><div class="detail-label">Taxonomy:</div><div class="detail-value">';
+                    if (species.taxonomy.subgenus) html += `Subgenus: ${species.taxonomy.subgenus}<br>`;
+                    if (species.taxonomy.section) html += `Section: ${species.taxonomy.section}<br>`;
+                    if (species.taxonomy.subsection) html += `Subsection: ${species.taxonomy.subsection}<br>`;
+                    if (species.taxonomy.series) html += `Series: ${species.taxonomy.series}`;
+                    html += '</div></div>';
+                }
+
+                html += '</div>';
+            }
+
+            // Local Names
+            if (species.local_names && species.local_names.length > 0) {
+                html += `
+                    <div class="detail-section">
+                        <h2>Local Names</h2>
+                        <ul class="synonym-list">
+                `;
+                for (const name of species.local_names) {
+                    html += `<li>${name}</li>`;
+                }
+                html += `</ul></div>`;
+            }
+
+            // Morphology sections
+            if (species.growth_habit || species.leaves || species.flowers || species.fruits || species.bark_twigs_buds) {
+                html += '<div class="detail-section"><h2>Morphology</h2>';
+
+                if (species.growth_habit) {
+                    html += `
+                        <div class="detail-field">
+                            <div class="detail-label">Growth Habit:</div>
+                            <div class="detail-value">${species.growth_habit}</div>
+                        </div>
+                    `;
+                }
+
+                if (species.leaves) {
+                    html += `
+                        <div class="detail-field">
+                            <div class="detail-label">Leaves:</div>
+                            <div class="detail-value">${species.leaves}</div>
+                        </div>
+                    `;
+                }
+
+                if (species.flowers) {
+                    html += `
+                        <div class="detail-field">
+                            <div class="detail-label">Flowers:</div>
+                            <div class="detail-value">${species.flowers}</div>
+                        </div>
+                    `;
+                }
+
+                if (species.fruits) {
+                    html += `
+                        <div class="detail-field">
+                            <div class="detail-label">Fruits:</div>
+                            <div class="detail-value">${species.fruits}</div>
+                        </div>
+                    `;
+                }
+
+                if (species.bark_twigs_buds) {
+                    html += `
+                        <div class="detail-field">
+                            <div class="detail-label">Bark, Twigs & Buds:</div>
+                            <div class="detail-value">${species.bark_twigs_buds}</div>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+            }
+
+            // Range & Habitat
+            if (species.range || species.hardiness_habitat) {
+                html += '<div class="detail-section"><h2>Distribution & Habitat</h2>';
+
+                if (species.range) {
+                    html += `
+                        <div class="detail-field">
+                            <div class="detail-label">Range:</div>
+                            <div class="detail-value">${species.range}</div>
+                        </div>
+                    `;
+                }
+
+                if (species.hardiness_habitat) {
+                    html += `
+                        <div class="detail-field">
+                            <div class="detail-label">Hardiness & Habitat:</div>
+                            <div class="detail-value">${species.hardiness_habitat}</div>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+            }
+
+            // Subspecies & Varieties
+            if (species.subspecies_varieties && species.subspecies_varieties.length > 0) {
+                html += `
+                    <div class="detail-section">
+                        <h2>Subspecies & Varieties</h2>
+                        <ul class="synonym-list">
+                `;
+                for (const sub of species.subspecies_varieties) {
+                    html += `<li>${sub}</li>`;
+                }
+                html += `</ul></div>`;
+            }
+
+            // Hybrids (species this is parent of)
+            if (species.hybrids && species.hybrids.length > 0) {
+                html += `
+                    <div class="detail-section">
+                        <h2>Known Hybrids (${species.hybrids.length})</h2>
+                        <ul class="parent-list">
+                `;
+                for (const hybrid of species.hybrids) {
+                    // Find the hybrid species to get its parents
+                    const hybridSpecies = allSpecies.find(s => s.name === hybrid);
+                    let otherParent = null;
+
+                    if (hybridSpecies) {
+                        // Determine which parent is the "other" one (not current species)
+                        const parent1Name = hybridSpecies.parent1 ? hybridSpecies.parent1.replace('Quercus ', '').replace('× ', '').trim() : null;
+                        const parent2Name = hybridSpecies.parent2 ? hybridSpecies.parent2.replace('Quercus ', '').replace('× ', '').trim() : null;
+                        const currentName = species.name;
+
+                        if (parent1Name && parent1Name.toLowerCase() !== currentName.toLowerCase()) {
+                            otherParent = parent1Name;
+                        } else if (parent2Name && parent2Name.toLowerCase() !== currentName.toLowerCase()) {
+                            otherParent = parent2Name;
+                        }
+                    }
+
+                    html += `
+                        <li class="clickable-item" onclick="navigateToSpecies('${hybrid.replace(/'/g, "\\'")}')">
+                            <a href="#species/${encodeURIComponent(hybrid)}" class="species-link" onclick="event.stopPropagation(); navigateToSpecies('${hybrid.replace(/'/g, "\\'")}'); return false;">
+                                <span class="parent-name">Quercus × ${hybrid}</span>
+                            </a>
+                    `;
+
+                    // Show other parent if found
+                    if (otherParent) {
+                        html += `
+                            <span class="other-parent">(with
+                                <a href="#species/${encodeURIComponent(otherParent)}" class="species-link" onclick="event.stopPropagation(); navigateToSpecies('${otherParent.replace(/'/g, "\\'")}'); return false;">
+                                    Quercus ${otherParent}
+                                </a>)
+                            </span>
+                        `;
+                    }
+
+                    html += `
+                        </li>
+                    `;
+                }
+                html += `</ul></div>`;
+            }
+
+            // Closely Related Species
+            if (species.closely_related_to && species.closely_related_to.length > 0) {
+                html += `
+                    <div class="detail-section">
+                        <h2>Closely Related Species</h2>
+                        <ul class="parent-list">
+                `;
+                for (const related of species.closely_related_to) {
+                    html += `
+                        <li class="clickable-item" onclick="navigateToSpecies('${related.replace(/'/g, "\\'")}')">
+                            <a href="#species/${encodeURIComponent(related)}" class="species-link" onclick="event.stopPropagation(); navigateToSpecies('${related.replace(/'/g, "\\'")}'); return false;">
+                                <span class="parent-name">Quercus ${related}</span>
+                            </a>
+                        </li>
+                    `;
+                }
+                html += `</ul></div>`;
+            }
+
+            // Synonyms
+            if (species.synonyms && species.synonyms.length > 0) {
+                html += `
+                    <div class="detail-section">
+                        <h2>Synonyms (${species.synonyms.length})</h2>
+                        <ul class="synonym-list">
+                `;
+                for (const syn of species.synonyms) {
+                    // Handle both string and object formats
+                    const synName = typeof syn === 'string' ? syn : syn.name;
+                    const synAuthor = (typeof syn === 'object' && syn.author) ? ' ' + syn.author : '';
+                    html += `
+                        <li>
+                            <span class="synonym-name">${synName}</span>${synAuthor}
+                        </li>
+                    `;
+                }
+                html += `</ul></div>`;
+            }
+
+            // Miscellaneous
+            if (species.miscellaneous) {
+                html += `
+                    <div class="detail-section">
+                        <h2>Additional Information</h2>
+                        <div class="detail-value">${species.miscellaneous}</div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function showError(message) {
+            const container = document.getElementById('view-container');
+            container.innerHTML = `
+                <div class="no-results">
+                    <h2>Error</h2>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // Navigation
+        function navigateToSpecies(speciesName) {
+            window.location.hash = 'species/' + encodeURIComponent(speciesName);
+        }
+
+        function handleHashChange() {
+            const hash = window.location.hash.slice(1); // Remove #
+
+            if (hash.startsWith('species/')) {
+                const speciesName = decodeURIComponent(hash.slice(8));
+                showSpeciesDetail(speciesName);
+            } else if (hash.startsWith('search/')) {
+                const query = decodeURIComponent(hash.slice(7));
+                document.getElementById('search-input').value = query;
+                performSearch(query);
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+
+            const searchInput = document.getElementById('search-input');
+            const searchButton = document.getElementById('search-button');
+
+            searchButton.addEventListener('click', () => {
+                const query = searchInput.value;
+                if (query.trim()) {
+                    window.location.hash = 'search/' + encodeURIComponent(query);
+                    performSearch(query);
+                }
+            });
+
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const query = searchInput.value;
+                    if (query.trim()) {
+                        window.location.hash = 'search/' + encodeURIComponent(query);
+                        performSearch(query);
+                    }
+                }
+            });
+
+            window.addEventListener('hashchange', handleHashChange);
+        });
+    </script>
+</body>
+</html>

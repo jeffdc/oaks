@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Oak Entry Schema",
+  "description": "Schema for validating Oak Compendium entries",
+  "type": "object",
+  "required": ["scientific_name"],
+  "properties": {
+    "scientific_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The scientific name of the oak (primary key)"
+    },
+    "common_names": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/dataPoint"
+      }
+    },
+    "leaf_color": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/dataPoint"
+      }
+    },
+    "bud_shape": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/dataPoint"
+      }
+    },
+    "leaf_shape": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/dataPoint"
+      }
+    },
+    "bark_texture": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/dataPoint"
+      }
+    },
+    "habitat": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/dataPoint"
+      }
+    },
+    "native_range": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/dataPoint"
+      }
+    },
+    "height": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/dataPoint"
+      }
+    },
+    "synonyms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "definitions": {
+    "dataPoint": {
+      "type": "object",
+      "required": ["value", "source_id"],
+      "properties": {
+        "value": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "page_number": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "enumerations": {
+    "leaf_shape": [
+      "lobed",
+      "entire",
+      "serrated",
+      "toothed"
+    ],
+    "leaf_color": [
+      "green",
+      "dark green",
+      "blue-green",
+      "yellow-green"
+    ],
+    "bud_shape": [
+      "ovoid",
+      "conical",
+      "rounded"
+    ],
+    "bark_texture": [
+      "rough",
+      "furrowed",
+      "scaly",
+      "smooth"
+    ]
+  }
+}

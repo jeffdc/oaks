@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+/* Custom Properties for Consistent Theming */
+:root {
+  /* Color Palette - Nature-inspired with rich greens and earth tones */
+  --color-forest-50: #f0f9f4;
+  --color-forest-100: #dcf3e4;
+  --color-forest-200: #bae6cd;
+  --color-forest-300: #86d4aa;
+  --color-forest-400: #4fb87f;
+  --color-forest-500: #2a9d5f;
+  --color-forest-600: #1e7e4b;
+  --color-forest-700: #19653d;
+  --color-forest-800: #165132;
+  --color-forest-900: #14432a;
+
+  /* Accent colors */
+  --color-oak-brown: #8b6f47;
+  --color-acorn: #a67c52;
+  --color-bark: #6b5747;
+
+  /* Semantic colors */
+  --color-background: #fafaf9;
+  --color-surface: #ffffff;
+  --color-text-primary: #1c1917;
+  --color-text-secondary: #57534e;
+  --color-text-tertiary: #78716c;
+  --color-border: #e7e5e4;
+  --color-border-light: #f5f5f4;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Typography */
+  --font-serif: 'Georgia', 'Cambria', 'Times New Roman', serif;
+}
+
+/* Base Styles */
+body {
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
+}
