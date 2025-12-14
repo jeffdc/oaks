@@ -34,8 +34,10 @@ ENV/
 *~
 .DS_Store
 
-# Scraper progress (temporary files)
-scraper_progress.json
+# Scraper cache and temporary files
+scrapers/**/html_cache/
+scrapers/**/scraper_progress.json
+scrapers/**/data_inconsistencies.log
 
 # Testing
 .pytest_cache/
@@ -44,3 +46,14 @@ htmlcov/
 
 # Logs
 *.log
+
+# Rust build artifacts
+cli/target/
+
+# JavaScript/Node
+web/node_modules/
+web/dist/
+web/.vite/
+
+# macOS
+.DS_Store

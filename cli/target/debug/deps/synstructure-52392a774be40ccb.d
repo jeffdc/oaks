@@ -1,8 +1,0 @@
-/Users/jeff/dev/oak_scraper/cli/target/debug/deps/synstructure-52392a774be40ccb.d: /Users/jeff/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/synstructure-0.13.2/src/lib.rs /Users/jeff/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/synstructure-0.13.2/src/macros.rs
-
-/Users/jeff/dev/oak_scraper/cli/target/debug/deps/libsynstructure-52392a774be40ccb.rlib: /Users/jeff/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/synstructure-0.13.2/src/lib.rs /Users/jeff/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/synstructure-0.13.2/src/macros.rs
-
-/Users/jeff/dev/oak_scraper/cli/target/debug/deps/libsynstructure-52392a774be40ccb.rmeta: /Users/jeff/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/synstructure-0.13.2/src/lib.rs /Users/jeff/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/synstructure-0.13.2/src/macros.rs
-
-/Users/jeff/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/synstructure-0.13.2/src/lib.rs:
-/Users/jeff/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/synstructure-0.13.2/src/macros.rs:
