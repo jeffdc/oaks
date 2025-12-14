@@ -10,9 +10,65 @@
 -- =============================================================================
 -- TAXONOMY TABLES
 -- =============================================================================
--- TODO: Define taxonomy structure (subgenus, section, subsection hierarchy)
--- See issue: oaks-o9i
--- These tables will be referenced by species.taxonomy_* foreign keys
+-- Hierarchical taxonomy structure for oak species
+-- Hierarchy: Genus > Subgenus > Section > Subsection > Complex
+-- All ranks are optional except Genus
+
+CREATE TABLE genera (
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,    -- e.g., "Quercus"
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE subgenera (
+    id INTEGER PRIMARY KEY,
+    genus_id INTEGER NOT NULL REFERENCES genera(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,           -- e.g., "Quercus", "Cerris", "Cyclobalanopsis"
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(genus_id, name)
+);
+
+CREATE INDEX idx_subgenera_genus ON subgenera(genus_id);
+
+CREATE TABLE sections (
+    id INTEGER PRIMARY KEY,
+    subgenus_id INTEGER NOT NULL REFERENCES subgenera(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,           -- e.g., "Lobatae", "Quercus", "Ilex"
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(subgenus_id, name)
+);
+
+CREATE INDEX idx_sections_subgenus ON sections(subgenus_id);
+
+CREATE TABLE subsections (
+    id INTEGER PRIMARY KEY,
+    section_id INTEGER NOT NULL REFERENCES sections(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,           -- e.g., "Coccineae", "Dumosae", "Albae"
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(section_id, name)
+);
+
+CREATE INDEX idx_subsections_section ON subsections(section_id);
+
+CREATE TABLE complexes (
+    id INTEGER PRIMARY KEY,
+    subsection_id INTEGER NOT NULL REFERENCES subsections(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,           -- e.g., "Q. shumardii complex"
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(subsection_id, name)
+);
+
+CREATE INDEX idx_complexes_subsection ON complexes(subsection_id);
 
 -- =============================================================================
 -- CONTROLLED VOCABULARIES
@@ -59,10 +115,12 @@ CREATE TABLE species (
     is_hybrid BOOLEAN NOT NULL DEFAULT FALSE,
     author VARCHAR(500),                  -- Taxonomic authority (e.g., "L. 1753")
 
-    -- Taxonomy (FKs to taxonomy tables - TBD in oaks-o9i)
-    -- taxonomy_subgenus_id INTEGER REFERENCES taxonomy_subgenus(id),
-    -- taxonomy_section_id INTEGER REFERENCES taxonomy_section(id),
-    -- taxonomy_subsection_id INTEGER REFERENCES taxonomy_subsection(id),
+    -- Taxonomy (opinionated/curated classification)
+    genus_id INTEGER NOT NULL REFERENCES genera(id),
+    subgenus_id INTEGER REFERENCES subgenera(id),
+    section_id INTEGER REFERENCES sections(id),
+    subsection_id INTEGER REFERENCES subsections(id),
+    complex_id INTEGER REFERENCES complexes(id),
 
     -- Conservation status (species-level fact)
     conservation_status_id INTEGER REFERENCES conservation_statuses(id),
@@ -83,6 +141,11 @@ CREATE TABLE species (
 
 CREATE INDEX idx_species_name ON species(name);
 CREATE INDEX idx_species_is_hybrid ON species(is_hybrid);
+CREATE INDEX idx_species_genus ON species(genus_id);
+CREATE INDEX idx_species_subgenus ON species(subgenus_id);
+CREATE INDEX idx_species_section ON species(section_id);
+CREATE INDEX idx_species_subsection ON species(subsection_id);
+CREATE INDEX idx_species_complex ON species(complex_id);
 
 -- =============================================================================
 -- SPECIES-SOURCE DATA (Source-Attributed Observations)
@@ -103,6 +166,7 @@ CREATE TABLE species_source_data (
     range TEXT,
     hardiness_habitat TEXT,
     additional_info TEXT,                 -- Miscellaneous notes
+    taxonomy TEXT,                        -- Source-reported taxonomy (free text)
 
     -- Structured data extracted from text (optional, for querying)
     -- Height (from growth_habit)
@@ -193,3 +257,7 @@ INSERT INTO leaf_persistence (name, description) VALUES
     ('deciduous', 'Leaves fall seasonally'),
     ('evergreen', 'Leaves persist year-round'),
     ('semi-evergreen', 'Partially deciduous depending on climate');
+
+-- Genus (seed with Quercus)
+INSERT INTO genera (name, description) VALUES
+    ('Quercus', 'Oak genus containing approximately 600 extant species');
