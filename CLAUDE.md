@@ -177,6 +177,74 @@ This failed POC wasted time and would have derailed the project if committed. Al
 
 **Issue References**: oaks-5oo (research), oaks-j9s (failed POC)
 
+---
+
+### JSON Export Format for Web App (Decision: 2025-12-14)
+
+**Decision**: Use a denormalized, single-file JSON format for CLI-to-web-app data export.
+
+**Format Characteristics**:
+- **Single file**: `quercus_data.json` contains all data
+- **Full export**: Always export complete dataset (no incremental updates)
+- **Denormalized structure**: Embed taxonomy and source data within each species object
+- **Simple updates**: Re-download entire file when updates are available
+
+**Rationale**:
+- **Dataset size**: ~670 species, minimal growth expected (only new sources added over time)
+- **Transport only**: JSON is just a transport format; data is converted to IndexedDB for querying
+- **Simplicity**: Denormalized format is easiest to iterate and populate IndexedDB
+- **File size acceptable**: At this scale (~1-2MB), denormalization overhead is negligible
+- **Future flexibility**: Can split into multiple files later if needed
+
+**JSON Structure**:
+```json
+{
+  "species": [
+    {
+      "name": "alba",
+      "author": "L. 1753",
+      "is_hybrid": false,
+      "conservation_status": "LC",
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": "Quercus",
+        "section": "Quercus",
+        "subsection": null,
+        "complex": null
+      },
+      "parent1": null,
+      "parent2": null,
+      "sources": [
+        {
+          "source_id": 1,
+          "source_name": "Oaks of the World",
+          "source_url": "https://oaksoftheworld.fr/...",
+          "is_preferred": true,
+          "leaves": "...",
+          "flowers": "...",
+          "fruits": "...",
+          "synonyms": [...],
+          "local_names": [...]
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Trade-offs Accepted**:
+- Duplicates taxonomy metadata across species (acceptable at this scale)
+- Must re-download entire file for updates (simple, fast enough for our use case)
+- Larger file size than normalized format (negligible impact)
+
+**Benefits**:
+- Easy to iterate in JavaScript and populate IndexedDB
+- Matches typical display needs (show species with all its data)
+- No complex joins or assembly required on client side
+- Service worker can cache efficiently
+
+**Issue Reference**: oaks-e9p
+
 ## Data Structure
 
 ### Species Object Schema
