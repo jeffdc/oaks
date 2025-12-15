@@ -1,46 +1,70 @@
 # Quercus Database
 
-A comprehensive database and query tool for Quercus (oak) species and their hybrids, scraped from [Oaks of the World](https://oaksoftheworld.fr).
+A comprehensive database and query tool for Quercus (oak) species and their hybrids.
 
 ## Features
 
-- **Scraper**: Python script to extract all oak species and hybrid data
-- **Query Tool**: Static webpage for searching and exploring species relationships
-- **Comprehensive Data**: Includes taxonomy, morphology, distribution, and hybrid parentage
-- **Resume Support**: Scraper automatically resumes from interruptions
+- **682 Species**: Complete iNaturalist Quercus taxonomy with species data
+- **Web Application**: Modern Svelte 5 PWA with offline support
+- **CLI Tool**: Go-based tool for managing taxonomic data
+- **Multi-Source**: Combines data from iNaturalist and Oaks of the World
+- **Offline-First**: Works without internet after initial load
 
 ## Quick Start
 
-### 1. Scrape the Data
+### Browse Species (Web App)
 
 ```bash
-# Navigate to the scraper directory
-cd scrapers/oaksoftheworld
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the scraper
-python3 scraper.py
-
-# Output: ../../quercus_data.json (in root directory)
+cd web
+npm install
+npm run dev
+# Open http://localhost:5173
 ```
 
-The scraper will:
-- Fetch all species from the main list
-- Extract detailed information from each species page
-- Build bidirectional hybrid relationships
-- Save progress automatically (resume on restart)
+### Manage Data (CLI)
 
-See [scrapers/oaksoftheworld/README.md](scrapers/oaksoftheworld/README.md) for detailed scraper documentation.
+```bash
+cd cli
+go build -o oak .
 
-### 2. Browse the Data
+# View taxonomy tree
+./oak taxa list
 
-Open `browse.html` in your browser to:
-- Search for species by name (case-insensitive, partial matching)
-- View all hybrids for a given species with their other parent
-- See parent species for each hybrid
-- Explore detailed species information
+# Search for species
+./oak find alba
+
+# Export to JSON for web app
+./oak export ../quercus_data.json
+```
+
+### Initialize Database from Seed Files
+
+```bash
+cd cli
+
+# Import iNaturalist taxonomy and species
+./oak taxa import --clear data/quercus-taxonomy.yaml
+./oak import-bulk data/quercus-species.yaml --source-id 1
+```
+
+## Data Pipeline
+
+```
+Data Sources                    CLI Tool                      Web App
+─────────────                   ────────                      ───────
+iNaturalist ──────┐
+  (taxonomy)      │
+                  ├──▶ oak_compendium.db ──▶ quercus_data.json ──▶ IndexedDB
+Oaks of the World │         (SQLite)            (JSON export)      (browser)
+  (descriptions) ─┘
+```
+
+1. **Seed Files** (`cli/data/`): iNaturalist taxonomy and species list
+2. **CLI Database**: SQLite database managed by `oak` CLI tool
+3. **JSON Export**: `oak export` generates denormalized JSON for web
+4. **Web App**: Loads JSON into IndexedDB for offline-capable queries
+
+See [CLAUDE.md](CLAUDE.md) for detailed architecture documentation.
 
 ## Scraper Usage
 

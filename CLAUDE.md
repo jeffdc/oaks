@@ -104,23 +104,102 @@ go install .
 
 ## Data Flow Architecture
 
+The complete data pipeline from sources to browser:
+
 ```
-oaksoftheworld.fr (source)
-        ↓
-    scraper.py (extracts)
-        ↓
-quercus_data.json
-        ↓
-    ┌───────┴───────────┐
-    ↓                   ↓
-browse.html        web/ (Svelte PWA)
-                        ↓
-                Load JSON → IndexedDB
-                        ↓
-                User's browser (offline queries via IndexedDB)
+┌─────────────────────────────────────────────────────────────────────┐
+│                         DATA SOURCES                                │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  iNaturalist                      Oaks of the World                 │
+│  (taxonomy + species list)        (descriptive data)                │
+│         │                                │                          │
+│         ▼                                ▼                          │
+│  cli/data/quercus-taxonomy.yaml   scrapers/oaksoftheworld/          │
+│  cli/data/quercus-species.yaml           │                          │
+│         │                                │                          │
+└─────────┼────────────────────────────────┼──────────────────────────┘
+          │                                │
+          ▼                                ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                         CLI TOOL (oak)                              │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  oak taxa import ...          oak import-oaksoftheworld ...         │
+│  oak import-bulk ...                                                │
+│         │                                │                          │
+│         └────────────┬───────────────────┘                          │
+│                      ▼                                              │
+│              oak_compendium.db (SQLite)                             │
+│              ├── taxa (taxonomy hierarchy)                          │
+│              ├── oak_entries (species)                              │
+│              ├── sources (data sources)                             │
+│              └── species_sources (source-attributed data)           │
+│                      │                                              │
+│                      ▼                                              │
+│              oak export quercus_data.json                           │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      quercus_data.json                              │
+│                 (denormalized JSON for web)                         │
+└─────────────────────────────────────────────────────────────────────┘
+                       │
+          ┌────────────┴────────────┐
+          ▼                         ▼
+┌──────────────────┐    ┌─────────────────────────────────────────────┐
+│   browse.html    │    │              WEB APP (Svelte PWA)           │
+│   (legacy)       │    ├─────────────────────────────────────────────┤
+└──────────────────┘    │  1. Fetch quercus_data.json                 │
+                        │  2. Populate IndexedDB (via Dexie.js)       │
+                        │  3. Query from IndexedDB for UI             │
+                        │  4. Service worker caches for offline       │
+                        └─────────────────────────────────────────────┘
+                                        │
+                                        ▼
+                        ┌─────────────────────────────────────────────┐
+                        │         USER'S BROWSER                      │
+                        │  • Offline-capable queries via IndexedDB    │
+                        │  • Service worker serves cached assets      │
+                        └─────────────────────────────────────────────┘
 ```
 
-**Note**: The scraper outputs `quercus_data.json` directly. The web app loads this JSON and populates IndexedDB for offline-capable structured queries. The CLI tool (in development) uses `oak_compendium.db` for its local database.
+### Pipeline Steps
+
+**1. Data Sources**
+- **iNaturalist**: Provides authoritative taxonomy (subgenera, sections, subsections, complexes) and species list. Stored as seed files in `cli/data/`.
+- **Oaks of the World**: Provides rich descriptive data (morphology, distribution, local names). Scraped via Python scripts.
+
+**2. CLI Database (oak_compendium.db)**
+```bash
+# Initialize from seed files
+oak taxa import --clear cli/data/quercus-taxonomy.yaml
+oak import-bulk cli/data/quercus-species.yaml --source-id 1
+
+# Import Oaks of the World data
+oak import-oaksoftheworld <json-file> --source-id 2
+```
+
+**3. JSON Export**
+```bash
+# Generate web-ready JSON
+oak export ../quercus_data.json
+```
+
+**4. Web App Loading**
+- Vite build copies `quercus_data.json` to `public/`
+- App fetches JSON on startup
+- Data populates IndexedDB for structured queries
+- Service worker caches everything for offline use
+
+### Key Design Decisions
+
+- **CLI is the single source of truth**: All data flows through the CLI database
+- **Source attribution**: Every data point is linked to its source (iNaturalist, Oaks of the World, etc.)
+- **Denormalized JSON export**: Optimized for web consumption, not storage efficiency
+- **IndexedDB for offline**: Browser-native storage with query capabilities
 
 ## Architecture Decisions
 
