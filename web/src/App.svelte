@@ -1,12 +1,17 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import { loadSpeciesData, selectedSpecies, isLoading, error, findSpeciesByName } from './lib/dataStore.js';
+  import { loadSpeciesData, selectedSpecies, isLoading, error, findSpeciesByName, searchQuery } from './lib/dataStore.js';
   import Search from './lib/Search.svelte';
   import SpeciesList from './lib/SpeciesList.svelte';
   import SpeciesDetail from './lib/SpeciesDetail.svelte';
+  import TaxonomyTree from './lib/TaxonomyTree.svelte';
   import UpdatePrompt from './lib/UpdatePrompt.svelte';
 
-  let view = 'list'; // 'list' or 'detail'
+  let view = 'list'; // 'list', 'taxonomy', or 'detail'
+  let browseMode = 'list'; // 'list' or 'taxonomy' - remembers preferred browse mode
+
+  // Auto-switch to list when searching, return to browseMode when cleared
+  $: effectiveView = view === 'detail' ? 'detail' : ($searchQuery ? 'list' : browseMode);
 
   onMount(async () => {
     try {
@@ -40,6 +45,11 @@
   function restoreFromHistoryState(state) {
     view = state.view || 'list';
 
+    // Restore browseMode if present
+    if (state.browseMode) {
+      browseMode = state.browseMode;
+    }
+
     if (state.view === 'detail' && state.speciesName) {
       // Find and set the species
       const found = findSpeciesByName(state.speciesName);
@@ -51,13 +61,19 @@
     }
   }
 
+  function setBrowseMode(mode) {
+    browseMode = mode;
+    view = mode;
+    history.pushState({ view: mode, browseMode: mode }, '', mode === 'taxonomy' ? '#taxonomy' : '#');
+  }
+
   function handleSelectSpecies(species) {
     selectedSpecies.set(species);
     view = 'detail';
 
-    // Push new state to history
+    // Push new state to history (include browseMode for back navigation)
     history.pushState(
-      { view: 'detail', speciesName: species.name },
+      { view: 'detail', speciesName: species.name, browseMode },
       '',
       `#${species.name}`
     );
@@ -75,9 +91,9 @@
     selectedSpecies.set(species);
     view = 'detail';
 
-    // Push new state to history
+    // Push new state to history (include browseMode for back navigation)
     history.pushState(
-      { view: 'detail', speciesName: species.name },
+      { view: 'detail', speciesName: species.name, browseMode },
       '',
       `#${species.name}`
     );
@@ -110,8 +126,32 @@
               <p class="text-sm text-white/70 mt-0.5">A comprehensive guide to oak species</p>
             </div>
           </div>
-          <div class="w-full sm:w-auto sm:flex-1 sm:max-w-md ml-auto">
+          <div class="flex items-center gap-3 w-full sm:w-auto sm:flex-1 sm:max-w-lg ml-auto">
             <Search />
+            <div class="flex gap-1">
+              <button
+                on:click={() => setBrowseMode('list')}
+                class="view-toggle"
+                class:active={browseMode === 'list'}
+                aria-label="List view"
+                title="List view"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+              </button>
+              <button
+                on:click={() => setBrowseMode('taxonomy')}
+                class="view-toggle"
+                class:active={browseMode === 'taxonomy'}
+                aria-label="Taxonomy tree view"
+                title="Taxonomy tree view"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h10M4 14h6M4 18h10" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       {/if}
@@ -148,9 +188,11 @@
           </div>
         </div>
       </div>
-    {:else if view === 'list'}
+    {:else if effectiveView === 'list'}
       <SpeciesList onSelectSpecies={handleSelectSpecies} />
-    {:else if view === 'detail' && $selectedSpecies}
+    {:else if effectiveView === 'taxonomy'}
+      <TaxonomyTree onSelectSpecies={handleSelectSpecies} />
+    {:else if effectiveView === 'detail' && $selectedSpecies}
       <div class="rounded-xl overflow-hidden" style="background-color: var(--color-surface); box-shadow: var(--shadow-xl);">
         <SpeciesDetail
           species={$selectedSpecies}
@@ -163,3 +205,29 @@
 
   <UpdatePrompt />
 </div>
+
+<style>
+  .view-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .view-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+
+  .view-toggle.active {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: white;
+  }
+</style>

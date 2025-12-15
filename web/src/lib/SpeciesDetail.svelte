@@ -215,6 +215,10 @@
             <dt>Subsection:</dt>
             <dd>{species.taxonomy.subsection}</dd>
           {/if}
+          {#if species.taxonomy.complex}
+            <dt>Complex:</dt>
+            <dd>Q. {species.taxonomy.complex}</dd>
+          {/if}
           {#if species.taxonomy.series}
             <dt>Series:</dt>
             <dd>{species.taxonomy.series}</dd>
