@@ -17,5 +17,8 @@
     "tailwindcss": "^4.1.17",
     "vite": "^7.2.4",
     "vite-plugin-pwa": "^1.2.0"
+  },
+  "dependencies": {
+    "dexie": "^4.2.1"
   }
 }
