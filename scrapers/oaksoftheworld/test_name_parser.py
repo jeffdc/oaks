@@ -5,12 +5,16 @@ Parses liste.htm and outputs results to a text file for manual inspection
 """
 
 import sys
+from pathlib import Path
 from name_parser import parse_species_list_html
 
-# Configuration
+# Configuration - use project-root-relative paths
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+TMP_SCRAPER_DIR = PROJECT_ROOT / "tmp" / "scraper"
+
 BASE_URL = "https://oaksoftheworld.fr/"
-INPUT_FILE = "html_cache/liste.htm"
-OUTPUT_FILE = "parser_test_results.txt"
+INPUT_FILE = str(TMP_SCRAPER_DIR / "html_cache" / "liste.htm")
+OUTPUT_FILE = str(TMP_SCRAPER_DIR / "parser_test_results.txt")
 
 def main():
     print("="*80)

@@ -30,6 +30,9 @@ oaks/
 │   ├── internal/             # Internal packages (db, models, schema, editor)
 │   ├── go.mod                # cobra, go-sqlite3, yaml.v3, jsonschema
 │   └── docs/oak_cli.md       # CLI specification (historical)
+├── tmp/                      # Temporary/working files (gitignored)
+│   ├── scraper/              # Scraper cache and progress files
+│   └── data/                 # Working data files (e.g., iNaturalist imports)
 ├── browse.html               # Legacy static HTML browser
 ├── quercus.db                # Canonical SQLite database (managed by CLI)
 └── quercus_data.json         # JSON export for web consumption
@@ -321,12 +324,12 @@ This failed POC wasted time and would have derailed the project if committed. Al
 **utils.py** - Infrastructure:
 - `fetch_page()`: HTTP with caching and rate limiting (0.5s delay)
 - Progress tracking: `load_progress()`, `save_progress()`
-- Cache management: `html_cache/` directory
-- Inconsistency logging: `data_inconsistencies.log`
+- Cache management: `tmp/scraper/html_cache/` directory
+- Inconsistency logging: `tmp/scraper/data_inconsistencies.log`
 
 ### Scraper State Management
 
-**Progress File**: `scrapers/oaksoftheworld/scraper_progress.json`
+**Progress File**: `tmp/scraper/scraper_progress.json`
 ```json
 {
   "species_links": [...],      // All URLs to scrape
@@ -457,7 +460,7 @@ go test ./...
 After running scraper, verify:
 1. `quercus_data.json` exists in root directory
 2. JSON is valid: `python3 -m json.tool quercus_data.json > /dev/null`
-3. Check `data_inconsistencies.log` for taxonomic issues
+3. Check `tmp/scraper/data_inconsistencies.log` for taxonomic issues
 4. Test in web app: `cd web && npm run dev`
 
 ### Web App Data Loading
@@ -470,7 +473,7 @@ The web app fetches `/quercus_data.json` at startup. If schema changes:
 
 ### Scraper
 - Rate limiting: 0.5 second delay between requests (hardcoded in `utils.py`)
-- Caching: HTML pages cached in `html_cache/` to avoid re-fetching
+- Caching: HTML pages cached in `tmp/scraper/html_cache/` to avoid re-fetching
 - Use `--no-cache` flag only for testing/debugging
 
 ### Web App
@@ -483,9 +486,9 @@ The web app fetches `/quercus_data.json` at startup. If schema changes:
 
 ### Scraper Issues
 - **SSL errors**: Use `--no-ssl-verify` flag (not recommended)
-- **Stuck progress**: Check `scraper_progress.json`, use `--restart` to clear
-- **Missing data**: Check `data_inconsistencies.log` for parsing issues
-- **Cache problems**: Delete `html_cache/` directory or use `--no-cache`
+- **Stuck progress**: Check `tmp/scraper/scraper_progress.json`, use `--restart` to clear
+- **Missing data**: Check `tmp/scraper/data_inconsistencies.log` for parsing issues
+- **Cache problems**: Delete `tmp/scraper/html_cache/` directory or use `--no-cache`
 
 ### Web App Issues
 - **Data not loading**: Check browser console, verify `quercus_data.json` exists

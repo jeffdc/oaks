@@ -25,7 +25,7 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 - Add docstrings to functions
 - Use meaningful variable names
 - Cache HTML to avoid re-fetching
-- Log data inconsistencies to `data_inconsistencies.log`
+- Log data inconsistencies to `tmp/scraper/data_inconsistencies.log`
 
 ### JavaScript/Svelte (Web App)
 - 2-space indentation

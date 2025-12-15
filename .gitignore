@@ -34,10 +34,8 @@ ENV/
 *~
 .DS_Store
 
-# Scraper cache and temporary files
-scrapers/**/html_cache/
-scrapers/**/scraper_progress.json
-scrapers/**/data_inconsistencies.log
+# Temporary and working files
+tmp/
 
 # Testing
 .pytest_cache/
@@ -61,5 +59,3 @@ web/.vite/
 # Generated files (temp exports, not the main quercus_data.json)
 quercus_export.json
 
-# Working files
-data/inaturalist-taxonomy.dwca/

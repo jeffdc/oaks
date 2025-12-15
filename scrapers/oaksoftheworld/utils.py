@@ -8,13 +8,17 @@ import os
 import json
 import time
 import requests
+from pathlib import Path
 from urllib.parse import urlparse
 
-# Configuration
-CACHE_DIR = "html_cache"
-PROGRESS_FILE = "scraper_progress.json"
-OUTPUT_FILE = "../../quercus_data.json"  # Output to root directory
-INCONSISTENCY_LOG = "data_inconsistencies.log"
+# Configuration - use project-root-relative paths
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+TMP_SCRAPER_DIR = PROJECT_ROOT / "tmp" / "scraper"
+
+CACHE_DIR = str(TMP_SCRAPER_DIR / "html_cache")
+PROGRESS_FILE = str(TMP_SCRAPER_DIR / "scraper_progress.json")
+OUTPUT_FILE = str(PROJECT_ROOT / "quercus_data.json")
+INCONSISTENCY_LOG = str(TMP_SCRAPER_DIR / "data_inconsistencies.log")
 DELAY_SECONDS = 0.25
 
 

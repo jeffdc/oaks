@@ -46,8 +46,9 @@ python3 scraper.py --no-cache
 - `parsing_rules.txt` - Documentation of parsing rules for the species list
 - `requirements.txt` - Python dependencies
 
-## Data Files
+## Data Files (in tmp/scraper/)
 
+All temporary/cache files are stored in `tmp/scraper/` at the project root:
 - `html_cache/` - Cached HTML pages from the website
 - `data_inconsistencies.log` - Log of taxonomic notes and name mismatches
 - `scraper_progress.json` - Progress file (created during scraping)

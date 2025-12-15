@@ -69,9 +69,9 @@ python3 scraper.py --limit=10
 
 ### Output Files
 - `quercus_data.json` - Final structured data (in root directory)
-- `scrapers/oaksoftheworld/scraper_progress.json` - Progress state (can be deleted to restart)
-- `scrapers/oaksoftheworld/data_inconsistencies.log` - Taxonomic notes and name mismatches
-- `scrapers/oaksoftheworld/html_cache/` - Cached HTML pages
+- `tmp/scraper/scraper_progress.json` - Progress state (can be deleted to restart)
+- `tmp/scraper/data_inconsistencies.log` - Taxonomic notes and name mismatches
+- `tmp/scraper/html_cache/` - Cached HTML pages
 
 ## Data Structure
 
