@@ -58,3 +58,6 @@ web/.vite/
 
 # macOS
 .DS_Store
+
+# Generated files
+quercus_export.json
