@@ -611,3 +611,92 @@ func (db *Database) SearchSources(query string) ([]string, error) {
 func (db *Database) BeginTx() (*sql.Tx, error) {
 	return db.conn.Begin()
 }
+
+// ListOakEntries returns all oak entries (for export)
+func (db *Database) ListOakEntries() ([]*models.OakEntry, error) {
+	rows, err := db.conn.Query(
+		`SELECT scientific_name, author, is_hybrid, conservation_status,
+		        subgenus, section, subsection, complex,
+		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms
+		 FROM oak_entries ORDER BY scientific_name`,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list oak entries: %w", err)
+	}
+	defer rows.Close()
+
+	var entries []*models.OakEntry
+	for rows.Next() {
+		var entry models.OakEntry
+		var isHybrid int
+		var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON sql.NullString
+
+		if err := rows.Scan(
+			&entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
+			&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
+			&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan oak entry: %w", err)
+		}
+
+		entry.IsHybrid = isHybrid != 0
+
+		// Unmarshal JSON arrays
+		if hybridsJSON.Valid {
+			json.Unmarshal([]byte(hybridsJSON.String), &entry.Hybrids)
+		}
+		if entry.Hybrids == nil {
+			entry.Hybrids = []string{}
+		}
+
+		if relatedJSON.Valid {
+			json.Unmarshal([]byte(relatedJSON.String), &entry.CloselyRelatedTo)
+		}
+		if entry.CloselyRelatedTo == nil {
+			entry.CloselyRelatedTo = []string{}
+		}
+
+		if subspeciesJSON.Valid {
+			json.Unmarshal([]byte(subspeciesJSON.String), &entry.SubspeciesVarieties)
+		}
+		if entry.SubspeciesVarieties == nil {
+			entry.SubspeciesVarieties = []string{}
+		}
+
+		if synonymsJSON.Valid {
+			json.Unmarshal([]byte(synonymsJSON.String), &entry.Synonyms)
+		}
+		if entry.Synonyms == nil {
+			entry.Synonyms = []string{}
+		}
+
+		entries = append(entries, &entry)
+	}
+
+	return entries, rows.Err()
+}
+
+// GetDataPointsForEntry returns all data points for a given scientific name
+func (db *Database) GetDataPointsForEntry(scientificName string) (map[string][]models.DataPoint, error) {
+	rows, err := db.conn.Query(
+		`SELECT field_name, value, source_id, page_number FROM data_points
+		 WHERE scientific_name = ? ORDER BY field_name, source_id`,
+		scientificName,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get data points: %w", err)
+	}
+	defer rows.Close()
+
+	result := make(map[string][]models.DataPoint)
+	for rows.Next() {
+		var fieldName string
+		var dp models.DataPoint
+		if err := rows.Scan(&fieldName, &dp.Value, &dp.SourceID, &dp.PageNumber); err != nil {
+			return nil, fmt.Errorf("failed to scan data point: %w", err)
+		}
+		result[fieldName] = append(result[fieldName], dp)
+	}
+
+	return result, rows.Err()
+}
