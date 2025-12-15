@@ -248,10 +248,15 @@ func runTaxaList(cmd *cobra.Command, args []string) error {
 			fmt.Printf("%s%s (section)%s\n", secPrefix, sec.Name, fmtAuthor(sec))
 
 			subsections := subsectionsByParent[sec.Name]
-			for j, subsec := range subsections {
+			sectionComplexes := complexesByParent[sec.Name]
+			totalChildren := len(subsections) + len(sectionComplexes)
+			childIdx := 0
+
+			for _, subsec := range subsections {
 				subsecPrefix := secChildPrefix + "├── "
 				subsecChildPrefix := secChildPrefix + "│   "
-				if j == len(subsections)-1 {
+				childIdx++
+				if childIdx == totalChildren {
 					subsecPrefix = secChildPrefix + "└── "
 					subsecChildPrefix = secChildPrefix + "    "
 				}
@@ -265,6 +270,16 @@ func runTaxaList(cmd *cobra.Command, args []string) error {
 					}
 					fmt.Printf("%s%s (complex)%s\n", cpxPrefix, cpx.Name, fmtAuthor(cpx))
 				}
+			}
+
+			// Show complexes directly under section (no subsection)
+			for _, cpx := range sectionComplexes {
+				cpxPrefix := secChildPrefix + "├── "
+				childIdx++
+				if childIdx == totalChildren {
+					cpxPrefix = secChildPrefix + "└── "
+				}
+				fmt.Printf("%s%s (complex)%s\n", cpxPrefix, cpx.Name, fmtAuthor(cpx))
 			}
 		}
 	}
