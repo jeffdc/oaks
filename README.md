@@ -114,7 +114,7 @@ python3 scraper.py --limit=10
       "taxonomy": {
         "subgenus": "Quercus",
         "section": "Quercus",
-        "series": "Albae"
+        "complex": null
       },
       "hybrids": ["Quercus × bebbiana", ...],
       "url": "http://..."
@@ -146,7 +146,7 @@ All species include (when available):
 - **fruits**: Acorn characteristics
 - **bark_twigs_buds**: Bark and twig features
 - **hardiness_habitat**: Growing conditions
-- **taxonomy**: Subgenus, section, series classification
+- **taxonomy**: Subgenus, section, subsection, complex classification
 - **conservation_status**: IUCN status if applicable
 - **subspecies_varieties**: Infraspecific taxa
 - **url**: Link to source page

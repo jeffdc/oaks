@@ -324,47 +324,82 @@ This failed POC wasted time and would have derailed the project if committed. Al
 
 ## Data Structure
 
-### Species Object Schema
+### CLI Database Schema
+
+The SQLite database (`oak_compendium.db`) has four tables:
+
+**oak_entries** (core species data):
+- `scientific_name` (PRIMARY KEY), `author`, `is_hybrid`, `conservation_status`
+- Taxonomy: `subgenus`, `section`, `subsection`, `complex`
+- Relationships: `parent1`, `parent2`, `hybrids`, `closely_related_to`
+- `subspecies_varieties`, `synonyms` (both stored as JSON arrays)
+
+**species_sources** (source-attributed descriptive data):
+- `scientific_name`, `source_id`, `is_preferred`
+- `local_names`, `range`, `growth_habit`
+- `leaves`, `flowers`, `fruits`, `bark_twigs_buds`
+- `hardiness_habitat`, `miscellaneous`, `url`
+
+**taxa** (taxonomy hierarchy):
+- `name`, `level` (subgenus/section/subsection/complex), `parent`, `author`, `notes`, `links`
+
+**sources** (data source registry):
+- `id`, `source_type`, `name`, `description`, `author`, `year`, `url`, `isbn`, `doi`, `notes`
+
+### JSON Export Schema (quercus_data.json)
+
+The `oak export` command produces this denormalized format:
 
 ```json
 {
-  "name": "alba",              // Species name (WITHOUT "Quercus" prefix)
-  "is_hybrid": false,
-  "author": "L. 1753",
-  "synonyms": [
-    {"name": "...", "author": "..."}
-  ],
-  "local_names": ["white oak", "eastern white oak"],
-  "range": "Eastern North America; 0 to 1600 m",
-  "growth_habit": "reaches 25 m high...",
-  "leaves": "8-20 cm long...",
-  "flowers": "...",
-  "fruits": "...",
-  "bark_twigs_buds": "...",
-  "hardiness_habitat": "...",
-  "taxonomy": {
-    "subgenus": "Quercus",
-    "section": "Quercus",
-    "series": "Albae"
-  },
-  "conservation_status": "...",
-  "subspecies_varieties": [...],
-  "hybrids": ["Quercus × bebbiana"],  // Bidirectional relationships
-  "url": "https://oaksoftheworld.fr/...",
-
-  // Hybrid-specific fields:
-  "parent_formula": "alba x macrocarpa",  // Only for hybrids
-  "parent1": "Quercus alba",              // Only for hybrids
-  "parent2": "Quercus macrocarpa"         // Only for hybrids
+  "species": [
+    {
+      "name": "alba",
+      "author": "L. 1753",
+      "is_hybrid": false,
+      "conservation_status": "LC",
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": "Quercus",
+        "section": "Quercus",
+        "subsection": null,
+        "complex": null
+      },
+      "parent1": null,
+      "parent2": null,
+      "hybrids": ["bebbiana"],
+      "closely_related_to": ["stellata"],
+      "subspecies_varieties": ["alba var. latiloba"],
+      "synonyms": ["alba var. repanda"],
+      "sources": [
+        {
+          "source_id": 1,
+          "source_name": "Oaks of the World",
+          "source_url": "https://oaksoftheworld.fr",
+          "is_preferred": true,
+          "local_names": ["white oak", "eastern white oak"],
+          "range": "Eastern North America; 0 to 1600 m",
+          "growth_habit": "reaches 25 m high...",
+          "leaves": "8-20 cm long...",
+          "flowers": "...",
+          "fruits": "...",
+          "bark_twigs_buds": "...",
+          "hardiness_habitat": "...",
+          "miscellaneous": "...",
+          "url": "https://oaksoftheworld.fr/species/alba"
+        }
+      ]
+    }
+  ]
 }
 ```
 
-**Important Conventions**:
+**Key Conventions**:
 - Species names stored WITHOUT "Quercus" prefix (e.g., "alba" not "Quercus alba")
 - Hybrid indicator: `is_hybrid` boolean + `×` in name
 - All fields are optional except `name` and `is_hybrid`
-- Empty/missing fields represented as `null` or omitted
-- Hybrids list is bidirectional (maintained by `build_hybrid_relationships()` in `parser.py`)
+- `sources` array contains data from different sources (e.g., iNaturalist, Oaks of the World)
+- `is_preferred` marks the primary source for display when sources conflict
 
 ## Scraper Architecture
 
@@ -385,7 +420,7 @@ This failed POC wasted time and would have derailed the project if committed. Al
 
 **parser.py** - Individual page parsing:
 - Extracts all morphological data
-- Parses taxonomy (subgenus/section/series)
+- Parses taxonomy (subgenus/section/series from Oaks of the World; CLI uses "complex" from iNaturalist)
 - Identifies hybrid parents from formulas like "alba x macrocarpa"
 - Function: `build_hybrid_relationships()` creates bidirectional links
 

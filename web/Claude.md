@@ -202,7 +202,8 @@ Species object shape:
   taxonomy: {
     subgenus: "Quercus",
     section: "Quercus",
-    series: "Albae"
+    subsection: null,
+    complex: null
   },
   conservation_status: "...",
   subspecies_varieties: [{...}],
