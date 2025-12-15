@@ -1,0 +1,2465 @@
+{
+  "summary": {
+    "db_total": 682,
+    "scraper_total": 673,
+    "importable": {
+      "matched_normalized": 502,
+      "spelling_variations": 12,
+      "total_importable": 514
+    },
+    "not_importable": {
+      "only_in_db": 168,
+      "scraper_only_total": 159,
+      "breakdown": {
+        "ootw_hybrids_not_in_inat": 80,
+        "synonym_matches": 7,
+        "asian_species": 40,
+        "european_mediterranean": 11,
+        "americas": 18,
+        "other": 3
+      }
+    }
+  },
+  "spelling_mappings": {
+    "asymmetrica": "asymetrica",
+    "augustinei": "augustinii",
+    "brandegeei": "brandegei",
+    "eduardi": "eduardii",
+    "fabri": "fabrei",
+    "guyavifolia": "guyavaefolia",
+    "magnoliifolia": "magnoliaefolia",
+    "mcvaughii": "macvaughii",
+    "mexiae": "mexia",
+    "myrsinifolia": "myrsinaefolia",
+    "runcinatifolia": "runcinatifolifa",
+    "urbani": "urbanii"
+  },
+  "importable": {
+    "matched_normalized": [
+      {
+        "db_name": "acerifolia",
+        "scraper_name": "acerifolia"
+      },
+      {
+        "db_name": "acherdophylla",
+        "scraper_name": "acherdophylla"
+      },
+      {
+        "db_name": "acrodonta",
+        "scraper_name": "acrodonta"
+      },
+      {
+        "db_name": "aculcingensis",
+        "scraper_name": "aculcingensis"
+      },
+      {
+        "db_name": "acuta",
+        "scraper_name": "acuta"
+      },
+      {
+        "db_name": "acutangula",
+        "scraper_name": "acutangula"
+      },
+      {
+        "db_name": "acutifolia",
+        "scraper_name": "acutifolia"
+      },
+      {
+        "db_name": "acutissima",
+        "scraper_name": "acutissima"
+      },
+      {
+        "db_name": "afares",
+        "scraper_name": "afares"
+      },
+      {
+        "db_name": "affinis",
+        "scraper_name": "affinis"
+      },
+      {
+        "db_name": "agrifolia",
+        "scraper_name": "agrifolia"
+      },
+      {
+        "db_name": "airensis",
+        "scraper_name": "airensis"
+      },
+      {
+        "db_name": "alba",
+        "scraper_name": "alba"
+      },
+      {
+        "db_name": "albicaulis",
+        "scraper_name": "albicaulis"
+      },
+      {
+        "db_name": "albocincta",
+        "scraper_name": "albocincta"
+      },
+      {
+        "db_name": "aliena",
+        "scraper_name": "aliena"
+      },
+      {
+        "db_name": "alnifolia",
+        "scraper_name": "alnifolia"
+      },
+      {
+        "db_name": "alpescens",
+        "scraper_name": "alpescens"
+      },
+      {
+        "db_name": "aquifolioides",
+        "scraper_name": "aquifolioides"
+      },
+      {
+        "db_name": "arbutifolia",
+        "scraper_name": "arbutifolia"
+      },
+      {
+        "db_name": "argentata",
+        "scraper_name": "argentata"
+      },
+      {
+        "db_name": "argyrotricha",
+        "scraper_name": "argyrotricha"
+      },
+      {
+        "db_name": "ariifolia",
+        "scraper_name": "ariifolia"
+      },
+      {
+        "db_name": "aristata",
+        "scraper_name": "aristata"
+      },
+      {
+        "db_name": "arizonica",
+        "scraper_name": "arizonica"
+      },
+      {
+        "db_name": "arkansana",
+        "scraper_name": "arkansana"
+      },
+      {
+        "db_name": "aucheri",
+        "scraper_name": "aucheri"
+      },
+      {
+        "db_name": "auricoma",
+        "scraper_name": "auricoma"
+      },
+      {
+        "db_name": "austrina",
+        "scraper_name": "austrina"
+      },
+      {
+        "db_name": "austrocochinchinensis",
+        "scraper_name": "austrocochinchinensis"
+      },
+      {
+        "db_name": "baloot",
+        "scraper_name": "baloot"
+      },
+      {
+        "db_name": "baronii",
+        "scraper_name": "baronii"
+      },
+      {
+        "db_name": "barrancana",
+        "scraper_name": "barrancana"
+      },
+      {
+        "db_name": "bawanglingensis",
+        "scraper_name": "bawanglingensis"
+      },
+      {
+        "db_name": "bella",
+        "scraper_name": "bella"
+      },
+      {
+        "db_name": "benthamii",
+        "scraper_name": "benthamii"
+      },
+      {
+        "db_name": "berberidifolia",
+        "scraper_name": "berberidifolia"
+      },
+      {
+        "db_name": "bicolor",
+        "scraper_name": "bicolor"
+      },
+      {
+        "db_name": "bidoupensis",
+        "scraper_name": "bidoupensis"
+      },
+      {
+        "db_name": "blakei",
+        "scraper_name": "blakei"
+      },
+      {
+        "db_name": "boyntonii",
+        "scraper_name": "boyntonii"
+      },
+      {
+        "db_name": "braianensis",
+        "scraper_name": "braianensis"
+      },
+      {
+        "db_name": "brantii",
+        "scraper_name": "brantii"
+      },
+      {
+        "db_name": "breedloveana",
+        "scraper_name": "breedloveana"
+      },
+      {
+        "db_name": "brevicalyx",
+        "scraper_name": "brevicalyx"
+      },
+      {
+        "db_name": "buckleyi",
+        "scraper_name": "buckleyi"
+      },
+      {
+        "db_name": "calophylla",
+        "scraper_name": "calophylla"
+      },
+      {
+        "db_name": "camusiae",
+        "scraper_name": "camusiae"
+      },
+      {
+        "db_name": "canariensis",
+        "scraper_name": "canariensis"
+      },
+      {
+        "db_name": "canbyi",
+        "scraper_name": "canbyi"
+      },
+      {
+        "db_name": "carmenensis",
+        "scraper_name": "carmenensis"
+      },
+      {
+        "db_name": "castanea",
+        "scraper_name": "castanea"
+      },
+      {
+        "db_name": "castaneifolia",
+        "scraper_name": "castaneifolia"
+      },
+      {
+        "db_name": "cedrosensis",
+        "scraper_name": "cedrosensis"
+      },
+      {
+        "db_name": "centenaria",
+        "scraper_name": "centenaria"
+      },
+      {
+        "db_name": "cerris",
+        "scraper_name": "cerris"
+      },
+      {
+        "db_name": "championii",
+        "scraper_name": "championii"
+      },
+      {
+        "db_name": "chapmanii",
+        "scraper_name": "chapmanii"
+      },
+      {
+        "db_name": "charcasana",
+        "scraper_name": "charcasana"
+      },
+      {
+        "db_name": "chartacea",
+        "scraper_name": "chartacea"
+      },
+      {
+        "db_name": "chenii",
+        "scraper_name": "chenii"
+      },
+      {
+        "db_name": "chihuahuensis",
+        "scraper_name": "chihuahuensis"
+      },
+      {
+        "db_name": "chrysolepis",
+        "scraper_name": "chrysolepis"
+      },
+      {
+        "db_name": "chrysotricha",
+        "scraper_name": "chrysotricha"
+      },
+      {
+        "db_name": "chungii",
+        "scraper_name": "chungii"
+      },
+      {
+        "db_name": "ciliaris",
+        "scraper_name": "ciliaris"
+      },
+      {
+        "db_name": "coahuilensis",
+        "scraper_name": "coahuilensis"
+      },
+      {
+        "db_name": "coccifera",
+        "scraper_name": "coccifera"
+      },
+      {
+        "db_name": "cocciferoides",
+        "scraper_name": "cocciferoides"
+      },
+      {
+        "db_name": "coccinea",
+        "scraper_name": "coccinea"
+      },
+      {
+        "db_name": "coffeicolor",
+        "scraper_name": "coffeicolor"
+      },
+      {
+        "db_name": "confertifolia",
+        "scraper_name": "confertifolia"
+      },
+      {
+        "db_name": "congesta",
+        "scraper_name": "congesta"
+      },
+      {
+        "db_name": "convallata",
+        "scraper_name": "convallata"
+      },
+      {
+        "db_name": "conzattii",
+        "scraper_name": "conzattii"
+      },
+      {
+        "db_name": "copeyensis",
+        "scraper_name": "copeyensis"
+      },
+      {
+        "db_name": "cornelius-mulleri",
+        "scraper_name": "cornelius-mulleri"
+      },
+      {
+        "db_name": "corrugata",
+        "scraper_name": "corrugata"
+      },
+      {
+        "db_name": "cortesii",
+        "scraper_name": "cortesii"
+      },
+      {
+        "db_name": "costaricensis",
+        "scraper_name": "costaricensis"
+      },
+      {
+        "db_name": "crassifolia",
+        "scraper_name": "crassifolia"
+      },
+      {
+        "db_name": "crassipes",
+        "scraper_name": "crassipes"
+      },
+      {
+        "db_name": "crispifolia",
+        "scraper_name": "crispifolia"
+      },
+      {
+        "db_name": "crispipilis",
+        "scraper_name": "crispipilis"
+      },
+      {
+        "db_name": "cualensis",
+        "scraper_name": "cualensis"
+      },
+      {
+        "db_name": "cupreata",
+        "scraper_name": "cupreata"
+      },
+      {
+        "db_name": "daimingshanensis",
+        "scraper_name": "daimingshanensis"
+      },
+      {
+        "db_name": "dalechampii",
+        "scraper_name": "dalechampii"
+      },
+      {
+        "db_name": "dankiaensis",
+        "scraper_name": "dankiaensis"
+      },
+      {
+        "db_name": "delavayi",
+        "scraper_name": "delavayi"
+      },
+      {
+        "db_name": "delgadoana",
+        "scraper_name": "delgadoana"
+      },
+      {
+        "db_name": "delicatula",
+        "scraper_name": "delicatula"
+      },
+      {
+        "db_name": "deliquescens",
+        "scraper_name": "deliquescens"
+      },
+      {
+        "db_name": "dentata",
+        "scraper_name": "dentata"
+      },
+      {
+        "db_name": "depressa",
+        "scraper_name": "depressa"
+      },
+      {
+        "db_name": "depressipes",
+        "scraper_name": "depressipes"
+      },
+      {
+        "db_name": "deserticola",
+        "scraper_name": "deserticola"
+      },
+      {
+        "db_name": "devia",
+        "scraper_name": "devia"
+      },
+      {
+        "db_name": "dinghuensis",
+        "scraper_name": "dinghuensis"
+      },
+      {
+        "db_name": "disciformis",
+        "scraper_name": "disciformis"
+      },
+      {
+        "db_name": "diversifolia",
+        "scraper_name": "diversifolia"
+      },
+      {
+        "db_name": "dolicholepis",
+        "scraper_name": "dolicholepis"
+      },
+      {
+        "db_name": "donnaiensis",
+        "scraper_name": "donnaiensis"
+      },
+      {
+        "db_name": "douglasii",
+        "scraper_name": "douglasii"
+      },
+      {
+        "db_name": "dumosa",
+        "scraper_name": "dumosa"
+      },
+      {
+        "db_name": "durifolia",
+        "scraper_name": "durifolia"
+      },
+      {
+        "db_name": "edithiae",
+        "scraper_name": "edithiae"
+      },
+      {
+        "db_name": "elevaticostata",
+        "scraper_name": "elevaticostata"
+      },
+      {
+        "db_name": "ellipsoidalis",
+        "scraper_name": "ellipsoidalis"
+      },
+      {
+        "db_name": "elliptica",
+        "scraper_name": "elliptica"
+      },
+      {
+        "db_name": "elmeri",
+        "scraper_name": "elmeri"
+      },
+      {
+        "db_name": "emoryi",
+        "scraper_name": "emoryi"
+      },
+      {
+        "db_name": "engelmannii",
+        "scraper_name": "engelmannii"
+      },
+      {
+        "db_name": "engleriana",
+        "scraper_name": "engleriana"
+      },
+      {
+        "db_name": "estremadurensis",
+        "scraper_name": "estremadurensis"
+      },
+      {
+        "db_name": "eumorpha",
+        "scraper_name": "eumorpha"
+      },
+      {
+        "db_name": "faginea",
+        "scraper_name": "faginea"
+      },
+      {
+        "db_name": "falcata",
+        "scraper_name": "falcata"
+      },
+      {
+        "db_name": "fimbriata",
+        "scraper_name": "fimbriata"
+      },
+      {
+        "db_name": "floccosa",
+        "scraper_name": "floccosa"
+      },
+      {
+        "db_name": "flocculenta",
+        "scraper_name": "flocculenta"
+      },
+      {
+        "db_name": "floribunda",
+        "scraper_name": "floribunda"
+      },
+      {
+        "db_name": "frainetto",
+        "scraper_name": "frainetto"
+      },
+      {
+        "db_name": "franchetii",
+        "scraper_name": "franchetii"
+      },
+      {
+        "db_name": "frutex",
+        "scraper_name": "frutex"
+      },
+      {
+        "db_name": "fulva",
+        "scraper_name": "fulva"
+      },
+      {
+        "db_name": "furfuracea",
+        "scraper_name": "furfuracea"
+      },
+      {
+        "db_name": "fusiformis",
+        "scraper_name": "fusiformis"
+      },
+      {
+        "db_name": "gaharuensis",
+        "scraper_name": "gaharuensis"
+      },
+      {
+        "db_name": "galeanensis",
+        "scraper_name": "galeanensis"
+      },
+      {
+        "db_name": "gambelii",
+        "scraper_name": "gambelii"
+      },
+      {
+        "db_name": "gambleana",
+        "scraper_name": "gambleana"
+      },
+      {
+        "db_name": "garryana",
+        "scraper_name": "garryana"
+      },
+      {
+        "db_name": "gemelliflora",
+        "scraper_name": "gemelliflora"
+      },
+      {
+        "db_name": "georgiana",
+        "scraper_name": "georgiana"
+      },
+      {
+        "db_name": "germana",
+        "scraper_name": "germana"
+      },
+      {
+        "db_name": "ghiesbreghtii",
+        "scraper_name": "ghiesbreghtii"
+      },
+      {
+        "db_name": "gilva",
+        "scraper_name": "gilva"
+      },
+      {
+        "db_name": "glabrescens",
+        "scraper_name": "glabrescens"
+      },
+      {
+        "db_name": "glauca",
+        "scraper_name": "glauca"
+      },
+      {
+        "db_name": "glaucescens",
+        "scraper_name": "glaucescens"
+      },
+      {
+        "db_name": "glaucoides",
+        "scraper_name": "glaucoides"
+      },
+      {
+        "db_name": "gomeziana",
+        "scraper_name": "gomeziana"
+      },
+      {
+        "db_name": "grahamii",
+        "scraper_name": "grahamii"
+      },
+      {
+        "db_name": "gravesii",
+        "scraper_name": "gravesii"
+      },
+      {
+        "db_name": "greggii",
+        "scraper_name": "greggii"
+      },
+      {
+        "db_name": "griffithii",
+        "scraper_name": "griffithii"
+      },
+      {
+        "db_name": "grisea",
+        "scraper_name": "grisea"
+      },
+      {
+        "db_name": "gulielmi-treleasei",
+        "scraper_name": "gulielmi-treleasei"
+      },
+      {
+        "db_name": "hartwissiana",
+        "scraper_name": "hartwissiana"
+      },
+      {
+        "db_name": "havardii",
+        "scraper_name": "havardii"
+      },
+      {
+        "db_name": "helferiana",
+        "scraper_name": "helferiana"
+      },
+      {
+        "db_name": "hemisphaerica",
+        "scraper_name": "hemisphaerica"
+      },
+      {
+        "db_name": "hinckleyi",
+        "scraper_name": "hinckleyi"
+      },
+      {
+        "db_name": "hintonii",
+        "scraper_name": "hintonii"
+      },
+      {
+        "db_name": "hintoniorum",
+        "scraper_name": "hintoniorum"
+      },
+      {
+        "db_name": "hirtifolia",
+        "scraper_name": "hirtifolia"
+      },
+      {
+        "db_name": "hui",
+        "scraper_name": "hui"
+      },
+      {
+        "db_name": "huicholensis",
+        "scraper_name": "huicholensis"
+      },
+      {
+        "db_name": "humboldtii",
+        "scraper_name": "humboldtii"
+      },
+      {
+        "db_name": "hypargyrea",
+        "scraper_name": "hypargyrea"
+      },
+      {
+        "db_name": "hypoleucoides",
+        "scraper_name": "hypoleucoides"
+      },
+      {
+        "db_name": "hypophaea",
+        "scraper_name": "hypophaea"
+      },
+      {
+        "db_name": "hypoxantha",
+        "scraper_name": "hypoxantha"
+      },
+      {
+        "db_name": "ichnusae",
+        "scraper_name": "ichnusae"
+      },
+      {
+        "db_name": "ignaciensis",
+        "scraper_name": "ignaciensis"
+      },
+      {
+        "db_name": "ilex",
+        "scraper_name": "ilex"
+      },
+      {
+        "db_name": "ilicifolia",
+        "scraper_name": "ilicifolia"
+      },
+      {
+        "db_name": "iltisii",
+        "scraper_name": "iltisii"
+      },
+      {
+        "db_name": "imbricaria",
+        "scraper_name": "imbricaria"
+      },
+      {
+        "db_name": "incana",
+        "scraper_name": "incana"
+      },
+      {
+        "db_name": "infectoria",
+        "scraper_name": "infectoria"
+      },
+      {
+        "db_name": "inopina",
+        "scraper_name": "inopina"
+      },
+      {
+        "db_name": "insignis",
+        "scraper_name": "insignis"
+      },
+      {
+        "db_name": "intricata",
+        "scraper_name": "intricata"
+      },
+      {
+        "db_name": "invaginata",
+        "scraper_name": "invaginata"
+      },
+      {
+        "db_name": "ithaburensis",
+        "scraper_name": "ithaburensis"
+      },
+      {
+        "db_name": "jenseniana",
+        "scraper_name": "jenseniana"
+      },
+      {
+        "db_name": "jinpinensis",
+        "scraper_name": "jinpinensis"
+      },
+      {
+        "db_name": "jonesii",
+        "scraper_name": "jonesii"
+      },
+      {
+        "db_name": "kelloggii",
+        "scraper_name": "kelloggii"
+      },
+      {
+        "db_name": "kerrii",
+        "scraper_name": "kerrii"
+      },
+      {
+        "db_name": "kingiana",
+        "scraper_name": "kingiana"
+      },
+      {
+        "db_name": "kiukiangensis",
+        "scraper_name": "kiukiangensis"
+      },
+      {
+        "db_name": "kotschyana",
+        "scraper_name": "kotschyana"
+      },
+      {
+        "db_name": "kouangsiensis",
+        "scraper_name": "kouangsiensis"
+      },
+      {
+        "db_name": "laceyi",
+        "scraper_name": "laceyi"
+      },
+      {
+        "db_name": "laeta",
+        "scraper_name": "laeta"
+      },
+      {
+        "db_name": "laevis",
+        "scraper_name": "laevis"
+      },
+      {
+        "db_name": "lamellosa",
+        "scraper_name": "lamellosa"
+      },
+      {
+        "db_name": "lanata",
+        "scraper_name": "lanata"
+      },
+      {
+        "db_name": "lancifolia",
+        "scraper_name": "lancifolia"
+      },
+      {
+        "db_name": "langbianensis",
+        "scraper_name": "langbianensis"
+      },
+      {
+        "db_name": "laurifolia",
+        "scraper_name": "laurifolia"
+      },
+      {
+        "db_name": "laurina",
+        "scraper_name": "laurina"
+      },
+      {
+        "db_name": "libani",
+        "scraper_name": "libani"
+      },
+      {
+        "db_name": "liebmannii",
+        "scraper_name": "liebmannii"
+      },
+      {
+        "db_name": "lineata",
+        "scraper_name": "lineata"
+      },
+      {
+        "db_name": "litseoides",
+        "scraper_name": "litseoides"
+      },
+      {
+        "db_name": "lobata",
+        "scraper_name": "lobata"
+      },
+      {
+        "db_name": "longinux",
+        "scraper_name": "longinux"
+      },
+      {
+        "db_name": "longispica",
+        "scraper_name": "longispica"
+      },
+      {
+        "db_name": "lowii",
+        "scraper_name": "lowii"
+      },
+      {
+        "db_name": "lungmaiensis",
+        "scraper_name": "lungmaiensis"
+      },
+      {
+        "db_name": "lyrata",
+        "scraper_name": "lyrata"
+      },
+      {
+        "db_name": "macdougallii",
+        "scraper_name": "macdougallii"
+      },
+      {
+        "db_name": "macranthera",
+        "scraper_name": "macranthera"
+      },
+      {
+        "db_name": "macrocalyx",
+        "scraper_name": "macrocalyx"
+      },
+      {
+        "db_name": "macrocarpa",
+        "scraper_name": "macrocarpa"
+      },
+      {
+        "db_name": "manzanillana",
+        "scraper_name": "manzanillana"
+      },
+      {
+        "db_name": "marilandica",
+        "scraper_name": "marilandica"
+      },
+      {
+        "db_name": "martinezii",
+        "scraper_name": "martinezii"
+      },
+      {
+        "db_name": "meavei",
+        "scraper_name": "meavei"
+      },
+      {
+        "db_name": "melissae",
+        "scraper_name": "melissae"
+      },
+      {
+        "db_name": "mexicana",
+        "scraper_name": "mexicana"
+      },
+      {
+        "db_name": "michauxii",
+        "scraper_name": "michauxii"
+      },
+      {
+        "db_name": "microphylla",
+        "scraper_name": "microphylla"
+      },
+      {
+        "db_name": "minima",
+        "scraper_name": "minima"
+      },
+      {
+        "db_name": "miquihuanensis",
+        "scraper_name": "miquihuanensis"
+      },
+      {
+        "db_name": "miyagii",
+        "scraper_name": "miyagii"
+      },
+      {
+        "db_name": "mohriana",
+        "scraper_name": "mohriana"
+      },
+      {
+        "db_name": "mongolica",
+        "scraper_name": "mongolica"
+      },
+      {
+        "db_name": "monimotricha",
+        "scraper_name": "monimotricha"
+      },
+      {
+        "db_name": "montana",
+        "scraper_name": "montana"
+      },
+      {
+        "db_name": "monterreyensis",
+        "scraper_name": "monterreyensis"
+      },
+      {
+        "db_name": "morii",
+        "scraper_name": "morii"
+      },
+      {
+        "db_name": "motuoensis",
+        "scraper_name": "motuoensis"
+      },
+      {
+        "db_name": "muehlenbergii",
+        "scraper_name": "muehlenbergii"
+      },
+      {
+        "db_name": "myrtifolia",
+        "scraper_name": "myrtifolia"
+      },
+      {
+        "db_name": "nigra",
+        "scraper_name": "nigra"
+      },
+      {
+        "db_name": "ningangensis",
+        "scraper_name": "ningangensis"
+      },
+      {
+        "db_name": "nivea",
+        "scraper_name": "nivea"
+      },
+      {
+        "db_name": "nixoniana",
+        "scraper_name": "nixoniana"
+      },
+      {
+        "db_name": "oblongifolia",
+        "scraper_name": "oblongifolia"
+      },
+      {
+        "db_name": "obtusanthera",
+        "scraper_name": "obtusanthera"
+      },
+      {
+        "db_name": "obtusata",
+        "scraper_name": "obtusata"
+      },
+      {
+        "db_name": "ocoteifolia",
+        "scraper_name": "ocoteifolia"
+      },
+      {
+        "db_name": "oglethorpensis",
+        "scraper_name": "oglethorpensis"
+      },
+      {
+        "db_name": "oidocarpa",
+        "scraper_name": "oidocarpa"
+      },
+      {
+        "db_name": "oleoides",
+        "scraper_name": "oleoides"
+      },
+      {
+        "db_name": "oocarpa",
+        "scraper_name": "oocarpa"
+      },
+      {
+        "db_name": "opaca",
+        "scraper_name": "opaca"
+      },
+      {
+        "db_name": "orocantabrica",
+        "scraper_name": "orocantabrica"
+      },
+      {
+        "db_name": "oxyodon",
+        "scraper_name": "oxyodon"
+      },
+      {
+        "db_name": "oxyphylla",
+        "scraper_name": "oxyphylla"
+      },
+      {
+        "db_name": "pachyloma",
+        "scraper_name": "pachyloma"
+      },
+      {
+        "db_name": "pacifica",
+        "scraper_name": "pacifica"
+      },
+      {
+        "db_name": "pagoda",
+        "scraper_name": "pagoda"
+      },
+      {
+        "db_name": "palmeri",
+        "scraper_name": "palmeri"
+      },
+      {
+        "db_name": "palustris",
+        "scraper_name": "palustris"
+      },
+      {
+        "db_name": "panamandinaea",
+        "scraper_name": "panamandinaea"
+      },
+      {
+        "db_name": "pannosa",
+        "scraper_name": "pannosa"
+      },
+      {
+        "db_name": "parvula",
+        "scraper_name": "parvula"
+      },
+      {
+        "db_name": "pauciradiata",
+        "scraper_name": "pauciradiata"
+      },
+      {
+        "db_name": "paxtalensis",
+        "scraper_name": "paxtalensis"
+      },
+      {
+        "db_name": "peduncularis",
+        "scraper_name": "peduncularis"
+      },
+      {
+        "db_name": "peninsularis",
+        "scraper_name": "peninsularis"
+      },
+      {
+        "db_name": "pennivenia",
+        "scraper_name": "pennivenia"
+      },
+      {
+        "db_name": "pentacycla",
+        "scraper_name": "pentacycla"
+      },
+      {
+        "db_name": "perpallida",
+        "scraper_name": "perpallida"
+      },
+      {
+        "db_name": "petelotii",
+        "scraper_name": "petelotii"
+      },
+      {
+        "db_name": "petraea",
+        "scraper_name": "petraea"
+      },
+      {
+        "db_name": "phanera",
+        "scraper_name": "phanera"
+      },
+      {
+        "db_name": "phellos",
+        "scraper_name": "phellos"
+      },
+      {
+        "db_name": "phillyreoides",
+        "scraper_name": "phillyreoides"
+      },
+      {
+        "db_name": "pinnativenulosa",
+        "scraper_name": "pinnativenulosa"
+      },
+      {
+        "db_name": "planipocula",
+        "scraper_name": "planipocula"
+      },
+      {
+        "db_name": "poilanei",
+        "scraper_name": "poilanei"
+      },
+      {
+        "db_name": "polymorpha",
+        "scraper_name": "polymorpha"
+      },
+      {
+        "db_name": "pontica",
+        "scraper_name": "pontica"
+      },
+      {
+        "db_name": "porphyrogenita",
+        "scraper_name": "porphyrogenita"
+      },
+      {
+        "db_name": "potosina",
+        "scraper_name": "potosina"
+      },
+      {
+        "db_name": "praeco",
+        "scraper_name": "praeco"
+      },
+      {
+        "db_name": "pringlei",
+        "scraper_name": "pringlei"
+      },
+      {
+        "db_name": "prinoides",
+        "scraper_name": "prinoides"
+      },
+      {
+        "db_name": "protoroburoides",
+        "scraper_name": "protoroburoides"
+      },
+      {
+        "db_name": "pseudococcifera",
+        "scraper_name": "pseudococcifera"
+      },
+      {
+        "db_name": "pseudosetulosa",
+        "scraper_name": "pseudosetulosa"
+      },
+      {
+        "db_name": "pseudoverticillata",
+        "scraper_name": "pseudoverticillata"
+      },
+      {
+        "db_name": "pubescens",
+        "scraper_name": "pubescens"
+      },
+      {
+        "db_name": "pumila",
+        "scraper_name": "pumila"
+      },
+      {
+        "db_name": "pungens",
+        "scraper_name": "pungens"
+      },
+      {
+        "db_name": "purulhana",
+        "scraper_name": "purulhana"
+      },
+      {
+        "db_name": "pyrenaica",
+        "scraper_name": "pyrenaica"
+      },
+      {
+        "db_name": "radiata",
+        "scraper_name": "radiata"
+      },
+      {
+        "db_name": "rehderiana",
+        "scraper_name": "rehderiana"
+      },
+      {
+        "db_name": "rekonis",
+        "scraper_name": "rekonis"
+      },
+      {
+        "db_name": "repanda",
+        "scraper_name": "repanda"
+      },
+      {
+        "db_name": "resinosa",
+        "scraper_name": "resinosa"
+      },
+      {
+        "db_name": "rex",
+        "scraper_name": "rex"
+      },
+      {
+        "db_name": "robur",
+        "scraper_name": "robur"
+      },
+      {
+        "db_name": "robusta",
+        "scraper_name": "robusta"
+      },
+      {
+        "db_name": "rotundifolia",
+        "scraper_name": "rotundifolia"
+      },
+      {
+        "db_name": "rubra",
+        "scraper_name": "rubra"
+      },
+      {
+        "db_name": "rubramenta",
+        "scraper_name": "rubramenta"
+      },
+      {
+        "db_name": "rugosa",
+        "scraper_name": "rugosa"
+      },
+      {
+        "db_name": "rupestris",
+        "scraper_name": "rupestris"
+      },
+      {
+        "db_name": "rysophylla",
+        "scraper_name": "rysophylla"
+      },
+      {
+        "db_name": "sadleriana",
+        "scraper_name": "sadleriana"
+      },
+      {
+        "db_name": "salicifolia",
+        "scraper_name": "salicifolia"
+      },
+      {
+        "db_name": "salicina",
+        "scraper_name": "salicina"
+      },
+      {
+        "db_name": "saltillensis",
+        "scraper_name": "saltillensis"
+      },
+      {
+        "db_name": "sanchezcolinii",
+        "scraper_name": "sanchezcolinii"
+      },
+      {
+        "db_name": "sapotifolia",
+        "scraper_name": "sapotifolia"
+      },
+      {
+        "db_name": "sarahmariae",
+        "scraper_name": "sarahmariae"
+      },
+      {
+        "db_name": "saravanensis",
+        "scraper_name": "saravanensis"
+      },
+      {
+        "db_name": "sartorii",
+        "scraper_name": "sartorii"
+      },
+      {
+        "db_name": "schottkyana",
+        "scraper_name": "schottkyana"
+      },
+      {
+        "db_name": "schultzei",
+        "scraper_name": "schultzei"
+      },
+      {
+        "db_name": "scytophylla",
+        "scraper_name": "scytophylla"
+      },
+      {
+        "db_name": "sebifera",
+        "scraper_name": "sebifera"
+      },
+      {
+        "db_name": "seemannii",
+        "scraper_name": "seemannii"
+      },
+      {
+        "db_name": "segoviensis",
+        "scraper_name": "segoviensis"
+      },
+      {
+        "db_name": "semecarpifolia",
+        "scraper_name": "semecarpifolia"
+      },
+      {
+        "db_name": "semiserrata",
+        "scraper_name": "semiserrata"
+      },
+      {
+        "db_name": "senescens",
+        "scraper_name": "senescens"
+      },
+      {
+        "db_name": "serrata",
+        "scraper_name": "serrata"
+      },
+      {
+        "db_name": "sessilifolia",
+        "scraper_name": "sessilifolia"
+      },
+      {
+        "db_name": "setulosa",
+        "scraper_name": "setulosa"
+      },
+      {
+        "db_name": "shumardii",
+        "scraper_name": "shumardii"
+      },
+      {
+        "db_name": "sichourensis",
+        "scraper_name": "sichourensis"
+      },
+      {
+        "db_name": "sideroxyla",
+        "scraper_name": "sideroxyla"
+      },
+      {
+        "db_name": "similis",
+        "scraper_name": "similis"
+      },
+      {
+        "db_name": "sinuata",
+        "scraper_name": "sinuata"
+      },
+      {
+        "db_name": "skinneri",
+        "scraper_name": "skinneri"
+      },
+      {
+        "db_name": "sontraensis",
+        "scraper_name": "sontraensis"
+      },
+      {
+        "db_name": "sororia",
+        "scraper_name": "sororia"
+      },
+      {
+        "db_name": "spinosa",
+        "scraper_name": "spinosa"
+      },
+      {
+        "db_name": "stellata",
+        "scraper_name": "stellata"
+      },
+      {
+        "db_name": "stenophylloides",
+        "scraper_name": "stenophylloides"
+      },
+      {
+        "db_name": "stewardiana",
+        "scraper_name": "stewardiana"
+      },
+      {
+        "db_name": "striatula",
+        "scraper_name": "striatula"
+      },
+      {
+        "db_name": "suber",
+        "scraper_name": "suber"
+      },
+      {
+        "db_name": "subsericea",
+        "scraper_name": "subsericea"
+      },
+      {
+        "db_name": "subspathulata",
+        "scraper_name": "subspathulata"
+      },
+      {
+        "db_name": "sumatrana",
+        "scraper_name": "sumatrana"
+      },
+      {
+        "db_name": "supranitida",
+        "scraper_name": "supranitida"
+      },
+      {
+        "db_name": "tarahumara",
+        "scraper_name": "tarahumara"
+      },
+      {
+        "db_name": "tardifolia",
+        "scraper_name": "tardifolia"
+      },
+      {
+        "db_name": "tarokoensis",
+        "scraper_name": "tarokoensis"
+      },
+      {
+        "db_name": "tenuiloba",
+        "scraper_name": "tenuiloba"
+      },
+      {
+        "db_name": "texana",
+        "scraper_name": "texana"
+      },
+      {
+        "db_name": "thorelii",
+        "scraper_name": "thorelii"
+      },
+      {
+        "db_name": "tiaoloshanica",
+        "scraper_name": "tiaoloshanica"
+      },
+      {
+        "db_name": "tinkhamii",
+        "scraper_name": "tinkhamii"
+      },
+      {
+        "db_name": "tomentella",
+        "scraper_name": "tomentella"
+      },
+      {
+        "db_name": "tomentosinervis",
+        "scraper_name": "tomentosinervis"
+      },
+      {
+        "db_name": "toumeyi",
+        "scraper_name": "toumeyi"
+      },
+      {
+        "db_name": "toxicodendrifolia",
+        "scraper_name": "toxicodendrifolia"
+      },
+      {
+        "db_name": "trojana",
+        "scraper_name": "trojana"
+      },
+      {
+        "db_name": "tuberculata",
+        "scraper_name": "tuberculata"
+      },
+      {
+        "db_name": "tuitensis",
+        "scraper_name": "tuitensis"
+      },
+      {
+        "db_name": "turbinella",
+        "scraper_name": "turbinella"
+      },
+      {
+        "db_name": "undata",
+        "scraper_name": "undata"
+      },
+      {
+        "db_name": "uxoris",
+        "scraper_name": "uxoris"
+      },
+      {
+        "db_name": "variabilis",
+        "scraper_name": "variabilis"
+      },
+      {
+        "db_name": "vaseyana",
+        "scraper_name": "vaseyana"
+      },
+      {
+        "db_name": "velutina",
+        "scraper_name": "velutina"
+      },
+      {
+        "db_name": "verde",
+        "scraper_name": "verde"
+      },
+      {
+        "db_name": "vicentensis",
+        "scraper_name": "vicentensis"
+      },
+      {
+        "db_name": "viminea",
+        "scraper_name": "viminea"
+      },
+      {
+        "db_name": "virginiana",
+        "scraper_name": "virginiana"
+      },
+      {
+        "db_name": "welshii",
+        "scraper_name": "welshii"
+      },
+      {
+        "db_name": "wislizeni",
+        "scraper_name": "wislizeni"
+      },
+      {
+        "db_name": "xalapensis",
+        "scraper_name": "xalapensis"
+      },
+      {
+        "db_name": "xanthoclada",
+        "scraper_name": "xanthoclada"
+      },
+      {
+        "db_name": "xylina",
+        "scraper_name": "xylina"
+      },
+      {
+        "db_name": "yonganensis",
+        "scraper_name": "yonganensis"
+      },
+      {
+        "db_name": "\u00d7 acutidens",
+        "scraper_name": "acutidens"
+      },
+      {
+        "db_name": "\u00d7 albescens",
+        "scraper_name": "albescens"
+      },
+      {
+        "db_name": "\u00d7 alvordiana",
+        "scraper_name": "alvordiana"
+      },
+      {
+        "db_name": "\u00d7 andegavensis",
+        "scraper_name": "andegavensis"
+      },
+      {
+        "db_name": "\u00d7 andresii",
+        "scraper_name": "andresii"
+      },
+      {
+        "db_name": "\u00d7 atlantica",
+        "scraper_name": "atlantica"
+      },
+      {
+        "db_name": "\u00d7 audleyensis",
+        "scraper_name": "audleyensis"
+      },
+      {
+        "db_name": "\u00d7 autumnalis",
+        "scraper_name": "autumnalis"
+      },
+      {
+        "db_name": "\u00d7 auzendei",
+        "scraper_name": "auzendei"
+      },
+      {
+        "db_name": "\u00d7 avellaniformis",
+        "scraper_name": "avellaniformis"
+      },
+      {
+        "db_name": "\u00d7 baenitzii",
+        "scraper_name": "baenitzii"
+      },
+      {
+        "db_name": "\u00d7 basaseachicensis",
+        "scraper_name": "basaseachicensis"
+      },
+      {
+        "db_name": "\u00d7 beaumontiana",
+        "scraper_name": "beaumontiana"
+      },
+      {
+        "db_name": "\u00d7 bebbiana",
+        "scraper_name": "bebbiana"
+      },
+      {
+        "db_name": "\u00d7 beckyae",
+        "scraper_name": "beckyae"
+      },
+      {
+        "db_name": "\u00d7 benderi",
+        "scraper_name": "benderi"
+      },
+      {
+        "db_name": "\u00d7 bimundorum",
+        "scraper_name": "bimundorum"
+      },
+      {
+        "db_name": "\u00d7 blufftonensis",
+        "scraper_name": "blufftonensis"
+      },
+      {
+        "db_name": "\u00d7 brittonii",
+        "scraper_name": "brittonii"
+      },
+      {
+        "db_name": "\u00d7 burnetensis",
+        "scraper_name": "burnetensis"
+      },
+      {
+        "db_name": "\u00d7 bushii",
+        "scraper_name": "bushii"
+      },
+      {
+        "db_name": "\u00d7 byarsii",
+        "scraper_name": "byarsii"
+      },
+      {
+        "db_name": "\u00d7 caduca",
+        "scraper_name": "caduca"
+      },
+      {
+        "db_name": "\u00d7 caesariensis",
+        "scraper_name": "caesariensis"
+      },
+      {
+        "db_name": "\u00d7 campitica",
+        "scraper_name": "campitica"
+      },
+      {
+        "db_name": "\u00d7 capesii",
+        "scraper_name": "capesii"
+      },
+      {
+        "db_name": "\u00d7 celtica",
+        "scraper_name": "celtica"
+      },
+      {
+        "db_name": "\u00d7 cerrioides",
+        "scraper_name": "cerrioides"
+      },
+      {
+        "db_name": "\u00d7 cocksii",
+        "scraper_name": "cocksii"
+      },
+      {
+        "db_name": "\u00d7 comptoniae",
+        "scraper_name": "comptoniae"
+      },
+      {
+        "db_name": "\u00d7 coscojosuberiformis",
+        "scraper_name": "coscojosuberiformis"
+      },
+      {
+        "db_name": "\u00d7 coutinhoi",
+        "scraper_name": "coutinhoi"
+      },
+      {
+        "db_name": "\u00d7 cravenensis",
+        "scraper_name": "cravenensis"
+      },
+      {
+        "db_name": "\u00d7 deamii",
+        "scraper_name": "deamii"
+      },
+      {
+        "db_name": "\u00d7 diegoi",
+        "scraper_name": "diegoi"
+      },
+      {
+        "db_name": "\u00d7 discreta",
+        "scraper_name": "discreta"
+      },
+      {
+        "db_name": "\u00d7 diversiloba",
+        "scraper_name": "diversiloba"
+      },
+      {
+        "db_name": "\u00d7 drummondii",
+        "scraper_name": "drummondii"
+      },
+      {
+        "db_name": "\u00d7 duriensis",
+        "scraper_name": "duriensis"
+      },
+      {
+        "db_name": "\u00d7 dysophylla",
+        "scraper_name": "dysophylla"
+      },
+      {
+        "db_name": "\u00d7 eborense",
+        "scraper_name": "eborense"
+      },
+      {
+        "db_name": "\u00d7 egglestonii",
+        "scraper_name": "egglestonii"
+      },
+      {
+        "db_name": "\u00d7 eplingii",
+        "scraper_name": "eplingii"
+      },
+      {
+        "db_name": "\u00d7 exacta",
+        "scraper_name": "exacta"
+      },
+      {
+        "db_name": "\u00d7 faxonii",
+        "scraper_name": "faxonii"
+      },
+      {
+        "db_name": "\u00d7 fernaldii",
+        "scraper_name": "fernaldii"
+      },
+      {
+        "db_name": "\u00d7 fernowii",
+        "scraper_name": "fernowii"
+      },
+      {
+        "db_name": "\u00d7 filialis",
+        "scraper_name": "filialis"
+      },
+      {
+        "db_name": "\u00d7 firmurensis",
+        "scraper_name": "firmurensis"
+      },
+      {
+        "db_name": "\u00d7 fontana",
+        "scraper_name": "fontana"
+      },
+      {
+        "db_name": "\u00d7 fontqueri",
+        "scraper_name": "fontqueri"
+      },
+      {
+        "db_name": "\u00d7 gallaecica",
+        "scraper_name": "gallaecica"
+      },
+      {
+        "db_name": "\u00d7 ganderi",
+        "scraper_name": "ganderi"
+      },
+      {
+        "db_name": "\u00d7 garlandensis",
+        "scraper_name": "garlandensis"
+      },
+      {
+        "db_name": "\u00d7 giffordii",
+        "scraper_name": "giffordii"
+      },
+      {
+        "db_name": "\u00d7 guadalupensis",
+        "scraper_name": "guadalupensis"
+      },
+      {
+        "db_name": "\u00d7 harbisonii",
+        "scraper_name": "harbisonii"
+      },
+      {
+        "db_name": "\u00d7 hastingsii",
+        "scraper_name": "hastingsii"
+      },
+      {
+        "db_name": "\u00d7 hawkinsiae",
+        "scraper_name": "hawkinsiae"
+      },
+      {
+        "db_name": "\u00d7 heterophylla",
+        "scraper_name": "heterophylla"
+      },
+      {
+        "db_name": "\u00d7 hillii",
+        "scraper_name": "hillii"
+      },
+      {
+        "db_name": "\u00d7 hispanica",
+        "scraper_name": "hispanica"
+      },
+      {
+        "db_name": "\u00d7 howellii",
+        "scraper_name": "howellii"
+      },
+      {
+        "db_name": "\u00d7 humidicola",
+        "scraper_name": "humidicola"
+      },
+      {
+        "db_name": "\u00d7 incomita",
+        "scraper_name": "incomita"
+      },
+      {
+        "db_name": "\u00d7 inconstans",
+        "scraper_name": "inconstans"
+      },
+      {
+        "db_name": "\u00d7 introgressa",
+        "scraper_name": "introgressa"
+      },
+      {
+        "db_name": "\u00d7 jackiana",
+        "scraper_name": "jackiana"
+      },
+      {
+        "db_name": "\u00d7 jolonensis",
+        "scraper_name": "jolonensis"
+      },
+      {
+        "db_name": "\u00d7 joorii",
+        "scraper_name": "joorii"
+      },
+      {
+        "db_name": "\u00d7 kerneri",
+        "scraper_name": "kerneri"
+      },
+      {
+        "db_name": "\u00d7 kewensis",
+        "scraper_name": "kewensis"
+      },
+      {
+        "db_name": "\u00d7 kinseliae",
+        "scraper_name": "kinseliae"
+      },
+      {
+        "db_name": "\u00d7 knoblochii",
+        "scraper_name": "knoblochii"
+      },
+      {
+        "db_name": "\u00d7 leana",
+        "scraper_name": "leana"
+      },
+      {
+        "db_name": "\u00d7 lousae",
+        "scraper_name": "lousae"
+      },
+      {
+        "db_name": "\u00d7 ludoviciana",
+        "scraper_name": "ludoviciana"
+      },
+      {
+        "db_name": "\u00d7 macdonaldii",
+        "scraper_name": "macdonaldii"
+      },
+      {
+        "db_name": "\u00d7 macnabiana",
+        "scraper_name": "macnabiana"
+      },
+      {
+        "db_name": "\u00d7 mannifera",
+        "scraper_name": "mannifera"
+      },
+      {
+        "db_name": "\u00d7 megaleia",
+        "scraper_name": "megaleia"
+      },
+      {
+        "db_name": "\u00d7 mellichampii",
+        "scraper_name": "mellichampii"
+      },
+      {
+        "db_name": "\u00d7 mongolicodentata",
+        "scraper_name": "mongolicodentata"
+      },
+      {
+        "db_name": "\u00d7 morehus",
+        "scraper_name": "morehus"
+      },
+      {
+        "db_name": "\u00d7 morisii",
+        "scraper_name": "morisii"
+      },
+      {
+        "db_name": "\u00d7 moultonensis",
+        "scraper_name": "moultonensis"
+      },
+      {
+        "db_name": "\u00d7 munzii",
+        "scraper_name": "munzii"
+      },
+      {
+        "db_name": "\u00d7 mutabilis",
+        "scraper_name": "mutabilis"
+      },
+      {
+        "db_name": "\u00d7 neopalmeri",
+        "scraper_name": "neopalmeri"
+      },
+      {
+        "db_name": "\u00d7 neotharpii",
+        "scraper_name": "neotharpii"
+      },
+      {
+        "db_name": "\u00d7 numidica",
+        "scraper_name": "numidica"
+      },
+      {
+        "db_name": "\u00d7 organensis",
+        "scraper_name": "organensis"
+      },
+      {
+        "db_name": "\u00d7 oviedoensis",
+        "scraper_name": "oviedoensis"
+      },
+      {
+        "db_name": "\u00d7 pachucana",
+        "scraper_name": "pachucana"
+      },
+      {
+        "db_name": "\u00d7 palmeriana",
+        "scraper_name": "palmeriana"
+      },
+      {
+        "db_name": "\u00d7 pastorensis",
+        "scraper_name": "pastorensis"
+      },
+      {
+        "db_name": "\u00d7 podophylla",
+        "scraper_name": "podophylla"
+      },
+      {
+        "db_name": "\u00d7 prasina",
+        "scraper_name": "prasina"
+      },
+      {
+        "db_name": "\u00d7 rehderi",
+        "scraper_name": "rehderi"
+      },
+      {
+        "db_name": "\u00d7 riparia",
+        "scraper_name": "riparia"
+      },
+      {
+        "db_name": "\u00d7 robbinsii",
+        "scraper_name": "robbinsii"
+      },
+      {
+        "db_name": "\u00d7 rolfsii",
+        "scraper_name": "rolfsii"
+      },
+      {
+        "db_name": "\u00d7 rosacea",
+        "scraper_name": "rosacea"
+      },
+      {
+        "db_name": "\u00d7 rudkinii",
+        "scraper_name": "rudkinii"
+      },
+      {
+        "db_name": "\u00d7 runcinata",
+        "scraper_name": "runcinata"
+      },
+      {
+        "db_name": "\u00d7 sargentii",
+        "scraper_name": "sargentii"
+      },
+      {
+        "db_name": "\u00d7 schochiana",
+        "scraper_name": "schochiana"
+      },
+      {
+        "db_name": "\u00d7 senneniana",
+        "scraper_name": "senneniana"
+      },
+      {
+        "db_name": "\u00d7 smallii",
+        "scraper_name": "smallii"
+      },
+      {
+        "db_name": "\u00d7 stelloides",
+        "scraper_name": "stelloides"
+      },
+      {
+        "db_name": "\u00d7 sterilis",
+        "scraper_name": "sterilis"
+      },
+      {
+        "db_name": "\u00d7 sternbergii",
+        "scraper_name": "sternbergii"
+      },
+      {
+        "db_name": "\u00d7 sterrettii",
+        "scraper_name": "sterrettii"
+      },
+      {
+        "db_name": "\u00d7 streimii",
+        "scraper_name": "streimii"
+      },
+      {
+        "db_name": "\u00d7 subintegra",
+        "scraper_name": "subintegra"
+      },
+      {
+        "db_name": "\u00d7 substellata",
+        "scraper_name": "substellata"
+      },
+      {
+        "db_name": "\u00d7 succulenta",
+        "scraper_name": "succulenta"
+      },
+      {
+        "db_name": "\u00d7 takaoyamensis",
+        "scraper_name": "takaoyamensis"
+      },
+      {
+        "db_name": "\u00d7 tavaresii",
+        "scraper_name": "tavaresii"
+      },
+      {
+        "db_name": "\u00d7 tharpii",
+        "scraper_name": "tharpii"
+      },
+      {
+        "db_name": "\u00d7 tingitana",
+        "scraper_name": "tingitana"
+      },
+      {
+        "db_name": "\u00d7 tlemcenensis",
+        "scraper_name": "tlemcenensis"
+      },
+      {
+        "db_name": "\u00d7 tottenii",
+        "scraper_name": "tottenii"
+      },
+      {
+        "db_name": "\u00d7 townei",
+        "scraper_name": "townei"
+      },
+      {
+        "db_name": "\u00d7 trabutii",
+        "scraper_name": "trabutii"
+      },
+      {
+        "db_name": "\u00d7 tridentata",
+        "scraper_name": "tridentata"
+      },
+      {
+        "db_name": "\u00d7 turneri",
+        "scraper_name": "turneri"
+      },
+      {
+        "db_name": "\u00d7 undulata",
+        "scraper_name": "undulata"
+      },
+      {
+        "db_name": "\u00d7 vaga",
+        "scraper_name": "vaga"
+      },
+      {
+        "db_name": "\u00d7 wagneri",
+        "scraper_name": "wagneri"
+      },
+      {
+        "db_name": "\u00d7 walteriana",
+        "scraper_name": "walteriana"
+      },
+      {
+        "db_name": "\u00d7 warei",
+        "scraper_name": "warei"
+      },
+      {
+        "db_name": "\u00d7 welwitschii",
+        "scraper_name": "welwitschii"
+      },
+      {
+        "db_name": "\u00d7 willdenowiana",
+        "scraper_name": "willdenowiana"
+      }
+    ],
+    "spelling_matches": [
+      {
+        "db_name": "asymmetrica",
+        "scraper_name": "asymetrica"
+      },
+      {
+        "db_name": "augustinei",
+        "scraper_name": "augustinii"
+      },
+      {
+        "db_name": "brandegeei",
+        "scraper_name": "brandegei"
+      },
+      {
+        "db_name": "eduardi",
+        "scraper_name": "eduardii"
+      },
+      {
+        "db_name": "fabri",
+        "scraper_name": "fabrei"
+      },
+      {
+        "db_name": "guyavifolia",
+        "scraper_name": "guyavaefolia"
+      },
+      {
+        "db_name": "magnoliifolia",
+        "scraper_name": "magnoliaefolia"
+      },
+      {
+        "db_name": "mcvaughii",
+        "scraper_name": "macvaughii"
+      },
+      {
+        "db_name": "mexiae",
+        "scraper_name": "mexia"
+      },
+      {
+        "db_name": "myrsinifolia",
+        "scraper_name": "myrsinaefolia"
+      },
+      {
+        "db_name": "runcinatifolia",
+        "scraper_name": "runcinatifolifa"
+      },
+      {
+        "db_name": "urbani",
+        "scraper_name": "urbanii"
+      }
+    ]
+  },
+  "not_importable": {
+    "only_in_db": [
+      "acatenangensis",
+      "acutissima acutissima",
+      "acutissima kingii",
+      "aerea",
+      "agrifolia agrifolia",
+      "agrifolia oxyadenia",
+      "agrifolia \u00d7 parvula",
+      "agrifolia \u00d7 parvula parvula",
+      "agrifolia \u00d7 parvula shrevei",
+      "agrifolia \u00d7 wislizeni",
+      "ajoensis",
+      "aliena acuteserrata",
+      "annulata",
+      "bambusifolia",
+      "berberidifolia x cornelius-mulleri",
+      "berberidifolia \u00d7 douglasii",
+      "berberidifolia \u00d7 dumosa",
+      "berberidifolia \u00d7 durata",
+      "berberidifolia \u00d7 durata durata",
+      "berberidifolia \u00d7 durata gabrielensis",
+      "berberidifolia \u00d7 engelmannii",
+      "berberidifolia \u00d7 john-tuckeri",
+      "berberidifolia \u00d7 lobata",
+      "brenesii",
+      "bumelioides",
+      "cambodiensis",
+      "carduchorum",
+      "castaneifolia \u00d7 cerris",
+      "chrysocalyx",
+      "chrysolepis \u00d7 palmeri",
+      "chrysolepis \u00d7 tomentella",
+      "chrysolepis \u00d7 vacciniifolia",
+      "clivicola",
+      "coccifera calliprinos",
+      "coccifera coccifera",
+      "conspersa",
+      "dentata dentata",
+      "dentata stewardii",
+      "dentata yunnanensis",
+      "dumosa x engelmannii",
+      "durata",
+      "durata durata",
+      "durata durata \u00d7 lobata",
+      "durata gabrielensis",
+      "durata gabrielensis \u00d7 lobata",
+      "durata \u00d7 lobata",
+      "duratifolia",
+      "edwardsiae",
+      "eugeniifolia",
+      "faginea broteroi",
+      "faginea faginea",
+      "faginea oscensis",
+      "fusiformis \u00d7 oleoides",
+      "gambelii \u00d7 macrocarpa",
+      "garryana breweri",
+      "garryana breweri \u00d7 lobata",
+      "garryana garryana",
+      "garryana garryana \u00d7 lobata",
+      "garryana semota",
+      "garryana semota \u00d7 lobata",
+      "garryana \u00d7 lobata",
+      "garryana \u00d7 sadleriana",
+      "geminata",
+      "geminata \u00d7 virginiana",
+      "gilliana",
+      "globosa",
+      "graciliformis",
+      "graciliramis",
+      "hemisphaerica hemisphaerica",
+      "hemisphaerica \u00d7 marilandica",
+      "hemisphaerica \u00d7 myrtifolia",
+      "hemisphaerica \u00d7 nigra",
+      "hondae",
+      "infectoria boissieri",
+      "infectoria infectoria",
+      "infectoria tenuicarpa",
+      "infectoria veneris",
+      "ithaburensis ithaburensis",
+      "ithaburensis macrolepis",
+      "john-tuckeri",
+      "juergensenii",
+      "kelloggii \u00d7 parvula",
+      "lanata lanata",
+      "lanata leiocarpa",
+      "leucotrichophora",
+      "lobata \u00d7 robur",
+      "look",
+      "lusitanica",
+      "macranthera macranthera",
+      "macranthera syspirensis",
+      "macrocarpa depressa",
+      "macrocarpa macrocarpa",
+      "margaretiae",
+      "marilandica ashei",
+      "marilandica marilandica",
+      "marlipoensis",
+      "mongolica crispula",
+      "mongolica mongolica",
+      "mongolica mongolicoides",
+      "mulleri",
+      "ophiosquamata",
+      "parvula parvula",
+      "parvula shrevei",
+      "parvula tamalpaisensis",
+      "parvula \u00d7 wislizeni",
+      "petraea austrotyrrhenica",
+      "petraea huguetiana",
+      "petraea iberica",
+      "petraea medwediewii",
+      "petraea petraea",
+      "petraea pinnatiloba",
+      "petraea polycarpa",
+      "pinbianensis",
+      "platycalyx",
+      "praineana",
+      "pseudococcifera pseudococcifera",
+      "pseudococcifera rivasmartinezii",
+      "pubescens crispata",
+      "pubescens pubescens",
+      "purhepecha",
+      "ramsbottomii",
+      "repandifolia",
+      "robur brutia",
+      "robur imeretina",
+      "robur pedunculiflora",
+      "robur robur",
+      "rubra ambigua",
+      "rubra rubra",
+      "sagraeana",
+      "shennongii",
+      "shumardii schneckii",
+      "shumardii shumardii",
+      "shumardii stenocarpa",
+      "sinuata breviloba",
+      "sinuata sinuata",
+      "spinosa miyabei",
+      "spinosa spinosa",
+      "tatakaensis",
+      "tonduzii",
+      "trojana euboica",
+      "trojana trojana",
+      "trojana yaltirikii",
+      "turbinella \u00d7 virginiana",
+      "vacciniifolia",
+      "vallicola",
+      "vulcanica",
+      "wislizeni frutescens",
+      "wislizeni wislizeni",
+      "wutaishanica",
+      "yiwuensis",
+      "\u00d7 ashei",
+      "\u00d7 battandieri",
+      "\u00d7 beadlei",
+      "\u00d7 bernardiensis",
+      "\u00d7 carrissoana",
+      "\u00d7 columnaris",
+      "\u00d7 demareei",
+      "\u00d7 ewanii",
+      "\u00d7 kerneri montserratii",
+      "\u00d7 macdanielii",
+      "\u00d7 numantina",
+      "\u00d7 palaeolithicola",
+      "\u00d7 saulii",
+      "\u00d7 schuettei",
+      "\u00d7 subconvexa",
+      "\u00d7 subfalcata",
+      "\u00d7 subglaucescens",
+      "\u00d7 subpyrenaica"
+    ],
+    "scraper_only": {
+      "ootw_hybrids_not_in_inat": [
+        "alentejana",
+        "alienoserratoides",
+        "allorgeana",
+        "almeidae",
+        "alvesii",
+        "amaralii",
+        "andrewsii",
+        "anselmii",
+        "arrimatensis",
+        "aruciensis",
+        "asheana",
+        "barcarrotensis",
+        "beguinotii",
+        "benkoi",
+        "bernardensis",
+        "budensis",
+        "cantabrica",
+        "capeloana",
+        "demarei",
+        "diosdadoi",
+        "diversifrons",
+        "elisae",
+        "esculiformis",
+        "fagineomirbeckii",
+        "fangshanensis",
+        "fenchengensis",
+        "fontanesii",
+        "grandidentata",
+        "haynaldiana",
+        "heterogina",
+        "hickelii",
+        "hopeiensis",
+        "idzuensis",
+        "kiusiana",
+        "lagunai",
+        "libanerris",
+        "lucana",
+        "maccormickii",
+        "maccormickoserrata",
+        "macdanielli",
+        "macon",
+        "major",
+        "mazei",
+        "nessiana",
+        "nipponica",
+        "ordenensis",
+        "pacensis",
+        "palaelithicola",
+        "parkeri",
+        "pastorae",
+        "paui",
+        "pellucida",
+        "pendulina",
+        "pondaim",
+        "pongtungensis",
+        "pseudoinfectoria",
+        "raineri",
+        "richteri",
+        "roseoides",
+        "rotensis",
+        "rugelii",
+        "salcedoi",
+        "saulei",
+        "schneideri",
+        "serratoides",
+        "shuettei",
+        "squamulosa",
+        "subimbricaria",
+        "szechenyana",
+        "tabajdiana",
+        "takatorensis",
+        "tentudaica",
+        "thellungii",
+        "urartensis",
+        "venulosa",
+        "vilmoriniana",
+        "viverii",
+        "warburgii",
+        "yokohamensis",
+        "zehra"
+      ],
+      "synonym_matches": [
+        {
+          "scraper_name": "wislizenii",
+          "db_synonym": "agrifolia"
+        },
+        {
+          "scraper_name": "neglecta",
+          "db_synonym": "salicina"
+        },
+        {
+          "scraper_name": "splendens",
+          "db_synonym": "glauca"
+        },
+        {
+          "scraper_name": "quangtriensis",
+          "db_synonym": "platycalyx"
+        },
+        {
+          "scraper_name": "cubana",
+          "db_synonym": "sagraeana"
+        },
+        {
+          "scraper_name": "fruticosa",
+          "db_synonym": "glauca"
+        },
+        {
+          "scraper_name": "boissieri",
+          "db_synonym": "microphylla"
+        }
+      ],
+      "asian_species": [
+        "baniensis",
+        "baolamensis",
+        "blaoensis",
+        "brandisiana",
+        "breviradiata",
+        "changhualingensis",
+        "chapensis",
+        "chevalieri",
+        "dilacerata",
+        "dongfangensis",
+        "fleuryi",
+        "fuliginosa",
+        "glandulifera",
+        "hilldebrandii",
+        "honbaensis",
+        "hondai",
+        "kerangasensis",
+        "kinabaluensis",
+        "laotica",
+        "liaoi",
+        "lobbii",
+        "lodicosa",
+        "longistyla",
+        "mangdenensis",
+        "merrillii",
+        "mespilifolia",
+        "ngochoaensis",
+        "obconica",
+        "percoriacea",
+        "steenisii",
+        "tenuicupula",
+        "thomsoniana",
+        "treubiana",
+        "trungkhanhensis",
+        "utilis",
+        "wangsaiensis",
+        "xanthotricha",
+        "xuanlienensis",
+        "yanqianii",
+        "yunnanensis"
+      ],
+      "european_mediterranean": [
+        "brutia",
+        "gussonei",
+        "iberica",
+        "imeretina",
+        "marianica",
+        "neomairei",
+        "pedunculiflora",
+        "rechingeri",
+        "sampaioana",
+        "vesca",
+        "virgiliana"
+      ],
+      "americas": [
+        "boyacensis",
+        "colombiana",
+        "cordifolia",
+        "galeottii",
+        "jaralensis",
+        "malinaltepecana",
+        "mixtecana",
+        "nigrirhachis",
+        "pilarius",
+        "revoluta",
+        "substenocarpa",
+        "subtriloba",
+        "synthetica",
+        "tamiapensis",
+        "texquitzinae",
+        "trinidadensis",
+        "trinitatis",
+        "zempoaltepecana"
+      ],
+      "other": [
+        "crenata",
+        "leiophylla",
+        "tungmaiensis"
+      ]
+    }
+  }
+}

@@ -17,7 +17,7 @@ TMP_SCRAPER_DIR = PROJECT_ROOT / "tmp" / "scraper"
 
 CACHE_DIR = str(TMP_SCRAPER_DIR / "html_cache")
 PROGRESS_FILE = str(TMP_SCRAPER_DIR / "scraper_progress.json")
-OUTPUT_FILE = str(PROJECT_ROOT / "quercus_data.json")
+OUTPUT_FILE = str(TMP_SCRAPER_DIR / "oaksoftheworld.json")
 INCONSISTENCY_LOG = str(TMP_SCRAPER_DIR / "data_inconsistencies.log")
 DELAY_SECONDS = 0.25
 
