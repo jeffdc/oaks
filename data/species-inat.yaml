@@ -1,0 +1,3680 @@
+# Quercus Species from iNaturalist
+# Generated from iNaturalist taxonomy export
+#
+# Import with: oak import-bulk data/species-inat.yaml --source-id inat
+
+- scientific_name: "acatenangensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "acerifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "shumardii"
+
+- scientific_name: "acherdophylla"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "acrodonta"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "aculcingensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "acuta"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "acutangula"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "acutifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "acutissima"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Campylolepides
+
+- scientific_name: "acutissima acutissima"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Campylolepides
+
+- scientific_name: "acutissima kingii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Campylolepides
+
+- scientific_name: "aerea"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "afares"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Libani
+
+- scientific_name: "affinis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "agrifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "agrifolia agrifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "agrifolia oxyadenia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "agrifolia × parvula"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "agrifolia × parvula parvula"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "agrifolia × parvula shrevei"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "agrifolia × wislizeni"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "airensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+  subsection: Coccifera
+  complex: "coccifera"
+
+- scientific_name: "ajoensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "alba"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Albae
+
+- scientific_name: "albicaulis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "albocincta"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "aliena"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "aliena acuteserrata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "alnifolia"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "alpescens"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "annulata"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "aquifolioides"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "arbutifolia"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "argentata"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "argyrotricha"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "ariifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "aristata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "arizonica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "arkansana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "phellos"
+
+- scientific_name: "asymmetrica"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "aucheri"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+  subsection: Coccifera
+
+- scientific_name: "augustinei"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "auricoma"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "austrina"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+  complex: "austrina"
+
+- scientific_name: "austrocochinchinensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "baloot"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "bambusifolia"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "baronii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "barrancana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "bawanglingensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "bella"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "benthamii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "berberidifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "berberidifolia"
+
+- scientific_name: "berberidifolia x cornelius-mulleri"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "berberidifolia × douglasii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "berberidifolia × dumosa"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "berberidifolia × durata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "berberidifolia"
+
+- scientific_name: "berberidifolia × durata durata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "berberidifolia"
+
+- scientific_name: "berberidifolia × durata gabrielensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "berberidifolia"
+
+- scientific_name: "berberidifolia × engelmannii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "berberidifolia × john-tuckeri"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "berberidifolia × lobata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "bicolor"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+  complex: "lyrata"
+
+- scientific_name: "bidoupensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "blakei"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "boyntonii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+  complex: "stellata"
+
+- scientific_name: "braianensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "brandegeei"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Virentes
+
+- scientific_name: "brantii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Aegilops
+
+- scientific_name: "breedloveana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "brenesii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "brevicalyx"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "buckleyi"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "shumardii"
+
+- scientific_name: "bumelioides"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "calophylla"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "cambodiensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "camusiae"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "canariensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "canbyi"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "carduchorum"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Libani
+
+- scientific_name: "carmenensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "castanea"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "castaneifolia"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Cerris
+
+- scientific_name: "castaneifolia × cerris"
+  is_hybrid: true
+  subgenus: Cerris
+  section: Cerris
+  subsection: Cerris
+
+- scientific_name: "cedrosensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Protobalanus
+
+- scientific_name: "centenaria"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "cerris"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Cerris
+
+- scientific_name: "championii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "chapmanii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+  complex: "chapmanii"
+
+- scientific_name: "charcasana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "chartacea"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "chenii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Campylolepides
+
+- scientific_name: "chihuahuensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "chrysocalyx"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "chrysolepis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Protobalanus
+
+- scientific_name: "chrysolepis × palmeri"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Protobalanus
+
+- scientific_name: "chrysolepis × tomentella"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Protobalanus
+
+- scientific_name: "chrysolepis × vacciniifolia"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Protobalanus
+
+- scientific_name: "chrysotricha"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "chungii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "ciliaris"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "clivicola"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "coahuilensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "coccifera"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+  subsection: Coccifera
+  complex: "coccifera"
+
+- scientific_name: "coccifera calliprinos"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+  subsection: Coccifera
+  complex: "coccifera"
+
+- scientific_name: "coccifera coccifera"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+  subsection: Coccifera
+  complex: "coccifera"
+
+- scientific_name: "cocciferoides"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "coccinea"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "coccinea"
+
+- scientific_name: "coffeicolor"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "confertifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "congesta"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "conspersa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "convallata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "conzattii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "copeyensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "cornelius-mulleri"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "dumosa"
+
+- scientific_name: "corrugata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "cortesii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "costaricensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "crassifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "crassipes"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "crispifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "crispipilis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "cualensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "cupreata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "daimingshanensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "dalechampii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "dankiaensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "delavayi"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "delgadoana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "delicatula"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "deliquescens"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "dentata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "dentata dentata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "dentata stewardii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "dentata yunnanensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "depressa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "depressipes"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "deserticola"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "devia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "dinghuensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "disciformis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "diversifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "dolicholepis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "donnaiensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "douglasii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "dumosa"
+
+- scientific_name: "dumosa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "dumosa"
+
+- scientific_name: "dumosa x engelmannii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "durata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "berberidifolia"
+
+- scientific_name: "durata durata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "berberidifolia"
+
+- scientific_name: "durata durata × lobata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "durata gabrielensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "berberidifolia"
+
+- scientific_name: "durata gabrielensis × lobata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "durata × lobata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "duratifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "durifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "edithiae"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "eduardi"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "edwardsiae"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "elevaticostata"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "ellipsoidalis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "coccinea"
+
+- scientific_name: "elliptica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "elmeri"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "emoryi"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "engelmannii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "engleriana"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "estremadurensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  complex: "robur"
+
+- scientific_name: "eugeniifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "eumorpha"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "fabri"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "faginea"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "faginea broteroi"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "faginea faginea"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "faginea oscensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "falcata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "marilandica"
+
+- scientific_name: "fimbriata"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "floccosa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "flocculenta"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "floribunda"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "frainetto"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "franchetii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "frutex"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "fulva"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "furfuracea"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "fusiformis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Virentes
+
+- scientific_name: "fusiformis × oleoides"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Virentes
+
+- scientific_name: "gaharuensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "galeanensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "gambelii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "gambelii × macrocarpa"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "gambleana"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "garryana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "garryana breweri"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "garryana breweri × lobata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "garryana garryana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "garryana garryana × lobata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "garryana semota"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "garryana semota × lobata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "garryana × lobata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "garryana × sadleriana"
+  is_hybrid: true
+  subgenus: Quercus
+
+- scientific_name: "gemelliflora"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "geminata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Virentes
+
+- scientific_name: "geminata × virginiana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Virentes
+
+- scientific_name: "georgiana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "ilicifolia"
+
+- scientific_name: "germana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "ghiesbreghtii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "gilliana"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "gilva"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "glabrescens"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "glauca"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "glaucescens"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "glaucoides"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "globosa"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "gomeziana"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "graciliformis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "graciliramis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "grahamii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "gravesii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "greggii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "griffithii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "grisea"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "gulielmi-treleasei"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "guyavifolia"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "hartwissiana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "havardii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+  complex: "chapmanii"
+
+- scientific_name: "helferiana"
+  is_hybrid: false
+
+- scientific_name: "hemisphaerica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "incana"
+
+- scientific_name: "hemisphaerica hemisphaerica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "incana"
+
+- scientific_name: "hemisphaerica × marilandica"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "hemisphaerica × myrtifolia"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "incana"
+
+- scientific_name: "hemisphaerica × nigra"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "hinckleyi"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Polymorphae
+  complex: "vaseyana"
+
+- scientific_name: "hintonii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "hintoniorum"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "hirtifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "hondae"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "hui"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "huicholensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "humboldtii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "hypargyrea"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "hypoleucoides"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "hypophaea"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "hypoxantha"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "ichnusae"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "ignaciensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "ilex"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+  complex: "ilex"
+
+- scientific_name: "ilicifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "ilicifolia"
+
+- scientific_name: "iltisii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "imbricaria"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "ilicifolia"
+
+- scientific_name: "incana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "incana"
+
+- scientific_name: "infectoria"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "infectoria boissieri"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "infectoria infectoria"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "infectoria tenuicarpa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "infectoria veneris"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "inopina"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "incana"
+
+- scientific_name: "insignis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "intricata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "invaginata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "ithaburensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Aegilops
+
+- scientific_name: "ithaburensis ithaburensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Aegilops
+
+- scientific_name: "ithaburensis macrolepis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Aegilops
+
+- scientific_name: "jenseniana"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "jinpinensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "john-tuckeri"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "dumosa"
+
+- scientific_name: "jonesii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "juergensenii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "kelloggii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "kelloggii × parvula"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "kerrii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "kingiana"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "kiukiangensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "kotschyana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "kouangsiensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "laceyi"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Polymorphae
+
+- scientific_name: "laeta"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "laevis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "marilandica"
+
+- scientific_name: "lamellosa"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "lanata"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "lanata lanata"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "lanata leiocarpa"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "lancifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "langbianensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "laurifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "phellos"
+
+- scientific_name: "laurina"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "leucotrichophora"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "libani"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Libani
+
+- scientific_name: "liebmannii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "lineata"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "litseoides"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "lobata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "lobata × robur"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "longinux"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "longispica"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "look"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Cerris
+
+- scientific_name: "lowii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "lungmaiensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "lusitanica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "lyrata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+  complex: "lyrata"
+
+- scientific_name: "macdougallii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "macranthera"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "macranthera macranthera"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "macranthera syspirensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "macrocalyx"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "macrocarpa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+  complex: "lyrata"
+
+- scientific_name: "macrocarpa depressa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+  complex: "lyrata"
+
+- scientific_name: "macrocarpa macrocarpa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+  complex: "lyrata"
+
+- scientific_name: "magnoliifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "manzanillana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "margaretiae"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+  complex: "austrina"
+
+- scientific_name: "marilandica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "marilandica"
+
+- scientific_name: "marilandica ashei"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "marilandica"
+
+- scientific_name: "marilandica marilandica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "marilandica"
+
+- scientific_name: "marlipoensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "martinezii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "mcvaughii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "meavei"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "melissae"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "mexiae"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "mexicana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "michauxii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Albae
+
+- scientific_name: "microphylla"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "minima"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Virentes
+
+- scientific_name: "miquihuanensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "miyagii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "mohriana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Polymorphae
+
+- scientific_name: "mongolica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "mongolica crispula"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "mongolica mongolica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "mongolica mongolicoides"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "monimotricha"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "montana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Albae
+
+- scientific_name: "monterreyensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "morii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "motuoensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "muehlenbergii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+  complex: "prinoides"
+
+- scientific_name: "mulleri"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "myrsinifolia"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "myrtifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "incana"
+
+- scientific_name: "nigra"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "phellos"
+
+- scientific_name: "ningangensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "nivea"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "nixoniana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "oblongifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "obtusanthera"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "obtusata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "ocoteifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "oglethorpensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+
+- scientific_name: "oidocarpa"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "oleoides"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Virentes
+
+- scientific_name: "oocarpa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "opaca"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "ophiosquamata"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Aegilops
+
+- scientific_name: "orocantabrica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  complex: "robur"
+
+- scientific_name: "oxyodon"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "oxyphylla"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "pachyloma"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "pacifica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "dumosa"
+
+- scientific_name: "pagoda"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "phellos"
+
+- scientific_name: "palmeri"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Protobalanus
+
+- scientific_name: "palustris"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Palustres
+
+- scientific_name: "panamandinaea"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "pannosa"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "parvula"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "parvula parvula"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "parvula shrevei"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "parvula tamalpaisensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "parvula × wislizeni"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "pauciradiata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "paxtalensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "peduncularis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "peninsularis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "pennivenia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "pentacycla"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "perpallida"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "petelotii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "petraea"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "petraea austrotyrrhenica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "petraea huguetiana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "petraea iberica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "petraea medwediewii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "petraea petraea"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "petraea pinnatiloba"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "petraea polycarpa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "phanera"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "phellos"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "phellos"
+
+- scientific_name: "phillyreoides"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "pinbianensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "pinnativenulosa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "planipocula"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "platycalyx"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "poilanei"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "polymorpha"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Polymorphae
+
+- scientific_name: "pontica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Ponticae
+
+- scientific_name: "porphyrogenita"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "potosina"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "praeco"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "praineana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "pringlei"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "prinoides"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+  complex: "prinoides"
+
+- scientific_name: "protoroburoides"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "pseudococcifera"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+  subsection: Coccifera
+  complex: "coccifera"
+
+- scientific_name: "pseudococcifera pseudococcifera"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+  subsection: Coccifera
+  complex: "coccifera"
+
+- scientific_name: "pseudococcifera rivasmartinezii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+  subsection: Coccifera
+  complex: "coccifera"
+
+- scientific_name: "pseudosetulosa"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "pseudoverticillata"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "pubescens"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "pubescens crispata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "pubescens pubescens"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "pumila"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "phellos"
+
+- scientific_name: "pungens"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Polymorphae
+  complex: "vaseyana"
+
+- scientific_name: "purhepecha"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "purulhana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "pyrenaica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "radiata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "ramsbottomii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "rehderiana"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "rekonis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "repanda"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "repandifolia"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "resinosa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "rex"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "robur"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  complex: "robur"
+
+- scientific_name: "robur brutia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  complex: "robur"
+
+- scientific_name: "robur imeretina"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  complex: "robur"
+
+- scientific_name: "robur pedunculiflora"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  complex: "robur"
+
+- scientific_name: "robur robur"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  complex: "robur"
+
+- scientific_name: "robusta"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "rotundifolia"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+  complex: "ilex"
+
+- scientific_name: "rubra"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "shumardii"
+
+- scientific_name: "rubra ambigua"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "shumardii"
+
+- scientific_name: "rubra rubra"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "shumardii"
+
+- scientific_name: "rubramenta"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "rugosa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "runcinatifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "rupestris"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "rysophylla"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "sadleriana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Ponticae
+
+- scientific_name: "sagraeana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Virentes
+
+- scientific_name: "salicifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "salicina"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "saltillensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "sanchezcolinii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "sapotifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "sarahmariae"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "saravanensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "sartorii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "schottkyana"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "schultzei"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "scytophylla"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "sebifera"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "seemannii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "segoviensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "semecarpifolia"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "semiserrata"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "senescens"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "serrata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "sessilifolia"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "setulosa"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "shennongii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "shumardii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "shumardii"
+
+- scientific_name: "shumardii schneckii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "shumardii"
+
+- scientific_name: "shumardii shumardii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "shumardii"
+
+- scientific_name: "shumardii stenocarpa"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "shumardii"
+
+- scientific_name: "sichourensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "sideroxyla"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "similis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+  complex: "stellata"
+
+- scientific_name: "sinuata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+
+- scientific_name: "sinuata breviloba"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+
+- scientific_name: "sinuata sinuata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+
+- scientific_name: "skinneri"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "sontraensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "sororia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "spinosa"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "spinosa miyabei"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "spinosa spinosa"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "stellata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+  complex: "stellata"
+
+- scientific_name: "stenophylloides"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "stewardiana"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "striatula"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "suber"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Suber
+
+- scientific_name: "subsericea"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "subspathulata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "sumatrana"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "supranitida"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "tarahumara"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "tardifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "tarokoensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "tatakaensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "tenuiloba"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "texana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Palustres
+
+- scientific_name: "thorelii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "tiaoloshanica"
+  is_hybrid: false
+
+- scientific_name: "tinkhamii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "tomentella"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Protobalanus
+
+- scientific_name: "tomentosinervis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "tonduzii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "toumeyi"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "toxicodendrifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "trojana"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Libani
+
+- scientific_name: "trojana euboica"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Libani
+
+- scientific_name: "trojana trojana"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Libani
+
+- scientific_name: "trojana yaltirikii"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Libani
+
+- scientific_name: "tuberculata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "tuitensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "turbinella"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "turbinella × virginiana"
+  is_hybrid: true
+  subgenus: Quercus
+
+- scientific_name: "undata"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "urbani"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "uxoris"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "vacciniifolia"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Protobalanus
+
+- scientific_name: "vallicola"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "variabilis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cerris
+  subsection: Campylolepides
+
+- scientific_name: "vaseyana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+  subsection: Polymorphae
+  complex: "vaseyana"
+
+- scientific_name: "velutina"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "coccinea"
+
+- scientific_name: "verde"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "vicentensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "viminea"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "virginiana"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Virentes
+
+- scientific_name: "vulcanica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "welshii"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "wislizeni"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "wislizeni frutescens"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "wislizeni wislizeni"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "wutaishanica"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "xalapensis"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "xanthoclada"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "xylina"
+  is_hybrid: false
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "yiwuensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "yonganensis"
+  is_hybrid: false
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "× acutidens"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× albescens"
+  is_hybrid: true
+
+- scientific_name: "× alvordiana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "dumosa"
+
+- scientific_name: "× andegavensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× andresii"
+  is_hybrid: true
+
+- scientific_name: "× ashei"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× atlantica"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× audleyensis"
+  is_hybrid: true
+
+- scientific_name: "× autumnalis"
+  is_hybrid: true
+  subgenus: Cerris
+  section: Ilex
+  complex: "ilex"
+
+- scientific_name: "× auzendei"
+  is_hybrid: true
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "× avellaniformis"
+  is_hybrid: true
+  subgenus: Cerris
+
+- scientific_name: "× baenitzii"
+  is_hybrid: true
+
+- scientific_name: "× basaseachicensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× battandieri"
+  is_hybrid: true
+
+- scientific_name: "× beadlei"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Albae
+
+- scientific_name: "× beaumontiana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× bebbiana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× beckyae"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+
+- scientific_name: "× benderi"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+
+- scientific_name: "× bernardiensis"
+  is_hybrid: true
+
+- scientific_name: "× bernardiensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× bimundorum"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× blufftonensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "marilandica"
+
+- scientific_name: "× brittonii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× burnetensis"
+  is_hybrid: true
+  subgenus: Quercus
+
+- scientific_name: "× bushii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× byarsii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× caduca"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× caesariensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× campitica"
+  is_hybrid: true
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "× capesii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "phellos"
+
+- scientific_name: "× carrissoana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× celtica"
+  is_hybrid: true
+
+- scientific_name: "× cerrioides"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× cocksii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× columnaris"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× comptoniae"
+  is_hybrid: true
+  subgenus: Quercus
+
+- scientific_name: "× coscojosuberiformis"
+  is_hybrid: true
+  subgenus: Cerris
+
+- scientific_name: "× coutinhoi"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× cravenensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× deamii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+
+- scientific_name: "× demareei"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× diegoi"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× discreta"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+
+- scientific_name: "× diversiloba"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× drummondii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+
+- scientific_name: "× duriensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× dysophylla"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× eborense"
+  is_hybrid: true
+  subgenus: Cerris
+  section: Ilex
+
+- scientific_name: "× egglestonii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× eplingii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "× ewanii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× exacta"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× faxonii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× fernaldii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× fernowii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× filialis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× firmurensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× fontana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "coccinea"
+
+- scientific_name: "× fontqueri"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× gallaecica"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× ganderi"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "× garlandensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× giffordii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× guadalupensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× harbisonii"
+  is_hybrid: true
+  subgenus: Quercus
+
+- scientific_name: "× hastingsii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× hawkinsiae"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+
+- scientific_name: "× heterophylla"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× hillii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× hispanica"
+  is_hybrid: true
+  subgenus: Cerris
+  section: Cerris
+
+- scientific_name: "× howellii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "× humidicola"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+  complex: "lyrata"
+
+- scientific_name: "× incomita"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "marilandica"
+
+- scientific_name: "× inconstans"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× introgressa"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+
+- scientific_name: "× jackiana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× jolonensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "× joorii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× kerneri"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× kerneri montserratii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× kewensis"
+  is_hybrid: true
+
+- scientific_name: "× kinseliae"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+  complex: "dumosa"
+
+- scientific_name: "× knoblochii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× leana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× lousae"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× ludoviciana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "phellos"
+
+- scientific_name: "× macdanielii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× macdonaldii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "× macnabiana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Stellatae
+
+- scientific_name: "× mannifera"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× megaleia"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+  complex: "lyrata"
+
+- scientific_name: "× mellichampii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× mongolicodentata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× morehus"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Agrifoliae
+
+- scientific_name: "× morisii"
+  is_hybrid: true
+  subgenus: Cerris
+
+- scientific_name: "× moultonensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× munzii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× mutabilis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× neopalmeri"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× neotharpii"
+  is_hybrid: true
+  subgenus: Quercus
+
+- scientific_name: "× numantina"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× numidica"
+  is_hybrid: true
+  subgenus: Cerris
+  section: Cerris
+
+- scientific_name: "× organensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× oviedoensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+  complex: "incana"
+
+- scientific_name: "× pachucana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× palaeolithicola"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "coccinea"
+
+- scientific_name: "× palmeriana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× pastorensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× podophylla"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× prasina"
+  is_hybrid: true
+
+- scientific_name: "× rehderi"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× riparia"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "shumardii"
+
+- scientific_name: "× robbinsii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× rolfsii"
+  is_hybrid: true
+  subgenus: Quercus
+
+- scientific_name: "× rosacea"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× rudkinii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× runcinata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× sargentii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× saulii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Albae
+
+- scientific_name: "× schochiana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× schuettei"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+  complex: "lyrata"
+
+- scientific_name: "× senneniana"
+  is_hybrid: true
+
+- scientific_name: "× smallii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× stelloides"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× sterilis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× sternbergii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Coccineae
+  complex: "shumardii"
+
+- scientific_name: "× sterrettii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× streimii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× subconvexa"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "× subfalcata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× subglaucescens"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× subintegra"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× subpyrenaica"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× substellata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× succulenta"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Virentes
+
+- scientific_name: "× takaoyamensis"
+  is_hybrid: true
+  subgenus: Cerris
+  section: Cyclobalanopsis
+
+- scientific_name: "× tavaresii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× tharpii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× tingitana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "× tlemcenensis"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Galliferae
+
+- scientific_name: "× tottenii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× townei"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Dumosae
+
+- scientific_name: "× trabutii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× tridentata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× turneri"
+  is_hybrid: true
+
+- scientific_name: "× undulata"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× vaga"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+
+- scientific_name: "× wagneri"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+  subsection: Prinoideae
+
+- scientific_name: "× walteriana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae
+  subsection: Phellos
+
+- scientific_name: "× warei"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× welwitschii"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Quercus
+
+- scientific_name: "× willdenowiana"
+  is_hybrid: true
+  subgenus: Quercus
+  section: Lobatae

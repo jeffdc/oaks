@@ -16,10 +16,24 @@ var sourceCmd = &cobra.Command{
 	Long:  `Commands for managing source references.`,
 }
 
+var (
+	srcNewID   string
+	srcNewType string
+	srcNewName string
+	srcNewURL  string
+)
+
 var sourceNewCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Create a new source",
-	Long:  `Create a new source entry interactively.`,
+	Long: `Create a new source entry.
+
+If --id, --type, and --name are provided, creates non-interactively.
+Otherwise, opens $EDITOR for interactive creation.
+
+Examples:
+  oak source new
+  oak source new --id inat --type database --name "iNaturalist" --url "https://www.inaturalist.org"`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		database, err := getDB()
 		if err != nil {
@@ -27,9 +41,23 @@ var sourceNewCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		source, err := editor.NewSource()
-		if err != nil {
-			return err
+		var source *models.Source
+
+		// If required flags are provided, create non-interactively
+		if srcNewID != "" && srcNewType != "" && srcNewName != "" {
+			source = models.NewSource(srcNewID, srcNewType, srcNewName)
+			if srcNewURL != "" {
+				source.URL = &srcNewURL
+			}
+		} else if srcNewID != "" || srcNewType != "" || srcNewName != "" {
+			return fmt.Errorf("for non-interactive mode, all of --id, --type, and --name are required")
+		} else {
+			// Interactive mode
+			var err error
+			source, err = editor.NewSource()
+			if err != nil {
+				return err
+			}
 		}
 
 		if err := database.InsertSource(source); err != nil {
@@ -173,6 +201,11 @@ func printSource(s *models.Source) {
 }
 
 func init() {
+	sourceNewCmd.Flags().StringVar(&srcNewID, "id", "", "Source ID (required for non-interactive)")
+	sourceNewCmd.Flags().StringVar(&srcNewType, "type", "", "Source type (required for non-interactive)")
+	sourceNewCmd.Flags().StringVar(&srcNewName, "name", "", "Source name (required for non-interactive)")
+	sourceNewCmd.Flags().StringVar(&srcNewURL, "url", "", "Source URL (optional)")
+
 	sourceCmd.AddCommand(sourceNewCmd)
 	sourceCmd.AddCommand(sourceEditCmd)
 	sourceCmd.AddCommand(sourceListCmd)
