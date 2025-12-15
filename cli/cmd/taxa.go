@@ -18,12 +18,19 @@ type TaxaFile struct {
 	Complexes   []TaxonEntry `yaml:"complexes"`
 }
 
+// TaxonLink represents an external link in the YAML file
+type TaxonLinkEntry struct {
+	Label string `yaml:"label"`
+	URL   string `yaml:"url"`
+}
+
 // TaxonEntry represents a single taxon in the YAML file
 type TaxonEntry struct {
-	Name   string  `yaml:"name"`
-	Parent *string `yaml:"parent"`
-	Author *string `yaml:"author"`
-	Notes  *string `yaml:"notes"`
+	Name   string           `yaml:"name"`
+	Parent *string          `yaml:"parent"`
+	Author *string          `yaml:"author"`
+	Notes  *string          `yaml:"notes"`
+	Links  []TaxonLinkEntry `yaml:"links"`
 }
 
 var taxaCmd = &cobra.Command{
@@ -105,6 +112,18 @@ func runTaxaImport(cmd *cobra.Command, args []string) error {
 	// Import counts
 	var imported, skipped, errors int
 
+	// Helper to convert YAML links to model links
+	convertLinks := func(entries []TaxonLinkEntry) []models.TaxonLink {
+		if len(entries) == 0 {
+			return nil
+		}
+		links := make([]models.TaxonLink, len(entries))
+		for i, e := range entries {
+			links[i] = models.TaxonLink{Label: e.Label, URL: e.URL}
+		}
+		return links
+	}
+
 	// Helper to import a list of taxa at a given level
 	importLevel := func(entries []TaxonEntry, level models.TaxonLevel) {
 		for _, entry := range entries {
@@ -118,6 +137,7 @@ func runTaxaImport(cmd *cobra.Command, args []string) error {
 				Parent: entry.Parent,
 				Author: entry.Author,
 				Notes:  entry.Notes,
+				Links:  convertLinks(entry.Links),
 			}
 
 			err := database.InsertTaxon(taxon)

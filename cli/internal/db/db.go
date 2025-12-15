@@ -26,6 +26,10 @@ func New(dbPath string) (*Database, error) {
 		conn.Close()
 		return nil, err
 	}
+	if err := db.runMigrations(); err != nil {
+		conn.Close()
+		return nil, err
+	}
 
 	return db, nil
 }
@@ -45,6 +49,7 @@ func (db *Database) initializeSchema() error {
 			parent TEXT,
 			author TEXT,
 			notes TEXT,
+			links TEXT,
 			PRIMARY KEY (name, level)
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_taxa_level ON taxa(level)`,
@@ -107,6 +112,40 @@ func (db *Database) initializeSchema() error {
 	}
 
 	return nil
+}
+
+// runMigrations applies schema migrations for existing databases
+func (db *Database) runMigrations() error {
+	// Migration 1: Add links column to taxa table if it doesn't exist
+	if !db.columnExists("taxa", "links") {
+		if _, err := db.conn.Exec(`ALTER TABLE taxa ADD COLUMN links TEXT`); err != nil {
+			return fmt.Errorf("failed to add links column to taxa: %w", err)
+		}
+	}
+	return nil
+}
+
+// columnExists checks if a column exists in a table
+func (db *Database) columnExists(table, column string) bool {
+	rows, err := db.conn.Query(fmt.Sprintf("PRAGMA table_info(%s)", table))
+	if err != nil {
+		return false
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cid int
+		var name, ctype string
+		var notnull, pk int
+		var dfltValue interface{}
+		if err := rows.Scan(&cid, &name, &ctype, &notnull, &dfltValue, &pk); err != nil {
+			continue
+		}
+		if name == column {
+			return true
+		}
+	}
+	return false
 }
 
 // InsertSource inserts a new source
@@ -181,9 +220,19 @@ func (db *Database) ListSources() ([]*models.Source, error) {
 
 // InsertTaxon inserts a new taxon into the reference table
 func (db *Database) InsertTaxon(taxon *models.Taxon) error {
+	var linksJSON *string
+	if len(taxon.Links) > 0 {
+		data, err := json.Marshal(taxon.Links)
+		if err != nil {
+			return fmt.Errorf("failed to marshal links: %w", err)
+		}
+		s := string(data)
+		linksJSON = &s
+	}
+
 	_, err := db.conn.Exec(
-		`INSERT INTO taxa (name, level, parent, author, notes) VALUES (?, ?, ?, ?, ?)`,
-		taxon.Name, string(taxon.Level), taxon.Parent, taxon.Author, taxon.Notes,
+		`INSERT INTO taxa (name, level, parent, author, notes, links) VALUES (?, ?, ?, ?, ?, ?)`,
+		taxon.Name, string(taxon.Level), taxon.Parent, taxon.Author, taxon.Notes, linksJSON,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to insert taxon: %w", err)
@@ -191,16 +240,39 @@ func (db *Database) InsertTaxon(taxon *models.Taxon) error {
 	return nil
 }
 
+// UpdateTaxon updates an existing taxon
+func (db *Database) UpdateTaxon(taxon *models.Taxon) error {
+	var linksJSON *string
+	if len(taxon.Links) > 0 {
+		data, err := json.Marshal(taxon.Links)
+		if err != nil {
+			return fmt.Errorf("failed to marshal links: %w", err)
+		}
+		s := string(data)
+		linksJSON = &s
+	}
+
+	_, err := db.conn.Exec(
+		`UPDATE taxa SET parent = ?, author = ?, notes = ?, links = ? WHERE name = ? AND level = ?`,
+		taxon.Parent, taxon.Author, taxon.Notes, linksJSON, taxon.Name, string(taxon.Level),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update taxon: %w", err)
+	}
+	return nil
+}
+
 // GetTaxon gets a taxon by name and level
 func (db *Database) GetTaxon(name string, level models.TaxonLevel) (*models.Taxon, error) {
 	row := db.conn.QueryRow(
-		`SELECT name, level, parent, author, notes FROM taxa WHERE name = ? AND level = ?`,
+		`SELECT name, level, parent, author, notes, links FROM taxa WHERE name = ? AND level = ?`,
 		name, string(level),
 	)
 
 	var t models.Taxon
 	var levelStr string
-	err := row.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes)
+	var linksJSON sql.NullString
+	err := row.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes, &linksJSON)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -208,6 +280,14 @@ func (db *Database) GetTaxon(name string, level models.TaxonLevel) (*models.Taxo
 		return nil, fmt.Errorf("failed to get taxon: %w", err)
 	}
 	t.Level = models.TaxonLevel(levelStr)
+
+	if linksJSON.Valid && linksJSON.String != "" {
+		json.Unmarshal([]byte(linksJSON.String), &t.Links)
+	}
+	if t.Links == nil {
+		t.Links = []models.TaxonLink{}
+	}
+
 	return &t, nil
 }
 
@@ -218,12 +298,12 @@ func (db *Database) ListTaxa(level *models.TaxonLevel) ([]*models.Taxon, error) 
 
 	if level != nil {
 		rows, err = db.conn.Query(
-			`SELECT name, level, parent, author, notes FROM taxa WHERE level = ? ORDER BY name`,
+			`SELECT name, level, parent, author, notes, links FROM taxa WHERE level = ? ORDER BY name`,
 			string(*level),
 		)
 	} else {
 		rows, err = db.conn.Query(
-			`SELECT name, level, parent, author, notes FROM taxa ORDER BY level, name`,
+			`SELECT name, level, parent, author, notes, links FROM taxa ORDER BY level, name`,
 		)
 	}
 	if err != nil {
@@ -235,10 +315,19 @@ func (db *Database) ListTaxa(level *models.TaxonLevel) ([]*models.Taxon, error) 
 	for rows.Next() {
 		var t models.Taxon
 		var levelStr string
-		if err := rows.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes); err != nil {
+		var linksJSON sql.NullString
+		if err := rows.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes, &linksJSON); err != nil {
 			return nil, fmt.Errorf("failed to scan taxon: %w", err)
 		}
 		t.Level = models.TaxonLevel(levelStr)
+
+		if linksJSON.Valid && linksJSON.String != "" {
+			json.Unmarshal([]byte(linksJSON.String), &t.Links)
+		}
+		if t.Links == nil {
+			t.Links = []models.TaxonLink{}
+		}
+
 		taxa = append(taxa, &t)
 	}
 	return taxa, rows.Err()

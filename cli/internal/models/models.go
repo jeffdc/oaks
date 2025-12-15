@@ -10,14 +10,21 @@ const (
 	TaxonLevelComplex     TaxonLevel = "complex"
 )
 
+// TaxonLink represents a labeled external link for a taxon
+type TaxonLink struct {
+	Label string `json:"label" yaml:"label"` // e.g., "iNaturalist", "Wikipedia"
+	URL   string `json:"url" yaml:"url"`
+}
+
 // Taxon represents a taxonomic rank in the reference table
 // Hierarchy: Genus (Quercus) → Subgenus → Section → Subsection → Complex → Species
 type Taxon struct {
-	Name   string     `json:"name" yaml:"name"`
-	Level  TaxonLevel `json:"level" yaml:"level"`
-	Parent *string    `json:"parent,omitempty" yaml:"parent,omitempty"` // Parent taxon name
-	Author *string    `json:"author,omitempty" yaml:"author,omitempty"` // Taxonomic authority
-	Notes  *string    `json:"notes,omitempty" yaml:"notes,omitempty"`
+	Name   string      `json:"name" yaml:"name"`
+	Level  TaxonLevel  `json:"level" yaml:"level"`
+	Parent *string     `json:"parent,omitempty" yaml:"parent,omitempty"` // Parent taxon name
+	Author *string     `json:"author,omitempty" yaml:"author,omitempty"` // Taxonomic authority
+	Notes  *string     `json:"notes,omitempty" yaml:"notes,omitempty"`
+	Links  []TaxonLink `json:"links,omitempty" yaml:"links,omitempty"` // External reference links
 }
 
 // DataPoint represents a single data point attributed to a specific source
