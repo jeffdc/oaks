@@ -34,7 +34,6 @@ oaks/
 │   ├── scraper/              # Scraper cache and progress files
 │   └── data/                 # Working data files (e.g., iNaturalist imports)
 ├── browse.html               # Legacy static HTML browser
-├── quercus.db                # Canonical SQLite database (managed by CLI)
 └── quercus_data.json         # JSON export for web consumption
 ```
 
@@ -110,14 +109,6 @@ oaksoftheworld.fr (source)
         ↓
     scraper.py (extracts)
         ↓
-intermediate JSON/JSONL (scraped data)
-        ↓
-    CLI tool (import & manage)
-        ↓
-quercus.db (SQLite - canonical database)
-        ↓
-    CLI export to JSON
-        ↓
 quercus_data.json
         ↓
     ┌───────┴───────────┐
@@ -129,7 +120,7 @@ browse.html        web/ (Svelte PWA)
                 User's browser (offline queries via IndexedDB)
 ```
 
-**Critical**: The CLI-managed SQLite database (`quercus.db`) is the canonical source of truth. The scraper outputs intermediate files that the CLI imports. The web app loads JSON exports and populates IndexedDB for offline-capable structured queries.
+**Note**: The scraper outputs `quercus_data.json` directly. The web app loads this JSON and populates IndexedDB for offline-capable structured queries. The CLI tool (in development) uses `oak_compendium.db` for its local database.
 
 ## Architecture Decisions
 
