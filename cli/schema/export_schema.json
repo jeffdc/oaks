@@ -1,0 +1,197 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Oak Database Export Schema",
+  "description": "Schema for the JSON export format consumed by the web application",
+  "type": "object",
+  "required": ["metadata", "species"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["version", "exported_at", "species_count"],
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Schema version for compatibility checking"
+        },
+        "exported_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of export"
+        },
+        "species_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of species in export"
+        }
+      }
+    },
+    "species": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/species"
+      }
+    }
+  },
+  "definitions": {
+    "species": {
+      "type": "object",
+      "required": ["name", "is_hybrid"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Species epithet without genus (e.g., 'alba' not 'Quercus alba')"
+        },
+        "author": {
+          "type": ["string", "null"],
+          "description": "Taxonomic authority (e.g., 'L. 1753')"
+        },
+        "is_hybrid": {
+          "type": "boolean",
+          "description": "True if this is a hybrid species"
+        },
+        "conservation_status": {
+          "type": ["string", "null"],
+          "description": "IUCN Red List category (LC, NT, VU, EN, CR, EW, EX)"
+        },
+        "taxonomy": {
+          "$ref": "#/definitions/taxonomy"
+        },
+        "parent1": {
+          "type": ["string", "null"],
+          "description": "First parent species name (hybrids only)"
+        },
+        "parent2": {
+          "type": ["string", "null"],
+          "description": "Second parent species name (hybrids only)"
+        },
+        "hybrids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Bidirectional list of hybrid names involving this species"
+        },
+        "closely_related_to": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Species with close taxonomic or morphological affinity"
+        },
+        "subspecies_varieties": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Infraspecific taxa (subspecies, varieties, forms)"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/source"
+          },
+          "description": "Data from each source, with source-specific morphological descriptions"
+        }
+      }
+    },
+    "taxonomy": {
+      "type": "object",
+      "properties": {
+        "genus": {
+          "type": "string",
+          "const": "Quercus",
+          "description": "Always 'Quercus' for this database"
+        },
+        "subgenus": {
+          "type": ["string", "null"],
+          "description": "Subgenus (e.g., 'Quercus', 'Cerris')"
+        },
+        "section": {
+          "type": ["string", "null"],
+          "description": "Section within subgenus"
+        },
+        "subsection": {
+          "type": ["string", "null"],
+          "description": "Subsection within section"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["source_id", "source_name"],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "description": "Unique identifier for the source"
+        },
+        "source_name": {
+          "type": "string",
+          "description": "Human-readable source name"
+        },
+        "source_url": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "URL to the species page in this source"
+        },
+        "is_primary": {
+          "type": "boolean",
+          "default": false,
+          "description": "True if this is the preferred source for display"
+        },
+        "range": {
+          "type": ["string", "null"],
+          "description": "Geographic distribution"
+        },
+        "growth_habit": {
+          "type": ["string", "null"],
+          "description": "Size and growth form"
+        },
+        "leaves": {
+          "type": ["string", "null"],
+          "description": "Leaf morphology"
+        },
+        "flowers": {
+          "type": ["string", "null"],
+          "description": "Flower characteristics"
+        },
+        "fruits": {
+          "type": ["string", "null"],
+          "description": "Acorn and cup characteristics"
+        },
+        "bark_twigs_buds": {
+          "type": ["string", "null"],
+          "description": "Bark, twig, and bud characteristics"
+        },
+        "hardiness_habitat": {
+          "type": ["string", "null"],
+          "description": "Climate tolerance and habitat preferences"
+        },
+        "miscellaneous": {
+          "type": ["string", "null"],
+          "description": "Additional notes and observations"
+        },
+        "synonyms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/synonym"
+          },
+          "description": "Taxonomic synonyms from this source"
+        },
+        "local_names": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Common/vernacular names from this source"
+        }
+      }
+    },
+    "synonym": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Synonym species epithet"
+        },
+        "author": {
+          "type": ["string", "null"],
+          "description": "Authority for the synonym"
+        }
+      }
+    }
+  }
+}
