@@ -20,33 +20,36 @@ type ExportTaxonomy struct {
 
 // ExportSourceData represents source-attributed data for a species
 type ExportSourceData struct {
-	SourceID   string   `json:"source_id"`
-	SourceName string   `json:"source_name"`
-	SourceURL  *string  `json:"source_url,omitempty"`
-	LocalNames []string `json:"local_names,omitempty"`
-	Synonyms   []string `json:"synonyms,omitempty"`
-	// Morphological fields from data_points
-	LeafColor   *string `json:"leaf_color,omitempty"`
-	LeafShape   *string `json:"leaf_shape,omitempty"`
-	BudShape    *string `json:"bud_shape,omitempty"`
-	BarkTexture *string `json:"bark_texture,omitempty"`
-	Habitat     *string `json:"habitat,omitempty"`
-	NativeRange *string `json:"native_range,omitempty"`
-	Height      *string `json:"height,omitempty"`
+	SourceID         int64    `json:"source_id"`
+	SourceName       string   `json:"source_name"`
+	SourceURL        *string  `json:"source_url,omitempty"`
+	IsPreferred      bool     `json:"is_preferred"`
+	LocalNames       []string `json:"local_names,omitempty"`
+	Range            *string  `json:"range,omitempty"`
+	GrowthHabit      *string  `json:"growth_habit,omitempty"`
+	Leaves           *string  `json:"leaves,omitempty"`
+	Flowers          *string  `json:"flowers,omitempty"`
+	Fruits           *string  `json:"fruits,omitempty"`
+	BarkTwigsBuds    *string  `json:"bark_twigs_buds,omitempty"`
+	HardinessHabitat *string  `json:"hardiness_habitat,omitempty"`
+	Miscellaneous    *string  `json:"miscellaneous,omitempty"`
+	URL              *string  `json:"url,omitempty"` // Source's page for this species
 }
 
 // ExportSpecies represents a species in export format
 type ExportSpecies struct {
-	Name               string             `json:"name"`
-	Author             *string            `json:"author,omitempty"`
-	IsHybrid           bool               `json:"is_hybrid"`
-	ConservationStatus *string            `json:"conservation_status,omitempty"`
-	Taxonomy           ExportTaxonomy     `json:"taxonomy"`
-	Parent1            *string            `json:"parent1,omitempty"`
-	Parent2            *string            `json:"parent2,omitempty"`
-	Hybrids            []string           `json:"hybrids,omitempty"`
-	CloselyRelatedTo   []string           `json:"closely_related_to,omitempty"`
-	Sources            []ExportSourceData `json:"sources,omitempty"`
+	Name                string             `json:"name"`
+	Author              *string            `json:"author,omitempty"`
+	IsHybrid            bool               `json:"is_hybrid"`
+	ConservationStatus  *string            `json:"conservation_status,omitempty"`
+	Taxonomy            ExportTaxonomy     `json:"taxonomy"`
+	Parent1             *string            `json:"parent1,omitempty"`
+	Parent2             *string            `json:"parent2,omitempty"`
+	Hybrids             []string           `json:"hybrids,omitempty"`
+	CloselyRelatedTo    []string           `json:"closely_related_to,omitempty"`
+	SubspeciesVarieties []string           `json:"subspecies_varieties,omitempty"`
+	Synonyms            []string           `json:"synonyms,omitempty"`
+	Sources             []ExportSourceData `json:"sources,omitempty"`
 }
 
 // ExportFile represents the complete export format
@@ -103,9 +106,9 @@ func runExport(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to list sources: %w", err)
 	}
-	sourceMap := make(map[string]*models.Source)
+	sourceMap := make(map[int64]*models.Source)
 	for _, s := range sources {
-		sourceMap[s.SourceID] = s
+		sourceMap[s.ID] = s
 	}
 
 	// Build export data
@@ -126,52 +129,45 @@ func runExport(cmd *cobra.Command, args []string) error {
 				Subsection: entry.Subsection,
 				Complex:    entry.Complex,
 			},
-			Parent1:          entry.Parent1,
-			Parent2:          entry.Parent2,
-			Hybrids:          nonEmptySlice(entry.Hybrids),
-			CloselyRelatedTo: nonEmptySlice(entry.CloselyRelatedTo),
-			Sources:          []ExportSourceData{},
+			Parent1:             entry.Parent1,
+			Parent2:             entry.Parent2,
+			Hybrids:             nonEmptySlice(entry.Hybrids),
+			CloselyRelatedTo:    nonEmptySlice(entry.CloselyRelatedTo),
+			SubspeciesVarieties: nonEmptySlice(entry.SubspeciesVarieties),
+			Synonyms:            nonEmptySlice(entry.Synonyms),
+			Sources:             []ExportSourceData{},
 		}
 
-		// Get data points for this entry
-		dataPoints, err := database.GetDataPointsForEntry(entry.ScientificName)
+		// Get species_sources data for this entry
+		speciesSources, err := database.GetSpeciesSources(entry.ScientificName)
 		if err != nil {
-			return fmt.Errorf("failed to get data points for %s: %w", entry.ScientificName, err)
+			return fmt.Errorf("failed to get species sources for %s: %w", entry.ScientificName, err)
 		}
 
-		// Group data by source
-		sourceDataMap := make(map[string]*ExportSourceData)
-
-		// Process common_names (becomes local_names in export)
-		for _, dp := range dataPoints["common_names"] {
-			sd := getOrCreateSourceData(sourceDataMap, dp.SourceID, sourceMap)
-			sd.LocalNames = append(sd.LocalNames, dp.Value)
-		}
-
-		// Process morphological fields
-		processField(dataPoints, "leaf_color", sourceDataMap, sourceMap, func(sd *ExportSourceData, v string) { sd.LeafColor = &v })
-		processField(dataPoints, "leaf_shape", sourceDataMap, sourceMap, func(sd *ExportSourceData, v string) { sd.LeafShape = &v })
-		processField(dataPoints, "bud_shape", sourceDataMap, sourceMap, func(sd *ExportSourceData, v string) { sd.BudShape = &v })
-		processField(dataPoints, "bark_texture", sourceDataMap, sourceMap, func(sd *ExportSourceData, v string) { sd.BarkTexture = &v })
-		processField(dataPoints, "habitat", sourceDataMap, sourceMap, func(sd *ExportSourceData, v string) { sd.Habitat = &v })
-		processField(dataPoints, "native_range", sourceDataMap, sourceMap, func(sd *ExportSourceData, v string) { sd.NativeRange = &v })
-		processField(dataPoints, "height", sourceDataMap, sourceMap, func(sd *ExportSourceData, v string) { sd.Height = &v })
-
-		// Add synonyms (stored on entry, not in data_points)
-		if len(entry.Synonyms) > 0 {
-			// If we have sources with data, add synonyms to the first one
-			// Otherwise create a placeholder source
-			if len(sourceDataMap) > 0 {
-				for _, sd := range sourceDataMap {
-					sd.Synonyms = entry.Synonyms
-					break
-				}
+		// Convert species_sources to export format
+		for _, ss := range speciesSources {
+			sd := ExportSourceData{
+				SourceID:         ss.SourceID,
+				SourceName:       fmt.Sprintf("Source %d", ss.SourceID),
+				IsPreferred:      ss.IsPreferred,
+				LocalNames:       nonEmptySlice(ss.LocalNames),
+				Range:            ss.Range,
+				GrowthHabit:      ss.GrowthHabit,
+				Leaves:           ss.Leaves,
+				Flowers:          ss.Flowers,
+				Fruits:           ss.Fruits,
+				BarkTwigsBuds:    ss.BarkTwigsBuds,
+				HardinessHabitat: ss.HardinessHabitat,
+				Miscellaneous:    ss.Miscellaneous,
+				URL:              ss.URL,
 			}
-		}
 
-		// Convert map to slice
-		for _, sd := range sourceDataMap {
-			species.Sources = append(species.Sources, *sd)
+			if source, ok := sourceMap[ss.SourceID]; ok {
+				sd.SourceName = source.Name
+				sd.SourceURL = source.URL
+			}
+
+			species.Sources = append(species.Sources, sd)
 		}
 
 		exportData.Species = append(exportData.Species, species)
@@ -194,34 +190,6 @@ func runExport(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func getOrCreateSourceData(m map[string]*ExportSourceData, sourceID string, sourceMap map[string]*models.Source) *ExportSourceData {
-	if sd, ok := m[sourceID]; ok {
-		return sd
-	}
-
-	sd := &ExportSourceData{
-		SourceID:   sourceID,
-		SourceName: sourceID, // Default to ID if source not found
-		LocalNames: []string{},
-		Synonyms:   []string{},
-	}
-
-	if source, ok := sourceMap[sourceID]; ok {
-		sd.SourceName = source.Name
-		sd.SourceURL = source.URL
-	}
-
-	m[sourceID] = sd
-	return sd
-}
-
-func processField(dataPoints map[string][]models.DataPoint, fieldName string, sourceDataMap map[string]*ExportSourceData, sourceMap map[string]*models.Source, setter func(*ExportSourceData, string)) {
-	for _, dp := range dataPoints[fieldName] {
-		sd := getOrCreateSourceData(sourceDataMap, dp.SourceID, sourceMap)
-		setter(sd, dp.Value)
-	}
 }
 
 func nonEmptySlice(s []string) []string {

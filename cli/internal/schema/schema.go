@@ -79,39 +79,11 @@ func (v *Validator) ValidateOakEntry(entry *models.OakEntry) error {
 }
 
 // validateEnumerations checks field values against allowed enumerations
+// Note: Previously validated DataPoint fields on OakEntry, but those moved to SpeciesSource.
+// This is now a no-op for OakEntry. Add ValidateSpeciesSource if enumeration validation needed.
 func (v *Validator) validateEnumerations(entry *models.OakEntry) error {
-	var errors []string
-
-	validateField := func(fieldName string, dataPoints []models.DataPoint) {
-		allowedValues, hasEnum := v.enumerations[fieldName]
-		if !hasEnum {
-			return
-		}
-
-		allowed := make(map[string]bool)
-		for _, val := range allowedValues {
-			allowed[val] = true
-		}
-
-		for _, dp := range dataPoints {
-			if !allowed[dp.Value] {
-				errors = append(errors, fmt.Sprintf(
-					"invalid value '%s' for field '%s'. Allowed values: %s",
-					dp.Value, fieldName, strings.Join(allowedValues, ", "),
-				))
-			}
-		}
-	}
-
-	validateField("leaf_shape", entry.LeafShape)
-	validateField("leaf_color", entry.LeafColor)
-	validateField("bud_shape", entry.BudShape)
-	validateField("bark_texture", entry.BarkTexture)
-
-	if len(errors) > 0 {
-		return fmt.Errorf("enumeration validation failed:\n  - %s", strings.Join(errors, "\n  - "))
-	}
-
+	// OakEntry no longer contains source-attributed data fields.
+	// Enumeration validation would apply to SpeciesSource fields if needed.
 	return nil
 }
 

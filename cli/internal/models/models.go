@@ -27,14 +27,27 @@ type Taxon struct {
 	Links  []TaxonLink `json:"links,omitempty" yaml:"links,omitempty"` // External reference links
 }
 
-// DataPoint represents a single data point attributed to a specific source
-type DataPoint struct {
-	Value      string  `json:"value" yaml:"value"`
-	SourceID   string  `json:"source_id" yaml:"source_id"`
-	PageNumber *string `json:"page_number,omitempty" yaml:"page_number,omitempty"`
+// SpeciesSource represents source-attributed descriptive data for a species
+// One row = everything source X says about species Y
+type SpeciesSource struct {
+	ID               int64    `json:"id" yaml:"id"`
+	ScientificName   string   `json:"scientific_name" yaml:"scientific_name"`
+	SourceID         int64    `json:"source_id" yaml:"source_id"`
+	LocalNames       []string `json:"local_names,omitempty" yaml:"local_names,omitempty"`
+	Range            *string  `json:"range,omitempty" yaml:"range,omitempty"`
+	GrowthHabit      *string  `json:"growth_habit,omitempty" yaml:"growth_habit,omitempty"`
+	Leaves           *string  `json:"leaves,omitempty" yaml:"leaves,omitempty"`
+	Flowers          *string  `json:"flowers,omitempty" yaml:"flowers,omitempty"`
+	Fruits           *string  `json:"fruits,omitempty" yaml:"fruits,omitempty"`
+	BarkTwigsBuds    *string  `json:"bark_twigs_buds,omitempty" yaml:"bark_twigs_buds,omitempty"`
+	HardinessHabitat *string  `json:"hardiness_habitat,omitempty" yaml:"hardiness_habitat,omitempty"`
+	Miscellaneous    *string  `json:"miscellaneous,omitempty" yaml:"miscellaneous,omitempty"`
+	URL              *string  `json:"url,omitempty" yaml:"url,omitempty"`
+	IsPreferred      bool     `json:"is_preferred" yaml:"is_preferred"`
 }
 
-// OakEntry represents an Oak taxonomic entry
+// OakEntry represents an Oak taxonomic entry (species-intrinsic data)
+// Source-attributed descriptive data is stored separately in species_sources
 type OakEntry struct {
 	ScientificName     string  `json:"scientific_name" yaml:"scientific_name"`
 	Author             *string `json:"author,omitempty" yaml:"author,omitempty"`
@@ -52,20 +65,10 @@ type OakEntry struct {
 	Parent2 *string `json:"parent2,omitempty" yaml:"parent2,omitempty"`
 
 	// Related species
-	Hybrids           []string `json:"hybrids,omitempty" yaml:"hybrids,omitempty"`
-	CloselyRelatedTo  []string `json:"closely_related_to,omitempty" yaml:"closely_related_to,omitempty"`
+	Hybrids             []string `json:"hybrids,omitempty" yaml:"hybrids,omitempty"`
+	CloselyRelatedTo    []string `json:"closely_related_to,omitempty" yaml:"closely_related_to,omitempty"`
 	SubspeciesVarieties []string `json:"subspecies_varieties,omitempty" yaml:"subspecies_varieties,omitempty"`
-
-	// Source-attributed data (stored in data_points table)
-	CommonNames []DataPoint `json:"common_names,omitempty" yaml:"common_names,omitempty"`
-	LeafColor   []DataPoint `json:"leaf_color,omitempty" yaml:"leaf_color,omitempty"`
-	BudShape    []DataPoint `json:"bud_shape,omitempty" yaml:"bud_shape,omitempty"`
-	LeafShape   []DataPoint `json:"leaf_shape,omitempty" yaml:"leaf_shape,omitempty"`
-	BarkTexture []DataPoint `json:"bark_texture,omitempty" yaml:"bark_texture,omitempty"`
-	Habitat     []DataPoint `json:"habitat,omitempty" yaml:"habitat,omitempty"`
-	NativeRange []DataPoint `json:"native_range,omitempty" yaml:"native_range,omitempty"`
-	Height      []DataPoint `json:"height,omitempty" yaml:"height,omitempty"`
-	Synonyms    []string    `json:"synonyms,omitempty" yaml:"synonyms,omitempty"`
+	Synonyms            []string `json:"synonyms,omitempty" yaml:"synonyms,omitempty"`
 }
 
 // NewOakEntry creates a new empty OakEntry with the given scientific name
@@ -76,35 +79,37 @@ func NewOakEntry(scientificName string) *OakEntry {
 		Hybrids:             []string{},
 		CloselyRelatedTo:    []string{},
 		SubspeciesVarieties: []string{},
-		CommonNames:         []DataPoint{},
-		LeafColor:           []DataPoint{},
-		BudShape:            []DataPoint{},
-		LeafShape:           []DataPoint{},
-		BarkTexture:         []DataPoint{},
-		Habitat:             []DataPoint{},
-		NativeRange:         []DataPoint{},
-		Height:              []DataPoint{},
 		Synonyms:            []string{},
+	}
+}
+
+// NewSpeciesSource creates a new SpeciesSource for a species from a source
+func NewSpeciesSource(scientificName string, sourceID int64) *SpeciesSource {
+	return &SpeciesSource{
+		ScientificName: scientificName,
+		SourceID:       sourceID,
+		LocalNames:     []string{},
+		IsPreferred:    false,
 	}
 }
 
 // Source represents a source reference
 type Source struct {
-	SourceID   string  `json:"source_id" yaml:"source_id"`
-	SourceType string  `json:"source_type" yaml:"source_type"`
-	Name       string  `json:"name" yaml:"name"`
-	Author     *string `json:"author,omitempty" yaml:"author,omitempty"`
-	Year       *int    `json:"year,omitempty" yaml:"year,omitempty"`
-	URL        *string `json:"url,omitempty" yaml:"url,omitempty"`
-	ISBN       *string `json:"isbn,omitempty" yaml:"isbn,omitempty"`
-	DOI        *string `json:"doi,omitempty" yaml:"doi,omitempty"`
-	Notes      *string `json:"notes,omitempty" yaml:"notes,omitempty"`
+	ID          int64   `json:"id" yaml:"id"`
+	SourceType  string  `json:"source_type" yaml:"source_type"`
+	Name        string  `json:"name" yaml:"name"`
+	Description *string `json:"description,omitempty" yaml:"description,omitempty"`
+	Author      *string `json:"author,omitempty" yaml:"author,omitempty"`
+	Year        *int    `json:"year,omitempty" yaml:"year,omitempty"`
+	URL         *string `json:"url,omitempty" yaml:"url,omitempty"`
+	ISBN        *string `json:"isbn,omitempty" yaml:"isbn,omitempty"`
+	DOI         *string `json:"doi,omitempty" yaml:"doi,omitempty"`
+	Notes       *string `json:"notes,omitempty" yaml:"notes,omitempty"`
 }
 
-// NewSource creates a new Source with the given ID, type, and name
-func NewSource(sourceID, sourceType, name string) *Source {
+// NewSource creates a new Source with the given type and name
+func NewSource(sourceType, name string) *Source {
 	return &Source{
-		SourceID:   sourceID,
 		SourceType: sourceType,
 		Name:       name,
 	}

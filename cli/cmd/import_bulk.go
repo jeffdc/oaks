@@ -15,13 +15,16 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var sourceID string
+var sourceID int64
 
 var importBulkCmd = &cobra.Command{
 	Use:   "import-bulk <file>",
 	Short: "Import data from a file in bulk",
-	Long: `Import oak entries from a YAML or JSON file with conflict resolution.
-All imported data will be attributed to the specified source.`,
+	Long: `Import oak entries from a YAML or JSON file.
+All imported data will be attributed to the specified source.
+
+Note: This command imports OakEntry (species-intrinsic) data only.
+Source-attributed descriptive data should be imported via import-oaksoftheworld.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		filePath := args[0]
@@ -43,14 +46,14 @@ All imported data will be attributed to the specified source.`,
 			return err
 		}
 		if source == nil {
-			return fmt.Errorf("source '%s' not found. Create it first with 'oak source new'", sourceID)
+			return fmt.Errorf("source with ID %d not found. Create it first with 'oak source new'", sourceID)
 		}
 
 		return importBulk(database, validator, filePath, sourceID)
 	},
 }
 
-func importBulk(database *db.Database, validator *schema.Validator, filePath, srcID string) error {
+func importBulk(database *db.Database, validator *schema.Validator, filePath string, srcID int64) error {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to read import file: %w", err)
@@ -90,8 +93,8 @@ func importBulk(database *db.Database, validator *schema.Validator, filePath, sr
 		}
 
 		if existing != nil {
-			// Check for conflicts (same source)
-			conflicts := findConflicts(existing, &entry, srcID)
+			// Check for conflicts on intrinsic fields
+			conflicts := findConflicts(existing, &entry)
 			if len(conflicts) > 0 {
 				resolved, skip := resolveConflicts(entry.ScientificName, conflicts)
 				if skip {
@@ -104,7 +107,7 @@ func importBulk(database *db.Database, validator *schema.Validator, filePath, sr
 			}
 
 			// Merge with existing entry
-			mergeEntries(existing, &entry, srcID)
+			mergeEntries(existing, &entry)
 			entry = *existing
 		}
 
@@ -122,43 +125,31 @@ func importBulk(database *db.Database, validator *schema.Validator, filePath, sr
 }
 
 type conflict struct {
-	field        string
-	existingVal  string
-	importedVal  string
+	field       string
+	existingVal string
+	importedVal string
 }
 
-func findConflicts(existing, imported *models.OakEntry, srcID string) []conflict {
+func findConflicts(existing, imported *models.OakEntry) []conflict {
 	var conflicts []conflict
 
-	checkField := func(fieldName string, existingDPs, importedDPs []models.DataPoint) {
-		existingBySource := make(map[string]string)
-		for _, dp := range existingDPs {
-			if dp.SourceID == srcID {
-				existingBySource[dp.SourceID] = dp.Value
-			}
-		}
-
-		for _, dp := range importedDPs {
-			if dp.SourceID == srcID {
-				if existingVal, ok := existingBySource[srcID]; ok && existingVal != dp.Value {
-					conflicts = append(conflicts, conflict{
-						field:       fieldName,
-						existingVal: existingVal,
-						importedVal: dp.Value,
-					})
-				}
-			}
-		}
+	// Check intrinsic fields that could conflict
+	if existing.Author != nil && imported.Author != nil && *existing.Author != *imported.Author {
+		conflicts = append(conflicts, conflict{
+			field:       "author",
+			existingVal: *existing.Author,
+			importedVal: *imported.Author,
+		})
 	}
 
-	checkField("leaf_color", existing.LeafColor, imported.LeafColor)
-	checkField("leaf_shape", existing.LeafShape, imported.LeafShape)
-	checkField("bud_shape", existing.BudShape, imported.BudShape)
-	checkField("bark_texture", existing.BarkTexture, imported.BarkTexture)
-	checkField("habitat", existing.Habitat, imported.Habitat)
-	checkField("native_range", existing.NativeRange, imported.NativeRange)
-	checkField("height", existing.Height, imported.Height)
-	checkField("common_names", existing.CommonNames, imported.CommonNames)
+	if existing.ConservationStatus != nil && imported.ConservationStatus != nil &&
+		*existing.ConservationStatus != *imported.ConservationStatus {
+		conflicts = append(conflicts, conflict{
+			field:       "conservation_status",
+			existingVal: *existing.ConservationStatus,
+			importedVal: *imported.ConservationStatus,
+		})
+	}
 
 	return conflicts
 }
@@ -194,48 +185,15 @@ func resolveConflicts(name string, conflicts []conflict) (map[string]string, boo
 }
 
 func applyResolutions(entry *models.OakEntry, resolutions map[string]string) {
-	applyToField := func(fieldName string, dataPoints *[]models.DataPoint) {
-		if val, ok := resolutions[fieldName]; ok {
-			for i := range *dataPoints {
-				(*dataPoints)[i].Value = val
-			}
-		}
+	if val, ok := resolutions["author"]; ok {
+		entry.Author = &val
 	}
-
-	applyToField("leaf_color", &entry.LeafColor)
-	applyToField("leaf_shape", &entry.LeafShape)
-	applyToField("bud_shape", &entry.BudShape)
-	applyToField("bark_texture", &entry.BarkTexture)
-	applyToField("habitat", &entry.Habitat)
-	applyToField("native_range", &entry.NativeRange)
-	applyToField("height", &entry.Height)
-	applyToField("common_names", &entry.CommonNames)
+	if val, ok := resolutions["conservation_status"]; ok {
+		entry.ConservationStatus = &val
+	}
 }
 
-func mergeEntries(existing, imported *models.OakEntry, srcID string) {
-	mergeField := func(existingDPs *[]models.DataPoint, importedDPs []models.DataPoint) {
-		// Add imported data points that don't conflict with existing ones from the same source
-		existingSources := make(map[string]bool)
-		for _, dp := range *existingDPs {
-			existingSources[dp.SourceID] = true
-		}
-
-		for _, dp := range importedDPs {
-			if !existingSources[dp.SourceID] {
-				*existingDPs = append(*existingDPs, dp)
-			}
-		}
-	}
-
-	mergeField(&existing.LeafColor, imported.LeafColor)
-	mergeField(&existing.LeafShape, imported.LeafShape)
-	mergeField(&existing.BudShape, imported.BudShape)
-	mergeField(&existing.BarkTexture, imported.BarkTexture)
-	mergeField(&existing.Habitat, imported.Habitat)
-	mergeField(&existing.NativeRange, imported.NativeRange)
-	mergeField(&existing.Height, imported.Height)
-	mergeField(&existing.CommonNames, imported.CommonNames)
-
+func mergeEntries(existing, imported *models.OakEntry) {
 	// Merge synonyms
 	existingSynonyms := make(map[string]bool)
 	for _, s := range existing.Synonyms {
@@ -246,10 +204,69 @@ func mergeEntries(existing, imported *models.OakEntry, srcID string) {
 			existing.Synonyms = append(existing.Synonyms, s)
 		}
 	}
+
+	// Merge hybrids
+	existingHybrids := make(map[string]bool)
+	for _, h := range existing.Hybrids {
+		existingHybrids[h] = true
+	}
+	for _, h := range imported.Hybrids {
+		if !existingHybrids[h] {
+			existing.Hybrids = append(existing.Hybrids, h)
+		}
+	}
+
+	// Merge closely related
+	existingRelated := make(map[string]bool)
+	for _, r := range existing.CloselyRelatedTo {
+		existingRelated[r] = true
+	}
+	for _, r := range imported.CloselyRelatedTo {
+		if !existingRelated[r] {
+			existing.CloselyRelatedTo = append(existing.CloselyRelatedTo, r)
+		}
+	}
+
+	// Merge subspecies/varieties
+	existingSubsp := make(map[string]bool)
+	for _, s := range existing.SubspeciesVarieties {
+		existingSubsp[s] = true
+	}
+	for _, s := range imported.SubspeciesVarieties {
+		if !existingSubsp[s] {
+			existing.SubspeciesVarieties = append(existing.SubspeciesVarieties, s)
+		}
+	}
+
+	// For single-value fields, only update if existing is nil
+	if existing.Author == nil && imported.Author != nil {
+		existing.Author = imported.Author
+	}
+	if existing.ConservationStatus == nil && imported.ConservationStatus != nil {
+		existing.ConservationStatus = imported.ConservationStatus
+	}
+	if existing.Subgenus == nil && imported.Subgenus != nil {
+		existing.Subgenus = imported.Subgenus
+	}
+	if existing.Section == nil && imported.Section != nil {
+		existing.Section = imported.Section
+	}
+	if existing.Subsection == nil && imported.Subsection != nil {
+		existing.Subsection = imported.Subsection
+	}
+	if existing.Complex == nil && imported.Complex != nil {
+		existing.Complex = imported.Complex
+	}
+	if existing.Parent1 == nil && imported.Parent1 != nil {
+		existing.Parent1 = imported.Parent1
+	}
+	if existing.Parent2 == nil && imported.Parent2 != nil {
+		existing.Parent2 = imported.Parent2
+	}
 }
 
 func init() {
-	importBulkCmd.Flags().StringVar(&sourceID, "source-id", "", "Source ID to attribute the data to (required)")
+	importBulkCmd.Flags().Int64Var(&sourceID, "source-id", 0, "Source ID to attribute the data to (required)")
 	importBulkCmd.MarkFlagRequired("source-id")
 	rootCmd.AddCommand(importBulkCmd)
 }

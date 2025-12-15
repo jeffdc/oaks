@@ -103,12 +103,9 @@ func NewOakEntry(scientificName string, validator *schema.Validator) (*models.Oa
 
 // EditSource edits a Source entry
 func EditSource(source *models.Source) (*models.Source, error) {
-	yamlContent, err := yaml.Marshal(source)
-	if err != nil {
-		return nil, fmt.Errorf("failed to serialize source to YAML: %w", err)
-	}
-
-	content := string(yamlContent)
+	// Generate YAML with all fields shown explicitly
+	content := sourceToYAML(source)
+	originalID := source.ID
 
 	for {
 		editedYAML, err := openEditor(content)
@@ -125,8 +122,9 @@ func EditSource(source *models.Source) (*models.Source, error) {
 			continue
 		}
 
-		if editedSource.SourceID == "" {
-			fmt.Fprintln(os.Stderr, "\nsource_id cannot be empty")
+		// Reject ID changes
+		if editedSource.ID != originalID {
+			fmt.Fprintf(os.Stderr, "\nID cannot be changed (was %d, attempted %d)\n", originalID, editedSource.ID)
 			fmt.Fprintln(os.Stderr, "Press Enter to re-open the editor and fix the error...")
 			waitForEnter()
 			content = editedYAML
@@ -141,8 +139,46 @@ func EditSource(source *models.Source) (*models.Source, error) {
 			continue
 		}
 
+		if editedSource.SourceType == "" {
+			fmt.Fprintln(os.Stderr, "\nsource_type cannot be empty")
+			fmt.Fprintln(os.Stderr, "Press Enter to re-open the editor and fix the error...")
+			waitForEnter()
+			content = editedYAML
+			continue
+		}
+
 		return &editedSource, nil
 	}
+}
+
+// sourceToYAML generates a YAML string with all fields shown explicitly
+func sourceToYAML(s *models.Source) string {
+	deref := func(p *string) string {
+		if p == nil {
+			return ""
+		}
+		return *p
+	}
+	derefInt := func(p *int) string {
+		if p == nil {
+			return ""
+		}
+		return fmt.Sprintf("%d", *p)
+	}
+
+	return fmt.Sprintf(`# Source Entry (ID cannot be changed)
+id: %d
+source_type: %s
+name: %s
+description: %s
+author: %s
+year: %s
+url: %s
+isbn: %s
+doi: %s
+notes: %s
+`, s.ID, s.SourceType, s.Name, deref(s.Description), deref(s.Author),
+		derefInt(s.Year), deref(s.URL), deref(s.ISBN), deref(s.DOI), deref(s.Notes))
 }
 
 // NewSource creates a new source entry interactively
@@ -167,17 +203,17 @@ func NewSource() (*models.Source, error) {
 
 	fmt.Println("Creating new source...\n")
 
-	sourceID, err := prompt("Source ID (unique identifier)")
-	if err != nil {
-		return nil, err
-	}
-
 	sourceType, err := prompt("Source Type (Book, Paper, Website, Observation, etc.)")
 	if err != nil {
 		return nil, err
 	}
 
 	name, err := prompt("Name/Title")
+	if err != nil {
+		return nil, err
+	}
+
+	description, err := prompt("Description (optional)")
 	if err != nil {
 		return nil, err
 	}
@@ -212,8 +248,11 @@ func NewSource() (*models.Source, error) {
 		return nil, err
 	}
 
-	source := models.NewSource(sourceID, sourceType, name)
+	source := models.NewSource(sourceType, name)
 
+	if description != "" {
+		source.Description = &description
+	}
 	if author != "" {
 		source.Author = &author
 	}

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 	"text/tabwriter"
 	"os"
 
@@ -17,10 +18,10 @@ var sourceCmd = &cobra.Command{
 }
 
 var (
-	srcNewID   string
 	srcNewType string
 	srcNewName string
 	srcNewURL  string
+	srcNewDesc string
 )
 
 var sourceNewCmd = &cobra.Command{
@@ -28,12 +29,12 @@ var sourceNewCmd = &cobra.Command{
 	Short: "Create a new source",
 	Long: `Create a new source entry.
 
-If --id, --type, and --name are provided, creates non-interactively.
+If --type and --name are provided, creates non-interactively.
 Otherwise, opens $EDITOR for interactive creation.
 
 Examples:
   oak source new
-  oak source new --id inat --type database --name "iNaturalist" --url "https://www.inaturalist.org"`,
+  oak source new --type database --name "iNaturalist" --url "https://www.inaturalist.org"`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		database, err := getDB()
 		if err != nil {
@@ -44,13 +45,16 @@ Examples:
 		var source *models.Source
 
 		// If required flags are provided, create non-interactively
-		if srcNewID != "" && srcNewType != "" && srcNewName != "" {
-			source = models.NewSource(srcNewID, srcNewType, srcNewName)
+		if srcNewType != "" && srcNewName != "" {
+			source = models.NewSource(srcNewType, srcNewName)
 			if srcNewURL != "" {
 				source.URL = &srcNewURL
 			}
-		} else if srcNewID != "" || srcNewType != "" || srcNewName != "" {
-			return fmt.Errorf("for non-interactive mode, all of --id, --type, and --name are required")
+			if srcNewDesc != "" {
+				source.Description = &srcNewDesc
+			}
+		} else if srcNewType != "" || srcNewName != "" {
+			return fmt.Errorf("for non-interactive mode, both --type and --name are required")
 		} else {
 			// Interactive mode
 			var err error
@@ -60,11 +64,12 @@ Examples:
 			}
 		}
 
-		if err := database.InsertSource(source); err != nil {
+		id, err := database.InsertSource(source)
+		if err != nil {
 			return err
 		}
 
-		fmt.Printf("Created source: %s\n", source.SourceID)
+		fmt.Printf("Created source with ID: %d\n", id)
 		return nil
 	},
 }
@@ -75,7 +80,10 @@ var sourceEditCmd = &cobra.Command{
 	Long:  `Edit an existing source by opening it in your $EDITOR.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		sourceID := args[0]
+		id, err := strconv.ParseInt(args[0], 10, 64)
+		if err != nil {
+			return fmt.Errorf("invalid source ID: %s", args[0])
+		}
 
 		database, err := getDB()
 		if err != nil {
@@ -83,12 +91,12 @@ var sourceEditCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		existing, err := database.GetSource(sourceID)
+		existing, err := database.GetSource(id)
 		if err != nil {
 			return err
 		}
 		if existing == nil {
-			return fmt.Errorf("source '%s' not found", sourceID)
+			return fmt.Errorf("source with ID %d not found", id)
 		}
 
 		edited, err := editor.EditSource(existing)
@@ -96,18 +104,14 @@ var sourceEditCmd = &cobra.Command{
 			return err
 		}
 
-		// If the source_id changed, we need to handle that
-		if edited.SourceID != existing.SourceID {
-			// For now, just update in place (source_id is immutable)
-			edited.SourceID = existing.SourceID
-			fmt.Fprintln(os.Stderr, "Warning: source_id cannot be changed. Keeping original ID.")
-		}
+		// Preserve the ID (cannot be changed)
+		edited.ID = existing.ID
 
 		if err := database.UpdateSource(edited); err != nil {
 			return err
 		}
 
-		fmt.Printf("Updated source: %s\n", edited.SourceID)
+		fmt.Printf("Updated source: %d\n", edited.ID)
 		return nil
 	},
 }
@@ -141,7 +145,7 @@ var sourceListCmd = &cobra.Command{
 			if len(name) > 50 {
 				name = name[:47] + "..."
 			}
-			fmt.Fprintf(w, "%s\t%s\t%s\n", s.SourceID, s.SourceType, name)
+			fmt.Fprintf(w, "%d\t%s\t%s\n", s.ID, s.SourceType, name)
 		}
 		w.Flush()
 
@@ -155,7 +159,10 @@ var sourceShowCmd = &cobra.Command{
 	Long:  `Display detailed information about a specific source.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		sourceID := args[0]
+		id, err := strconv.ParseInt(args[0], 10, 64)
+		if err != nil {
+			return fmt.Errorf("invalid source ID: %s", args[0])
+		}
 
 		database, err := getDB()
 		if err != nil {
@@ -163,12 +170,12 @@ var sourceShowCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		source, err := database.GetSource(sourceID)
+		source, err := database.GetSource(id)
 		if err != nil {
 			return err
 		}
 		if source == nil {
-			return fmt.Errorf("source '%s' not found", sourceID)
+			return fmt.Errorf("source with ID %d not found", id)
 		}
 
 		printSource(source)
@@ -177,9 +184,12 @@ var sourceShowCmd = &cobra.Command{
 }
 
 func printSource(s *models.Source) {
-	fmt.Printf("Source ID:   %s\n", s.SourceID)
+	fmt.Printf("ID:          %d\n", s.ID)
 	fmt.Printf("Type:        %s\n", s.SourceType)
 	fmt.Printf("Name:        %s\n", s.Name)
+	if s.Description != nil {
+		fmt.Printf("Description: %s\n", *s.Description)
+	}
 	if s.Author != nil {
 		fmt.Printf("Author:      %s\n", *s.Author)
 	}
@@ -201,10 +211,10 @@ func printSource(s *models.Source) {
 }
 
 func init() {
-	sourceNewCmd.Flags().StringVar(&srcNewID, "id", "", "Source ID (required for non-interactive)")
 	sourceNewCmd.Flags().StringVar(&srcNewType, "type", "", "Source type (required for non-interactive)")
 	sourceNewCmd.Flags().StringVar(&srcNewName, "name", "", "Source name (required for non-interactive)")
 	sourceNewCmd.Flags().StringVar(&srcNewURL, "url", "", "Source URL (optional)")
+	sourceNewCmd.Flags().StringVar(&srcNewDesc, "description", "", "Source description (optional)")
 
 	sourceCmd.AddCommand(sourceNewCmd)
 	sourceCmd.AddCommand(sourceEditCmd)
