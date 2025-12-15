@@ -1,0 +1,240 @@
+package editor
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"os/exec"
+
+	"github.com/jeff/oaks/cli/internal/models"
+	"github.com/jeff/oaks/cli/internal/schema"
+	"gopkg.in/yaml.v3"
+)
+
+// getEditor returns the user's preferred editor
+func getEditor() string {
+	if editor := os.Getenv("EDITOR"); editor != "" {
+		return editor
+	}
+	return "vi"
+}
+
+// openEditor opens the editor with the given content and returns the edited content
+func openEditor(initialContent string) (string, error) {
+	editor := getEditor()
+
+	tmpFile, err := os.CreateTemp("", "oak-*.yaml")
+	if err != nil {
+		return "", fmt.Errorf("failed to create temp file: %w", err)
+	}
+	tmpPath := tmpFile.Name()
+	defer os.Remove(tmpPath)
+
+	if _, err := tmpFile.WriteString(initialContent); err != nil {
+		tmpFile.Close()
+		return "", fmt.Errorf("failed to write temp file: %w", err)
+	}
+	tmpFile.Close()
+
+	cmd := exec.Command(editor, tmpPath)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("editor '%s' exited with error: %w", editor, err)
+	}
+
+	content, err := os.ReadFile(tmpPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read edited content: %w", err)
+	}
+
+	return string(content), nil
+}
+
+// waitForEnter waits for the user to press Enter
+func waitForEnter() {
+	reader := bufio.NewReader(os.Stdin)
+	reader.ReadString('\n')
+}
+
+// EditOakEntry edits an Oak entry with validation loop
+func EditOakEntry(entry *models.OakEntry, validator *schema.Validator) (*models.OakEntry, error) {
+	yamlContent, err := yaml.Marshal(entry)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize entry to YAML: %w", err)
+	}
+
+	content := string(yamlContent)
+
+	for {
+		editedYAML, err := openEditor(content)
+		if err != nil {
+			return nil, err
+		}
+
+		var editedEntry models.OakEntry
+		if err := yaml.Unmarshal([]byte(editedYAML), &editedEntry); err != nil {
+			fmt.Fprintf(os.Stderr, "\nFailed to parse YAML: %v\n", err)
+			fmt.Fprintln(os.Stderr, "Press Enter to re-open the editor and fix the error...")
+			waitForEnter()
+			content = editedYAML
+			continue
+		}
+
+		if err := validator.ValidateOakEntry(&editedEntry); err != nil {
+			fmt.Fprintf(os.Stderr, "\nValidation failed:\n%v\n", err)
+			fmt.Fprintln(os.Stderr, "\nPress Enter to re-open the editor and fix the errors...")
+			waitForEnter()
+			content = editedYAML
+			continue
+		}
+
+		return &editedEntry, nil
+	}
+}
+
+// NewOakEntry creates a new Oak entry with validation loop
+func NewOakEntry(scientificName string, validator *schema.Validator) (*models.OakEntry, error) {
+	template := models.NewOakEntry(scientificName)
+	return EditOakEntry(template, validator)
+}
+
+// EditSource edits a Source entry
+func EditSource(source *models.Source) (*models.Source, error) {
+	yamlContent, err := yaml.Marshal(source)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize source to YAML: %w", err)
+	}
+
+	content := string(yamlContent)
+
+	for {
+		editedYAML, err := openEditor(content)
+		if err != nil {
+			return nil, err
+		}
+
+		var editedSource models.Source
+		if err := yaml.Unmarshal([]byte(editedYAML), &editedSource); err != nil {
+			fmt.Fprintf(os.Stderr, "\nFailed to parse YAML: %v\n", err)
+			fmt.Fprintln(os.Stderr, "Press Enter to re-open the editor and fix the error...")
+			waitForEnter()
+			content = editedYAML
+			continue
+		}
+
+		if editedSource.SourceID == "" {
+			fmt.Fprintln(os.Stderr, "\nsource_id cannot be empty")
+			fmt.Fprintln(os.Stderr, "Press Enter to re-open the editor and fix the error...")
+			waitForEnter()
+			content = editedYAML
+			continue
+		}
+
+		if editedSource.Name == "" {
+			fmt.Fprintln(os.Stderr, "\nname cannot be empty")
+			fmt.Fprintln(os.Stderr, "Press Enter to re-open the editor and fix the error...")
+			waitForEnter()
+			content = editedYAML
+			continue
+		}
+
+		return &editedSource, nil
+	}
+}
+
+// NewSource creates a new source entry interactively
+func NewSource() (*models.Source, error) {
+	reader := bufio.NewReader(os.Stdin)
+
+	prompt := func(label string) (string, error) {
+		fmt.Printf("%s: ", label)
+		text, err := reader.ReadString('\n')
+		if err != nil {
+			return "", err
+		}
+		// Trim newline
+		if len(text) > 0 && text[len(text)-1] == '\n' {
+			text = text[:len(text)-1]
+		}
+		if len(text) > 0 && text[len(text)-1] == '\r' {
+			text = text[:len(text)-1]
+		}
+		return text, nil
+	}
+
+	fmt.Println("Creating new source...\n")
+
+	sourceID, err := prompt("Source ID (unique identifier)")
+	if err != nil {
+		return nil, err
+	}
+
+	sourceType, err := prompt("Source Type (Book, Paper, Website, Observation, etc.)")
+	if err != nil {
+		return nil, err
+	}
+
+	name, err := prompt("Name/Title")
+	if err != nil {
+		return nil, err
+	}
+
+	author, err := prompt("Author (optional)")
+	if err != nil {
+		return nil, err
+	}
+
+	yearStr, err := prompt("Year (optional)")
+	if err != nil {
+		return nil, err
+	}
+
+	url, err := prompt("URL (optional)")
+	if err != nil {
+		return nil, err
+	}
+
+	isbn, err := prompt("ISBN (optional)")
+	if err != nil {
+		return nil, err
+	}
+
+	doi, err := prompt("DOI (optional)")
+	if err != nil {
+		return nil, err
+	}
+
+	notes, err := prompt("Notes (optional)")
+	if err != nil {
+		return nil, err
+	}
+
+	source := models.NewSource(sourceID, sourceType, name)
+
+	if author != "" {
+		source.Author = &author
+	}
+	if yearStr != "" {
+		var year int
+		if _, err := fmt.Sscanf(yearStr, "%d", &year); err == nil {
+			source.Year = &year
+		}
+	}
+	if url != "" {
+		source.URL = &url
+	}
+	if isbn != "" {
+		source.ISBN = &isbn
+	}
+	if doi != "" {
+		source.DOI = &doi
+	}
+	if notes != "" {
+		source.Notes = &notes
+	}
+
+	return source, nil
+}

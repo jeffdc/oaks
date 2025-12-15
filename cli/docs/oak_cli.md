@@ -1,3 +1,11 @@
+---
+spec_status: FINAL
+finalized: 2025-12-14
+implementation_tracking: beads (oaks-7jl, oaks-2qm, oaks-97p, oaks-cgv)
+---
+
+> **⚠️ READ-ONLY DOCUMENT**: This specification is frozen as of 2025-12-14. It will inevitably drift from the actual implementation and no effort will be made to keep it synchronized. This document is retained for historical context only. For current behavior, refer to the source code and `oak --help`.
+
 # 🌳 Oak Compendium CLI Tool Specification
 
 ## 1. Overview and Goals

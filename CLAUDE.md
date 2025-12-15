@@ -2,13 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Note**: This project uses [bd (beads)](https://github.com/steveyegge/beads) for issue tracking. Use `bd` commands instead of markdown TODOs. See AGENTS.md for workflow details.
+
 ## Project Overview
 
 The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. The project consists of three main components:
 
 1. **Python Scraper** - Extracts oak species data from oaksoftheworld.fr
 2. **Web Application** - Modern Svelte 5 PWA for browsing species data
-3. **CLI Tool** - Rust-based command-line tool for managing taxonomic data (in development)
+3. **CLI Tool** - Go-based command-line tool for managing taxonomic data (in development)
 
 ## Repository Structure
 
@@ -23,10 +25,11 @@ oaks/
 ├── web/                      # Svelte 5 PWA (see web/CLAUDE.md for details)
 │   ├── src/                  # Svelte components and stores
 │   └── package.json          # Vite, Svelte 5, Tailwind 4
-├── cli/                      # Rust CLI tool (in development)
-│   ├── src/                  # Rust source files
-│   ├── Cargo.toml            # clap, rusqlite, serde, jsonschema
-│   └── docs/oak_cli.md       # Comprehensive CLI specification
+├── cli/                      # Go CLI tool (in development)
+│   ├── cmd/                  # Cobra command implementations
+│   ├── internal/             # Internal packages (db, models, schema, editor)
+│   ├── go.mod                # cobra, go-sqlite3, yaml.v3, jsonschema
+│   └── docs/oak_cli.md       # CLI specification (historical)
 ├── browse.html               # Legacy static HTML browser
 ├── quercus.db                # Canonical SQLite database (managed by CLI)
 └── quercus_data.json         # JSON export for web consumption
@@ -83,16 +86,19 @@ npm run preview    # Preview production build
 cd cli
 
 # Build
-cargo build
+go build -o oak .
 
-# Run with cargo
-cargo run -- <subcommand>
+# Run directly
+./oak <subcommand>
 
-# Install locally
-cargo install --path .
+# Or run with go
+go run . <subcommand>
+
+# Install to $GOPATH/bin
+go install .
 ```
 
-**Note**: The CLI is in early development. See `cli/docs/oak_cli.md` for the complete specification.
+**Note**: The CLI is in early development. See `cli/docs/oak_cli.md` for historical specification (may be outdated).
 
 ## Data Flow Architecture
 
@@ -335,7 +341,7 @@ Progress auto-saves every 10 species. Delete progress file or use `--restart` to
 
 ## CLI Tool Design (In Development)
 
-The Rust CLI (`oak`) follows a sophisticated architecture for managing taxonomic data with strict validation and source attribution. See `cli/docs/oak_cli.md` for full specification.
+The Go CLI (`oak`) manages taxonomic data with strict validation and source attribution.
 
 ### Core Concepts
 
@@ -343,22 +349,26 @@ The Rust CLI (`oak`) follows a sophisticated architecture for managing taxonomic
 
 **Editor-Based Workflow**: Uses `$EDITOR` for structured YAML editing with strict schema validation.
 
-### Key Commands (Planned)
+### Key Commands
 
 ```bash
-oak new                          # Create new entry (opens $EDITOR)
+oak new <name>                   # Create new entry (opens $EDITOR)
 oak edit <name>                  # Edit existing entry
+oak delete <name>                # Delete entry (with confirmation)
 oak find <query> [-i]            # Search (use -i for pipeline-friendly IDs)
-oak source new                   # Create source entry
+oak source new                   # Create source entry interactively
+oak source list                  # List all sources
+oak source edit <id>             # Edit source in $EDITOR
+oak add-value <field> <value>    # Add enumeration value to schema
 oak import-bulk <file> --source-id <ID>  # Bulk import with conflict resolution
 ```
 
 **Technology Stack**:
-- Language: Rust (latest stable)
-- Database: SQLite via `rusqlite`
-- CLI Framework: `clap`
-- Validation: JSON Schema via `jsonschema` crate
-- Serialization: YAML via `serde_yaml`
+- Language: Go
+- Database: SQLite via `go-sqlite3`
+- CLI Framework: `cobra`
+- Validation: JSON Schema via `jsonschema`
+- Serialization: YAML via `yaml.v3`
 
 ## Web Application Details
 
@@ -392,11 +402,11 @@ cd web
 npm install
 ```
 
-### Rust (CLI)
+### Go (CLI)
 
 ```bash
 cd cli
-cargo build
+go build -o oak .
 ```
 
 ## Important Conventions
@@ -404,12 +414,12 @@ cargo build
 ### File Naming
 - Python: `snake_case.py`
 - JavaScript: `PascalCase.svelte`, `camelCase.js`
-- Rust: `snake_case.rs`
+- Go: `snake_case.go`
 
 ### Code Style
 - **Python**: PEP 8, docstrings on functions, meaningful variable names
 - **JavaScript**: 2-space indent, see `web/CLAUDE.md` for Svelte conventions
-- **Rust**: `cargo fmt`, strict type safety, Repository Pattern for DB access
+- **Go**: `gofmt`, Repository Pattern for DB access
 
 ### Git Workflow
 - This project uses Beads for issue tracking (see `.beads/` and session startup hook)
@@ -438,7 +448,7 @@ npm run dev  # Manual testing in browser
 ### CLI Testing
 ```bash
 cd cli
-cargo test
+go test ./...
 ```
 
 ## Data Validation
@@ -483,7 +493,7 @@ The web app fetches `/quercus_data.json` at startup. If schema changes:
 - **Build fails**: Delete `node_modules/` and `package-lock.json`, run `npm install`
 
 ### CLI Issues
-- **Build errors**: Run `cargo clean && cargo build`
+- **Build errors**: Run `go clean && go build -o oak .`
 - **Database locked**: Only one process can access SQLite at a time
 
 ## Future Enhancements

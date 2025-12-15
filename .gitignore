@@ -47,8 +47,9 @@ htmlcov/
 # Logs
 *.log
 
-# Rust build artifacts
-cli/target/
+# Go build artifacts
+cli/oak
+cli/*.db
 
 # JavaScript/Node
 web/node_modules/
