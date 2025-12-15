@@ -14,7 +14,7 @@ The scraper parses the main species list and individual species pages to extract
 
 ## Output
 
-The scraper outputs `quercus_data.json` to the root directory (`../../quercus_data.json` relative to this directory) so that `browse.html` can load it.
+The scraper outputs `quercus_data.json` to the root directory (`../../quercus_data.json`). This data can be imported into the CLI database for use by the web application.
 
 ## Usage
 

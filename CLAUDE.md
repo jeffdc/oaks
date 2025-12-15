@@ -33,7 +33,6 @@ oaks/
 ├── tmp/                      # Temporary/working files (gitignored)
 │   ├── scraper/              # Scraper cache and progress files
 │   └── data/                 # Working data files (e.g., iNaturalist imports)
-├── browse.html               # Legacy static HTML browser
 └── quercus_data.json         # JSON export for web consumption
 ```
 
@@ -147,16 +146,15 @@ The complete data pipeline from sources to browser:
 │                 (denormalized JSON for web)                         │
 └─────────────────────────────────────────────────────────────────────┘
                        │
-          ┌────────────┴────────────┐
-          ▼                         ▼
-┌──────────────────┐    ┌─────────────────────────────────────────────┐
-│   browse.html    │    │              WEB APP (Svelte PWA)           │
-│   (legacy)       │    ├─────────────────────────────────────────────┤
-└──────────────────┘    │  1. Fetch quercus_data.json                 │
-                        │  2. Populate IndexedDB (via Dexie.js)       │
-                        │  3. Query from IndexedDB for UI             │
-                        │  4. Service worker caches for offline       │
-                        └─────────────────────────────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      WEB APP (Svelte PWA)                           │
+├─────────────────────────────────────────────────────────────────────┤
+│  1. Fetch quercus_data.json                                         │
+│  2. Populate IndexedDB (via Dexie.js)                               │
+│  3. Query from IndexedDB for UI                                     │
+│  4. Service worker caches for offline                               │
+└─────────────────────────────────────────────────────────────────────┘
                                         │
                                         ▼
                         ┌─────────────────────────────────────────────┐
