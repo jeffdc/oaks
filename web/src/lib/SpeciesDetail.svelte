@@ -1,9 +1,27 @@
 <script>
-  import { allSpecies } from './dataStore.js';
+  import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness } from './dataStore.js';
 
   export let species;
   export let onClose;
   export let onNavigate;
+
+  // Source selection state
+  let selectedSourceId = null;
+
+  // Get all sources and determine selected source
+  $: sources = getAllSources(species);
+  $: {
+    // Reset selection when species changes
+    if (species) {
+      const primary = getPrimarySource(species);
+      selectedSourceId = primary?.source_id ?? null;
+    }
+  }
+  $: selectedSource = sources.find(s => s.source_id === selectedSourceId) || null;
+
+  function handleSourceChange(event) {
+    selectedSourceId = parseInt(event.target.value, 10);
+  }
 
   function handleNavigate(speciesName) {
     const targetSpecies = $allSpecies.find(s => s.name === speciesName);
@@ -71,6 +89,54 @@
       </section>
     {/if}
 
+    {#if sources.length > 0}
+      <section class="detail-section source-selector-section">
+        <h2 class="section-header">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <span>Data Source</span>
+        </h2>
+        <div class="source-selector-container">
+          {#if sources.length === 1}
+            <div class="source-single">
+              <span class="source-name">{selectedSource?.source_name || 'Unknown Source'}</span>
+              {#if selectedSource?.source_url}
+                <a href={selectedSource.source_url} target="_blank" rel="noopener noreferrer" class="source-link-small" aria-label="Visit source website">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              {/if}
+            </div>
+          {:else}
+            <div class="source-dropdown-row">
+              <select
+                class="source-dropdown"
+                value={selectedSourceId}
+                on:change={handleSourceChange}
+              >
+                {#each sources as source}
+                  <option value={source.source_id}>
+                    {source.source_name}
+                    {#if source.is_preferred} (preferred){/if}
+                  </option>
+                {/each}
+              </select>
+              <span class="source-count">{sources.length} sources</span>
+              {#if selectedSource?.source_url}
+                <a href={selectedSource.source_url} target="_blank" rel="noopener noreferrer" class="source-link-small" aria-label="Visit source website">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              {/if}
+            </div>
+          {/if}
+        </div>
+      </section>
+    {/if}
+
     {#if species.is_hybrid && (species.parent1 || species.parent2)}
       <section class="detail-section">
         <h2 class="section-header">
@@ -109,7 +175,7 @@
       </section>
     {/if}
 
-    {#if species.range}
+    {#if selectedSource?.range}
       <section class="detail-section">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -118,11 +184,11 @@
           </svg>
           <span>Geographic Range</span>
         </h2>
-        <p class="detail-text">{species.range}</p>
+        <p class="detail-text">{selectedSource.range}</p>
       </section>
     {/if}
 
-    {#if species.growth_habit}
+    {#if selectedSource?.growth_habit}
       <section class="detail-section">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -130,11 +196,11 @@
           </svg>
           <span>Growth Habit</span>
         </h2>
-        <p class="detail-text">{species.growth_habit}</p>
+        <p class="detail-text">{selectedSource.growth_habit}</p>
       </section>
     {/if}
 
-    {#if species.leaves}
+    {#if selectedSource?.leaves}
       <section class="detail-section">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -142,11 +208,11 @@
           </svg>
           <span>Leaves</span>
         </h2>
-        <p class="detail-text">{species.leaves}</p>
+        <p class="detail-text">{selectedSource.leaves}</p>
       </section>
     {/if}
 
-    {#if species.fruits}
+    {#if selectedSource?.fruits}
       <section class="detail-section">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -154,11 +220,11 @@
           </svg>
           <span>Fruits</span>
         </h2>
-        <p class="detail-text">{species.fruits}</p>
+        <p class="detail-text">{selectedSource.fruits}</p>
       </section>
     {/if}
 
-    {#if species.flowers}
+    {#if selectedSource?.flowers}
       <section class="detail-section">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -166,11 +232,11 @@
           </svg>
           <span>Flowers</span>
         </h2>
-        <p class="detail-text">{species.flowers}</p>
+        <p class="detail-text">{selectedSource.flowers}</p>
       </section>
     {/if}
 
-    {#if species.bark_twigs_buds}
+    {#if selectedSource?.bark_twigs_buds}
       <section class="detail-section">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -178,11 +244,11 @@
           </svg>
           <span>Bark, Twigs & Buds</span>
         </h2>
-        <p class="detail-text">{species.bark_twigs_buds}</p>
+        <p class="detail-text">{selectedSource.bark_twigs_buds}</p>
       </section>
     {/if}
 
-    {#if species.hardiness_habitat}
+    {#if selectedSource?.hardiness_habitat}
       <section class="detail-section">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -190,7 +256,7 @@
           </svg>
           <span>Hardiness & Habitat</span>
         </h2>
-        <p class="detail-text">{species.hardiness_habitat}</p>
+        <p class="detail-text">{selectedSource.hardiness_habitat}</p>
       </section>
     {/if}
 
@@ -307,7 +373,7 @@
       </section>
     {/if}
 
-    {#if species.local_names && species.local_names.length > 0}
+    {#if selectedSource?.local_names && selectedSource.local_names.length > 0}
       <section class="detail-section">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -316,7 +382,7 @@
           <span>Common Names</span>
         </h2>
         <ul class="flex flex-wrap gap-2">
-          {#each species.local_names as localName}
+          {#each selectedSource.local_names as localName}
             <li class="common-name-tag">
               {localName}
             </li>
@@ -355,7 +421,7 @@
       </section>
     {/if}
 
-    {#if species.miscellaneous}
+    {#if selectedSource?.miscellaneous}
       <section class="detail-section">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -363,26 +429,28 @@
           </svg>
           <span>Additional Information</span>
         </h2>
-        <p class="detail-text text-sm">{species.miscellaneous}</p>
+        <p class="detail-text text-sm">{selectedSource.miscellaneous}</p>
       </section>
     {/if}
 
-    {#if species.url}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-          <span>External Links</span>
-        </h2>
-        <a
-          href={species.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="external-link"
-        >
-          Oaks of the World
-        </a>
+    <section class="detail-section">
+      <h2 class="section-header">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+        <span>External Links</span>
+      </h2>
+      <div class="external-links-container">
+        {#if selectedSource?.url}
+          <a
+            href={selectedSource.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="external-link"
+          >
+            {selectedSource.source_name || 'Source'}
+          </a>
+        {/if}
         <a
           href={`https://www.inaturalist.org/search?q=${encodeURIComponent('Quercus ' + species.name)}`}
           target="_blank"
@@ -391,8 +459,8 @@
         >
           iNaturalist
         </a>
-      </section>
-    {/if}
+      </div>
+    </section>
   </div>
 </div>
 
@@ -548,5 +616,81 @@
   .close-button:hover {
     background-color: var(--color-forest-200);
     color: var(--color-forest-900);
+  }
+
+  /* Source selector styles */
+  .source-selector-section {
+    background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-surface) 100%);
+  }
+
+  .source-selector-container {
+    margin-top: 0.5rem;
+  }
+
+  .source-single {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .source-name {
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .source-link-small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    border-radius: 0.375rem;
+    color: var(--color-forest-600);
+    transition: all 0.15s ease;
+  }
+
+  .source-link-small:hover {
+    background-color: var(--color-forest-100);
+    color: var(--color-forest-700);
+  }
+
+  .source-dropdown-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .source-dropdown {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1.5px solid var(--color-forest-300);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    min-width: 200px;
+  }
+
+  .source-dropdown:hover {
+    border-color: var(--color-forest-400);
+  }
+
+  .source-dropdown:focus {
+    outline: none;
+    border-color: var(--color-forest-500);
+    box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
+  }
+
+  .source-count {
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+  }
+
+  .external-links-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
 </style>

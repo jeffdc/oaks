@@ -122,13 +122,50 @@ export async function getSpeciesCounts() {
 }
 
 /**
- * Get the primary source for a species (the canonical/synthesized data)
+ * Count populated (non-null, non-empty) fields in a source object
+ * Used for selecting the most complete source when no preferred flag is set
+ * @param {Object} source - Source object
+ * @returns {number} Count of populated fields
+ */
+function countPopulatedFields(source) {
+  if (!source) return 0;
+
+  const fieldsToCheck = [
+    'local_names', 'range', 'growth_habit', 'leaves', 'flowers',
+    'fruits', 'bark_twigs_buds', 'hardiness_habitat', 'miscellaneous', 'url'
+  ];
+
+  return fieldsToCheck.reduce((count, field) => {
+    const value = source[field];
+    if (value === null || value === undefined) return count;
+    if (Array.isArray(value) && value.length === 0) return count;
+    if (typeof value === 'string' && value.trim() === '') return count;
+    return count + 1;
+  }, 0);
+}
+
+/**
+ * Get the default/primary source for a species
+ * Selection priority:
+ *   1. Source with is_preferred === true
+ *   2. Source with most populated fields
+ *   3. First source in array
  * @param {Object} species - Species object
- * @returns {Object|null} Primary source or first source or null
+ * @returns {Object|null} Selected source or null if no sources
  */
 export function getPrimarySource(species) {
   if (!species?.sources?.length) return null;
-  return species.sources.find(s => s.is_primary) || species.sources[0];
+
+  // Priority 1: Check for is_preferred flag
+  const preferred = species.sources.find(s => s.is_preferred);
+  if (preferred) return preferred;
+
+  // Priority 2: Select source with most populated fields
+  const sorted = [...species.sources].sort((a, b) =>
+    countPopulatedFields(b) - countPopulatedFields(a)
+  );
+
+  return sorted[0];
 }
 
 /**
@@ -138,6 +175,26 @@ export function getPrimarySource(species) {
  */
 export function getAllSources(species) {
   return species?.sources || [];
+}
+
+/**
+ * Get a specific source by ID
+ * @param {Object} species - Species object
+ * @param {number} sourceId - Source ID to find
+ * @returns {Object|null} Source object or null if not found
+ */
+export function getSourceById(species, sourceId) {
+  if (!species?.sources?.length) return null;
+  return species.sources.find(s => s.source_id === sourceId) || null;
+}
+
+/**
+ * Get source completeness score (for display purposes)
+ * @param {Object} source - Source object
+ * @returns {number} Number of populated fields (0-10)
+ */
+export function getSourceCompleteness(source) {
+  return countPopulatedFields(source);
 }
 
 /**

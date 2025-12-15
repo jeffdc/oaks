@@ -6,11 +6,13 @@ import {
   hasData,
   getMetadata,
   getPrimarySource,
-  getAllSources
+  getAllSources,
+  getSourceById,
+  getSourceCompleteness
 } from './db.js';
 
 // Re-export source helpers for component use
-export { getPrimarySource, getAllSources };
+export { getPrimarySource, getAllSources, getSourceById, getSourceCompleteness };
 
 // Store for all species data
 export const allSpecies = writable([]);
