@@ -1,0 +1,140 @@
+# Quercus Taxonomy Reference Data
+# Hierarchy: Genus (Quercus) -> Subgenus -> Section -> Subsection -> Complex
+#
+# Instructions:
+# - Edit this file to add/correct taxa
+# - 'parent' refers to the parent taxon name (e.g., section's parent is its subgenus)
+# - 'author' is the taxonomic authority (optional)
+# - 'notes' for any additional information (optional)
+#
+# Import with: oak taxa import data/taxa.yaml
+
+subgenera:
+  - name: Cerris
+    author: null
+    notes: null
+
+  - name: Cyclobalanopsis
+    author: null
+    notes: Ring-cupped oaks, sometimes treated as separate genus
+
+  - name: Quercus
+    author: null
+    notes: Includes white oaks and red oaks
+
+sections:
+  # Sections under Cerris
+  - name: Cerris
+    parent: Cerris
+    author: null
+    notes: null
+
+  - name: Ilex
+    parent: Cerris
+    author: null
+    notes: null
+
+  # Sections under Cyclobalanopsis
+  - name: Cyclobalanopsis
+    parent: Cyclobalanopsis
+    author: null
+    notes: null
+
+  - name: Semiserrata
+    parent: Cyclobalanopsis
+    author: null
+    notes: null
+
+  # Sections under Quercus
+  - name: Lobatae
+    parent: Quercus
+    author: null
+    notes: Red oaks (Americas)
+
+  - name: Ponticae
+    parent: Quercus
+    author: null
+    notes: null
+
+  - name: Protobalanus
+    parent: Quercus
+    author: null
+    notes: Intermediate oaks
+
+  - name: Quercus
+    parent: Quercus
+    author: null
+    notes: White oaks
+
+  - name: Virentes
+    parent: Quercus
+    author: null
+    notes: Live oaks
+
+subsections:
+  # Subsections under Cerris
+  - name: Aegilops
+    parent: Cerris
+    author: null
+    notes: null
+
+  - name: Libani
+    parent: Cerris
+    author: null
+    notes: null
+
+  - name: Suber
+    parent: Cerris
+    author: null
+    notes: Cork oaks
+
+  # Subsections under Cyclobalanopsis
+  - name: Oidocarpae
+    parent: Cyclobalanopsis
+    author: null
+    notes: null
+
+  # Subsections under Lobatae
+  - name: Coccineae
+    parent: Lobatae
+    author: null
+    notes: null
+
+  - name: Erythromexicanae
+    parent: Lobatae
+    author: null
+    notes: null
+
+  - name: Phellos
+    parent: Lobatae
+    author: null
+    notes: null
+
+  - name: Salicifoliae
+    parent: Lobatae
+    author: null
+    notes: null
+
+  # Subsections under Quercus
+  - name: Dumosae
+    parent: Quercus
+    author: null
+    notes: null
+
+  - name: Leucomexicanae
+    parent: Quercus
+    author: null
+    notes: null
+
+  - name: Prinoideae
+    parent: Quercus
+    author: null
+    notes: null
+
+complexes:
+  # Add species complexes here as needed
+  # Example:
+  # - name: Agrifolia complex
+  #   parent: Dumosae
+  #   author: null
+  #   notes: Coast live oak and relatives

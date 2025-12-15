@@ -37,6 +37,20 @@ func (db *Database) Close() error {
 
 func (db *Database) initializeSchema() error {
 	statements := []string{
+		// Taxa reference table for validation
+		// Hierarchy: Genus (Quercus) → Subgenus → Section → Subsection → Complex → Species
+		`CREATE TABLE IF NOT EXISTS taxa (
+			name TEXT NOT NULL,
+			level TEXT NOT NULL CHECK(level IN ('subgenus', 'section', 'subsection', 'complex')),
+			parent TEXT,
+			author TEXT,
+			notes TEXT,
+			PRIMARY KEY (name, level)
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_taxa_level ON taxa(level)`,
+		`CREATE INDEX IF NOT EXISTS idx_taxa_parent ON taxa(parent)`,
+
+		// Sources table
 		`CREATE TABLE IF NOT EXISTS sources (
 			source_id TEXT PRIMARY KEY,
 			source_type TEXT NOT NULL,
@@ -48,10 +62,29 @@ func (db *Database) initializeSchema() error {
 			doi TEXT,
 			notes TEXT
 		)`,
+
+		// Oak entries with taxonomy and hybrid support
 		`CREATE TABLE IF NOT EXISTS oak_entries (
 			scientific_name TEXT PRIMARY KEY,
+			author TEXT,
+			is_hybrid INTEGER NOT NULL DEFAULT 0,
+			conservation_status TEXT,
+			subgenus TEXT,
+			section TEXT,
+			subsection TEXT,
+			complex TEXT,
+			parent1 TEXT,
+			parent2 TEXT,
+			hybrids TEXT,
+			closely_related_to TEXT,
+			subspecies_varieties TEXT,
 			synonyms TEXT
 		)`,
+		`CREATE INDEX IF NOT EXISTS idx_oak_entries_subgenus ON oak_entries(subgenus)`,
+		`CREATE INDEX IF NOT EXISTS idx_oak_entries_section ON oak_entries(section)`,
+		`CREATE INDEX IF NOT EXISTS idx_oak_entries_hybrid ON oak_entries(is_hybrid)`,
+
+		// Data points for source-attributed fields
 		`CREATE TABLE IF NOT EXISTS data_points (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			scientific_name TEXT NOT NULL,
@@ -146,6 +179,93 @@ func (db *Database) ListSources() ([]*models.Source, error) {
 	return sources, rows.Err()
 }
 
+// InsertTaxon inserts a new taxon into the reference table
+func (db *Database) InsertTaxon(taxon *models.Taxon) error {
+	_, err := db.conn.Exec(
+		`INSERT INTO taxa (name, level, parent, author, notes) VALUES (?, ?, ?, ?, ?)`,
+		taxon.Name, string(taxon.Level), taxon.Parent, taxon.Author, taxon.Notes,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to insert taxon: %w", err)
+	}
+	return nil
+}
+
+// GetTaxon gets a taxon by name and level
+func (db *Database) GetTaxon(name string, level models.TaxonLevel) (*models.Taxon, error) {
+	row := db.conn.QueryRow(
+		`SELECT name, level, parent, author, notes FROM taxa WHERE name = ? AND level = ?`,
+		name, string(level),
+	)
+
+	var t models.Taxon
+	var levelStr string
+	err := row.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get taxon: %w", err)
+	}
+	t.Level = models.TaxonLevel(levelStr)
+	return &t, nil
+}
+
+// ListTaxa lists all taxa, optionally filtered by level
+func (db *Database) ListTaxa(level *models.TaxonLevel) ([]*models.Taxon, error) {
+	var rows *sql.Rows
+	var err error
+
+	if level != nil {
+		rows, err = db.conn.Query(
+			`SELECT name, level, parent, author, notes FROM taxa WHERE level = ? ORDER BY name`,
+			string(*level),
+		)
+	} else {
+		rows, err = db.conn.Query(
+			`SELECT name, level, parent, author, notes FROM taxa ORDER BY level, name`,
+		)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to list taxa: %w", err)
+	}
+	defer rows.Close()
+
+	var taxa []*models.Taxon
+	for rows.Next() {
+		var t models.Taxon
+		var levelStr string
+		if err := rows.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes); err != nil {
+			return nil, fmt.Errorf("failed to scan taxon: %w", err)
+		}
+		t.Level = models.TaxonLevel(levelStr)
+		taxa = append(taxa, &t)
+	}
+	return taxa, rows.Err()
+}
+
+// ValidateTaxon checks if a taxon exists in the reference table
+func (db *Database) ValidateTaxon(name string, level models.TaxonLevel) (bool, error) {
+	var count int
+	err := db.conn.QueryRow(
+		`SELECT COUNT(*) FROM taxa WHERE name = ? AND level = ?`,
+		name, string(level),
+	).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("failed to validate taxon: %w", err)
+	}
+	return count > 0, nil
+}
+
+// ClearTaxa removes all taxa from the reference table
+func (db *Database) ClearTaxa() error {
+	_, err := db.conn.Exec(`DELETE FROM taxa`)
+	if err != nil {
+		return fmt.Errorf("failed to clear taxa: %w", err)
+	}
+	return nil
+}
+
 // SaveOakEntry saves or updates a complete oak entry
 func (db *Database) SaveOakEntry(entry *models.OakEntry) error {
 	tx, err := db.conn.Begin()
@@ -154,14 +274,40 @@ func (db *Database) SaveOakEntry(entry *models.OakEntry) error {
 	}
 	defer tx.Rollback()
 
+	// Marshal JSON arrays
 	synonymsJSON, err := json.Marshal(entry.Synonyms)
 	if err != nil {
 		return fmt.Errorf("failed to marshal synonyms: %w", err)
 	}
+	hybridsJSON, err := json.Marshal(entry.Hybrids)
+	if err != nil {
+		return fmt.Errorf("failed to marshal hybrids: %w", err)
+	}
+	relatedJSON, err := json.Marshal(entry.CloselyRelatedTo)
+	if err != nil {
+		return fmt.Errorf("failed to marshal closely_related_to: %w", err)
+	}
+	subspeciesJSON, err := json.Marshal(entry.SubspeciesVarieties)
+	if err != nil {
+		return fmt.Errorf("failed to marshal subspecies_varieties: %w", err)
+	}
+
+	// Convert bool to int for SQLite
+	isHybrid := 0
+	if entry.IsHybrid {
+		isHybrid = 1
+	}
 
 	_, err = tx.Exec(
-		`INSERT OR REPLACE INTO oak_entries (scientific_name, synonyms) VALUES (?, ?)`,
-		entry.ScientificName, string(synonymsJSON),
+		`INSERT OR REPLACE INTO oak_entries (
+			scientific_name, author, is_hybrid, conservation_status,
+			subgenus, section, subsection, complex,
+			parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		entry.ScientificName, entry.Author, isHybrid, entry.ConservationStatus,
+		entry.Subgenus, entry.Section, entry.Subsection, entry.Complex,
+		entry.Parent1, entry.Parent2, string(hybridsJSON), string(relatedJSON),
+		string(subspeciesJSON), string(synonymsJSON),
 	)
 	if err != nil {
 		return fmt.Errorf("failed to insert oak entry: %w", err)
@@ -212,22 +358,61 @@ func (db *Database) SaveOakEntry(entry *models.OakEntry) error {
 // GetOakEntry gets an oak entry by scientific name
 func (db *Database) GetOakEntry(scientificName string) (*models.OakEntry, error) {
 	row := db.conn.QueryRow(
-		`SELECT synonyms FROM oak_entries WHERE scientific_name = ?`,
+		`SELECT scientific_name, author, is_hybrid, conservation_status,
+		        subgenus, section, subsection, complex,
+		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms
+		 FROM oak_entries WHERE scientific_name = ?`,
 		scientificName,
 	)
 
-	var synonymsJSON string
-	if err := row.Scan(&synonymsJSON); err != nil {
+	var entry models.OakEntry
+	var isHybrid int
+	var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON sql.NullString
+
+	if err := row.Scan(
+		&entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
+		&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
+		&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON,
+	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to get oak entry: %w", err)
 	}
 
+	entry.IsHybrid = isHybrid != 0
+
+	// Unmarshal JSON arrays
+	if hybridsJSON.Valid {
+		json.Unmarshal([]byte(hybridsJSON.String), &entry.Hybrids)
+	}
+	if entry.Hybrids == nil {
+		entry.Hybrids = []string{}
+	}
+
+	if relatedJSON.Valid {
+		json.Unmarshal([]byte(relatedJSON.String), &entry.CloselyRelatedTo)
+	}
+	if entry.CloselyRelatedTo == nil {
+		entry.CloselyRelatedTo = []string{}
+	}
+
+	if subspeciesJSON.Valid {
+		json.Unmarshal([]byte(subspeciesJSON.String), &entry.SubspeciesVarieties)
+	}
+	if entry.SubspeciesVarieties == nil {
+		entry.SubspeciesVarieties = []string{}
+	}
+
 	var synonyms []string
-	if err := json.Unmarshal([]byte(synonymsJSON), &synonyms); err != nil {
+	if synonymsJSON.Valid {
+		json.Unmarshal([]byte(synonymsJSON.String), &synonyms)
+	}
+	if synonyms == nil {
 		synonyms = []string{}
 	}
+
+	entry.Synonyms = synonyms
 
 	loadField := func(fieldName string) ([]models.DataPoint, error) {
 		rows, err := db.conn.Query(
@@ -251,11 +436,6 @@ func (db *Database) GetOakEntry(scientificName string) (*models.OakEntry, error)
 		return points, rows.Err()
 	}
 
-	entry := &models.OakEntry{
-		ScientificName: scientificName,
-		Synonyms:       synonyms,
-	}
-
 	fieldPtrs := map[string]*[]models.DataPoint{
 		"common_names": &entry.CommonNames,
 		"leaf_color":   &entry.LeafColor,
@@ -275,7 +455,7 @@ func (db *Database) GetOakEntry(scientificName string) (*models.OakEntry, error)
 		*ptr = points
 	}
 
-	return entry, nil
+	return &entry, nil
 }
 
 // DeleteOakEntry deletes an oak entry
