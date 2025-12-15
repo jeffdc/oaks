@@ -162,19 +162,8 @@ func runTaxaList(cmd *cobra.Command, args []string) error {
 	}
 	defer database.Close()
 
-	var level *models.TaxonLevel
-	if len(args) > 0 {
-		l := models.TaxonLevel(args[0])
-		switch l {
-		case models.TaxonLevelSubgenus, models.TaxonLevelSection,
-			models.TaxonLevelSubsection, models.TaxonLevelComplex:
-			level = &l
-		default:
-			return fmt.Errorf("invalid level: %s (use: subgenus, section, subsection, complex)", args[0])
-		}
-	}
-
-	taxa, err := database.ListTaxa(level)
+	// Get all taxa
+	taxa, err := database.ListTaxa(nil)
 	if err != nil {
 		return fmt.Errorf("failed to list taxa: %w", err)
 	}
@@ -184,23 +173,80 @@ func runTaxaList(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	// Group by level for display
-	currentLevel := ""
-	for _, t := range taxa {
-		if string(t.Level) != currentLevel {
-			currentLevel = string(t.Level)
-			fmt.Printf("\n=== %s ===\n", currentLevel)
-		}
+	// Organize by level
+	subgenera := []*models.Taxon{}
+	sectionsByParent := make(map[string][]*models.Taxon)
+	subsectionsByParent := make(map[string][]*models.Taxon)
+	complexesByParent := make(map[string][]*models.Taxon)
 
-		parent := ""
-		if t.Parent != nil {
-			parent = fmt.Sprintf(" (parent: %s)", *t.Parent)
+	for _, t := range taxa {
+		switch t.Level {
+		case models.TaxonLevelSubgenus:
+			subgenera = append(subgenera, t)
+		case models.TaxonLevelSection:
+			parent := ""
+			if t.Parent != nil {
+				parent = *t.Parent
+			}
+			sectionsByParent[parent] = append(sectionsByParent[parent], t)
+		case models.TaxonLevelSubsection:
+			parent := ""
+			if t.Parent != nil {
+				parent = *t.Parent
+			}
+			subsectionsByParent[parent] = append(subsectionsByParent[parent], t)
+		case models.TaxonLevelComplex:
+			parent := ""
+			if t.Parent != nil {
+				parent = *t.Parent
+			}
+			complexesByParent[parent] = append(complexesByParent[parent], t)
 		}
-		author := ""
-		if t.Author != nil {
-			author = fmt.Sprintf(" [%s]", *t.Author)
+	}
+
+	// Helper to format author
+	fmtAuthor := func(t *models.Taxon) string {
+		if t.Author != nil && *t.Author != "" {
+			return fmt.Sprintf(" [%s]", *t.Author)
 		}
-		fmt.Printf("  %s%s%s\n", t.Name, parent, author)
+		return ""
+	}
+
+	// Print hierarchical tree
+	fmt.Println("Quercus (genus)")
+	for _, sg := range subgenera {
+		fmt.Printf("├── %s (subgenus)%s\n", sg.Name, fmtAuthor(sg))
+
+		sections := sectionsByParent[sg.Name]
+		for i, sec := range sections {
+			secPrefix := "│   ├── "
+			secChildPrefix := "│   │   "
+			if i == len(sections)-1 {
+				secPrefix = "│   └── "
+				secChildPrefix = "│       "
+			}
+			fmt.Printf("%s%s (section)%s\n", secPrefix, sec.Name, fmtAuthor(sec))
+
+			subsections := subsectionsByParent[sec.Name]
+			for j, subsec := range subsections {
+				subsecPrefix := secChildPrefix + "├── "
+				subsecChildPrefix := secChildPrefix + "│   "
+				if j == len(subsections)-1 {
+					subsecPrefix = secChildPrefix + "└── "
+					subsecChildPrefix = secChildPrefix + "    "
+				}
+				fmt.Printf("%s%s (subsection)%s\n", subsecPrefix, subsec.Name, fmtAuthor(subsec))
+
+				complexes := complexesByParent[subsec.Name]
+				for k, cpx := range complexes {
+					cpxPrefix := subsecChildPrefix + "├── "
+					if k == len(complexes)-1 {
+						cpxPrefix = subsecChildPrefix + "└── "
+					}
+					fmt.Printf("%s%s (complex)%s\n", cpxPrefix, cpx.Name, fmtAuthor(cpx))
+				}
+			}
+		}
 	}
 	fmt.Println()
 
