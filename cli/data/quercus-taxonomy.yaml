@@ -1,0 +1,290 @@
+# Quercus Taxonomy Seed File
+# Source: iNaturalist (https://www.inaturalist.org/taxa/47851-Quercus)
+#
+# This file defines the complete Quercus taxonomy hierarchy as recognized by iNaturalist.
+# Use it to initialize or reset the database taxonomy:
+#
+#   oak taxa import --clear cli/data/quercus-taxonomy.yaml
+#
+# Hierarchy: Genus (Quercus) > Subgenus > Section > Subsection > Complex > Species
+#
+# Last updated: 2025-12-15
+
+subgenera:
+  - name: Cerris
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/861028
+
+  - name: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/861029
+
+sections:
+  # Subgenus Cerris sections
+  - name: Cerris
+    parent: Cerris
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/861031
+
+  - name: Cyclobalanopsis
+    parent: Cerris
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/861030
+
+  - name: Ilex
+    parent: Cerris
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/861032
+
+  # Subgenus Quercus sections
+  - name: Lobatae
+    parent: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/861036
+
+  - name: Ponticae
+    parent: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/861034
+
+  - name: Protobalanus
+    parent: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/861037
+
+  - name: Quercus
+    parent: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/861033
+
+  - name: Virentes
+    parent: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/861035
+
+subsections:
+  # Section Cerris subsections
+  - name: Aegilops
+    parent: Cerris
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1553160
+
+  - name: Campylolepides
+    parent: Cerris
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1553158
+
+  - name: Cerris
+    parent: Cerris
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1553162
+
+  - name: Libani
+    parent: Cerris
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1553161
+
+  - name: Suber
+    parent: Cerris
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1553159
+
+  # Section Ilex subsections
+  - name: Coccifera
+    parent: Ilex
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1352807
+
+  # Section Lobatae subsections
+  - name: Agrifoliae
+    parent: Lobatae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1542658
+
+  - name: Coccineae
+    parent: Lobatae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1549935
+
+  - name: Palustres
+    parent: Lobatae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1549929
+
+  - name: Phellos
+    parent: Lobatae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1549940
+
+  # Section Quercus subsections
+  - name: Albae
+    parent: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1552800
+
+  - name: Dumosae
+    parent: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1553163
+
+  - name: Galliferae
+    parent: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1577571
+
+  - name: Polymorphae
+    parent: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1552805
+
+  - name: Prinoideae
+    parent: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1552797
+
+  - name: Stellatae
+    parent: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1552801
+
+complexes:
+  # Subsection Aegilops complexes (none currently defined)
+
+  # Subsection Cerris complexes (none currently defined)
+
+  # Subsection Coccifera complexes
+  - name: coccifera
+    parent: Coccifera
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1516775
+
+  # Subsection Coccineae complexes
+  - name: coccinea
+    parent: Coccineae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1541686
+
+  - name: shumardii
+    parent: Coccineae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1550123
+
+  # Subsection Dumosae complexes
+  - name: berberidifolia
+    parent: Dumosae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1553165
+
+  - name: dumosa
+    parent: Dumosae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1553166
+
+  # Section Ilex complexes (directly under section, not subsection)
+  - name: ilex
+    parent: Ilex
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1137754
+
+  # Subsection Phellos complexes
+  - name: ilicifolia
+    parent: Phellos
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1550125
+
+  - name: incana
+    parent: Phellos
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1550124
+
+  - name: marilandica
+    parent: Phellos
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1550131
+
+  - name: phellos
+    parent: Phellos
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1550127
+
+  # Subsection Polymorphae complexes
+  - name: vaseyana
+    parent: Polymorphae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1552806
+
+  # Subsection Prinoideae complexes
+  - name: lyrata
+    parent: Prinoideae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1552799
+
+  - name: prinoides
+    parent: Prinoideae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1552798
+
+  # Section Quercus complexes (directly under section)
+  - name: robur
+    parent: Quercus
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1520309
+
+  # Subsection Stellatae complexes
+  - name: austrina
+    parent: Stellatae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1552802
+
+  - name: chapmanii
+    parent: Stellatae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1552803
+
+  - name: stellata
+    parent: Stellatae
+    links:
+      - label: iNaturalist
+        url: https://www.inaturalist.org/taxa/1552804
