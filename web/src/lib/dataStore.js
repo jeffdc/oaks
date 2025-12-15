@@ -1,4 +1,16 @@
 import { writable, derived } from 'svelte/store';
+import {
+  db,
+  getAllSpecies,
+  populateFromJson,
+  hasData,
+  getMetadata,
+  getPrimarySource,
+  getAllSources
+} from './db.js';
+
+// Re-export source helpers for component use
+export { getPrimarySource, getAllSources };
 
 // Store for all species data
 export const allSpecies = writable([]);
@@ -14,6 +26,9 @@ export const searchQuery = writable('');
 
 // Store for selected species (for detail view)
 export const selectedSpecies = writable(null);
+
+// Store for data source info
+export const dataSource = writable({ from: null, version: null });
 
 // Derived store: filtered species based on search
 export const filteredSpecies = derived(
@@ -58,34 +73,132 @@ export const speciesCounts = derived(
   }
 );
 
-// Load species data from JSON
+/**
+ * Load species data with IndexedDB caching
+ * Strategy:
+ * 1. If IndexedDB has data, load from there immediately (fast, offline-capable)
+ * 2. Then check JSON for updates in background
+ * 3. If IndexedDB is empty, fetch JSON and populate
+ */
 export async function loadSpeciesData() {
   try {
     isLoading.set(true);
     error.set(null);
 
-    const response = await fetch('/quercus_data.json');
-    if (!response.ok) {
-      throw new Error(`Failed to load data: ${response.statusText}`);
+    // Check if we have cached data in IndexedDB
+    const hasCachedData = await hasData();
+
+    if (hasCachedData) {
+      // Load from IndexedDB immediately (fast path)
+      const species = await getAllSpecies();
+      allSpecies.set(species);
+
+      const metadata = await getMetadata();
+      dataSource.set({ from: 'indexeddb', version: metadata.dataVersion });
+      isLoading.set(false);
+
+      // Check for updates in background (non-blocking)
+      checkForUpdates().catch(err => {
+        console.warn('Background update check failed:', err);
+      });
+
+      return species;
     }
 
-    const data = await response.json();
-
-    // Sort species alphabetically by name
-    const sorted = data.species.sort((a, b) =>
-      a.name.localeCompare(b.name)
-    );
-
-    allSpecies.set(sorted);
-    isLoading.set(false);
-
-    return sorted;
+    // No cached data - fetch from JSON
+    return await fetchAndCacheData();
   } catch (err) {
     console.error('Error loading species data:', err);
     error.set(err.message);
     isLoading.set(false);
     throw err;
   }
+}
+
+/**
+ * Fetch JSON and populate IndexedDB
+ */
+async function fetchAndCacheData() {
+  const response = await fetch('/quercus_data.json');
+  if (!response.ok) {
+    throw new Error(`Failed to load data: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+
+  // Normalize data format (handle both old flat format and new format with metadata)
+  const normalizedData = normalizeJsonData(data);
+
+  // Populate IndexedDB
+  await populateFromJson(normalizedData);
+
+  // Load from IndexedDB (ensures consistent data format)
+  const species = await getAllSpecies();
+  allSpecies.set(species);
+
+  const metadata = await getMetadata();
+  dataSource.set({ from: 'json', version: metadata.dataVersion });
+  isLoading.set(false);
+
+  return species;
+}
+
+/**
+ * Check if JSON has newer data than IndexedDB
+ */
+async function checkForUpdates() {
+  try {
+    const response = await fetch('/quercus_data.json');
+    if (!response.ok) return;
+
+    const data = await response.json();
+    const normalizedData = normalizeJsonData(data);
+
+    // populateFromJson checks version and only updates if newer
+    const count = await populateFromJson(normalizedData);
+
+    if (count > 0) {
+      // Data was updated - reload stores
+      const species = await getAllSpecies();
+      allSpecies.set(species);
+
+      const metadata = await getMetadata();
+      dataSource.set({ from: 'json-update', version: metadata.dataVersion });
+
+      console.log(`Updated IndexedDB with ${count} species`);
+    }
+  } catch (err) {
+    // Non-fatal - we already have data
+    console.warn('Update check failed:', err);
+  }
+}
+
+/**
+ * Normalize JSON data to match expected format
+ * Handles both old flat format and new format with metadata/sources
+ */
+function normalizeJsonData(data) {
+  // If already has metadata, assume it's new format
+  if (data.metadata) {
+    return data;
+  }
+
+  // Old format: { species: [...] } with flat species objects
+  // Convert to new format with synthetic metadata
+  const species = data.species || data;
+
+  return {
+    metadata: {
+      version: '1.0-legacy',
+      exported_at: new Date().toISOString(),
+      species_count: species.length
+    },
+    species: species.map(s => ({
+      ...s,
+      // If no sources array, the flat fields are treated as primary source data
+      // The UI will handle both formats via getPrimarySource helper
+    }))
+  };
 }
 
 // Helper to find species by name
