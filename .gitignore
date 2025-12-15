@@ -49,7 +49,6 @@ htmlcov/
 
 # Go build artifacts
 cli/oak
-cli/*.db
 
 # JavaScript/Node
 web/node_modules/
@@ -59,9 +58,8 @@ web/.vite/
 # macOS
 .DS_Store
 
-# Generated files
+# Generated files (temp exports, not the main quercus_data.json)
 quercus_export.json
-quercus.db
 
 # Working files
 data/inaturalist-taxonomy.dwca/
