@@ -1,9 +1,10 @@
 <script>
-  import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness } from './dataStore.js';
+  import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName } from './dataStore.js';
 
   export let species;
-  export let onClose;
   export let onNavigate;
+  export let onNavigateToTaxon = null;
+  export let onGoHome = null;
 
   // Source selection state
   let selectedSourceId = null;
@@ -41,9 +42,55 @@
     }
     return null;
   }
+
+  // Check if hybrid name already has × symbol (most do)
+  function needsHybridSymbol(s) {
+    return s.is_hybrid && !s.name.startsWith('×');
+  }
+
+  function handleTaxonClick(level, value) {
+    if (!onNavigateToTaxon || !species.taxonomy) return;
+
+    // Build the expansion path based on the level clicked
+    const t = species.taxonomy;
+    const path = {};
+
+    // Always include subgenus if clicking any level
+    if (t.subgenus) {
+      path.subgenus = t.subgenus;
+    }
+
+    // Include section if clicking section or lower
+    if (level !== 'subgenus' && t.section) {
+      path.section = t.section;
+    }
+
+    // Include subsection if clicking subsection or lower
+    if ((level === 'subsection' || level === 'complex') && t.subsection) {
+      path.subsection = t.subsection;
+    }
+
+    // Include complex if clicking complex
+    if (level === 'complex' && t.complex) {
+      path.complex = t.complex;
+    }
+
+    onNavigateToTaxon(path);
+  }
 </script>
 
 <div class="species-detail">
+  <!-- Breadcrumb navigation -->
+  <nav class="breadcrumb">
+    <button class="breadcrumb-link" on:click={onGoHome}>
+      Browse
+    </button>
+    <span class="breadcrumb-separator">›</span>
+    <span class="breadcrumb-current">
+      {formatSpeciesName(species)}
+    </span>
+  </nav>
+
   <!-- Header -->
   <div class="px-6 py-6" style="background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-forest-100) 100%); border-bottom: 2px solid var(--color-forest-200);">
     <div class="flex items-start justify-between gap-4">
@@ -60,18 +107,9 @@
           {/if}
         </div>
         <h1 class="text-3xl font-bold leading-tight" style="color: var(--color-forest-900); font-family: var(--font-serif);">
-          Quercus {#if species.is_hybrid}×{/if} <span class="italic">{species.name}</span>
+          Quercus {#if needsHybridSymbol(species)}× {/if}<span class="italic">{species.name}</span>
         </h1>
       </div>
-      <button
-        on:click={onClose}
-        class="close-button flex-shrink-0 p-2 rounded-lg transition-colors duration-200 focus:outline-none"
-        aria-label="Close"
-      >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
     </div>
   </div>
 
@@ -271,19 +309,35 @@
         <dl class="taxonomy-grid">
           {#if species.taxonomy.subgenus}
             <dt>Subgenus:</dt>
-            <dd>{species.taxonomy.subgenus}</dd>
+            <dd>
+              <button class="taxonomy-link" on:click={() => handleTaxonClick('subgenus', species.taxonomy.subgenus)}>
+                {species.taxonomy.subgenus}
+              </button>
+            </dd>
           {/if}
           {#if species.taxonomy.section}
             <dt>Section:</dt>
-            <dd>{species.taxonomy.section}</dd>
+            <dd>
+              <button class="taxonomy-link" on:click={() => handleTaxonClick('section', species.taxonomy.section)}>
+                {species.taxonomy.section}
+              </button>
+            </dd>
           {/if}
           {#if species.taxonomy.subsection}
             <dt>Subsection:</dt>
-            <dd>{species.taxonomy.subsection}</dd>
+            <dd>
+              <button class="taxonomy-link" on:click={() => handleTaxonClick('subsection', species.taxonomy.subsection)}>
+                {species.taxonomy.subsection}
+              </button>
+            </dd>
           {/if}
           {#if species.taxonomy.complex}
             <dt>Complex:</dt>
-            <dd>Q. {species.taxonomy.complex}</dd>
+            <dd>
+              <button class="taxonomy-link" on:click={() => handleTaxonClick('complex', species.taxonomy.complex)}>
+                Q. {species.taxonomy.complex}
+              </button>
+            </dd>
           {/if}
           {#if species.taxonomy.series}
             <dt>Series:</dt>
@@ -565,6 +619,26 @@
     font-weight: 500;
   }
 
+  .taxonomy-link {
+    color: var(--color-forest-700);
+    font-weight: 500;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    text-decoration: none;
+    border-bottom: 1px dashed var(--color-forest-400);
+    transition: all 0.15s ease;
+  }
+
+  .taxonomy-link:hover {
+    color: var(--color-forest-600);
+    border-bottom-color: var(--color-forest-600);
+    border-bottom-style: solid;
+  }
+
   .common-name-tag {
     padding: 0.5rem 1rem;
     border-radius: 9999px;
@@ -608,14 +682,43 @@
     box-shadow: var(--shadow-sm);
   }
 
-  .close-button {
-    color: var(--color-text-secondary);
+  /* Breadcrumb styles */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
     background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.875rem;
   }
 
-  .close-button:hover {
-    background-color: var(--color-forest-200);
-    color: var(--color-forest-900);
+  .breadcrumb-link {
+    color: var(--color-forest-700);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .breadcrumb-link:hover {
+    color: var(--color-forest-500);
+    text-decoration: underline;
+  }
+
+  .breadcrumb-separator {
+    color: var(--color-text-tertiary);
+  }
+
+  .breadcrumb-current {
+    color: var(--color-text-primary);
+    font-weight: 500;
+    font-style: italic;
   }
 
   /* Source selector styles */

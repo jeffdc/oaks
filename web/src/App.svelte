@@ -1,25 +1,35 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { loadSpeciesData, selectedSpecies, isLoading, error, findSpeciesByName, searchQuery } from './lib/dataStore.js';
-  import Search from './lib/Search.svelte';
+  import Header from './lib/Header.svelte';
   import SpeciesList from './lib/SpeciesList.svelte';
   import SpeciesDetail from './lib/SpeciesDetail.svelte';
   import TaxonomyTree from './lib/TaxonomyTree.svelte';
+  import TaxonView from './lib/TaxonView.svelte';
   import UpdatePrompt from './lib/UpdatePrompt.svelte';
 
-  let view = 'list'; // 'list', 'taxonomy', or 'detail'
+  let view = 'list'; // 'list', 'taxonomy', 'taxon', or 'detail'
   let browseMode = 'list'; // 'list' or 'taxonomy' - remembers preferred browse mode
+  let taxonPath = []; // Path for taxon view, e.g., ['Quercus', 'Quercus', 'Albae']
 
-  // Auto-switch to list when searching, return to browseMode when cleared
-  $: effectiveView = view === 'detail' ? 'detail' : ($searchQuery ? 'list' : browseMode);
+  // Auto-switch to list when searching (from any view except detail)
+  // When search is cleared, return to previous view
+  $: effectiveView = view === 'detail' ? 'detail' :
+                     $searchQuery ? 'list' :
+                     view === 'taxon' ? 'taxon' :
+                     browseMode;
 
   onMount(async () => {
     try {
       await loadSpeciesData();
 
+      // Parse initial URL hash
+      const initialState = parseUrlHash(window.location.hash);
+
       // Initialize history state if not already set
       if (!history.state) {
-        history.replaceState({ view: 'list' }, '', window.location.href);
+        history.replaceState(initialState, '', window.location.href);
+        restoreFromHistoryState(initialState);
       } else {
         // Restore state from history (e.g., after page reload or back/forward navigation)
         restoreFromHistoryState(history.state);
@@ -31,6 +41,30 @@
       console.error('Failed to load species data:', err);
     }
   });
+
+  function parseUrlHash(hash) {
+    if (!hash || hash === '#') {
+      return { view: 'list' };
+    }
+
+    const path = hash.slice(1); // Remove leading #
+
+    // Check for taxonomy paths: taxonomy/Subgenus/Section/...
+    if (path.startsWith('taxonomy/')) {
+      const segments = path.slice(9).split('/').filter(s => s); // Remove 'taxonomy/' prefix
+      if (segments.length > 0) {
+        return { view: 'taxon', taxonPath: segments };
+      }
+      return { view: 'taxonomy', browseMode: 'taxonomy' };
+    }
+
+    if (path === 'taxonomy') {
+      return { view: 'taxonomy', browseMode: 'taxonomy' };
+    }
+
+    // Otherwise treat as species name
+    return { view: 'detail', speciesName: decodeURIComponent(path) };
+  }
 
   onDestroy(() => {
     window.removeEventListener('popstate', handlePopState);
@@ -50,6 +84,13 @@
       browseMode = state.browseMode;
     }
 
+    // Restore taxon path if present
+    if (state.taxonPath) {
+      taxonPath = state.taxonPath;
+    } else {
+      taxonPath = [];
+    }
+
     if (state.view === 'detail' && state.speciesName) {
       // Find and set the species
       const found = findSpeciesByName(state.speciesName);
@@ -67,6 +108,16 @@
     history.pushState({ view: mode, browseMode: mode }, '', mode === 'taxonomy' ? '#taxonomy' : '#');
   }
 
+  function handleGoHome() {
+    searchQuery.set('');
+    selectedSpecies.set(null);
+    view = 'list';
+    browseMode = 'list';
+    taxonPath = [];
+    history.pushState({ view: 'list', browseMode: 'list' }, '', '#');
+    window.scrollTo(0, 0);
+  }
+
   function handleSelectSpecies(species) {
     selectedSpecies.set(species);
     view = 'detail';
@@ -80,11 +131,6 @@
 
     // Scroll to top
     window.scrollTo(0, 0);
-  }
-
-  function handleCloseDetail() {
-    // Use browser back instead of directly changing state
-    history.back();
   }
 
   function handleNavigate(species) {
@@ -101,62 +147,59 @@
     // Scroll to top
     window.scrollTo(0, 0);
   }
+
+  function handleNavigateToTaxon(pathOrObject) {
+    // Handle both array paths (from TaxonView) and object paths (from SpeciesDetail)
+    let newPath;
+
+    if (Array.isArray(pathOrObject)) {
+      newPath = pathOrObject;
+    } else {
+      // Convert object format { subgenus, section, ... } to array
+      newPath = [];
+      if (pathOrObject.subgenus) newPath.push(pathOrObject.subgenus);
+      if (pathOrObject.section) newPath.push(pathOrObject.section);
+      if (pathOrObject.subsection) newPath.push(pathOrObject.subsection);
+      if (pathOrObject.complex) newPath.push(pathOrObject.complex);
+    }
+
+    // Clear search when navigating to taxon
+    searchQuery.set('');
+
+    if (newPath.length === 0) {
+      // Navigate to taxonomy tree view
+      browseMode = 'taxonomy';
+      view = 'taxonomy';
+      taxonPath = [];
+      selectedSpecies.set(null);
+
+      history.pushState(
+        { view: 'taxonomy', browseMode: 'taxonomy' },
+        '',
+        '#taxonomy'
+      );
+    } else {
+      // Navigate to taxon page
+      view = 'taxon';
+      taxonPath = newPath;
+      selectedSpecies.set(null);
+
+      const url = '#taxonomy/' + newPath.map(encodeURIComponent).join('/');
+      history.pushState(
+        { view: 'taxon', taxonPath: newPath },
+        '',
+        url
+      );
+    }
+
+    // Scroll to top
+    window.scrollTo(0, 0);
+  }
 </script>
 
 <div class="app min-h-screen" style="background-color: var(--color-background);">
 
-  <header class="sticky top-0 z-40" style="background: linear-gradient(135deg, var(--color-forest-800) 0%, var(--color-forest-700) 100%); box-shadow: var(--shadow-lg);">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-      {#if view === 'detail'}
-        <button
-          on:click={handleCloseDetail}
-          class="flex items-center gap-2 text-white/90 hover:text-white transition-all duration-200 hover:gap-3 font-medium"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          <span>Back to List</span>
-        </button>
-      {:else}
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <img src="/oak-leaf-outline.svg" alt="Oak Leaf" class="w-8 h-12 brightness-0 invert opacity-90" />
-            <div>
-              <h1 class="text-2xl font-bold text-white" style="font-family: var(--font-serif); letter-spacing: 0.01em;">Quercus Compendium</h1>
-              <p class="text-sm text-white/70 mt-0.5">A comprehensive guide to oak species</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-3 w-full sm:w-auto sm:flex-1 sm:max-w-lg ml-auto">
-            <Search />
-            <div class="flex gap-1">
-              <button
-                on:click={() => setBrowseMode('list')}
-                class="view-toggle"
-                class:active={browseMode === 'list'}
-                aria-label="List view"
-                title="List view"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                </svg>
-              </button>
-              <button
-                on:click={() => setBrowseMode('taxonomy')}
-                class="view-toggle"
-                class:active={browseMode === 'taxonomy'}
-                aria-label="Taxonomy tree view"
-                title="Taxonomy tree view"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h10M4 14h6M4 18h10" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      {/if}
-    </div>
-  </header>
+  <Header onGoHome={handleGoHome} />
 
 
   <main class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-12 py-10">
@@ -192,12 +235,20 @@
       <SpeciesList onSelectSpecies={handleSelectSpecies} />
     {:else if effectiveView === 'taxonomy'}
       <TaxonomyTree onSelectSpecies={handleSelectSpecies} />
+    {:else if effectiveView === 'taxon'}
+      <TaxonView
+        {taxonPath}
+        onSelectSpecies={handleSelectSpecies}
+        onNavigateToTaxon={handleNavigateToTaxon}
+        onGoHome={handleGoHome}
+      />
     {:else if effectiveView === 'detail' && $selectedSpecies}
       <div class="rounded-xl overflow-hidden" style="background-color: var(--color-surface); box-shadow: var(--shadow-xl);">
         <SpeciesDetail
           species={$selectedSpecies}
-          onClose={handleCloseDetail}
           onNavigate={handleNavigate}
+          onNavigateToTaxon={handleNavigateToTaxon}
+          onGoHome={handleGoHome}
         />
       </div>
     {/if}
@@ -206,28 +257,3 @@
   <UpdatePrompt />
 </div>
 
-<style>
-  .view-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 0.5rem;
-    border: none;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.7);
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .view-toggle:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-  }
-
-  .view-toggle.active {
-    background-color: rgba(255, 255, 255, 0.25);
-    color: white;
-  }
-</style>

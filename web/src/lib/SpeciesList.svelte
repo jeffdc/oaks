@@ -6,6 +6,11 @@
   function handleClick(species) {
     onSelectSpecies(species);
   }
+
+  // Check if hybrid name already has × symbol (most do)
+  function needsHybridSymbol(species) {
+    return species.is_hybrid && !species.name.startsWith('×');
+  }
 </script>
 
 <div class="species-list">
@@ -37,7 +42,7 @@
           >
             <div>
               <h3 class="species-name mb-2">
-                Quercus {#if species.is_hybrid}×{/if} <span class="italic">{species.name}</span>
+                Quercus {#if needsHybridSymbol(species)}× {/if}<span class="italic">{species.name}</span>
               </h3>
               {#if species.author}
                 <p class="text-sm mb-3" style="color: var(--color-text-secondary); line-height: 1.4;">{species.author}</p>

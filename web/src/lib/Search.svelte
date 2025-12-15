@@ -1,15 +1,14 @@
 <script>
   import { searchQuery, filteredSpecies } from './dataStore.js';
 
-  let inputValue = $searchQuery;
+  // Keep inputValue synced with the store (handles external clears like handleGoHome)
+  $: inputValue = $searchQuery;
 
   function handleInput(event) {
-    inputValue = event.target.value;
-    searchQuery.set(inputValue);
+    searchQuery.set(event.target.value);
   }
 
   function handleClear() {
-    inputValue = '';
     searchQuery.set('');
   }
 </script>
