@@ -32,9 +32,6 @@ jobs:
         working-directory: web
         run: npm ci
 
-      - name: Copy data file
-        run: cp quercus_data.json web/public/
-
       - name: Build
         working-directory: web
         run: npm run build
