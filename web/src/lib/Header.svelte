@@ -3,6 +3,8 @@
 
   export let onGoHome;
   export let onAbout;
+
+  const baseUrl = import.meta.env.BASE_URL;
 </script>
 
 <header class="sticky top-0 z-40" style="background: linear-gradient(135deg, var(--color-forest-800) 0%, var(--color-forest-700) 100%); box-shadow: var(--shadow-lg);">
@@ -13,7 +15,7 @@
         on:click={onGoHome}
         class="flex items-center gap-3 hover:opacity-90 transition-opacity"
       >
-        <img src="/oak-leaf-outline.svg" alt="Oak Leaf" class="w-7 h-10 brightness-0 invert opacity-90" />
+        <img src="{baseUrl}oak-leaf-outline.svg" alt="Oak Leaf" class="w-7 h-10 brightness-0 invert opacity-90" />
         <h1 class="text-xl font-bold text-white" style="font-family: var(--font-serif); letter-spacing: 0.01em;">Quercus Compendium</h1>
       </button>
 

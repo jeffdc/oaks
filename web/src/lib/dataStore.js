@@ -187,7 +187,7 @@ export async function loadSpeciesData() {
  * Fetch JSON and populate IndexedDB
  */
 async function fetchAndCacheData() {
-  const response = await fetch('/quercus_data.json');
+  const response = await fetch(`${import.meta.env.BASE_URL}quercus_data.json`);
   if (!response.ok) {
     throw new Error(`Failed to load data: ${response.statusText}`);
   }
@@ -216,7 +216,7 @@ async function fetchAndCacheData() {
  */
 async function checkForUpdates() {
   try {
-    const response = await fetch('/quercus_data.json');
+    const response = await fetch(`${import.meta.env.BASE_URL}quercus_data.json`);
     if (!response.ok) return;
 
     const data = await response.json();
