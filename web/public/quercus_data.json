@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "version": "2025-12-16T02:44:46Z",
-    "exported_at": "2025-12-16T02:44:46Z",
-    "species_count": 682
+    "version": "2025-12-16T03:03:41Z",
+    "exported_at": "2025-12-16T03:03:41Z",
+    "species_count": 734
   },
   "species": [
     {
@@ -144,7 +144,7 @@
         "section": "Cyclobalanopsis"
       },
       "hybrids": [
-        "idzuensis"
+        "× idzuensis"
       ],
       "synonyms": [
         "angustifolia Hort.",
@@ -242,7 +242,7 @@
         "subsection": "Campylolepides"
       },
       "hybrids": [
-        "pellucida"
+        "× pellucida"
       ],
       "synonyms": [
         "bombyx K.Koch",
@@ -631,11 +631,11 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "pongtungensis",
-        "maccormickii",
-        "alienoserratoides",
-        "maccormickoserrata",
-        "major"
+        "× pongtungensis",
+        "× maccormickii",
+        "× alienoserratoides",
+        "× maccormickoserrata",
+        "× major"
       ],
       "synonyms": [
         "acuteserrata",
@@ -976,7 +976,7 @@
         "complex": "phellos"
       },
       "hybrids": [
-        "venulosa"
+        "× venulosa"
       ],
       "synonyms": [
         "caput-rivuli"
@@ -1529,11 +1529,11 @@
       "hybrids": [
         "humidicola",
         "jackiana",
-        "nessiana",
         "warei",
         "substellata",
         "wagneri",
-        "schuettei"
+        "schuettei",
+        "× nessiana"
       ],
       "synonyms": [
         "mollis Raf.",
@@ -1943,16 +1943,16 @@
         "subsection": "Galliferae"
       },
       "hybrids": [
-        "amaralii",
-        "anselmii",
-        "elisae",
-        "fagineomirbeckii",
         "fontqueri",
         "lagunai",
         "lousae",
-        "ordenensis",
-        "paui",
-        "viverii"
+        "× amaralii",
+        "× anselmii",
+        "× elisae",
+        "× fagineomirbeckii",
+        "× paui",
+        "× viverii",
+        "× ordenensis"
       ],
       "synonyms": [
         "gibraltarica",
@@ -2234,8 +2234,8 @@
       "hybrids": [
         "baenitzii",
         "kewensis",
-        "libanerris",
-        "schneideri"
+        "× libanerris",
+        "× schneideri"
       ],
       "synonyms": [
         "aegilops Scop.",
@@ -2689,7 +2689,7 @@
         "auzendei",
         "campitica",
         "eborense",
-        "ordenensis"
+        "× ordenensis"
       ],
       "synonyms": [
         "angustifolia (Laguna)Gonzalez-Albo",
@@ -2792,7 +2792,7 @@
         "benderi",
         "fontana",
         "robbinsii",
-        "rugelii"
+        "× rugelii"
       ],
       "synonyms": [
         "repanda hort."
@@ -3385,9 +3385,9 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "beguinotii",
-        "benkoi",
-        "lucana"
+        "× beguinotii",
+        "× benkoi",
+        "× lucana"
       ],
       "synonyms": [
         "aurea Wierzb. ex Rchb."
@@ -3562,14 +3562,14 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "maccormickii",
-        "nipponica",
-        "fangshanensis",
         "fenchengensis",
         "hopeiensis",
         "mongolicodentata",
-        "maccormickoserrata",
-        "vilmoriniana"
+        "× maccormickii",
+        "× maccormickoserrata",
+        "× nipponica",
+        "× vilmoriniana",
+        "× fangshanensis"
       ],
       "synonyms": [
         "obovata",
@@ -4550,17 +4550,17 @@
         "subsection": "Galliferae"
       },
       "hybrids": [
-        "alentejana",
-        "allorgeana",
         "andresii",
         "aruciensis",
         "coutinhoi",
         "duriensis",
-        "fagineomirbeckii",
-        "pacensis",
-        "salcedoi",
         "senneniana",
-        "tentudaica"
+        "× fagineomirbeckii",
+        "× salcedoi",
+        "× tentudaica",
+        "× alentejana",
+        "× allorgeana",
+        "× pacensis"
       ],
       "synonyms": [
         "aegilopifolia Pers.",
@@ -4653,7 +4653,7 @@
         "joorii",
         "willdenowiana",
         "subintegra",
-        "zehra"
+        "× zehra"
       ],
       "synonyms": [
         "aurea Raf.",
@@ -4815,11 +4815,11 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "szechenyana",
-        "esculiformis",
-        "haynaldiana",
-        "lucana",
-        "tabajdiana"
+        "× szechenyana",
+        "× esculiformis",
+        "× haynaldiana",
+        "× tabajdiana",
+        "× lucana"
       ],
       "synonyms": [
         "apennina Loisel.",
@@ -5075,7 +5075,7 @@
       },
       "hybrids": [
         "undulata",
-        "mazei"
+        "× mazei"
       ],
       "synonyms": [
         "albifolia",
@@ -5476,7 +5476,7 @@
         "section": "Lobatae"
       },
       "hybrids": [
-        "heterogina"
+        "× heterogina"
       ],
       "synonyms": [
         "arachnoidea",
@@ -5512,8 +5512,8 @@
         "section": "Cyclobalanopsis"
       },
       "hybrids": [
-        "idzuensis",
-        "kiusiana"
+        "kiusiana",
+        "× idzuensis"
       ],
       "synonyms": [
         "amamiana",
@@ -5921,7 +5921,7 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "esculiformis"
+        "× esculiformis"
       ],
       "synonyms": [
         "armeniaca",
@@ -6617,8 +6617,8 @@
         "exacta",
         "leana",
         "runcinata",
-        "subimbricaria",
-        "tridentata"
+        "tridentata",
+        "× subimbricaria"
       ],
       "synonyms": [
         "aprica",
@@ -6657,14 +6657,14 @@
         "complex": "incana"
       },
       "hybrids": [
-        "asheana",
         "atlantica",
         "caduca",
         "cravenensis",
         "oviedoensis",
         "podophylla",
         "subintegra",
-        "venulosa"
+        "× venulosa",
+        "× asheana"
       ],
       "synonyms": [
         "brevifolia Sarg.",
@@ -6702,8 +6702,8 @@
         "subsection": "Galliferae"
       },
       "hybrids": [
-        "pseudoinfectoria",
-        "squamulosa"
+        "× pseudoinfectoria",
+        "× squamulosa"
       ],
       "synonyms": [
         "lusitanica Boiss.",
@@ -7365,10 +7365,10 @@
         "complex": "marilandica"
       },
       "hybrids": [
-        "asheana",
         "blufftonensis",
         "mellichampii",
-        "walteriana"
+        "walteriana",
+        "× asheana"
       ],
       "synonyms": [
         "catesbaei",
@@ -7659,8 +7659,8 @@
         "subsection": "Libani"
       },
       "hybrids": [
-        "libanerris",
-        "squamulosa"
+        "× libanerris",
+        "× squamulosa"
       ],
       "synonyms": [
         "carduchorum",
@@ -8160,10 +8160,10 @@
         "deamii",
         "guadalupensis",
         "hillii",
-        "mazei",
         "megaleia",
         "schuettei",
-        "macdanielii"
+        "macdanielii",
+        "× mazei"
       ],
       "synonyms": [
         "macrophylla hort.",
@@ -8750,12 +8750,12 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "pongtungensis",
-        "alienoserratoides",
-        "serratoides",
-        "fangshanensis",
         "mongolicodentata",
-        "pellucida"
+        "× pellucida",
+        "× pongtungensis",
+        "× alienoserratoides",
+        "× serratoides",
+        "× fangshanensis"
       ],
       "synonyms": [
         "crispula",
@@ -9119,10 +9119,10 @@
         "capesii",
         "garlandensis",
         "neopalmeri",
-        "raineri",
         "sterilis",
         "walteriana",
-        "demareei"
+        "demareei",
+        "× raineri"
       ],
       "synonyms": [
         "aquatica",
@@ -9789,11 +9789,11 @@
         "subsection": "Palustres"
       },
       "hybrids": [
-        "richteri",
         "exacta",
         "mutabilis",
-        "rugelii",
-        "vaga"
+        "vaga",
+        "× rugelii",
+        "× richteri"
       ],
       "synonyms": [
         "umbraculifera"
@@ -9954,8 +9954,8 @@
       },
       "hybrids": [
         "andresii",
-        "arrimatensis",
-        "rotensis"
+        "× arrimatensis",
+        "× rotensis"
       ],
       "sources": [
         {
@@ -10185,18 +10185,18 @@
       },
       "hybrids": [
         "rosacea",
-        "arrimatensis",
         "audleyensis",
         "streimii",
-        "benkoi",
         "cantabrica",
         "diversifrons",
         "trabutii",
         "roseoides",
-        "salcedoi",
-        "tabajdiana",
-        "vilmoriniana",
-        "viverii"
+        "× viverii",
+        "× benkoi",
+        "× vilmoriniana",
+        "× salcedoi",
+        "× tabajdiana",
+        "× arrimatensis"
       ],
       "synonyms": [
         "abietum",
@@ -10357,7 +10357,7 @@
         "heterophylla",
         "moultonensis",
         "ludoviciana",
-        "subimbricaria"
+        "× subimbricaria"
       ],
       "synonyms": [
         "salicifolia hort. non Née"
@@ -10573,7 +10573,7 @@
         "section": "Ponticae"
       },
       "hybrids": [
-        "hickelii"
+        "× hickelii"
       ],
       "sources": [
         {
@@ -10799,8 +10799,8 @@
         "complex": "coccifera"
       },
       "hybrids": [
-        "almeidae",
-        "capeloana"
+        "× almeidae",
+        "× capeloana"
       ],
       "synonyms": [
         "arcuata",
@@ -10914,19 +10914,19 @@
       },
       "hybrids": [
         "albescens",
-        "allorgeana",
-        "anselmii",
         "baenitzii",
         "barcarrotensis",
         "streimii",
-        "beguinotii",
-        "szechenyana",
         "budensis",
         "kerneri",
         "firmurensis",
         "thellungii",
-        "paui",
-        "pseudoinfectoria"
+        "× anselmii",
+        "× paui",
+        "× beguinotii",
+        "× szechenyana",
+        "× pseudoinfectoria",
+        "× allorgeana"
       ],
       "synonyms": [
         "aegilops Mill.",
@@ -11097,15 +11097,15 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "alentejana",
         "andegavensis",
         "cantabrica",
-        "diosdadoi",
         "firmurensis",
         "fontqueri",
         "trabutii",
-        "rotensis",
-        "tavaresii"
+        "tavaresii",
+        "× diosdadoi",
+        "× alentejana",
+        "× rotensis"
       ],
       "synonyms": [
         "brossa",
@@ -11344,16 +11344,16 @@
         "andegavensis",
         "bimundorum",
         "kerneri",
-        "elisae",
-        "haynaldiana",
         "thellungii",
-        "hickelii",
-        "warburgii",
-        "pastorae",
         "pendulina",
         "warei",
         "sargentii",
-        "macdanielii"
+        "macdanielii",
+        "× elisae",
+        "× haynaldiana",
+        "× warburgii",
+        "× hickelii",
+        "× pastorae"
       ],
       "synonyms": [
         "borzii",
@@ -11485,13 +11485,13 @@
         "complex": "ilex"
       },
       "hybrids": [
-        "almeidae",
         "alvesii",
         "autumnalis",
-        "diosdadoi",
         "eborense",
-        "tentudaica",
-        "urartensis"
+        "urartensis",
+        "× tentudaica",
+        "× almeidae",
+        "× diosdadoi"
       ],
       "synonyms": [
         "alzina",
@@ -11527,13 +11527,13 @@
       },
       "hybrids": [
         "benderi",
-        "richteri",
         "fernaldii",
         "hawkinsiae",
         "heterophylla",
-        "raineri",
         "riparia",
-        "runcinata"
+        "runcinata",
+        "× richteri",
+        "× raineri"
       ],
       "synonyms": [
         "ambigua Michx. non Bonpl.",
@@ -11619,8 +11619,8 @@
       },
       "hybrids": [
         "basaseachicensis",
-        "heterogina",
-        "warburgii"
+        "× heterogina",
+        "× warburgii"
       ],
       "synonyms": [
         "conglomerata Trel.",
@@ -11721,7 +11721,7 @@
         "section": "Lobatae"
       },
       "hybrids": [
-        "zehra"
+        "× zehra"
       ],
       "synonyms": [
         "rhysophylla"
@@ -12324,9 +12324,9 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "nipponica",
-        "serratoides",
-        "major"
+        "× major",
+        "× nipponica",
+        "× serratoides"
       ],
       "synonyms": [
         "donarium",
@@ -12965,13 +12965,13 @@
         "subsection": "Suber"
       },
       "hybrids": [
-        "amaralii",
         "morisii",
-        "capeloana",
         "fontanesii",
         "numidica",
-        "pacensis",
-        "pastorae"
+        "× amaralii",
+        "× capeloana",
+        "× pacensis",
+        "× pastorae"
       ],
       "synonyms": [
         "bivoniana",
@@ -13508,7 +13508,7 @@
         "subsection": "Libani"
       },
       "hybrids": [
-        "schneideri"
+        "× schneideri"
       ],
       "synonyms": [
         "aegilops Griseb.",
@@ -14002,7 +14002,7 @@
         "burnetensis",
         "comptoniae",
         "harbisonii",
-        "nessiana"
+        "× nessiana"
       ],
       "synonyms": [
         "andromeda",
@@ -14332,6 +14332,50 @@
       ]
     },
     {
+      "name": "× alentejana",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "faginea",
+      "parent2": "pyrenaica"
+    },
+    {
+      "name": "× alienoserratoides",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "aliena",
+      "parent2": "mongolica"
+    },
+    {
+      "name": "× allorgeana",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "faginea",
+      "parent2": "pubescens"
+    },
+    {
+      "name": "× almeidae",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "pseudococcifera",
+      "parent2": "rotundifolia"
+    },
+    {
       "name": "× alvordiana",
       "author": "Eastwood",
       "is_hybrid": true,
@@ -14360,6 +14404,17 @@
           "url": "https://oaksoftheworld.fr/quercus_alvordiana.htm"
         }
       ]
+    },
+    {
+      "name": "× amaralii",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "canariensis",
+      "parent2": "suber"
     },
     {
       "name": "× andegavensis",
@@ -14413,6 +14468,39 @@
           "url": "https://oaksoftheworld.fr/quercus_andresii.htm"
         }
       ]
+    },
+    {
+      "name": "× anselmii",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "canariensis",
+      "parent2": "pubescens"
+    },
+    {
+      "name": "× arrimatensis",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "pauciradiata",
+      "parent2": "petraea"
+    },
+    {
+      "name": "× asheana",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "incana",
+      "parent2": "laevis"
     },
     {
       "name": "× ashei",
@@ -14728,6 +14816,17 @@
       ]
     },
     {
+      "name": "× beguinotii",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "dalechampii",
+      "parent2": "pubescens"
+    },
+    {
       "name": "× benderi",
       "author": "Baenitz",
       "is_hybrid": true,
@@ -14757,6 +14856,17 @@
           "url": "https://oaksoftheworld.fr/quercus_benderi.htm"
         }
       ]
+    },
+    {
+      "name": "× benkoi",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "dalechampii",
+      "parent2": "petraea"
     },
     {
       "name": "× bernardiensis",
@@ -15020,6 +15130,17 @@
           "url": "https://oaksoftheworld.fr/quercus_campitica.htm"
         }
       ]
+    },
+    {
+      "name": "× capeloana",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "pseudococcifera",
+      "parent2": "suber"
     },
     {
       "name": "× capesii",
@@ -15353,6 +15474,17 @@
       ]
     },
     {
+      "name": "× diosdadoi",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "pyrenaica",
+      "parent2": "rotundifolia"
+    },
+    {
       "name": "× discreta",
       "author": "Laughlin",
       "is_hybrid": true,
@@ -15556,6 +15688,17 @@
       ]
     },
     {
+      "name": "× elisae",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "canariensis",
+      "parent2": "robur"
+    },
+    {
       "name": "× eplingii",
       "author": "C.H.Mull.",
       "is_hybrid": true,
@@ -15585,6 +15728,17 @@
           "url": "https://oaksoftheworld.fr/quercus_eplingii.htm"
         }
       ]
+    },
+    {
+      "name": "× esculiformis",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "frainetto",
+      "parent2": "hartwissiana"
     },
     {
       "name": "× ewanii",
@@ -15626,6 +15780,28 @@
           "url": "https://oaksoftheworld.fr/quercus_exacta.htm"
         }
       ]
+    },
+    {
+      "name": "× fagineomirbeckii",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "canariensis",
+      "parent2": "faginea"
+    },
+    {
+      "name": "× fangshanensis",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "dentata",
+      "parent2": "mongolica"
     },
     {
       "name": "× faxonii",
@@ -16044,6 +16220,28 @@
       ]
     },
     {
+      "name": "× haynaldiana",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "frainetto",
+      "parent2": "robur"
+    },
+    {
+      "name": "× heterogina",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "glabrescens",
+      "parent2": "rugosa"
+    },
+    {
       "name": "× heterophylla",
       "author": "F.Michx",
       "is_hybrid": true,
@@ -16074,6 +16272,17 @@
           "url": "https://oaksoftheworld.fr/quercus_heterophylla.htm"
         }
       ]
+    },
+    {
+      "name": "× hickelii",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "pontica",
+      "parent2": "robur"
     },
     {
       "name": "× hillii",
@@ -16189,6 +16398,17 @@
           "url": "https://oaksoftheworld.fr/quercus_humidicola.htm"
         }
       ]
+    },
+    {
+      "name": "× idzuensis",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "acuta",
+      "parent2": "glauca"
     },
     {
       "name": "× incomita",
@@ -16511,6 +16731,17 @@
       ]
     },
     {
+      "name": "× libanerris",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "cerris",
+      "parent2": "libani"
+    },
+    {
       "name": "× lousae",
       "author": "C.Vila-Viçosa \u0026 al.",
       "is_hybrid": true,
@@ -16536,6 +16767,17 @@
           "url": "https://oaksoftheworld.fr/quercus_lousae.htm"
         }
       ]
+    },
+    {
+      "name": "× lucana",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "dalechampii",
+      "parent2": "frainetto"
     },
     {
       "name": "× ludoviciana",
@@ -16571,6 +16813,28 @@
           "url": "https://oaksoftheworld.fr/quercus_ludoviciana.htm"
         }
       ]
+    },
+    {
+      "name": "× maccormickii",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "aliena",
+      "parent2": "dentata"
+    },
+    {
+      "name": "× maccormickoserrata",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "aliena",
+      "parent2": "dentata"
     },
     {
       "name": "× macdanielii",
@@ -16645,6 +16909,17 @@
       ]
     },
     {
+      "name": "× major",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "aliena",
+      "parent2": "serrata"
+    },
+    {
       "name": "× mannifera",
       "author": "Lindl.",
       "is_hybrid": true,
@@ -16675,6 +16950,17 @@
           "url": "https://oaksoftheworld.fr/quercus_mannifera.htm"
         }
       ]
+    },
+    {
+      "name": "× mazei",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "gambelii",
+      "parent2": "macrocarpa"
     },
     {
       "name": "× megaleia",
@@ -16954,6 +17240,28 @@
       ]
     },
     {
+      "name": "× nessiana",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "bicolor",
+      "parent2": "virginiana"
+    },
+    {
+      "name": "× nipponica",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "dentata",
+      "parent2": "serrata"
+    },
+    {
       "name": "× numantina",
       "is_hybrid": true,
       "taxonomy": {
@@ -16991,6 +17299,17 @@
           "url": "https://oaksoftheworld.fr/quercus_numidica.htm"
         }
       ]
+    },
+    {
+      "name": "× ordenensis",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "canariensis",
+      "parent2": "coccifera"
     },
     {
       "name": "× organensis",
@@ -17047,6 +17366,17 @@
           "url": "https://oaksoftheworld.fr/quercus_oviedoensis.htm"
         }
       ]
+    },
+    {
+      "name": "× pacensis",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "faginea",
+      "parent2": "suber"
     },
     {
       "name": "× pachucana",
@@ -17115,6 +17445,17 @@
       ]
     },
     {
+      "name": "× pastorae",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "robur",
+      "parent2": "suber"
+    },
+    {
       "name": "× pastorensis",
       "author": "C.H.Mull.",
       "is_hybrid": true,
@@ -17140,6 +17481,28 @@
           "url": "https://oaksoftheworld.fr/quercus_pastorensis.htm"
         }
       ]
+    },
+    {
+      "name": "× paui",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "canariensis",
+      "parent2": "pubescens"
+    },
+    {
+      "name": "× pellucida",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "acutissima",
+      "parent2": "mongolica"
     },
     {
       "name": "× podophylla",
@@ -17168,6 +17531,17 @@
       ]
     },
     {
+      "name": "× pongtungensis",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "aliena",
+      "parent2": "mongolica"
+    },
+    {
       "name": "× prasina",
       "author": "Bosc e Endl.",
       "is_hybrid": true,
@@ -17190,6 +17564,28 @@
           "url": "https://oaksoftheworld.fr/quercus_prasina.htm"
         }
       ]
+    },
+    {
+      "name": "× pseudoinfectoria",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "infectoria",
+      "parent2": "pubescens"
+    },
+    {
+      "name": "× raineri",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "nigra",
+      "parent2": "rubra"
     },
     {
       "name": "× rehderi",
@@ -17218,6 +17614,17 @@
           "url": "https://oaksoftheworld.fr/quercus_rehderi.htm"
         }
       ]
+    },
+    {
+      "name": "× richteri",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "palustris",
+      "parent2": "rubra"
     },
     {
       "name": "× riparia",
@@ -17342,6 +17749,17 @@
       ]
     },
     {
+      "name": "× rotensis",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "pauciradiata",
+      "parent2": "pyrenaica"
+    },
+    {
       "name": "× rudkinii",
       "author": "Britt.",
       "is_hybrid": true,
@@ -17369,6 +17787,17 @@
           "url": "https://oaksoftheworld.fr/quercus_rudkinii.htm"
         }
       ]
+    },
+    {
+      "name": "× rugelii",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "coccinea",
+      "parent2": "palustris"
     },
     {
       "name": "× runcinata",
@@ -17399,6 +17828,17 @@
           "url": "https://oaksoftheworld.fr/quercus_runcinata.htm"
         }
       ]
+    },
+    {
+      "name": "× salcedoi",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "faginea",
+      "parent2": "petraea"
     },
     {
       "name": "× sargentii",
@@ -17443,6 +17883,17 @@
       },
       "parent1": "alba",
       "parent2": "montana"
+    },
+    {
+      "name": "× schneideri",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "cerris",
+      "parent2": "trojana"
     },
     {
       "name": "× schochiana",
@@ -17518,6 +17969,17 @@
       ]
     },
     {
+      "name": "× serratoides",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "mongolica",
+      "parent2": "serrata"
+    },
+    {
       "name": "× smallii",
       "author": "Trel.",
       "is_hybrid": true,
@@ -17543,6 +18005,17 @@
           "url": "https://oaksoftheworld.fr/quercus_smallii.htm"
         }
       ]
+    },
+    {
+      "name": "× squamulosa",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "infectoria",
+      "parent2": "libani"
     },
     {
       "name": "× stelloides",
@@ -17723,6 +18196,17 @@
       }
     },
     {
+      "name": "× subimbricaria",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "imbricaria",
+      "parent2": "phellos"
+    },
+    {
       "name": "× subintegra",
       "author": "Trel.",
       "is_hybrid": true,
@@ -17811,6 +18295,28 @@
       ]
     },
     {
+      "name": "× szechenyana",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "frainetto",
+      "parent2": "pubescens"
+    },
+    {
+      "name": "× tabajdiana",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "frainetto",
+      "parent2": "petraea"
+    },
+    {
       "name": "× takaoyamensis",
       "author": "Makino",
       "is_hybrid": true,
@@ -17865,6 +18371,17 @@
           "url": "https://oaksoftheworld.fr/quercus_tavaresii.htm"
         }
       ]
+    },
+    {
+      "name": "× tentudaica",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "faginea",
+      "parent2": "rotundifolia"
     },
     {
       "name": "× tharpii",
@@ -18163,6 +18680,39 @@
       ]
     },
     {
+      "name": "× venulosa",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "arkansana",
+      "parent2": "incana"
+    },
+    {
+      "name": "× vilmoriniana",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "dentata",
+      "parent2": "petraea"
+    },
+    {
+      "name": "× viverii",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "canariensis",
+      "parent2": "petraea"
+    },
+    {
       "name": "× wagneri",
       "author": "Gaynor",
       "is_hybrid": true,
@@ -18215,6 +18765,17 @@
           "url": "https://oaksoftheworld.fr/quercus_walteriana.htm"
         }
       ]
+    },
+    {
+      "name": "× warburgii",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "robur",
+      "parent2": "rugosa"
     },
     {
       "name": "× warei",
@@ -18295,6 +18856,17 @@
           "url": "https://oaksoftheworld.fr/quercus_willdenowiana.htm"
         }
       ]
+    },
+    {
+      "name": "× zehra",
+      "is_hybrid": true,
+      "taxonomy": {
+        "genus": "Quercus",
+        "subgenus": null,
+        "section": null
+      },
+      "parent1": "falcata",
+      "parent2": "rysophylla"
     }
   ]
 }
