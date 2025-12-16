@@ -44,20 +44,20 @@
 
 <style>
   .search-input {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: var(--color-white-15);
     backdrop-filter: blur(8px);
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border: 1.5px solid var(--color-white-20);
     color: white;
     box-shadow: var(--shadow-sm);
   }
 
   .search-input:focus {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: var(--shadow-md), 0 0 0 3px rgba(255, 255, 255, 0.1);
+    background-color: var(--color-white-20);
+    border-color: var(--color-white-40);
+    box-shadow: var(--shadow-md), 0 0 0 3px var(--color-white-10);
   }
 
   .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--color-white-60);
   }
 </style>

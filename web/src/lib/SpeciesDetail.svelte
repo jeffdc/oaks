@@ -674,9 +674,9 @@
     border-radius: 9999px;
     font-size: 0.875rem;
     font-weight: 600;
-    background-color: #fef3c7;
-    color: #92400e;
-    border: 1px solid #fcd34d;
+    background-color: var(--color-status-warning-bg);
+    color: var(--color-status-warning-text);
+    border: 1px solid var(--color-status-warning-border);
   }
 
   .external-link {

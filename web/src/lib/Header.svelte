@@ -38,19 +38,19 @@
     padding: 0.5rem 1rem;
     font-size: 0.9375rem;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--color-white-85);
     border-radius: 0.375rem;
     transition: all 0.15s;
   }
 
   .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--color-white-10);
     color: white;
   }
 
   .nav-link:focus-visible {
     outline: none;
-    background-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+    background-color: var(--color-white-15);
+    box-shadow: 0 0 0 2px var(--color-white-30);
   }
 </style>
