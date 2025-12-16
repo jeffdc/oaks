@@ -520,12 +520,12 @@
         "subsection": "Albae"
       },
       "hybrids": [
-        "saulei",
         "bebbiana",
         "bimundorum",
         "faxonii",
         "fernowii",
-        "jackiana"
+        "jackiana",
+        "saulii"
       ],
       "synonyms": [
         "candida Steud.",
@@ -1526,9 +1526,9 @@
         "jackiana",
         "nessiana",
         "warei",
-        "shuettei",
         "substellata",
-        "wagneri"
+        "wagneri",
+        "schuettei"
       ],
       "synonyms": [
         "mollis Raf.",
@@ -4214,7 +4214,7 @@
         "complex": "coccinea"
       },
       "hybrids": [
-        "palaelithicola"
+        "palaeolithicola"
       ],
       "synonyms": [
         "kaposianensis"
@@ -8155,10 +8155,10 @@
         "deamii",
         "guadalupensis",
         "hillii",
-        "macdanielli",
         "mazei",
         "megaleia",
-        "shuettei"
+        "schuettei",
+        "macdanielii"
       ],
       "synonyms": [
         "macrophylla hort.",
@@ -8852,9 +8852,9 @@
         "subsection": "Albae"
       },
       "hybrids": [
-        "saulei",
-        "bernardensis",
-        "sargentii"
+        "sargentii",
+        "bernardiensis",
+        "saulii"
       ],
       "synonyms": [
         "monticola",
@@ -9112,12 +9112,12 @@
       "hybrids": [
         "caduca",
         "capesii",
-        "demarei",
         "garlandensis",
         "neopalmeri",
         "raineri",
         "sterilis",
-        "walteriana"
+        "walteriana",
+        "demareei"
       ],
       "synonyms": [
         "aquatica",
@@ -11343,12 +11343,12 @@
         "haynaldiana",
         "thellungii",
         "hickelii",
-        "macdanielli",
         "warburgii",
         "pastorae",
         "pendulina",
         "warei",
-        "sargentii"
+        "sargentii",
+        "macdanielii"
       ],
       "synonyms": [
         "borzii",
@@ -12819,7 +12819,6 @@
         "complex": "stellata"
       },
       "hybrids": [
-        "bernardensis",
         "drummondii",
         "fernowii",
         "guadalupensis",
@@ -12828,7 +12827,8 @@
         "neotharpii",
         "stelloides",
         "sterrettii",
-        "substellata"
+        "substellata",
+        "bernardiensis"
       ],
       "synonyms": [
         "araniosa",
@@ -13855,17 +13855,17 @@
       "hybrids": [
         "bushii",
         "cocksii",
-        "demarei",
         "discreta",
         "filialis",
         "fontana",
         "hawkinsiae",
         "leana",
-        "palaelithicola",
         "podophylla",
         "willdenowiana",
         "rehderi",
-        "vaga"
+        "vaga",
+        "palaeolithicola",
+        "demareei"
       ],
       "synonyms": [
         "discolor Aiton",
@@ -14760,7 +14760,9 @@
         "genus": "Quercus",
         "subgenus": "Quercus",
         "section": "Quercus"
-      }
+      },
+      "parent1": "montana",
+      "parent2": "stellata"
     },
     {
       "name": "× bimundorum",
@@ -15298,7 +15300,9 @@
         "genus": "Quercus",
         "subgenus": "Quercus",
         "section": "Lobatae"
-      }
+      },
+      "parent1": "nigra",
+      "parent2": "velutina"
     },
     {
       "name": "× diegoi",
@@ -16570,7 +16574,9 @@
         "genus": "Quercus",
         "subgenus": "Quercus",
         "section": "Quercus"
-      }
+      },
+      "parent1": "macrocarpa",
+      "parent2": "robur"
     },
     {
       "name": "× macdonaldii",
@@ -17071,7 +17077,9 @@
         "section": "Lobatae",
         "subsection": "Coccineae",
         "complex": "coccinea"
-      }
+      },
+      "parent1": "ellipsoidalis",
+      "parent2": "velutina"
     },
     {
       "name": "× palmeriana",
@@ -17427,7 +17435,9 @@
         "subgenus": "Quercus",
         "section": "Quercus",
         "subsection": "Albae"
-      }
+      },
+      "parent1": "alba",
+      "parent2": "montana"
     },
     {
       "name": "× schochiana",
@@ -17468,7 +17478,9 @@
         "section": "Quercus",
         "subsection": "Prinoideae",
         "complex": "lyrata"
-      }
+      },
+      "parent1": "bicolor",
+      "parent2": "macrocarpa"
     },
     {
       "name": "× senneniana",
