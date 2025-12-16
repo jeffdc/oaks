@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/jeff/oaks/cli/internal/models"
 	"github.com/spf13/cobra"
@@ -52,9 +53,17 @@ type ExportSpecies struct {
 	Sources             []ExportSourceData `json:"sources,omitempty"`
 }
 
+// ExportMetadata contains version info for cache invalidation
+type ExportMetadata struct {
+	Version      string `json:"version"`       // Timestamp-based version for cache invalidation
+	ExportedAt   string `json:"exported_at"`   // ISO 8601 timestamp
+	SpeciesCount int    `json:"species_count"` // Number of species in export
+}
+
 // ExportFile represents the complete export format
 type ExportFile struct {
-	Species []ExportSpecies `json:"species"`
+	Metadata ExportMetadata  `json:"metadata"`
+	Species  []ExportSpecies `json:"species"`
 }
 
 var exportCmd = &cobra.Command{
@@ -111,8 +120,14 @@ func runExport(cmd *cobra.Command, args []string) error {
 		sourceMap[s.ID] = s
 	}
 
-	// Build export data
+	// Build export data with metadata
+	now := time.Now().UTC()
 	exportData := ExportFile{
+		Metadata: ExportMetadata{
+			Version:      now.Format("2006-01-02T15:04:05Z"), // ISO 8601 UTC timestamp as version
+			ExportedAt:   now.Format(time.RFC3339),
+			SpeciesCount: len(entries),
+		},
 		Species: make([]ExportSpecies, 0, len(entries)),
 	}
 
