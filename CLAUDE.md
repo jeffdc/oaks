@@ -533,6 +533,9 @@ go build -o oak .
 - Before completing work: `bd sync --from-main` to pull latest beads
 - Commit messages: Present tense, imperative mood (see `CONTRIBUTING.md`)
 
+### Critical: Files That Must Be Tracked
+- **`cli/oak_compendium.db`**: The SQLite database MUST be committed to git. This is the authoritative data source for the project. Do NOT add it to .gitignore or remove it from tracking.
+
 ## Testing
 
 ### Scraper Testing

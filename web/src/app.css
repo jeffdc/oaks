@@ -64,3 +64,21 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* Global link styles */
+a {
+  color: var(--color-forest-700);
+  text-decoration: underline;
+  text-decoration-color: var(--color-forest-300);
+  text-underline-offset: 2px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+a:hover {
+  color: var(--color-forest-600);
+  text-decoration-color: var(--color-forest-600);
+}
+
+a:visited {
+  color: var(--color-forest-800);
+}
