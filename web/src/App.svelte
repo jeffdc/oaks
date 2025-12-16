@@ -12,10 +12,10 @@
   let browseMode = 'list'; // 'list' or 'taxonomy' - remembers preferred browse mode
   let taxonPath = []; // Path for taxon view, e.g., ['Quercus', 'Quercus', 'Albae']
 
-  // Auto-switch to list when searching (from any view except detail)
+  // Auto-switch to list when searching (from any view including detail)
   // When search is cleared, return to previous view
-  $: effectiveView = view === 'detail' ? 'detail' :
-                     $searchQuery ? 'list' :
+  $: effectiveView = $searchQuery ? 'list' :
+                     view === 'detail' ? 'detail' :
                      view === 'taxon' ? 'taxon' :
                      browseMode;
 
@@ -119,6 +119,7 @@
   }
 
   function handleSelectSpecies(species) {
+    searchQuery.set('');  // Clear search so detail view shows
     selectedSpecies.set(species);
     view = 'detail';
 
@@ -134,6 +135,7 @@
   }
 
   function handleNavigate(species) {
+    searchQuery.set('');  // Clear search so detail view shows
     selectedSpecies.set(species);
     view = 'detail';
 

@@ -32,15 +32,34 @@
   }
 
   function getOtherParent(hybrid, currentSpecies) {
-    const parent1 = hybrid.parent1?.replace('Quercus ', '').replace('× ', '').trim();
-    const parent2 = hybrid.parent2?.replace('Quercus ', '').replace('× ', '').trim();
+    // Clean up parent names - remove Quercus prefix and × symbol
+    const cleanName = (name) => name?.replace(/^Quercus\s+/, '').replace(/^×\s*/, '').trim();
+    const parent1 = cleanName(hybrid.parent1);
+    const parent2 = cleanName(hybrid.parent2);
+    const current = cleanName(currentSpecies);
 
-    if (parent1 && parent1.toLowerCase() !== currentSpecies.toLowerCase()) {
+    if (parent1 && parent1.toLowerCase() !== current.toLowerCase()) {
       return parent1;
-    } else if (parent2 && parent2.toLowerCase() !== currentSpecies.toLowerCase()) {
+    } else if (parent2 && parent2.toLowerCase() !== current.toLowerCase()) {
       return parent2;
     }
     return null;
+  }
+
+  // Find hybrid species by name, handling × prefix variations
+  function findHybridSpecies(hybridName) {
+    // Try exact match first
+    let found = $allSpecies.find(s => s.name === hybridName);
+    if (found) return found;
+
+    // Try with × prefix
+    found = $allSpecies.find(s => s.name === `× ${hybridName}`);
+    if (found) return found;
+
+    // Try without × prefix
+    const withoutPrefix = hybridName.replace(/^×\s*/, '');
+    found = $allSpecies.find(s => s.name === withoutPrefix || s.name === `× ${withoutPrefix}`);
+    return found || null;
   }
 
   // Check if hybrid name already has × symbol (most do)
@@ -357,14 +376,14 @@
         </h2>
         <ul class="space-y-3">
           {#each species.hybrids as hybridName}
-            {@const hybridSpecies = $allSpecies.find(s => s.name === hybridName)}
+            {@const hybridSpecies = findHybridSpecies(hybridName)}
             {@const otherParent = hybridSpecies ? getOtherParent(hybridSpecies, species.name) : null}
             <li class="hybrid-item">
               <button
-                on:click={() => handleNavigate(hybridName)}
+                on:click={() => handleNavigate(hybridSpecies?.name || hybridName)}
                 class="species-link font-semibold"
               >
-                Quercus × {hybridName}
+                Quercus {hybridSpecies?.name?.startsWith('×') ? '' : '× '}{hybridSpecies?.name || hybridName}
               </button>
               {#if otherParent}
                 <span class="text-sm" style="color: var(--color-text-secondary);">
