@@ -233,7 +233,6 @@ async function checkForUpdates() {
       const metadata = await getMetadata();
       dataSource.set({ from: 'json-update', version: metadata.dataVersion });
 
-      console.log(`Updated IndexedDB with ${count} species`);
     }
   } catch (err) {
     // Non-fatal - we already have data

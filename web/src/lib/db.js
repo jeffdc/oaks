@@ -69,7 +69,6 @@ export async function populateFromJson(jsonData) {
   // Check if we need to update
   const currentVersion = await db.metadata.get('dataVersion');
   if (currentVersion?.value === metadata?.version) {
-    console.log('Database already up to date');
     return 0;
   }
 
@@ -84,7 +83,6 @@ export async function populateFromJson(jsonData) {
     await db.metadata.put({ key: 'speciesCount', value: species.length });
   });
 
-  console.log(`Populated database with ${species.length} species`);
   return species.length;
 }
 
