@@ -8,7 +8,7 @@ A modern, responsive web application for browsing and exploring oak (Quercus) sp
 - **Build Tool**: Vite 7
 - **Styling**: Tailwind CSS 4 + Custom CSS Variables
 - **PWA**: vite-plugin-pwa with Workbox
-- **Data Source**: Static JSON (`quercus_data.json` copied from parent directory)
+- **Data Source**: Static JSON (`public/quercus_data.json`, committed to repo)
 
 ## Project Structure
 
@@ -25,7 +25,7 @@ web/
 │       ├── SpeciesDetail.svelte  # Detail view for individual species
 │       └── UpdatePrompt.svelte   # PWA update notification
 ├── public/                  # Static assets (icons, SVGs)
-├── vite.config.js          # Vite config + PWA + data copy plugin
+├── vite.config.js          # Vite config + PWA settings
 ├── package.json            # Dependencies
 └── Claude.md               # This file
 ```
@@ -153,7 +153,7 @@ npm run preview    # Preview production build
 
 ### Data Updates
 
-The `vite.config.js` includes a custom plugin that copies `../quercus_data.json` to `public/quercus_data.json` on build. If data structure changes, no code changes needed unless new fields should be displayed.
+The data file `public/quercus_data.json` is committed to the repo. The CLI exports directly to this location. If data structure changes, no code changes needed unless new fields should be displayed. GitHub Actions auto-deploys on push to main.
 
 ## Important Conventions
 
