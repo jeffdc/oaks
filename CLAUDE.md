@@ -33,7 +33,7 @@ oaks/
 ├── tmp/                      # Temporary/working files (gitignored)
 │   ├── scraper/              # Scraper cache and progress files
 │   └── data/                 # Working data files (e.g., iNaturalist imports)
-└── quercus_data.json         # JSON export for web consumption
+└── web/public/quercus_data.json  # JSON export for web (committed to repo)
 ```
 
 ## Common Development Tasks
@@ -60,7 +60,7 @@ python3 scraper.py --test
 # Process specific number
 python3 scraper.py --limit=10
 
-# Output location: ../../quercus_data.json
+# Output location: ../../web/public/quercus_data.json
 ```
 
 ### Web Application Workflow
@@ -79,7 +79,7 @@ npm run build      # Output: dist/
 npm run preview    # Preview production build
 ```
 
-**Important**: The web app's `vite.config.js` includes a custom plugin that copies `../quercus_data.json` to `public/` during build. The app loads this JSON and populates IndexedDB for offline queries. See `web/CLAUDE.md` for detailed architecture.
+**Important**: The data file `web/public/quercus_data.json` is committed to the repo and served directly. The app loads this JSON and populates IndexedDB for offline queries. GitHub Actions deploys automatically on push to main. See `web/CLAUDE.md` for detailed architecture.
 
 ### CLI Tool Workflow
 
@@ -136,14 +136,14 @@ The complete data pipeline from sources to browser:
 │              └── species_sources (source-attributed data)           │
 │                      │                                              │
 │                      ▼                                              │
-│              oak export quercus_data.json                           │
+│              oak export ../web/public/quercus_data.json             │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      quercus_data.json                              │
-│                 (denormalized JSON for web)                         │
+│                 web/public/quercus_data.json                        │
+│            (denormalized JSON, committed to repo)                   │
 └─────────────────────────────────────────────────────────────────────┘
                        │
                        ▼
@@ -182,15 +182,16 @@ oak import-oaksoftheworld <json-file> --source-id 2
 
 **3. JSON Export**
 ```bash
-# Generate web-ready JSON
-oak export ../quercus_data.json
+# Generate web-ready JSON (from cli/ directory)
+oak export ../web/public/quercus_data.json
 ```
 
 **4. Web App Loading**
-- Vite build copies `quercus_data.json` to `public/`
+- Data file `web/public/quercus_data.json` is committed to the repo
 - App fetches JSON on startup
 - Data populates IndexedDB for structured queries
 - Service worker caches everything for offline use
+- GitHub Actions auto-deploys to GitHub Pages on push to main
 
 ### Key Design Decisions
 
