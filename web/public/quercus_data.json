@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-16T03:03:41Z",
-    "exported_at": "2025-12-16T03:03:41Z",
+    "version": "2025-12-16T03:05:37Z",
+    "exported_at": "2025-12-16T03:05:37Z",
     "species_count": 734
   },
   "species": [
@@ -317,7 +317,7 @@
         "subsection": "Libani"
       },
       "hybrids": [
-        "numidica"
+        "× numidica"
       ],
       "synonyms": [
         "algeriensis",
@@ -384,7 +384,7 @@
         "subsection": "Agrifoliae"
       },
       "hybrids": [
-        "ganderi"
+        "× ganderi"
       ],
       "synonyms": [
         "acroglandis Kellogg",
@@ -525,12 +525,12 @@
         "subsection": "Albae"
       },
       "hybrids": [
-        "bebbiana",
-        "bimundorum",
-        "faxonii",
-        "fernowii",
-        "jackiana",
-        "saulii"
+        "× bebbiana",
+        "× bimundorum",
+        "× faxonii",
+        "× fernowii",
+        "× jackiana",
+        "× saulii"
       ],
       "synonyms": [
         "candida Steud.",
@@ -687,7 +687,7 @@
         "section": "Ilex"
       },
       "hybrids": [
-        "campitica"
+        "× campitica"
       ],
       "synonyms": [
         "cypria"
@@ -936,7 +936,7 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "organensis"
+        "× organensis"
       ],
       "synonyms": [
         "endemica",
@@ -1399,7 +1399,7 @@
         "complex": "berberidifolia"
       },
       "hybrids": [
-        "howellii"
+        "× howellii"
       ],
       "synonyms": [
         "dumosa \n        Nuttall 1842 in part agrifolia var. berberidifolia (Liebm.) Wenz. 1884 dumosa f. berberidifolia (Liebm.) Trel. 1924 dumosa var. munita Greene 1889"
@@ -1527,12 +1527,12 @@
         "complex": "lyrata"
       },
       "hybrids": [
-        "humidicola",
-        "jackiana",
-        "warei",
-        "substellata",
-        "wagneri",
-        "schuettei",
+        "× humidicola",
+        "× jackiana",
+        "× warei",
+        "× substellata",
+        "× wagneri",
+        "× schuettei",
         "× nessiana"
       ],
       "synonyms": [
@@ -1817,7 +1817,7 @@
         "complex": "shumardii"
       },
       "hybrids": [
-        "sternbergii"
+        "× sternbergii"
       ],
       "synonyms": [
         "texana Young \n        1873",
@@ -1943,9 +1943,9 @@
         "subsection": "Galliferae"
       },
       "hybrids": [
-        "fontqueri",
+        "× fontqueri",
         "lagunai",
-        "lousae",
+        "× lousae",
         "× amaralii",
         "× anselmii",
         "× elisae",
@@ -2232,8 +2232,8 @@
         "subsection": "Cerris"
       },
       "hybrids": [
-        "baenitzii",
-        "kewensis",
+        "× baenitzii",
+        "× kewensis",
         "× libanerris",
         "× schneideri"
       ],
@@ -2319,7 +2319,7 @@
         "complex": "chapmanii"
       },
       "hybrids": [
-        "rolfsii"
+        "× rolfsii"
       ],
       "synonyms": [
         "obtusiloba var. parvifolia Chapm. 1860"
@@ -2686,9 +2686,9 @@
         "complex": "coccifera"
       },
       "hybrids": [
-        "auzendei",
-        "campitica",
-        "eborense",
+        "× auzendei",
+        "× campitica",
+        "× eborense",
         "× ordenensis"
       ],
       "synonyms": [
@@ -2789,9 +2789,9 @@
         "complex": "coccinea"
       },
       "hybrids": [
-        "benderi",
-        "fontana",
-        "robbinsii",
+        "× benderi",
+        "× fontana",
+        "× robbinsii",
         "× rugelii"
       ],
       "synonyms": [
@@ -3154,7 +3154,7 @@
         "subsection": "Erythromexicanae"
       },
       "hybrids": [
-        "dysophylla"
+        "× dysophylla"
       ],
       "synonyms": [
         "brachystachys",
@@ -3198,7 +3198,7 @@
         "section": "Lobatae"
       },
       "hybrids": [
-        "dysophylla"
+        "× dysophylla"
       ],
       "synonyms": [
         "colimae",
@@ -3564,7 +3564,7 @@
       "hybrids": [
         "fenchengensis",
         "hopeiensis",
-        "mongolicodentata",
+        "× mongolicodentata",
         "× maccormickii",
         "× maccormickoserrata",
         "× nipponica",
@@ -3666,7 +3666,7 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "basaseachicensis"
+        "× basaseachicensis"
       ],
       "synonyms": [
         "bocoynensis",
@@ -3918,9 +3918,9 @@
         "complex": "dumosa"
       },
       "hybrids": [
-        "alvordiana",
-        "eplingii",
-        "jolonensis"
+        "× alvordiana",
+        "× eplingii",
+        "× jolonensis"
       ],
       "synonyms": [
         "gambelii Liebm.",
@@ -3960,8 +3960,8 @@
         "complex": "dumosa"
       },
       "hybrids": [
-        "kinseliae",
-        "townei"
+        "× kinseliae",
+        "× townei"
       ],
       "synonyms": [
         "durata",
@@ -4219,7 +4219,7 @@
         "complex": "coccinea"
       },
       "hybrids": [
-        "palaeolithicola"
+        "× palaeolithicola"
       ],
       "synonyms": [
         "kaposianensis"
@@ -4331,8 +4331,8 @@
         "section": "Lobatae"
       },
       "hybrids": [
-        "inconstans",
-        "tharpii"
+        "× inconstans",
+        "× tharpii"
       ],
       "synonyms": [
         "balsequillana",
@@ -4373,7 +4373,7 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "acutidens",
+        "× acutidens",
         "grandidentata"
       ],
       "sources": [
@@ -4448,8 +4448,8 @@
         "complex": "robur"
       },
       "hybrids": [
-        "coutinhoi",
-        "lousae"
+        "× coutinhoi",
+        "× lousae"
       ],
       "synonyms": [
         "robur subsp. estremadurensis \n        (O. Schwarz) A. Camus 1935 racemosa Brot. 1804 non Lam. 1785 robur subsp. broteroana auct. pl. non Schwarz 1935 robur var. conimbricensis Camus 1934"
@@ -4550,11 +4550,11 @@
         "subsection": "Galliferae"
       },
       "hybrids": [
-        "andresii",
+        "× andresii",
         "aruciensis",
-        "coutinhoi",
-        "duriensis",
-        "senneniana",
+        "× coutinhoi",
+        "× duriensis",
+        "× senneniana",
         "× fagineomirbeckii",
         "× salcedoi",
         "× tentudaica",
@@ -4644,15 +4644,15 @@
       "parent1": "Mich",
       "parent2": "1803",
       "hybrids": [
-        "palmeriana",
-        "beaumontiana",
-        "blufftonensis",
-        "caesariensis",
-        "garlandensis",
-        "incomita",
-        "joorii",
-        "willdenowiana",
-        "subintegra",
+        "× palmeriana",
+        "× beaumontiana",
+        "× blufftonensis",
+        "× caesariensis",
+        "× garlandensis",
+        "× incomita",
+        "× joorii",
+        "× willdenowiana",
+        "× subintegra",
         "× zehra"
       ],
       "synonyms": [
@@ -5074,7 +5074,7 @@
         "subsection": "Dumosae"
       },
       "hybrids": [
-        "undulata",
+        "× undulata",
         "× mazei"
       ],
       "synonyms": [
@@ -5169,8 +5169,8 @@
         "subsection": "Dumosae"
       },
       "hybrids": [
-        "eplingii",
-        "howellii"
+        "× eplingii",
+        "× howellii"
       ],
       "synonyms": [
         "breweri",
@@ -5342,7 +5342,7 @@
         "complex": "ilicifolia"
       },
       "hybrids": [
-        "smallii"
+        "× smallii"
       ],
       "sources": [
         {
@@ -5595,7 +5595,7 @@
         "subsection": "Leucomexicanae"
       },
       "hybrids": [
-        "pastorensis"
+        "× pastorensis"
       ],
       "synonyms": [
         "baldoquinae",
@@ -5823,7 +5823,7 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "organensis"
+        "× organensis"
       ],
       "synonyms": [
         "oblongifolia Coult."
@@ -6350,7 +6350,7 @@
         "section": "Lobatae"
       },
       "hybrids": [
-        "inconstans"
+        "× inconstans"
       ],
       "synonyms": [
         "confertifolia Torr.",
@@ -6490,13 +6490,13 @@
         "complex": "ilex"
       },
       "hybrids": [
-        "auzendei",
-        "turneri",
-        "albescens",
-        "audleyensis",
-        "autumnalis",
-        "morisii",
-        "senneniana"
+        "× auzendei",
+        "× turneri",
+        "× albescens",
+        "× audleyensis",
+        "× autumnalis",
+        "× morisii",
+        "× senneniana"
       ],
       "synonyms": [
         "alpina",
@@ -6543,12 +6543,12 @@
         "complex": "ilicifolia"
       },
       "hybrids": [
-        "brittonii",
-        "caesariensis",
-        "fernaldii",
-        "giffordii",
-        "rehderi",
-        "robbinsii"
+        "× brittonii",
+        "× caesariensis",
+        "× fernaldii",
+        "× giffordii",
+        "× rehderi",
+        "× robbinsii"
       ],
       "synonyms": [
         "banisteri",
@@ -6612,12 +6612,12 @@
         "complex": "ilicifolia"
       },
       "hybrids": [
-        "palmeriana",
-        "egglestonii",
-        "exacta",
-        "leana",
-        "runcinata",
-        "tridentata",
+        "× palmeriana",
+        "× egglestonii",
+        "× exacta",
+        "× leana",
+        "× runcinata",
+        "× tridentata",
         "× subimbricaria"
       ],
       "synonyms": [
@@ -6657,12 +6657,12 @@
         "complex": "incana"
       },
       "hybrids": [
-        "atlantica",
-        "caduca",
-        "cravenensis",
-        "oviedoensis",
-        "podophylla",
-        "subintegra",
+        "× atlantica",
+        "× caduca",
+        "× cravenensis",
+        "× oviedoensis",
+        "× podophylla",
+        "× subintegra",
         "× venulosa",
         "× asheana"
       ],
@@ -7092,8 +7092,8 @@
         "subsection": "Agrifoliae"
       },
       "hybrids": [
-        "ganderi",
-        "morehus"
+        "× ganderi",
+        "× morehus"
       ],
       "synonyms": [
         "californica (Torr.)Cooper",
@@ -7365,9 +7365,9 @@
         "complex": "marilandica"
       },
       "hybrids": [
-        "blufftonensis",
-        "mellichampii",
-        "walteriana",
+        "× blufftonensis",
+        "× mellichampii",
+        "× walteriana",
         "× asheana"
       ],
       "synonyms": [
@@ -7563,11 +7563,11 @@
         "complex": "phellos"
       },
       "hybrids": [
-        "atlantica",
-        "beaumontiana",
-        "cocksii",
-        "diversiloba",
-        "mellichampii"
+        "× atlantica",
+        "× beaumontiana",
+        "× cocksii",
+        "× diversiloba",
+        "× mellichampii"
       ],
       "synonyms": [
         "obtusa (Willd.) Ashe",
@@ -7792,11 +7792,11 @@
         "subsection": "Dumosae"
       },
       "hybrids": [
-        "jolonensis",
-        "kinseliae",
-        "macdonaldii",
-        "munzii",
-        "townei"
+        "× jolonensis",
+        "× kinseliae",
+        "× macdonaldii",
+        "× munzii",
+        "× townei"
       ],
       "synonyms": [
         "hindsii",
@@ -7995,11 +7995,11 @@
         "complex": "lyrata"
       },
       "hybrids": [
-        "comptoniae",
-        "humidicola",
-        "megaleia",
-        "sterrettii",
-        "tottenii"
+        "× comptoniae",
+        "× humidicola",
+        "× megaleia",
+        "× sterrettii",
+        "× tottenii"
       ],
       "synonyms": [
         "bicolor \n        var. lyrata (Walt.) Dippel 1891"
@@ -8153,16 +8153,16 @@
       },
       "hybrids": [
         "andrewsii",
-        "bebbiana",
-        "beckyae",
-        "burnetensis",
-        "byarsii",
-        "deamii",
-        "guadalupensis",
-        "hillii",
-        "megaleia",
-        "schuettei",
-        "macdanielii",
+        "× bebbiana",
+        "× beckyae",
+        "× burnetensis",
+        "× byarsii",
+        "× deamii",
+        "× guadalupensis",
+        "× hillii",
+        "× megaleia",
+        "× schuettei",
+        "× macdanielii",
         "× mazei"
       ],
       "synonyms": [
@@ -8308,16 +8308,16 @@
         "complex": "marilandica"
       },
       "hybrids": [
-        "brittonii",
-        "bushii",
-        "cravenensis",
-        "diversiloba",
-        "rudkinii",
-        "hastingsii",
-        "incomita",
-        "smallii",
-        "sterilis",
-        "tridentata"
+        "× brittonii",
+        "× bushii",
+        "× cravenensis",
+        "× diversiloba",
+        "× rudkinii",
+        "× hastingsii",
+        "× incomita",
+        "× smallii",
+        "× sterilis",
+        "× tridentata"
       ],
       "synonyms": [
         "dilatata Raf., non Royle",
@@ -8558,8 +8558,8 @@
         "subsection": "Albae"
       },
       "hybrids": [
-        "byarsii",
-        "tottenii"
+        "× byarsii",
+        "× tottenii"
       ],
       "synonyms": [
         "houstoniana"
@@ -8625,9 +8625,9 @@
         "section": "Virentes"
       },
       "hybrids": [
-        "neotharpii",
-        "rolfsii",
-        "succulenta"
+        "× neotharpii",
+        "× rolfsii",
+        "× succulenta"
       ],
       "synonyms": [
         "virginiana var. minima Sarg.1895 virens var. dentata Chapman 1860 virginiana var. dentata (Chapman) Sarg. 1918 virginiana subsp dentata (Chapm.) E.Murray 1983 virginiana var. pygmaea Sarg. 1918 geminata var. reasoneri (Trel.) A.Camus 1939"
@@ -8750,7 +8750,7 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "mongolicodentata",
+        "× mongolicodentata",
         "× pellucida",
         "× pongtungensis",
         "× alienoserratoides",
@@ -8857,9 +8857,9 @@
         "subsection": "Albae"
       },
       "hybrids": [
-        "sargentii",
-        "bernardiensis",
-        "saulii"
+        "× sargentii",
+        "× bernardiensis",
+        "× saulii"
       ],
       "synonyms": [
         "monticola",
@@ -8988,9 +8988,9 @@
         "complex": "prinoides"
       },
       "hybrids": [
-        "deamii",
-        "hillii",
-        "introgressa"
+        "× deamii",
+        "× hillii",
+        "× introgressa"
       ],
       "synonyms": [
         "acuminata (Michx.)Sarg.",
@@ -9077,7 +9077,7 @@
         "complex": "incana"
       },
       "hybrids": [
-        "oviedoensis"
+        "× oviedoensis"
       ],
       "synonyms": [
         "myrtifolia f. ampla Trel. 1924 phellos var. arenaria Chapm. 1860"
@@ -9115,13 +9115,13 @@
         "complex": "phellos"
       },
       "hybrids": [
-        "caduca",
-        "capesii",
-        "garlandensis",
-        "neopalmeri",
-        "sterilis",
-        "walteriana",
-        "demareei",
+        "× caduca",
+        "× capesii",
+        "× garlandensis",
+        "× neopalmeri",
+        "× sterilis",
+        "× walteriana",
+        "× demareei",
         "× raineri"
       ],
       "synonyms": [
@@ -9541,8 +9541,8 @@
         "complex": "robur"
       },
       "hybrids": [
-        "duriensis",
-        "tavaresii"
+        "× duriensis",
+        "× tavaresii"
       ],
       "synonyms": [
         "robur subsp. broteroana O. Schwarz 1937"
@@ -9680,7 +9680,7 @@
         "complex": "dumosa"
       },
       "hybrids": [
-        "macdonaldii"
+        "× macdonaldii"
       ],
       "synonyms": [
         "dumosa var. polycarpa Greene 1889"
@@ -9717,7 +9717,7 @@
         "complex": "phellos"
       },
       "hybrids": [
-        "ludoviciana"
+        "× ludoviciana"
       ],
       "synonyms": [
         "leucophylla",
@@ -9789,9 +9789,9 @@
         "subsection": "Palustres"
       },
       "hybrids": [
-        "exacta",
-        "mutabilis",
-        "vaga",
+        "× exacta",
+        "× mutabilis",
+        "× vaga",
         "× rugelii",
         "× richteri"
       ],
@@ -9953,7 +9953,7 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "andresii",
+        "× andresii",
         "× arrimatensis",
         "× rotensis"
       ],
@@ -10184,12 +10184,12 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "rosacea",
-        "audleyensis",
-        "streimii",
+        "× rosacea",
+        "× audleyensis",
+        "× streimii",
         "cantabrica",
         "diversifrons",
-        "trabutii",
+        "× trabutii",
         "roseoides",
         "× viverii",
         "× benkoi",
@@ -10350,13 +10350,13 @@
         "complex": "phellos"
       },
       "hybrids": [
-        "capesii",
-        "rudkinii",
-        "filialis",
-        "giffordii",
-        "heterophylla",
-        "moultonensis",
-        "ludoviciana",
+        "× capesii",
+        "× rudkinii",
+        "× filialis",
+        "× giffordii",
+        "× heterophylla",
+        "× moultonensis",
+        "× ludoviciana",
         "× subimbricaria"
       ],
       "synonyms": [
@@ -10733,10 +10733,10 @@
         "complex": "prinoides"
       },
       "hybrids": [
-        "beckyae",
-        "faxonii",
-        "stelloides",
-        "wagneri"
+        "× beckyae",
+        "× faxonii",
+        "× stelloides",
+        "× wagneri"
       ],
       "synonyms": [
         "chincapin",
@@ -10913,13 +10913,13 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "albescens",
-        "baenitzii",
+        "× albescens",
+        "× baenitzii",
         "barcarrotensis",
-        "streimii",
+        "× streimii",
         "budensis",
-        "kerneri",
-        "firmurensis",
+        "× kerneri",
+        "× firmurensis",
         "thellungii",
         "× anselmii",
         "× paui",
@@ -11097,12 +11097,12 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "andegavensis",
+        "× andegavensis",
         "cantabrica",
-        "firmurensis",
-        "fontqueri",
-        "trabutii",
-        "tavaresii",
+        "× firmurensis",
+        "× fontqueri",
+        "× trabutii",
+        "× tavaresii",
         "× diosdadoi",
         "× alentejana",
         "× rotensis"
@@ -11339,16 +11339,16 @@
         "complex": "robur"
       },
       "hybrids": [
-        "turneri",
-        "rosacea",
-        "andegavensis",
-        "bimundorum",
-        "kerneri",
+        "× turneri",
+        "× rosacea",
+        "× andegavensis",
+        "× bimundorum",
+        "× kerneri",
         "thellungii",
         "pendulina",
-        "warei",
-        "sargentii",
-        "macdanielii",
+        "× warei",
+        "× sargentii",
+        "× macdanielii",
         "× elisae",
         "× haynaldiana",
         "× warburgii",
@@ -11486,8 +11486,8 @@
       },
       "hybrids": [
         "alvesii",
-        "autumnalis",
-        "eborense",
+        "× autumnalis",
+        "× eborense",
         "urartensis",
         "× tentudaica",
         "× almeidae",
@@ -11526,12 +11526,12 @@
         "complex": "shumardii"
       },
       "hybrids": [
-        "benderi",
-        "fernaldii",
-        "hawkinsiae",
-        "heterophylla",
-        "riparia",
-        "runcinata",
+        "× benderi",
+        "× fernaldii",
+        "× hawkinsiae",
+        "× heterophylla",
+        "× riparia",
+        "× runcinata",
         "× richteri",
         "× raineri"
       ],
@@ -11618,7 +11618,7 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "basaseachicensis",
+        "× basaseachicensis",
         "× heterogina",
         "× warburgii"
       ],
@@ -12444,15 +12444,15 @@
         "complex": "shumardii"
       },
       "hybrids": [
-        "discreta",
-        "egglestonii",
-        "hastingsii",
-        "moultonensis",
-        "joorii",
-        "mutabilis",
-        "neopalmeri",
-        "riparia",
-        "sternbergii"
+        "× discreta",
+        "× egglestonii",
+        "× hastingsii",
+        "× moultonensis",
+        "× joorii",
+        "× mutabilis",
+        "× neopalmeri",
+        "× riparia",
+        "× sternbergii"
       ],
       "synonyms": [
         "schneckii",
@@ -12621,7 +12621,7 @@
         "subsection": "Stellatae"
       },
       "hybrids": [
-        "macnabiana"
+        "× macnabiana"
       ],
       "synonyms": [
         "annulata Buckley",
@@ -12824,16 +12824,16 @@
         "complex": "stellata"
       },
       "hybrids": [
-        "drummondii",
-        "fernowii",
-        "guadalupensis",
-        "harbisonii",
-        "macnabiana",
-        "neotharpii",
-        "stelloides",
-        "sterrettii",
-        "substellata",
-        "bernardiensis"
+        "× drummondii",
+        "× fernowii",
+        "× guadalupensis",
+        "× harbisonii",
+        "× macnabiana",
+        "× neotharpii",
+        "× stelloides",
+        "× sterrettii",
+        "× substellata",
+        "× bernardiensis"
       ],
       "synonyms": [
         "araniosa",
@@ -12965,9 +12965,9 @@
         "subsection": "Suber"
       },
       "hybrids": [
-        "morisii",
+        "× morisii",
         "fontanesii",
-        "numidica",
+        "× numidica",
         "× amaralii",
         "× capeloana",
         "× pacensis",
@@ -13633,8 +13633,8 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "alvordiana",
-        "undulata"
+        "× alvordiana",
+        "× undulata"
       ],
       "synonyms": [
         "ajoensis",
@@ -13858,19 +13858,19 @@
         "complex": "coccinea"
       },
       "hybrids": [
-        "bushii",
-        "cocksii",
-        "discreta",
-        "filialis",
-        "fontana",
-        "hawkinsiae",
-        "leana",
-        "podophylla",
-        "willdenowiana",
-        "rehderi",
-        "vaga",
-        "palaeolithicola",
-        "demareei"
+        "× bushii",
+        "× cocksii",
+        "× discreta",
+        "× filialis",
+        "× fontana",
+        "× hawkinsiae",
+        "× leana",
+        "× podophylla",
+        "× willdenowiana",
+        "× rehderi",
+        "× vaga",
+        "× palaeolithicola",
+        "× demareei"
       ],
       "synonyms": [
         "discolor Aiton",
@@ -13999,9 +13999,9 @@
         "section": "Virentes"
       },
       "hybrids": [
-        "burnetensis",
-        "comptoniae",
-        "harbisonii",
+        "× burnetensis",
+        "× comptoniae",
+        "× harbisonii",
         "× nessiana"
       ],
       "synonyms": [
@@ -14082,8 +14082,8 @@
         "subsection": "Agrifoliae"
       },
       "hybrids": [
-        "kewensis",
-        "morehus"
+        "× kewensis",
+        "× morehus"
       ],
       "synonyms": [
         "wislizeni f. \n        extima Jeps. 1909"
@@ -18328,7 +18328,7 @@
       "parent1": "Cyclobalanopsis",
       "parent2": "takaoyamensis",
       "hybrids": [
-        "takaoyamensis",
+        "× takaoyamensis",
         "yokohamensis"
       ],
       "synonyms": [
