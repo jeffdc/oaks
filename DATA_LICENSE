@@ -1,0 +1,23 @@
+Data License - All Rights Reserved
+
+Copyright (c) 2025 Jeff Clark
+
+The data files in this repository are NOT covered by the MIT License that applies
+to the source code. The following files and their contents are proprietary:
+
+- quercus_data.json
+- cli/data/*.yaml
+- oak_compendium.db (and any SQLite database exports)
+- Any JSON, YAML, or database exports derived from the above
+
+All rights are reserved. You may not copy, distribute, modify, or create
+derivative works from this data without explicit written permission from the
+copyright holder.
+
+For licensing inquiries, please open an issue on the GitHub repository.
+
+---
+
+Note: This project incorporates data from external sources which retain their
+original licenses. See individual source attributions in the application for
+details on third-party data.

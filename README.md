@@ -178,7 +178,15 @@ Data scraped from [Oaks of the World](https://oaksoftheworld.fr) with respect to
 
 ## License
 
-MIT License - See LICENSE file for details
+This project uses a dual-license structure:
+
+**Source Code**: MIT License - see [LICENSE](LICENSE)
+
+**Data Files**: All Rights Reserved - see [DATA_LICENSE](DATA_LICENSE)
+
+The data files (`quercus_data.json`, `cli/data/*.yaml`, `oak_compendium.db`) are
+proprietary and not covered by the MIT License. The data incorporates information
+from multiple sources; see the application for individual source attributions.
 
 ## Future Enhancements
 
