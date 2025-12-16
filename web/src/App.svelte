@@ -2,13 +2,14 @@
   import { onMount, onDestroy } from 'svelte';
   import { loadSpeciesData, selectedSpecies, isLoading, error, findSpeciesByName, searchQuery } from './lib/dataStore.js';
   import Header from './lib/Header.svelte';
+  import LandingPage from './lib/LandingPage.svelte';
   import SpeciesList from './lib/SpeciesList.svelte';
   import SpeciesDetail from './lib/SpeciesDetail.svelte';
   import TaxonomyTree from './lib/TaxonomyTree.svelte';
   import TaxonView from './lib/TaxonView.svelte';
   import UpdatePrompt from './lib/UpdatePrompt.svelte';
 
-  let view = 'list'; // 'list', 'taxonomy', 'taxon', or 'detail'
+  let view = 'home'; // 'home', 'list', 'taxonomy', 'taxon', or 'detail'
   let browseMode = 'list'; // 'list' or 'taxonomy' - remembers preferred browse mode
   let taxonPath = []; // Path for taxon view, e.g., ['Quercus', 'Quercus', 'Albae']
 
@@ -17,6 +18,7 @@
   $: effectiveView = $searchQuery ? 'list' :
                      view === 'detail' ? 'detail' :
                      view === 'taxon' ? 'taxon' :
+                     view === 'home' ? 'home' :
                      browseMode;
 
   onMount(async () => {
@@ -44,7 +46,7 @@
 
   function parseUrlHash(hash) {
     if (!hash || hash === '#') {
-      return { view: 'list' };
+      return { view: 'home' };
     }
 
     const path = hash.slice(1); // Remove leading #
@@ -62,6 +64,10 @@
       return { view: 'taxonomy', browseMode: 'taxonomy' };
     }
 
+    if (path === 'list') {
+      return { view: 'list', browseMode: 'list' };
+    }
+
     // Otherwise treat as species name
     return { view: 'detail', speciesName: decodeURIComponent(path) };
   }
@@ -77,7 +83,7 @@
   }
 
   function restoreFromHistoryState(state) {
-    view = state.view || 'list';
+    view = state.view || 'home';
 
     // Restore browseMode if present
     if (state.browseMode) {
@@ -111,10 +117,23 @@
   function handleGoHome() {
     searchQuery.set('');
     selectedSpecies.set(null);
+    view = 'home';
+    taxonPath = [];
+    history.pushState({ view: 'home' }, '', '#');
+    window.scrollTo(0, 0);
+  }
+
+  function handleBrowseList() {
     view = 'list';
     browseMode = 'list';
-    taxonPath = [];
-    history.pushState({ view: 'list', browseMode: 'list' }, '', '#');
+    history.pushState({ view: 'list', browseMode: 'list' }, '', '#list');
+    window.scrollTo(0, 0);
+  }
+
+  function handleBrowseTaxonomy() {
+    view = 'taxonomy';
+    browseMode = 'taxonomy';
+    history.pushState({ view: 'taxonomy', browseMode: 'taxonomy' }, '', '#taxonomy');
     window.scrollTo(0, 0);
   }
 
@@ -233,6 +252,12 @@
           </div>
         </div>
       </div>
+    {:else if effectiveView === 'home'}
+      <LandingPage
+        onSelectSpecies={handleSelectSpecies}
+        onBrowseList={handleBrowseList}
+        onBrowseTaxonomy={handleBrowseTaxonomy}
+      />
     {:else if effectiveView === 'list'}
       <SpeciesList onSelectSpecies={handleSelectSpecies} />
     {:else if effectiveView === 'taxonomy'}
