@@ -1,30 +1,11 @@
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { VitePWA } from 'vite-plugin-pwa'
-import { copyFileSync } from 'fs'
-import { resolve } from 'path'
-
-// Copy quercus_export.json from parent directory to public folder before build
-// Uses the transformed export format (with metadata and sources array)
-const copyDataFile = () => ({
-  name: 'copy-data-file',
-  buildStart() {
-    const source = resolve(__dirname, '../quercus_export.json')
-    const dest = resolve(__dirname, 'public/quercus_data.json')
-    try {
-      copyFileSync(source, dest)
-      console.log('✓ Copied quercus_export.json to public folder')
-    } catch (err) {
-      console.error('Error copying quercus_export.json:', err.message)
-    }
-  }
-})
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     svelte(),
-    copyDataFile(),
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['quercus_data.json'],
