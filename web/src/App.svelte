@@ -7,9 +7,10 @@
   import SpeciesDetail from './lib/SpeciesDetail.svelte';
   import TaxonomyTree from './lib/TaxonomyTree.svelte';
   import TaxonView from './lib/TaxonView.svelte';
+  import AboutPage from './lib/AboutPage.svelte';
   import UpdatePrompt from './lib/UpdatePrompt.svelte';
 
-  let view = 'home'; // 'home', 'list', 'taxonomy', 'taxon', or 'detail'
+  let view = 'home'; // 'home', 'list', 'taxonomy', 'taxon', 'about', or 'detail'
   let browseMode = 'list'; // 'list' or 'taxonomy' - remembers preferred browse mode
   let taxonPath = []; // Path for taxon view, e.g., ['Quercus', 'Quercus', 'Albae']
 
@@ -19,6 +20,7 @@
                      view === 'detail' ? 'detail' :
                      view === 'taxon' ? 'taxon' :
                      view === 'home' ? 'home' :
+                     view === 'about' ? 'about' :
                      browseMode;
 
   onMount(async () => {
@@ -66,6 +68,10 @@
 
     if (path === 'list') {
       return { view: 'list', browseMode: 'list' };
+    }
+
+    if (path === 'about') {
+      return { view: 'about' };
     }
 
     // Otherwise treat as species name
@@ -134,6 +140,14 @@
     view = 'taxonomy';
     browseMode = 'taxonomy';
     history.pushState({ view: 'taxonomy', browseMode: 'taxonomy' }, '', '#taxonomy');
+    window.scrollTo(0, 0);
+  }
+
+  function handleAbout() {
+    searchQuery.set('');
+    selectedSpecies.set(null);
+    view = 'about';
+    history.pushState({ view: 'about' }, '', '#about');
     window.scrollTo(0, 0);
   }
 
@@ -220,7 +234,7 @@
 
 <div class="app min-h-screen" style="background-color: var(--color-background);">
 
-  <Header onGoHome={handleGoHome} />
+  <Header onGoHome={handleGoHome} onAbout={handleAbout} />
 
 
   <main class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-12 py-10">
@@ -262,6 +276,8 @@
       <SpeciesList onSelectSpecies={handleSelectSpecies} />
     {:else if effectiveView === 'taxonomy'}
       <TaxonomyTree onSelectSpecies={handleSelectSpecies} />
+    {:else if effectiveView === 'about'}
+      <AboutPage />
     {:else if effectiveView === 'taxon'}
       <TaxonView
         {taxonPath}
