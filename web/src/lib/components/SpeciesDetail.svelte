@@ -1,10 +1,8 @@
 <script>
-  import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName } from './dataStore.js';
+  import { base } from '$app/paths';
+  import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName } from '$lib/stores/dataStore.js';
 
   export let species;
-  export let onNavigate;
-  export let onNavigateToTaxon = null;
-  export let onGoHome = null;
 
   // Source selection state
   let selectedSourceId = null;
@@ -24,11 +22,9 @@
     selectedSourceId = parseInt(event.target.value, 10);
   }
 
-  function handleNavigate(speciesName) {
-    const targetSpecies = $allSpecies.find(s => s.name === speciesName);
-    if (targetSpecies) {
-      onNavigate(targetSpecies);
-    }
+  // Build species detail URL
+  function getSpeciesUrl(speciesName) {
+    return `${base}/species/${encodeURIComponent(speciesName)}/`;
   }
 
   function getOtherParent(hybrid, currentSpecies) {
@@ -67,43 +63,44 @@
     return s.is_hybrid && !s.name.startsWith('×');
   }
 
-  function handleTaxonClick(level, value) {
-    if (!onNavigateToTaxon || !species.taxonomy) return;
+  // Build taxonomy URL for a given level
+  function getTaxonUrl(level) {
+    if (!species.taxonomy) return `${base}/taxonomy/`;
 
-    // Build the expansion path based on the level clicked
     const t = species.taxonomy;
-    const path = {};
+    const parts = [];
 
-    // Always include subgenus if clicking any level
+    // Build path based on the level clicked
     if (t.subgenus) {
-      path.subgenus = t.subgenus;
+      parts.push(t.subgenus);
+      if (level === 'subgenus') return `${base}/taxonomy/${parts.map(encodeURIComponent).join('/')}/`;
     }
 
-    // Include section if clicking section or lower
-    if (level !== 'subgenus' && t.section) {
-      path.section = t.section;
+    if (t.section) {
+      parts.push(t.section);
+      if (level === 'section') return `${base}/taxonomy/${parts.map(encodeURIComponent).join('/')}/`;
     }
 
-    // Include subsection if clicking subsection or lower
-    if ((level === 'subsection' || level === 'complex') && t.subsection) {
-      path.subsection = t.subsection;
+    if (t.subsection) {
+      parts.push(t.subsection);
+      if (level === 'subsection') return `${base}/taxonomy/${parts.map(encodeURIComponent).join('/')}/`;
     }
 
-    // Include complex if clicking complex
-    if (level === 'complex' && t.complex) {
-      path.complex = t.complex;
+    if (t.complex) {
+      parts.push(t.complex);
+      if (level === 'complex') return `${base}/taxonomy/${parts.map(encodeURIComponent).join('/')}/`;
     }
 
-    onNavigateToTaxon(path);
+    return `${base}/taxonomy/${parts.map(encodeURIComponent).join('/')}/`;
   }
 </script>
 
 <div class="species-detail">
   <!-- Breadcrumb navigation -->
   <nav class="breadcrumb">
-    <button class="breadcrumb-link" on:click={onGoHome}>
+    <a href="{base}/" class="breadcrumb-link">
       Browse
-    </button>
+    </a>
     <span class="breadcrumb-separator">›</span>
     <span class="breadcrumb-current">
       {formatSpeciesName(species)}
@@ -209,22 +206,22 @@
           <ul class="space-y-2">
             {#if species.parent1}
               <li class="parent-link-item">
-                <button
-                  on:click={() => handleNavigate(species.parent1.replace('Quercus ', ''))}
+                <a
+                  href="{getSpeciesUrl(species.parent1.replace('Quercus ', ''))}"
                   class="species-link"
                 >
                   {species.parent1}
-                </button>
+                </a>
               </li>
             {/if}
             {#if species.parent2}
               <li class="parent-link-item">
-                <button
-                  on:click={() => handleNavigate(species.parent2.replace('Quercus ', ''))}
+                <a
+                  href="{getSpeciesUrl(species.parent2.replace('Quercus ', ''))}"
                   class="species-link"
                 >
                   {species.parent2}
-                </button>
+                </a>
               </li>
             {/if}
           </ul>
@@ -329,33 +326,33 @@
           {#if species.taxonomy.subgenus}
             <dt>Subgenus:</dt>
             <dd>
-              <button class="taxonomy-link" on:click={() => handleTaxonClick('subgenus', species.taxonomy.subgenus)}>
+              <a href="{getTaxonUrl('subgenus')}" class="taxonomy-link">
                 {species.taxonomy.subgenus}
-              </button>
+              </a>
             </dd>
           {/if}
           {#if species.taxonomy.section}
             <dt>Section:</dt>
             <dd>
-              <button class="taxonomy-link" on:click={() => handleTaxonClick('section', species.taxonomy.section)}>
+              <a href="{getTaxonUrl('section')}" class="taxonomy-link">
                 {species.taxonomy.section}
-              </button>
+              </a>
             </dd>
           {/if}
           {#if species.taxonomy.subsection}
             <dt>Subsection:</dt>
             <dd>
-              <button class="taxonomy-link" on:click={() => handleTaxonClick('subsection', species.taxonomy.subsection)}>
+              <a href="{getTaxonUrl('subsection')}" class="taxonomy-link">
                 {species.taxonomy.subsection}
-              </button>
+              </a>
             </dd>
           {/if}
           {#if species.taxonomy.complex}
             <dt>Complex:</dt>
             <dd>
-              <button class="taxonomy-link" on:click={() => handleTaxonClick('complex', species.taxonomy.complex)}>
+              <a href="{getTaxonUrl('complex')}" class="taxonomy-link">
                 Q. {species.taxonomy.complex}
-              </button>
+              </a>
             </dd>
           {/if}
           {#if species.taxonomy.series}
@@ -379,21 +376,21 @@
             {@const hybridSpecies = findHybridSpecies(hybridName)}
             {@const otherParent = hybridSpecies ? getOtherParent(hybridSpecies, species.name) : null}
             <li class="hybrid-item">
-              <button
-                on:click={() => handleNavigate(hybridSpecies?.name || hybridName)}
+              <a
+                href="{getSpeciesUrl(hybridSpecies?.name || hybridName)}"
                 class="species-link font-semibold"
               >
                 Quercus {hybridSpecies?.name?.startsWith('×') ? '' : '× '}{hybridSpecies?.name || hybridName}
-              </button>
+              </a>
               {#if otherParent}
                 <span class="text-sm" style="color: var(--color-text-secondary);">
                   (with
-                  <button
-                    on:click={() => handleNavigate(otherParent)}
+                  <a
+                    href="{getSpeciesUrl(otherParent)}"
                     class="species-link-inline"
                   >
                     Quercus {otherParent}
-                  </button>)
+                  </a>)
                 </span>
               {/if}
             </li>
@@ -413,12 +410,12 @@
         <ul class="related-species-list">
           {#each species.closely_related_to as relatedName}
             <li>
-              <button
-                on:click={() => handleNavigate(relatedName)}
+              <a
+                href="{getSpeciesUrl(relatedName)}"
                 class="species-link"
               >
                 Quercus {relatedName}
-              </button>
+              </a>
             </li>
           {/each}
         </ul>

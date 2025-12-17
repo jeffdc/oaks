@@ -1,10 +1,8 @@
 <script>
-  import { allSpecies, formatSpeciesName } from './dataStore.js';
+  import { base } from '$app/paths';
+  import { allSpecies, formatSpeciesName } from '$lib/stores/dataStore.js';
 
   export let taxonPath = []; // e.g., ['Quercus', 'Quercus', 'Albae']
-  export let onSelectSpecies;
-  export let onNavigateToTaxon;
-  export let onGoHome = null;
 
   // Determine the taxon level and name from the path
   $: taxonLevel = getTaxonLevel(taxonPath.length);
@@ -87,37 +85,29 @@
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  function handleSubTaxonClick(subTaxonName) {
-    onNavigateToTaxon([...taxonPath, subTaxonName]);
-  }
-
-  function handleBreadcrumbClick(index) {
-    if (index === -1) {
-      // Click on "Taxonomy" - go to taxonomy tree view
-      onNavigateToTaxon([]);
-    } else {
-      // Navigate to ancestor taxon
-      onNavigateToTaxon(taxonPath.slice(0, index + 1));
-    }
+  // Build taxonomy path URL
+  function getTaxonUrl(path) {
+    if (path.length === 0) return `${base}/taxonomy/`;
+    return `${base}/taxonomy/${path.map(encodeURIComponent).join('/')}/`;
   }
 </script>
 
 <div class="taxon-view">
   <!-- Breadcrumb navigation -->
   <nav class="breadcrumb">
-    <button class="breadcrumb-link" on:click={onGoHome}>
+    <a href="{base}/" class="breadcrumb-link">
       Browse
-    </button>
+    </a>
     <span class="breadcrumb-separator">›</span>
-    <button class="breadcrumb-link" on:click={() => handleBreadcrumbClick(-1)}>
+    <a href="{base}/taxonomy/" class="breadcrumb-link">
       Taxonomy
-    </button>
+    </a>
     {#each taxonPath as segment, i}
       <span class="breadcrumb-separator">›</span>
       {#if i < taxonPath.length - 1}
-        <button class="breadcrumb-link" on:click={() => handleBreadcrumbClick(i)}>
+        <a href="{getTaxonUrl(taxonPath.slice(0, i + 1))}" class="breadcrumb-link">
           {segment}
-        </button>
+        </a>
       {:else}
         <span class="breadcrumb-current">{segment}</span>
       {/if}
@@ -141,12 +131,12 @@
       </h2>
       <div class="sub-taxa-grid">
         {#each subTaxa as subTaxon}
-          <button class="sub-taxon-card" on:click={() => handleSubTaxonClick(subTaxon.name)}>
+          <a href="{getTaxonUrl([...taxonPath, subTaxon.name])}" class="sub-taxon-card">
             <span class="sub-taxon-name">
               {#if taxonPath.length === 3}Q. {/if}{subTaxon.name}
             </span>
             <span class="sub-taxon-count">{subTaxon.count} species</span>
-          </button>
+          </a>
         {/each}
       </div>
     </section>
@@ -157,14 +147,14 @@
     <h2 class="section-title">Species</h2>
     <div class="species-grid">
       {#each matchingSpecies as species}
-        <button class="species-card" on:click={() => onSelectSpecies(species)}>
+        <a href="{base}/species/{encodeURIComponent(species.name)}/" class="species-card">
           <span class="species-name">
             {formatSpeciesName(species)}
           </span>
           {#if species.author}
             <span class="species-author">{species.author}</span>
           {/if}
-        </button>
+        </a>
       {/each}
     </div>
   </section>
@@ -288,6 +278,7 @@
     transition: all 0.15s ease;
     text-align: left;
     font-family: inherit;
+    text-decoration: none;
   }
 
   .sub-taxon-card:hover {
@@ -335,6 +326,7 @@
     transition: all 0.15s ease;
     text-align: left;
     font-family: inherit;
+    text-decoration: none;
   }
 
   .species-card:hover {

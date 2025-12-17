@@ -1,5 +1,5 @@
 <script>
-  import { searchQuery, filteredSpecies } from './dataStore.js';
+  import { searchQuery, filteredSpecies } from '$lib/stores/dataStore.js';
 
   // Keep inputValue synced with the store (handles external clears like handleGoHome)
   $: inputValue = $searchQuery;

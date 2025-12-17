@@ -1,7 +1,6 @@
 <script>
-    import { taxonomyTree, sortTaxonomyKeys, formatSpeciesName, speciesCounts } from "./dataStore.js";
-
-    export let onSelectSpecies;
+	import { base } from '$app/paths';
+	import { taxonomyTree, sortTaxonomyKeys, formatSpeciesName, speciesCounts } from '$lib/stores/dataStore.js';
 
     // Local expansion state - resets on view change
     let expanded = {};
@@ -118,12 +117,9 @@
                                                                             {#if expanded[complexKey]}
                                                                                 <div class="node-children">
                                                                                     {#each sortSpecies(complexData.species) as species}
-                                                                                        <button
+                                                                                        <a
+                                                                                            href="{base}/species/{encodeURIComponent(species.name)}/"
                                                                                             class="species-leaf"
-                                                                                            on:click={() =>
-                                                                                                onSelectSpecies(
-                                                                                                    species,
-                                                                                                )}
                                                                                         >
                                                                                             <span class="species-name">
                                                                                                 {formatSpeciesName(
@@ -133,7 +129,7 @@
                                                                                                     },
                                                                                                 )}
                                                                                             </span>
-                                                                                        </button>
+                                                                                        </a>
                                                                                     {/each}
                                                                                 </div>
                                                                             {/if}
@@ -141,17 +137,16 @@
                                                                     {:else}
                                                                         <!-- Species without complex - show directly under subsection -->
                                                                         {#each sortSpecies(complexData.species) as species}
-                                                                            <button
+                                                                            <a
+                                                                                href="{base}/species/{encodeURIComponent(species.name)}/"
                                                                                 class="species-leaf"
-                                                                                on:click={() =>
-                                                                                    onSelectSpecies(species)}
                                                                             >
                                                                                 <span class="species-name">
                                                                                     {formatSpeciesName(species, {
                                                                                         abbreviated: true,
                                                                                     })}
                                                                                 </span>
-                                                                            </button>
+                                                                            </a>
                                                                         {/each}
                                                                     {/if}
                                                                 {/each}
@@ -163,14 +158,14 @@
                                                     {#each sortTaxonomyKeys(Object.keys(subsectionData.complexes)) as complex}
                                                         {@const complexData = subsectionData.complexes[complex]}
                                                         {#each sortSpecies(complexData.species) as species}
-                                                            <button
+                                                            <a
+                                                                href="{base}/species/{encodeURIComponent(species.name)}/"
                                                                 class="species-leaf"
-                                                                on:click={() => onSelectSpecies(species)}
                                                             >
                                                                 <span class="species-name">
                                                                     {formatSpeciesName(species, { abbreviated: true })}
                                                                 </span>
-                                                            </button>
+                                                            </a>
                                                         {/each}
                                                     {/each}
                                                 {/if}
@@ -185,11 +180,11 @@
                                     {#each sortTaxonomyKeys(Object.keys(subsectionData.complexes)) as complex}
                                         {@const complexData = subsectionData.complexes[complex]}
                                         {#each sortSpecies(complexData.species) as species}
-                                            <button class="species-leaf" on:click={() => onSelectSpecies(species)}>
+                                            <a href="{base}/species/{encodeURIComponent(species.name)}/" class="species-leaf">
                                                 <span class="species-name">
                                                     {formatSpeciesName(species, { abbreviated: true })}
                                                 </span>
-                                            </button>
+                                            </a>
                                         {/each}
                                     {/each}
                                 {/each}
@@ -215,9 +210,9 @@
                         {#each sortTaxonomyKeys(Object.keys(subsectionData.complexes)) as complex}
                             {@const complexData = subsectionData.complexes[complex]}
                             {#each sortSpecies(complexData.species) as species}
-                                <button class="species-leaf-flat" on:click={() => onSelectSpecies(species)}>
+                                <a href="{base}/species/{encodeURIComponent(species.name)}/" class="species-leaf-flat">
                                     {formatSpeciesName(species, { abbreviated: true })}
-                                </button>
+                                </a>
                             {/each}
                         {/each}
                     {/each}
@@ -302,6 +297,7 @@
         cursor: pointer;
         transition: all 0.15s ease;
         font-family: inherit;
+        text-decoration: none;
     }
 
     .species-leaf-flat:hover {
@@ -391,6 +387,7 @@
         cursor: pointer;
         font-family: inherit;
         font-size: inherit;
+        text-decoration: none;
     }
 
     .species-leaf:hover {

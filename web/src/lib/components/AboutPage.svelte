@@ -1,5 +1,5 @@
 <script>
-    import { speciesCounts } from "./dataStore.js";
+	import { speciesCounts } from '$lib/stores/dataStore.js';
 </script>
 
 <div class="about-page">

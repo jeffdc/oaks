@@ -9,7 +9,7 @@ import {
   getAllSources,
   getSourceById,
   getSourceCompleteness
-} from './db.js';
+} from '../db.js';
 
 // Re-export source helpers for component use
 export { getPrimarySource, getAllSources, getSourceById, getSourceCompleteness };
