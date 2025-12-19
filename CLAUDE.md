@@ -33,7 +33,7 @@ oaks/
 ├── tmp/                      # Temporary/working files (gitignored)
 │   ├── scraper/              # Scraper cache and progress files
 │   └── data/                 # Working data files (e.g., iNaturalist imports)
-└── web/public/quercus_data.json  # JSON export for web (committed to repo)
+└── web/static/quercus_data.json  # JSON export for web (committed to repo)
 ```
 
 ## Common Development Tasks
@@ -60,7 +60,7 @@ python3 scraper.py --test
 # Process specific number
 python3 scraper.py --limit=10
 
-# Output location: ../../web/public/quercus_data.json
+# Output location: ../../web/static/quercus_data.json
 ```
 
 ### Web Application Workflow
@@ -79,7 +79,7 @@ npm run build      # Output: dist/
 npm run preview    # Preview production build
 ```
 
-**Important**: The data file `web/public/quercus_data.json` is committed to the repo and served directly. The app loads this JSON and populates IndexedDB for offline queries. GitHub Actions deploys automatically on push to main. See `web/CLAUDE.md` for detailed architecture.
+**Important**: The data file `web/static/quercus_data.json` is committed to the repo and served directly. The app loads this JSON and populates IndexedDB for offline queries. GitHub Actions deploys automatically on push to main. See `web/CLAUDE.md` for detailed architecture.
 
 ### CLI Tool Workflow
 
@@ -89,7 +89,7 @@ cd cli
 # Build
 go build -o oak .
 
-# Run directly
+# Run directly (ALWAYS from cli/ directory)
 ./oak <subcommand>
 
 # Or run with go
@@ -98,6 +98,12 @@ go run . <subcommand>
 # Install to $GOPATH/bin
 go install .
 ```
+
+**IMPORTANT: Database Location**
+- The authoritative database is `cli/oak_compendium.db`
+- **Always run `oak` commands from the `cli/` directory** - the tool defaults to `oak_compendium.db` in the current working directory
+- If running from elsewhere, use `-d /path/to/cli/oak_compendium.db`
+- Never create database files outside `cli/`
 
 **Note**: The CLI is in early development. See `cli/docs/oak_cli.md` for historical specification (may be outdated).
 
@@ -138,13 +144,13 @@ The complete data pipeline from sources to browser:
 │                    └── species_sources (source-attributed data)     │
 │                                │                                    │
 │                                ▼                                    │
-│                    oak export ../web/public/quercus_data.json       │
+│                    oak export ../web/static/quercus_data.json       │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
                                  │
                                  ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                 web/public/quercus_data.json                        │
+│                 web/static/quercus_data.json                        │
 │            (denormalized JSON, committed to repo)                   │
 └─────────────────────────────────────────────────────────────────────┘
                                  │
@@ -199,13 +205,13 @@ cd cli
 oak import-bear --source-id 3
 
 # Export to JSON for web app
-oak export ../web/public/quercus_data.json
+oak export ../web/static/quercus_data.json
 ```
 
 **3. Deployment**
 ```bash
 # From repository root
-git add web/public/quercus_data.json cli/oak_compendium.db
+git add web/static/quercus_data.json cli/oak_compendium.db
 git commit -m "Update species data"
 git push origin main
 # GitHub Actions automatically builds and deploys to GitHub Pages
