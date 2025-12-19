@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-19T15:06:36Z",
-    "exported_at": "2025-12-19T15:06:36Z",
+    "version": "2025-12-19T18:51:54Z",
+    "exported_at": "2025-12-19T18:51:54Z",
     "species_count": 734
   },
   "species": [
@@ -557,6 +557,15 @@
           "hardiness_habitat": "hardy; prefers acidic, well drained moist soils; long-lived, up to 200 years and more;",
           "miscellaneous": "-- A. Camus : n° 278 ; -- Sub-genus Quercus, Section Quercus, Series Albae; -- Closely related to Q.bicolor and to Q.macrocarpa ;",
           "url": "https://oaksoftheworld.fr/quercus_alba.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Eastern White Oak"
+          ],
+          "miscellaneous": "Resources:\n[Quercus alba](https://www.fs.usda.gov/database/feis/plants/tree/quealb/all.html)"
         }
       ]
     },
@@ -1157,6 +1166,14 @@
           "hardiness_habitat": "hardy zone 5-6; prefers rich and moist soils or bluffs, along rivers;",
           "miscellaneous": "-- Sub-genus Quercus, Section Quercus, Series Stellatae; (however is sometimes confused with Q.nigra, Sub-genus Quercus, section Lobatae , since leaves are remotely resembling); -- Threatened (IUCN Red List Category : VU). -- Often misidentified as Q.sinuata, but the latter has larger and more pointed buds, darker twigs, deeper cup, and mature leaves glabrous on both sides with deeper sinuses;",
           "url": "https://oaksoftheworld.fr/quercus_austrina.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Bluff Oak"
+          ]
         }
       ]
     },
@@ -1559,6 +1576,14 @@
           "hardiness_habitat": "hardy; prefers moist, lime-free soils; long-living;",
           "miscellaneous": "-- A. Camus : n° 189 ; -- Sub-genus Quercus, Section Quercus, Subsection Prinoideae; -- Related to Q.macrocarpa ;",
           "url": "https://oaksoftheworld.fr/quercus_bicolor.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Swamp White Oak"
+          ]
         }
       ]
     },
@@ -1652,6 +1677,14 @@
           "hardiness_habitat": "prefers sandy, well drained soils;",
           "miscellaneous": "-- Sub-genus Quercus, Section Quercus, Series Stellatae; -- Related to Q.stellata ; -- Rare. Threatened (IUCN Red List Category : CR)",
           "url": "https://oaksoftheworld.fr/quercus_boyntonii.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Boyntoni’s Oak"
+          ]
         }
       ]
     },
@@ -2341,6 +2374,14 @@
           "hardiness_habitat": "a little tender (may withstand -15°C); prefers sandy soils; slow growing; inhabits sandy, bushy sites;",
           "miscellaneous": "-- A. Camus : n° 276 ; -- Sub-genus Quercus, Section Quercus, Series Stellatae; -- Alvin Chapman (1809-1899) = physician and botanist of Florida, the first to describe this species; -- Hybridizes with Q.minima (= x rolfsii )",
           "url": "https://oaksoftheworld.fr/quercus_chapmanii.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Chapman’s Oak"
+          ]
         }
       ]
     },
@@ -5978,6 +6019,14 @@
           "hardiness_habitat": "hardy in zone 7; occurs in sand dunes;",
           "miscellaneous": "-- A. Camus n° 259; -- Sub-genus Quercus, Section Quercus, Series Stellatae; -- Threatened (IUCN Red List Category : EN) -- Hybridizes with Q.pungens which it resembles a lot, and with Q.stellata ;",
           "url": "https://oaksoftheworld.fr/quercus_havardii.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Sand Post Oak"
+          ]
         }
       ]
     },
@@ -6045,6 +6094,15 @@
           "hardiness_habitat": "hardy; prefers light, well drained soils;",
           "miscellaneous": "-- A. Camus : n° 409; -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- For a long time confused with Q.laurifolia (\"swamp laurel oak\", \"diamondleaf oak\") ; -- Numerous hybrids (among them : Q.x sublaurifolia with Q.incana , Q.x mellichampi with Q.laevis )",
           "url": "https://oaksoftheworld.fr/quercus_hemisphaerica.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Sand Laurel Oak"
+          ],
+          "miscellaneous": "Field Notes:\nQ. lauifolia vs Q. hemisphaerica:\n\nQ. h.:\n- Very short petiole\n- Leaf bases more U-shaped\n- Saplings and resprouts can have cordate leaf bases and very sharply lobed leaves\n- Lower leaf surface is glabrous\n- Leaves on average narrower and widest towards the tip\n- Secondary veins raised on upper surface\n- Leaves leathery and opaque\n- Flowers about 2 weeks later\n- Evergreen, maybe tardily deciduous at times (not sure about this)\n\nQ. l.:\n- Short petiole\n- Leaf bases more V-shaped\n- Leaves can be lobed but more like Q. nigra, generally not sharply lobed\n- Lower leaf surface can have hairs in the vein axils\n- Leaves on average wider and widest in the middle (diamond shaped)\n- Secondary veins flush or impressed\n- Leaves slightly translucent when backlit\n- Flower about 2 weeks earlier\n- Tardily deciduous, never evergreen"
         }
       ]
     },
@@ -7593,6 +7651,15 @@
           "hardiness_habitat": "hardy; prefers light, moist soils;",
           "miscellaneous": "-- A.Camus : 409; -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- Numerous hybrids.",
           "url": "https://oaksoftheworld.fr/quercus_laurifolia.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Laurel Oak"
+          ],
+          "miscellaneous": "Field Notes:\nQ. lauifolia vs Q. hemisphaerica:\n\nQ. h.:\n- Very short petiole\n- Leaf bases more U-shaped\n- Saplings and resprouts can have cordate leaf bases and very sharply lobed leaves\n- Lower leaf surface is glabrous\n- Leaves on average narrower and widest towards the tip\n- Secondary veins raised on upper surface\n- Leaves leathery and opaque\n- Flowers about 2 weeks later\n- Evergreen, maybe tardily deciduous at times (not sure about this)\n\nQ. l.:\n- Short petiole\n- Leaf bases more V-shaped\n- Leaves can be lobed but more like Q. nigra, generally not sharply lobed\n- Lower leaf surface can have hairs in the vein axils\n- Leaves on average wider and widest in the middle (diamond shaped)\n- Secondary veins flush or impressed\n- Leaves slightly translucent when backlit\n- Flower about 2 weeks earlier\n- Tardily deciduous, never evergreen"
         }
       ]
     },
@@ -8583,6 +8650,14 @@
           "hardiness_habitat": "hardy; prefers moist or wet soils;",
           "miscellaneous": "-- Sub-genus Quercus, Section Quercus, Series Albae; -- Leaves resembling those of Q.montana ; -- André Michaux was a French botanist; -- For today's Authors ( in Flora of North America North of Mexico 1998), Q.michauxii and Q.prinus are synonyms, but this is ambiguous because, on one hand, the \"true\" Q.prinus L. (= Q.montana Willd.) has often been confused with Q.michauxii , and, on other hand, the name \" Q.prinus [auct. not L].\" has been often applied to Q.michauxii... that's why it is necessary to name Q.prinus L. \" Q.montana Willd.\" in order to avoid any confusion.",
           "url": "https://oaksoftheworld.fr/quercus_michauxii.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Swamp Chestnut Oak"
+          ]
         }
       ]
     },
@@ -8883,6 +8958,14 @@
           "hardiness_habitat": "hardy; withstands poor, dry, rocky soils;",
           "miscellaneous": "-- A. Camus : n° 191, named Q.prinus L.; -- Sub-genus Quercus, Section Quercus, Series Albae; -- The name Q.prinus has been used for an other species ( Quercus michauxii) , so it is preferable to name this species Q.montana Willdenow , in order to avoid any confusion.",
           "url": "https://oaksoftheworld.fr/quercus_montana.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Chestnut Oak"
+          ]
         }
       ]
     },
@@ -9019,6 +9102,14 @@
           "fruits": "acorn 2 cm long, ovoid; dark brown to black; stalkless or nearly so; singly or paired; enclosed 1/2 or 1/3 by the grey tomentose cup; maturing in 1 year in September; cotyledons distinct;",
           "miscellaneous": "-- A. Camus : n° 192 ; -- Sub-genus Quercus, Section Quercus, Subsection Prinoideae; -- Henry E. Muehlenberg (1753-1815) was a botanist from Pennsylvania;",
           "url": "https://oaksoftheworld.fr/quercus_muehlenbergii.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Chinkapin Oak"
+          ]
         }
       ]
     },
@@ -9395,6 +9486,14 @@
           "hardiness_habitat": "hardy; prefers rich, moist soils;",
           "miscellaneous": "-- A. Camus : n° 276; -- Sub-genus Quercus, Section Quercus, Series Stellatae; -- Named in 1940 after James Oglethorpe (1695-1785 ), founder of Oglethorpe County in Georgia; -- Threatened (IUCN Red List Category : EN). -- May hybridize with Q.alba ;",
           "url": "https://oaksoftheworld.fr/quercus_oglethorpensis.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Oglethorpe’s Oak"
+          ]
         }
       ]
     },
@@ -10382,7 +10481,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
-          "is_preferred": false,
+          "is_preferred": true,
           "miscellaneous": "I am forming a theory that these can be reliable separated by the following: - Twig color - phellos - gray; nigra brown -- this can be tough - Midrid and twig end color - nigra can sometimes (often?) be red, phellos not - leaves - while nigra can have totally linear leaves with an acute tip, there will always? be at least some sign on one of the leaves of lobing, even if only a swelling. This only works if there are enough leaves seen in the photo(s).\nThe distal lobing is indicative of Q nigra. Q phellos can have lobing but in my experience and research I believe it will never be distal, only proximal from the midpoint. Another point for Q nigra is that Q phellos does not have the severely constricted proximal portion of the leaf as seen on some of these leaves, towards the upper left in the photo."
         }
       ]
@@ -10767,6 +10866,15 @@
           "hardiness_habitat": "hardy; prefers dry, acidic, sandy soils; withstands calcareous soils;",
           "miscellaneous": "-- A. Camus : n° 194 ; -- Sub-genus Quercus, Section Quercus, Subsection Prinoideae; -- Closely related to Q.muehlenbergii (variety ?), but Q.prinoides thrives in acidic, sandy soils, and Q.muehlenbergii in calcareous ones...Moreover Q.prinoides bears acorns even on young plants, and layers all around; for Zander and Pierce, 1979, both are identical...;",
           "url": "https://oaksoftheworld.fr/quercus_prinoides.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Dwarf Chinkapin Oak"
+          ],
+          "miscellaneous": "Resources:\nhttp://oaks.of.the.world.free.fr/quercus_prinoides.htm"
         }
       ]
     },
@@ -12613,6 +12721,14 @@
           "hardiness_habitat": "occurs in wet forests and swamp valleys",
           "miscellaneous": "-- Sub-genus Quercus, Section Quercus, Series Stellatae; -- A. Camus n° 274; -- Related to Q.stellata , of which it differs in having slender twigs, smaller and thinner leaves, smaller and red brown buds; -- One should not confuse Q.ashei Sterret with Q.x ashei Trel. that is a hybrid between Q.laevis and Q.incana (and therefore is not a \"white oak\", as it is in Sub-genus Quercus, section Lobatae).",
           "url": "https://oaksoftheworld.fr/quercus_similis.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Swamp Post Oak"
+          ]
         }
       ]
     },
@@ -12655,6 +12771,14 @@
           "fruits": "acorn 1,2-1.8 cm; almost round or ovoid to oblong; brown; sessile or nearly so; singly or paired; cup shallow, enclosing 1/4 or less of nut, with appressed, smooth, greyish scales; maturing in 1 year in October;",
           "miscellaneous": "-- Sub-genus Quercus, Section Quercus, Series Stellatae; -- This taxon has been often confused with Q.nigra , because of the likeness of leaves, but the latter belongs to the Sub-genus Quercus, section Lobatae, therefore they have nothing in common ! -- Elias Magloire Durand (1794-1873) = botanist at Philadelphia ; -- Hybridizes with Q.stellata (= x macnabiana ) --The term \"undulata\" inspired numerous Authors ! One can list the following : Q.undulata Engelm 1878 (= Q.sinuata Walt.), Q.undulata Kit.1863 (= Q.pubescens Willd.), Q.undulata Benth. 1841 (= Q.benthamii A.DC), Q.undulata K.Koch 1847 (= Q.lusitanica Lam.), Q.undulata Torr 1827 (= Q.x undulata complex Little 1979), Q.undulata Sarg., and A.DC ( describing more or less Q.x pauciloba ...), Q.undulata S. Wats. (= Q.gambelii Nutt.) ; -- The term \"durandii\" is currently considered as \"nomen confusum\", because it was given by Buckley to some taxons he considered as varieties, whereas we know today they are separate species (= Q.austrina, Q.sinuata var. sinuata and Q.sinuata var. breviloba );",
           "url": "https://oaksoftheworld.fr/quercus_sinuata.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Oak"
+          ]
         }
       ]
     },
@@ -12865,6 +12989,14 @@
           "hardiness_habitat": "hardy; prefers lime-free soils, even dry ones; not so fast growing;",
           "miscellaneous": "-- A. Camus : n° 274 ; -- Sub-genus Quercus, Section Quercus, Series Stellatae; -- Numerous hybrids : xstelloides , xpseudomargaretta , xsterretti , xmacnabiana , xguadalupensis , xfernowii , xbernardensis ;",
           "url": "https://oaksoftheworld.fr/quercus_stellata.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Post Oak"
+          ]
         }
       ]
     },
@@ -14973,6 +15105,15 @@
           "hardiness_habitat": "hardy;",
           "miscellaneous": "-- Section Lobatae; -- Discovered in 1888 on Staten Island, New York;",
           "url": "https://oaksoftheworld.fr/quercus_brittonii.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Britton’s Oak"
+          ],
+          "miscellaneous": "Resources:\n[Britton's Oak \\(Hybrid Quercus × brittonii\\)](https://www.inaturalist.org/taxa/170986-Quercus---brittonii)\nhttp://oaks.of.the.world.free.fr/quercus_brittonii.htm"
         }
       ]
     },
@@ -15176,6 +15317,15 @@
           "hardiness_habitat": "prefers moist or wet soils;",
           "miscellaneous": "-- Section Lobatae; -- Usually difficult to recognize with certainty because of similarities of extreme forms of the parent species, especially in the leaves of shoots and juvenile specimens, which are often eccentrically lobed and quite similar in both, and they may sometimes be mistaken for hybrids (Palmer, 1948).",
           "url": "https://oaksoftheworld.fr/quercus_capesii.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Cape Oak"
+          ],
+          "miscellaneous": "Resources:\nhttp://oaks.of.the.world.free.fr/quercus_capesii.htm\n[Cape Oak \\(Hybrid Quercus × capesii\\)](https://www.inaturalist.org/taxa/170992-Quercus---capesii)"
         }
       ]
     },
@@ -15422,6 +15572,14 @@
           "fruits": "acorn oblong-oboval, nearly globose, 2-3 cm long and wide; short peduncle; enclosed 1/2 in the cup; cup-scales acuminate, thick, pubescent;",
           "miscellaneous": "-- Section Quercus -- Discovered in Indiana in 1916",
           "url": "https://oaksoftheworld.fr/quercus_deamii.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Deam’s Oak"
+          ]
         }
       ]
     },
@@ -15832,6 +15990,14 @@
           "range": "Eastern USA",
           "miscellaneous": "-- Section Quercus;",
           "url": "https://oaksoftheworld.fr/quercus_faxonii.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Faxon’s Oak"
+          ]
         }
       ]
     },
@@ -15887,6 +16053,14 @@
           "range": "Eastern USA",
           "miscellaneous": "-- Section Quercus;",
           "url": "https://oaksoftheworld.fr/quercus_fernowii.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Fernow’s Oak"
+          ]
         }
       ]
     },
@@ -16168,6 +16342,15 @@
           "fruits": "closely resemble those of Q. virginiana",
           "miscellaneous": "-- Section Quercus;",
           "url": "https://oaksoftheworld.fr/quercus_harbisonii.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Harbison’s Oak"
+          ],
+          "miscellaneous": "Resources:\n[Harbison Oak \\(Hybrid Quercus × harbisonii\\)](https://www.inaturalist.org/observations/109321708)\n33.7939936608, -78.8514372639 to 67m\n33.793813, -78.851217\n33.7941033333, -78.851495 acc 10m"
         }
       ]
     },
@@ -16222,6 +16405,15 @@
           "fruits": "likely show characters of Q. velutina in the shape of the cup or in the pubescence of its inner surface and scales;",
           "miscellaneous": "-- Section Lobatae; -- Also written \"hawkinsii\"; -- Differs from Q. rubra in having somewhat pubescent scales of the winter buds, and more persistent tomentum on the abaxial surface of the leaves.",
           "url": "https://oaksoftheworld.fr/quercus_hawkinsiae.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Hawkin’s Oak"
+          ],
+          "miscellaneous": "Resources:\n[Hybrid Quercus × incomita](https://www.inaturalist.org/taxa/171016-Quercus---hawkinsiae)\nhttp://oaks.of.the.world.free.fr/quercus_hawkinsiae.htm"
         }
       ]
     },
@@ -16440,6 +16632,15 @@
           "is_preferred": true,
           "range": "Arkansas",
           "url": "https://oaksoftheworld.fr/quercus_incomita.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Britton’s Oak"
+          ],
+          "miscellaneous": "Resources:\n[Hybrid Quercus × incomita](https://www.inaturalist.org/taxa/171020-Quercus---incomita)\nhttp://oaks.of.the.world.free.fr/quercus_incomita.htm"
         }
       ]
     },
@@ -17791,6 +17992,15 @@
           "hardiness_habitat": "hardy;",
           "miscellaneous": "-- Section Lobatae; -- Discovered in 1881; -- Fixed hybrid, comes true from seeds.",
           "url": "https://oaksoftheworld.fr/quercus_rudkinii.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Rudkin’s Oak"
+          ],
+          "miscellaneous": "Resources:\nhttp://oaks.of.the.world.free.fr/quercus_rudkinii.htm\n[Rudkin's oak \\(Hybrid Quercus × rudkinii\\)](https://www.inaturalist.org/taxa/171048-Quercus---rudkinii)"
         }
       ]
     },
@@ -17888,7 +18098,17 @@
         "subsection": "Albae"
       },
       "parent1": "alba",
-      "parent2": "montana"
+      "parent2": "montana",
+      "sources": [
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": true,
+          "local_names": [
+            "Saul’s Oak"
+          ]
+        }
+      ]
     },
     {
       "name": "× schneideri",
