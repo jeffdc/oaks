@@ -17,6 +17,10 @@ const config = {
 		},
 		prerender: {
 			handleHttpError: 'warn'
+		},
+		version: {
+			// Check for new app version every 5 minutes
+			pollInterval: 5 * 60 * 1000
 		}
 	}
 };
