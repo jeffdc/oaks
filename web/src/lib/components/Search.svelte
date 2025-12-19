@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { base } from '$app/paths';
   import { page } from '$app/stores';
-  import { searchQuery, filteredSpecies } from '$lib/stores/dataStore.js';
+  import { searchQuery } from '$lib/stores/dataStore.js';
 
   let inputElement;
 
@@ -48,12 +48,6 @@
       </button>
     {/if}
   </div>
-
-  {#if $searchQuery}
-    <div class="mt-2 text-sm font-medium text-white/80">
-      {$filteredSpecies.length} species found
-    </div>
-  {/if}
 </div>
 
 <style>
