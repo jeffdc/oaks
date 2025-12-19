@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-19T20:29:20Z",
-    "exported_at": "2025-12-19T20:29:20Z",
+    "version": "2025-12-19T21:08:47Z",
+    "exported_at": "2025-12-19T21:08:47Z",
     "species_count": 734
   },
   "species": [
@@ -6081,7 +6081,7 @@
           "source_id": 3,
           "source_name": "Oak Compendium",
           "is_preferred": true,
-          "leaves": "Very short petiole. Leaf bases more U-shaped. Saplings and resprouts can have cordate leaf bases and very sharply lobed leaves.\nLower leaf surface is glabrous\nLeaves on average narrower and widest towards the tip as compared to Q laurifolia\nSecondary veins raised on upper surface\nLeaves leathery and opaque\nFlowers about 2 weeks later as compared to Q laurifolia\nEvergreen, maybe tardily deciduous at times (not sure about this)"
+          "leaves": "- Very short petiole.\n- Leaf bases more U-shaped.\n- Saplings and resprouts can have cordate leaf bases and very sharply lobed leaves.\n- Lower leaf surface is glabrous\n- Secondary veins raised on upper surface\n- Leaves leathery and opaque\n- Evergreen, maybe tardily deciduous at times (not sure about this)\n\nAs compared to Q. laurifolia:\n- Leaves on average narrower and widest towards the tip\n- Flowers about 2 weeks later"
         },
         {
           "source_id": 2,
@@ -7634,7 +7634,7 @@
           "source_id": 3,
           "source_name": "Oak Compendium",
           "is_preferred": true,
-          "leaves": "Short petiole. Leaf bases mostly V-shaped.\nLeaves can be lobed but more like Q. nigra, generally not sharply lobed.\nLower leaf surface can have hairs in the vein axils\nLeaves on average wider and widest in the middle (diamond shaped) as compared to Q hemispaerica\nSecondary veins flush or impressed\nLeaves slightly translucent when backlit\nFlower about 2 weeks earlier than Q hemispaerica\nTardily deciduous, never evergreen"
+          "leaves": "- Short petiole\n- Leaf bases mostly V-shaped\n- Leaves can be lobed but more like Q. nigra, generally not sharply lobed.\n- Lower leaf surface can have hairs in the vein axils\n- Secondary veins flush or impressed\n- Leaves slightly translucent when backlit\n- Tardily deciduous, never evergreen\n\nAs compared to Q. hemispaerica:\n- Leaves on average wider and widest in the middle (diamond shaped)\n- Flowers about 2 weeks earlier than Q hemispaerica"
         },
         {
           "source_id": 2,
