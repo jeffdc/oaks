@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-19T18:58:11Z",
-    "exported_at": "2025-12-19T18:58:11Z",
+    "version": "2025-12-19T20:15:42Z",
+    "exported_at": "2025-12-19T20:15:42Z",
     "species_count": 734
   },
   "species": [
@@ -6081,9 +6081,6 @@
           "source_id": 3,
           "source_name": "Oak Compendium",
           "is_preferred": true,
-          "local_names": [
-            "Sand Laurel Oak"
-          ],
           "miscellaneous": "Field Notes:\nQ. lauifolia vs Q. hemisphaerica:\n\nQ. h.:\n- Very short petiole\n- Leaf bases more U-shaped\n- Saplings and resprouts can have cordate leaf bases and very sharply lobed leaves\n- Lower leaf surface is glabrous\n- Leaves on average narrower and widest towards the tip\n- Secondary veins raised on upper surface\n- Leaves leathery and opaque\n- Flowers about 2 weeks later\n- Evergreen, maybe tardily deciduous at times (not sure about this)\n\nQ. l.:\n- Short petiole\n- Leaf bases more V-shaped\n- Leaves can be lobed but more like Q. nigra, generally not sharply lobed\n- Lower leaf surface can have hairs in the vein axils\n- Leaves on average wider and widest in the middle (diamond shaped)\n- Secondary veins flush or impressed\n- Leaves slightly translucent when backlit\n- Flower about 2 weeks earlier\n- Tardily deciduous, never evergreen"
         },
         {
@@ -7637,9 +7634,6 @@
           "source_id": 3,
           "source_name": "Oak Compendium",
           "is_preferred": true,
-          "local_names": [
-            "Laurel Oak"
-          ],
           "miscellaneous": "Field Notes:\nQ. lauifolia vs Q. hemisphaerica:\n\nQ. h.:\n- Very short petiole\n- Leaf bases more U-shaped\n- Saplings and resprouts can have cordate leaf bases and very sharply lobed leaves\n- Lower leaf surface is glabrous\n- Leaves on average narrower and widest towards the tip\n- Secondary veins raised on upper surface\n- Leaves leathery and opaque\n- Flowers about 2 weeks later\n- Evergreen, maybe tardily deciduous at times (not sure about this)\n\nQ. l.:\n- Short petiole\n- Leaf bases more V-shaped\n- Leaves can be lobed but more like Q. nigra, generally not sharply lobed\n- Lower leaf surface can have hairs in the vein axils\n- Leaves on average wider and widest in the middle (diamond shaped)\n- Secondary veins flush or impressed\n- Leaves slightly translucent when backlit\n- Flower about 2 weeks earlier\n- Tardily deciduous, never evergreen"
         },
         {
