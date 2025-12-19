@@ -6,10 +6,18 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jeff/oaks/cli/internal/models"
 	"github.com/spf13/cobra"
+)
+
+const (
+	bearLastImportKey = "bear_last_import_timestamp"
+	// Core Data reference date: Jan 1, 2001 00:00:00 UTC
+	coreDataEpoch = 978307200 // Unix timestamp for 2001-01-01
 )
 
 var bearSourceID int64
@@ -45,17 +53,23 @@ Note Template Fields:
   ## Field Notes:    → miscellaneous
   ## Resources:      → miscellaneous (appended)
 
+By default, only notes modified since the last import are processed (incremental).
+Use --full to force a complete re-import of all notes.
+
 Examples:
   oak import-bear --source-id 3
-  oak import-bear --source-id 3 --dry-run`,
+  oak import-bear --source-id 3 --dry-run
+  oak import-bear --full              # Re-import all notes`,
 	RunE: runImportBear,
 }
 
 var bearDryRun bool
+var bearFullImport bool
 
 func init() {
 	importBearCmd.Flags().Int64Var(&bearSourceID, "source-id", 3, "Source ID to attribute the data to")
 	importBearCmd.Flags().BoolVar(&bearDryRun, "dry-run", false, "Show what would be imported without making changes")
+	importBearCmd.Flags().BoolVar(&bearFullImport, "full", false, "Force full re-import of all notes (ignore last import timestamp)")
 	rootCmd.AddCommand(importBearCmd)
 }
 
@@ -123,13 +137,35 @@ func runImportBear(cmd *cobra.Command, args []string) error {
 		fmt.Println("DRY RUN - no changes will be made\n")
 	}
 
+	// Get last import timestamp for incremental import
+	var lastImportCoreData float64 = 0
+	if !bearFullImport {
+		lastImportStr, err := database.GetMetadata(bearLastImportKey)
+		if err != nil {
+			return fmt.Errorf("failed to get last import timestamp: %w", err)
+		}
+		if lastImportStr != "" {
+			lastImportCoreData, _ = strconv.ParseFloat(lastImportStr, 64)
+			lastImportTime := coreDataToTime(lastImportCoreData)
+			fmt.Printf("Incremental import: checking notes modified since %s\n", lastImportTime.Format("2006-01-02 15:04:05"))
+		} else {
+			fmt.Println("No previous import found, importing all notes")
+		}
+	} else {
+		fmt.Println("Full import: processing all notes")
+	}
+
+	// Record current time (in Core Data format) before querying
+	// This will be saved after successful import
+	importTimeCoreData := timeToCoreData(time.Now())
+
 	// Query notes with Quercus taxonomy tags
-	notes, err := queryBearNotes(bearDB)
+	notes, err := queryBearNotes(bearDB, lastImportCoreData)
 	if err != nil {
 		return fmt.Errorf("failed to query Bear notes: %w", err)
 	}
 
-	fmt.Printf("Found %d Quercus notes in Bear\n\n", len(notes))
+	fmt.Printf("Found %d Quercus notes to process\n\n", len(notes))
 
 	imported := 0
 	skipped := 0
@@ -199,14 +235,42 @@ func runImportBear(cmd *cobra.Command, args []string) error {
 	fmt.Printf("  Skipped:  %d\n", skipped)
 	fmt.Printf("  Errors:   %d\n", errors)
 
+	// Save import timestamp (unless dry run)
+	if !bearDryRun && imported > 0 {
+		if err := database.SetMetadata(bearLastImportKey, strconv.FormatFloat(importTimeCoreData, 'f', -1, 64)); err != nil {
+			return fmt.Errorf("failed to save import timestamp: %w", err)
+		}
+		fmt.Printf("\nNext import will check for notes modified after %s\n", time.Now().Format("2006-01-02 15:04:05"))
+	}
+
 	return nil
 }
 
-func queryBearNotes(db *sql.DB) ([]BearNote, error) {
+// coreDataToTime converts Core Data timestamp to Go time
+func coreDataToTime(coreDataTimestamp float64) time.Time {
+	unixTimestamp := int64(coreDataTimestamp) + coreDataEpoch
+	return time.Unix(unixTimestamp, 0)
+}
+
+// timeToCoreData converts Go time to Core Data timestamp
+func timeToCoreData(t time.Time) float64 {
+	return float64(t.Unix() - coreDataEpoch)
+}
+
+func queryBearNotes(db *sql.DB, sinceTimestamp float64) ([]BearNote, error) {
 	// Query notes that have Quercus species-level tags
 	// Use subquery to get the most specific (longest) tag for each note
 	// This avoids getting both parent tags and species tags for the same note
-	query := `
+	//
+	// If sinceTimestamp > 0, only return notes modified after that time
+	// (Core Data timestamp = seconds since Jan 1, 2001)
+
+	modificationFilter := ""
+	if sinceTimestamp > 0 {
+		modificationFilter = fmt.Sprintf("AND n.ZMODIFICATIONDATE > %f", sinceTimestamp)
+	}
+
+	query := fmt.Sprintf(`
 		WITH species_tags AS (
 			SELECT n.Z_PK as note_id, n.ZTITLE as title, n.ZTEXT as text, t.ZTITLE as tag,
 				   LENGTH(t.ZTITLE) as tag_len
@@ -216,13 +280,14 @@ func queryBearNotes(db *sql.DB) ([]BearNote, error) {
 			WHERE (
 				-- Species pattern: Quercus/{subgenus}/{section}/{subsection}?/{complex}?/{species}
 				-- Minimum 4 parts (Quercus/subgenus/section/species), max 6 parts
-				(t.ZTITLE LIKE 'Quercus/%/%/%'
-				 AND t.ZTITLE NOT LIKE 'Quercus/%/x')
+				(t.ZTITLE LIKE 'Quercus/%%/%%/%%'
+				 AND t.ZTITLE NOT LIKE 'Quercus/%%/x')
 				OR
 				-- Hybrid pattern: .../x/{hybrid} anywhere in path
-				(t.ZTITLE LIKE 'Quercus/%/x/%')
+				(t.ZTITLE LIKE 'Quercus/%%/x/%%')
 			)
 			AND n.ZTRASHED = 0
+			%s
 		),
 		most_specific AS (
 			SELECT note_id, MAX(tag_len) as max_len
@@ -233,7 +298,7 @@ func queryBearNotes(db *sql.DB) ([]BearNote, error) {
 		FROM species_tags st
 		JOIN most_specific ms ON st.note_id = ms.note_id AND st.tag_len = ms.max_len
 		ORDER BY st.title
-	`
+	`, modificationFilter)
 
 	rows, err := db.Query(query)
 	if err != nil {
