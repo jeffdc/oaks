@@ -63,7 +63,7 @@ Use -i/--id-only to output only IDs for pipelining.`,
 				if idOnly {
 					fmt.Println(id)
 				} else {
-					fmt.Printf("  %s\n", id)
+					fmt.Printf("  %d\n", id)
 				}
 			}
 		}

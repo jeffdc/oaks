@@ -312,7 +312,7 @@ func NewSource() (*models.Source, error) {
 		return text, nil
 	}
 
-	fmt.Println("Creating new source...\n")
+	fmt.Println("Creating new source...")
 
 	sourceType, err := prompt("Source Type (Book, Paper, Website, Observation, etc.)")
 	if err != nil {

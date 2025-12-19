@@ -134,7 +134,7 @@ func runImportBear(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("Importing from Bear to source: %s (ID: %d)\n", source.Name, bearSourceID)
 	if bearDryRun {
-		fmt.Println("DRY RUN - no changes will be made\n")
+		fmt.Println("DRY RUN - no changes will be made")
 	}
 
 	// Get last import timestamp for incremental import
