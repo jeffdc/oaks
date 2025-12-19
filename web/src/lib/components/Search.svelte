@@ -1,11 +1,20 @@
 <script>
+  import { goto } from '$app/navigation';
+  import { base } from '$app/paths';
+  import { page } from '$app/stores';
   import { searchQuery, filteredSpecies } from '$lib/stores/dataStore.js';
 
   // Keep inputValue synced with the store (handles external clears like handleGoHome)
   $: inputValue = $searchQuery;
 
   function handleInput(event) {
-    searchQuery.set(event.target.value);
+    const value = event.target.value;
+    searchQuery.set(value);
+
+    // Navigate to list page when user starts typing (if not already there)
+    if (value && !$page.url.pathname.endsWith('/list/')) {
+      goto(`${base}/list/`);
+    }
   }
 
   function handleClear() {

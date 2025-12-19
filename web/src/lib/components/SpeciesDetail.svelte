@@ -107,44 +107,209 @@
     </span>
   </nav>
 
-  <!-- Header -->
-  <div class="px-6 py-6" style="background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-forest-100) 100%); border-bottom: 2px solid var(--color-forest-200);">
-    <div class="flex items-start justify-between gap-4">
-      <div class="flex-1">
-        <div class="flex items-center gap-2 mb-2">
-          {#if species.is_hybrid}
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" style="background-color: var(--color-forest-200); color: var(--color-forest-900);">
-              Hybrid
-            </span>
-          {:else}
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" style="background-color: var(--color-forest-300); color: var(--color-forest-900);">
-              Species
-            </span>
-          {/if}
-        </div>
-        <h1 class="text-3xl font-bold leading-tight" style="color: var(--color-forest-900); font-family: var(--font-serif);">
-          Quercus {#if needsHybridSymbol(species)}× {/if}<span class="italic">{species.name}</span>
-        </h1>
-      </div>
-    </div>
+  <!-- Header with name, authority, and type badge -->
+  <div class="species-header">
+    <h1 class="species-title">
+      <span class="species-name">Quercus {#if needsHybridSymbol(species)}× {/if}<span class="italic">{species.name}</span></span>
+      {#if species.author}<span class="author-text">{species.author}</span>{/if}
+      {#if species.is_hybrid}
+        <span class="type-badge hybrid">Hybrid</span>
+      {:else}
+        <span class="type-badge species">Species</span>
+      {/if}
+    </h1>
   </div>
 
   <!-- Content -->
-  <div class="px-6 py-6 space-y-8" style="background-color: var(--color-background);">
-    {#if species.author}
-      <section class="detail-section">
+  <div class="content-grid" style="background-color: var(--color-background);">
+    <!-- SPECIES-INTRINSIC DATA (not source-dependent) -->
+
+    {#if species.taxonomy}
+      <section class="detail-section full-width">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <span>Authority</span>
+          <span>Taxonomy</span>
         </h2>
-        <p class="detail-text">{species.author}</p>
+        <div class="taxonomy-inline">
+          {#if species.taxonomy.subgenus}
+            <span class="taxonomy-item">
+              <span class="taxonomy-label">Subgenus:</span>
+              <a href="{getTaxonUrl('subgenus')}" class="taxonomy-link">{species.taxonomy.subgenus}</a>
+            </span>
+          {/if}
+          {#if species.taxonomy.section}
+            <span class="taxonomy-item">
+              <span class="taxonomy-label">Section:</span>
+              <a href="{getTaxonUrl('section')}" class="taxonomy-link">{species.taxonomy.section}</a>
+            </span>
+          {/if}
+          {#if species.taxonomy.subsection}
+            <span class="taxonomy-item">
+              <span class="taxonomy-label">Subsection:</span>
+              <a href="{getTaxonUrl('subsection')}" class="taxonomy-link">{species.taxonomy.subsection}</a>
+            </span>
+          {/if}
+          {#if species.taxonomy.complex}
+            <span class="taxonomy-item">
+              <span class="taxonomy-label">Complex:</span>
+              <a href="{getTaxonUrl('complex')}" class="taxonomy-link">Q. {species.taxonomy.complex}</a>
+            </span>
+          {/if}
+          {#if species.taxonomy.series}
+            <span class="taxonomy-item">
+              <span class="taxonomy-label">Series:</span>
+              <span class="taxonomy-value">{species.taxonomy.series}</span>
+            </span>
+          {/if}
+        </div>
       </section>
     {/if}
 
+    {#if species.is_hybrid && (species.parent1 || species.parent2)}
+      <section class="detail-section full-width">
+        <h2 class="section-header">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          <span>Parent Species</span>
+        </h2>
+        <div class="space-y-3">
+          {#if species.parent_formula}
+            <p class="detail-text italic font-medium" style="color: var(--color-forest-700);">{species.parent_formula}</p>
+          {/if}
+          <ul class="space-y-2">
+            {#if species.parent1}
+              <li class="parent-link-item">
+                <a
+                  href="{getSpeciesUrl(species.parent1.replace('Quercus ', ''))}"
+                  class="species-link"
+                >
+                  {species.parent1}
+                </a>
+              </li>
+            {/if}
+            {#if species.parent2}
+              <li class="parent-link-item">
+                <a
+                  href="{getSpeciesUrl(species.parent2.replace('Quercus ', ''))}"
+                  class="species-link"
+                >
+                  {species.parent2}
+                </a>
+              </li>
+            {/if}
+          </ul>
+        </div>
+      </section>
+    {/if}
+
+    {#if species.hybrids && species.hybrids.length > 0}
+      <section class="detail-section full-width">
+        <h2 class="section-header">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          <span>Known Hybrids ({species.hybrids.length})</span>
+        </h2>
+        <div class="hybrids-grid">
+          {#each species.hybrids as hybridName}
+            {@const hybridSpecies = findHybridSpecies(hybridName)}
+            {@const otherParent = hybridSpecies ? getOtherParent(hybridSpecies, species.name) : null}
+            <div class="hybrid-item">
+              <a
+                href="{getSpeciesUrl(hybridSpecies?.name || hybridName)}"
+                class="species-link font-semibold"
+              >
+                Q. {hybridSpecies?.name?.startsWith('×') ? '' : '× '}{hybridSpecies?.name || hybridName}
+              </a>
+              {#if otherParent}
+                <span class="text-sm" style="color: var(--color-text-secondary);">
+                  (with Q. {otherParent})
+                </span>
+              {/if}
+            </div>
+          {/each}
+        </div>
+      </section>
+    {/if}
+
+    {#if species.closely_related_to && species.closely_related_to.length > 0}
+      <section class="detail-section full-width">
+        <h2 class="section-header">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+          </svg>
+          <span>Closely Related Species</span>
+        </h2>
+        <ul class="related-species-list">
+          {#each species.closely_related_to as relatedName}
+            <li>
+              <a
+                href="{getSpeciesUrl(relatedName)}"
+                class="species-link"
+              >
+                Quercus {relatedName}
+              </a>
+            </li>
+          {/each}
+        </ul>
+      </section>
+    {/if}
+
+    {#if species.subspecies_varieties && species.subspecies_varieties.length > 0}
+      <section class="detail-section full-width">
+        <h2 class="section-header">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+          <span>Subspecies & Varieties</span>
+        </h2>
+        <ul class="space-y-2">
+          {#each species.subspecies_varieties as variety}
+            <li class="text-sm italic" style="color: var(--color-text-secondary);">{variety}</li>
+          {/each}
+        </ul>
+      </section>
+    {/if}
+
+    {#if species.synonyms && species.synonyms.length > 0}
+      <section class="detail-section full-width">
+        <h2 class="section-header">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+          </svg>
+          <span>Synonyms ({species.synonyms.length})</span>
+        </h2>
+        <ul class="flex flex-wrap gap-2">
+          {#each species.synonyms as synonym}
+            <li class="pill-tag">
+              <span class="italic">{synonym.name || synonym}</span>{#if synonym.author} <span class="text-xs opacity-70">{synonym.author}</span>{/if}
+            </li>
+          {/each}
+        </ul>
+      </section>
+    {/if}
+
+    {#if species.conservation_status}
+      <section class="detail-section">
+        <h2 class="section-header">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <span>Conservation Status</span>
+        </h2>
+        <span class="conservation-badge">
+          {species.conservation_status}
+        </span>
+      </section>
+    {/if}
+
+    <!-- SOURCE-DEPENDENT DATA -->
+
     {#if sources.length > 0}
-      <section class="detail-section source-selector-section">
+      <section class="detail-section source-selector-section full-width">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -187,44 +352,6 @@
               {/if}
             </div>
           {/if}
-        </div>
-      </section>
-    {/if}
-
-    {#if species.is_hybrid && (species.parent1 || species.parent2)}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          <span>Parent Species</span>
-        </h2>
-        <div class="space-y-3">
-          {#if species.parent_formula}
-            <p class="detail-text italic font-medium" style="color: var(--color-forest-700);">{species.parent_formula}</p>
-          {/if}
-          <ul class="space-y-2">
-            {#if species.parent1}
-              <li class="parent-link-item">
-                <a
-                  href="{getSpeciesUrl(species.parent1.replace('Quercus ', ''))}"
-                  class="species-link"
-                >
-                  {species.parent1}
-                </a>
-              </li>
-            {/if}
-            {#if species.parent2}
-              <li class="parent-link-item">
-                <a
-                  href="{getSpeciesUrl(species.parent2.replace('Quercus ', ''))}"
-                  class="species-link"
-                >
-                  {species.parent2}
-                </a>
-              </li>
-            {/if}
-          </ul>
         </div>
       </section>
     {/if}
@@ -326,6 +453,24 @@
       </section>
     {/if}
 
+    {#if selectedSource?.local_names && selectedSource.local_names.length > 0}
+      <section class="detail-section">
+        <h2 class="section-header">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+          </svg>
+          <span>Common Names</span>
+        </h2>
+        <ul class="flex flex-wrap gap-2">
+          {#each selectedSource.local_names as localName}
+            <li class="pill-tag">
+              {localName}
+            </li>
+          {/each}
+        </ul>
+      </section>
+    {/if}
+
     {#if selectedSource?.hardiness_habitat}
       <section class="detail-section">
         <h2 class="section-header">
@@ -338,185 +483,8 @@
       </section>
     {/if}
 
-    {#if species.taxonomy}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span>Taxonomy</span>
-        </h2>
-        <dl class="taxonomy-grid">
-          {#if species.taxonomy.subgenus}
-            <dt>Subgenus:</dt>
-            <dd>
-              <a href="{getTaxonUrl('subgenus')}" class="taxonomy-link">
-                {species.taxonomy.subgenus}
-              </a>
-            </dd>
-          {/if}
-          {#if species.taxonomy.section}
-            <dt>Section:</dt>
-            <dd>
-              <a href="{getTaxonUrl('section')}" class="taxonomy-link">
-                {species.taxonomy.section}
-              </a>
-            </dd>
-          {/if}
-          {#if species.taxonomy.subsection}
-            <dt>Subsection:</dt>
-            <dd>
-              <a href="{getTaxonUrl('subsection')}" class="taxonomy-link">
-                {species.taxonomy.subsection}
-              </a>
-            </dd>
-          {/if}
-          {#if species.taxonomy.complex}
-            <dt>Complex:</dt>
-            <dd>
-              <a href="{getTaxonUrl('complex')}" class="taxonomy-link">
-                Q. {species.taxonomy.complex}
-              </a>
-            </dd>
-          {/if}
-          {#if species.taxonomy.series}
-            <dt>Series:</dt>
-            <dd>{species.taxonomy.series}</dd>
-          {/if}
-        </dl>
-      </section>
-    {/if}
-
-    {#if species.hybrids && species.hybrids.length > 0}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-          </svg>
-          <span>Known Hybrids ({species.hybrids.length})</span>
-        </h2>
-        <ul class="space-y-3">
-          {#each species.hybrids as hybridName}
-            {@const hybridSpecies = findHybridSpecies(hybridName)}
-            {@const otherParent = hybridSpecies ? getOtherParent(hybridSpecies, species.name) : null}
-            <li class="hybrid-item">
-              <a
-                href="{getSpeciesUrl(hybridSpecies?.name || hybridName)}"
-                class="species-link font-semibold"
-              >
-                Quercus {hybridSpecies?.name?.startsWith('×') ? '' : '× '}{hybridSpecies?.name || hybridName}
-              </a>
-              {#if otherParent}
-                <span class="text-sm" style="color: var(--color-text-secondary);">
-                  (with
-                  <a
-                    href="{getSpeciesUrl(otherParent)}"
-                    class="species-link-inline"
-                  >
-                    Quercus {otherParent}
-                  </a>)
-                </span>
-              {/if}
-            </li>
-          {/each}
-        </ul>
-      </section>
-    {/if}
-
-    {#if species.closely_related_to && species.closely_related_to.length > 0}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-          </svg>
-          <span>Closely Related Species</span>
-        </h2>
-        <ul class="related-species-list">
-          {#each species.closely_related_to as relatedName}
-            <li>
-              <a
-                href="{getSpeciesUrl(relatedName)}"
-                class="species-link"
-              >
-                Quercus {relatedName}
-              </a>
-            </li>
-          {/each}
-        </ul>
-      </section>
-    {/if}
-
-    {#if species.synonyms && species.synonyms.length > 0}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-          </svg>
-          <span>Synonyms ({species.synonyms.length})</span>
-        </h2>
-        <ul class="space-y-2">
-          {#each species.synonyms as synonym}
-            <li class="text-sm" style="color: var(--color-text-secondary);">
-              <span class="italic font-medium" style="color: var(--color-text-primary);">{synonym.name || synonym}</span>
-              {#if synonym.author}
-                <span style="color: var(--color-text-tertiary);"> {synonym.author}</span>
-              {/if}
-            </li>
-          {/each}
-        </ul>
-      </section>
-    {/if}
-
-    {#if selectedSource?.local_names && selectedSource.local_names.length > 0}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-          </svg>
-          <span>Common Names</span>
-        </h2>
-        <ul class="flex flex-wrap gap-2">
-          {#each selectedSource.local_names as localName}
-            <li class="common-name-tag">
-              {localName}
-            </li>
-          {/each}
-        </ul>
-      </section>
-    {/if}
-
-    {#if species.subspecies_varieties && species.subspecies_varieties.length > 0}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
-          <span>Subspecies & Varieties</span>
-        </h2>
-        <ul class="space-y-2">
-          {#each species.subspecies_varieties as variety}
-            <li class="text-sm italic" style="color: var(--color-text-secondary);">{variety}</li>
-          {/each}
-        </ul>
-      </section>
-    {/if}
-
-    {#if species.conservation_status}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-          <span>Conservation Status</span>
-        </h2>
-        <span class="conservation-badge">
-          {species.conservation_status}
-        </span>
-      </section>
-    {/if}
-
     {#if selectedSource?.miscellaneous}
-      <section class="detail-section">
+      <section class="detail-section full-width">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -527,7 +495,7 @@
       </section>
     {/if}
 
-    <section class="detail-section">
+    <section class="detail-section full-width">
       <h2 class="section-header">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -563,26 +531,48 @@
     background-color: var(--color-surface);
   }
 
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  /* Two columns on large screens */
+  @media (min-width: 1024px) {
+    .content-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+  }
+
   .detail-section {
-    padding: 1.25rem;
-    border-radius: 0.75rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     box-shadow: var(--shadow-sm);
   }
 
+  /* Full-width sections span both columns */
+  .detail-section.full-width {
+    grid-column: 1 / -1;
+  }
+
   .section-header {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
-    font-size: 1.125rem;
+    gap: 0.5rem;
+    font-size: 1rem;
     font-weight: 600;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     color: var(--color-forest-800);
     font-family: var(--font-serif);
   }
 
   .section-header svg {
+    width: 1.125rem;
+    height: 1.125rem;
     color: var(--color-forest-600);
     flex-shrink: 0;
   }
@@ -604,19 +594,6 @@
   .species-link:hover {
     color: var(--color-forest-600);
     border-bottom-color: var(--color-forest-400);
-  }
-
-  .species-link-inline {
-    color: var(--color-forest-700);
-    font-weight: 500;
-    text-decoration: underline;
-    text-decoration-color: var(--color-forest-300);
-    transition: all 0.15s ease;
-  }
-
-  .species-link-inline:hover {
-    color: var(--color-forest-600);
-    text-decoration-color: var(--color-forest-500);
   }
 
   .parent-link-item {
@@ -642,19 +619,26 @@
     gap: 0.5rem;
   }
 
-  .taxonomy-grid {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.75rem 1.5rem;
+  .taxonomy-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
     font-size: 0.9375rem;
+    align-items: baseline;
   }
 
-  .taxonomy-grid dt {
+  .taxonomy-item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.375rem;
+  }
+
+  .taxonomy-label {
     font-weight: 500;
     color: var(--color-text-tertiary);
   }
 
-  .taxonomy-grid dd {
+  .taxonomy-value {
     color: var(--color-text-primary);
     font-weight: 500;
   }
@@ -677,16 +661,6 @@
     color: var(--color-forest-600);
     border-bottom-color: var(--color-forest-600);
     border-bottom-style: solid;
-  }
-
-  .common-name-tag {
-    padding: 0.5rem 1rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    background-color: var(--color-forest-100);
-    color: var(--color-forest-900);
-    border: 1px solid var(--color-forest-200);
   }
 
   .conservation-badge {
@@ -759,6 +733,88 @@
     color: var(--color-text-primary);
     font-weight: 500;
     font-style: italic;
+  }
+
+  /* Species header styles */
+  .species-header {
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-surface) 100%);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .species-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-forest-900);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .species-name {
+    color: var(--color-forest-800);
+  }
+
+  .author-text {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--color-text-secondary);
+    font-family: var(--font-sans);
+  }
+
+  .type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    vertical-align: middle;
+  }
+
+  .type-badge.species {
+    background-color: var(--color-forest-100);
+    color: var(--color-forest-800);
+    border: 1px solid var(--color-forest-200);
+  }
+
+  .type-badge.hybrid {
+    background-color: var(--color-oak-light);
+    color: var(--color-oak-brown);
+    border: 1px solid var(--color-oak-medium);
+  }
+
+  /* Hybrids two-column grid */
+  .hybrids-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .hybrids-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* Pill tag styling for synonyms and common names */
+  .pill-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background-color: var(--color-forest-100);
+    color: var(--color-forest-900);
+    border: 1px solid var(--color-forest-200);
   }
 
   /* Source selector styles */

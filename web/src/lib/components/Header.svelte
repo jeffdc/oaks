@@ -9,7 +9,7 @@
 			<!-- Logo and title -->
 			<a
 				href="{base}/"
-				class="flex items-center gap-3 hover:opacity-90 transition-opacity"
+				class="flex items-center gap-3 hover:opacity-90 transition-opacity no-underline"
 			>
 				<img src="{base}/oak-leaf-outline.svg" alt="Oak Leaf" class="w-7 h-10 brightness-0 invert opacity-90" />
 				<h1 class="text-xl font-bold text-white" style="font-family: var(--font-serif); letter-spacing: 0.01em;">Quercus Compendium</h1>
@@ -32,6 +32,10 @@
 </header>
 
 <style>
+	a {
+		text-decoration: none;
+	}
+
 	.nav-link {
 		padding: 0.5rem 1rem;
 		font-size: 0.9375rem;
