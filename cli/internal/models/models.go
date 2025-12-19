@@ -107,6 +107,8 @@ type Source struct {
 	ISBN        *string `json:"isbn,omitempty" yaml:"isbn,omitempty"`
 	DOI         *string `json:"doi,omitempty" yaml:"doi,omitempty"`
 	Notes       *string `json:"notes,omitempty" yaml:"notes,omitempty"`
+	License     *string `json:"license,omitempty" yaml:"license,omitempty"`
+	LicenseURL  *string `json:"license_url,omitempty" yaml:"license_url,omitempty"`
 }
 
 // NewSource creates a new Source with the given type and name

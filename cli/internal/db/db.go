@@ -62,7 +62,9 @@ func (db *Database) initializeSchema() error {
 			url TEXT,
 			isbn TEXT,
 			doi TEXT,
-			notes TEXT
+			notes TEXT,
+			license TEXT,
+			license_url TEXT
 		)`,
 
 		// Oak entries with taxonomy and hybrid support
@@ -131,10 +133,10 @@ func (db *Database) initializeSchema() error {
 // InsertSource inserts a new source and returns its ID
 func (db *Database) InsertSource(source *models.Source) (int64, error) {
 	result, err := db.conn.Exec(
-		`INSERT INTO sources (source_type, name, description, author, year, url, isbn, doi, notes)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO sources (source_type, name, description, author, year, url, isbn, doi, notes, license, license_url)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		source.SourceType, source.Name, source.Description,
-		source.Author, source.Year, source.URL, source.ISBN, source.DOI, source.Notes,
+		source.Author, source.Year, source.URL, source.ISBN, source.DOI, source.Notes, source.License, source.LicenseURL,
 	)
 	if err != nil {
 		return 0, fmt.Errorf("failed to insert source: %w", err)
@@ -150,13 +152,13 @@ func (db *Database) InsertSource(source *models.Source) (int64, error) {
 // GetSource gets a source by ID
 func (db *Database) GetSource(id int64) (*models.Source, error) {
 	row := db.conn.QueryRow(
-		`SELECT id, source_type, name, description, author, year, url, isbn, doi, notes
+		`SELECT id, source_type, name, description, author, year, url, isbn, doi, notes, license, license_url
 		 FROM sources WHERE id = ?`,
 		id,
 	)
 
 	var s models.Source
-	err := row.Scan(&s.ID, &s.SourceType, &s.Name, &s.Description, &s.Author, &s.Year, &s.URL, &s.ISBN, &s.DOI, &s.Notes)
+	err := row.Scan(&s.ID, &s.SourceType, &s.Name, &s.Description, &s.Author, &s.Year, &s.URL, &s.ISBN, &s.DOI, &s.Notes, &s.License, &s.LicenseURL)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -170,10 +172,10 @@ func (db *Database) GetSource(id int64) (*models.Source, error) {
 func (db *Database) UpdateSource(source *models.Source) error {
 	_, err := db.conn.Exec(
 		`UPDATE sources
-		 SET source_type = ?, name = ?, description = ?, author = ?, year = ?, url = ?, isbn = ?, doi = ?, notes = ?
+		 SET source_type = ?, name = ?, description = ?, author = ?, year = ?, url = ?, isbn = ?, doi = ?, notes = ?, license = ?, license_url = ?
 		 WHERE id = ?`,
 		source.SourceType, source.Name, source.Description, source.Author, source.Year,
-		source.URL, source.ISBN, source.DOI, source.Notes, source.ID,
+		source.URL, source.ISBN, source.DOI, source.Notes, source.License, source.LicenseURL, source.ID,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to update source: %w", err)
@@ -184,7 +186,7 @@ func (db *Database) UpdateSource(source *models.Source) error {
 // ListSources lists all sources
 func (db *Database) ListSources() ([]*models.Source, error) {
 	rows, err := db.conn.Query(
-		`SELECT id, source_type, name, description, author, year, url, isbn, doi, notes
+		`SELECT id, source_type, name, description, author, year, url, isbn, doi, notes, license, license_url
 		 FROM sources ORDER BY name`,
 	)
 	if err != nil {
@@ -195,7 +197,7 @@ func (db *Database) ListSources() ([]*models.Source, error) {
 	var sources []*models.Source
 	for rows.Next() {
 		var s models.Source
-		if err := rows.Scan(&s.ID, &s.SourceType, &s.Name, &s.Description, &s.Author, &s.Year, &s.URL, &s.ISBN, &s.DOI, &s.Notes); err != nil {
+		if err := rows.Scan(&s.ID, &s.SourceType, &s.Name, &s.Description, &s.Author, &s.Year, &s.URL, &s.ISBN, &s.DOI, &s.Notes, &s.License, &s.LicenseURL); err != nil {
 			return nil, fmt.Errorf("failed to scan source: %w", err)
 		}
 		sources = append(sources, &s)

@@ -24,6 +24,8 @@ type ExportSourceData struct {
 	SourceID         int64    `json:"source_id"`
 	SourceName       string   `json:"source_name"`
 	SourceURL        *string  `json:"source_url,omitempty"`
+	License          *string  `json:"license,omitempty"`
+	LicenseURL       *string  `json:"license_url,omitempty"`
 	IsPreferred      bool     `json:"is_preferred"`
 	LocalNames       []string `json:"local_names,omitempty"`
 	Range            *string  `json:"range,omitempty"`
@@ -184,6 +186,8 @@ func runExport(cmd *cobra.Command, args []string) error {
 			if source, ok := sourceMap[ss.SourceID]; ok {
 				sd.SourceName = source.Name
 				sd.SourceURL = source.URL
+				sd.License = source.License
+				sd.LicenseURL = source.LicenseURL
 			}
 
 			species.Sources = append(species.Sources, sd)

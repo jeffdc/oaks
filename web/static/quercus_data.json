@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-19T21:08:47Z",
-    "exported_at": "2025-12-19T21:08:47Z",
+    "version": "2025-12-19T21:32:14Z",
+    "exported_at": "2025-12-19T21:32:14Z",
     "species_count": 734
   },
   "species": [
@@ -34,6 +34,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "maple-leaf oak"
@@ -62,6 +63,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico, Sierra Madre Oriental (Hidalgo, Puebla, Oaxaca, Veracruz); 1500-2500 m;",
           "growth_habit": "to 20 m tall; trunk to 1.5 m in diameter;",
@@ -93,6 +95,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "yan li"
@@ -125,6 +128,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Vera Cruz) ; near 2200 m;",
           "growth_habit": "usually less than 3 metres tall; may reach 5 m;",
@@ -157,6 +161,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "japanese green oak",
@@ -187,6 +192,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Guerrero) ;",
           "growth_habit": "tree, or shrub more than 3 metres tall;",
@@ -216,6 +222,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino pipitillo",
@@ -258,6 +265,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Japanese chestnut oak",
@@ -330,6 +338,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Algeria, Tunisia; in mountains;",
           "growth_habit": "25 m high; pyramidal crown when young;",
@@ -361,6 +370,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "NE, C, S and SE Mexico : Sierra Madre Oriental and East of the Volcanic Trans-Mexican Belt (Guanajuato, Hidalgo, Nuevo Leon, Oaxaca, Puebla, Queretaro, San Luis Potosi, Tamaulipas and Veracruz); 1200-2600 m;",
           "growth_habit": "tree to 18 m high, often smaller, 7-12m;",
@@ -397,6 +407,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "coast live oak",
@@ -492,6 +503,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "downy-kermes Oak"
@@ -543,6 +555,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Eastern White Oak"
@@ -553,6 +566,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "white oak",
@@ -587,6 +601,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "bai zhi qing gang"
@@ -618,6 +633,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico in the North-West (Sonora, Sinaloa, Durango, Chihuahua); 800-1800 m;",
           "growth_habit": "tree to 3-15 m tall; trunk 25-50 cm in diameter;",
@@ -663,6 +679,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "hu li"
@@ -706,6 +723,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Cyprus golden oak"
@@ -734,6 +752,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Hidalgo)",
           "growth_habit": "1 to 1.5 m",
@@ -768,6 +787,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "chuan dian gao shan li"
@@ -802,6 +822,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "dao luan ye qing gang"
@@ -834,6 +855,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "pinang pinang"
@@ -867,6 +889,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "gui \n        zhou qing gang"
@@ -895,6 +918,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico, in the Sierra Madre Oriental (Hidalgo, Nuevo León, Puebla, Queretaro, San Luis Potosi and Veracruz); 1900-2890 m;",
           "growth_habit": "7-15 (-20) m ;",
@@ -923,6 +947,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Nayarit, Jalisco, Sinaloa, Aguas Calientes); 250-1700 m;",
           "growth_habit": "tree, not exceeding 10 m tall; trunk to 30-40 cm in diameter;",
@@ -956,6 +981,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Arizona \n        white oak",
@@ -995,6 +1021,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Arkansas \n        oak",
@@ -1029,6 +1056,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "tuo pan qing gang"
@@ -1062,6 +1090,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "boz-pirnal"
@@ -1093,6 +1122,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "zhai \n        ye qing gang"
@@ -1122,6 +1152,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Vietnam; to 1400 m;",
           "growth_habit": "3 m tall;",
@@ -1153,6 +1184,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Bluff Oak"
@@ -1162,6 +1194,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "bluff-oak",
@@ -1195,6 +1228,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "yue \n        nan qing gang"
@@ -1227,6 +1261,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Holly \n        oak",
@@ -1271,6 +1306,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "jiang \n        zi li"
@@ -1299,6 +1335,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (SW Chihuahua, NW Sonora, in the Sierra Madre Occidental); 1300-2115 m;",
           "growth_habit": "shrub or small tree, 1 to 5 m;",
@@ -1325,6 +1362,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "ba \n        wang li"
@@ -1357,6 +1395,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "bing \n        lang qing gang"
@@ -1393,6 +1432,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Costa-Rica (2400 m), El Salvador (2500 m), Guatemala (2100 m), Honduras (1800-2800 m), Mexico (Chiapas, Oaxaca, 1500-3000 m), Nicaragua (450-1700 m), Panama (2100 m);",
           "growth_habit": "15-35 m tall;",
@@ -1426,6 +1466,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "inland scrub oak",
@@ -1562,6 +1603,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Swamp White Oak"
@@ -1571,6 +1613,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "swamp \n        white oak",
@@ -1602,6 +1645,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Vietnam (Bidoup-Nui Ba National Park); 1700 m;",
           "growth_habit": "tree reaching 8 m hight;",
@@ -1630,6 +1674,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "li zi qing gang"
@@ -1664,6 +1709,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Boyntoni’s Oak"
@@ -1673,6 +1719,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Boyntons sand post oak"
@@ -1706,6 +1753,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Central Vietnam; 900 to 2000 m;",
           "growth_habit": "14-28 m;",
@@ -1732,6 +1780,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Baja California del Sur); 300-1000 m;",
           "growth_habit": "10-20 m high; trunk to 80 cm in diameter;",
@@ -1763,6 +1812,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "East Turkey (Zagros Mounts); W and S Iran; N Iraq; Desert of Syria; 300 to 1900 m;",
           "growth_habit": "reaches 10 m, with trunk to 0.8 m in diametre; often smaller; rounded crown;",
@@ -1788,6 +1838,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Chiapas, Guerrero);",
           "growth_habit": "to 20 m heigh and more;",
@@ -1824,6 +1875,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "ying jiang qing gang"
@@ -1861,6 +1913,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Buckleys \n        oak",
@@ -1911,6 +1964,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        aguacatillo",
@@ -1954,6 +2008,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Vietnam (Khanh Hoa Province, Hon Ba Nature Reserve); 990-1500 m;",
           "growth_habit": "12-15(-20) m; trunc to 0.35-0.50 m in diameter;",
@@ -1999,6 +2054,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Mirbeck's \n        oak",
@@ -2041,6 +2097,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "chisos oak",
@@ -2084,6 +2141,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mexican \n        oak",
@@ -2136,6 +2194,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Encino \n        cascara roja"
@@ -2169,6 +2228,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "chesnut \n        leaf oak",
@@ -2210,6 +2270,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Cedros \n        Island Oak"
@@ -2239,6 +2300,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino borneo",
@@ -2290,6 +2352,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "hairy \n        oak",
@@ -2325,6 +2388,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "ling \n        nan qing gang"
@@ -2361,6 +2425,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Chapman’s Oak"
@@ -2370,6 +2435,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Chapman's \n        oak"
@@ -2399,6 +2465,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico, en la Sierra Madre Oriental (Charcas,San Luis Potosi) ;",
           "growth_habit": "less than 3 m tall;",
@@ -2424,6 +2491,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Oaxaca, Chiapas) ;",
           "growth_habit": "tree;",
@@ -2453,6 +2521,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "xiao ye li"
@@ -2486,6 +2555,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Chihuahuan \n        oak",
@@ -2532,6 +2602,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "canyon \n        oak",
@@ -2596,6 +2667,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Borneo (Mt Dulit, Norh of Sarawak); to 1300 m;",
           "growth_habit": "more than 15 m tall;",
@@ -2625,6 +2697,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "fujian \n        qing gang"
@@ -2661,6 +2734,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "xi ye qing gang"
@@ -2703,6 +2777,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Coahuila, Chihuahua); 2000-3550 m;",
           "growth_habit": "may sometimes reach more than 5-6 m tall; trunk to 0.25 m in diameter;",
@@ -2743,6 +2818,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "chêne kermès",
@@ -2803,6 +2879,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "tie \n        xiang li"
@@ -2843,6 +2920,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "scarlet \n        oak"
@@ -2876,6 +2954,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino de asta",
@@ -2909,6 +2988,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        avellano cimarron",
@@ -2947,6 +3027,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Sardinia; Sicily; S Italy; S France;",
           "leaves": "5-8.5 x 3-5 cm; deciduous; elliptical to oblong; base subcordate; 5-8 pairs of regular, rounded lobes, sometimes lobulate and mucronate; dull adaxially; grey green pubescent beneath; tertiary veins evident; petiole 4-14 mm long;",
@@ -2984,6 +3065,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Durango, Jaliso, Nayarit) ; 2300-2500 m;",
           "growth_habit": "small shrub less than 3 m tall, to tree 10-15 m;",
@@ -3012,6 +3094,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Sierra Madre de Oaxaca, SW Puebla). 1700-2800 m;",
           "growth_habit": "3-10 m",
@@ -3040,6 +3123,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Costa-Rica; Honduras; Panama; 2000-3000 m;",
           "growth_habit": "reaches more than 30 m tall; trunk to 2 m in diameter, and more;",
@@ -3066,6 +3150,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Muller's \n        oak"
@@ -3105,6 +3190,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino blanco"
@@ -3137,6 +3223,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Puebla, Chiapas, Oaxaca, Veracruz) 1800 m; Honduras; Belize; Costa Rica 600 - 1500 m; Nicaragua to 1200-1600 m; Panama ;",
           "growth_habit": "8-25 m, but may reach 40 m; trunk broad and short;",
@@ -3168,6 +3255,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino",
@@ -3215,6 +3303,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        chicharron"
@@ -3252,6 +3341,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino capulincillo"
@@ -3285,6 +3375,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Chiapas), South Guatemala, El Salvador, Honduras (?), Colombia; 750 to 2700 m;",
           "growth_habit": "10-15 m;",
@@ -3318,6 +3409,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Chiapas); Guatemala; 1800-2500 m;",
           "growth_habit": "more than 10 m tall;",
@@ -3343,6 +3435,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Jalisco); 1800-2300 m;",
           "growth_habit": "reaches 10-15 m tall; more often shrubby;",
@@ -3372,6 +3465,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Nuevo Leon) ; 800-1400 m;",
           "growth_habit": "5-10 m tall;",
@@ -3401,6 +3495,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "da ming shan qing gang"
@@ -3438,6 +3533,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Oak of Daléchamp"
@@ -3467,6 +3563,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Vietnam (Lam Dong Province);",
           "growth_habit": "reaches 30 m tall;",
@@ -3493,6 +3590,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "huang \n        mao qing gang"
@@ -3523,6 +3621,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico, in the Sierra Madre Oriental (Hidalgo, Puebla, Veracruz); 1400-2200 m;",
           "growth_habit": "25 m tall; trunc to 1 m in diameter;",
@@ -3552,6 +3651,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "shang \n        si qing gang"
@@ -3581,6 +3681,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Chihuahua, in mountains along the courses of Rio Grande and Rio Conchos); 1700-2100 m; rhizomatous shrub in extensive and dense thickets;",
           "growth_habit": "1 m tall; intricate branching;",
@@ -3623,6 +3724,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "daimyo \n        oak",
@@ -3685,6 +3787,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Hidalgo, Oaxaca, Puebla, Veracruz ); endemic in Sierra Madre Oriental; 1800-3100 m;",
           "growth_habit": "usually less than 1.2 m tall; rhizomatous;",
@@ -3718,6 +3821,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "depressed \n        oak",
@@ -3756,6 +3860,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        tecux",
@@ -3786,6 +3891,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Baja California : Sierra de la Laguna, Cape Reg.) ; 2600 m;",
           "growth_habit": "more than 3 m tall;",
@@ -3813,6 +3919,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "ding \n        hu qing gang"
@@ -3845,6 +3952,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "die \n        dou qing gang"
@@ -3879,6 +3987,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Central Mexico ( Nuevo Leon, Durango, Mexico, Puebla, Veracruz)",
           "growth_habit": "3-5 m tall;",
@@ -3906,6 +4015,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "chi \n        ye li"
@@ -3936,6 +4046,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Vietnam (Province du Haut-Donnaï); 1000-1700 m;",
           "growth_habit": "25 m;",
@@ -3972,6 +4083,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "blue oak",
@@ -4014,6 +4126,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "California \n        scrub oak",
@@ -4128,6 +4241,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "sipuri",
@@ -4161,6 +4275,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "hua \n        nan qing gang"
@@ -4194,6 +4309,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        manzano",
@@ -4235,6 +4351,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "tu mai qing gang"
@@ -4270,6 +4387,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "jack \n        oak",
@@ -4321,6 +4439,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        cucharita",
@@ -4351,6 +4470,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "North Borneo; Sumatra; Malaysia; to 1500 m;",
           "growth_habit": "reaches 35 m tall and more; trunk to 0,9 m in diameter;",
@@ -4385,6 +4505,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Emory's oak",
@@ -4422,6 +4543,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Engelmann's \n        oak",
@@ -4463,6 +4585,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "ba \n        dong li"
@@ -4500,6 +4623,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Central-West Iberian Penisula, specially Portugal",
           "growth_habit": "reaches 20 m tall",
@@ -4540,6 +4664,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Myanmar; Thailand; to 2100 m;",
           "growth_habit": "may reach more than 30 m high;",
@@ -4565,6 +4690,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "bai \n        li"
@@ -4624,6 +4750,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "roure de fulla petita \n        (Catalonia)",
@@ -4711,6 +4838,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Spanish \n        red oak",
@@ -4744,6 +4872,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "China (Sichuan, Yunnan)",
           "leaves": "yellow trichomes on the abaxial face, not covering the secondary veins, of very slightly;",
@@ -4767,6 +4896,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico in the Sierra Madre Oriental (Vera Cruz, Orizaba Pike at 2600-3300 m ) ;",
           "growth_habit": "more than 3 m tall;",
@@ -4795,6 +4925,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Nuevo Leon) ; 2300-2800 m;",
           "growth_habit": "shrub or small tree..",
@@ -4829,6 +4960,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Moru \n        oak",
@@ -4877,6 +5009,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Hungarian \n        oak"
@@ -4909,6 +5042,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "zhui lian li"
@@ -4938,6 +5072,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Hidalgo, Mexico DF, Michoacán, Oaxaca, Puebla, Queretaro, Tlaxcala and Veracruz); 2200-3000 m;",
           "growth_habit": "2 m tall, sometimes to 7 m; rhizomatous;",
@@ -4966,6 +5101,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Coahuila, Jalisco, Sinaloa, Nayarit, Durango, Chihuahua); 1800 - 2900 m;",
           "growth_habit": "3-10 m; trunk 0.2-0.4 m in diameter;",
@@ -4996,6 +5132,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico, Sierra Madre Oriental (Puebla, Hidalgo, San Luis Potosi) ; 1300-2600 m;",
           "growth_habit": "8-15 m tall;",
@@ -5024,6 +5161,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "plateau \n        oak",
@@ -5065,6 +5203,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Borneo, Sumatra, Malaysia; 100-1400 m;",
           "growth_habit": "reaches 30 m, with trunk to 1 m in diameter;",
@@ -5092,6 +5231,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Nuevo Leon, Tamaulipas) ; 1200-2500 m;",
           "growth_habit": "less than 3 m tall; dense shrub;",
@@ -5139,6 +5279,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Utah's white oak",
@@ -5184,6 +5325,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mao \n        man qing gang"
@@ -5226,6 +5368,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Oregon \n        white oak"
@@ -5340,6 +5483,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Borneo, Java, Sumatra, W Malaysia; 600-2000 m;",
           "growth_habit": "tall tree 30 m and more; trunk to 0.60m in diameter;",
@@ -5390,6 +5534,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Georgia's oak"
@@ -5422,6 +5567,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Mexican royal oak"
@@ -5450,6 +5596,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "manzanillo"
@@ -5490,6 +5637,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Red \n        Bark Oak",
@@ -5528,6 +5676,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "quebracho"
@@ -5574,6 +5723,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Ara-kasi",
@@ -5609,6 +5759,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Tocuz",
@@ -5652,6 +5803,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        chaparro",
@@ -5695,6 +5847,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "S.E. Bangladesh, China (South of Yunnan), Myanmar; 300-1500 m ;",
           "growth_habit": "18-24 m;",
@@ -5747,6 +5900,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino chilillo"
@@ -5781,6 +5935,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Graves \n        oak",
@@ -5814,6 +5969,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico ( Coahuila, , Hidalgo, Nuevo Leon, Oaxaca, Puebla, Querretaro, San Luis Potosi, Tamaulipas, Veracruz); 2000-3300 m, North of the 24th parallel;",
           "growth_habit": "4-6 m (sometimes only 2 m at high elevations and in the North of its range);",
@@ -5842,6 +5998,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "India, (NE and Sikkim); China (Guizhou, Sichuan, Xizang, Yunnan); Laos; Vietnam; Myanmar; North Thailand; Sri Lanka; 700 m to 3200 m;",
           "growth_habit": "usually 4-8 m, hardly more;",
@@ -5874,6 +6031,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "scrub \n        oak",
@@ -5908,6 +6066,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Costa Rica (2600 m) ; Panama (1500 m) ;",
           "growth_habit": "more than 30 m;",
@@ -5937,6 +6096,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mao \n        dou li"
@@ -5973,6 +6133,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "South and East Bulgaria; Asia Minor; The Caucasus; 1000-1500 m;",
           "growth_habit": "7-9 m in cultivation, but may reach 35 m;",
@@ -6003,6 +6164,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Sand Post Oak"
@@ -6012,6 +6174,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Havards \n        oak",
@@ -6047,6 +6210,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mao \n        zhi qing gang"
@@ -6080,6 +6244,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "leaves": "- Very short petiole.\n- Leaf bases more U-shaped.\n- Saplings and resprouts can have cordate leaf bases and very sharply lobed leaves.\n- Lower leaf surface is glabrous\n- Secondary veins raised on upper surface\n- Leaves leathery and opaque\n- Evergreen, maybe tardily deciduous at times (not sure about this)\n\nAs compared to Q. laurifolia:\n- Leaves on average narrower and widest towards the tip\n- Flowers about 2 weeks later"
         },
@@ -6087,6 +6252,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Darlingtons \n        oak",
@@ -6162,6 +6328,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Hinckleys \n        oak"
@@ -6198,6 +6365,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        prieto"
@@ -6228,6 +6396,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico(Coahuila, Nuevo Leon) ; 2600-3300 m;",
           "growth_habit": "rhizomatous shrub ; may exceed 4m tall;",
@@ -6255,6 +6424,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico : Southern part of the Sierra Madre Oriental (Hidalgo, Puebla, Veracruz), 1600 to 2400 m ;",
           "growth_habit": "Tree to 4-15 m, or shrub to 3-5 m;",
@@ -6293,6 +6463,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "lei \n        gong qing gang"
@@ -6322,6 +6493,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Southern Sierra Madre Occidental, from North of Jalisco to South Durango, in the Sierra de los Huicholes); 1650-2820 m;",
           "growth_habit": "1-13 m; trunk 10 to 45 cm in diametre;",
@@ -6353,6 +6525,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Eastern Panama; Colombia; 1000-3000 m ;",
           "growth_habit": "more than 30 m tall, trunk to 40 cm in diameter or more; stout trunk, rounded crown;",
@@ -6381,6 +6554,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "duo mai qing gang"
@@ -6416,6 +6590,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "whiteleaf \n        oak",
@@ -6449,6 +6624,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "rong \n        mao qing gang"
@@ -6481,6 +6657,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Coahuila, Nuevo Leon, San Luis Potosi, Tamaulipas); 2100-2950 m;",
           "growth_habit": "usually less than 3 m tall;",
@@ -6506,6 +6683,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "growth_habit": "Sardinia",
           "url": "https://oaksoftheworld.fr/quercus_ichnusae.htm"
@@ -6526,6 +6704,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Sonora) ;",
           "growth_habit": "more than 3 m tall;",
@@ -6570,6 +6749,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "yeuse",
@@ -6614,6 +6794,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "bear \n        oak",
@@ -6644,6 +6825,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Jalisco, volcano Colima); 330-1550 m;",
           "growth_habit": "10-20 m tall and more;",
@@ -6685,6 +6867,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "shingle \n        oak",
@@ -6731,6 +6914,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "bluejack \n        oak",
@@ -6770,6 +6954,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Asia Minor, Southern Turkey, Greece; to 850 m; introduced in Europe in 1822;",
           "growth_habit": "5-6 m tall; often small shrub less than 2 m tall;",
@@ -6838,6 +7023,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "scrub \n        oak",
@@ -6876,6 +7062,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        bornio"
@@ -6908,6 +7095,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "intricate \n        oak",
@@ -6943,6 +7131,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Coahuila, Chihuahua, Nuevo Leon, Tamaulipas); 1800-2000 m;",
           "growth_habit": "shrub often less than m;",
@@ -6986,6 +7175,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Mount \n        Thabor's oak"
@@ -7037,6 +7227,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "da \n        ye qing gang"
@@ -7069,6 +7260,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "jin \n        ping qing gang"
@@ -7112,6 +7304,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        capulincillo"
@@ -7159,6 +7352,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "California \n        black oak"
@@ -7202,6 +7396,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mao \n        ye qing gang"
@@ -7232,6 +7427,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "lan cang li"
@@ -7265,6 +7461,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "qiu \n        jiang qing gang"
@@ -7293,6 +7490,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Lebanon (Natural Reserve of Ehden); 1300-1900 m;",
           "leaves": "6-12 x 3.2-6.5 cm; round-oval to oblong lanceolate; tomentose adaxially; margin with deep, narrow sinuses and sinuate, acuminate, linear lobes; petiole thin, stellate hairy, 1.5-2.7 cm long.",
@@ -7322,6 +7520,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "guang \n        xi qing gang"
@@ -7355,6 +7554,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Lacey oak"
@@ -7392,6 +7592,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        algodoncillo",
@@ -7434,6 +7635,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "turquey \n        oak",
@@ -7473,6 +7675,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Buk \n        oak",
@@ -7511,6 +7714,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "woolly oak",
@@ -7561,6 +7765,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Veracruz, Chiapas, Hidalgo, Oaxaca, Puebla); Guatemala,; 700 - 2400 m;",
           "growth_habit": "4-20 (-30) m, with a trunk 30-50 cm and more in diameter;",
@@ -7593,6 +7798,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "fa dou qing gang"
@@ -7633,6 +7839,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "leaves": "- Short petiole\n- Leaf bases mostly V-shaped\n- Leaves can be lobed but more like Q. nigra, generally not sharply lobed.\n- Lower leaf surface can have hairs in the vein axils\n- Secondary veins flush or impressed\n- Leaves slightly translucent when backlit\n- Tardily deciduous, never evergreen\n\nAs compared to Q. hemispaerica:\n- Leaves on average wider and widest in the middle (diamond shaped)\n- Flowers about 2 weeks earlier than Q hemispaerica"
         },
@@ -7640,6 +7847,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "laurel oak",
@@ -7685,6 +7893,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino uricua"
@@ -7735,6 +7944,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Lebanon's \n        oak"
@@ -7766,6 +7976,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Oaxaca, Puebla, Guerrero); 1000 to 2500 m;",
           "growth_habit": "reaches 10 m tall;",
@@ -7797,6 +8008,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Java, Sumatra, West Borneo, Malaysia; 1500-2000 m;",
           "growth_habit": "may reach 30 m tall; trunk up to 0,6 m in diameter;",
@@ -7827,6 +8039,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mu jiang ye quig gang"
@@ -7869,6 +8082,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mush \n        oak",
@@ -7916,6 +8130,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "chang \n        guo qing gang"
@@ -7948,6 +8163,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "China (Sichuan, Yunnan)",
           "growth_habit": "to 25 m;",
@@ -7986,6 +8202,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Borneo; 1500-2500 m",
           "growth_habit": "not exceeding 20 m; trunk to 0.4 m in diameter;",
@@ -8019,6 +8236,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "long \n        mai qing gang"
@@ -8070,6 +8288,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "overcup oak",
@@ -8100,6 +8319,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Oaxaca); 2800 to 3000 m;",
           "growth_habit": "20-25 m tall; trunk to 1 m in diameter;",
@@ -8133,6 +8353,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Caucasus \n        oak"
@@ -8185,6 +8406,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "fan zeng qing gang",
@@ -8237,6 +8459,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mossycup \n        oak",
@@ -8305,6 +8528,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        bermejo",
@@ -8336,6 +8560,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Puebla) ;",
           "growth_habit": "not exceeding 3 m tall;",
@@ -8392,6 +8617,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "blackjack \n        oak"
@@ -8452,6 +8678,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "cortitucuz"
@@ -8484,6 +8711,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Chihuahua, Durango, Sonora, San Luis Potosi) ; 1500-3100 m;",
           "growth_habit": "reaches more than 20 m tall; sometimes shrubby;",
@@ -8510,6 +8738,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico, in the Sierra Madre Oriental (Hidalgo, Puebla, San Luis Potosi, Veracruz); 1600-2200;",
           "growth_habit": "20-30 m",
@@ -8535,6 +8764,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Chiapas); Guatemala; 700-2300 m;",
           "growth_habit": "reaches 20 m;",
@@ -8559,6 +8789,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino blanco",
@@ -8594,6 +8825,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino tezahuatl"
@@ -8629,6 +8861,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Swamp Chestnut Oak"
@@ -8638,6 +8871,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "swamp \n        chestnut oak",
@@ -8673,6 +8907,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico in the Trans-Mexican Volcanic Belt (Aguascalientes, Durango, Guanajuato, Hidalgo, Jalisco, Nuevo Leon, Oaxaca, Puebla, Querétaro, Tamaulipas, Tlaxcala, Veracruz, Zacatecas) ; 2000-3000 m ;",
           "growth_habit": "small shrub 0.4-2 m tall, branched even at base of trunk;",
@@ -8706,6 +8941,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "minimal \n        oak",
@@ -8736,6 +8972,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Tamaulipas, Nuevo Leon) ; 2500-3050 m;",
           "growth_habit": "usually 1.5 m tall, 2 m wide; can reach 3-4 m;",
@@ -8766,6 +9003,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Okinawa-urairo-gasi"
@@ -8795,6 +9033,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Mohr's shin oak"
@@ -8841,6 +9080,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "meng gu li"
@@ -8900,6 +9140,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "ai gao shan li"
@@ -8938,6 +9179,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Chestnut Oak"
@@ -8947,6 +9189,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mountain chestnut oak",
@@ -8977,6 +9220,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Nuevo Leon); to 1300 m;",
           "growth_habit": "small shrub;",
@@ -9006,6 +9250,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "tai \n        wan qing gang"
@@ -9039,6 +9284,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mo \n        tuo qing gang"
@@ -9081,6 +9327,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Chinkapin Oak"
@@ -9090,6 +9337,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "chinkapin",
@@ -9134,6 +9382,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "shira-kashi",
@@ -9172,6 +9421,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "myrtle oak",
@@ -9220,6 +9470,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "water \n        oak",
@@ -9253,6 +9504,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "ning \n        gang qing gang"
@@ -9282,6 +9534,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Borneo ; Malaysia ; to 1000 m;",
           "growth_habit": "more than 20 m tall; trunk to 0,4 m in diameter;",
@@ -9308,6 +9561,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Guerrero, Jalisco, Oaxaca); 1300-2300 m;",
           "growth_habit": "reaches 25 m;",
@@ -9333,6 +9587,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Sonoran \n        blue oak",
@@ -9365,6 +9620,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico in the Sierra Madre del Sur (Guerrero); 2000 m;",
           "leaves": "6 x 5 cm; deciduous; lanceolate; both ends attenuate; tomentum soon deciduous; 10 pairs of lateral veins ; petiole thon 1-1.5 cm long;",
@@ -9399,6 +9655,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino calicahuac",
@@ -9439,6 +9696,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino sunuj",
@@ -9470,6 +9728,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Oglethorpe’s Oak"
@@ -9479,6 +9738,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Southwestern Carolina; Northeastern Georgia; Louisiana; Mississipi; 0-200 m;",
           "growth_habit": "18-24 m tall; trunk straight, branches twisted;",
@@ -9508,6 +9768,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Sumatra, Borneo, Java, west Malaysia; 600-1500 m;",
           "growth_habit": "reaches 30 m tall; trunk to 0.5 m in diameter;",
@@ -9539,6 +9800,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        tesmosl",
@@ -9576,6 +9838,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Chiapas, Guerrero, Jalisco, Nayarit); Guatemala; Costa Rica; Panama; 1200-2000 m;",
           "growth_habit": "6-25 m; trunk to 1 m in diameter and more;",
@@ -9600,6 +9863,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Hidalgo, Nuevo Leon, San Luis Potosi, Tamaulipas); 1200-2000 m;",
           "growth_habit": "not exceeding 2 m tall, usually 0.6 m;",
@@ -9645,6 +9909,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "roble \n        cantabrica"
@@ -9678,6 +9943,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "man \n        qing gang"
@@ -9710,6 +9976,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "jian \n        ye li"
@@ -9745,6 +10012,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mao \n        guo qing gang"
@@ -9783,6 +10051,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Channel \n        Islands scrub oak"
@@ -9821,6 +10090,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "swamp \n        spanish oak",
@@ -9856,6 +10126,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Dunn oak",
@@ -9896,6 +10167,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "pin-oak"
@@ -9924,6 +10196,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Costa Rica; Panama;",
           "growth_habit": "25 m;",
@@ -9952,6 +10225,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "China (Sichuan, Yunnan), to 4000 m.",
           "growth_habit": "may reach 15 m, but often shrubby;",
@@ -9980,6 +10254,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Sta \n        Cruz Island oak",
@@ -10055,6 +10330,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "North of Spain (Cantabriques Mounts in Leon); 900-1300 m;",
           "growth_habit": "to 10 m ;",
@@ -10080,6 +10356,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Chiapas, Hidalgo, Oaxaca, Tamaulipas, Veracruz); 1000-1800 m",
           "growth_habit": "7-20 m tall ;",
@@ -10117,6 +10394,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        zopilote negro",
@@ -10146,6 +10424,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Peninsular \n        Oak"
@@ -10175,6 +10454,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (E. Sinaloa, SW Durango); 1730-2500 m",
           "growth_habit": "5-8 m, trunk 15-45 cm in diameter",
@@ -10203,6 +10483,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "wu \n        huan qing gang"
@@ -10231,6 +10512,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Sonora);",
           "growth_habit": "less than 3 metres tall;",
@@ -10256,6 +10538,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Vietnam; 400-800 m;",
           "growth_habit": "more than 15 metres tall;",
@@ -10318,6 +10601,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "sessile \n        oak",
@@ -10416,6 +10700,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "liang \n        ye qing gang"
@@ -10459,6 +10744,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "miscellaneous": "Field Notes:\nI am forming a theory that these can be reliable separated by the following: \n- Twig color - phellos - gray; nigra brown -- this can be tough \n- Midrid and twig end color - nigra can sometimes (often?) be red, phellos not\n- Leaves - while nigra can have totally linear leaves with an acute tip, there will always? be at least some sign on one of the leaves of lobing, even if only a swelling. This only works if there are enough leaves seen in the photo(s).\n\nThe distal lobing is indicative of Q nigra. Q phellos can have lobing but in my experience and research I believe it will never be distal, only proximal from the midpoint. Another point for Q nigra is that Q phellos does not have the severely constricted proximal portion of the leaf as seen on some of these leaves, towards the upper left in the photo."
         },
@@ -10466,6 +10752,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "willow \n        oak"
@@ -10502,6 +10789,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "wu \n        gang li"
@@ -10539,6 +10827,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico, endemic to the Sierra Madre Oriental (Hidalgo, Nuevo Leon, Oaxaca, Querétaro, San Luis Potosi, Tamaulipas and Veracruz); 800-1900 m;",
           "growth_habit": "7-20 m tall, trunk to 0.5 m in diameter;",
@@ -10568,6 +10857,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        rosillo"
@@ -10609,6 +10899,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "huang \n        bei qing gang"
@@ -10644,6 +10935,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "net-leaf \n        white oak",
@@ -10679,6 +10971,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Armenian \n        Oak"
@@ -10711,6 +11004,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Nuevo Leon, Tamaulipas); 700-1350 m;",
           "growth_habit": "5-8 m;",
@@ -10739,6 +11033,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "quebracho"
@@ -10767,6 +11062,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino de asta"
@@ -10808,6 +11104,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico ( Coahuila, Durango, Hidalgo, Nuevo Leon, Queretaro, San Luis Potosi, Tamaulipas, Zacatecas) ; 1000-3000 m;",
           "growth_habit": "usually less than 2 m tall, but reaches 3 m;",
@@ -10846,6 +11143,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Dwarf Chinkapin Oak"
@@ -10856,6 +11154,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "dwarf \n        chinquapin oak",
@@ -10889,6 +11188,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Bulgaria (Rila Mountains, valley of the Rilska River)",
           "url": "https://oaksoftheworld.fr/quercus_protoroburoides.htm"
@@ -10925,6 +11225,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "false Kermes Oak"
@@ -10974,6 +11275,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "China (Guangdong, Dawanshan Island);",
           "growth_habit": "0.5-3 m",
@@ -11000,6 +11302,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Borneo (Kinabalu Mount) ; to 1650 m;",
           "growth_habit": "more than 25 m tall; trunk to 0,9 m in diameter;",
@@ -11056,6 +11359,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "South, Center and West Europe; West Asia; the Caucasus, 400-1500 m;",
           "growth_habit": "15-20 m, trunk to 1 m in diameter, short, twisted; crown open, rounded;",
@@ -11107,6 +11411,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "runner \n        oak",
@@ -11141,6 +11446,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "pungent \n        oak",
@@ -11184,6 +11490,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Belize, Guatemala (near Purulha), Honduras, Nicaragua, Mexico ; 300 - 1400 m ;",
           "growth_habit": "6-20 (25) m tall;",
@@ -11227,6 +11534,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Chêne des Pyrénées",
@@ -11261,6 +11569,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Durango, Jalisco, Zacatecas); 2000-2600 m;",
           "growth_habit": "6-12 m; trunk to 0.5 m in diameter;",
@@ -11297,6 +11606,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mao \n        mai gao shan li"
@@ -11326,6 +11636,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Oaxaca) ; 500 m ;",
           "leaves": "16-17 x 4.5-6 cm; deciduous; oboval-lanceolate or oblanceolate; apex attenuate, subacute; base narrowly rounded, attenuate; margin wavy, with apical 1/2 toothed with 4 pairs of obtuse teeth ; above hairless, dull blue-green; beneath with sparce whitish tomentum ; 10-12 vein pairs, at an angle of 42° with midrib ; petiole 8 mm long;",
@@ -11353,6 +11664,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico in the Trans-Mexican Volcanic Belt (Hidalgo, San Luis Potosi, Guanajuato, Mexico, Puebla, Queretaro, Tamaulipas, Tlaxcala, Veracruz) ; 1700-3100 m, South of the 22th parallel;",
           "growth_habit": "very small shrub, 0.3-1.2 m tall, seldom to 2 m;",
@@ -11390,6 +11702,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Aguascalientes, Durango, Guanajuato, Jalisco, Michoacan, Nayarit, San Luis Potosi, Zacatecas); 1300-2600 m;",
           "growth_habit": "6-12 m tall; trunk to 0.4 m in diameter;",
@@ -11421,6 +11734,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "da \n        guo qing gang"
@@ -11493,6 +11807,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "English oak",
@@ -11567,6 +11882,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Chisos \n        mountains oak"
@@ -11610,6 +11926,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "South Europe, Algeria, North Africa; 0-2200 m;",
           "growth_habit": "10 m tall;",
@@ -11653,6 +11970,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "northern \n        red oak"
@@ -11705,6 +12023,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Guerrero, in the Sierra Madre del Sur); 2200-2950 m;",
           "growth_habit": "25-40 m; trunk to 1 m in diameter;",
@@ -11748,6 +12067,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "netleaf \n        oak",
@@ -11784,6 +12104,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Nuevo Leon) ;",
           "growth_habit": "more than 3 metres tall;",
@@ -11807,6 +12128,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Vietnam; 600-900 m;",
           "growth_habit": "5-6 m tall;",
@@ -11839,6 +12161,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Loquat \n        leaf oak",
@@ -11869,6 +12192,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "SW Oregon; NW California (Siskiyou and Klamath Mountains); often associate with Picea breweriana; to 2200 m ;",
           "growth_habit": "0.5-1 m tall, sometimes to 2.5 m; with multiple trunks and spreading crown; rhizomatous;",
@@ -11911,6 +12235,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino saucillo"
@@ -11944,6 +12269,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "urazirogashi"
@@ -11977,6 +12303,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Coahuila, Nuevo Leon, Tamaulipas, Zacatecas) ; 1900-2700 m;",
           "growth_habit": "usually 1-5 m; often less than 3 metres tall, seldom to 12 m;",
@@ -12003,6 +12330,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Central Mexico",
           "growth_habit": "more than 3 metres tall;",
@@ -12039,6 +12367,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Costa-Rica; Honduras; El Salvador; Guatemala; Panama; Belize; South-East Mexico, in the Sierra Madre Oriental (Chiapas, Oaxaca, Veracruz); 1300 m - 2000 m; Nicaragua 800 - 1500m ;",
           "growth_habit": "4-15 m tall, sometimes more;",
@@ -12065,6 +12394,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Costa Rica (Limon, Puntarenas, Chiriqui) ; 700-1900 m:",
           "growth_habit": "reaches 45 m and more;",
@@ -12092,6 +12422,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "bao \n        ye qing gang"
@@ -12123,6 +12454,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Veracruz, San Luis Potosi, Hidalgo, Puebla, Oaxaca, Tamaulipas) ; 1300-2400 m;",
           "growth_habit": "reaches 25 m tall;",
@@ -12151,6 +12483,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "dian \n        qing gang"
@@ -12180,6 +12513,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Guerrero) ;",
           "growth_habit": "more than 3 metres tall;",
@@ -12207,6 +12541,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Encino \n        amarillo"
@@ -12241,6 +12576,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Chiapas, Hidalgo, Nuevo Leon, Oaxaca, Puebla, San Luis Potosi, Tamaulipas, Veracruz) ; 1600 m.-2500m ;",
           "growth_habit": "often a bushy, rhizomatous shrub less than 1 m tall, or a shrub to 2 m;",
@@ -12277,6 +12613,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Costa Rica; Panama; Mexico (Hidalgo, Puebla, Veracruz); 1400-2400 m;",
           "growth_habit": "reaches 30 m tall;",
@@ -12306,6 +12643,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "roble belloto"
@@ -12339,6 +12677,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Brown oak",
@@ -12375,6 +12714,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "wu \n        chi qing gang"
@@ -12407,6 +12747,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "hui bei li"
@@ -12450,6 +12791,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "bao \n        li"
@@ -12484,6 +12826,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "yun \n        shan qing gang"
@@ -12516,6 +12859,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "fu \n        ning li"
@@ -12571,6 +12915,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Shumard's oak"
@@ -12637,6 +12982,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "xi \n        chou qing gang"
@@ -12668,6 +13014,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino colorado"
@@ -12701,6 +13048,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Swamp Post Oak"
@@ -12710,6 +13058,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Swamp \n        post oak",
@@ -12751,6 +13100,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Oak"
@@ -12760,6 +13110,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "bastard \n        oak",
@@ -12817,6 +13168,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "chicharro"
@@ -12846,6 +13198,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Da Nang City, Son Tra Nature Reserve, Son Tra Peninsula, Central Vietnam; 300-500 m;",
           "growth_habit": "12 m tall;",
@@ -12871,6 +13224,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Durango, Guerrero, Jalisco, Mexico, Michoacan, Morelos, Nayarit, Oaxaca, Sinaloa) ; 1000-2300 m ;",
           "leaves": "4.4-15 x 1.2-4.6 cm; lanceolate, elliptic or more often oblong; hairless; glaucous; margin entire, or remotely lobed or crenate;",
@@ -12903,6 +13257,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "ci \n        ye gao shan li"
@@ -12971,6 +13326,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Post Oak"
@@ -12980,6 +13336,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "post oak"
@@ -13011,6 +13368,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "tai \n        wan zhai ye qing gang"
@@ -13043,6 +13401,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "he \n        ye qing gang"
@@ -13076,6 +13435,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico in the Sierra Madre Occidental (Aguascalientes, Chihuahua, Durango, Guanajuato, Zacatecas) ; 1500-3000 m ;",
           "growth_habit": "0.3-1.2 m;",
@@ -13115,6 +13475,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "chêne-liège",
@@ -13151,6 +13512,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Borneo (Sarawak); Malaysia; Sumatra; West Java; 850 to 1500 m;",
           "growth_habit": "may reach 20 m; trunk to 40 cm in diameter;",
@@ -13180,6 +13542,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        borrego",
@@ -13209,6 +13572,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Sumatra, Borneo ; to 1300 m;",
           "growth_habit": "more than 30 metres tall; trunk to 1.3 m in diameter;",
@@ -13237,6 +13601,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Nuevo Leon)",
           "growth_habit": "less than 3 metres tall;",
@@ -13263,6 +13628,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico, in the North of the Sierra Madre Occidental (NE Sinaloa, NW Durango, NE Sonora, W Chihuahua); 1400-2000 m;",
           "growth_habit": "reaches 12 metres tall;",
@@ -13289,6 +13655,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Lateleaf \n        oak"
@@ -13316,6 +13683,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "tai lu ge li"
@@ -13357,6 +13725,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Nuevo Leon); 1400-2000 m;",
           "growth_habit": "tall tree;",
@@ -13387,6 +13756,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Nuttall's \n        oak",
@@ -13421,6 +13791,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "hou \n        yuan qing gang",
@@ -13456,6 +13827,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "diao \n        luo shan qing gang"
@@ -13485,6 +13857,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Hidalgo, San Luis Potosi, Nuevo Leon, Tamaulipas); 1400-2400 m;",
           "growth_habit": "small tree;",
@@ -13514,6 +13887,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Island live oak",
@@ -13548,6 +13922,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "mao \n        mai qing gang"
@@ -13589,6 +13964,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Toumey's \n        oak"
@@ -13618,6 +13994,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Hidalgo, Puebla, Veracruz, Chiapas); 1580-2210 m;",
           "growth_habit": "6-10 (20) m. tall;",
@@ -13653,6 +14030,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Trojan \n        oak",
@@ -13717,6 +14095,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Aguascalientes, Chihuahua, Coahuila, Durango, Guanajuato, Michoacan, Nayarit, Sinaloa, Sonora); 900-2000 m ;",
           "growth_habit": "6-12 m tall; short trunk to 30 cm in diameter;",
@@ -13744,6 +14123,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Jalisco); 980-1400 m;",
           "growth_habit": "3-15 m tall;",
@@ -13777,6 +14157,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "shrub \n        live oak",
@@ -13820,6 +14201,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico, in the Sierra Madre Occidental (Chihuahua, Durango); 2000 - 2800 m ;",
           "growth_habit": "shrub, no more than 3-4 metres tall;",
@@ -13849,6 +14231,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino \n        cucharillo"
@@ -13878,6 +14261,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico, in the Sierra Madre del Sur (Jalisco, Colima, Guerrero, Chiapas, Oaxaca); 900 - 2500 m;",
           "growth_habit": "10-40 m, with trunk to 1 m in diameter, and more;",
@@ -13929,6 +14313,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "shuan \n        pi li"
@@ -13963,6 +14348,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Vasey \n        shin oak"
@@ -14017,6 +14403,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "black \n        oak",
@@ -14048,6 +14435,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Nuevo Leon) ; 2100-2500 m;",
           "growth_habit": "small tree, sometimes less than 3 metres tall; gnarled branches;",
@@ -14079,6 +14467,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Central America (El Salvador; Guatemala; Honduras, SE Mexico); 1200-1900 m;",
           "growth_habit": "tall tree;",
@@ -14106,6 +14495,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "encino sauce"
@@ -14148,6 +14538,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "live \n        oak",
@@ -14190,6 +14581,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "shinnery oak"
@@ -14225,6 +14617,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Interior \n        live oak",
@@ -14289,6 +14682,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "capulincillo",
@@ -14323,6 +14717,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Vietnam; Laos; Myanmar;",
           "growth_habit": "10-15 m; trunk to 2 m in girth;",
@@ -14352,6 +14747,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Durango, Guanajuato, Hidalgo, Jalisco, Queretaro, Sinaloa); 1650-3000 m;",
           "growth_habit": "3-10 m tall;",
@@ -14390,6 +14786,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "yong \n        an qing gang"
@@ -14424,6 +14821,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "American mainland, in front of California Channel Islands (San Luis Rey, San Diego County), at less than 1600m above sea level;",
           "growth_habit": "Small shrub less than 6-10 m tall",
@@ -14454,6 +14852,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "SE France; NE Spain (near Zaragoza);",
           "leaves": "4-8 x 2,5-4 cm, semi-evergreen, thick, subleathery; adaxially slightly pubescent at first, becoming glabrous; tomentose beneath, becoming more or less glabrous at fall; apex obtuse; base asymmetrical or truncate; margin wavy, dentate or sublobate, with pointed, irregular teeth; midrib prominent beneath; 5-7 vein pairs, with sometimes sinusal ones; petiole tomentose 0.5-1 cm;",
@@ -14528,6 +14927,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "California, at 400-1300 m ;",
           "growth_habit": "no more than 3 m;",
@@ -14567,6 +14967,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "France, Spain (Navarra, near Roncesvalles);",
           "leaves": "6-10 cm x 3-5; pinnatilobate; dark green above, becoming nearly hairless; below with thick tomentum at first, then glabrescent with only rare axil tufts; apex rather obtuse; base cordate or truncate, often asymmetrical; lobes ovate, obtuse, sometimes lobulate; 5-8 vein pairs, prominent below, with intercalary veins; petiole tomentose 0.5-1 cm long;",
@@ -14595,6 +14996,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "NW Spain",
           "url": "https://oaksoftheworld.fr/quercus_andresii.htm"
@@ -14664,6 +15066,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "SE USA (Georgia, Florida);",
           "miscellaneous": "-- Sub-genus Quercus, section Lobatae, subsection Phellos; -- Intermediate between the parents in all features;",
@@ -14690,6 +15093,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "leaves": "8-9 cm, oblong-obovate; nearly leathery; entire with margine wavy, or with 4-5 pairs of teeth (or lobes); dark green, shiny above; lighter beneath with pubescence at base and on veins; petiole 1-2 cm long; actually, the leaves are variable even on the same twig;",
           "hardiness_habitat": "hardy; keeps its leaves to late fall;",
@@ -14718,6 +15122,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Spain",
           "leaves": "2-5 cm x 0.8-1.8; lanceolate to oblong; base rounded, apex obtuse; remotely tomentose above; tomentose beneath; margin entire; 5-9 vein pairs; petiole 0.8-2 cm long, pubescent;",
@@ -14754,6 +15159,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "France, Spain, Portugal, Morocco, Algeria, Sicily, Greece;",
           "growth_habit": "small shrub 2 to 10 m, seldom to 15 m;",
@@ -14783,6 +15189,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "leaves": "lamina ovate to obovate; base broad; abaxially densely tomentose; lateral veins straight (all these features like in Q. rotundifolia )",
           "fruits": "cupscales appressed and tuberculate in the basal part (as in Q. rotundifolia ), free and partially outcurved in the apical part (as in Q. suber )",
@@ -14810,6 +15217,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Italy; Lebanon; Turkey; Albany; Sicilia;",
           "url": "https://oaksoftheworld.fr/quercus_baenitzii.htm"
@@ -14835,6 +15243,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Chihuahua 4 sites, Durango 1 site) ;",
           "miscellaneous": "Very rare;",
@@ -14881,6 +15290,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Texas ;",
           "miscellaneous": "-- Subgenus Quercus, Section Lobatae ; -- For Trelease 1924 it is laurifolia x rubra; -- The intermediate character of the generally slightly asymmetrically lobed leaves suggest the parentage (E.J. Palmer);",
@@ -14907,6 +15317,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Bebb's \n        oak"
@@ -14941,6 +15352,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Michigan ;",
           "url": "https://oaksoftheworld.fr/quercus_beckyae.htm"
@@ -14978,6 +15390,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Eastern USA",
           "growth_habit": "reaches 25 m tall;",
@@ -15030,6 +15443,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Bimundors oak"
@@ -15065,6 +15479,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "South Carolina;",
           "miscellaneous": "-- Section Lobatae; -- Found at Bluffton, South Carolina, in 1893 by J. Mellichamp.",
@@ -15091,6 +15506,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Britton’s Oak"
@@ -15101,6 +15517,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Pennsylvania, New York, New Jersey ;",
           "growth_habit": "shrub or small tree;",
@@ -15131,6 +15548,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "North, Center and East USA ;",
           "miscellaneous": "-- Q. virginiana is clearly one of the parents, but there is little to suggest the bur-oak in any of the characters mentioned in the description (Palmer, 1948)",
@@ -15157,6 +15575,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "North, Center, East USA;",
           "growth_habit": "9 m ;",
@@ -15187,6 +15606,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Tennessee;",
           "miscellaneous": "-- Section Quercus; -- Also written \"byersi\";",
@@ -15214,6 +15634,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "from south-eastern USA to Texas;",
           "miscellaneous": "-- Section Lobatae;",
@@ -15241,6 +15662,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "New Jersey;",
           "url": "https://oaksoftheworld.fr/quercus_caesariensis.htm"
@@ -15266,6 +15688,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Cyprus",
           "url": "https://oaksoftheworld.fr/quercus_campitica.htm"
@@ -15303,6 +15726,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Cape Oak"
@@ -15313,6 +15737,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "New Jersey, South Carolina;",
           "growth_habit": "tall tree;",
@@ -15349,6 +15774,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "SW Portugal (Alentejo Region, near coast).",
           "growth_habit": "often less than 3 meters tall;",
@@ -15378,6 +15804,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "north-east Spain ;",
           "growth_habit": "medium size tree;",
@@ -15407,6 +15834,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Louisiana;",
           "leaves": "7-15 cm x 2-6 ; lanceolate or rhombic ; margin nearly entire, undulate or eccentrically lobed;",
@@ -15443,6 +15871,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Texas to Louisiana;",
           "growth_habit": "reaches 35 m tall;",
@@ -15470,6 +15899,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Spain, near Madrid (Monte de El Pardo);",
           "leaves": "2.3-4.8 x 1-2.2 cm; evergreen; lanceolate; margin undulate, dentate with spiny teeth; yellowish green both sides; abaxially with a loose tomentum; 5-7 vein pairs;",
@@ -15501,6 +15931,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Portugal; South Spain;",
           "growth_habit": "rarely exceeding 3m;",
@@ -15532,6 +15963,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "S.E. USA to Texas",
           "miscellaneous": "-- Section Lobatae;",
@@ -15558,6 +15990,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Deam’s Oak"
@@ -15567,6 +16000,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Eastern USA",
           "growth_habit": "tall tree;",
@@ -15621,6 +16055,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Estremadura (Spain)",
           "growth_habit": "up to 6 m.",
@@ -15662,6 +16097,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Missouri",
           "url": "https://oaksoftheworld.fr/quercus_discreta.htm"
@@ -15688,6 +16124,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Texas",
           "url": "https://oaksoftheworld.fr/quercus_diversiloba.htm"
@@ -15714,6 +16151,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Drummond \n        post oak",
@@ -15744,6 +16182,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Portugal; Douro Basin;",
           "growth_habit": "tree",
@@ -15774,6 +16213,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "laurelillo"
@@ -15807,6 +16247,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "South Portugal, mainly in Alentejo;",
           "growth_habit": "shrub to 3 m;",
@@ -15836,6 +16277,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Kentucky, Missouri;",
           "leaves": "margin deeply divided with sharp nearly simple symmetrical lobes;",
@@ -15876,6 +16318,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "California",
           "growth_habit": "20-30 m; open spreading crown;",
@@ -15926,6 +16369,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "laurelpin \n        oak"
@@ -15979,6 +16423,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Faxon’s Oak"
@@ -15988,6 +16433,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Eastern USA",
           "miscellaneous": "-- Section Quercus;",
@@ -16014,6 +16460,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Eastern USA;",
           "growth_habit": "reaches 12 m;",
@@ -16042,6 +16489,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Fernow’s Oak"
@@ -16051,6 +16499,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Eastern USA",
           "miscellaneous": "-- Section Quercus;",
@@ -16078,6 +16527,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "North-Center and East of USA",
           "miscellaneous": "-- Section Lobatae; -- Resembles Q. x heterophylla, from which it can be distinguished by the more persistent tomentum on the abaxial surface of the leaves, especially along the midrib and their axils, and by its usually larger winter-buds with pubescent scales ; also the acorns have looser pubescent cup-scales;",
@@ -16104,6 +16554,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "France; Spain (Navarra, Cataluña);",
           "growth_habit": "tree or shrub;",
@@ -16135,6 +16586,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Missouri",
           "url": "https://oaksoftheworld.fr/quercus_fontana.htm"
@@ -16160,6 +16612,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Spain (Catalonia); South-West Portugal;",
           "growth_habit": "tree or shrub;",
@@ -16188,6 +16641,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Spain; Portugal;",
           "growth_habit": "1.5 m tall;",
@@ -16218,6 +16672,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "California (San Diego); to 1500 m;",
           "growth_habit": "5 m",
@@ -16249,6 +16704,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Alabama, Louisiana, Arkansas;",
           "leaves": "extremely variable in shape and size, many of them being asymmetric; young leaves have a loose pale or tawny pubescence;",
@@ -16277,6 +16733,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "New Jersey, Delaware;",
           "leaves": "undulate or irregularly lobed; adaxially fine cinereous pubescent;",
@@ -16304,6 +16761,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Texas",
           "miscellaneous": "-- Section Quercus; -- Leaves and fruit clearly intermediate between those of the parent species;",
@@ -16329,6 +16787,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Harbison’s Oak"
@@ -16339,6 +16798,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Florida, Texas",
           "leaves": "scurfy stellate-pubescence on the abaxial surface of the mature leaves",
@@ -16367,6 +16827,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Texas",
           "leaves": "deciduous, 5-10cm long, deeply lobed, more than those of marilandica ; glabrous adaxially ; abaxially traces of pubescence",
@@ -16393,6 +16854,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Hawkin’s Oak"
@@ -16403,6 +16865,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Tennessee; Maine; Massachusetts; New York; Pennsylvania; Ohio; Missouri",
           "fruits": "likely show characters of Q. velutina in the shape of the cup or in the pubescence of its inner surface and scales;",
@@ -16452,6 +16915,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Bartram's \n        hybrid oak"
@@ -16495,6 +16959,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "USA",
           "miscellaneous": "-- Section Quercus;",
@@ -16523,6 +16988,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "false \n        Spanish cork-oak",
@@ -16556,6 +17022,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "California",
           "miscellaneous": "-- Sub-genus Quercus, Section Quercus -- More exactly, Q.x subconvexa is durata X garryana",
@@ -16584,6 +17051,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Missouri, Illinois;",
           "miscellaneous": "-- Section Quercus",
@@ -16622,6 +17090,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Britton’s Oak"
@@ -16632,6 +17101,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Arkansas",
           "url": "https://oaksoftheworld.fr/quercus_incomita.htm"
@@ -16657,6 +17127,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Texas (Davis Mountains);",
           "leaves": "4-8 cm x 2-4; coriaceous or subcoriaceous; oblong-elliptic to oblanceolate; base cuneate or narrowed rounded; 2-3 (seldom -4) pairs of pungent, bristle-tipped teeth; slightly revolute margins; above green and thinly stellate-pubescent; abaxially coated with thick, pale, rather easily detached tomentum; veins slightly impressed above, prominent beneath; petiole 6-10 mm long;",
@@ -16686,6 +17157,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Missouri",
           "url": "https://oaksoftheworld.fr/quercus_introgressa.htm"
@@ -16711,6 +17183,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "N.E. USA; S.E. Canada; cultivated since 1916;",
           "growth_habit": "18 m; crown rounded;",
@@ -16741,6 +17214,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "California",
           "growth_habit": "20-30 m; large, dense crown;",
@@ -16770,6 +17244,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Texas",
           "miscellaneous": "-- Section Lobatae;",
@@ -16803,6 +17278,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "leaves": "4-6 x 3.5-4.5 cm, broad, apex obtuse, base auricled; lobulate lobes with deep sinuses; abaxially with rare uniseriate, solitary and fasciculate hairs, if present mostly on the veins ; 5 vein pairs; petiole tomentose, 4-8mm long;",
           "fruits": "acorn sterile;",
@@ -16838,6 +17314,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "growth_habit": "10-12 m; ovoid crown;",
           "leaves": "5-8 cm long, evergreen; oval-oblong; margin with somewhat acute, coarse, triangular teeth; base cordate to truncate; dull green, glabrous above; paler, shiny beneath, with sparse stellate hairs; petiole 1.5-2 cm long;",
@@ -16868,6 +17345,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "only in Sta Barbara County (Sta Inez Mountains)",
           "growth_habit": "evergreen shrub;",
@@ -16890,6 +17368,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Chihuahua, Sonora) ;",
           "growth_habit": "more than 3 m tall ;",
@@ -16917,6 +17396,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Lea's \n        hybrid oak"
@@ -16961,6 +17441,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "South-West of Iberian Peninsula",
           "growth_habit": "reaches 20 m high",
@@ -17001,6 +17482,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Ludwig's \n        hybrid oak"
@@ -17068,6 +17550,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "island \n        scrub oak"
@@ -17102,6 +17585,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Texas, Oklahoma, Arkansas;",
           "miscellaneous": "-- Section Quercus;",
@@ -17141,6 +17625,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "East Turquey to North Iran; 700-2000 m;",
           "growth_habit": "shrub (2-6 m ); crown fastigiate; very branched;",
@@ -17184,6 +17669,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Missouri",
           "url": "https://oaksoftheworld.fr/quercus_megaleia.htm"
@@ -17210,6 +17696,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "South Carolina, Florida;",
           "leaves": "extremely variable, often eccentrically lobed;",
@@ -17237,6 +17724,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "China; Manshuria; Korea;",
           "url": "https://oaksoftheworld.fr/quercus_mongolicodentata.htm"
@@ -17264,6 +17752,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Oracle \n        oak"
@@ -17298,6 +17787,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "France, Spain, Portugal, Italy, Sardinia, Sicily, Algeria;",
           "growth_habit": "5-20 m;",
@@ -17330,6 +17820,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Alabama, Arkansas, Virginia, Tennessee;",
           "miscellaneous": "-- Section Lobatae; -- Some authors consider Q. x shirlingii as synonymous with Q. x egglestonii",
@@ -17356,6 +17847,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "California;",
           "url": "https://oaksoftheworld.fr/quercus_munzii.htm"
@@ -17381,6 +17873,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Missouri;",
           "miscellaneous": "-- Section Lobatae; -- The leaves and the fruit resemble more closely those of Q. shumardii, but the bark and habit of the tree and the thin, shallow cups of the acorn indicate hybridization with Q. palustris.",
@@ -17407,6 +17900,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "S.E. USA (Georgia, Florida, Arkansas, Alabama)",
           "leaves": "oboval, lobed, base cuneate, mature leaves glabrous except axillary tufts.",
@@ -17434,6 +17928,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Texas",
           "url": "https://oaksoftheworld.fr/quercus_neotharpii.htm"
@@ -17490,6 +17985,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Algeria; 800-1000 m;",
           "growth_habit": "tall tree, with the habit of Q. afares",
@@ -17531,6 +18027,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "from S.E. Arizona to W. Texas;",
           "leaves": "evergreen ; leaves to 12 x 5 cm;",
@@ -17560,6 +18057,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Florida",
           "growth_habit": "large shrub",
@@ -17593,6 +18091,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Hidalgo, Sierra de Pachuca); near 2800 m;",
           "growth_habit": "4-6 meters tall, sometimes shrubby, with branches from low on the trunk;",
@@ -17637,6 +18136,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Eastern USA (Illinois);",
           "leaves": "9-16 cm x 4-10; narrowly obovate or elliptic-oblong; often asymmetrical; margin entire wavy or with inaequal lobes; apex acute, mucronate; base cuneate or narrowly rounded; glabrous adaxially; abaxially fulvous tomentose;",
@@ -17675,6 +18175,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Mexico (Nuevo Leon); at ca 1600 m;",
           "leaves": "oblong; crenate margin; wiht persistent pubescence beneath (as in clivicola ), but venation as in glaucoides",
@@ -17724,6 +18225,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "North Carolina;",
           "miscellaneous": "-- Section Lobatae;",
@@ -17761,6 +18263,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "url": "https://oaksoftheworld.fr/quercus_prasina.htm"
         }
@@ -17807,6 +18310,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "N.E. USA;",
           "growth_habit": "shrub, sometimes small tree;",
@@ -17848,6 +18352,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Missouri;",
           "url": "https://oaksoftheworld.fr/quercus_riparia.htm"
@@ -17873,6 +18378,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "N.E. USA (Massachusetts, Pennsylvania);",
           "growth_habit": "to 12 m tall;",
@@ -17903,6 +18409,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "S.E. USA;",
           "growth_habit": "rhizomatous bush;",
@@ -17938,6 +18445,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Native hybrid in the whole Europe;",
           "leaves": "5-15 x 3-10 cm; variable in size and shape; both sides nearly glabrous (rarely with abaxially some solitary, uniseriate and fasciculate hairs on veins and axils and stellate trichomes on the blade); base narrower than in Q. petraea , sometimes auricled; lobes are more regular than in Q.petraea ; sinus obtuses, with variable depth; 5-7 vein pairs; petiole glabrous, 0.5-2.5 cm long;",
@@ -17979,6 +18487,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Rudkin’s Oak"
@@ -17989,6 +18498,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Eastern USA to Texas",
           "leaves": "very variable, even on the same twig; apex obtuse; base rounded or weakly cordate; margin entire or with obtuse lobes; young leaves pubescent, often rusty coloured beneath; petiole very short;",
@@ -18028,6 +18538,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Central and N.E. USA",
           "growth_habit": "tree;",
@@ -18069,6 +18580,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Sargent \n        oak"
@@ -18097,6 +18609,7 @@
         {
           "source_id": 3,
           "source_name": "Oak Compendium",
+          "license": "All Rights Reserved",
           "is_preferred": true,
           "local_names": [
             "Saul’s Oak"
@@ -18135,6 +18648,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Illinois, Kentucky, Arkansas;",
           "growth_habit": "20m ; spreading crown;",
@@ -18177,6 +18691,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "North Spain;",
           "growth_habit": "4 m;",
@@ -18219,6 +18734,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Georgia",
           "miscellaneous": "-- Section Lobatae; -- Leaves mostly resemble those of Q. marilandica , but are often deeply divided like in Q. georgiana;",
@@ -18256,6 +18772,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Missouri, Kansas, Oklahoma; Massachusetts: New Jersey;",
           "growth_habit": "shrubby, rarely exceeding 3 m.",
@@ -18285,6 +18802,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Georgia, North Carolina, Texas;",
           "leaves": "obovate or oblong-obovate; margin entire or with 3-5 lobes in apical half; glabrous adaxially; slightly pubescent beneath; veins conspicuous;",
@@ -18315,6 +18833,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "USA (Texas)",
           "growth_habit": "tree",
@@ -18342,6 +18861,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Arkansas",
           "leaves": "loosely stellate-pubescent beneath; above with traces of pubescence at least along the midrib at maturity;",
@@ -18376,6 +18896,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "from north Spain to Romania and Sweden;",
           "growth_habit": "tall tree;",
@@ -18446,6 +18967,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "S.E. USA;",
           "miscellaneous": "-- Section Lobatae;",
@@ -18481,6 +19003,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "New Jersey",
           "miscellaneous": "-- Section Quercus;",
@@ -18507,6 +19030,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Florida",
           "miscellaneous": "-- For Govaerts, 2007, it is a synonym of Q. minima -- For The Plant List 2013 it is a true species.",
@@ -18559,6 +19083,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Japan",
           "miscellaneous": "-- Sub-genus Cerris, Section Cyclobalanopsis;",
@@ -18585,6 +19110,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "North Portugal (Province of Cantabrica)",
           "leaves": "base auricled; margin pinnatifid or pinnatilobate; large glabrescent leaves, with fasciculate trichomes on the midrib and on the abaxial side; petiole short, reddish;",
@@ -18622,6 +19148,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Texas",
           "leaves": "leaves shorter than those of graciliformis",
@@ -18647,6 +19174,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Southern Spain;",
           "miscellaneous": "-- Q. x aruciensis would be more exactly the hybrid between Q. tlemcenensis and Q. fruticosa",
@@ -18674,6 +19202,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "South of Iberian Peninsula",
           "growth_habit": "rather tall tree;",
@@ -18704,6 +19233,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "North Carolina;",
           "url": "https://oaksoftheworld.fr/quercus_tottenii.htm"
@@ -18730,6 +19260,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "California;",
           "growth_habit": "shrub to 5-6 m tall;",
@@ -18760,6 +19291,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "S.W. France; North Spain;",
           "growth_habit": "tall tree;",
@@ -18791,6 +19323,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Missouri, Illinois;",
           "miscellaneous": "-- Section Lobatae;",
@@ -18821,6 +19354,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "\"Turner's \n        oak\""
@@ -18859,6 +19393,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "\"wavyleaf \n        oak\""
@@ -18892,6 +19427,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Missouri",
           "miscellaneous": "-- Section Lobatae;",
@@ -18952,6 +19488,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Michigan",
           "url": "https://oaksoftheworld.fr/quercus_wagneri.htm"
@@ -18979,6 +19516,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "South Carolina, Georgia, Florida;",
           "miscellaneous": "-- Section Lobatae;",
@@ -19016,6 +19554,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "miscellaneous": "-- cultivar : Q.x warei 'Long' PPAF (or 'Regal Prince') is Q.bicolor X Q.robur 'fastigiata' : columnar habit, silvery leaves underneath; rather fast growing.",
           "url": "https://oaksoftheworld.fr/quercus_warei.htm"
@@ -19042,6 +19581,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "North Spain; Portugal; Morocco;",
           "growth_habit": "shrub to 6 m;",
@@ -19070,6 +19610,7 @@
           "source_id": 2,
           "source_name": "Oaks of the World",
           "source_url": "https://oaksoftheworld.fr",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "North Carolina, Georgia, Arkansas;",
           "miscellaneous": "-- Section Lobatae;",
