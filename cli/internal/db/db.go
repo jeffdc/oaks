@@ -839,6 +839,43 @@ func (db *Database) GetSpeciesSources(scientificName string) ([]*models.SpeciesS
 	return results, rows.Err()
 }
 
+// GetSpeciesSourceBySourceID returns source data for a specific species+source combination
+func (db *Database) GetSpeciesSourceBySourceID(scientificName string, sourceID int64) (*models.SpeciesSource, error) {
+	row := db.conn.QueryRow(
+		`SELECT id, scientific_name, source_id, local_names, range, growth_habit,
+		        leaves, flowers, fruits, bark_twigs_buds, hardiness_habitat,
+		        miscellaneous, url, is_preferred
+		 FROM species_sources WHERE scientific_name = ? AND source_id = ?`,
+		scientificName, sourceID,
+	)
+
+	ss := &models.SpeciesSource{}
+	var localNamesJSON sql.NullString
+	var isPreferred int
+
+	err := row.Scan(
+		&ss.ID, &ss.ScientificName, &ss.SourceID, &localNamesJSON, &ss.Range, &ss.GrowthHabit,
+		&ss.Leaves, &ss.Flowers, &ss.Fruits, &ss.BarkTwigsBuds, &ss.HardinessHabitat,
+		&ss.Miscellaneous, &ss.URL, &isPreferred,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get species source: %w", err)
+	}
+
+	ss.IsPreferred = isPreferred != 0
+	if localNamesJSON.Valid {
+		json.Unmarshal([]byte(localNamesJSON.String), &ss.LocalNames)
+	}
+	if ss.LocalNames == nil {
+		ss.LocalNames = []string{}
+	}
+
+	return ss, nil
+}
+
 // GetPreferredSpeciesSource returns the preferred source data for a species
 func (db *Database) GetPreferredSpeciesSource(scientificName string) (*models.SpeciesSource, error) {
 	row := db.conn.QueryRow(

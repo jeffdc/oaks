@@ -181,6 +181,109 @@ notes: %s
 		derefInt(s.Year), deref(s.URL), deref(s.ISBN), deref(s.DOI), deref(s.Notes))
 }
 
+// EditSpeciesSource edits source-attributed data for a species
+func EditSpeciesSource(ss *models.SpeciesSource, sourceName string) (*models.SpeciesSource, error) {
+	content := speciesSourceToYAML(ss, sourceName)
+	originalName := ss.ScientificName
+	originalSourceID := ss.SourceID
+
+	for {
+		editedYAML, err := openEditor(content)
+		if err != nil {
+			return nil, err
+		}
+
+		var edited models.SpeciesSource
+		if err := yaml.Unmarshal([]byte(editedYAML), &edited); err != nil {
+			fmt.Fprintf(os.Stderr, "\nFailed to parse YAML: %v\n", err)
+			fmt.Fprintln(os.Stderr, "Press Enter to re-open the editor and fix the error...")
+			waitForEnter()
+			content = editedYAML
+			continue
+		}
+
+		// Preserve identity fields (cannot be changed)
+		edited.ScientificName = originalName
+		edited.SourceID = originalSourceID
+		edited.ID = ss.ID
+
+		return &edited, nil
+	}
+}
+
+// speciesSourceToYAML generates a YAML string for editing species source data
+func speciesSourceToYAML(ss *models.SpeciesSource, sourceName string) string {
+	deref := func(p *string) string {
+		if p == nil {
+			return ""
+		}
+		return *p
+	}
+
+	localNames := ""
+	if len(ss.LocalNames) > 0 {
+		for _, ln := range ss.LocalNames {
+			localNames += fmt.Sprintf("\n  - %s", ln)
+		}
+	}
+
+	isPreferred := "false"
+	if ss.IsPreferred {
+		isPreferred = "true"
+	}
+
+	return fmt.Sprintf(`# Source Data for: %s
+# Source: %s (ID: %d)
+#
+# Species name and source ID cannot be changed here.
+# Leave fields empty if no data available.
+
+# Local/common names for this species
+local_names:%s
+
+# Geographic range
+range: %s
+
+# Growth habit (tree size, form)
+growth_habit: %s
+
+# Leaf description
+leaves: %s
+
+# Flower description
+flowers: %s
+
+# Fruit/acorn description
+fruits: %s
+
+# Bark, twigs, and buds
+bark_twigs_buds: %s
+
+# Hardiness and habitat preferences
+hardiness_habitat: %s
+
+# Other notes
+miscellaneous: %s
+
+# URL for this specific source page (if applicable)
+url: %s
+
+# Is this the preferred/primary source for display?
+is_preferred: %s
+`, ss.ScientificName, sourceName, ss.SourceID,
+		localNames,
+		deref(ss.Range),
+		deref(ss.GrowthHabit),
+		deref(ss.Leaves),
+		deref(ss.Flowers),
+		deref(ss.Fruits),
+		deref(ss.BarkTwigsBuds),
+		deref(ss.HardinessHabitat),
+		deref(ss.Miscellaneous),
+		deref(ss.URL),
+		isPreferred)
+}
+
 // NewSource creates a new source entry interactively
 func NewSource() (*models.Source, error) {
 	reader := bufio.NewReader(os.Stdin)

@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-16T03:05:37Z",
-    "exported_at": "2025-12-16T03:05:37Z",
+    "version": "2025-12-19T15:06:36Z",
+    "exported_at": "2025-12-19T15:06:36Z",
     "species_count": 734
   },
   "species": [
@@ -10378,6 +10378,12 @@
           "hardiness_habitat": "hardy; prefers wet soils; fast growing;",
           "miscellaneous": "-- A. Camus : 410 -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- Numerous hybrids, among them : x giffordi Trel. with Q.ilicifolia , x ludoviciana Sarg. with Q.pagoda ;",
           "url": "https://oaksoftheworld.fr/quercus_phellos.htm"
+        },
+        {
+          "source_id": 3,
+          "source_name": "Oak Compendium",
+          "is_preferred": false,
+          "miscellaneous": "I am forming a theory that these can be reliable separated by the following: - Twig color - phellos - gray; nigra brown -- this can be tough - Midrid and twig end color - nigra can sometimes (often?) be red, phellos not - leaves - while nigra can have totally linear leaves with an acute tip, there will always? be at least some sign on one of the leaves of lobing, even if only a swelling. This only works if there are enough leaves seen in the photo(s).\nThe distal lobing is indicative of Q nigra. Q phellos can have lobing but in my experience and research I believe it will never be distal, only proximal from the midpoint. Another point for Q nigra is that Q phellos does not have the severely constricted proximal portion of the leaf as seen on some of these leaves, towards the upper left in the photo."
         }
       ]
     },
