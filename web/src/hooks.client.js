@@ -1,16 +1,27 @@
-// Handle errors from stale service worker / deployment mismatch
+// Handle errors from deployment mismatches
 // When a new version is deployed, old cached JS files may not exist anymore
 
 /** @type {import('@sveltejs/kit').HandleClientError} */
 export function handleError({ error, event, status, message }) {
-	// Check if this is a dynamic import error (stale deployment)
 	const errorMessage = error?.message || message || '';
-	if (
+	const errorName = error?.name || '';
+
+	// Check if this is a stale deployment error
+	const isStaleDeployment =
+		// Dynamic import failures (Chrome, Safari)
 		errorMessage.includes('dynamically imported module') ||
 		errorMessage.includes('Failed to fetch dynamically imported module') ||
-		errorMessage.includes('error loading dynamically imported module')
-	) {
-		// Force a full page reload to get the new version
+		errorMessage.includes('error loading dynamically imported module') ||
+		// Firefox-specific errors
+		errorMessage.includes('NS_ERROR_CORRUPTED_CONTENT') ||
+		errorName === 'NS_ERROR_CORRUPTED_CONTENT' ||
+		// Network errors for missing chunks
+		(errorMessage.includes('Failed to fetch') && errorMessage.includes('.js')) ||
+		// Generic chunk loading failures
+		errorMessage.includes('Loading chunk') ||
+		errorMessage.includes('ChunkLoadError');
+
+	if (isStaleDeployment) {
 		console.log('Detected stale deployment, reloading page...');
 		window.location.reload();
 		return;

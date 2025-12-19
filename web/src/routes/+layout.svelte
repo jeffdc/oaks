@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+	import { updated } from '$app/stores';
 	import '../app.css';
 	import Header from '$lib/components/Header.svelte';
 	import { loadSpeciesData, isLoading, error } from '$lib/stores/dataStore.js';
@@ -9,9 +10,19 @@
 	onMount(async () => {
 		await loadSpeciesData();
 	});
+
+	function reloadPage() {
+		window.location.reload();
+	}
 </script>
 
 <div class="app min-h-screen" style="background-color: var(--color-background);">
+	{#if $updated}
+		<div class="update-banner">
+			<span>A new version is available.</span>
+			<button onclick={reloadPage}>Reload</button>
+		</div>
+	{/if}
 	<Header />
 
 	<main class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-12 py-10">
@@ -32,3 +43,29 @@
 		{/if}
 	</main>
 </div>
+
+<style>
+	.update-banner {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		padding: 0.75rem 1rem;
+		background-color: var(--color-forest-700);
+		color: white;
+		font-size: 0.875rem;
+	}
+
+	.update-banner button {
+		padding: 0.25rem 0.75rem;
+		background-color: white;
+		color: var(--color-forest-700);
+		border-radius: 0.25rem;
+		font-weight: 500;
+		transition: background-color 0.15s;
+	}
+
+	.update-banner button:hover {
+		background-color: var(--color-forest-100);
+	}
+</style>
