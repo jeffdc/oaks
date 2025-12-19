@@ -25,10 +25,6 @@
   }
   $: selectedSource = sources.find(s => s.source_id === selectedSourceId) || null;
 
-  function handleSourceChange(event) {
-    selectedSourceId = parseInt(event.target.value, 10);
-  }
-
   // Build species detail URL
   function getSpeciesUrl(speciesName) {
     return `${base}/species/${encodeURIComponent(speciesName)}/`;
@@ -327,189 +323,181 @@
     <!-- SOURCE-DEPENDENT DATA -->
 
     {#if sources.length > 0}
-      <section class="detail-section source-selector-section full-width">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-          <span>Data Source</span>
-        </h2>
-        <div class="source-selector-container">
-          {#if sources.length === 1}
-            <div class="source-single">
-              <span class="source-name">{selectedSource?.source_name || 'Unknown Source'}</span>
-              {#if selectedSource?.source_url}
-                <a href={selectedSource.source_url} target="_blank" rel="noopener noreferrer" class="source-link-small" aria-label="Visit source website">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+      <section class="source-container full-width">
+        <!-- Source tabs -->
+        <div class="source-tabs" role="tablist">
+          {#each sources as source}
+            <button
+              class="source-tab"
+              class:active={selectedSourceId === source.source_id}
+              role="tab"
+              aria-selected={selectedSourceId === source.source_id}
+              on:click={() => selectedSourceId = source.source_id}
+            >
+              <span class="source-tab-name">{source.source_name}</span>
+              {#if source.is_preferred}
+                <span class="preferred-badge" title="Preferred source">★</span>
+              {/if}
+              {#if source.license}
+                <span class="license-text">({source.license})</span>
+              {/if}
+              {#if source.source_url}
+                <a
+                  href={source.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="source-tab-link"
+                  title="Visit source"
+                  on:click|stopPropagation
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
               {/if}
-            </div>
-          {:else}
-            <div class="source-dropdown-row">
-              <select
-                class="source-dropdown"
-                value={selectedSourceId}
-                on:change={handleSourceChange}
-              >
-                {#each sources as source}
-                  <option value={source.source_id}>
-                    {source.source_name}
-                    {#if source.is_preferred} (preferred){/if}
-                  </option>
+            </button>
+          {/each}
+        </div>
+
+        <!-- Source content -->
+        <div class="source-content" role="tabpanel">
+          {#if selectedSource?.range}
+            <section class="source-field">
+              <h3 class="field-header">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>Geographic Range</span>
+              </h3>
+              <div class="field-text">{@html renderMarkdown(selectedSource.range)}</div>
+            </section>
+          {/if}
+
+          {#if selectedSource?.growth_habit}
+            <section class="source-field">
+              <h3 class="field-header">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01M16 17h.01" />
+                </svg>
+                <span>Growth Habit</span>
+              </h3>
+              <div class="field-text">{@html renderMarkdown(selectedSource.growth_habit)}</div>
+            </section>
+          {/if}
+
+          {#if selectedSource?.leaves}
+            <section class="source-field">
+              <h3 class="field-header">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z" />
+                </svg>
+                <span>Leaves</span>
+              </h3>
+              <div class="field-text">{@html renderMarkdown(selectedSource.leaves)}</div>
+            </section>
+          {/if}
+
+          {#if selectedSource?.fruits}
+            <section class="source-field">
+              <h3 class="field-header">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12,2C12.5,2 13,2.19 13.41,2.59C13.8,3 14,3.5 14,4C14,4.5 13.8,5 13.41,5.41C13,5.8 12.5,6 12,6C11.5,6 11,5.8 10.59,5.41C10.2,5 10,4.5 10,4C10,3.5 10.2,3 10.59,2.59C11,2.19 11.5,2 12,2M12,6C13.1,6 14,6.9 14,8V9.5C15.72,9.5 17.17,10.6 17.71,12.13C18.14,13.38 18.13,14.77 17.66,16C17.19,17.26 16.32,18.23 15.19,18.74C14.06,19.25 12.78,19.25 11.65,18.74C10.5,18.23 9.63,17.26 9.16,16C8.69,14.77 8.68,13.38 9.11,12.13C9.65,10.6 11.1,9.5 12.83,9.5H12V8C12,6.9 12.9,6 12,6M12.13,11.5C11.41,11.5 10.81,11.89 10.54,12.5C10.27,13.11 10.39,13.82 10.85,14.3C11.31,14.78 12,14.94 12.63,14.7C13.26,14.46 13.7,13.86 13.7,13.17C13.7,12.64 13.5,12.13 13.13,11.76C12.76,11.39 12.26,11.5 12.13,11.5Z" />
+                </svg>
+                <span>Fruits</span>
+              </h3>
+              <div class="field-text">{@html renderMarkdown(selectedSource.fruits)}</div>
+            </section>
+          {/if}
+
+          {#if selectedSource?.flowers}
+            <section class="source-field">
+              <h3 class="field-header">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M15,10.59V9L12.5,6.5L10,9V10.59L11.29,11.88L10.59,14.59L12,14L13.41,14.59L12.71,11.88L15,10.59Z" />
+                </svg>
+                <span>Flowers</span>
+              </h3>
+              <div class="field-text">{@html renderMarkdown(selectedSource.flowers)}</div>
+            </section>
+          {/if}
+
+          {#if selectedSource?.bark}
+            <section class="source-field">
+              <h3 class="field-header">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                <span>Bark</span>
+              </h3>
+              <div class="field-text">{@html renderMarkdown(selectedSource.bark)}</div>
+            </section>
+          {/if}
+
+          {#if selectedSource?.twigs}
+            <section class="source-field">
+              <h3 class="field-header">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                <span>Twigs</span>
+              </h3>
+              <div class="field-text">{@html renderMarkdown(selectedSource.twigs)}</div>
+            </section>
+          {/if}
+
+          {#if selectedSource?.buds}
+            <section class="source-field">
+              <h3 class="field-header">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                <span>Buds</span>
+              </h3>
+              <div class="field-text">{@html renderMarkdown(selectedSource.buds)}</div>
+            </section>
+          {/if}
+
+          {#if selectedSource?.local_names && selectedSource.local_names.length > 0}
+            <section class="source-field">
+              <h3 class="field-header">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                </svg>
+                <span>Common Names</span>
+              </h3>
+              <ul class="flex flex-wrap gap-2">
+                {#each selectedSource.local_names as localName}
+                  <li class="pill-tag">{localName}</li>
                 {/each}
-              </select>
-              <span class="source-count">{sources.length} sources</span>
-              {#if selectedSource?.source_url}
-                <a href={selectedSource.source_url} target="_blank" rel="noopener noreferrer" class="source-link-small" aria-label="Visit source website">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              {/if}
-            </div>
+              </ul>
+            </section>
+          {/if}
+
+          {#if selectedSource?.hardiness_habitat}
+            <section class="source-field">
+              <h3 class="field-header">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Hardiness & Habitat</span>
+              </h3>
+              <div class="field-text">{@html renderMarkdown(selectedSource.hardiness_habitat)}</div>
+            </section>
+          {/if}
+
+          {#if selectedSource?.miscellaneous}
+            <section class="source-field">
+              <h3 class="field-header">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Additional Information</span>
+              </h3>
+              <div class="field-text">{@html renderMarkdown(selectedSource.miscellaneous)}</div>
+            </section>
           {/if}
         </div>
-      </section>
-    {/if}
-
-    {#if selectedSource?.range}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span>Geographic Range</span>
-        </h2>
-        <div class="detail-text">{@html renderMarkdown(selectedSource.range)}</div>
-      </section>
-    {/if}
-
-    {#if selectedSource?.growth_habit}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01M16 17h.01" />
-          </svg>
-          <span>Growth Habit</span>
-        </h2>
-        <div class="detail-text">{@html renderMarkdown(selectedSource.growth_habit)}</div>
-      </section>
-    {/if}
-
-    {#if selectedSource?.leaves}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z" />
-          </svg>
-          <span>Leaves</span>
-        </h2>
-        <div class="detail-text">{@html renderMarkdown(selectedSource.leaves)}</div>
-      </section>
-    {/if}
-
-    {#if selectedSource?.fruits}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12,2C12.5,2 13,2.19 13.41,2.59C13.8,3 14,3.5 14,4C14,4.5 13.8,5 13.41,5.41C13,5.8 12.5,6 12,6C11.5,6 11,5.8 10.59,5.41C10.2,5 10,4.5 10,4C10,3.5 10.2,3 10.59,2.59C11,2.19 11.5,2 12,2M12,6C13.1,6 14,6.9 14,8V9.5C15.72,9.5 17.17,10.6 17.71,12.13C18.14,13.38 18.13,14.77 17.66,16C17.19,17.26 16.32,18.23 15.19,18.74C14.06,19.25 12.78,19.25 11.65,18.74C10.5,18.23 9.63,17.26 9.16,16C8.69,14.77 8.68,13.38 9.11,12.13C9.65,10.6 11.1,9.5 12.83,9.5H12V8C12,6.9 12.9,6 12,6M12.13,11.5C11.41,11.5 10.81,11.89 10.54,12.5C10.27,13.11 10.39,13.82 10.85,14.3C11.31,14.78 12,14.94 12.63,14.7C13.26,14.46 13.7,13.86 13.7,13.17C13.7,12.64 13.5,12.13 13.13,11.76C12.76,11.39 12.26,11.5 12.13,11.5Z" />
-          </svg>
-          <span>Fruits</span>
-        </h2>
-        <div class="detail-text">{@html renderMarkdown(selectedSource.fruits)}</div>
-      </section>
-    {/if}
-
-    {#if selectedSource?.flowers}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M15,10.59V9L12.5,6.5L10,9V10.59L11.29,11.88L10.59,14.59L12,14L13.41,14.59L12.71,11.88L15,10.59Z" />
-          </svg>
-          <span>Flowers</span>
-        </h2>
-        <div class="detail-text">{@html renderMarkdown(selectedSource.flowers)}</div>
-      </section>
-    {/if}
-
-    {#if selectedSource?.bark}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-          <span>Bark</span>
-        </h2>
-        <div class="detail-text">{@html renderMarkdown(selectedSource.bark)}</div>
-      </section>
-    {/if}
-
-    {#if selectedSource?.twigs}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-          <span>Twigs</span>
-        </h2>
-        <div class="detail-text">{@html renderMarkdown(selectedSource.twigs)}</div>
-      </section>
-    {/if}
-
-    {#if selectedSource?.buds}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-          <span>Buds</span>
-        </h2>
-        <div class="detail-text">{@html renderMarkdown(selectedSource.buds)}</div>
-      </section>
-    {/if}
-
-    {#if selectedSource?.local_names && selectedSource.local_names.length > 0}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-          </svg>
-          <span>Common Names</span>
-        </h2>
-        <ul class="flex flex-wrap gap-2">
-          {#each selectedSource.local_names as localName}
-            <li class="pill-tag">
-              {localName}
-            </li>
-          {/each}
-        </ul>
-      </section>
-    {/if}
-
-    {#if selectedSource?.hardiness_habitat}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>Hardiness & Habitat</span>
-        </h2>
-        <div class="detail-text">{@html renderMarkdown(selectedSource.hardiness_habitat)}</div>
-      </section>
-    {/if}
-
-    {#if selectedSource?.miscellaneous}
-      <section class="detail-section full-width">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>Additional Information</span>
-        </h2>
-        <div class="detail-text">{@html renderMarkdown(selectedSource.miscellaneous)}</div>
       </section>
     {/if}
 
@@ -835,74 +823,174 @@
     border: 1px solid var(--color-forest-200);
   }
 
-  /* Source selector styles */
-  .source-selector-section {
-    background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-surface) 100%);
+  /* Source container and tabs */
+  .source-container {
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
   }
 
-  .source-selector-container {
-    margin-top: 0.5rem;
+  .source-container.full-width {
+    grid-column: 1 / -1;
   }
 
-  .source-single {
+  .source-tabs {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0;
+    background-color: var(--color-forest-50);
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.5rem 0.5rem 0;
   }
 
-  .source-name {
+  .source-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.625rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
     font-weight: 500;
+    cursor: pointer;
+    border-radius: 0.375rem 0.375rem 0 0;
+    transition: all 0.15s ease;
+    position: relative;
+    margin-bottom: -1px;
+  }
+
+  .source-tab:hover:not(.active) {
+    background-color: var(--color-forest-100);
     color: var(--color-text-primary);
   }
 
-  .source-link-small {
+  .source-tab.active {
+    background-color: var(--color-surface);
+    color: var(--color-forest-800);
+    border: 1px solid var(--color-border);
+    border-bottom-color: var(--color-surface);
+  }
+
+  .source-tab-name {
+    white-space: nowrap;
+  }
+
+  .preferred-badge {
+    color: var(--color-oak-brown);
+    font-size: 0.75rem;
+  }
+
+  .license-text {
+    font-size: 0.6875rem;
+    color: var(--color-text-tertiary);
+    font-weight: 400;
+  }
+
+  .source-tab-link {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    padding: 0.25rem;
-    border-radius: 0.375rem;
-    color: var(--color-forest-600);
+    color: var(--color-text-tertiary);
+    padding: 0.125rem;
+    border-radius: 0.25rem;
     transition: all 0.15s ease;
   }
 
-  .source-link-small:hover {
+  .source-tab-link:hover {
+    color: var(--color-forest-600);
     background-color: var(--color-forest-100);
+  }
+
+  .source-tab-link svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .source-content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .source-field {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border-light, var(--color-border));
+  }
+
+  .source-field:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .field-header {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
     color: var(--color-forest-700);
   }
 
-  .source-dropdown-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+  .field-header svg {
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-forest-500);
+    flex-shrink: 0;
   }
 
-  .source-dropdown {
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
-    border: 1.5px solid var(--color-forest-300);
-    background-color: var(--color-surface);
+  .field-text {
     color: var(--color-text-primary);
+    line-height: 1.6;
     font-size: 0.9375rem;
-    font-weight: 500;
-    cursor: pointer;
+  }
+
+  /* Apply same markdown styles to field-text */
+  .field-text :global(p) {
+    margin: 0 0 0.75rem 0;
+  }
+
+  .field-text :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .field-text :global(ul) {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+    list-style-type: disc;
+  }
+
+  .field-text :global(ol) {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+    list-style-type: decimal;
+  }
+
+  .field-text :global(li) {
+    margin: 0.25rem 0;
+  }
+
+  .field-text :global(a) {
+    color: var(--color-forest-700);
+    text-decoration: underline;
+    text-decoration-color: var(--color-forest-300);
     transition: all 0.15s ease;
-    min-width: 200px;
   }
 
-  .source-dropdown:hover {
-    border-color: var(--color-forest-400);
+  .field-text :global(a:hover) {
+    color: var(--color-forest-600);
+    text-decoration-color: var(--color-forest-600);
   }
 
-  .source-dropdown:focus {
-    outline: none;
-    border-color: var(--color-forest-500);
-    box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
+  .field-text :global(strong) {
+    font-weight: 600;
   }
 
-  .source-count {
-    font-size: 0.8125rem;
-    color: var(--color-text-tertiary);
+  .field-text :global(em) {
+    font-style: italic;
   }
 
   .external-links-container {
