@@ -384,7 +384,7 @@ func buildSpeciesSource(scientificName string, parsed ParsedNote, sourceID int64
 		ScientificName: scientificName,
 		SourceID:       sourceID,
 		LocalNames:     parsed.CommonNames,
-		IsPreferred:    false, // Bear notes are supplemental, not primary
+		IsPreferred:    sourceID == 3, // Source 3 (Personal Observation) is always preferred
 	}
 
 	if ss.LocalNames == nil {
