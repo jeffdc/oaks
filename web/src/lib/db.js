@@ -145,7 +145,7 @@ function countPopulatedFields(source) {
 /**
  * Get the default/primary source for a species
  * Selection priority:
- *   1. Source with is_preferred === true
+ *   1. Source with is_preferred === true AND has substantive content
  *   2. Source with most populated fields
  *   3. First source in array
  * @param {Object} species - Species object
@@ -154,15 +154,24 @@ function countPopulatedFields(source) {
 export function getPrimarySource(species) {
   if (!species?.sources?.length) return null;
 
-  // Priority 1: Check for is_preferred flag
-  const preferred = species.sources.find(s => s.is_preferred);
-  if (preferred) return preferred;
-
-  // Priority 2: Select source with most populated fields
+  // Sort all sources by completeness
   const sorted = [...species.sources].sort((a, b) =>
     countPopulatedFields(b) - countPopulatedFields(a)
   );
 
+  // Priority 1: Check for is_preferred flag with substantive content
+  const preferred = species.sources.find(s => s.is_preferred);
+  if (preferred) {
+    const preferredCount = countPopulatedFields(preferred);
+    const bestCount = countPopulatedFields(sorted[0]);
+    // Use preferred source if it has at least 2 fields OR is the most complete
+    if (preferredCount >= 2 || preferredCount >= bestCount) {
+      return preferred;
+    }
+    // Fall through to most complete source if preferred is too sparse
+  }
+
+  // Priority 2: Select source with most populated fields
   return sorted[0];
 }
 
