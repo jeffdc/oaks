@@ -50,19 +50,33 @@ cd cli
 ## Data Pipeline
 
 ```
-Data Sources                    CLI Tool                      Web App
-─────────────                   ────────                      ───────
+Data Sources                    CLI Tool                      Deployment
+─────────────                   ────────                      ──────────
 iNaturalist ──────┐
   (taxonomy)      │
-                  ├──▶ oak_compendium.db ──▶ quercus_data.json ──▶ IndexedDB
-Oaks of the World │         (SQLite)            (JSON export)      (browser)
-  (descriptions) ─┘
+                  │
+Oaks of the World ├──▶ oak_compendium.db ──▶ quercus_data.json ──▶ git push
+  (descriptions)  │         (SQLite)            (JSON export)         │
+                  │                                                   ▼
+Bear App ─────────┘                                           GitHub Actions
+  (personal notes)                                                    │
+                                                                      ▼
+                                                              GitHub Pages
 ```
 
-1. **Seed Files** (`cli/data/`): iNaturalist taxonomy and species list
-2. **CLI Database**: SQLite database managed by `oak` CLI tool
-3. **JSON Export**: `oak export` generates denormalized JSON for web
-4. **Web App**: Loads JSON into IndexedDB for offline-capable queries
+**Data Sources:**
+1. **iNaturalist** (Source 1): Authoritative taxonomy and species list
+2. **Oaks of the World** (Source 2): Morphological descriptions from scraping
+3. **Bear App** (Source 3): Personal field notes and observations
+
+**Workflow:**
+```bash
+cd cli
+oak import-bear                              # Import from Bear
+oak export ../web/public/quercus_data.json   # Export for web
+git add -A && git commit -m "Update data" && git push
+# GitHub Actions auto-deploys to GitHub Pages
+```
 
 See [CLAUDE.md](CLAUDE.md) for detailed architecture documentation.
 

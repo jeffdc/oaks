@@ -110,43 +110,53 @@ The complete data pipeline from sources to browser:
 │                         DATA SOURCES                                │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│  iNaturalist                      Oaks of the World                 │
-│  (taxonomy + species list)        (descriptive data)                │
-│         │                                │                          │
-│         ▼                                ▼                          │
-│  cli/data/quercus-taxonomy.yaml   scrapers/oaksoftheworld/          │
-│  cli/data/quercus-species.yaml           │                          │
-│         │                                │                          │
-└─────────┼────────────────────────────────┼──────────────────────────┘
-          │                                │
-          ▼                                ▼
+│  iNaturalist            Oaks of the World         Bear App          │
+│  (Source 1)             (Source 2)                (Source 3)        │
+│  taxonomy + species     descriptive data          personal notes    │
+│         │                      │                       │            │
+│         ▼                      ▼                       │            │
+│  cli/data/*.yaml        scrapers/                     │            │
+│         │               oaksoftheworld/               │            │
+│         │                      │                       │            │
+└─────────┼──────────────────────┼───────────────────────┼────────────┘
+          │                      │                       │
+          ▼                      ▼                       ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         CLI TOOL (oak)                              │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│  oak taxa import ...          oak import-oaksoftheworld ...         │
-│  oak import-bulk ...                                                │
-│         │                                │                          │
-│         └────────────┬───────────────────┘                          │
-│                      ▼                                              │
-│              oak_compendium.db (SQLite)                             │
-│              ├── taxa (taxonomy hierarchy)                          │
-│              ├── oak_entries (species)                              │
-│              ├── sources (data sources)                             │
-│              └── species_sources (source-attributed data)           │
-│                      │                                              │
-│                      ▼                                              │
-│              oak export ../web/public/quercus_data.json             │
+│  oak taxa import        oak import-           oak import-bear       │
+│  oak import-bulk        oaksoftheworld        (reads Bear SQLite)   │
+│         │                      │                       │            │
+│         └──────────────────────┴───────────────────────┘            │
+│                                │                                    │
+│                                ▼                                    │
+│                    oak_compendium.db (SQLite)                       │
+│                    ├── taxa (taxonomy hierarchy)                    │
+│                    ├── oak_entries (species)                        │
+│                    ├── sources (data sources)                       │
+│                    └── species_sources (source-attributed data)     │
+│                                │                                    │
+│                                ▼                                    │
+│                    oak export ../web/public/quercus_data.json       │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
-                       │
-                       ▼
+                                 │
+                                 ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                 web/public/quercus_data.json                        │
 │            (denormalized JSON, committed to repo)                   │
 └─────────────────────────────────────────────────────────────────────┘
-                       │
-                       ▼
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                         DEPLOYMENT                                  │
+├─────────────────────────────────────────────────────────────────────┤
+│  git add/commit/push  ──▶  GitHub Actions  ──▶  GitHub Pages        │
+│                            (.github/workflows/deploy.yml)           │
+└─────────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                      WEB APP (Svelte PWA)                           │
 ├─────────────────────────────────────────────────────────────────────┤
@@ -155,48 +165,111 @@ The complete data pipeline from sources to browser:
 │  3. Query from IndexedDB for UI                                     │
 │  4. Service worker caches for offline                               │
 └─────────────────────────────────────────────────────────────────────┘
-                                        │
-                                        ▼
-                        ┌─────────────────────────────────────────────┐
-                        │         USER'S BROWSER                      │
-                        │  • Offline-capable queries via IndexedDB    │
-                        │  • Service worker serves cached assets      │
-                        └─────────────────────────────────────────────┘
 ```
+
+### Data Sources
+
+| Source | ID | Type | Purpose | Import Command |
+|--------|-----|------|---------|----------------|
+| iNaturalist | 1 | Website | Authoritative taxonomy (subgenera, sections, subsections, complexes) and species list | `oak taxa import`, `oak import-bulk` |
+| Oaks of the World | 2 | Website | Rich descriptive data (morphology, distribution, local names) | `oak import-oaksoftheworld` |
+| Oak Compendium | 3 | Personal Observation | Field notes, personal observations, curated content | `oak import-bear` |
 
 ### Pipeline Steps
 
-**1. Data Sources**
-- **iNaturalist**: Provides authoritative taxonomy (subgenera, sections, subsections, complexes) and species list. Stored as seed files in `cli/data/`.
-- **Oaks of the World**: Provides rich descriptive data (morphology, distribution, local names). Scraped via Python scripts.
-
-**2. CLI Database (oak_compendium.db)**
+**1. Database Initialization (one-time setup)**
 ```bash
-# Initialize from seed files
-oak taxa import --clear cli/data/quercus-taxonomy.yaml
-oak import-bulk cli/data/quercus-species.yaml --source-id 1
+cd cli
 
-# Import Oaks of the World data
-oak import-oaksoftheworld <json-file> --source-id 2
+# Import taxonomy hierarchy
+oak taxa import --clear data/quercus-taxonomy.yaml
+
+# Import species list from iNaturalist
+oak import-bulk data/quercus-species.yaml --source-id 1
+
+# Import Oaks of the World descriptive data
+oak import-oaksoftheworld <scraped-json> --source-id 2
 ```
 
-**3. JSON Export**
+**2. Ongoing Updates (Bear workflow)**
 ```bash
-# Generate web-ready JSON (from cli/ directory)
+cd cli
+
+# Import notes from Bear app
+oak import-bear --source-id 3
+
+# Export to JSON for web app
 oak export ../web/public/quercus_data.json
 ```
 
-**4. Web App Loading**
-- Data file `web/public/quercus_data.json` is committed to the repo
-- App fetches JSON on startup
-- Data populates IndexedDB for structured queries
-- Service worker caches everything for offline use
-- GitHub Actions auto-deploys to GitHub Pages on push to main
+**3. Deployment**
+```bash
+# From repository root
+git add web/public/quercus_data.json cli/oak_compendium.db
+git commit -m "Update species data"
+git push origin main
+# GitHub Actions automatically builds and deploys to GitHub Pages
+```
+
+### Bear App Integration
+
+Bear provides a low-friction way to capture field notes on iOS/macOS. Notes sync via iCloud and are imported into the database.
+
+**Bear SQLite Location:**
+```
+~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite
+```
+
+**Tag Format:**
+- Regular species: `#Quercus/{subgenus}/{section}/{species}`
+- Hybrids: `#Quercus/{subgenus}/{section}/x/{hybrid}`
+
+**Note Template:**
+```markdown
+# Quercus {species}
+
+## Common Name(s):
+## Taxonomy:
+#Quercus/{subgenus}/{section}/{species}
+## Identification:
+### Leaf:
+### Acorn:
+### Bark:
+### Buds:
+### Form:
+## Range & Habitat:
+## Field Notes:
+## Resources:
+## Photos:
+```
+
+**Field Mapping:**
+| Bear Section | Database Field |
+|--------------|----------------|
+| Common Name(s) | local_names |
+| Leaf | leaves |
+| Acorn | fruits |
+| Bark | bark |
+| Buds | buds |
+| Form | growth_habit |
+| Range & Habitat | range |
+| Field Notes | miscellaneous |
+| Resources | miscellaneous (appended) |
+
+**Helper Commands:**
+```bash
+# Generate note templates for species not yet in Bear
+oak generate-bear-notes --output ../tmp/bear-notes
+
+# Preview import without making changes
+oak import-bear --dry-run
+```
 
 ### Key Design Decisions
 
 - **CLI is the single source of truth**: All data flows through the CLI database
-- **Source attribution**: Every data point is linked to its source (iNaturalist, Oaks of the World, etc.)
+- **Source attribution**: Every data point is linked to its source (iNaturalist, Oaks of the World, Personal Observation)
+- **Source 3 is preferred**: Personal observations take precedence over other sources for display
 - **Denormalized JSON export**: Optimized for web consumption, not storage efficiency
 - **IndexedDB for offline**: Browser-native storage with query capabilities
 
