@@ -920,10 +920,16 @@
     margin-bottom: 0;
   }
 
-  .detail-text :global(ul),
+  .detail-text :global(ul) {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+    list-style-type: disc;
+  }
+
   .detail-text :global(ol) {
     margin: 0.5rem 0;
     padding-left: 1.5rem;
+    list-style-type: decimal;
   }
 
   .detail-text :global(li) {
