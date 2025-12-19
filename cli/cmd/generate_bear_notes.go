@@ -225,17 +225,26 @@ func generateBearNoteContent(species SpeciesForBear) string {
 func buildTaxonomyTag(species SpeciesForBear) string {
 	parts := []string{"#Quercus"}
 
-	// Subgenus
+	// Subgenus (default to Quercus if not specified)
 	if species.Subgenus != nil && *species.Subgenus != "" {
 		parts = append(parts, *species.Subgenus)
 	} else {
-		// Default to Quercus subgenus if not specified
 		parts = append(parts, "Quercus")
 	}
 
 	// Section (if present)
 	if species.Section != nil && *species.Section != "" {
 		parts = append(parts, *species.Section)
+	}
+
+	// Subsection (if present)
+	if species.Subsection != nil && *species.Subsection != "" {
+		parts = append(parts, *species.Subsection)
+	}
+
+	// Complex (if present)
+	if species.Complex != nil && *species.Complex != "" {
+		parts = append(parts, *species.Complex)
 	}
 
 	// For hybrids, add /x/ before the species name

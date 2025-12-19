@@ -25,9 +25,14 @@ tagged with the Quercus taxonomy pattern into the oak compendium.
 Bear Notes Location:
   ~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite
 
-Tag Format:
-  #Quercus/Subgenus/Section/species     - Regular species
-  #Quercus/Subgenus/Section/x/hybrid    - Hybrids
+Tag Format (taxonomy levels are optional, skip if not present):
+  #Quercus/{subgenus}/{section}/{subsection}/{complex}/{species}
+  #Quercus/{subgenus}/{section}/{subsection}/{complex}/x/{hybrid}
+
+Examples:
+  #Quercus/Quercus/Quercus/Albae/alba           (no complex)
+  #Quercus/Quercus/Lobatae/Phellos/phellos/phellos  (with complex)
+  #Quercus/Quercus/Lobatae/x/heterophylla       (hybrid)
 
 Note Template Fields:
   ## Common Name(s): → local_names
@@ -64,19 +69,17 @@ type BearNote struct {
 
 // ParsedNote contains parsed fields from a Bear note
 type ParsedNote struct {
-	SpeciesName     string
-	IsHybrid        bool
-	Subgenus        string
-	Section         string
-	CommonNames     []string
-	Leaves          string
-	Fruits          string // From Acorn section
-	Bark            string
-	Buds            string
-	GrowthHabit     string // From Form section
-	Range           string
-	FieldNotes      string
-	Resources       string
+	SpeciesName string
+	IsHybrid    bool
+	CommonNames []string
+	Leaves      string
+	Fruits      string // From Acorn section
+	Bark        string
+	Buds        string
+	GrowthHabit string // From Form section
+	Range       string
+	FieldNotes  string
+	Resources   string
 }
 
 func runImportBear(cmd *cobra.Command, args []string) error {
@@ -211,11 +214,12 @@ func queryBearNotes(db *sql.DB) ([]BearNote, error) {
 			JOIN Z_5TAGS nt ON n.Z_PK = nt.Z_5NOTES
 			JOIN ZSFNOTETAG t ON nt.Z_13TAGS = t.Z_PK
 			WHERE (
-				-- Species pattern: Quercus/Subgenus/Section/species (4 parts)
+				-- Species pattern: Quercus/{subgenus}/{section}/{subsection}?/{complex}?/{species}
+				-- Minimum 4 parts (Quercus/subgenus/section/species), max 6 parts
 				(t.ZTITLE LIKE 'Quercus/%/%/%'
 				 AND t.ZTITLE NOT LIKE 'Quercus/%/x')
 				OR
-				-- Hybrid pattern: Quercus/Subgenus/x/hybrid or Quercus/Subgenus/Section/x/hybrid
+				-- Hybrid pattern: .../x/{hybrid} anywhere in path
 				(t.ZTITLE LIKE 'Quercus/%/x/%')
 			)
 			AND n.ZTRASHED = 0
@@ -256,27 +260,23 @@ func queryBearNotes(db *sql.DB) ([]BearNote, error) {
 func parseNoteContent(note BearNote) ParsedNote {
 	parsed := ParsedNote{}
 
-	// Parse taxonomy tag to get species info
-	// Format: Quercus/Subgenus/Section/species or Quercus/Subgenus/x/hybrid or Quercus/Subgenus/Section/x/hybrid
+	// Parse taxonomy tag to get species name
+	// Format: Quercus/{subgenus}/{section}/{subsection}?/{complex}?/{species}
+	// Or for hybrids: .../x/{hybrid}
+	// We only extract the species name - taxonomy is looked up from the database
 	parts := strings.Split(note.TaxonomyTag, "/")
-	if len(parts) >= 4 {
-		parsed.Subgenus = parts[1]
-
-		// Check for hybrid pattern
+	if len(parts) >= 3 {
+		// Check for hybrid pattern: look for /x/ followed by species name
 		for i, part := range parts {
 			if strings.EqualFold(part, "x") && i < len(parts)-1 {
 				parsed.IsHybrid = true
 				parsed.SpeciesName = parts[i+1]
-				if i >= 2 {
-					parsed.Section = parts[i-1]
-				}
 				break
 			}
 		}
 
-		// Regular species
+		// Regular species: last element is the species name
 		if !parsed.IsHybrid {
-			parsed.Section = parts[2]
 			parsed.SpeciesName = parts[len(parts)-1]
 		}
 	}
