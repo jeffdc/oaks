@@ -1,4 +1,11 @@
-# Quercus Database Schema
+---
+spec_status: HISTORICAL
+created: 2025-12-12
+---
+
+> **Historical Design Document**: This schema was the initial design specification. The actual implementation differs significantly (simpler table structure, JSON arrays instead of separate tables, `scientific_name` as primary key). For the current database schema, see the "Data Structure" section in [CLAUDE.md](CLAUDE.md).
+
+# Quercus Database Schema (Original Design)
 
 ## Overview
 

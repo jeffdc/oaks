@@ -1,13 +1,14 @@
 # Oak Browser Web Application
 
-A modern, performant Progressive Web App (PWA) for browsing Quercus (oak) species data.
+A Progressive Web App (PWA) for browsing Quercus (oak) species data with offline support.
 
 ## Technology Stack
 
-- **Framework**: Svelte (compiler-based, zero runtime)
-- **Styling**: Tailwind CSS v4 (utility-first, optimized CSS)
-- **Build Tool**: Vite (fast builds and HMR)
-- **PWA**: vite-plugin-pwa (offline support)
+- **Framework**: SvelteKit with Svelte 5 (runes syntax)
+- **Styling**: Tailwind CSS v4
+- **Build Tool**: Vite 6
+- **Adapter**: @sveltejs/adapter-static (GitHub Pages)
+- **PWA**: @vite-pwa/sveltekit
 
 ## Prerequisites
 
@@ -17,66 +18,75 @@ A modern, performant Progressive Web App (PWA) for browsing Quercus (oak) specie
 ## Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Start development server (with hot reload)
-npm run dev
+npm run dev        # Dev server at http://localhost:5173
 ```
 
-The dev server will run at `http://localhost:5173`
-
-## Building for Production
+## Building
 
 ```bash
-# Build optimized production bundle
-npm run build
-
-# Preview production build locally
-npm run preview
+npm run build      # Output to dist/
+npm run preview    # Preview production build
 ```
-
-The build output will be in the `dist/` directory.
-
-## Data Source
-
-The application loads species data from `../quercus_data.json`. During the build process, this file is automatically copied to the `public/` directory.
-
-To update the data:
-1. Run the scraper in `../scrapers/oaksoftheworld/`
-2. The build process will automatically pick up the updated `quercus_data.json`
-
-## PWA Features
-
-- **Offline Support**: Works without internet after initial load
-- **Update Notifications**: Users are notified when new versions are available
-- **App-like Experience**: Can be installed on mobile/desktop
 
 ## Project Structure
 
 ```
 web/
 ├── src/
-│   ├── App.svelte          # Main app component
-│   ├── app.css             # Tailwind CSS import
-│   ├── main.js             # App entry point
-│   └── lib/                # Reusable components
-│       ├── dataStore.js    # Svelte stores for state management
-│       ├── Search.svelte   # Search component
-│       ├── SpeciesList.svelte  # Species list view
-│       ├── SpeciesDetail.svelte # Species detail view
-│       └── UpdatePrompt.svelte # PWA update notification
-├── public/                 # Static assets
-├── index.html              # HTML entry point
-├── vite.config.js          # Vite configuration (includes PWA setup)
-├── postcss.config.js       # PostCSS configuration
-└── package.json            # Dependencies and scripts
+│   ├── app.html             # HTML template
+│   ├── app.css              # Global styles & CSS custom properties
+│   ├── routes/              # SvelteKit file-based routing
+│   │   ├── +layout.svelte   # Root layout with Header
+│   │   ├── +page.svelte     # Home page
+│   │   ├── list/            # Species list view
+│   │   ├── about/           # About page
+│   │   ├── taxonomy/        # Taxonomy tree + dynamic taxon views
+│   │   └── species/[name]/  # Species detail pages
+│   └── lib/
+│       ├── components/      # Svelte components
+│       ├── stores/          # State management (dataStore.js)
+│       └── db.js            # IndexedDB wrapper (Dexie.js)
+├── static/                  # Static assets (icons, quercus_data.json)
+├── svelte.config.js         # SvelteKit config
+├── vite.config.js           # Vite + PWA config
+└── package.json
 ```
 
-## Development Notes
+## Routes
 
-- The app is fully client-side (no backend required)
-- All data is loaded from a static JSON file
-- Service Worker handles caching for offline use
-- Using Tailwind CSS v4 with `@tailwindcss/postcss` plugin
-- Vite's custom plugin automatically copies `quercus_data.json` during build
+| Path | Description |
+|------|-------------|
+| `/` | Home / Landing page |
+| `/list/` | Species list with search |
+| `/species/[name]/` | Species detail (e.g., `/species/alba/`) |
+| `/taxonomy/` | Taxonomy tree view |
+| `/taxonomy/[...path]/` | Taxon detail (e.g., `/taxonomy/Quercus/Quercus/`) |
+| `/about/` | About page |
+
+## Data Source
+
+The app loads species data from `static/quercus_data.json`, which is:
+- Exported from the CLI: `oak export ../web/public/quercus_data.json`
+- Committed to the repo
+- Loaded into IndexedDB on first load for offline queries
+
+## PWA Features
+
+- **Offline Support**: Works without internet after initial load
+- **Installable**: Can be added to home screen on mobile/desktop
+- **Auto-Update**: Prompts user when new version is available
+
+## Deployment
+
+GitHub Actions auto-deploys to GitHub Pages on push to main.
+
+Base path is `/oaks` (configured in `svelte.config.js`).
+
+## Detailed Documentation
+
+See [CLAUDE.md](CLAUDE.md) for comprehensive architecture documentation including:
+- State management patterns
+- Component details
+- Styling system
+- Data structures
