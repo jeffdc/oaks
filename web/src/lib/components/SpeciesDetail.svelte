@@ -1,6 +1,13 @@
 <script>
   import { base } from '$app/paths';
+  import { marked } from 'marked';
   import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName } from '$lib/stores/dataStore.js';
+
+  // Configure marked for safe rendering
+  marked.setOptions({
+    breaks: true,  // Convert \n to <br>
+    gfm: true,     // GitHub Flavored Markdown
+  });
 
   export let species;
 
@@ -63,19 +70,15 @@
     return s.is_hybrid && !s.name.startsWith('×');
   }
 
-  // Convert markdown links [text](url) to HTML links
-  function renderMarkdownLinks(text) {
+  // Render Markdown to HTML with sanitization
+  function renderMarkdown(text) {
     if (!text) return '';
-    // Escape HTML first to prevent XSS, then convert markdown links
-    const escaped = text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-    // Convert markdown links to anchor tags
-    return escaped.replace(
-      /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" target="_blank" rel="noopener noreferrer" class="markdown-link">$1</a>'
-    );
+    // Use marked to parse markdown, then sanitize dangerous tags
+    let html = marked.parse(text);
+    // Remove script tags and on* event handlers for safety
+    html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    html = html.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
+    return html;
   }
 
   // Build taxonomy URL for a given level
@@ -380,7 +383,7 @@
           </svg>
           <span>Geographic Range</span>
         </h2>
-        <p class="detail-text">{selectedSource.range}</p>
+        <div class="detail-text">{@html renderMarkdown(selectedSource.range)}</div>
       </section>
     {/if}
 
@@ -392,7 +395,7 @@
           </svg>
           <span>Growth Habit</span>
         </h2>
-        <p class="detail-text">{selectedSource.growth_habit}</p>
+        <div class="detail-text">{@html renderMarkdown(selectedSource.growth_habit)}</div>
       </section>
     {/if}
 
@@ -404,7 +407,7 @@
           </svg>
           <span>Leaves</span>
         </h2>
-        <p class="detail-text">{selectedSource.leaves}</p>
+        <div class="detail-text">{@html renderMarkdown(selectedSource.leaves)}</div>
       </section>
     {/if}
 
@@ -416,7 +419,7 @@
           </svg>
           <span>Fruits</span>
         </h2>
-        <p class="detail-text">{selectedSource.fruits}</p>
+        <div class="detail-text">{@html renderMarkdown(selectedSource.fruits)}</div>
       </section>
     {/if}
 
@@ -428,7 +431,7 @@
           </svg>
           <span>Flowers</span>
         </h2>
-        <p class="detail-text">{selectedSource.flowers}</p>
+        <div class="detail-text">{@html renderMarkdown(selectedSource.flowers)}</div>
       </section>
     {/if}
 
@@ -440,7 +443,7 @@
           </svg>
           <span>Bark</span>
         </h2>
-        <p class="detail-text">{selectedSource.bark}</p>
+        <div class="detail-text">{@html renderMarkdown(selectedSource.bark)}</div>
       </section>
     {/if}
 
@@ -452,7 +455,7 @@
           </svg>
           <span>Twigs</span>
         </h2>
-        <p class="detail-text">{selectedSource.twigs}</p>
+        <div class="detail-text">{@html renderMarkdown(selectedSource.twigs)}</div>
       </section>
     {/if}
 
@@ -464,7 +467,7 @@
           </svg>
           <span>Buds</span>
         </h2>
-        <p class="detail-text">{selectedSource.buds}</p>
+        <div class="detail-text">{@html renderMarkdown(selectedSource.buds)}</div>
       </section>
     {/if}
 
@@ -494,7 +497,7 @@
           </svg>
           <span>Hardiness & Habitat</span>
         </h2>
-        <p class="detail-text">{selectedSource.hardiness_habitat}</p>
+        <div class="detail-text">{@html renderMarkdown(selectedSource.hardiness_habitat)}</div>
       </section>
     {/if}
 
@@ -506,7 +509,7 @@
           </svg>
           <span>Additional Information</span>
         </h2>
-        <p class="detail-text text-sm">{@html renderMarkdownLinks(selectedSource.miscellaneous)}</p>
+        <div class="detail-text">{@html renderMarkdown(selectedSource.miscellaneous)}</div>
       </section>
     {/if}
 
@@ -908,16 +911,50 @@
     gap: 0.75rem;
   }
 
-  /* Markdown link styling (used with @html) */
-  :global(.markdown-link) {
+  /* Markdown content styling */
+  .detail-text :global(p) {
+    margin: 0 0 0.75rem 0;
+  }
+
+  .detail-text :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .detail-text :global(ul),
+  .detail-text :global(ol) {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .detail-text :global(li) {
+    margin: 0.25rem 0;
+  }
+
+  .detail-text :global(a) {
     color: var(--color-forest-700);
     text-decoration: underline;
     text-decoration-color: var(--color-forest-300);
     transition: all 0.15s ease;
   }
 
-  :global(.markdown-link:hover) {
+  .detail-text :global(a:hover) {
     color: var(--color-forest-600);
     text-decoration-color: var(--color-forest-600);
+  }
+
+  .detail-text :global(strong) {
+    font-weight: 600;
+  }
+
+  .detail-text :global(em) {
+    font-style: italic;
+  }
+
+  .detail-text :global(code) {
+    font-family: monospace;
+    background-color: var(--color-forest-50);
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
   }
 </style>
