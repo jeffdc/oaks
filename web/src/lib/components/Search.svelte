@@ -4,16 +4,20 @@
   import { page } from '$app/stores';
   import { searchQuery, filteredSpecies } from '$lib/stores/dataStore.js';
 
+  let inputElement;
+
   // Keep inputValue synced with the store (handles external clears like handleGoHome)
   $: inputValue = $searchQuery;
 
-  function handleInput(event) {
+  async function handleInput(event) {
     const value = event.target.value;
     searchQuery.set(value);
 
     // Navigate to list page when user starts typing (if not already there)
     if (value && !$page.url.pathname.endsWith('/list/')) {
-      goto(`${base}/list/`);
+      await goto(`${base}/list/`);
+      // Restore focus after navigation
+      inputElement?.focus();
     }
   }
 
@@ -26,6 +30,7 @@
   <div class="relative group">
     <input
       type="text"
+      bind:this={inputElement}
       bind:value={inputValue}
       on:input={handleInput}
       placeholder="Search by name, author, synonym, or location..."

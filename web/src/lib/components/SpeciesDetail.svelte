@@ -63,6 +63,21 @@
     return s.is_hybrid && !s.name.startsWith('×');
   }
 
+  // Convert markdown links [text](url) to HTML links
+  function renderMarkdownLinks(text) {
+    if (!text) return '';
+    // Escape HTML first to prevent XSS, then convert markdown links
+    const escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    // Convert markdown links to anchor tags
+    return escaped.replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer" class="markdown-link">$1</a>'
+    );
+  }
+
   // Build taxonomy URL for a given level
   function getTaxonUrl(level) {
     if (!species.taxonomy) return `${base}/taxonomy/`;
@@ -491,7 +506,7 @@
           </svg>
           <span>Additional Information</span>
         </h2>
-        <p class="detail-text text-sm">{selectedSource.miscellaneous}</p>
+        <p class="detail-text text-sm">{@html renderMarkdownLinks(selectedSource.miscellaneous)}</p>
       </section>
     {/if}
 
@@ -891,5 +906,18 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
+  }
+
+  /* Markdown link styling (used with @html) */
+  :global(.markdown-link) {
+    color: var(--color-forest-700);
+    text-decoration: underline;
+    text-decoration-color: var(--color-forest-300);
+    transition: all 0.15s ease;
+  }
+
+  :global(.markdown-link:hover) {
+    color: var(--color-forest-600);
+    text-decoration-color: var(--color-forest-600);
   }
 </style>
