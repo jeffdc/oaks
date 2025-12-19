@@ -256,8 +256,14 @@ flowers: %s
 # Fruit/acorn description
 fruits: %s
 
-# Bark, twigs, and buds
-bark_twigs_buds: %s
+# Bark description
+bark: %s
+
+# Twig description
+twigs: %s
+
+# Bud description
+buds: %s
 
 # Hardiness and habitat preferences
 hardiness_habitat: %s
@@ -277,7 +283,9 @@ is_preferred: %s
 		deref(ss.Leaves),
 		deref(ss.Flowers),
 		deref(ss.Fruits),
-		deref(ss.BarkTwigsBuds),
+		deref(ss.Bark),
+		deref(ss.Twigs),
+		deref(ss.Buds),
 		deref(ss.HardinessHabitat),
 		deref(ss.Miscellaneous),
 		deref(ss.URL),

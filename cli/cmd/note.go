@@ -178,8 +178,14 @@ func runNoteList(cmd *cobra.Command, args []string) error {
 		if ss.Fruits != nil && *ss.Fruits != "" {
 			fmt.Fprintf(w, "Fruits:\t%s\n", truncate(*ss.Fruits, 80))
 		}
-		if ss.BarkTwigsBuds != nil && *ss.BarkTwigsBuds != "" {
-			fmt.Fprintf(w, "Bark/twigs/buds:\t%s\n", truncate(*ss.BarkTwigsBuds, 80))
+		if ss.Bark != nil && *ss.Bark != "" {
+			fmt.Fprintf(w, "Bark:\t%s\n", truncate(*ss.Bark, 80))
+		}
+		if ss.Twigs != nil && *ss.Twigs != "" {
+			fmt.Fprintf(w, "Twigs:\t%s\n", truncate(*ss.Twigs, 80))
+		}
+		if ss.Buds != nil && *ss.Buds != "" {
+			fmt.Fprintf(w, "Buds:\t%s\n", truncate(*ss.Buds, 80))
 		}
 		if ss.HardinessHabitat != nil && *ss.HardinessHabitat != "" {
 			fmt.Fprintf(w, "Hardiness/habitat:\t%s\n", truncate(*ss.HardinessHabitat, 80))

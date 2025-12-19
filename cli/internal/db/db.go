@@ -102,7 +102,9 @@ func (db *Database) initializeSchema() error {
 			leaves TEXT,
 			flowers TEXT,
 			fruits TEXT,
-			bark_twigs_buds TEXT,
+			bark TEXT,
+			twigs TEXT,
+			buds TEXT,
 			hardiness_habitat TEXT,
 			miscellaneous TEXT,
 			url TEXT,
@@ -148,6 +150,29 @@ func (db *Database) runMigrations() error {
 			return fmt.Errorf("failed to drop data_points table: %w", err)
 		}
 		fmt.Println("Migrated: dropped old data_points table (replaced by species_sources)")
+	}
+
+	// Migration 4: Split bark_twigs_buds into bark, twigs, buds
+	if db.columnExists("species_sources", "bark_twigs_buds") {
+		// Add new columns
+		if !db.columnExists("species_sources", "bark") {
+			if _, err := db.conn.Exec(`ALTER TABLE species_sources ADD COLUMN bark TEXT`); err != nil {
+				return fmt.Errorf("failed to add bark column: %w", err)
+			}
+		}
+		if !db.columnExists("species_sources", "twigs") {
+			if _, err := db.conn.Exec(`ALTER TABLE species_sources ADD COLUMN twigs TEXT`); err != nil {
+				return fmt.Errorf("failed to add twigs column: %w", err)
+			}
+		}
+		if !db.columnExists("species_sources", "buds") {
+			if _, err := db.conn.Exec(`ALTER TABLE species_sources ADD COLUMN buds TEXT`); err != nil {
+				return fmt.Errorf("failed to add buds column: %w", err)
+			}
+		}
+		// Note: SQLite doesn't support DROP COLUMN in older versions, so we leave bark_twigs_buds
+		// but the code will no longer use it. Data migration would copy to bark column if needed.
+		fmt.Println("Migrated: added bark, twigs, buds columns to species_sources")
 	}
 
 	return nil
@@ -796,11 +821,11 @@ func (db *Database) SaveSpeciesSource(ss *models.SpeciesSource) error {
 	result, err := db.conn.Exec(
 		`INSERT OR REPLACE INTO species_sources (
 			scientific_name, source_id, local_names, range, growth_habit,
-			leaves, flowers, fruits, bark_twigs_buds, hardiness_habitat,
+			leaves, flowers, fruits, bark, twigs, buds, hardiness_habitat,
 			miscellaneous, url, is_preferred
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		ss.ScientificName, ss.SourceID, string(localNamesJSON), ss.Range, ss.GrowthHabit,
-		ss.Leaves, ss.Flowers, ss.Fruits, ss.BarkTwigsBuds, ss.HardinessHabitat,
+		ss.Leaves, ss.Flowers, ss.Fruits, ss.Bark, ss.Twigs, ss.Buds, ss.HardinessHabitat,
 		ss.Miscellaneous, ss.URL, isPreferred,
 	)
 	if err != nil {
@@ -818,7 +843,7 @@ func (db *Database) SaveSpeciesSource(ss *models.SpeciesSource) error {
 func (db *Database) GetSpeciesSources(scientificName string) ([]*models.SpeciesSource, error) {
 	rows, err := db.conn.Query(
 		`SELECT id, scientific_name, source_id, local_names, range, growth_habit,
-		        leaves, flowers, fruits, bark_twigs_buds, hardiness_habitat,
+		        leaves, flowers, fruits, bark, twigs, buds, hardiness_habitat,
 		        miscellaneous, url, is_preferred
 		 FROM species_sources WHERE scientific_name = ? ORDER BY is_preferred DESC, source_id`,
 		scientificName,
@@ -843,7 +868,7 @@ func (db *Database) GetSpeciesSources(scientificName string) ([]*models.SpeciesS
 func (db *Database) GetSpeciesSourceBySourceID(scientificName string, sourceID int64) (*models.SpeciesSource, error) {
 	row := db.conn.QueryRow(
 		`SELECT id, scientific_name, source_id, local_names, range, growth_habit,
-		        leaves, flowers, fruits, bark_twigs_buds, hardiness_habitat,
+		        leaves, flowers, fruits, bark, twigs, buds, hardiness_habitat,
 		        miscellaneous, url, is_preferred
 		 FROM species_sources WHERE scientific_name = ? AND source_id = ?`,
 		scientificName, sourceID,
@@ -855,7 +880,7 @@ func (db *Database) GetSpeciesSourceBySourceID(scientificName string, sourceID i
 
 	err := row.Scan(
 		&ss.ID, &ss.ScientificName, &ss.SourceID, &localNamesJSON, &ss.Range, &ss.GrowthHabit,
-		&ss.Leaves, &ss.Flowers, &ss.Fruits, &ss.BarkTwigsBuds, &ss.HardinessHabitat,
+		&ss.Leaves, &ss.Flowers, &ss.Fruits, &ss.Bark, &ss.Twigs, &ss.Buds, &ss.HardinessHabitat,
 		&ss.Miscellaneous, &ss.URL, &isPreferred,
 	)
 	if err == sql.ErrNoRows {
@@ -880,7 +905,7 @@ func (db *Database) GetSpeciesSourceBySourceID(scientificName string, sourceID i
 func (db *Database) GetPreferredSpeciesSource(scientificName string) (*models.SpeciesSource, error) {
 	row := db.conn.QueryRow(
 		`SELECT id, scientific_name, source_id, local_names, range, growth_habit,
-		        leaves, flowers, fruits, bark_twigs_buds, hardiness_habitat,
+		        leaves, flowers, fruits, bark, twigs, buds, hardiness_habitat,
 		        miscellaneous, url, is_preferred
 		 FROM species_sources WHERE scientific_name = ? ORDER BY is_preferred DESC LIMIT 1`,
 		scientificName,
@@ -892,7 +917,7 @@ func (db *Database) GetPreferredSpeciesSource(scientificName string) (*models.Sp
 
 	err := row.Scan(
 		&ss.ID, &ss.ScientificName, &ss.SourceID, &localNamesJSON, &ss.Range, &ss.GrowthHabit,
-		&ss.Leaves, &ss.Flowers, &ss.Fruits, &ss.BarkTwigsBuds, &ss.HardinessHabitat,
+		&ss.Leaves, &ss.Flowers, &ss.Fruits, &ss.Bark, &ss.Twigs, &ss.Buds, &ss.HardinessHabitat,
 		&ss.Miscellaneous, &ss.URL, &isPreferred,
 	)
 	if err == sql.ErrNoRows {
@@ -921,7 +946,7 @@ func scanSpeciesSource(rows *sql.Rows) (*models.SpeciesSource, error) {
 
 	err := rows.Scan(
 		&ss.ID, &ss.ScientificName, &ss.SourceID, &localNamesJSON, &ss.Range, &ss.GrowthHabit,
-		&ss.Leaves, &ss.Flowers, &ss.Fruits, &ss.BarkTwigsBuds, &ss.HardinessHabitat,
+		&ss.Leaves, &ss.Flowers, &ss.Fruits, &ss.Bark, &ss.Twigs, &ss.Buds, &ss.HardinessHabitat,
 		&ss.Miscellaneous, &ss.URL, &isPreferred,
 	)
 	if err != nil {
@@ -943,7 +968,7 @@ func scanSpeciesSource(rows *sql.Rows) (*models.SpeciesSource, error) {
 func (db *Database) ListAllSpeciesSources() ([]*models.SpeciesSource, error) {
 	rows, err := db.conn.Query(
 		`SELECT id, scientific_name, source_id, local_names, range, growth_habit,
-		        leaves, flowers, fruits, bark_twigs_buds, hardiness_habitat,
+		        leaves, flowers, fruits, bark, twigs, buds, hardiness_habitat,
 		        miscellaneous, url, is_preferred
 		 FROM species_sources ORDER BY scientific_name, is_preferred DESC`,
 	)

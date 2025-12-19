@@ -290,15 +290,39 @@
       </section>
     {/if}
 
-    {#if selectedSource?.bark_twigs_buds}
+    {#if selectedSource?.bark}
       <section class="detail-section">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
           </svg>
-          <span>Bark, Twigs & Buds</span>
+          <span>Bark</span>
         </h2>
-        <p class="detail-text">{selectedSource.bark_twigs_buds}</p>
+        <p class="detail-text">{selectedSource.bark}</p>
+      </section>
+    {/if}
+
+    {#if selectedSource?.twigs}
+      <section class="detail-section">
+        <h2 class="section-header">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+          <span>Twigs</span>
+        </h2>
+        <p class="detail-text">{selectedSource.twigs}</p>
+      </section>
+    {/if}
+
+    {#if selectedSource?.buds}
+      <section class="detail-section">
+        <h2 class="section-header">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+          <span>Buds</span>
+        </h2>
+        <p class="detail-text">{selectedSource.buds}</p>
       </section>
     {/if}
 

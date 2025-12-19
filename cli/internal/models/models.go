@@ -39,7 +39,9 @@ type SpeciesSource struct {
 	Leaves           *string  `json:"leaves,omitempty" yaml:"leaves,omitempty"`
 	Flowers          *string  `json:"flowers,omitempty" yaml:"flowers,omitempty"`
 	Fruits           *string  `json:"fruits,omitempty" yaml:"fruits,omitempty"`
-	BarkTwigsBuds    *string  `json:"bark_twigs_buds,omitempty" yaml:"bark_twigs_buds,omitempty"`
+	Bark             *string  `json:"bark,omitempty" yaml:"bark,omitempty"`
+	Twigs            *string  `json:"twigs,omitempty" yaml:"twigs,omitempty"`
+	Buds             *string  `json:"buds,omitempty" yaml:"buds,omitempty"`
 	HardinessHabitat *string  `json:"hardiness_habitat,omitempty" yaml:"hardiness_habitat,omitempty"`
 	Miscellaneous    *string  `json:"miscellaneous,omitempty" yaml:"miscellaneous,omitempty"`
 	URL              *string  `json:"url,omitempty" yaml:"url,omitempty"`

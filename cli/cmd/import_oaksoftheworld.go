@@ -291,8 +291,10 @@ func convertToSpeciesSource(sp *ScraperSpecies, srcID int64) *models.SpeciesSour
 		ss.Fruits = &cleaned
 	}
 	if sp.BarkTwigsBuds != "" {
+		// Oaks of the World combines bark, twigs, buds into one field
+		// Store in bark field; can be split manually if needed
 		cleaned := cleanText(sp.BarkTwigsBuds)
-		ss.BarkTwigsBuds = &cleaned
+		ss.Bark = &cleaned
 	}
 	if sp.HardinessHabitat != "" {
 		cleaned := cleanText(sp.HardinessHabitat)

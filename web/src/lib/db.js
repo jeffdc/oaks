@@ -42,7 +42,7 @@ db.version(1).stores({
  *   - sources[]: Array of source objects, each containing:
  *     - source_id, source_name, source_url, is_primary
  *     - range, growth_habit, leaves, flowers, fruits,
- *       bark_twigs_buds, hardiness_habitat, miscellaneous
+ *       bark, twigs, buds, hardiness_habitat, miscellaneous
  *     - synonyms, local_names
  *
  *   The source with is_primary=true is the canonical/synthesized source
@@ -130,7 +130,7 @@ function countPopulatedFields(source) {
 
   const fieldsToCheck = [
     'local_names', 'range', 'growth_habit', 'leaves', 'flowers',
-    'fruits', 'bark_twigs_buds', 'hardiness_habitat', 'miscellaneous', 'url'
+    'fruits', 'bark', 'twigs', 'buds', 'hardiness_habitat', 'miscellaneous', 'url'
   ];
 
   return fieldsToCheck.reduce((count, field) => {

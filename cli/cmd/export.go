@@ -31,7 +31,9 @@ type ExportSourceData struct {
 	Leaves           *string  `json:"leaves,omitempty"`
 	Flowers          *string  `json:"flowers,omitempty"`
 	Fruits           *string  `json:"fruits,omitempty"`
-	BarkTwigsBuds    *string  `json:"bark_twigs_buds,omitempty"`
+	Bark             *string  `json:"bark,omitempty"`
+	Twigs            *string  `json:"twigs,omitempty"`
+	Buds             *string  `json:"buds,omitempty"`
 	HardinessHabitat *string  `json:"hardiness_habitat,omitempty"`
 	Miscellaneous    *string  `json:"miscellaneous,omitempty"`
 	URL              *string  `json:"url,omitempty"` // Source's page for this species
@@ -171,7 +173,9 @@ func runExport(cmd *cobra.Command, args []string) error {
 				Leaves:           ss.Leaves,
 				Flowers:          ss.Flowers,
 				Fruits:           ss.Fruits,
-				BarkTwigsBuds:    ss.BarkTwigsBuds,
+				Bark:             ss.Bark,
+				Twigs:            ss.Twigs,
+				Buds:             ss.Buds,
 				HardinessHabitat: ss.HardinessHabitat,
 				Miscellaneous:    ss.Miscellaneous,
 				URL:              ss.URL,
