@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-20T17:48:46Z",
-    "exported_at": "2025-12-20T17:48:46Z",
+    "version": "2025-12-20T18:51:11Z",
+    "exported_at": "2025-12-20T18:51:11Z",
     "species_count": 734
   },
   "species": [
@@ -46,6 +46,23 @@
           "hardiness_habitat": "hardy; prefers dry, limestone soils;",
           "miscellaneous": "-- Sub-genus Quercus, section Lobatae, subsection Coccineae -- Threatened, protected species (IUCN Red List Category : EN);",
           "url": "https://oaksoftheworld.fr/quercus_acerifolia.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Maple-leaf Oak"
+          ],
+          "range": "Rare and local; known only from four localities in AR.",
+          "growth_habit": "Deciduous. Large shrub or small tree usually under 30' tall, often with multiple trunks.",
+          "leaves": "- small 5\"\n- similar to maple leaves; often wider than long, usually with 5 lobes\n- leaves of some trees similar to marilandica or veluttina\n- tufts of hair on underleaf",
+          "fruits": "- 3/4\"\n- hallow gray cup",
+          "twigs": "grayish to reddish-brown",
+          "buds": "realtively large and pale, similar to shumardii",
+          "hardiness_habitat": "Dry slopes.\nVery rarely cultivated",
+          "miscellaneous": "Closelt realted to shumardii and sometimes considered the same species; differs in leaf shape, smaller leaves and acorns, and usually brighter red fall foilage."
         }
       ]
     },
@@ -1929,6 +1946,22 @@
           "hardiness_habitat": "hardy zone 6; requires dry and calcareous soils;",
           "miscellaneous": "-- A. Camus n° 295; -- Sub-genus Quercus, section Lobatae, Series Coccineae; -- Closely related to Q.shumardii -- This species was erroneously named Q.texana , Q.rubra var. texana , Q.shumardii var. texana , while the true Q.texana is Q.nuttallii;",
           "url": "https://oaksoftheworld.fr/quercus_buckleyi.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Buckley's Oak",
+            "Texas Red Oak"
+          ],
+          "growth_habit": "Deciduous. Shrub or small tree usually under 35' tall. Often multi-trunked.",
+          "leaves": "- 4 1/2\"\n- deeply and sharply lobed\n- outline nearly circular\n- underleaf green, hairless",
+          "fruits": "- 3/4\"\n- cup realtively deep 1/3-1/2 of nut\n- rarely shallow",
+          "twigs": "reddish-brown",
+          "hardiness_habitat": "Common well-drained sand or gravel soils, limestone ridges, creek bottoms.\nUncommon in cultivation\nZone 8",
+          "miscellaneous": "Hybridizes with shumardii where range overlaps"
         }
       ]
     },
@@ -2933,6 +2966,23 @@
           "hardiness_habitat": "hardy; prefers acidic soils; fast growing;",
           "miscellaneous": "-- Sub-genus Quercus, section Lobatae, Series Coccineae; -- Different from other red oaks in the rounded sinuses and the large central lobe; -- Hybridizes with Q.ilicifolia (= x robbinsii ), Q.velutina (= x fontana ), Q.palustris ;",
           "url": "https://oaksoftheworld.fr/quercus_coccinea.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Scarlet Oak",
+            "Black Oak",
+            "Spanish Oak"
+          ],
+          "growth_habit": "Decidous. Medium to large tree often 80'.",
+          "leaves": "- 6\"\n- deeply lobed\n- light green underleaf with tufts of hair along midvein\n- Fall color often brighter red",
+          "fruits": "- 3/4\"\n- deep tightly scaled\n- var tuberculata produce acorns with warty cup scales",
+          "twigs": "reddish brown and realtivel slender",
+          "buds": "whitish hairy tip",
+          "hardiness_habitat": "Locally common in poor dry soils, dry slopes, and uplands.\nUncommon in cultivation.\nZones 4-9\nLess tolerant than palustris or rubra"
         }
       ]
     },
@@ -4402,6 +4452,23 @@
           "hardiness_habitat": "hardy; prefers dry, sandy, lime-free soils;",
           "miscellaneous": "-- A. Camus : 428; -- Sub-genus Quercus, section Lobatae, Series Coccineae; -- Close to Q.palustris , but in dry sites; resembles Q.coccinea , but darker green; -- Often treated as variety of Q.coccinea ; -- Hybrid with Q.velutina : Q.x paleolithicola ;",
           "url": "https://oaksoftheworld.fr/quercus_ellipsoidalis.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Jack Oak",
+            "Northern Pin Oak",
+            "Hill;s Oak"
+          ],
+          "growth_habit": "Deciduous. Medium to large tree often 65'.",
+          "leaves": "-5 1/2\"\n- deeply lobed\n- pale green underleaf",
+          "fruits": "- 3/4\"\n- deep conical cup",
+          "twigs": "reddish brown",
+          "buds": "can be hairless or with hairy tips",
+          "hardiness_habitat": "Fairly locally common on dry sandy soils in lowlands; rarely on mesic to dry uplands.\nVery rarely cultivated"
         }
       ]
     },
@@ -4851,6 +4918,23 @@
           "fruits": "acorn 1-2 cm, singly or paired; globose; apex often striate; cup shallow, scaly, broad, enclosing 1/3 of nut; maturing in 2 years; first acorns when the tree is 25 year old;",
           "miscellaneous": "-- A. Camus : n° 419; -- Sub-genus Quercus, section Lobatae, sub-section Phellos; -- \"Spanish\", because present on the territory of the first Spanish colonies; -- Numerous hybrids, among them : Q.x caesariensis with Q.ilicifolia , Q.x beaumontiana with Q.laurifolia ;",
           "url": "https://oaksoftheworld.fr/quercus_falcata.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Southern Red Oak",
+            "Turkey Foot Oak",
+            "Spanish Oak"
+          ],
+          "growth_habit": "Deciduous. Medium to large tree to 90'. Similar ot pagoda",
+          "leaves": "- 7\"\n- base U-shaped\n- tend to droop\n- usually 3 sharp main lobes, central lobe long and narrow\n- underleaf generally with rusty hairs",
+          "fruits": "- 5/8\" \n- cup covers 1/3 - 1/2 of nut\n- scales tight",
+          "twigs": "- yellowish brown hairy",
+          "buds": "reddish brown",
+          "hardiness_habitat": "Common in dry to sandy uplands\nNot commonly cultivated\nZones 7-9"
         }
       ]
     },
@@ -5547,6 +5631,20 @@
           "hardiness_habitat": "hardy zone 5; all types of soils, but prefers dry, lime-free, sunny sites; slow-growing;",
           "miscellaneous": "-- A. Camus : n° 423; -- Sub-genus Quercus, section Lobatae, sub-section Phellos; -- Rare. Threatened (IUCN Red List Category : EN) -- Discovered at Stone Mountains, Georgia ; -- Hybridizes with Q.marilandica (= Q.x smallii Trel.) ;",
           "url": "https://oaksoftheworld.fr/quercus_georgiana.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Georgia Oak"
+          ],
+          "growth_habit": "Deciduous. Small tree to 25' tall.",
+          "leaves": "- 4\"\n- 3-5 broad lobes\n- similar ot ilicifolia in shape\n- underleaf pale hairless, greenish",
+          "fruits": "- 3/4\"\n- shallow cup",
+          "twigs": "- gray pubescent",
+          "hardiness_habitat": "Rare on rocky outcrops and ridges and dry slopes\nOccasionally cultivates\nZones 5-8"
         }
       ]
     },
@@ -6808,6 +6906,22 @@
           "hardiness_habitat": "hardy; prefers lime-free soils, even poor or dry; slow-growing, short-lived;",
           "miscellaneous": "-- A.Camus : 420; -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- Hybrids with other red oaks ( Q.x brittonii , Q.x caesariensis , Q.x fernaldii , Q.x giffordii , Q.x rehderi , Q. x robbinsii ) ;",
           "url": "https://oaksoftheworld.fr/quercus_ilicifolia.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Bear Oak",
+            "Scrub Oak"
+          ],
+          "growth_habit": "Deciduous. Shrub or small tree usually under 15' often forming thickets.",
+          "leaves": "- 4\"\n- 3-7 pointed lobes\n- dark glossy above\n- underleaf whitish, unlike other red oaks",
+          "fruits": "-3/4\"\n- cup fairly deep\n- scales pointed, tight",
+          "twigs": "brown to yellowish, downy",
+          "buds": "small, blunt, dark reddish",
+          "hardiness_habitat": "Locally common in poor soil in clearings and edges, dry sandy woods and barrens, rocky outcrops.\nNot cultivated"
         }
       ]
     },
@@ -7650,6 +7764,24 @@
           "hardiness_habitat": "hardiness zone 7-8; prefers dry, sandy soils; slow growing;",
           "miscellaneous": "-- A.Camus : 418; -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- Hybridizes with several species, among them : Q.nigra (= x walterana ), Q.falcata (= x blufftonensis ), Q.laurifolia (= x mellichampii ), and Q.incana (= x asheana );",
           "url": "https://oaksoftheworld.fr/quercus_laevis.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "American Turkey Oak",
+            "Turkey Oak",
+            "Catesby Oak",
+            "Scrub Oak"
+          ],
+          "growth_habit": "Deciduous. Shrub or small tree usually under 30' tall. Often thicket forming.",
+          "leaves": "- 6\"\n- 3-5 slender pointed lobes like a turkey foot\n- petiole short and stiff\n- underleaf occasionally orange-fuzzy\n- held stiffly upright",
+          "fruits": "- 1\"\n- cup deep and goblet-shaped\n- scales rolled in tightly at edge",
+          "twigs": "stout, dark with grayish cast",
+          "buds": "large, narrow, lateral buds divergent",
+          "hardiness_habitat": "Common in pine-oak scrub in dry sandy soil, often with incana and margarettae\nNot cultivated"
         }
       ]
     },
@@ -8630,6 +8762,26 @@
           "hardiness_habitat": "hardy; prefers lime-free, sandy soils, even poor; slow-growing;",
           "miscellaneous": "-- A.Camus : n° 415; -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- Described in 1704 after a tree from Maryland ; very rare in Europe ; -- Hybridizes with : Q.velutina (= Q.x bushi i Sarg.), Q.ilicifolia (= Q.x brittonii ), Q.imbricaria (= Q.x tridentata ), Q.phellos (= Q.x rudkini ) ;",
           "url": "https://oaksoftheworld.fr/quercus_marilandica.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Blackjack Oak",
+            "Barren Oak",
+            "Black Oak",
+            "Jack Oak"
+          ],
+          "growth_habit": "Deciduous, Small or medium tree usually under 50' tall. Often scrubby with drooping branches.",
+          "leaves": "- 6\"\n- short petiole\n- blocky T-shaped or triangular\n- thick and leathery\n- underleaf sometimes bright rust-yellow\n- stand stiff around twig tips",
+          "fruits": "- 3/4\"\n- deep goblet shaped cup\n- scales loose",
+          "bark": "dark in squarish blocks with deep fissures",
+          "twigs": "ashy brown hairy",
+          "buds": "tawny hairs",
+          "hardiness_habitat": "Locally common in poor, dry soils; dry ridhes, barrens, disturbed fields. Often with stellata.\nRarely cultivated",
+          "miscellaneous": "In TX and OK a var. with smaller leaves, ashei is recognized."
         }
       ]
     },
@@ -10106,6 +10258,23 @@
           "hardiness_habitat": "hardy; all types of soils, prefers moist ones; very fast-growing; propagation by seeds and grafts;",
           "miscellaneous": "-- A.Camus : n° 419; -- Sub-genus Quercus, section Lobatae, subsection Phellos;",
           "url": "https://oaksoftheworld.fr/quercus_pagoda.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Cherrybark Oak",
+            "Pagoda Oak",
+            "Swamp Red Oak"
+          ],
+          "growth_habit": "Deciduous. Medium to large tree often 80'",
+          "leaves": "- 7\"\n- widest near base with 7-11 lobes (more than falcata)\n- pagoda shaped\n- wedge shaped at base, not U-shaped\n- underleaf with pale gray hairs",
+          "fruits": "- identical to falcata\n- 5/8\"\n- cup covers 1/3-1/2 nut\n- scales tight",
+          "twigs": "yellowish brown, hairy",
+          "buds": "reddish brown",
+          "hardiness_habitat": "Common in well-drained soils in floodplain forests and riverbanks\nNot commonly cultivated\nZones 7-9"
         }
       ]
     },
@@ -10183,6 +10352,7 @@
         {
           "source_id": 4,
           "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Pin Oak",
@@ -12005,6 +12175,7 @@
         {
           "source_id": 4,
           "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Northern Red Oak",
@@ -12965,6 +13136,23 @@
           "hardiness_habitat": "hardy; all types of soils, but prefers moist and rich ones; rather fast-growing;",
           "miscellaneous": "-- A. Camus : n° 426; -- Sub-genus Quercus, section Lobatae, Series Coccineae; -- Resembles Q.velutina ; -- Benjamin F. Shumard (1820-1869) : geologist in Texas ; -- Numerous hybrids, mainly with Q.falcata (= x joori ), Q.imbricaria (= x egglestoni ), Q.palustris ( = x mutabilis ), Q.phellos (= x moultonensis ), Q.velutina (= x discreta ), Q.marilandica (= x hastingsii ), Q.nigra (= x neopalmeri) ; -- Allied to Q. rubra and Q. coccinea , from which it differs in having pale buds, large axillary tufts on the leaf-undersides, and the shape of acorns;",
           "url": "https://oaksoftheworld.fr/quercus_shumardii.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Shumard Oak",
+            "Leopard Oak",
+            "Spotted Oak"
+          ],
+          "growth_habit": "Deciduous. Medium to large tree often 90'.",
+          "leaves": "- 6 1/2\"\n= squarish lobes end in multiple bristles\n- shiny green above and below\n- usually orange, felty hairs in vein junctures of underleaf",
+          "fruits": "- 1\" \n- cup shallow gray",
+          "twigs": "gray to light brown",
+          "buds": "large, grayish or straw-colored, and hairless",
+          "hardiness_habitat": "Fairly common in well-drained mesic soils or on poorly drained uplands\nGenerally uncommon in cultivation\nZones 5-9"
         }
       ]
     },
@@ -13806,6 +13994,24 @@
           "hardiness_habitat": "hardy; prefers moist soils; fast-growing;",
           "miscellaneous": "-- Sub-genus Quercus, section Lobatae, Series Palustres; -- The name Q.texana has been erroneously used for Q.buckleyi , and by some Authors for Q.gravesii , so it may be better to name this taxon Q.nuttallii in order to avoid confusions...? -- Thomas Nuttall ( 1786-1859 ) = English American botanist and ornithologist ; -- Described as a true species, different from Q.palustris , in 1927 only;",
           "url": "https://oaksoftheworld.fr/quercus_texana.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Texas Red Oak",
+            "Nuttall Oak",
+            "Red River Oak",
+            "Smoothbark Red Oak"
+          ],
+          "growth_habit": "Deciduous. Medium to large tree to 75' tall.",
+          "leaves": "- 6\"\n- thin\n- sharply lobed\n- dark above\n- underleaf with conspicious hair tufts at vein junction",
+          "fruits": "- 1\"\n- cup deep goblet shaped\n- covers 1/2 - 1/2 of nut\n- scales tight",
+          "twigs": "reddish-brown to gray",
+          "buds": "reddish brown to gray",
+          "hardiness_habitat": "Common in floodplains and bottomlands.\nUncommon by increasing cultivation, particualr in warmer zones\nZones 5-9"
         }
       ]
     },
@@ -14459,6 +14665,7 @@
         {
           "source_id": 4,
           "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
           "is_preferred": false,
           "local_names": [
             "Eastern Black Oak",
