@@ -51,13 +51,16 @@ export const filteredSpecies = derived(
         syn.name && syn.name.toLowerCase().includes(query)
       )) return true;
 
-      // Search in local names
-      if (species.local_names && species.local_names.some(name =>
-        name.toLowerCase().includes(query)
+      // Search in local names (common names) from all sources
+      if (species.sources && species.sources.some(source =>
+        source.local_names && source.local_names.some(name =>
+          name.toLowerCase().includes(query)
+        )
       )) return true;
 
-      // Search in range
-      if (species.range && species.range.toLowerCase().includes(query)) return true;
+      // Search in range from primary source
+      const primarySource = getPrimarySource(species);
+      if (primarySource?.range && primarySource.range.toLowerCase().includes(query)) return true;
 
       return false;
     });
@@ -74,64 +77,6 @@ export const speciesCounts = derived(
     return { speciesCount, hybridCount, total };
   }
 );
-
-// Derived store: taxonomy tree structure
-// Groups species by: subgenus → section → subsection → complex
-export const taxonomyTree = derived(
-  allSpecies,
-  ($allSpecies) => {
-    const tree = {};
-
-    for (const species of $allSpecies) {
-      if (!species) continue;
-
-      const t = species.taxonomy || {};
-      const subgenus = t.subgenus || null;
-      const section = t.section || null;
-      const subsection = t.subsection || null;
-      const complex = t.complex || null;
-
-      // Initialize nested structure
-      if (!tree[subgenus]) {
-        tree[subgenus] = { count: 0, sections: {} };
-      }
-      if (!tree[subgenus].sections[section]) {
-        tree[subgenus].sections[section] = { count: 0, subsections: {} };
-      }
-      if (!tree[subgenus].sections[section].subsections[subsection]) {
-        tree[subgenus].sections[section].subsections[subsection] = {
-          count: 0,
-          complexes: {}
-        };
-      }
-      if (!tree[subgenus].sections[section].subsections[subsection].complexes[complex]) {
-        tree[subgenus].sections[section].subsections[subsection].complexes[complex] = {
-          species: []
-        };
-      }
-
-      // Add species and update counts
-      tree[subgenus].sections[section].subsections[subsection].complexes[complex].species.push(species);
-      tree[subgenus].count++;
-      tree[subgenus].sections[section].count++;
-      tree[subgenus].sections[section].subsections[subsection].count++;
-    }
-
-    return tree;
-  }
-);
-
-// Helper: sort keys with taxa first, null/'Unknown' last
-// 'null' string keys represent species without that taxonomy level
-export function sortTaxonomyKeys(keys) {
-  return [...keys].sort((a, b) => {
-    const aIsNull = a === 'Unknown' || a === null || a === 'null';
-    const bIsNull = b === 'Unknown' || b === null || b === 'null';
-    if (aIsNull && !bIsNull) return 1;
-    if (bIsNull && !aIsNull) return -1;
-    return String(a).localeCompare(String(b));
-  });
-}
 
 // Helper: format species display name
 // Options: { abbreviated: true } returns "Q. alba", otherwise "Quercus alba"

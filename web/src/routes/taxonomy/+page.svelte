@@ -1,9 +1,9 @@
 <script>
-	import TaxonomyTree from '$lib/components/TaxonomyTree.svelte';
+	import TaxonView from '$lib/components/TaxonView.svelte';
 </script>
 
 <svelte:head>
 	<title>Taxonomy - Quercus Compendium</title>
 </svelte:head>
 
-<TaxonomyTree />
+<TaxonView taxonPath={[]} />

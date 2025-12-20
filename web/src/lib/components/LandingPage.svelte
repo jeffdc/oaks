@@ -80,7 +80,7 @@
 
 	<!-- Browse options -->
 	<section class="browse-section">
-		<h3 class="section-title">Browse Species</h3>
+		<h3 class="section-title">What would you like to do?</h3>
 		<div class="browse-options">
 			<a href="{base}/list/" class="browse-card">
 				<div class="browse-icon">
@@ -111,6 +111,21 @@
 					<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
 				</svg>
 			</a>
+
+			<div class="browse-card browse-card-disabled">
+				<div class="browse-icon browse-icon-disabled">
+					<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+					</svg>
+				</div>
+				<div class="browse-text">
+					<h4 class="browse-title browse-title-disabled">
+						Identification
+						<span class="coming-soon-badge">Coming Soon</span>
+					</h4>
+					<p class="browse-description">Identify oaks by their characteristics</p>
+				</div>
+			</div>
 		</div>
 	</section>
 </div>
@@ -327,6 +342,40 @@
 		color: var(--color-forest-500);
 	}
 
+	.browse-card-disabled {
+		cursor: default;
+		opacity: 0.7;
+	}
+
+	.browse-card-disabled:hover {
+		border-color: var(--color-border);
+		box-shadow: var(--shadow-sm);
+		transform: none;
+	}
+
+	.browse-icon-disabled {
+		background-color: var(--color-stone-100);
+		color: var(--color-text-tertiary);
+	}
+
+	.browse-title-disabled {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.coming-soon-badge {
+		font-size: 0.6875rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.025em;
+		padding: 0.125rem 0.5rem;
+		background-color: var(--color-stone-200);
+		color: var(--color-text-tertiary);
+		border-radius: 9999px;
+	}
+
 	@media (min-width: 640px) {
 		.browse-options {
 			flex-direction: row;
@@ -351,6 +400,10 @@
 
 		.browse-arrow {
 			display: none;
+		}
+
+		.browse-title-disabled {
+			justify-content: center;
 		}
 	}
 </style>

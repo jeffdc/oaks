@@ -1,5 +1,5 @@
 <script>
-	import { speciesCounts } from '$lib/stores/dataStore.js';
+    import { speciesCounts } from "$lib/stores/dataStore.js";
 </script>
 
 <div class="about-page">
@@ -71,30 +71,34 @@
 
     <section class="content-section">
         <h3 class="section-title">Data Sources</h3>
-        <p>Species data is compiled from multiple authoritative sources including:</p>
-        <ul class="source-list">
-            <li>
-                <a href="https://www.inaturalist.org/taxa/47851-Quercus" target="_blank" rel="noopener noreferrer">
-                    iNaturalist
-                </a>
-                <span class="source-desc">— Taxonomy and species classification</span>
-            </li>
-            <li>
-                <a href="https://oaksoftheworld.fr" target="_blank" rel="noopener noreferrer"> Oaks of the World </a>
-                <span class="source-desc">— Morphological descriptions and distribution data</span>
-            </li>
-        </ul>
+        <p>
+            The taxonomic structure used in this compendium follows
+            <a href="https://www.inaturalist.org/taxa/47851-Quercus" target="_blank" rel="noopener noreferrer"
+                >iNaturalist</a
+            >, which provides the authoritative hierarchy of subgenera, sections, and species.
+        </p>
+        <p>
+            The primary species data—descriptions, identification notes, and range information—comes from my own
+            research and field observations. <a
+                href="https://oaksoftheworld.fr"
+                target="_blank"
+                rel="noopener noreferrer">Oaks of the World</a
+            >
+            serves as an important secondary source, providing additional morphological details and distribution data.
+        </p>
+        <p>Other sources have been consulted as well; these are credited on each species page where applicable.</p>
     </section>
 
     <section class="content-section">
         <h3 class="section-title">Data Licensing</h3>
-        <p>This project uses a dual-license structure:</p>
         <ul class="license-list">
             <li>
-                <strong>Source Code</strong>: <a href="https://github.com/jeffdc/oaks/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
-            </li>
-            <li>
-                <strong>Data Files</strong>: <a href="https://github.com/jeffdc/oaks/blob/main/DATA_LICENSE" target="_blank" rel="noopener noreferrer">All Rights Reserved</a>
+                <strong>Species Data</strong>:
+                <a
+                    href="https://github.com/jeffdc/oaks/blob/main/DATA_LICENSE"
+                    target="_blank"
+                    rel="noopener noreferrer">All Rights Reserved</a
+                > unless otherwise stated.
             </li>
         </ul>
         <p>
@@ -108,6 +112,12 @@
         <p>
             This project is open source. View the code, report issues, or contribute on
             <a href="https://github.com/jeffdc/oaks" target="_blank" rel="noopener noreferrer">GitHub</a>.
+        </p>
+        <p>
+            <strong>Source Code</strong>:
+            <a href="https://github.com/jeffdc/oaks/blob/main/LICENSE" target="_blank" rel="noopener noreferrer"
+                >MIT License</a
+            >
         </p>
     </section>
 </div>

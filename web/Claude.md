@@ -24,7 +24,7 @@ web/
 │   │   ├── +page.svelte     # Home page (LandingPage)
 │   │   ├── list/+page.svelte           # Species list view
 │   │   ├── about/+page.svelte          # About page
-│   │   ├── taxonomy/+page.svelte       # Taxonomy tree view
+│   │   ├── taxonomy/+page.svelte       # Taxonomy browser (genus-level view)
 │   │   ├── taxonomy/[...path]/         # Dynamic taxon view
 │   │   └── species/[name]/             # Dynamic species detail
 │   └── lib/
@@ -34,7 +34,6 @@ web/
 │       │   ├── LandingPage.svelte
 │       │   ├── SpeciesList.svelte
 │       │   ├── SpeciesDetail.svelte
-│       │   ├── TaxonomyTree.svelte
 │       │   ├── TaxonView.svelte
 │       │   ├── AboutPage.svelte
 │       │   └── UpdatePrompt.svelte

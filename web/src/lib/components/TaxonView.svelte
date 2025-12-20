@@ -5,6 +5,7 @@
   export let taxonPath = []; // e.g., ['Quercus', 'Quercus', 'Albae']
 
   // Determine the taxon level and name from the path
+  $: isGenusLevel = taxonPath.length === 0;
   $: taxonLevel = getTaxonLevel(taxonPath.length);
   $: taxonName = taxonPath[taxonPath.length - 1] || '';
 
@@ -15,17 +16,35 @@
   $: subTaxa = getSubTaxa($allSpecies, taxonPath);
 
   function getTaxonLevel(depth) {
-    const levels = ['subgenus', 'section', 'subsection', 'complex'];
-    return levels[depth - 1] || 'taxon';
+    const levels = ['genus', 'subgenus', 'section', 'subsection', 'complex'];
+    return levels[depth] || 'taxon';
   }
 
   function getTaxonLevelLabel(depth) {
-    const labels = ['Subgenus', 'Section', 'Subsection', 'Complex'];
-    return labels[depth - 1] || 'Taxon';
+    const labels = ['Genus', 'Subgenus', 'Section', 'Subsection', 'Complex'];
+    return labels[depth] || 'Taxon';
+  }
+
+  function getTaxonLevelLabelPlural(depth) {
+    const labels = ['Genera', 'Subgenera', 'Sections', 'Subsections', 'Complexes'];
+    return labels[depth] || 'Taxa';
+  }
+
+  // Get lowercase level label for breadcrumb items (path index → level)
+  function getBreadcrumbLevelLabel(pathIndex) {
+    const labels = ['subgenus', 'section', 'subsection', 'complex'];
+    return labels[pathIndex] || '';
   }
 
   function getSpeciesInTaxon(species, path) {
-    if (!path || path.length === 0) return [];
+    // At genus level, show only species without a subgenus assignment
+    if (!path || path.length === 0) {
+      return species.filter(s => !s.taxonomy?.subgenus || s.taxonomy.subgenus === 'null')
+        .sort((a, b) => {
+          if (a.is_hybrid !== b.is_hybrid) return a.is_hybrid ? 1 : -1;
+          return a.name.localeCompare(b.name);
+        });
+    }
 
     return species.filter(s => {
       if (!s.taxonomy) return false;
@@ -93,42 +112,58 @@
 </script>
 
 <div class="taxon-view">
-  <!-- Breadcrumb navigation -->
-  <nav class="breadcrumb">
-    <a href="{base}/" class="breadcrumb-link">
-      Browse
-    </a>
-    <span class="breadcrumb-separator">›</span>
-    <a href="{base}/taxonomy/" class="breadcrumb-link">
-      Taxonomy
-    </a>
-    {#each taxonPath as segment, i}
-      <span class="breadcrumb-separator">›</span>
-      {#if i < taxonPath.length - 1}
-        <a href="{getTaxonUrl(taxonPath.slice(0, i + 1))}" class="breadcrumb-link">
-          {segment}
-        </a>
-      {:else}
-        <span class="breadcrumb-current">{segment}</span>
-      {/if}
-    {/each}
-  </nav>
-
-  <!-- Taxon header -->
+  <!-- Combined navigation header -->
   <header class="taxon-header">
-    <span class="taxon-level">{getTaxonLevelLabel(taxonPath.length)}</span>
-    <h1 class="taxon-name">
-      {#if taxonLevel === 'complex'}Q. {/if}{taxonName}
-    </h1>
-    <p class="taxon-count">{matchingSpecies.length} species</p>
+    <!-- Breadcrumb path (ancestors) -->
+    <nav class="breadcrumb">
+      {#if isGenusLevel}
+        <span class="breadcrumb-item">
+          <span class="breadcrumb-name">Quercus</span>
+          <span class="breadcrumb-label">(genus)</span>
+        </span>
+      {:else}
+        <a href="{base}/taxonomy/" class="breadcrumb-link">
+          <span class="breadcrumb-name">Quercus</span>
+          <span class="breadcrumb-label">(genus)</span>
+        </a>
+        {#each taxonPath.slice(0, -1) as segment, i}
+          <span class="breadcrumb-separator">›</span>
+          <a href="{getTaxonUrl(taxonPath.slice(0, i + 1))}" class="breadcrumb-link">
+            <span class="breadcrumb-name">{segment}</span>
+            <span class="breadcrumb-label">({getBreadcrumbLevelLabel(i)})</span>
+          </a>
+        {/each}
+      {/if}
+    </nav>
+
+    <!-- Current taxon -->
+    <div class="taxon-current">
+      <div class="taxon-current-left">
+        <span class="taxon-level">{getTaxonLevelLabel(taxonPath.length)}</span>
+        <h1 class="taxon-name">
+          {#if isGenusLevel}
+            <em>Quercus</em>
+          {:else if taxonLevel === 'complex'}
+            Q. {taxonName}
+          {:else}
+            {taxonName}
+          {/if}
+        </h1>
+      </div>
+      <p class="taxon-count">
+        {#if isGenusLevel}
+          {$allSpecies.length} species
+        {:else}
+          {matchingSpecies.length} species
+        {/if}
+      </p>
+    </div>
   </header>
 
   <!-- Sub-taxa (if any) -->
   {#if subTaxa.length > 0}
     <section class="sub-taxa-section">
-      <h2 class="section-title">
-        {getTaxonLevelLabel(taxonPath.length + 1)}s in this {getTaxonLevelLabel(taxonPath.length).toLowerCase()}
-      </h2>
+      <h2 class="section-title">{getTaxonLevelLabelPlural(taxonPath.length + 1)}</h2>
       <div class="sub-taxa-grid">
         {#each subTaxa as subTaxon}
           <a href="{getTaxonUrl([...taxonPath, subTaxon.name])}" class="sub-taxon-card">
@@ -143,21 +178,27 @@
   {/if}
 
   <!-- Species list -->
-  <section class="species-section">
-    <h2 class="section-title">Species</h2>
-    <div class="species-grid">
-      {#each matchingSpecies as species}
-        <a href="{base}/species/{encodeURIComponent(species.name)}/" class="species-card">
-          <span class="species-name">
-            {formatSpeciesName(species)}
-          </span>
-          {#if species.author}
-            <span class="species-author">{species.author}</span>
-          {/if}
-        </a>
-      {/each}
-    </div>
-  </section>
+  {#if matchingSpecies.length > 0}
+    <section class="species-section">
+      <h2 class="section-title">
+        {#if isGenusLevel}
+          Species without subgenus assignment ({matchingSpecies.length})
+        {:else}
+          Species
+        {/if}
+      </h2>
+      <div class="species-grid">
+        {#each matchingSpecies as species}
+          <a href="{base}/species/{encodeURIComponent(species.name)}/" class="species-card">
+            <span class="species-name-line">
+              <span class="species-name">{formatSpeciesName(species)}</span>
+              {#if species.author}<span class="species-author">{species.author}</span>{/if}
+            </span>
+          </a>
+        {/each}
+      </div>
+    </section>
+  {/if}
 </div>
 
 <style>
@@ -165,61 +206,81 @@
     padding: 1rem;
   }
 
-  /* Breadcrumb */
-  .breadcrumb {
+  /* Combined navigation header */
+  .taxon-header {
     display: flex;
-    align-items: center;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 0.5rem;
     padding: 1rem 1.5rem;
     margin-bottom: 1.5rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
+    background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-forest-100) 100%);
+    border: 1px solid var(--color-forest-200);
     border-radius: 0.75rem;
-    font-size: 0.875rem;
   }
 
+  /* Breadcrumb (ancestors) */
+  .breadcrumb {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+  }
+
+  .breadcrumb-item,
   .breadcrumb-link {
-    color: var(--color-forest-700);
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: inherit;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25rem;
     text-decoration: none;
     transition: color 0.15s ease;
   }
 
   .breadcrumb-link:hover {
-    color: var(--color-forest-500);
     text-decoration: underline;
+    text-decoration-color: var(--color-forest-400);
   }
 
-  .breadcrumb-separator {
+  .breadcrumb-name {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--color-forest-700);
+  }
+
+  .breadcrumb-link:hover .breadcrumb-name {
+    color: var(--color-forest-900);
+  }
+
+  .breadcrumb-label {
+    font-size: 0.75rem;
+    font-style: normal;
+    font-weight: 400;
     color: var(--color-text-tertiary);
   }
 
-  .breadcrumb-current {
-    color: var(--color-text-primary);
-    font-weight: 500;
+  .breadcrumb-separator {
+    color: var(--color-forest-400);
   }
 
-  /* Taxon header */
-  .taxon-header {
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-    background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-forest-100) 100%);
-    border: 1px solid var(--color-forest-200);
-    border-radius: 0.75rem;
-    text-align: center;
+  /* Current taxon row */
+  .taxon-current {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .taxon-current-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
   }
 
   .taxon-level {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
-    margin-bottom: 0.75rem;
-    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -229,17 +290,18 @@
   }
 
   .taxon-name {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--color-forest-900);
     font-family: var(--font-serif);
-    margin: 0 0 0.5rem 0;
+    margin: 0;
   }
 
   .taxon-count {
     font-size: 0.9375rem;
     color: var(--color-text-secondary);
     margin: 0;
+    flex-shrink: 0;
   }
 
   /* Section titles */
@@ -315,9 +377,7 @@
   }
 
   .species-card {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    display: block;
     padding: 1rem;
     background-color: var(--color-background);
     border: 1px solid var(--color-border);
@@ -336,6 +396,14 @@
     box-shadow: var(--shadow-sm);
   }
 
+  .species-name-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.375rem;
+    line-height: 1.4;
+  }
+
   .species-name {
     font-style: italic;
     font-weight: 500;
@@ -346,7 +414,7 @@
   .species-author {
     font-size: 0.8125rem;
     color: var(--color-text-tertiary);
-    margin-top: 0.25rem;
     font-style: normal;
+    font-weight: 400;
   }
 </style>
