@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-19T21:32:14Z",
-    "exported_at": "2025-12-19T21:32:14Z",
+    "version": "2025-12-20T17:48:46Z",
+    "exported_at": "2025-12-20T17:48:46Z",
     "species_count": 734
   },
   "species": [
@@ -10179,6 +10179,24 @@
           "fruits": "acorn 1.2 cm long, 1.5 cm wide, rounded, often striate; one or several together, on short peduncle; cup shallow with appressed scales, covering the base of the small nut;",
           "miscellaneous": "--A.Camus : 421 -- Sub-genus Quercus, section Lobatae ; -- Resembles Q.coccinea , but it is easy to distinguish it from other red oaks = in the middle of the tree, the branches are at a right angle with the trunk, while the branches of the upper part of the tree are directed upwards, and the branches of the lower part are inclined towards the ground; -- Several hybrids, among them x exacta with Q.imbricaria , and x schochiana with Q.phellos ;",
           "url": "https://oaksoftheworld.fr/quercus_palustris.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "is_preferred": false,
+          "local_names": [
+            "Pin Oak",
+            "Swamp Oak",
+            "Water Oak",
+            "Spanish Oak"
+          ],
+          "growth_habit": "Deciduous. Medium to lrage tree often 80' tall\nDrooping lower branches (similar to coccinea and ellipsoidalis)",
+          "leaves": "- small 5 1/2\"\n- deeply lobed, lobes often recurved\n- underleaf light green, tufts of hair along midvein",
+          "fruits": "5/8\" - small\ncup shallow tightly scaled",
+          "bark": "persistent small branchlets common along trunk and branches\ndark gray with broad fissures\nrelatively smooth even on large trees",
+          "twigs": "relatively slender, reddish\nrelatively crooked with many short spur twigs (pins)",
+          "buds": "small, sharp, and hairless",
+          "hardiness_habitat": "Locally common in moist lowland and poorly drained upland sites in wild.\nVery commonly cultivated.\nZones 4-8"
         }
       ]
     },
@@ -11983,6 +12001,25 @@
           "hardiness_habitat": "hardy; prefers lime-free soils, even sandy or rocky ones; fast growing; living up to 200 years;",
           "miscellaneous": "-- A. Camus : n° 425; -- Sub-genus Quercus, section Lobatae, Series Coccineae; -- Closely related to Q.coccinea , but branches of rubra are stouter and horizontal, leaves have shallower sinuses; -- Hybridizes with Q.coccinea (= x benderi ), Q.ilicifolia (= x fernaldii ), Q.imbricaria (= x runcinata ), Q.palustris (= x richteri ), Q.phellos (= x heterophylla ), Q.shumardii (= x riparia ) , Q.velutina (= x hawkinsiae ) ;",
           "url": "https://oaksoftheworld.fr/quercus_rubra.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "is_preferred": false,
+          "local_names": [
+            "Northern Red Oak",
+            "Red Oak",
+            "Gray Oak",
+            "Eastern Red Oak"
+          ],
+          "growth_habit": "Decidious. Medium to large tree. Often 90'.",
+          "leaves": "- 7\"\n- petiole often red\n- tapred, pointed, usually shallowly lobed\n- smooth, green underleaf",
+          "fruits": "- 1\"\n- larger than similar red oaks\n- shallow tightly scaled cup",
+          "bark": "young tree trunks dark grayish and smooth\nmature trunks form long, broad, smooth ridges and shallow fissures",
+          "twigs": "- realtively short and rigid with large clusters of buds at tips\n- occassioanly retains caps into winter\n- reddish",
+          "buds": "- reddish",
+          "hardiness_habitat": "Common and widespread, growign mainly on mesic uplands, occoasionally in drier or wetter areas.\nZones 3-7\nCommonly cultivated",
+          "miscellaneous": "2 vars. var. borealis more common north, has a deeper acorn cup and more deeply lobed leaves than var. rubra, but these differences are not well defined and overshadowed by individal and other variations"
         }
       ]
     },
@@ -14418,6 +14455,23 @@
           "hardiness_habitat": "hardy; prefers sandy, lime-free soils, even dry ones; fast-growing;",
           "miscellaneous": "-- \"velutina\" refers to the velutinous surface of young leaves; -- A.Camus : n° 424; -- Sub-genus Quercus, section Lobatae, Series Coccineae; -- The name \"valentina\" has been used to name different species : Q.valentina Cav. 1793 = Q.fruticosa Q.valentina K.Koch 1849 = Q.infectoria Q.valentina Lam. ex Steudel 1821 = Q.velutina",
           "url": "https://oaksoftheworld.fr/quercus_velutina.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "is_preferred": false,
+          "local_names": [
+            "Eastern Black Oak",
+            "Yellow Oak",
+            "Quercitron Oak"
+          ],
+          "growth_habit": "Deciduous. Medium to large tree often 80'.\nlong horizontal branches\ntypically stout, big-limbed, and broad-spreading",
+          "leaves": "- Coarser foilage - large dark leaves that are glossy above and slightly orange-tinted below\n- large 7 1/2\"\n- shape variable, averages deeper lobes and broader sinuses than rubra\n- sun leaves usually deeply lobed\n- tufts of orange fuzz on underleaf give slightly orange tone",
+          "fruits": "- 3/4\" \n- cup shaggy fringed with loose scales, relatively deep",
+          "bark": "- Blocky\n- dark graysin broken into irregular rectangular blocks\n- young.small trunks similar to rubra",
+          "twigs": "- leaves droop graceful more so than rubra\n- drab brown",
+          "buds": "large, angular, and silvery",
+          "hardiness_habitat": "Common in well-drained moist soild or relatively dry, sandy, upland sites\nUncommon in cultivation\nZones 3-9"
         }
       ]
     },
