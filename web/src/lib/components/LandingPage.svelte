@@ -1,6 +1,6 @@
 <script>
 	import { base } from '$app/paths';
-	import { allSpecies, speciesCounts, getPrimarySource } from '$lib/stores/dataStore.js';
+	import { allSpecies, totalCounts, getPrimarySource } from '$lib/stores/dataStore.js';
 	import { onMount } from 'svelte';
 
 	let featuredSpecies = null;
@@ -26,8 +26,8 @@
 	<section class="welcome-section">
 		<h2 class="welcome-title">Explore the World of Oaks</h2>
 		<p class="welcome-subtitle">
-			A comprehensive database of <strong>{$speciesCounts.speciesCount}</strong> oak species
-			and <strong>{$speciesCounts.hybridCount}</strong> hybrids from around the globe.
+			A comprehensive database of <strong>{$totalCounts.speciesCount}</strong> oak species
+			and <strong>{$totalCounts.hybridCount}</strong> hybrids from around the globe.
 		</p>
 	</section>
 

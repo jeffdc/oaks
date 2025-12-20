@@ -67,13 +67,24 @@ export const filteredSpecies = derived(
   }
 );
 
-// Derived store: species counts
+// Derived store: filtered species counts (for search results)
 export const speciesCounts = derived(
   filteredSpecies,
   ($filteredSpecies) => {
     const speciesCount = $filteredSpecies.filter(s => !s.is_hybrid).length;
     const hybridCount = $filteredSpecies.filter(s => s.is_hybrid).length;
     const total = $filteredSpecies.length;
+    return { speciesCount, hybridCount, total };
+  }
+);
+
+// Derived store: total counts (for landing page, independent of search)
+export const totalCounts = derived(
+  allSpecies,
+  ($allSpecies) => {
+    const speciesCount = $allSpecies.filter(s => !s.is_hybrid).length;
+    const hybridCount = $allSpecies.filter(s => s.is_hybrid).length;
+    const total = $allSpecies.length;
     return { speciesCount, hybridCount, total };
   }
 );
