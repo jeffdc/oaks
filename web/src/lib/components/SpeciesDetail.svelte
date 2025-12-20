@@ -126,81 +126,67 @@
 </script>
 
 <div class="species-detail">
-  <!-- Breadcrumb navigation -->
-  <nav class="breadcrumb">
-    <a href="{base}/" class="breadcrumb-link">
-      Browse
-    </a>
-    <span class="breadcrumb-separator">›</span>
-    <span class="breadcrumb-current">
-      {formatSpeciesName(species)}
-    </span>
-  </nav>
-
-  <!-- Header with name, authority, type badge, and conservation status -->
-  <div class="species-header">
-    <h1 class="species-title">
-      <span class="species-name">Quercus {#if needsHybridSymbol(species)}× {/if}<span class="italic">{species.name}</span></span>
-      {#if species.author}<span class="author-text">{species.author}</span>{/if}
-      {#if species.is_hybrid}
-        <span class="type-badge hybrid">Hybrid</span>
-      {:else}
-        <span class="type-badge species">Species</span>
+  <!-- Combined header with species name and taxonomy -->
+  <header class="species-header-box">
+    <!-- Species name and badges -->
+    <div class="species-current">
+      <div class="species-current-left">
+        <span class="species-level">{species.is_hybrid ? 'Hybrid' : 'Species'}</span>
+        <h1 class="species-title">
+          <em>Quercus {#if needsHybridSymbol(species)}× {/if}{species.name}</em>
+          {#if species.author}<span class="author-text">{species.author}</span>{/if}
+        </h1>
+      </div>
+      {#if species.conservation_status}
+        <span class="conservation-badge" title={getConservationStatusLabel(species.conservation_status)}>
+          {species.conservation_status}
+        </span>
       {/if}
-    </h1>
-    {#if species.conservation_status}
-      <span class="conservation-badge header-badge" title={getConservationStatusLabel(species.conservation_status)}>
-        {species.conservation_status}
-      </span>
+    </div>
+
+    <!-- Taxonomy path (serves as both navigation and taxonomy display) -->
+    {#if species.taxonomy}
+      <nav class="taxonomy-nav">
+        <span class="taxonomy-label">Taxonomy:</span>
+        <a href="{base}/taxonomy/" class="taxonomy-link">
+          <span class="taxonomy-name">Quercus</span>
+          <span class="taxonomy-level-label">(genus)</span>
+        </a>
+        {#if species.taxonomy.subgenus}
+          <span class="taxonomy-separator">›</span>
+          <a href="{getTaxonUrl('subgenus')}" class="taxonomy-link">
+            <span class="taxonomy-name">{species.taxonomy.subgenus}</span>
+            <span class="taxonomy-level-label">(subgenus)</span>
+          </a>
+        {/if}
+        {#if species.taxonomy.section}
+          <span class="taxonomy-separator">›</span>
+          <a href="{getTaxonUrl('section')}" class="taxonomy-link">
+            <span class="taxonomy-name">{species.taxonomy.section}</span>
+            <span class="taxonomy-level-label">(section)</span>
+          </a>
+        {/if}
+        {#if species.taxonomy.subsection}
+          <span class="taxonomy-separator">›</span>
+          <a href="{getTaxonUrl('subsection')}" class="taxonomy-link">
+            <span class="taxonomy-name">{species.taxonomy.subsection}</span>
+            <span class="taxonomy-level-label">(subsection)</span>
+          </a>
+        {/if}
+        {#if species.taxonomy.complex}
+          <span class="taxonomy-separator">›</span>
+          <a href="{getTaxonUrl('complex')}" class="taxonomy-link">
+            <span class="taxonomy-name">Q. {species.taxonomy.complex}</span>
+            <span class="taxonomy-level-label">(complex)</span>
+          </a>
+        {/if}
+      </nav>
     {/if}
-  </div>
+  </header>
 
   <!-- Content -->
   <div class="content-grid" style="background-color: var(--color-background);">
     <!-- SPECIES-INTRINSIC DATA (not source-dependent) -->
-
-    {#if species.taxonomy}
-      <section class="detail-section full-width">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span>Taxonomy</span>
-        </h2>
-        <div class="taxonomy-inline">
-          {#if species.taxonomy.subgenus}
-            <span class="taxonomy-item">
-              <span class="taxonomy-label">Subgenus:</span>
-              <a href="{getTaxonUrl('subgenus')}" class="taxonomy-link">{species.taxonomy.subgenus}</a>
-            </span>
-          {/if}
-          {#if species.taxonomy.section}
-            <span class="taxonomy-item">
-              <span class="taxonomy-label">Section:</span>
-              <a href="{getTaxonUrl('section')}" class="taxonomy-link">{species.taxonomy.section}</a>
-            </span>
-          {/if}
-          {#if species.taxonomy.subsection}
-            <span class="taxonomy-item">
-              <span class="taxonomy-label">Subsection:</span>
-              <a href="{getTaxonUrl('subsection')}" class="taxonomy-link">{species.taxonomy.subsection}</a>
-            </span>
-          {/if}
-          {#if species.taxonomy.complex}
-            <span class="taxonomy-item">
-              <span class="taxonomy-label">Complex:</span>
-              <a href="{getTaxonUrl('complex')}" class="taxonomy-link">Q. {species.taxonomy.complex}</a>
-            </span>
-          {/if}
-          {#if species.taxonomy.series}
-            <span class="taxonomy-item">
-              <span class="taxonomy-label">Series:</span>
-              <span class="taxonomy-value">{species.taxonomy.series}</span>
-            </span>
-          {/if}
-        </div>
-      </section>
-    {/if}
 
     {#if species.is_hybrid && (species.parent1 || species.parent2)}
       <section class="detail-section full-width">
@@ -542,13 +528,13 @@
 <style>
   .species-detail {
     background-color: var(--color-surface);
+    padding: 1rem;
   }
 
   .content-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.5rem;
-    padding: 1.5rem;
   }
 
   /* Two columns on large screens */
@@ -632,50 +618,6 @@
     gap: 0.5rem;
   }
 
-  .taxonomy-inline {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.25rem;
-    font-size: 0.9375rem;
-    align-items: baseline;
-  }
-
-  .taxonomy-item {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.375rem;
-  }
-
-  .taxonomy-label {
-    font-weight: 500;
-    color: var(--color-text-tertiary);
-  }
-
-  .taxonomy-value {
-    color: var(--color-text-primary);
-    font-weight: 500;
-  }
-
-  .taxonomy-link {
-    color: var(--color-forest-700);
-    font-weight: 500;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    border-bottom: 1px dashed var(--color-forest-400);
-    transition: all 0.15s ease;
-  }
-
-  .taxonomy-link:hover {
-    color: var(--color-forest-600);
-    border-bottom-color: var(--color-forest-600);
-    border-bottom-style: solid;
-  }
-
   .conservation-badge {
     display: inline-flex;
     padding: 0.5rem 1rem;
@@ -685,9 +627,6 @@
     background-color: var(--color-status-warning-bg);
     color: var(--color-status-warning-text);
     border: 1px solid var(--color-status-warning-border);
-  }
-
-  .conservation-badge.header-badge {
     flex-shrink: 0;
   }
 
@@ -713,54 +652,94 @@
     box-shadow: var(--shadow-sm);
   }
 
-  /* Breadcrumb styles */
-  .breadcrumb {
+  /* Combined navigation header (matching TaxonView) */
+  .species-header-box {
     display: flex;
-    align-items: center;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 0.5rem;
     padding: 1rem 1.5rem;
-    background-color: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
-    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-forest-100) 100%);
+    border: 1px solid var(--color-forest-200);
+    border-radius: 0.75rem;
   }
 
-  .breadcrumb-link {
+  /* Taxonomy navigation (below species name) */
+  .taxonomy-nav {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  .taxonomy-nav .taxonomy-label {
+    font-weight: 600;
     color: var(--color-forest-700);
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: inherit;
+    margin-right: 0.25rem;
+  }
+
+  .taxonomy-nav .taxonomy-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25rem;
     text-decoration: none;
     transition: color 0.15s ease;
+    border-bottom: none;
   }
 
-  .breadcrumb-link:hover {
-    color: var(--color-forest-500);
+  .taxonomy-nav .taxonomy-link:hover {
     text-decoration: underline;
+    text-decoration-color: var(--color-forest-400);
   }
 
-  .breadcrumb-separator {
+  .taxonomy-name {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--color-forest-700);
+  }
+
+  .taxonomy-nav .taxonomy-link:hover .taxonomy-name {
+    color: var(--color-forest-900);
+  }
+
+  .taxonomy-level-label {
+    font-size: 0.75rem;
+    font-style: normal;
+    font-weight: 400;
     color: var(--color-text-tertiary);
   }
 
-  .breadcrumb-current {
-    color: var(--color-text-primary);
-    font-weight: 500;
-    font-style: italic;
+  .taxonomy-separator {
+    color: var(--color-forest-400);
   }
 
-  /* Species header styles */
-  .species-header {
+  /* Current species row */
+  .species-current {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     gap: 1rem;
-    padding: 1.25rem 1.5rem;
-    background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-surface) 100%);
-    border-bottom: 1px solid var(--color-border);
+  }
+
+  .species-current-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .species-level {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-forest-700);
+    background-color: var(--color-forest-200);
+    border-radius: 9999px;
   }
 
   .species-title {
@@ -768,48 +747,19 @@
     flex-wrap: wrap;
     align-items: baseline;
     gap: 0.5rem;
-    font-family: var(--font-serif);
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--color-forest-900);
+    font-family: var(--font-serif);
     margin: 0;
-    line-height: 1.3;
-  }
-
-  .species-name {
-    color: var(--color-forest-800);
   }
 
   .author-text {
     font-size: 1rem;
     font-weight: 400;
+    font-style: normal;
     color: var(--color-text-secondary);
     font-family: var(--font-sans);
-  }
-
-  .type-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.625rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    font-family: var(--font-sans);
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
-    vertical-align: middle;
-  }
-
-  .type-badge.species {
-    background-color: var(--color-forest-100);
-    color: var(--color-forest-800);
-    border: 1px solid var(--color-forest-200);
-  }
-
-  .type-badge.hybrid {
-    background-color: var(--color-oak-light);
-    color: var(--color-oak-brown);
-    border: 1px solid var(--color-oak-medium);
   }
 
   /* Hybrids two-column grid */
