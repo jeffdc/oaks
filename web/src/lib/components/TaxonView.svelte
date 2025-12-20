@@ -112,31 +112,9 @@
 </script>
 
 <div class="taxon-view">
-  <!-- Combined navigation header -->
+  <!-- Combined header with taxon name and taxonomy path -->
   <header class="taxon-header">
-    <!-- Breadcrumb path (ancestors) -->
-    <nav class="breadcrumb">
-      {#if isGenusLevel}
-        <span class="breadcrumb-item">
-          <span class="breadcrumb-name">Quercus</span>
-          <span class="breadcrumb-label">(genus)</span>
-        </span>
-      {:else}
-        <a href="{base}/taxonomy/" class="breadcrumb-link">
-          <span class="breadcrumb-name">Quercus</span>
-          <span class="breadcrumb-label">(genus)</span>
-        </a>
-        {#each taxonPath.slice(0, -1) as segment, i}
-          <span class="breadcrumb-separator">›</span>
-          <a href="{getTaxonUrl(taxonPath.slice(0, i + 1))}" class="breadcrumb-link">
-            <span class="breadcrumb-name">{segment}</span>
-            <span class="breadcrumb-label">({getBreadcrumbLevelLabel(i)})</span>
-          </a>
-        {/each}
-      {/if}
-    </nav>
-
-    <!-- Current taxon -->
+    <!-- Current taxon (name first) -->
     <div class="taxon-current">
       <div class="taxon-current-left">
         <span class="taxon-level">{getTaxonLevelLabel(taxonPath.length)}</span>
@@ -158,6 +136,24 @@
         {/if}
       </p>
     </div>
+
+    <!-- Taxonomy path (below name, serves as both navigation and taxonomy display) -->
+    {#if !isGenusLevel}
+      <nav class="taxonomy-nav">
+        <span class="taxonomy-label">Taxonomy:</span>
+        <a href="{base}/taxonomy/" class="taxonomy-link">
+          <span class="taxonomy-name">Quercus</span>
+          <span class="taxonomy-level-label">(genus)</span>
+        </a>
+        {#each taxonPath.slice(0, -1) as segment, i}
+          <span class="taxonomy-separator">›</span>
+          <a href="{getTaxonUrl(taxonPath.slice(0, i + 1))}" class="taxonomy-link">
+            <span class="taxonomy-name">{segment}</span>
+            <span class="taxonomy-level-label">({getBreadcrumbLevelLabel(i)})</span>
+          </a>
+        {/each}
+      </nav>
+    {/if}
   </header>
 
   <!-- Sub-taxa (if any) -->
@@ -218,17 +214,23 @@
     border-radius: 0.75rem;
   }
 
-  /* Breadcrumb (ancestors) */
-  .breadcrumb {
+  /* Taxonomy navigation (below taxon name) */
+  .taxonomy-nav {
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;
     gap: 0.5rem;
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
   }
 
-  .breadcrumb-item,
-  .breadcrumb-link {
+  .taxonomy-label {
+    font-weight: 600;
+    color: var(--color-forest-700);
+    margin-right: 0.25rem;
+  }
+
+  .taxonomy-link {
     display: inline-flex;
     align-items: baseline;
     gap: 0.25rem;
@@ -236,29 +238,29 @@
     transition: color 0.15s ease;
   }
 
-  .breadcrumb-link:hover {
+  .taxonomy-link:hover {
     text-decoration: underline;
     text-decoration-color: var(--color-forest-400);
   }
 
-  .breadcrumb-name {
+  .taxonomy-name {
     font-style: italic;
     font-weight: 500;
     color: var(--color-forest-700);
   }
 
-  .breadcrumb-link:hover .breadcrumb-name {
+  .taxonomy-link:hover .taxonomy-name {
     color: var(--color-forest-900);
   }
 
-  .breadcrumb-label {
+  .taxonomy-level-label {
     font-size: 0.75rem;
     font-style: normal;
     font-weight: 400;
     color: var(--color-text-tertiary);
   }
 
-  .breadcrumb-separator {
+  .taxonomy-separator {
     color: var(--color-forest-400);
   }
 
