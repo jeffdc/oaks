@@ -161,7 +161,10 @@ async function fetchAndCacheData() {
  */
 async function checkForUpdates() {
   try {
-    const response = await fetch(`${import.meta.env.BASE_URL}quercus_data.json`);
+    // Bypass browser cache to get fresh data from server
+    const response = await fetch(`${import.meta.env.BASE_URL}quercus_data.json`, {
+      cache: 'no-store'
+    });
     if (!response.ok) return;
 
     const data = await response.json();
