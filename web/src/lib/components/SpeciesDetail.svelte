@@ -77,6 +77,22 @@
     return html;
   }
 
+  // Map conservation status codes to full names
+  function getConservationStatusLabel(status) {
+    const labels = {
+      'LC': 'Least Concern',
+      'NT': 'Near Threatened',
+      'VU': 'Vulnerable',
+      'EN': 'Endangered',
+      'CR': 'Critically Endangered',
+      'EW': 'Extinct in the Wild',
+      'EX': 'Extinct',
+      'DD': 'Data Deficient',
+      'NE': 'Not Evaluated'
+    };
+    return labels[status] || status;
+  }
+
   // Build taxonomy URL for a given level
   function getTaxonUrl(level) {
     if (!species.taxonomy) return `${base}/taxonomy/`;
@@ -121,7 +137,7 @@
     </span>
   </nav>
 
-  <!-- Header with name, authority, and type badge -->
+  <!-- Header with name, authority, type badge, and conservation status -->
   <div class="species-header">
     <h1 class="species-title">
       <span class="species-name">Quercus {#if needsHybridSymbol(species)}× {/if}<span class="italic">{species.name}</span></span>
@@ -132,6 +148,11 @@
         <span class="type-badge species">Species</span>
       {/if}
     </h1>
+    {#if species.conservation_status}
+      <span class="conservation-badge header-badge" title={getConservationStatusLabel(species.conservation_status)}>
+        {species.conservation_status}
+      </span>
+    {/if}
   </div>
 
   <!-- Content -->
@@ -306,20 +327,6 @@
       </section>
     {/if}
 
-    {#if species.conservation_status}
-      <section class="detail-section">
-        <h2 class="section-header">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-          <span>Conservation Status</span>
-        </h2>
-        <span class="conservation-badge">
-          {species.conservation_status}
-        </span>
-      </section>
-    {/if}
-
     <!-- SOURCE-DEPENDENT DATA -->
 
     {#if sources.length > 0}
@@ -339,7 +346,7 @@
                 <span class="preferred-badge" title="Preferred source">★</span>
               {/if}
               {#if source.license}
-                <span class="license-text">({source.license})</span>
+                <span class="license-icon" title={source.license === "All Rights Reserved" ? "All Rights Reserved" : source.license}>©</span>
               {/if}
               {#if source.source_url}
                 <a
@@ -680,6 +687,10 @@
     border: 1px solid var(--color-status-warning-border);
   }
 
+  .conservation-badge.header-badge {
+    flex-shrink: 0;
+  }
+
   .external-link {
     display: inline-flex;
     align-items: center;
@@ -743,6 +754,10 @@
 
   /* Species header styles */
   .species-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
     padding: 1.25rem 1.5rem;
     background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-surface) 100%);
     border-bottom: 1px solid var(--color-border);
@@ -883,10 +898,10 @@
     font-size: 0.75rem;
   }
 
-  .license-text {
-    font-size: 0.6875rem;
+  .license-icon {
+    font-size: 0.875rem;
     color: var(--color-text-tertiary);
-    font-weight: 400;
+    cursor: help;
   }
 
   .source-tab-link {
