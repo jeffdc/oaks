@@ -82,7 +82,8 @@ func (db *Database) initializeSchema() error {
 			hybrids TEXT,
 			closely_related_to TEXT,
 			subspecies_varieties TEXT,
-			synonyms TEXT
+			synonyms TEXT,
+			external_links TEXT
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_oak_entries_subgenus ON oak_entries(subgenus)`,
 		`CREATE INDEX IF NOT EXISTS idx_oak_entries_section ON oak_entries(section)`,
@@ -125,6 +126,14 @@ func (db *Database) initializeSchema() error {
 		if _, err := db.conn.Exec(stmt); err != nil {
 			return fmt.Errorf("failed to execute schema statement: %w", err)
 		}
+	}
+
+	// Run migrations for new columns (ignore errors if column already exists)
+	migrations := []string{
+		`ALTER TABLE oak_entries ADD COLUMN external_links TEXT`,
+	}
+	for _, stmt := range migrations {
+		db.conn.Exec(stmt) // Ignore error - column may already exist
 	}
 
 	return nil
@@ -361,6 +370,10 @@ func (db *Database) SaveOakEntry(entry *models.OakEntry) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal subspecies_varieties: %w", err)
 	}
+	externalLinksJSON, err := json.Marshal(entry.ExternalLinks)
+	if err != nil {
+		return fmt.Errorf("failed to marshal external_links: %w", err)
+	}
 
 	// Convert bool to int for SQLite
 	isHybrid := 0
@@ -372,12 +385,12 @@ func (db *Database) SaveOakEntry(entry *models.OakEntry) error {
 		`INSERT OR REPLACE INTO oak_entries (
 			scientific_name, author, is_hybrid, conservation_status,
 			subgenus, section, subsection, complex,
-			parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		entry.ScientificName, entry.Author, isHybrid, entry.ConservationStatus,
 		entry.Subgenus, entry.Section, entry.Subsection, entry.Complex,
 		entry.Parent1, entry.Parent2, string(hybridsJSON), string(relatedJSON),
-		string(subspeciesJSON), string(synonymsJSON),
+		string(subspeciesJSON), string(synonymsJSON), string(externalLinksJSON),
 	)
 	if err != nil {
 		return fmt.Errorf("failed to insert oak entry: %w", err)
@@ -391,19 +404,19 @@ func (db *Database) GetOakEntry(scientificName string) (*models.OakEntry, error)
 	row := db.conn.QueryRow(
 		`SELECT scientific_name, author, is_hybrid, conservation_status,
 		        subgenus, section, subsection, complex,
-		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms
+		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
 		 FROM oak_entries WHERE scientific_name = ?`,
 		scientificName,
 	)
 
 	var entry models.OakEntry
 	var isHybrid int
-	var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON sql.NullString
+	var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON, externalLinksJSON sql.NullString
 
 	if err := row.Scan(
 		&entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
 		&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
-		&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON,
+		&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON, &externalLinksJSON,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -440,6 +453,13 @@ func (db *Database) GetOakEntry(scientificName string) (*models.OakEntry, error)
 	}
 	if entry.Synonyms == nil {
 		entry.Synonyms = []string{}
+	}
+
+	if externalLinksJSON.Valid {
+		json.Unmarshal([]byte(externalLinksJSON.String), &entry.ExternalLinks)
+	}
+	if entry.ExternalLinks == nil {
+		entry.ExternalLinks = []models.ExternalLink{}
 	}
 
 	return &entry, nil
@@ -515,7 +535,7 @@ func (db *Database) ListOakEntries() ([]*models.OakEntry, error) {
 	rows, err := db.conn.Query(
 		`SELECT scientific_name, author, is_hybrid, conservation_status,
 		        subgenus, section, subsection, complex,
-		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms
+		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
 		 FROM oak_entries ORDER BY scientific_name`,
 	)
 	if err != nil {
@@ -527,12 +547,12 @@ func (db *Database) ListOakEntries() ([]*models.OakEntry, error) {
 	for rows.Next() {
 		var entry models.OakEntry
 		var isHybrid int
-		var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON sql.NullString
+		var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON, externalLinksJSON sql.NullString
 
 		if err := rows.Scan(
 			&entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
 			&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
-			&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON,
+			&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON, &externalLinksJSON,
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan oak entry: %w", err)
 		}
@@ -566,6 +586,13 @@ func (db *Database) ListOakEntries() ([]*models.OakEntry, error) {
 		}
 		if entry.Synonyms == nil {
 			entry.Synonyms = []string{}
+		}
+
+		if externalLinksJSON.Valid {
+			json.Unmarshal([]byte(externalLinksJSON.String), &entry.ExternalLinks)
+		}
+		if entry.ExternalLinks == nil {
+			entry.ExternalLinks = []models.ExternalLink{}
 		}
 
 		entries = append(entries, &entry)

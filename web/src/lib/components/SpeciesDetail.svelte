@@ -2,6 +2,7 @@
   import { base } from '$app/paths';
   import { marked } from 'marked';
   import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName } from '$lib/stores/dataStore.js';
+  import { getLogoIcon } from '$lib/icons/index.js';
 
   // Configure marked for safe rendering
   marked.setOptions({
@@ -508,6 +509,19 @@
         <span>External Links</span>
       </h2>
       <div class="external-links-container">
+        {#if species.external_links && species.external_links.length > 0}
+          {#each species.external_links as link}
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="external-link"
+            >
+              <span class="external-link-icon">{@html getLogoIcon(link.logo)}</span>
+              <span>{link.name}</span>
+            </a>
+          {/each}
+        {/if}
         {#if selectedSource?.url}
           <a
             href={selectedSource.url}
@@ -524,7 +538,8 @@
           rel="noopener noreferrer"
           class="external-link"
         >
-          iNaturalist
+          <span class="external-link-icon">{@html getLogoIcon('inaturalist')}</span>
+          <span>iNaturalist</span>
         </a>
       </div>
     </section>
@@ -656,6 +671,21 @@
     border-color: var(--color-forest-400);
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
+  }
+
+  .external-link-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .external-link-icon :global(svg) {
+    width: 100%;
+    height: 100%;
+    color: var(--color-forest-600);
   }
 
   /* Combined navigation header (matching TaxonView) */

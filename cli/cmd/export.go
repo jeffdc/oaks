@@ -19,6 +19,13 @@ type ExportTaxonomy struct {
 	Complex    *string `json:"complex,omitempty"`
 }
 
+// ExportExternalLink represents an external reference link for a species
+type ExportExternalLink struct {
+	Name string `json:"name"` // Display label (e.g., "Wikipedia", "USDA Plants")
+	URL  string `json:"url"`  // Direct link to species on external site
+	Logo string `json:"logo"` // Identifier for bundled SVG icon (e.g., "wikipedia", "inaturalist")
+}
+
 // ExportSourceData represents source-attributed data for a species
 type ExportSourceData struct {
 	SourceID         int64    `json:"source_id"`
@@ -43,18 +50,19 @@ type ExportSourceData struct {
 
 // ExportSpecies represents a species in export format
 type ExportSpecies struct {
-	Name                string             `json:"name"`
-	Author              *string            `json:"author,omitempty"`
-	IsHybrid            bool               `json:"is_hybrid"`
-	ConservationStatus  *string            `json:"conservation_status,omitempty"`
-	Taxonomy            ExportTaxonomy     `json:"taxonomy"`
-	Parent1             *string            `json:"parent1,omitempty"`
-	Parent2             *string            `json:"parent2,omitempty"`
-	Hybrids             []string           `json:"hybrids,omitempty"`
-	CloselyRelatedTo    []string           `json:"closely_related_to,omitempty"`
-	SubspeciesVarieties []string           `json:"subspecies_varieties,omitempty"`
-	Synonyms            []string           `json:"synonyms,omitempty"`
-	Sources             []ExportSourceData `json:"sources,omitempty"`
+	Name                string               `json:"name"`
+	Author              *string              `json:"author,omitempty"`
+	IsHybrid            bool                 `json:"is_hybrid"`
+	ConservationStatus  *string              `json:"conservation_status,omitempty"`
+	Taxonomy            ExportTaxonomy       `json:"taxonomy"`
+	Parent1             *string              `json:"parent1,omitempty"`
+	Parent2             *string              `json:"parent2,omitempty"`
+	Hybrids             []string             `json:"hybrids,omitempty"`
+	CloselyRelatedTo    []string             `json:"closely_related_to,omitempty"`
+	SubspeciesVarieties []string             `json:"subspecies_varieties,omitempty"`
+	Synonyms            []string             `json:"synonyms,omitempty"`
+	ExternalLinks       []ExportExternalLink `json:"external_links,omitempty"`
+	Sources             []ExportSourceData   `json:"sources,omitempty"`
 }
 
 // ExportMetadata contains version info for cache invalidation
@@ -172,6 +180,19 @@ func runExport(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, entry := range entries {
+		// Convert external links to export format
+		var exportLinks []ExportExternalLink
+		if len(entry.ExternalLinks) > 0 {
+			exportLinks = make([]ExportExternalLink, len(entry.ExternalLinks))
+			for i, link := range entry.ExternalLinks {
+				exportLinks[i] = ExportExternalLink{
+					Name: link.Name,
+					URL:  link.URL,
+					Logo: link.Logo,
+				}
+			}
+		}
+
 		species := ExportSpecies{
 			Name:               entry.ScientificName,
 			Author:             entry.Author,
@@ -190,6 +211,7 @@ func runExport(cmd *cobra.Command, args []string) error {
 			CloselyRelatedTo:    nonEmptySlice(entry.CloselyRelatedTo),
 			SubspeciesVarieties: nonEmptySlice(entry.SubspeciesVarieties),
 			Synonyms:            nonEmptySlice(entry.Synonyms),
+			ExternalLinks:       exportLinks,
 			Sources:             []ExportSourceData{},
 		}
 
