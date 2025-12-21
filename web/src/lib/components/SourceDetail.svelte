@@ -179,7 +179,7 @@
 
       <div class="species-grid" bind:this={gridElement}>
         {#each displayedSpecies as species}
-          <a href="{base}/species/{encodeURIComponent(species.name)}/" class="species-link">
+          <a href="{base}/species/{encodeURIComponent(species.name)}/?source={sourceId}" class="species-link">
             <span class="species-name">
               {#if species.is_hybrid}
                 Q. ×{species.name.startsWith('×') ? species.name.slice(1) : species.name}

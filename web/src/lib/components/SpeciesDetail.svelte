@@ -10,6 +10,7 @@
   });
 
   export let species;
+  export let initialSourceId = null;
 
   // Source selection state
   let selectedSourceId = null;
@@ -19,8 +20,13 @@
   $: {
     // Reset selection when species changes
     if (species) {
-      const primary = getPrimarySource(species);
-      selectedSourceId = primary?.source_id ?? null;
+      // Use initialSourceId if provided and valid, otherwise fall back to primary source
+      if (initialSourceId && sources.some(s => s.source_id === initialSourceId)) {
+        selectedSourceId = initialSourceId;
+      } else {
+        const primary = getPrimarySource(species);
+        selectedSourceId = primary?.source_id ?? null;
+      }
     }
   }
   $: selectedSource = sources.find(s => s.source_id === selectedSourceId) || null;

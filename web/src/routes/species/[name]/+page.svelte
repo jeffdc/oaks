@@ -5,6 +5,8 @@
 
 	$: speciesName = decodeURIComponent($page.params.name);
 	$: species = $allSpecies.find(s => s.name === speciesName);
+	$: sourceParam = $page.url.searchParams.get('source');
+	$: initialSourceId = sourceParam ? Number(sourceParam) : null;
 </script>
 
 <svelte:head>
@@ -17,7 +19,7 @@
 
 {#if species}
 	<div class="rounded-xl overflow-hidden" style="background-color: var(--color-surface); box-shadow: var(--shadow-xl);">
-		<SpeciesDetail {species} />
+		<SpeciesDetail {species} {initialSourceId} />
 	</div>
 {:else}
 	<div class="text-center py-16">
