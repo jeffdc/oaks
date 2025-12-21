@@ -32,7 +32,7 @@ web/
 │       │   ├── Header.svelte
 │       │   ├── Search.svelte
 │       │   ├── LandingPage.svelte
-│       │   ├── SpeciesList.svelte
+│       │   ├── SearchResults.svelte
 │       │   ├── SpeciesDetail.svelte
 │       │   ├── TaxonView.svelte
 │       │   ├── AboutPage.svelte
@@ -137,11 +137,12 @@ All colors, shadows, and typography defined as CSS variables:
 - Search component integration
 - Consistent across all pages
 
-### SpeciesList.svelte
+### SearchResults.svelte
 
-- Grid layout (responsive: 1/2/3 columns)
-- Shows species count bar at top: "X species | Y hybrids | Z total"
-- Each species card shows: name (with × for hybrids), author, range
+- Displays search results for species and sources
+- Shows count bar at top: "X species | Y hybrids | Z total"
+- When searching, groups results by type (Sources first, then Species)
+- Each species shows: name (with × for hybrids), author, common names
 - Empty state when no results
 
 ### SpeciesDetail.svelte
@@ -187,7 +188,7 @@ The data file `public/quercus_data.json` is committed to the repo. The CLI expor
 
 ### File Naming
 
-- Components: PascalCase (e.g., `SpeciesList.svelte`)
+- Components: PascalCase (e.g., `SearchResults.svelte`)
 - Utilities: camelCase (e.g., `dataStore.js`)
 - Styles: kebab-case for CSS classes
 

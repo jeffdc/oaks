@@ -1,9 +1,9 @@
 <script>
-	import SpeciesList from '$lib/components/SpeciesList.svelte';
+	import SearchResults from '$lib/components/SearchResults.svelte';
 </script>
 
 <svelte:head>
 	<title>All Species - Oak Compendium</title>
 </svelte:head>
 
-<SpeciesList />
+<SearchResults />

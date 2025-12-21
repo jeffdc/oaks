@@ -92,21 +92,6 @@
 	<section class="browse-section">
 		<h3 class="section-title">What would you like to do?</h3>
 		<div class="browse-options">
-			<a href="{base}/list/" class="browse-card">
-				<div class="browse-icon">
-					<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-					</svg>
-				</div>
-				<div class="browse-text">
-					<h4 class="browse-title">Alphabetical List</h4>
-					<p class="browse-description">Browse all species in alphabetical order</p>
-				</div>
-				<svg class="browse-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-				</svg>
-			</a>
-
 			<a href="{base}/taxonomy/" class="browse-card">
 				<div class="browse-icon">
 					<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
