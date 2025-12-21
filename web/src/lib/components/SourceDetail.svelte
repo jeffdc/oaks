@@ -1,6 +1,6 @@
 <script>
   import { base } from '$app/paths';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { getSourceInfo, getSpeciesBySource } from '$lib/stores/dataStore.js';
 
   export let sourceId;
@@ -9,13 +9,22 @@
   let speciesList = [];
   let isLoading = true;
   let showAllSpecies = false;
+  let gridElement;
+  let columnCount = 1;
 
-  // Number of species to show before "Show all"
-  const PREVIEW_COUNT = 10;
+  // Number of rows to show before "Show more"
+  const PREVIEW_ROWS = 10;
 
-  onMount(async () => {
-    await loadSourceData();
+  onMount(() => {
+    loadSourceData();
+    window.addEventListener('resize', updateColumnCount);
+    return () => window.removeEventListener('resize', updateColumnCount);
   });
+
+  // Update column count when grid element becomes available
+  $: if (gridElement) {
+    tick().then(updateColumnCount);
+  }
 
   // Reload when sourceId changes
   $: if (sourceId) {
@@ -31,8 +40,19 @@
     isLoading = false;
   }
 
-  $: displayedSpecies = showAllSpecies ? speciesList : speciesList.slice(0, PREVIEW_COUNT);
-  $: remainingCount = speciesList.length - PREVIEW_COUNT;
+  function updateColumnCount() {
+    if (!gridElement) return;
+    const width = gridElement.offsetWidth;
+    // Match CSS breakpoints: 1 col < 480px, 2 cols < 768px, 3 cols < 1024px, 4 cols >= 1024px
+    if (width >= 1024) columnCount = 4;
+    else if (width >= 768) columnCount = 3;
+    else if (width >= 480) columnCount = 2;
+    else columnCount = 1;
+  }
+
+  $: previewCount = columnCount * PREVIEW_ROWS;
+  $: displayedSpecies = showAllSpecies ? speciesList : speciesList.slice(0, previewCount);
+  $: hasMoreSpecies = speciesList.length > previewCount;
 
   // Check if there's any metadata to display
   $: hasMetadata = source && (
@@ -157,23 +177,21 @@
     <section class="species-section">
       <h2 class="section-title">Species with Data from This Source</h2>
 
-      <ul class="species-list">
+      <div class="species-grid" bind:this={gridElement}>
         {#each displayedSpecies as species}
-          <li>
-            <a href="{base}/species/{encodeURIComponent(species.name)}/" class="species-link">
-              <span class="species-name">
-                {#if species.is_hybrid && !species.name.startsWith('×')}×{/if}
-                {species.name}
-              </span>
-              {#if species.author}
-                <span class="species-author">{species.author}</span>
+          <a href="{base}/species/{encodeURIComponent(species.name)}/" class="species-link">
+            <span class="species-name">
+              {#if species.is_hybrid}
+                Q. ×{species.name.startsWith('×') ? species.name.slice(1) : species.name}
+              {:else}
+                Q. {species.name}
               {/if}
-            </a>
-          </li>
+            </span>
+          </a>
         {/each}
-      </ul>
+      </div>
 
-      {#if speciesList.length > PREVIEW_COUNT}
+      {#if hasMoreSpecies}
         <button class="toggle-btn" on:click={() => showAllSpecies = !showAllSpecies}>
           {#if showAllSpecies}
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -184,7 +202,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
-            Show all {speciesList.length} species
+            More ({speciesList.length - previewCount} remaining)
           {/if}
         </button>
       {/if}
@@ -391,46 +409,50 @@
     margin-bottom: 2rem;
   }
 
-  .species-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  .species-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.25rem 1rem;
   }
 
-  .species-list li {
-    border-bottom: 1px solid var(--color-border);
+  @media (min-width: 480px) {
+    .species-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
-  .species-list li:last-child {
-    border-bottom: none;
+  @media (min-width: 768px) {
+    .species-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .species-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
   }
 
   .species-link {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    padding: 0.75rem 0;
+    display: block;
+    padding: 0.375rem 0.5rem;
     text-decoration: none;
+    border-radius: 0.25rem;
     transition: background-color 0.15s;
   }
 
   .species-link:hover {
     background-color: var(--color-forest-50);
-    margin: 0 -0.75rem;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
   }
 
   .species-name {
     font-family: var(--font-serif);
     font-style: italic;
-    font-size: 1.0625rem;
+    font-size: 0.9375rem;
     color: var(--color-forest-700);
-  }
-
-  .species-author {
-    font-size: 0.875rem;
-    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .toggle-btn {

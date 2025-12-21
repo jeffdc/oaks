@@ -28,6 +28,9 @@ export {
 // Store for all species data
 export const allSpecies = writable([]);
 
+// Store for all sources data
+export const allSources = writable([]);
+
 // Store for loading state
 export const isLoading = writable(true);
 
@@ -89,6 +92,40 @@ export const speciesCounts = derived(
   }
 );
 
+// Derived store: filtered sources based on search
+export const filteredSources = derived(
+  [allSources, searchQuery],
+  ([$allSources, $searchQuery]) => {
+    if (!$searchQuery) return [];
+
+    const query = $searchQuery.toLowerCase();
+    return $allSources.filter(source => {
+      // Search in source name
+      if (source.source_name?.toLowerCase().includes(query)) return true;
+
+      // Search in author
+      if (source.author?.toLowerCase().includes(query)) return true;
+
+      return false;
+    });
+  }
+);
+
+// Derived store: combined search results with type differentiation
+// Results are sorted: species first (alphabetically), then sources (by species count)
+export const searchResults = derived(
+  [filteredSpecies, filteredSources, searchQuery],
+  ([$filteredSpecies, $filteredSources, $searchQuery]) => {
+    if (!$searchQuery) return { species: [], sources: [], hasResults: false };
+
+    return {
+      species: $filteredSpecies,
+      sources: $filteredSources,
+      hasResults: $filteredSpecies.length > 0 || $filteredSources.length > 0
+    };
+  }
+);
+
 // Derived store: total counts (for landing page, independent of search)
 export const totalCounts = derived(
   allSpecies,
@@ -127,6 +164,10 @@ export async function loadSpeciesData() {
       // Load from IndexedDB immediately (fast path)
       const species = await getAllSpecies();
       allSpecies.set(species);
+
+      // Load sources for search
+      const sources = await getAllSourcesInfo();
+      allSources.set(sources);
 
       const metadata = await getMetadata();
       dataSource.set({ from: 'indexeddb', version: metadata.dataVersion });
@@ -171,6 +212,10 @@ async function fetchAndCacheData() {
   const species = await getAllSpecies();
   allSpecies.set(species);
 
+  // Load sources for search
+  const sources = await getAllSourcesInfo();
+  allSources.set(sources);
+
   const metadata = await getMetadata();
   dataSource.set({ from: 'json', version: metadata.dataVersion });
   isLoading.set(false);
@@ -200,9 +245,12 @@ async function checkForUpdates() {
       const species = await getAllSpecies();
       allSpecies.set(species);
 
+      // Reload sources
+      const sources = await getAllSourcesInfo();
+      allSources.set(sources);
+
       const metadata = await getMetadata();
       dataSource.set({ from: 'json-update', version: metadata.dataVersion });
-
     }
   } catch (err) {
     // Non-fatal - we already have data
