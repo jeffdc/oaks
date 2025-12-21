@@ -73,7 +73,7 @@ Uses Svelte stores for reactive state:
   - `/taxonomy/` - Taxonomy tree view
   - `/taxonomy/[...path]/` - Dynamic taxon view (e.g., `/taxonomy/Quercus/Quercus/`)
   - `/species/[name]/` - Species detail (e.g., `/species/alba/`)
-- Base path: `/oaks` for GitHub Pages deployment (configured in svelte.config.js)
+- Base path: `/` (custom domain: oakcompendium.org)
 - Navigation: Standard `<a href>` links with `$app/paths` base import
 - Browser back/forward buttons work correctly
 
