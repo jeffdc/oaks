@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>{taxonName} - Quercus Compendium</title>
+	<title>{taxonName} - Oak Compendium</title>
 </svelte:head>
 
 <TaxonView {taxonPath} />

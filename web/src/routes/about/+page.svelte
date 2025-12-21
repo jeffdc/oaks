@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>About - Quercus Compendium</title>
+	<title>About - Oak Compendium</title>
 </svelte:head>
 
 <AboutPage />

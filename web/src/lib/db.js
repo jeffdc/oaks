@@ -20,11 +20,15 @@ export const db = new Dexie('QuercusDB');
 // Syntax: 'primaryKey, index1, index2, ...'
 // Keep indexes minimal - use in-memory filtering for complex queries (~670 species)
 db.version(1).stores({
-  // Main species table - stores full denormalized objects including sources array
   species: 'name, is_hybrid',
-
-  // Metadata table for tracking data version
   metadata: 'key'
+});
+
+// Version 2: Add sources table for full source metadata
+db.version(2).stores({
+  species: 'name, is_hybrid',
+  metadata: 'key',
+  sources: 'id'
 });
 
 /**
@@ -64,7 +68,7 @@ db.version(1).stores({
  * @returns {Promise<number>} Number of species inserted
  */
 export async function populateFromJson(jsonData) {
-  const { metadata, species } = jsonData;
+  const { metadata, species, sources } = jsonData;
 
   // Check if we need to update
   const currentVersion = await db.metadata.get('dataVersion');
@@ -73,9 +77,15 @@ export async function populateFromJson(jsonData) {
   }
 
   // Clear and repopulate (full replacement strategy)
-  await db.transaction('rw', db.species, db.metadata, async () => {
+  await db.transaction('rw', db.species, db.metadata, db.sources, async () => {
     await db.species.clear();
     await db.species.bulkAdd(species);
+
+    // Store sources metadata if provided
+    if (sources?.length) {
+      await db.sources.clear();
+      await db.sources.bulkAdd(sources);
+    }
 
     // Store metadata
     await db.metadata.put({ key: 'dataVersion', value: metadata?.version || '1.0' });
@@ -87,11 +97,19 @@ export async function populateFromJson(jsonData) {
 }
 
 /**
- * Get all species sorted by name
- * @returns {Promise<Array>} All species sorted alphabetically
+ * Get all species sorted by name (species before hybrids)
+ * @returns {Promise<Array>} All species sorted: non-hybrids first, then hybrids, alphabetically within each group
  */
 export async function getAllSpecies() {
-  return db.species.orderBy('name').toArray();
+  const all = await db.species.toArray();
+  return all.sort((a, b) => {
+    // Species before hybrids
+    if (a.is_hybrid !== b.is_hybrid) {
+      return a.is_hybrid ? 1 : -1;
+    }
+    // Alphabetically within group
+    return a.name.localeCompare(b.name);
+  });
 }
 
 /**
@@ -202,6 +220,120 @@ export function getSourceById(species, sourceId) {
  */
 export function getSourceCompleteness(source) {
   return countPopulatedFields(source);
+}
+
+/**
+ * Get all unique sources with full metadata and coverage statistics
+ * Merges stored source metadata with derived coverage stats from species
+ * @returns {Promise<Array>} Array of source objects with:
+ *   - Full metadata: id, name, source_type, description, author, year, url, isbn, doi, notes, license, license_url
+ *   - Coverage stats: species_count, coverage_percent, species_names
+ */
+export async function getAllSourcesInfo() {
+  const allSpecies = await db.species.toArray();
+  const totalSpecies = allSpecies.length;
+
+  // Try to get stored source metadata
+  let storedSources = [];
+  try {
+    storedSources = await db.sources.toArray();
+  } catch (e) {
+    // Table might not exist yet
+  }
+
+  // Build map of stored source metadata by ID
+  const sourceMetaMap = new Map();
+  for (const s of storedSources) {
+    sourceMetaMap.set(s.id, s);
+  }
+
+  // Map to accumulate coverage and fallback info: source_id -> { species_names[], fallback }
+  const coverageMap = new Map();
+
+  for (const species of allSpecies) {
+    if (!species.sources?.length) continue;
+
+    for (const source of species.sources) {
+      const id = source.source_id;
+      if (!coverageMap.has(id)) {
+        // Store fallback info from species source data
+        coverageMap.set(id, {
+          species_names: [],
+          fallback: {
+            source_name: source.source_name,
+            source_url: source.source_url,
+            license: source.license,
+            license_url: source.license_url
+          }
+        });
+      }
+      coverageMap.get(id).species_names.push(species.name);
+    }
+  }
+
+  // Merge metadata with coverage stats
+  const sources = [];
+  for (const [id, data] of coverageMap) {
+    const meta = sourceMetaMap.get(id);
+    const fallback = data.fallback;
+    const speciesNames = data.species_names;
+
+    sources.push({
+      // Full metadata from sources table, with fallback to species source data
+      source_id: id,
+      source_name: meta?.name || fallback.source_name || `Source ${id}`,
+      source_type: meta?.source_type || null,
+      description: meta?.description || null,
+      author: meta?.author || null,
+      year: meta?.year || null,
+      source_url: meta?.url || fallback.source_url || null,
+      isbn: meta?.isbn || null,
+      doi: meta?.doi || null,
+      notes: meta?.notes || null,
+      license: meta?.license || fallback.license || null,
+      license_url: meta?.license_url || fallback.license_url || null,
+      // Coverage stats
+      species_names: speciesNames,
+      species_count: speciesNames.length,
+      coverage_percent: totalSpecies > 0
+        ? Math.round((speciesNames.length / totalSpecies) * 100)
+        : 0
+    });
+  }
+
+  // Sort: species before hybrids, then by count descending
+  sources.sort((a, b) => b.species_count - a.species_count);
+
+  return sources;
+}
+
+/**
+ * Get detailed info for a single source by ID
+ * @param {number} sourceId - Source ID to look up
+ * @returns {Promise<Object|null>} Source info with full metadata and stats, or null if not found
+ */
+export async function getSourceInfo(sourceId) {
+  const allSources = await getAllSourcesInfo();
+  return allSources.find(s => s.source_id === sourceId) || null;
+}
+
+/**
+ * Get all species that have data from a specific source
+ * @param {number} sourceId - Source ID to filter by
+ * @returns {Promise<Array>} Array of species objects (species before hybrids, then alphabetically)
+ */
+export async function getSpeciesBySource(sourceId) {
+  const allSpecies = await db.species.toArray();
+  return allSpecies
+    .filter(species => species.sources?.some(s => s.source_id === sourceId))
+    .sort((a, b) => {
+      // Species before hybrids
+      if (a.is_hybrid !== b.is_hybrid) {
+        return a.is_hybrid ? 1 : -1;
+      }
+      // Alphabetically within group
+      return a.name.localeCompare(b.name);
+    });
 }
 
 /**

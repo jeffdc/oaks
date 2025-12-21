@@ -9,9 +9,9 @@
 
 <svelte:head>
 	{#if species}
-		<title>{formatSpeciesName(species)} - Quercus Compendium</title>
+		<title>{formatSpeciesName(species)} - Oak Compendium</title>
 	{:else}
-		<title>Species Not Found - Quercus Compendium</title>
+		<title>Species Not Found - Oak Compendium</title>
 	{/if}
 </svelte:head>
 

@@ -64,9 +64,26 @@ type ExportMetadata struct {
 	SpeciesCount int    `json:"species_count"` // Number of species in export
 }
 
+// ExportSource represents full source metadata at top level
+type ExportSource struct {
+	ID          int64   `json:"id"`
+	SourceType  string  `json:"source_type"`
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
+	Author      *string `json:"author,omitempty"`
+	Year        *int    `json:"year,omitempty"`
+	URL         *string `json:"url,omitempty"`
+	ISBN        *string `json:"isbn,omitempty"`
+	DOI         *string `json:"doi,omitempty"`
+	Notes       *string `json:"notes,omitempty"`
+	License     *string `json:"license,omitempty"`
+	LicenseURL  *string `json:"license_url,omitempty"`
+}
+
 // ExportFile represents the complete export format
 type ExportFile struct {
 	Metadata ExportMetadata  `json:"metadata"`
+	Sources  []ExportSource  `json:"sources"`
 	Species  []ExportSpecies `json:"species"`
 }
 
@@ -132,7 +149,26 @@ func runExport(cmd *cobra.Command, args []string) error {
 			ExportedAt:   now.Format(time.RFC3339),
 			SpeciesCount: len(entries),
 		},
+		Sources: make([]ExportSource, 0, len(sources)),
 		Species: make([]ExportSpecies, 0, len(entries)),
+	}
+
+	// Build top-level sources array with full metadata
+	for _, s := range sources {
+		exportData.Sources = append(exportData.Sources, ExportSource{
+			ID:          s.ID,
+			SourceType:  s.SourceType,
+			Name:        s.Name,
+			Description: s.Description,
+			Author:      s.Author,
+			Year:        s.Year,
+			URL:         s.URL,
+			ISBN:        s.ISBN,
+			DOI:         s.DOI,
+			Notes:       s.Notes,
+			License:     s.License,
+			LicenseURL:  s.LicenseURL,
+		})
 	}
 
 	for _, entry := range entries {

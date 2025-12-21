@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>Quercus Compendium - Oak Species Database</title>
+	<title>Oak Compendium - Oak Species Database</title>
 </svelte:head>
 
 <LandingPage />

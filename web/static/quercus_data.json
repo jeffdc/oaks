@@ -1,9 +1,44 @@
 {
   "metadata": {
-    "version": "2025-12-20T19:23:55Z",
-    "exported_at": "2025-12-20T19:23:55Z",
+    "version": "2025-12-21T16:03:25Z",
+    "exported_at": "2025-12-21T16:03:25Z",
     "species_count": 734
   },
+  "sources": [
+    {
+      "id": 3,
+      "source_type": "Personal Observation",
+      "name": "Oak Compendium",
+      "author": "Jeff Clark",
+      "year": 2025,
+      "license": "All Rights Reserved"
+    },
+    {
+      "id": 2,
+      "source_type": "Website",
+      "name": "Oaks of the World",
+      "description": "Comprehensive oak species database by oaksoftheworld.fr",
+      "url": "https://oaksoftheworld.fr",
+      "license": "All Rights Reserved"
+    },
+    {
+      "id": 4,
+      "source_type": "Book",
+      "name": "The Sibley Guide to Trees",
+      "author": "David Allen Sibley",
+      "year": 2009,
+      "isbn": "978-0-375-415197",
+      "license": "All Rights Reserved"
+    },
+    {
+      "id": 1,
+      "source_type": "Website",
+      "name": "iNaturalist",
+      "url": "https://www.inaturalist.org/taxa/47851-Quercus",
+      "license": "CC0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/"
+    }
+  ],
   "species": [
     {
       "name": "acatenangensis",

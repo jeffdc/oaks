@@ -8,11 +8,22 @@ import {
   getPrimarySource,
   getAllSources,
   getSourceById,
-  getSourceCompleteness
+  getSourceCompleteness,
+  getAllSourcesInfo,
+  getSourceInfo,
+  getSpeciesBySource
 } from '../db.js';
 
 // Re-export source helpers for component use
-export { getPrimarySource, getAllSources, getSourceById, getSourceCompleteness };
+export {
+  getPrimarySource,
+  getAllSources,
+  getSourceById,
+  getSourceCompleteness,
+  getAllSourcesInfo,
+  getSourceInfo,
+  getSpeciesBySource
+};
 
 // Store for all species data
 export const allSpecies = writable([]);

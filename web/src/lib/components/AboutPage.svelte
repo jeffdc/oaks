@@ -3,11 +3,11 @@
 </script>
 
 <div class="about-page">
-    <h2 class="page-title">About the Quercus Compendium</h2>
+    <h2 class="page-title">About the Oak Compendium</h2>
 
     <section class="content-section">
         <p>
-            The Quercus Compendium is a comprehensive database of oak species from around the world, providing
+            The Oak Compendium is a comprehensive database of oak species from around the world, providing
             botanists, naturalists, and oak enthusiasts with detailed information about the amazing genus <em
                 >Quercus</em
             >.
@@ -20,7 +20,7 @@
             Almost everyone knows what an oak is, and many can even point to one in the wild. But getting them to
             species can be a huge challenge that stumps even the most seasoned botanist—just start looking at herbarium
             records to see all of the misidentified material! After years of frustration with the lack of a
-            comprehensive oak identification resource, the Quercus Compendium was born.
+            comprehensive oak identification resource, the Oak Compendium was born.
         </p>
         <p>The goal is to gather and organize information to provide the ultimate guide to oak identification.</p>
     </section>

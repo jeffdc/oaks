@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>All Species - Quercus Compendium</title>
+	<title>All Species - Oak Compendium</title>
 </svelte:head>
 
 <SpeciesList />

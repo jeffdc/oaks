@@ -1,14 +1,24 @@
 <script>
 	import { base } from '$app/paths';
-	import { allSpecies, totalCounts, getPrimarySource } from '$lib/stores/dataStore.js';
+	import { allSpecies, totalCounts, getPrimarySource, getAllSourcesInfo } from '$lib/stores/dataStore.js';
 	import { onMount } from 'svelte';
 
 	let featuredSpecies = null;
 	let featuredSource = null;
+	let sources = [];
 
-	// Pick a random non-hybrid species on mount
-	onMount(() => {
+	// Pick a random non-hybrid species on mount and load sources
+	onMount(async () => {
 		pickFeaturedSpecies();
+		const allSources = await getAllSourcesInfo();
+		// Sort: Oak Compendium (ID 3) first, then alphabetical by name
+		sources = allSources.sort((a, b) => {
+			if (a.source_id === 3) return -1;
+			if (b.source_id === 3) return 1;
+			const nameA = a.source_name || '';
+			const nameB = b.source_name || '';
+			return nameA.localeCompare(nameB);
+		});
 	});
 
 	function pickFeaturedSpecies() {
@@ -128,6 +138,29 @@
 			</div>
 		</div>
 	</section>
+
+	<!-- Data sources -->
+	{#if sources.length > 0}
+		<section class="sources-section">
+			<h3 class="section-title">Data Sources</h3>
+			<div class="sources-list">
+				{#each sources as source}
+					<a href="{base}/sources/{source.source_id}/" class="source-item" class:source-item-primary={source.source_id === 3}>
+						<div class="source-info">
+							<span class="source-name">{source.source_name}</span>
+							{#if source.source_id === 3}
+								<span class="primary-badge">Primary</span>
+							{/if}
+							<span class="source-stats">{source.species_count} species</span>
+						</div>
+						<svg class="source-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+						</svg>
+					</a>
+				{/each}
+			</div>
+		</section>
+	{/if}
 </div>
 
 <style>
@@ -373,6 +406,97 @@
 		padding: 0.125rem 0.5rem;
 		background-color: var(--color-stone-200);
 		color: var(--color-text-tertiary);
+		border-radius: 9999px;
+	}
+
+	.sources-section {
+		margin-bottom: 2rem;
+	}
+
+	.sources-section .section-title {
+		margin-bottom: 1rem;
+	}
+
+	.sources-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.source-item {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.875rem 1rem;
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 0.5rem;
+		text-decoration: none;
+		transition: all 0.2s;
+	}
+
+	.source-item:hover {
+		border-color: var(--color-forest-400);
+		background-color: var(--color-forest-50);
+	}
+
+	.source-item:focus-visible {
+		outline: none;
+		border-color: var(--color-forest-600);
+		box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.15);
+	}
+
+	.source-info {
+		display: flex;
+		align-items: baseline;
+		gap: 0.75rem;
+	}
+
+	.source-name {
+		font-weight: 500;
+		color: var(--color-forest-700);
+	}
+
+	.source-stats {
+		font-size: 0.875rem;
+		color: var(--color-text-tertiary);
+	}
+
+	.source-arrow {
+		width: 1.25rem;
+		height: 1.25rem;
+		color: var(--color-text-tertiary);
+		flex-shrink: 0;
+	}
+
+	.source-item:hover .source-arrow {
+		color: var(--color-forest-500);
+	}
+
+	.source-item-primary {
+		background-color: var(--color-forest-50);
+		border-color: var(--color-forest-300);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.source-item-primary .source-name {
+		color: var(--color-forest-800);
+		font-weight: 600;
+	}
+
+	.source-item-primary:hover {
+		border-color: var(--color-forest-500);
+		background-color: var(--color-forest-100);
+	}
+
+	.primary-badge {
+		font-size: 0.6875rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.025em;
+		padding: 0.125rem 0.5rem;
+		background-color: var(--color-forest-600);
+		color: white;
 		border-radius: 9999px;
 	}
 
