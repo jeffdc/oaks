@@ -11,5 +11,15 @@
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
+		<script>
+			// Recover from stale chunk references after deploys
+			// When browser has cached HTML referencing old chunk hashes,
+			// a hard reload fetches fresh HTML with correct references
+			window.addEventListener('error', function(e) {
+				if (e.message && e.message.includes('dynamically imported module')) {
+					window.location.reload();
+				}
+			});
+		</script>
 	</body>
 </html>
