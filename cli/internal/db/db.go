@@ -214,6 +214,22 @@ func (db *Database) ListSources() ([]*models.Source, error) {
 	return sources, rows.Err()
 }
 
+// DeleteSource deletes a source by ID
+func (db *Database) DeleteSource(id int64) error {
+	result, err := db.conn.Exec(`DELETE FROM sources WHERE id = ?`, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete source: %w", err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("source not found: %d", id)
+	}
+	return nil
+}
+
 // InsertTaxon inserts a new taxon into the reference table
 func (db *Database) InsertTaxon(taxon *models.Taxon) error {
 	var linksJSON *string
@@ -349,6 +365,59 @@ func (db *Database) ClearTaxa() error {
 		return fmt.Errorf("failed to clear taxa: %w", err)
 	}
 	return nil
+}
+
+// DeleteTaxon deletes a taxon by name and level
+func (db *Database) DeleteTaxon(name string, level models.TaxonLevel) error {
+	result, err := db.conn.Exec(
+		`DELETE FROM taxa WHERE name = ? AND level = ?`,
+		name, string(level),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to delete taxon: %w", err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("taxon not found: %s [%s]", name, level)
+	}
+	return nil
+}
+
+// SearchTaxa searches taxa by name pattern (case-insensitive)
+func (db *Database) SearchTaxa(query string) ([]*models.Taxon, error) {
+	rows, err := db.conn.Query(
+		`SELECT name, level, parent, author, notes, links FROM taxa
+		 WHERE name LIKE ? ORDER BY level, name`,
+		"%"+query+"%",
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search taxa: %w", err)
+	}
+	defer rows.Close()
+
+	var taxa []*models.Taxon
+	for rows.Next() {
+		var t models.Taxon
+		var levelStr string
+		var linksJSON sql.NullString
+		if err := rows.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes, &linksJSON); err != nil {
+			return nil, fmt.Errorf("failed to scan taxon: %w", err)
+		}
+		t.Level = models.TaxonLevel(levelStr)
+
+		if linksJSON.Valid && linksJSON.String != "" {
+			json.Unmarshal([]byte(linksJSON.String), &t.Links)
+		}
+		if t.Links == nil {
+			t.Links = []models.TaxonLink{}
+		}
+
+		taxa = append(taxa, &t)
+	}
+	return taxa, rows.Err()
 }
 
 // SaveOakEntry saves or updates a complete oak entry
@@ -781,6 +850,25 @@ func (db *Database) ListAllSpeciesSources() ([]*models.SpeciesSource, error) {
 		results = append(results, ss)
 	}
 	return results, rows.Err()
+}
+
+// DeleteSpeciesSource deletes a species-source record by scientific name and source ID
+func (db *Database) DeleteSpeciesSource(scientificName string, sourceID int64) error {
+	result, err := db.conn.Exec(
+		`DELETE FROM species_sources WHERE scientific_name = ? AND source_id = ?`,
+		scientificName, sourceID,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to delete species source: %w", err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("species source not found: %s (source %d)", scientificName, sourceID)
+	}
+	return nil
 }
 
 // GetMetadata retrieves a metadata value by key

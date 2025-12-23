@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/jeff/oaks/cli/internal/editor"
@@ -10,7 +12,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var noteSourceID int64
+var (
+	noteSourceID    int64
+	noteDeleteForce bool
+)
 
 var noteCmd = &cobra.Command{
 	Use:   "note <species>",
@@ -41,11 +46,28 @@ var noteListCmd = &cobra.Command{
 	RunE:  runNoteList,
 }
 
+var noteDeleteCmd = &cobra.Command{
+	Use:   "delete <species> --source-id <id>",
+	Short: "Delete source notes for a species",
+	Long: `Delete source-attributed notes for a species.
+
+Examples:
+  oak note delete phellos --source-id 2
+  oak note delete alba --source-id 3 --force`,
+	Args: cobra.ExactArgs(1),
+	RunE: runNoteDelete,
+}
+
 func init() {
 	noteCmd.Flags().Int64Var(&noteSourceID, "source-id", 0, "Source ID to attribute the notes to (required)")
 	noteCmd.MarkFlagRequired("source-id")
 
+	noteDeleteCmd.Flags().Int64Var(&noteSourceID, "source-id", 0, "Source ID of the notes to delete (required)")
+	noteDeleteCmd.MarkFlagRequired("source-id")
+	noteDeleteCmd.Flags().BoolVar(&noteDeleteForce, "force", false, "Skip confirmation prompt")
+
 	noteCmd.AddCommand(noteListCmd)
+	noteCmd.AddCommand(noteDeleteCmd)
 	rootCmd.AddCommand(noteCmd)
 }
 
@@ -209,4 +231,63 @@ func truncate(s string, maxLen int) string {
 		return s
 	}
 	return s[:maxLen-3] + "..."
+}
+
+func runNoteDelete(cmd *cobra.Command, args []string) error {
+	speciesName := args[0]
+
+	database, err := getDB()
+	if err != nil {
+		return err
+	}
+	defer database.Close()
+
+	// Verify species exists
+	entry, err := database.GetOakEntry(speciesName)
+	if err != nil {
+		return err
+	}
+	if entry == nil {
+		return fmt.Errorf("species '%s' not found", speciesName)
+	}
+
+	// Verify source exists
+	source, err := database.GetSource(noteSourceID)
+	if err != nil {
+		return err
+	}
+	if source == nil {
+		return fmt.Errorf("source with ID %d not found", noteSourceID)
+	}
+
+	// Check notes exist
+	existing, err := database.GetSpeciesSourceBySourceID(speciesName, noteSourceID)
+	if err != nil {
+		return err
+	}
+	if existing == nil {
+		return fmt.Errorf("no notes found for %s from source %d (%s)", speciesName, noteSourceID, source.Name)
+	}
+
+	// Confirm deletion unless --force
+	if !noteDeleteForce {
+		fmt.Printf("Delete notes for %s from %s (source %d)? (y/N): ", speciesName, source.Name, noteSourceID)
+		reader := bufio.NewReader(os.Stdin)
+		response, err := reader.ReadString('\n')
+		if err != nil {
+			return err
+		}
+		response = strings.TrimSpace(strings.ToLower(response))
+		if response != "y" && response != "yes" {
+			fmt.Println("Cancelled")
+			return nil
+		}
+	}
+
+	if err := database.DeleteSpeciesSource(speciesName, noteSourceID); err != nil {
+		return err
+	}
+
+	fmt.Printf("Deleted notes for %s (source: %s)\n", speciesName, source.Name)
+	return nil
 }

@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
-	"strconv"
-	"text/tabwriter"
 	"os"
+	"strconv"
+	"strings"
+	"text/tabwriter"
 
 	"github.com/jeff/oaks/cli/internal/editor"
 	"github.com/jeff/oaks/cli/internal/models"
@@ -18,10 +20,11 @@ var sourceCmd = &cobra.Command{
 }
 
 var (
-	srcNewType string
-	srcNewName string
-	srcNewURL  string
-	srcNewDesc string
+	srcNewType    string
+	srcNewName    string
+	srcNewURL     string
+	srcNewDesc    string
+	srcDelForce   bool
 )
 
 var sourceNewCmd = &cobra.Command{
@@ -183,6 +186,61 @@ var sourceShowCmd = &cobra.Command{
 	},
 }
 
+var sourceDeleteCmd = &cobra.Command{
+	Use:   "delete <id>",
+	Short: "Delete a source",
+	Long: `Delete a source by ID.
+
+Note: This will fail if the source is referenced by any species notes.
+Delete those notes first, or use a different source.
+
+Examples:
+  oak source delete 5`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		id, err := strconv.ParseInt(args[0], 10, 64)
+		if err != nil {
+			return fmt.Errorf("invalid source ID: %s", args[0])
+		}
+
+		database, err := getDB()
+		if err != nil {
+			return err
+		}
+		defer database.Close()
+
+		source, err := database.GetSource(id)
+		if err != nil {
+			return err
+		}
+		if source == nil {
+			return fmt.Errorf("source with ID %d not found", id)
+		}
+
+		// Confirm deletion unless --force
+		if !srcDelForce {
+			fmt.Printf("Delete source %d (%s)? (y/N): ", id, source.Name)
+			reader := bufio.NewReader(os.Stdin)
+			response, err := reader.ReadString('\n')
+			if err != nil {
+				return err
+			}
+			response = strings.TrimSpace(strings.ToLower(response))
+			if response != "y" && response != "yes" {
+				fmt.Println("Cancelled")
+				return nil
+			}
+		}
+
+		if err := database.DeleteSource(id); err != nil {
+			return err
+		}
+
+		fmt.Printf("Deleted source: %d\n", id)
+		return nil
+	},
+}
+
 func printSource(s *models.Source) {
 	fmt.Printf("ID:          %d\n", s.ID)
 	fmt.Printf("Type:        %s\n", s.SourceType)
@@ -220,5 +278,9 @@ func init() {
 	sourceCmd.AddCommand(sourceEditCmd)
 	sourceCmd.AddCommand(sourceListCmd)
 	sourceCmd.AddCommand(sourceShowCmd)
+	sourceCmd.AddCommand(sourceDeleteCmd)
+
+	sourceDeleteCmd.Flags().BoolVar(&srcDelForce, "force", false, "Skip confirmation prompt")
+
 	rootCmd.AddCommand(sourceCmd)
 }

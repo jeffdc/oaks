@@ -632,3 +632,171 @@ func NewSource() (*models.Source, error) {
 
 	return source, nil
 }
+
+// taxonToMarkdown generates a markdown string for editing a taxon
+func taxonToMarkdown(t *models.Taxon) string {
+	deref := func(p *string) string {
+		if p == nil {
+			return ""
+		}
+		return *p
+	}
+
+	formatLinks := func(links []models.TaxonLink) string {
+		if len(links) == 0 {
+			return "[]"
+		}
+		var sb strings.Builder
+		sb.WriteString("\n")
+		for _, link := range links {
+			sb.WriteString(fmt.Sprintf("  - label: %s\n", link.Label))
+			sb.WriteString(fmt.Sprintf("    url: %s\n", link.URL))
+		}
+		return strings.TrimSuffix(sb.String(), "\n")
+	}
+
+	var fm strings.Builder
+	fm.WriteString("---\n")
+	fm.WriteString(fmt.Sprintf("name: %s\n", t.Name))
+	fm.WriteString(fmt.Sprintf("level: %s\n", string(t.Level)))
+	fm.WriteString(fmt.Sprintf("parent: %s\n", deref(t.Parent)))
+	fm.WriteString(fmt.Sprintf("author: %s\n", deref(t.Author)))
+	fm.WriteString("\n")
+	fm.WriteString("# External links (label + url)\n")
+	fm.WriteString(fmt.Sprintf("links: %s\n", formatLinks(t.Links)))
+	fm.WriteString("---\n\n")
+
+	var body strings.Builder
+	body.WriteString(fmt.Sprintf("# Notes\n\n%s\n", deref(t.Notes)))
+
+	return fm.String() + body.String()
+}
+
+// taxonFrontmatter is the structured data from taxon frontmatter
+type taxonFrontmatter struct {
+	Name   string             `yaml:"name"`
+	Level  string             `yaml:"level"`
+	Parent string             `yaml:"parent"`
+	Author string             `yaml:"author"`
+	Links  []models.TaxonLink `yaml:"links"`
+}
+
+// parseTaxonMarkdown parses markdown content back into a Taxon
+func parseTaxonMarkdown(content string) (*models.Taxon, error) {
+	fm, body, err := parseFrontmatter(content)
+	if err != nil {
+		return nil, err
+	}
+
+	var fmData taxonFrontmatter
+	if err := yaml.Unmarshal([]byte(fm), &fmData); err != nil {
+		return nil, fmt.Errorf("failed to parse frontmatter: %w", err)
+	}
+
+	// Validate level
+	level := models.TaxonLevel(fmData.Level)
+	switch level {
+	case models.TaxonLevelSubgenus, models.TaxonLevelSection,
+		models.TaxonLevelSubsection, models.TaxonLevelComplex:
+		// Valid
+	default:
+		return nil, fmt.Errorf("invalid level: %s (must be subgenus, section, subsection, or complex)", fmData.Level)
+	}
+
+	result := &models.Taxon{
+		Name:  fmData.Name,
+		Level: level,
+		Links: fmData.Links,
+	}
+
+	if fmData.Parent != "" {
+		result.Parent = &fmData.Parent
+	}
+	if fmData.Author != "" {
+		result.Author = &fmData.Author
+	}
+
+	// Extract notes from body
+	if notes := extractSection(body, "Notes"); notes != "" {
+		result.Notes = &notes
+	}
+
+	return result, nil
+}
+
+// EditTaxon edits a taxon with validation loop
+func EditTaxon(taxon *models.Taxon) (*models.Taxon, error) {
+	content := taxonToMarkdown(taxon)
+	originalName := taxon.Name
+	originalLevel := taxon.Level
+
+	for {
+		editedContent, err := openEditorMarkdown(content)
+		if err != nil {
+			return nil, err
+		}
+
+		edited, err := parseTaxonMarkdown(editedContent)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\nFailed to parse markdown: %v\n", err)
+			fmt.Fprintln(os.Stderr, "Press Enter to re-open the editor and fix the error...")
+			waitForEnter()
+			content = editedContent
+			continue
+		}
+
+		// Reject name/level changes (these are the primary key)
+		if edited.Name != originalName {
+			fmt.Fprintf(os.Stderr, "\nname cannot be changed (was %q, attempted %q)\n", originalName, edited.Name)
+			fmt.Fprintln(os.Stderr, "Press Enter to re-open the editor and fix the error...")
+			waitForEnter()
+			content = editedContent
+			continue
+		}
+		if edited.Level != originalLevel {
+			fmt.Fprintf(os.Stderr, "\nlevel cannot be changed (was %q, attempted %q)\n", originalLevel, edited.Level)
+			fmt.Fprintln(os.Stderr, "Press Enter to re-open the editor and fix the error...")
+			waitForEnter()
+			content = editedContent
+			continue
+		}
+
+		return edited, nil
+	}
+}
+
+// NewTaxon creates a new taxon with validation loop
+func NewTaxon(name string, level models.TaxonLevel) (*models.Taxon, error) {
+	template := &models.Taxon{
+		Name:  name,
+		Level: level,
+		Links: []models.TaxonLink{},
+	}
+	content := taxonToMarkdown(template)
+
+	for {
+		editedContent, err := openEditorMarkdown(content)
+		if err != nil {
+			return nil, err
+		}
+
+		edited, err := parseTaxonMarkdown(editedContent)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\nFailed to parse markdown: %v\n", err)
+			fmt.Fprintln(os.Stderr, "Press Enter to re-open the editor and fix the error...")
+			waitForEnter()
+			content = editedContent
+			continue
+		}
+
+		if edited.Name == "" {
+			fmt.Fprintln(os.Stderr, "\nname cannot be empty")
+			fmt.Fprintln(os.Stderr, "Press Enter to re-open the editor and fix the error...")
+			waitForEnter()
+			content = editedContent
+			continue
+		}
+
+		return edited, nil
+	}
+}

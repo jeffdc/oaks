@@ -1,10 +1,14 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
+	"text/tabwriter"
 
 	"github.com/jeff/oaks/cli/internal/db"
+	"github.com/jeff/oaks/cli/internal/editor"
 	"github.com/jeff/oaks/cli/internal/models"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -68,16 +72,98 @@ Examples:
 	RunE: runTaxaList,
 }
 
+var taxaNewCmd = &cobra.Command{
+	Use:   "new <name> --level <level>",
+	Short: "Create a new taxon",
+	Long: `Create a new taxon entry by opening it in your $EDITOR.
+
+Levels: subgenus, section, subsection, complex
+
+Examples:
+  oak taxa new Lobatae --level section
+  oak taxa new Albae --level subsection`,
+	Args: cobra.ExactArgs(1),
+	RunE: runTaxaNew,
+}
+
+var taxaEditCmd = &cobra.Command{
+	Use:   "edit <name> --level <level>",
+	Short: "Edit an existing taxon",
+	Long: `Edit an existing taxon by opening it in your $EDITOR.
+
+Examples:
+  oak taxa edit Lobatae --level section
+  oak taxa edit Quercus --level subgenus`,
+	Args: cobra.ExactArgs(1),
+	RunE: runTaxaEdit,
+}
+
+var taxaDeleteCmd = &cobra.Command{
+	Use:   "delete <name> --level <level>",
+	Short: "Delete a taxon",
+	Long: `Delete a taxon from the reference table.
+
+Examples:
+  oak taxa delete Lobatae --level section`,
+	Args: cobra.ExactArgs(1),
+	RunE: runTaxaDelete,
+}
+
+var taxaShowCmd = &cobra.Command{
+	Use:   "show <name> --level <level>",
+	Short: "Show taxon details",
+	Long: `Display detailed information about a specific taxon.
+
+Examples:
+  oak taxa show Lobatae --level section
+  oak taxa show Quercus --level subgenus`,
+	Args: cobra.ExactArgs(1),
+	RunE: runTaxaShow,
+}
+
+var taxaFindCmd = &cobra.Command{
+	Use:   "find <query>",
+	Short: "Search taxa by name",
+	Long: `Search for taxa matching a name pattern.
+
+Examples:
+  oak taxa find alba
+  oak taxa find Lobat`,
+	Args: cobra.ExactArgs(1),
+	RunE: runTaxaFind,
+}
+
 var (
 	taxaImportClear bool
+	taxaLevel       string
+	taxaDeleteForce bool
 )
 
 func init() {
 	rootCmd.AddCommand(taxaCmd)
 	taxaCmd.AddCommand(taxaImportCmd)
 	taxaCmd.AddCommand(taxaListCmd)
+	taxaCmd.AddCommand(taxaNewCmd)
+	taxaCmd.AddCommand(taxaEditCmd)
+	taxaCmd.AddCommand(taxaDeleteCmd)
+	taxaCmd.AddCommand(taxaShowCmd)
+	taxaCmd.AddCommand(taxaFindCmd)
 
 	taxaImportCmd.Flags().BoolVar(&taxaImportClear, "clear", false, "Clear existing taxa before import")
+
+	// Level flag for new, edit, delete, show
+	taxaNewCmd.Flags().StringVar(&taxaLevel, "level", "", "Taxon level (subgenus, section, subsection, complex)")
+	taxaNewCmd.MarkFlagRequired("level")
+
+	taxaEditCmd.Flags().StringVar(&taxaLevel, "level", "", "Taxon level (subgenus, section, subsection, complex)")
+	taxaEditCmd.MarkFlagRequired("level")
+
+	taxaDeleteCmd.Flags().StringVar(&taxaLevel, "level", "", "Taxon level (subgenus, section, subsection, complex)")
+	taxaDeleteCmd.MarkFlagRequired("level")
+	taxaDeleteCmd.Flags().BoolVar(&taxaDeleteForce, "force", false, "Skip confirmation prompt")
+
+	taxaShowCmd.Flags().StringVar(&taxaLevel, "level", "", "Taxon level (subgenus, section, subsection, complex)")
+	taxaShowCmd.MarkFlagRequired("level")
 }
 
 func runTaxaImport(cmd *cobra.Command, args []string) error {
@@ -284,6 +370,223 @@ func runTaxaList(cmd *cobra.Command, args []string) error {
 		}
 	}
 	fmt.Println()
+
+	return nil
+}
+
+// parseTaxonLevel converts a string to a TaxonLevel
+func parseTaxonLevel(s string) (models.TaxonLevel, error) {
+	switch strings.ToLower(s) {
+	case "subgenus":
+		return models.TaxonLevelSubgenus, nil
+	case "section":
+		return models.TaxonLevelSection, nil
+	case "subsection":
+		return models.TaxonLevelSubsection, nil
+	case "complex":
+		return models.TaxonLevelComplex, nil
+	default:
+		return "", fmt.Errorf("invalid level: %s (must be subgenus, section, subsection, or complex)", s)
+	}
+}
+
+func runTaxaNew(cmd *cobra.Command, args []string) error {
+	name := args[0]
+
+	level, err := parseTaxonLevel(taxaLevel)
+	if err != nil {
+		return err
+	}
+
+	database, err := db.New(dbPath)
+	if err != nil {
+		return fmt.Errorf("failed to open database: %w", err)
+	}
+	defer database.Close()
+
+	// Check if already exists
+	existing, err := database.GetTaxon(name, level)
+	if err != nil {
+		return err
+	}
+	if existing != nil {
+		return fmt.Errorf("taxon already exists: %s [%s]", name, level)
+	}
+
+	taxon, err := editor.NewTaxon(name, level)
+	if err != nil {
+		return err
+	}
+
+	if err := database.InsertTaxon(taxon); err != nil {
+		return err
+	}
+
+	fmt.Printf("Created taxon: %s [%s]\n", taxon.Name, taxon.Level)
+	return nil
+}
+
+func runTaxaEdit(cmd *cobra.Command, args []string) error {
+	name := args[0]
+
+	level, err := parseTaxonLevel(taxaLevel)
+	if err != nil {
+		return err
+	}
+
+	database, err := db.New(dbPath)
+	if err != nil {
+		return fmt.Errorf("failed to open database: %w", err)
+	}
+	defer database.Close()
+
+	existing, err := database.GetTaxon(name, level)
+	if err != nil {
+		return err
+	}
+	if existing == nil {
+		return fmt.Errorf("taxon not found: %s [%s]", name, level)
+	}
+
+	edited, err := editor.EditTaxon(existing)
+	if err != nil {
+		return err
+	}
+
+	if err := database.UpdateTaxon(edited); err != nil {
+		return err
+	}
+
+	fmt.Printf("Updated taxon: %s [%s]\n", edited.Name, edited.Level)
+	return nil
+}
+
+func runTaxaDelete(cmd *cobra.Command, args []string) error {
+	name := args[0]
+
+	level, err := parseTaxonLevel(taxaLevel)
+	if err != nil {
+		return err
+	}
+
+	database, err := db.New(dbPath)
+	if err != nil {
+		return fmt.Errorf("failed to open database: %w", err)
+	}
+	defer database.Close()
+
+	// Check if exists
+	existing, err := database.GetTaxon(name, level)
+	if err != nil {
+		return err
+	}
+	if existing == nil {
+		return fmt.Errorf("taxon not found: %s [%s]", name, level)
+	}
+
+	// Confirm deletion unless --force
+	if !taxaDeleteForce {
+		fmt.Printf("Delete taxon %s [%s]? (y/N): ", name, level)
+		reader := bufio.NewReader(os.Stdin)
+		response, err := reader.ReadString('\n')
+		if err != nil {
+			return err
+		}
+		response = strings.TrimSpace(strings.ToLower(response))
+		if response != "y" && response != "yes" {
+			fmt.Println("Cancelled")
+			return nil
+		}
+	}
+
+	if err := database.DeleteTaxon(name, level); err != nil {
+		return err
+	}
+
+	fmt.Printf("Deleted taxon: %s [%s]\n", name, level)
+	return nil
+}
+
+func runTaxaShow(cmd *cobra.Command, args []string) error {
+	name := args[0]
+
+	level, err := parseTaxonLevel(taxaLevel)
+	if err != nil {
+		return err
+	}
+
+	database, err := db.New(dbPath)
+	if err != nil {
+		return fmt.Errorf("failed to open database: %w", err)
+	}
+	defer database.Close()
+
+	taxon, err := database.GetTaxon(name, level)
+	if err != nil {
+		return err
+	}
+	if taxon == nil {
+		return fmt.Errorf("taxon not found: %s [%s]", name, level)
+	}
+
+	printTaxon(taxon)
+	return nil
+}
+
+func printTaxon(t *models.Taxon) {
+	fmt.Printf("Name:   %s\n", t.Name)
+	fmt.Printf("Level:  %s\n", t.Level)
+	if t.Parent != nil {
+		fmt.Printf("Parent: %s\n", *t.Parent)
+	}
+	if t.Author != nil {
+		fmt.Printf("Author: %s\n", *t.Author)
+	}
+	if t.Notes != nil && *t.Notes != "" {
+		fmt.Printf("Notes:  %s\n", *t.Notes)
+	}
+	if len(t.Links) > 0 {
+		fmt.Println("Links:")
+		for _, link := range t.Links {
+			fmt.Printf("  - %s: %s\n", link.Label, link.URL)
+		}
+	}
+}
+
+func runTaxaFind(cmd *cobra.Command, args []string) error {
+	query := args[0]
+
+	database, err := db.New(dbPath)
+	if err != nil {
+		return fmt.Errorf("failed to open database: %w", err)
+	}
+	defer database.Close()
+
+	taxa, err := database.SearchTaxa(query)
+	if err != nil {
+		return err
+	}
+
+	if len(taxa) == 0 {
+		fmt.Println("No taxa found matching:", query)
+		return nil
+	}
+
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "NAME\tLEVEL\tPARENT\tAUTHOR")
+	fmt.Fprintln(w, "----\t-----\t------\t------")
+	for _, t := range taxa {
+		parent := ""
+		if t.Parent != nil {
+			parent = *t.Parent
+		}
+		author := ""
+		if t.Author != nil {
+			author = *t.Author
+		}
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", t.Name, t.Level, parent, author)
+	}
+	w.Flush()
 
 	return nil
 }
