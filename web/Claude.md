@@ -8,6 +8,7 @@ A modern, responsive web application for browsing and exploring oak (Quercus) sp
 - **Build Tool**: Vite 6
 - **Static Adapter**: @sveltejs/adapter-static for GitHub Pages deployment
 - **Styling**: Tailwind CSS 4 + Custom CSS Variables
+- **Testing**: Vitest + @testing-library/svelte
 - **PWA**: @vite-pwa/sveltekit with Workbox
 - **Data Source**: Static JSON (`static/quercus_data.json`, committed to repo)
 
@@ -39,7 +40,11 @@ web/
 │       │   └── UpdatePrompt.svelte
 │       ├── stores/
 │       │   └── dataStore.js  # Svelte stores for state management
-│       └── db.js             # IndexedDB wrapper (Dexie.js)
+│       ├── db.js             # IndexedDB wrapper (Dexie.js)
+│       └── tests/            # Test files
+│           ├── setup.js      # Vitest setup
+│           ├── dataStore.test.js
+│           └── db.test.js
 ├── static/                   # Static assets (icons, data file)
 ├── svelte.config.js          # SvelteKit config with static adapter
 ├── vite.config.js            # Vite config + PWA settings
@@ -179,6 +184,23 @@ npm run dev        # Dev server at http://localhost:5173
 npm run build      # Outputs to dist/
 npm run preview    # Preview production build
 ```
+
+### Testing
+
+```bash
+npm run test           # Run tests once
+npm run test:watch     # Watch mode for development
+npm run test:coverage  # Run with coverage report
+```
+
+Tests are located in `src/tests/`. The test infrastructure uses:
+- **Vitest**: Test runner (integrates with Vite)
+- **@testing-library/svelte**: Component testing
+- **jsdom**: DOM environment simulation
+
+Current test coverage includes:
+- `dataStore.test.js`: Store filtering, counts, helper functions
+- `db.test.js`: Source selection and completeness helpers
 
 ### Data Updates
 

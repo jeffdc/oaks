@@ -197,8 +197,17 @@ go build -o oak .
 ### Testing
 
 ```bash
-go test ./...
+go test ./...              # Run all tests
+go test ./... -v           # Verbose output
+go test ./... -cover       # With coverage report
+go test -run TestName      # Run specific test
 ```
+
+Test coverage includes:
+- `internal/db/`: Database operations (CRUD, search, transactions)
+- `internal/models/`: Model serialization and round-trip tests
+- `internal/schema/`: JSON schema validation
+- `internal/editor/`: Frontmatter parsing, section extraction
 
 ### Adding a New Command
 

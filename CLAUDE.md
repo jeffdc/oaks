@@ -631,7 +631,10 @@ python3 scraper.py --test  # First 50 species
 ### Web App Testing
 ```bash
 cd web
-npm run dev  # Manual testing in browser
+npm run test           # Run tests once
+npm run test:watch     # Watch mode for development
+npm run test:coverage  # Run with coverage report
+npm run dev            # Manual testing in browser
 ```
 
 ### CLI Testing
