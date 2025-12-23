@@ -143,6 +143,20 @@ func oakEntryToMarkdown(e *models.OakEntry) string {
 		return strings.TrimSuffix(sb.String(), "\n")
 	}
 
+	formatExternalLinks := func(links []models.ExternalLink) string {
+		if len(links) == 0 {
+			return "[]"
+		}
+		var sb strings.Builder
+		sb.WriteString("\n")
+		for _, link := range links {
+			sb.WriteString(fmt.Sprintf("  - name: %s\n", link.Name))
+			sb.WriteString(fmt.Sprintf("    url: %s\n", link.URL))
+			sb.WriteString(fmt.Sprintf("    logo: %s\n", link.Logo))
+		}
+		return strings.TrimSuffix(sb.String(), "\n")
+	}
+
 	var fm strings.Builder
 	fm.WriteString("---\n")
 	fm.WriteString(fmt.Sprintf("scientific_name: %s\n", e.ScientificName))
@@ -162,6 +176,9 @@ func oakEntryToMarkdown(e *models.OakEntry) string {
 	fm.WriteString(fmt.Sprintf("closely_related_to: %s\n", formatArray(e.CloselyRelatedTo)))
 	fm.WriteString(fmt.Sprintf("subspecies_varieties: %s\n", formatArray(e.SubspeciesVarieties)))
 	fm.WriteString(fmt.Sprintf("synonyms: %s\n", formatArray(e.Synonyms)))
+	fm.WriteString("\n")
+	fm.WriteString("# External links: name (display label), url, logo (icon id: wikipedia, inaturalist, usda, gbif, powo, generic)\n")
+	fm.WriteString(fmt.Sprintf("external_links: %s\n", formatExternalLinks(e.ExternalLinks)))
 	fm.WriteString("---\n")
 
 	return fm.String()
