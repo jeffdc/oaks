@@ -541,6 +541,15 @@
           <span class="external-link-icon">{@html getLogoIcon('inaturalist')}</span>
           <span>iNaturalist</span>
         </a>
+        <a
+          href={`https://en.wikipedia.org/wiki/Quercus_${species.name.replace(/ /g, '_')}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="external-link"
+        >
+          <span class="external-link-icon">{@html getLogoIcon('wikipedia')}</span>
+          <span>Wikipedia</span>
+        </a>
       </div>
     </section>
   </div>
