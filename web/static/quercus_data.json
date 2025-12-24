@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-24T01:45:40Z",
-    "exported_at": "2025-12-24T01:45:40Z",
+    "version": "2025-12-24T01:51:36Z",
+    "exported_at": "2025-12-24T01:51:36Z",
     "species_count": 734
   },
   "sources": [
@@ -9263,7 +9263,14 @@
         "section": "Quercus",
         "subsection": "Stellatae",
         "complex": "austrina"
-      }
+      },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_margaretta",
+          "logo": ""
+        }
+      ]
     },
     {
       "name": "marilandica",

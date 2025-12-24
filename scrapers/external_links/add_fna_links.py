@@ -21,6 +21,11 @@ DB_PATH = PROJECT_ROOT / "cli" / "oak_compendium.db"
 # FNA URL pattern - species name with underscores
 FNA_URL_PATTERN = "https://floranorthamerica.org/Quercus_{name}"
 
+# Species where FNA uses a different spelling than our database
+FNA_NAME_MAPPING = {
+    "margaretiae": "margaretta",  # Our DB uses margaretiae, FNA uses margaretta
+}
+
 # Species covered by FNA (from efloras.org browse page)
 # These are the 90 species with treatments in FNA Volume 3
 FNA_SPECIES = [
@@ -74,7 +79,7 @@ FNA_SPECIES = [
     "lobata",
     "lyrata",
     "macrocarpa",
-    "margarettae",
+    "margaretiae",  # FNA uses "margaretta"
     "marilandica",
     "michauxii",
     "minima",
@@ -119,8 +124,10 @@ FNA_SPECIES = [
 
 def get_fna_url(species_name):
     """Generate FNA URL for a species."""
+    # Check if FNA uses a different name
+    url_name = FNA_NAME_MAPPING.get(species_name, species_name)
     # FNA uses underscores in URLs
-    url_name = species_name.replace(" ", "_")
+    url_name = url_name.replace(" ", "_")
     return FNA_URL_PATTERN.format(name=url_name)
 
 
