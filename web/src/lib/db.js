@@ -72,18 +72,9 @@ export async function populateFromJson(jsonData) {
 
   // Check if we need to update
   const currentVersion = await db.metadata.get('dataVersion');
-  console.log('[DB] Version check:', {
-    current: currentVersion?.value,
-    server: metadata?.version,
-    equal: currentVersion?.value === metadata?.version
-  });
-
   if (currentVersion?.value === metadata?.version) {
-    console.log('[DB] Versions match - skipping update');
     return 0;
   }
-
-  console.log('[DB] Versions differ - updating database...');
 
   // Clear and repopulate (full replacement strategy)
   await db.transaction('rw', db.species, db.metadata, db.sources, async () => {

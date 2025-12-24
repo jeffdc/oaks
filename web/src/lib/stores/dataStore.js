@@ -197,9 +197,7 @@ export async function loadSpeciesData() {
  */
 async function fetchAndCacheData() {
   // Cache-bust to bypass CDN caching
-  // Use absolute path - base is '' for custom domain, so this becomes '/quercus_data.json'
   const dataUrl = `${base}/quercus_data.json?t=${Date.now()}`;
-  console.log('[DataStore] Fetching:', dataUrl);
   const response = await fetch(dataUrl, {
     cache: 'no-store'
   });
@@ -237,30 +235,18 @@ async function checkForUpdates() {
   try {
     // Cache-bust to bypass both browser and CDN caching
     const dataUrl = `${base}/quercus_data.json?t=${Date.now()}`;
-    console.log('[DataStore] Checking for updates from:', dataUrl);
-
     const response = await fetch(dataUrl, {
       cache: 'no-store'
     });
-    if (!response.ok) {
-      console.warn('[DataStore] Update check failed: HTTP', response.status);
-      return;
-    }
+    if (!response.ok) return;
 
     const data = await response.json();
     const normalizedData = normalizeJsonData(data);
-
-    // Log version comparison
-    const currentMeta = await getMetadata();
-    console.log('[DataStore] Current version:', currentMeta.dataVersion);
-    console.log('[DataStore] Server version:', normalizedData.metadata?.version);
 
     // populateFromJson checks version and only updates if newer
     const count = await populateFromJson(normalizedData);
 
     if (count > 0) {
-      console.log('[DataStore] Updated', count, 'species from server');
-
       // Data was updated - reload stores
       const species = await getAllSpecies();
       allSpecies.set(species);
@@ -271,12 +257,9 @@ async function checkForUpdates() {
 
       const metadata = await getMetadata();
       dataSource.set({ from: 'json-update', version: metadata.dataVersion });
-    } else {
-      console.log('[DataStore] No update needed - versions match');
     }
   } catch (err) {
     // Non-fatal - we already have data
-    console.warn('[DataStore] Update check failed:', err);
   }
 }
 
@@ -285,8 +268,6 @@ async function checkForUpdates() {
  * Use this when data appears stale despite updates
  */
 export async function forceRefresh() {
-  console.log('[DataStore] Force refresh requested');
-
   try {
     isLoading.set(true);
     error.set(null);
@@ -295,15 +276,10 @@ export async function forceRefresh() {
     await db.species.clear();
     await db.metadata.clear();
     await db.sources.clear();
-    console.log('[DataStore] IndexedDB cleared');
 
     // Fetch and cache fresh data
-    const result = await fetchAndCacheData();
-    console.log('[DataStore] Force refresh complete');
-
-    return result;
+    return await fetchAndCacheData();
   } catch (err) {
-    console.error('[DataStore] Force refresh failed:', err);
     error.set(err.message);
     isLoading.set(false);
     throw err;
