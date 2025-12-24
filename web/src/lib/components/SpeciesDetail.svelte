@@ -2,7 +2,8 @@
   import { base } from '$app/paths';
   import { marked } from 'marked';
   import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName } from '$lib/stores/dataStore.js';
-  import { getLogoIcon } from '$lib/icons/index.js';
+  import { getLogoIcon, getLinkLogoId } from '$lib/icons/index.js';
+  import inaturalistLogo from '$lib/icons/inaturalist-logo.svg';
 
   // Configure marked for safe rendering
   marked.setOptions({
@@ -116,6 +117,43 @@
     };
     return colors[status] || { bg: '#D1D1C6', text: '#000000' };
   }
+
+  // Build sorted list of all external links
+  function getSortedExternalLinks(species) {
+    const links = [];
+
+    // Add links from species.external_links
+    if (species.external_links && species.external_links.length > 0) {
+      for (const link of species.external_links) {
+        links.push({
+          name: link.name,
+          url: link.url,
+          logoId: getLinkLogoId(link),
+        });
+      }
+    }
+
+    // Add iNaturalist (uses full logo image instead of icon)
+    links.push({
+      name: 'iNaturalist',
+      url: `https://www.inaturalist.org/search?q=${encodeURIComponent('Quercus ' + species.name)}`,
+      isInaturalist: true,
+    });
+
+    // Add Wikipedia
+    links.push({
+      name: 'Wikipedia',
+      url: `https://en.wikipedia.org/wiki/Quercus_${species.name.replace(/ /g, '_')}`,
+      logoId: 'wikipedia',
+    });
+
+    // Sort alphabetically by name
+    links.sort((a, b) => a.name.localeCompare(b.name));
+
+    return links;
+  }
+
+  $: sortedExternalLinks = getSortedExternalLinks(species);
 
   // Build taxonomy URL for a given level
   function getTaxonUrl(level) {
@@ -543,47 +581,21 @@
         <span>External Links</span>
       </h2>
       <div class="external-links-container">
-        {#if species.external_links && species.external_links.length > 0}
-          {#each species.external_links as link}
-            <a
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="external-link"
-            >
-              <span class="external-link-icon">{@html getLogoIcon(link.logo)}</span>
-              <span>{link.name}</span>
-            </a>
-          {/each}
-        {/if}
-        {#if selectedSource?.url}
+        {#each sortedExternalLinks as link}
           <a
-            href={selectedSource.url}
+            href={link.url}
             target="_blank"
             rel="noopener noreferrer"
             class="external-link"
           >
-            {selectedSource.source_name || 'Source'}
+            {#if link.isInaturalist}
+              <img src={inaturalistLogo} alt="iNaturalist" class="inaturalist-logo" />
+            {:else}
+              <span class="external-link-icon">{@html getLogoIcon(link.logoId)}</span>
+              <span>{link.name}</span>
+            {/if}
           </a>
-        {/if}
-        <a
-          href={`https://www.inaturalist.org/search?q=${encodeURIComponent('Quercus ' + species.name)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="external-link"
-        >
-          <span class="external-link-icon">{@html getLogoIcon('inaturalist')}</span>
-          <span>iNaturalist</span>
-        </a>
-        <a
-          href={`https://en.wikipedia.org/wiki/Quercus_${species.name.replace(/ /g, '_')}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="external-link"
-        >
-          <span class="external-link-icon">{@html getLogoIcon('wikipedia')}</span>
-          <span>Wikipedia</span>
-        </a>
+        {/each}
       </div>
     </section>
   </div>
@@ -727,6 +739,11 @@
     width: 100%;
     height: 100%;
     color: var(--color-forest-600);
+  }
+
+  .inaturalist-logo {
+    height: 1.25rem;
+    width: auto;
   }
 
   /* Combined navigation header (matching TaxonView) */
