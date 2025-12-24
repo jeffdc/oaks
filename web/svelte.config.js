@@ -14,7 +14,9 @@ const config = {
 			base: ''
 		},
 		prerender: {
-			handleHttpError: 'warn'
+			handleHttpError: 'warn',
+			handleMissingId: 'warn',
+			handleUnseenRoutes: 'warn'
 		},
 		version: {
 			// Check for new app version every 5 minutes

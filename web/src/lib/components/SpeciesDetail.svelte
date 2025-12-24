@@ -357,6 +357,18 @@
               {/if}
             </button>
           {/each}
+          {#if sources.length > 1}
+            <a
+              href="{base}/compare/{encodeURIComponent(species.name)}/"
+              class="compare-sources-link"
+              title="Compare all sources side-by-side"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+              </svg>
+              <span>Compare</span>
+            </a>
+          {/if}
         </div>
 
         <!-- Source content -->
@@ -916,6 +928,33 @@
   .source-tab-link svg {
     width: 0.875rem;
     height: 0.875rem;
+  }
+
+  .compare-sources-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    margin-left: auto;
+    border: none;
+    background: transparent;
+    color: var(--color-forest-600);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    transition: all 0.15s ease;
+    text-decoration: none;
+  }
+
+  .compare-sources-link:hover {
+    background-color: var(--color-forest-100);
+    color: var(--color-forest-800);
+  }
+
+  .compare-sources-link svg {
+    width: 1rem;
+    height: 1rem;
   }
 
   .source-content {
