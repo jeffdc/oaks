@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-24T01:51:36Z",
-    "exported_at": "2025-12-24T01:51:36Z",
+    "version": "2025-12-24T02:07:56Z",
+    "exported_at": "2025-12-24T02:07:56Z",
     "species_count": 734
   },
   "sources": [
@@ -474,6 +474,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_agrifolia",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/queagr/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -638,6 +643,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_alba",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quealb/all.html",
           "logo": ""
         }
       ],
@@ -1080,6 +1090,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_arizonica",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/queari/all.html",
           "logo": ""
         }
       ],
@@ -1742,6 +1757,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_bicolor",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quebic/all.html",
           "logo": ""
         }
       ],
@@ -2820,6 +2840,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_chrysolepis",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quechr/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -3149,6 +3174,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_coccinea",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quecoc/all.html",
           "logo": ""
         }
       ],
@@ -4372,6 +4402,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_douglasii",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quedou/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -4703,6 +4738,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_ellipsoidalis",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/queell/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -4847,6 +4887,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_emoryi",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/queemo/all.html",
           "logo": ""
         }
       ],
@@ -5197,6 +5242,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_falcata",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quefal/all.html",
           "logo": ""
         }
       ],
@@ -5677,6 +5727,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_gambelii",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quegam/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -5774,6 +5829,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_garryana",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quegar/all.html",
           "logo": ""
         }
       ],
@@ -6503,6 +6563,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_grisea",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quegri/all.html",
           "logo": ""
         }
       ],
@@ -7469,6 +7534,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_incana",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/queinc/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -7944,6 +8014,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_kelloggii",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quekel/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -8245,6 +8320,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_laevis",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quelae/all.html",
           "logo": ""
         }
       ],
@@ -8734,6 +8814,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_lobata",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quelob/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -8953,6 +9038,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_lyrata",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quelyr/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -9134,6 +9224,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_macrocarpa",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quemac/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -9307,6 +9402,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_marilandica",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quemar/all.html",
           "logo": ""
         }
       ],
@@ -10090,6 +10190,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_muehlenbergii",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quemue/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -10250,6 +10355,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_nigra",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quenig/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -10375,6 +10485,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_oblongifolia",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/queobl/all.html",
           "logo": ""
         }
       ],
@@ -11018,6 +11133,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_palustris",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quepal/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -11631,6 +11751,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_phellos",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quephe/all.html",
           "logo": ""
         }
       ],
@@ -12934,6 +13059,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_rubra",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/querub/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -13941,6 +14071,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_shumardii",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/queshu/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -14398,6 +14533,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_stellata",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/queste/all.html",
           "logo": ""
         }
       ],
@@ -15302,6 +15442,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_turbinella",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quetur/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -15576,6 +15721,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_velutina",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quevel/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -15746,6 +15896,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_virginiana",
           "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quevir/all.html",
+          "logo": ""
         }
       ],
       "sources": [
@@ -15833,6 +15988,11 @@
         {
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_wislizeni",
+          "logo": ""
+        },
+        {
+          "name": "Fire Effects Information System",
+          "url": "https://www.fs.usda.gov/database/feis/plants/tree/quewis/all.html",
           "logo": ""
         }
       ],
