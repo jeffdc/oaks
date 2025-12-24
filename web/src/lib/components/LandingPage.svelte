@@ -1,11 +1,32 @@
 <script>
 	import { base } from '$app/paths';
-	import { allSpecies, totalCounts, getPrimarySource, getAllSourcesInfo } from '$lib/stores/dataStore.js';
+	import { allSpecies, totalCounts, dataSource, forceRefresh, getPrimarySource, getAllSourcesInfo } from '$lib/stores/dataStore.js';
 	import { onMount } from 'svelte';
 
 	let featuredSpecies = null;
 	let featuredSource = null;
 	let sources = [];
+	let isRefreshing = false;
+
+	async function handleForceRefresh() {
+		if (isRefreshing) return;
+		isRefreshing = true;
+		try {
+			await forceRefresh();
+			// Reload sources after refresh
+			const allSources = await getAllSourcesInfo();
+			sources = allSources.sort((a, b) => {
+				if (a.source_id === 3) return -1;
+				if (b.source_id === 3) return 1;
+				const nameA = a.source_name || '';
+				const nameB = b.source_name || '';
+				return nameA.localeCompare(nameB);
+			});
+			pickFeaturedSpecies();
+		} finally {
+			isRefreshing = false;
+		}
+	}
 
 	// Pick a random non-hybrid species on mount and load sources
 	onMount(async () => {
@@ -146,6 +167,31 @@
 			</div>
 		</section>
 	{/if}
+
+	<!-- Data version info -->
+	<section class="version-section">
+		<div class="version-info">
+			<span class="version-label">Data version:</span>
+			<span class="version-value">{$dataSource.version || 'Loading...'}</span>
+			<button
+				class="refresh-btn"
+				on:click={handleForceRefresh}
+				disabled={isRefreshing}
+				title="Force refresh data from server"
+			>
+				{#if isRefreshing}
+					<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+					</svg>
+				{:else}
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+					</svg>
+				{/if}
+				Refresh
+			</button>
+		</div>
+	</section>
 </div>
 
 <style>
@@ -490,6 +536,63 @@
 		background-color: var(--color-forest-600);
 		color: white;
 		border-radius: 9999px;
+	}
+
+	.version-section {
+		margin-top: 2rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--color-border);
+	}
+
+	.version-info {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		font-size: 0.75rem;
+		color: var(--color-text-tertiary);
+	}
+
+	.version-label {
+		font-weight: 500;
+	}
+
+	.version-value {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	}
+
+	.refresh-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		margin-left: 0.5rem;
+		font-size: 0.75rem;
+		color: var(--color-forest-600);
+		background-color: transparent;
+		border: 1px solid var(--color-forest-300);
+		border-radius: 0.25rem;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.refresh-btn:hover:not(:disabled) {
+		background-color: var(--color-forest-50);
+		border-color: var(--color-forest-400);
+	}
+
+	.refresh-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.animate-spin {
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
 	}
 
 	@media (min-width: 640px) {
