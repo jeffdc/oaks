@@ -59,3 +59,7 @@ web/.vite/
 # Generated files (temp exports, not the main quercus_data.json)
 quercus_export.json
 
+# Secrets and API keys
+.secrets
+.env
+.env.local

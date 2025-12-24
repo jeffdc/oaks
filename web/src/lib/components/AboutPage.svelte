@@ -86,6 +86,14 @@
             >
             serves as an important secondary source, providing additional morphological details and distribution data.
         </p>
+        <p>
+            Conservation status data is sourced from the <a
+                href="https://www.iucnredlist.org"
+                target="_blank"
+                rel="noopener noreferrer">IUCN Red List of Threatened Species</a
+            >, retrieved via the IUCN Red List API. Citation: IUCN 2024. IUCN Red List of Threatened Species. Version
+            2024-2 &lt;www.iucnredlist.org&gt;.
+        </p>
         <p>Other sources have been consulted as well; these are credited on each species page where applicable.</p>
     </section>
 
