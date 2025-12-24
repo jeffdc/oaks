@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-24T01:34:07Z",
-    "exported_at": "2025-12-24T01:34:07Z",
+    "version": "2025-12-24T01:45:40Z",
+    "exported_at": "2025-12-24T01:45:40Z",
     "species_count": 734
   },
   "sources": [
@@ -64,6 +64,13 @@
       },
       "synonyms": [
         "shumardii var. acerifolia E.J.Palmer 1927"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_acerifolia",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -462,6 +469,13 @@
         "oxyadenia",
         "pricei Sudw."
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_agrifolia",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -585,7 +599,14 @@
         "genus": "Quercus",
         "subgenus": "Quercus",
         "section": "Quercus"
-      }
+      },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_ajoensis",
+          "logo": ""
+        }
+      ]
     },
     {
       "name": "alba",
@@ -612,6 +633,13 @@
         "repanda Michx.",
         "subcaerulea",
         "subflavea"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_alba",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -1048,6 +1076,13 @@
         "endemica",
         "sacame"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_arizonica",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -1087,6 +1122,13 @@
       ],
       "synonyms": [
         "caput-rivuli"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_arkansana",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -1254,6 +1296,13 @@
       },
       "synonyms": [
         "durandii \n        var. austrina (Small) E.J.Palmer 1945"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_austrina",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -1543,6 +1592,13 @@
       "synonyms": [
         "dumosa \n        Nuttall 1842 in part agrifolia var. berberidifolia (Liebm.) Wenz. 1884 dumosa f. berberidifolia (Liebm.) Trel. 1924 dumosa var. munita Greene 1889"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_berberidifolia",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -1682,6 +1738,13 @@
         "pannosa Petz. et Kirchn.",
         "platanoides"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_bicolor",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 3,
@@ -1788,6 +1851,13 @@
       },
       "synonyms": [
         "stellata var. boyntonii (Beadle) Sarg. 1918"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_boyntonii",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -1995,6 +2065,13 @@
       "synonyms": [
         "texana Young \n        1873",
         "nom. illeg."
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_buckleyi",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -2246,6 +2323,13 @@
         "subgenus": "Quercus",
         "section": "Quercus"
       },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_carmenensis",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -2537,6 +2621,13 @@
       "synonyms": [
         "obtusiloba var. parvifolia Chapm. 1860"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_chapmanii",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 3,
@@ -2668,6 +2759,13 @@
         "jaliscensis",
         "santaclarensis"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_chihuahuensis",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -2716,6 +2814,13 @@
         "fulvescens",
         "oblongifolia R.Br.ter",
         "wilcoxii"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_chrysolepis",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -3040,6 +3145,13 @@
       "synonyms": [
         "repanda hort."
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_coccinea",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -3293,6 +3405,13 @@
         "subsection": "Dumosae",
         "complex": "dumosa"
       },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_cornelius-mulleri",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -3976,6 +4095,13 @@
         "bocoynensis",
         "daimio"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_depressipes",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -4241,6 +4367,13 @@
         "gambelii Liebm.",
         "ransomii"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_douglasii",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -4283,6 +4416,13 @@
         "durata",
         "elegantula",
         "gabrielensis"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_dumosa",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -4328,7 +4468,14 @@
         "section": "Quercus",
         "subsection": "Dumosae",
         "complex": "berberidifolia"
-      }
+      },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_durata",
+          "logo": ""
+        }
+      ]
     },
     {
       "name": "durata durata",
@@ -4551,6 +4698,13 @@
       "synonyms": [
         "kaposianensis"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_ellipsoidalis",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -4689,6 +4843,13 @@
         "duraznillo",
         "hastata"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_emoryi",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -4726,6 +4887,13 @@
       "hybrids": [
         "× acutidens",
         "grandidentata"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_engelmannii",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -5024,6 +5192,13 @@
         "hudsoniana",
         "rubra Sarg.",
         "triloba"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_falcata",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -5371,6 +5546,13 @@
       "synonyms": [
         "virginiana var. fusiformis \n        (Small) Sarg.1918 virginiana subsp fusiformis (Small) E.Murray 1983 virginiana var. macrophylla Sarg. 1918 oleoides var. quaterna C.H.Muller 1951"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_fusiformis",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -5490,6 +5672,13 @@
         "undulata S.Wats.",
         "vreelandii"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_gambelii",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -5580,6 +5769,13 @@
         "neaei",
         "oerstediana",
         "semota"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_garryana",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -5723,7 +5919,14 @@
         "genus": "Quercus",
         "subgenus": "Quercus",
         "section": "Virentes"
-      }
+      },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_geminata",
+          "logo": ""
+        }
+      ]
     },
     {
       "name": "geminata × virginiana",
@@ -5748,6 +5951,13 @@
       },
       "hybrids": [
         "× smallii"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_georgiana",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -6111,7 +6321,14 @@
         "genus": "Quercus",
         "subgenus": "Quercus",
         "section": "Lobatae"
-      }
+      },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_graciliformis",
+          "logo": ""
+        }
+      ]
     },
     {
       "name": "graciliramis",
@@ -6175,6 +6392,13 @@
         "chesosensis",
         "stellapila",
         "texana Sarg."
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_gravesii",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -6274,6 +6498,13 @@
       ],
       "synonyms": [
         "oblongifolia Coult."
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_grisea",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -6411,6 +6642,13 @@
       "synonyms": [
         "tuckeri"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_havardii",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 3,
@@ -6492,6 +6730,13 @@
       },
       "synonyms": [
         "maritima"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_hemisphaerica",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -6576,6 +6821,13 @@
         "subsection": "Polymorphae",
         "complex": "vaseyana"
       },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_hinckleyi",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -6842,6 +7094,13 @@
         "confertifolia Torr.",
         "hypoleuca Engelm."
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_hypoleucoides",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -7052,6 +7311,13 @@
         "banisteri",
         "nana"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_ilicifolia",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -7143,6 +7409,13 @@
         "latifolia",
         "obtusa Pursh"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_imbricaria",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -7190,6 +7463,13 @@
         "brevifolia Sarg.",
         "cinerea",
         "verrucosa"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_incana",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -7302,6 +7582,13 @@
         "subsection": "Phellos",
         "complex": "incana"
       },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_inopina",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -7374,6 +7661,13 @@
       },
       "synonyms": [
         "microphylla var. crispata A.DC. \n        1864"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_intricata",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -7572,7 +7866,14 @@
         "section": "Quercus",
         "subsection": "Dumosae",
         "complex": "dumosa"
-      }
+      },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_john-tuckeri",
+          "logo": ""
+        }
+      ]
     },
     {
       "name": "jonesii",
@@ -7637,6 +7938,13 @@
       "synonyms": [
         "californica (Torr.)Cooper",
         "sonomensis"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_kelloggii",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -7843,6 +8151,13 @@
       "synonyms": [
         "breviloba f. laceyi \n        (Small) Trel. 1924 breviloba subsp laceyi (Small) A.Camus 1939 glaucoides Auctores not Mart. \u0026 Gal. 1843"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_laceyi",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -7925,6 +8240,13 @@
       "synonyms": [
         "catesbaei",
         "rappii"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_laevis",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -8152,6 +8474,13 @@
         "obtusa (Willd.) Ashe",
         "obtusata Ashe",
         "rhombica"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_laurifolia",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -8400,6 +8729,13 @@
         "longiglanda",
         "walkeri"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_lobata",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -8612,6 +8948,13 @@
       "synonyms": [
         "bicolor \n        var. lyrata (Walt.) Dippel 1891"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_lyrata",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -8786,6 +9129,13 @@
         "olivaeformis (olivif.)",
         "ramosa Booth."
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_macrocarpa",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -8945,6 +9295,13 @@
         "neoashei",
         "nigra Wang. non L.",
         "nobilis"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_marilandica",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -9218,6 +9575,13 @@
       "synonyms": [
         "houstoniana"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_michauxii",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 3,
@@ -9298,6 +9662,13 @@
       ],
       "synonyms": [
         "virginiana var. minima Sarg.1895 virens var. dentata Chapman 1860 virginiana var. dentata (Chapman) Sarg. 1918 virginiana subsp dentata (Chapm.) E.Murray 1983 virginiana var. pygmaea Sarg. 1918 geminata var. reasoneri (Trel.) A.Camus 1939"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_minima",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -9393,6 +9764,13 @@
         "section": "Quercus",
         "subsection": "Polymorphae"
       },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_mohriana",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -9542,6 +9920,13 @@
       "synonyms": [
         "monticola",
         "prinus L."
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_montana",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -9693,6 +10078,13 @@
         "prinus Coulter",
         "sentenelensis"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_muehlenbergii",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 3,
@@ -9789,6 +10181,13 @@
       "synonyms": [
         "myrtifolia f. ampla Trel. 1924 phellos var. arenaria Chapm. 1860"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_myrtifolia",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -9838,6 +10237,13 @@
         "microcarya",
         "tridentifera",
         "uliginosa"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_nigra",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -9958,6 +10364,13 @@
         "subgenus": "Quercus",
         "section": "Quercus"
       },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_oblongifolia",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -10101,6 +10514,13 @@
         "section": "Quercus",
         "subsection": "Stellatae"
       },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_oglethorpensis",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 3,
@@ -10429,6 +10849,13 @@
       "synonyms": [
         "dumosa var. polycarpa Greene 1889"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_pacifica",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -10468,6 +10895,13 @@
       "synonyms": [
         "leucophylla",
         "pagodifolia"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_pagoda",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -10523,6 +10957,13 @@
       "synonyms": [
         "dunnii"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_palmeri",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -10564,6 +11005,13 @@
       ],
       "synonyms": [
         "umbraculifera"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_palustris",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -11172,6 +11620,13 @@
       "synonyms": [
         "salicifolia hort. non Née"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_phellos",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 3,
@@ -11368,6 +11823,13 @@
         "guatimalensis",
         "petiolaris Benth.",
         "turbinata Liebm."
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_polymorpha",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -11582,6 +12044,13 @@
         "chincapin",
         "chinquapin",
         "rufescens"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_prinoides",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -11853,6 +12322,13 @@
         "humilis Walt.",
         "sericea Willd."
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_pumila",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -11888,6 +12364,13 @@
       },
       "synonyms": [
         "undulata Torr. var. pungens (Liebm.) Engelm. \n        1877 undulata var. wrightii Engelm. 1876"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_pungens",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -12259,6 +12742,13 @@
         "tardifolia Stev.",
         "tardissima"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_robur",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -12334,6 +12824,13 @@
       },
       "synonyms": [
         "emoryi \n        x gravesii"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_robusta",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -12424,6 +12921,13 @@
         "ambigua Michx. non Bonpl.",
         "borealis",
         "maxima"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_rubra",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -12542,6 +13046,13 @@
         "suchiensis",
         "uhdeana",
         "vellifera"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_rugosa",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -12670,6 +13181,13 @@
         "subgenus": "Quercus",
         "section": "Ponticae"
       },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_sadleriana",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -13411,6 +13929,13 @@
         "schneckii",
         "texana Auctores"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_shumardii",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -13564,6 +14089,13 @@
         "ashei Sterrett, non Trel.",
         "mississippiensis"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_similis",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 3,
@@ -13616,6 +14148,13 @@
         "pseudocrispata",
         "sansabeana",
         "undulata Engelm."
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_sinuata",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -13847,6 +14386,13 @@
         "minor",
         "obtusiloba",
         "villosa"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_stellata",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -14186,6 +14732,13 @@
         "subgenus": "Quercus",
         "section": "Lobatae"
       },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_tardifolia",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -14289,6 +14842,13 @@
       "synonyms": [
         "cachensis",
         "nuttallii"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_texana",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -14441,6 +15001,13 @@
       "synonyms": [
         "chrysolepis var. tomentella (Engelm.) E.Murray \n        1983 chrysolepis subsp tomentella (Engelm.) E.Murray 1983 tomentella var. conjungens Trel. 1924"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_tomentella",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -14518,6 +15085,13 @@
       },
       "synonyms": [
         "hartmanii"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_toumeyi",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -14716,6 +15290,13 @@
         "ajoensis",
         "subturbinella"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_turbinella",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -14849,7 +15430,14 @@
         "genus": "Quercus",
         "subgenus": "Quercus",
         "section": "Protobalanus"
-      }
+      },
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_vacciniifolia",
+          "logo": ""
+        }
+      ]
     },
     {
       "name": "vallicola",
@@ -14913,6 +15501,13 @@
       "synonyms": [
         "sillae"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_vaseyana",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -14968,6 +15563,13 @@
         "nigra Du Roi, non L.",
         "tinctoria",
         "valentina Lam. ex Steudel"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_velutina",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -15081,6 +15683,13 @@
       "synonyms": [
         "bolanyosensis"
       ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_viminea",
+          "logo": ""
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -15124,6 +15733,13 @@
         "geminata Small",
         "sempervirens Walt.",
         "virens Aiton"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_virginiana",
+          "logo": ""
+        }
       ],
       "sources": [
         {
@@ -15205,6 +15821,13 @@
       ],
       "synonyms": [
         "wislizeni f. \n        extima Jeps. 1909"
+      ],
+      "external_links": [
+        {
+          "name": "Flora of North America",
+          "url": "https://floranorthamerica.org/Quercus_wislizeni",
+          "logo": ""
+        }
       ],
       "sources": [
         {
