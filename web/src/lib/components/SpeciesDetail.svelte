@@ -100,6 +100,23 @@
     return labels[status] || status;
   }
 
+  // Official IUCN Red List colors
+  // Source: https://nc.iucnredlist.org/redlist/resources/files/1646067752-FINAL_IUCN_Red_List_colour_chart.pdf
+  function getConservationStatusColors(status) {
+    const colors = {
+      'EX': { bg: '#000000', text: '#FFFFFF' },  // Extinct - black
+      'EW': { bg: '#542344', text: '#FFFFFF' },  // Extinct in Wild - dark purple
+      'CR': { bg: '#D81E05', text: '#FFFFFF' },  // Critically Endangered - red
+      'EN': { bg: '#FC7F3F', text: '#000000' },  // Endangered - orange
+      'VU': { bg: '#F9E814', text: '#000000' },  // Vulnerable - yellow
+      'NT': { bg: '#CCE226', text: '#000000' },  // Near Threatened - lime
+      'LC': { bg: '#60C659', text: '#000000' },  // Least Concern - green
+      'DD': { bg: '#D1D1C6', text: '#000000' },  // Data Deficient - gray
+      'NE': { bg: '#FFFFFF', text: '#000000', border: '#D1D1C6' }   // Not Evaluated - white with border
+    };
+    return colors[status] || { bg: '#D1D1C6', text: '#000000' };
+  }
+
   // Build taxonomy URL for a given level
   function getTaxonUrl(level) {
     if (!species.taxonomy) return `${base}/taxonomy/`;
@@ -145,7 +162,12 @@
         </h1>
       </div>
       {#if species.conservation_status}
-        <span class="conservation-badge" title={getConservationStatusLabel(species.conservation_status)}>
+        {@const statusColors = getConservationStatusColors(species.conservation_status)}
+        <span
+          class="conservation-badge"
+          title={getConservationStatusLabel(species.conservation_status)}
+          style="background-color: {statusColors.bg}; color: {statusColors.text}; {statusColors.border ? `border-color: ${statusColors.border};` : ''}"
+        >
           {species.conservation_status}
         </span>
       {/if}
@@ -666,9 +688,7 @@
     border-radius: 9999px;
     font-size: 0.875rem;
     font-weight: 600;
-    background-color: var(--color-status-warning-bg);
-    color: var(--color-status-warning-text);
-    border: 1px solid var(--color-status-warning-border);
+    border: 1px solid transparent;
     flex-shrink: 0;
   }
 
