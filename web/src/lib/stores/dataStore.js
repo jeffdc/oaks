@@ -1,4 +1,5 @@
 import { writable, derived } from 'svelte/store';
+import { base } from '$app/paths';
 import {
   db,
   getAllSpecies,
@@ -196,7 +197,10 @@ export async function loadSpeciesData() {
  */
 async function fetchAndCacheData() {
   // Cache-bust to bypass CDN caching
-  const response = await fetch(`${import.meta.env.BASE_URL}quercus_data.json?t=${Date.now()}`, {
+  // Use absolute path - base is '' for custom domain, so this becomes '/quercus_data.json'
+  const dataUrl = `${base}/quercus_data.json?t=${Date.now()}`;
+  console.log('[DataStore] Fetching:', dataUrl);
+  const response = await fetch(dataUrl, {
     cache: 'no-store'
   });
   if (!response.ok) {
@@ -231,10 +235,11 @@ async function fetchAndCacheData() {
  */
 async function checkForUpdates() {
   try {
-    console.log('[DataStore] Checking for updates...');
-
     // Cache-bust to bypass both browser and CDN caching
-    const response = await fetch(`${import.meta.env.BASE_URL}quercus_data.json?t=${Date.now()}`, {
+    const dataUrl = `${base}/quercus_data.json?t=${Date.now()}`;
+    console.log('[DataStore] Checking for updates from:', dataUrl);
+
+    const response = await fetch(dataUrl, {
       cache: 'no-store'
     });
     if (!response.ok) {
