@@ -1,5 +1,6 @@
 <script>
   import { base } from '$app/paths';
+  import { goto } from '$app/navigation';
   import { marked } from 'marked';
   import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName } from '$lib/stores/dataStore.js';
   import { getLogoIcon, getLinkLogoId } from '$lib/icons/index.js';
@@ -394,7 +395,13 @@
               aria-selected={selectedSourceId === source.source_id}
               on:click={() => selectedSourceId = source.source_id}
             >
-              <span class="source-tab-name">{source.source_name}</span>
+              <span
+                class="source-tab-name-link"
+                role="link"
+                tabindex="0"
+                on:click|stopPropagation={() => goto(`${base}/sources/${source.source_id}/`)}
+                on:keydown|stopPropagation={(e) => e.key === 'Enter' && goto(`${base}/sources/${source.source_id}/`)}
+              >{source.source_name}</span>
               {#if source.is_preferred}
                 <span class="preferred-badge" title="Preferred source">★</span>
               {/if}
@@ -935,6 +942,20 @@
 
   .source-tab-name {
     white-space: nowrap;
+  }
+
+  .source-tab-name-link {
+    white-space: nowrap;
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+    cursor: pointer;
+  }
+
+  .source-tab-name-link:hover {
+    color: var(--color-forest-600);
+    text-decoration: underline;
+    text-decoration-color: var(--color-forest-400);
   }
 
   .preferred-badge {
