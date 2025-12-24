@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-24T02:38:24Z",
-    "exported_at": "2025-12-24T02:38:24Z",
+    "version": "2025-12-24T19:16:55Z",
+    "exported_at": "2025-12-24T19:16:55Z",
     "species_count": 734
   },
   "sources": [
@@ -500,6 +500,24 @@
           "fruits": "sessile acorns 2.5-3.5 cm long; paired or most often solitary; elongated and pointed; enclosed for 1/4 or 1/3 of length in a 1.5-2 cm long, shallow cupule with thin, pointed, imbricated scales; scales with free, purplish margins; inner surface of nut shell downy; maturing in 1 year; edible;",
           "miscellaneous": "-- A. Camus : n° 297; -- Sub-genus Quercus, section Lobatae, sub-section Agrifoliae; -- Rare in cultivation; -- Resembles Q.ilex ; looks also like Q.wislizeni and Q.parvula but the two latter have flat or weakly convex blade leaves, and not any hair beneath; -- Hybridizes with Q.wislizeni and Q.kelloggii (see x ganderi );",
           "url": "https://oaksoftheworld.fr/quercus_agrifolia.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Coast Live Oak",
+            "California Live Oak",
+            "Encina"
+          ],
+          "growth_habit": "Evergreen, medium tree normally 25-50'. Very broad up to 200' wide",
+          "leaves": "- 2 1/2\"\n- broad holly like\n- cupped stiff and brittle\n- smooth edged or with many spiny teeth\n- underleaf pale green",
+          "fruits": "- 1\"\n- slender, narrow, cone shaped\n- deep cup with long pointed scales\n- nearly as long as leaves\n- mature in one season",
+          "bark": "Relatively smoth and page, becoming thick rough, dark, with wide ridges",
+          "twigs": "hairy or not",
+          "buds": "blunt",
+          "hardiness_habitat": "- Common in moderately dry rocky soils\n- forms park like groves\n- Commonly cultivated near its native range\n- Zones 8-9"
         }
       ]
     },
@@ -1164,6 +1182,22 @@
           "hardiness_habitat": "hardy; prefers sandy, rocky, moist and well-drained, lime-free soils; slow growing, short living;",
           "miscellaneous": "-- Sub-genus Quercus, section Lobatae, sub-section Phellos; -- Threatened (IUCN Red List Category : VU). -- Discovered in Arkansas in 1911; -- Hybridizes with Q.nigra, Q.marilandica, Q.phellos and with Q.incana (= Q.x venulosa )",
           "url": "https://oaksoftheworld.fr/quercus_arkansana.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Arkansas Oak",
+            "Arkansas Water Oak",
+            "Water Oak"
+          ],
+          "growth_habit": "Deciduous, small understory tree usually under 50'",
+          "leaves": "- 4 1/2\"\n- small and broad with rounded bases\n- underleaf pal green\n- similar to marilandica but leaves more rounded, less leathery, and greenish below\n- closely related to nigra but leaves broader, bark darker, and rougher",
+          "fruits": "- 5/8\"\n- thin shallow cup",
+          "twigs": "gray hairs",
+          "hardiness_habitat": "- Rare and local in well-drained sandy soil, often in understory of hardwood forest\n- most numerous in SW AR\n- not cultivated"
         }
       ]
     },
@@ -2868,6 +2902,24 @@
           "hardiness_habitat": "hardy; prefers moist, well-drained soils; very slow growing;",
           "miscellaneous": "-- A. Camus : n° 293; -- Sub-genus Quercus, section Protobalanus ; -- One of the most beautiful Californian oaks; wood hard, heavy; bearing flowers longer than other oaks; lives up to 300 years and more; -- Resembles Q.cedrosensis , but the latter is shrubby and has much smaller and mostly entire leaves, and small acorns;",
           "url": "https://oaksoftheworld.fr/quercus_chrysolepis.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Canyon Live Oak",
+            "Goldcup Oak",
+            "Maul Oak",
+            "Iron Oak"
+          ],
+          "growth_habit": "Evergreen (leaves persist 3-4 years). Shrub to medium tree typically under 40'. Wide-spreading with dense dark crown, taller and more upright in canyons",
+          "leaves": "- 2 1/2\"\n- pointed, oval, flat, leathery\n- sometimes spiny toothed (especially on juvenile growth - compare to palmeri)\n- underleaf yellowish downy when fresh, later wearing to pale smooth bluish\n- usually narrown pointed (underleaf yellowish when fresh)\n- leaves on vigorous shoots often broader, spiny (underleaf blusih when worn)",
+          "fruits": "- 1\"\n- extremely variable\n- cup shallow but often thickened and corky\n- covered with yellow-white wool",
+          "twigs": "golden brown\nhairy to second year",
+          "hardiness_habitat": "- Common, especailly in moist canyons and on north-facing slopes.\n- Uncommon in cultivationb in CA, very rarely in WA\n- Zones 8-9",
+          "miscellaneous": "The most commonly seen and most variable oak in CA, and of the most variable oaks in NA."
         }
       ]
     },
@@ -4916,6 +4968,22 @@
           "hardiness_habitat": "hardy zone 6; all types of soils if dry rocky ones; slow growing;",
           "miscellaneous": "-- A. Camus : n° 388; -- Sub-genus Quercus, section Lobatae, Series Erythromexicanae, Group Vimineae; -- Discovered by William H. Emory (U.S.A. 1811-1887 ) -- Hybridizes with Q.graciliformis (= Q.x tharpii C.H.Muller), Q. hypoleucoides , and with Q.gravesii (= Q.x robusta );",
           "url": "https://oaksoftheworld.fr/quercus_emoryi.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Emory Oak",
+            "Black Oak",
+            "Blackjack Oak",
+            "Bellota"
+          ],
+          "growth_habit": "Evergreen, small tree often to 45'\nCharacteristic oak of Mexican border in AZ and NM",
+          "leaves": "- 3\"\n- long, narrow, pointed, glossy green\n- holly like but usually only weakly prickly\n- fairly pointed and rigid along twig",
+          "fruits": "- 3/4\"\n- long, ripe in single growing season (unusual among red oaks)",
+          "hardiness_habitat": "Common in foothills and slopes\nRarely cultivated"
         }
       ]
     },
@@ -6388,6 +6456,21 @@
           "url": "https://floranorthamerica.org/Quercus_graciliformis",
           "logo": ""
         }
+      ],
+      "sources": [
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Slender Oak",
+            "Chisos Oak"
+          ],
+          "range": "Known only from a few dry rocky canyons in the Chisos Mountains of W. TX",
+          "growth_habit": "Tardily deciduous.",
+          "leaves": "- 3 1/2\"\n- narrow\n- drooping\n- smooth or with many teeth"
+        }
       ]
     },
     {
@@ -6478,6 +6561,23 @@
           "fruits": "acorn 1.2-1.5 cm, ovoid to globose; pubescent; singly on a short peduncle 0.7-3 cm long; enclosed 1/3 to 1/4 by deep, halfround, hairy, 1.5 cm wide cup, with flat scales; maturing in 2 years in October-November;",
           "miscellaneous": "-- A. Camus : n° 429; -- Sub-genus Quercus, section Lobatae, Series Coccineae; -- Close to Q.shumardii and Q.buckleyi . -- Different from Q. canbyi in having broad aristate teeth from the apex to the base, the terminal lobe elongate and having short aristate teeth or simple bristle tips. -- Henry S. Graves (1871-1950) was at the head of US Forests Department.",
           "url": "https://oaksoftheworld.fr/quercus_gravesii.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Graves Oak",
+            "Chisos Red Oak"
+          ],
+          "growth_habit": "Deciduous, small tree to 45'",
+          "leaves": "- 2 1/2\"\n- not leathery\n- small with few short pointed lobes\n- underleaf pale green",
+          "fruits": "- 1\"\n- narrow with deep tapered cup\n- scales tight 1/2 - 7/8\"",
+          "twigs": "light to red brown",
+          "buds": "small, blunt, hairy",
+          "hardiness_habitat": "- Locally common withing very limited range in Davis, Glass, and Chisos Mountains\n- Not cultivated",
+          "miscellaneous": "Relkated to emoryi, and on average differs in being deciduous with leaves more lobed and less leathery, but intermediate trees are not readily distinguished from emoryi."
         }
       ]
     },
@@ -6829,6 +6929,22 @@
           "hardiness_habitat": "hardy; prefers light, well drained soils;",
           "miscellaneous": "-- A. Camus : n° 409; -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- For a long time confused with Q.laurifolia (\"swamp laurel oak\", \"diamondleaf oak\") ; -- Numerous hybrids (among them : Q.x sublaurifolia with Q.incana , Q.x mellichampi with Q.laevis )",
           "url": "https://oaksoftheworld.fr/quercus_hemisphaerica.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Darlington Oak",
+            "Laurel Oak"
+          ],
+          "growth_habit": "Semi-evergreen. Medium or large often 60'",
+          "leaves": "- 3 1/2\"\n- very short petiole\n- base usually more U-shaped (vs V on laurifolia)\n- leathery vs opaque\n- generally broadest near the tip (not diamond shaped)\n- underleaf pale green",
+          "fruits": "- 5/8\"\n- like laurifolia\n- nearly round\n- cup fairly shallow\n- covers 1/4 - 1/3 of nut",
+          "twigs": "gray hairs",
+          "buds": "similar to laurifolia\nlarger than phellos",
+          "hardiness_habitat": "- common in fairly dry sandy soils of lowlands, stream terraces, occassioanly hillsides; mixed open woods, hammocks\n- commonly cultivated\n- zones 6-9"
         }
       ]
     },
@@ -7185,6 +7301,21 @@
           "hardiness_habitat": "not quite hardy (zone 7-8); wet mixed forests; prefers wet canyons; all types of soils;",
           "miscellaneous": "-- A. Camus : n° 300; -- Sub-genus Quercus, section Lobatae; -- Rare; -- Hybrids with Q.gravesi i ( = Q.x inconstans Palmer) and with Q.shumardii ; -- Q. confertifolia Bonpl. 1809 is the new name for Q. gentryi -- Q. hypoleuca Miq. 1858 is actually a synonym for Lithocarpus korthalsii Soepadmo",
           "url": "https://oaksoftheworld.fr/quercus_hypoleucoides.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Silverleaf Oak",
+            "White-Leaf Oak"
+          ],
+          "growth_habit": "Evergreen, shrub or small tree often 30'.\nUsually a sparse tree with upswept branches, striking whitish underleaf distinctive.",
+          "leaves": "- 3\"\n- foilage varies between trees, from larger sparser leafes to smaller and more densely clustered leaves\n- narrow usually untoothed edges rolled under\n- dark green above\n- underleaf striking white",
+          "fruits": "- 5/8\"\n- mature in 1 OR 2 growing seasons\n- scales blunt tight",
+          "hardiness_habitat": "- Common in less arid canyon sides and on ridges.\n- Attractive and often used in landscaping near native range\n- Zones 8-10",
+          "miscellaneous": "Among the Red Oak group only three species -- agrifolia, emoryi, and hypoleucoides -- have acorns that mature in one year like White Oaks."
         }
       ]
     },
@@ -7499,6 +7630,21 @@
           "fruits": "acorn 1-2 cm, round; brown striped with black; cup with soft, overlapping, hairy scales; nut enclosed 1/3 to 1/2 by cup; maturing in 2 years;",
           "miscellaneous": "-- A.Camus : n° 413; -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- Numerous hybrids, among them : Q.x anceps , Q.x egglestonii , Q.x exacta , Q.x leana , Q.x runcinata , Q. x tridentata ;",
           "url": "https://oaksoftheworld.fr/quercus_imbricaria.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Shingle Oak",
+            "Northern Laurel Oak"
+          ],
+          "growth_habit": "Deciduous, medium tree usually under 50'",
+          "leaves": "- 6\"\n- never lobed or toothed\n- wider than most similar oaks\n- underleaf densel;u hairy\n- droop gracefully (vs stiffer phellos)",
+          "fruits": "- 3/4\"\n- cup fairly deep\n- similar to velutina and coccinea",
+          "twigs": "greenish to brown",
+          "hardiness_habitat": "- Common in rish moist soils in lowlands and along streams, but also found on hillsides\n- often with palustris and lyrata\n- uncommon in cultivation\n- zones 4-8"
         }
       ]
     },
@@ -7559,6 +7705,25 @@
           "hardiness_habitat": "not quite hardy (withstands -15°C); prefers dry, sandy soils; slow-growing;",
           "miscellaneous": "-- A.Camus : n° 412; -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- Hybrids with : Q.falcata (= Q.x subintegra ), Q.laurifolia (= Q.x atlantica ), Q.laevis (= Q.x asheana ), Q.marilandica (= Q.x cravenensis ), Q.nigra (= Q.x caduca ), Q.velutina (= Q.x podophylla ) ;",
           "url": "https://oaksoftheworld.fr/quercus_incana.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Bluejack Oak",
+            "Cinnamon Oak",
+            "Sandjack",
+            "Shin Oak",
+            "Turkey Oak",
+            "Upland Willow Oak"
+          ],
+          "growth_habit": "Tardily deciduous. shrub or small tree usually under 25', often forming thickets",
+          "leaves": "- 3\"\n- leathery\n- bluish or ashy green above\n- petiole very short\n- margins flat not rolled under\n- occasional sprout leaves w/ 2-3 lobes\n- underleaf whitish",
+          "fruits": "- 3/4\"\n- cup shallow",
+          "twigs": "often hairy",
+          "hardiness_habitat": "- common in well-drained sandy soils, dunes, and ridges associated with laevis and margaretiae\n- not cultivated"
         }
       ]
     },
@@ -8039,6 +8204,23 @@
           "hardiness_habitat": "hardy; all types of soils, but prefers lime-free ones; thrive in well drained soils; slow-growing, long-lived; young plants have a low growth rate during 2-3 years;",
           "miscellaneous": "-- A.Camus :n° 430; -- Sub-genus Quercus, section Lobatae, Series Agrifoliae (with agrifolia , parvula , wislizeni ) -- Resembles Q.velutina ; -- Hybridizes with Q.agrifolia ( = x ganderi ) and Q.wislizeni ( = x morehus ) ;",
           "url": "https://oaksoftheworld.fr/quercus_kelloggii.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "California Black Oak",
+            "Kellogg Oak",
+            "Black Oak"
+          ],
+          "growth_habit": "Deciduous, large tree often 75'. Shrubby at high elevations, crooked trunk.",
+          "leaves": "- 5 1/2\"\n- thickish glossy, deeply lobed\n- underleaf pale green\n- emergins leaves (Mar-Apr) reddish or purplish, like many E NA oaks, but unlike other western species\n- new leaves and twigs covered by hoary whitish fuzz on smaller trees at higher elevations",
+          "fruits": "- 1 1/4\"\n- very deep cup often covering more than 1/2 of nut\n- scales thin poiinted, long and loose",
+          "bark": "mature trunks dark and deeply furrowed with broad irregular ridges",
+          "buds": "large, pale, pointed",
+          "hardiness_habitat": "- Common in sandy or gravelly soils of valleys and slopes\n- often in pure stands or mixed with confiers\n- Only occasionally cultivated within native range\n- zones 7-9"
         }
       ]
     },
@@ -8589,6 +8771,25 @@
           "hardiness_habitat": "hardy; prefers light, moist soils;",
           "miscellaneous": "-- A.Camus : 409; -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- Numerous hybrids.",
           "url": "https://oaksoftheworld.fr/quercus_laurifolia.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Swamp Laurel Oak",
+            "Laurel-Leaf Oak",
+            "Diamon Leaf Oak",
+            "Water Oak",
+            "Obtusa Oak"
+          ],
+          "growth_habit": "Tardily deciduous. Medium to large tree, under 60' tall usually",
+          "leaves": "- 3 1/2\"\n- petiole very short\n- vigorous shoots often lobed\n- occasional leaves resemble nigra\n- at least some leaves on tree widest in the middle (diamond shaped)\n- underleaf pale green\n- broader, less rigidly linear than phellos",
+          "fruits": "- 5/8\"\n- cup shallow\n- scales tight\n- cover 1/4 - 1/3 of nut",
+          "twigs": "like hemisphaerica",
+          "buds": "like hemispaherica",
+          "hardiness_habitat": "- Uncommon and scattered in swmaps, floodplains, wet hammocks\n- commonly cultivated\n- zones 6-9"
         }
       ]
     },
@@ -10319,6 +10520,22 @@
           "hardiness_habitat": "hardy zone 7 (withstands -14 ° C); prefers dry, sandy soils;",
           "miscellaneous": "-- A.Camus : n° 403; -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- Hybridizes with Q.incana = Q.x oviedoensis Sarg., (but this taxon could be a form of Q.inopina ...)",
           "url": "https://oaksoftheworld.fr/quercus_myrtifolia.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Myrtle Oak",
+            "Scrub Oak"
+          ],
+          "growth_habit": "Evergreen. Shrub or occasionally a small tree to 20', usually forms thickets.",
+          "leaves": "- 1 1/2\"\n- very short petiole\n- edges rolled under\n- oval to diamond-shaped\n- hairless and shiny\n- underleaf pale green",
+          "fruits": "- 5/8\"\n- cup fairly shallow 1/4 - 1/3 of nut\n- scales tight",
+          "twigs": "- dark reddish brown",
+          "buds": "- dark reddish-brown",
+          "hardiness_habitat": "- Uncommon in dry sandy soil, particularly pine-oak scrub on coastal dunes\n- rarely cultvated\n- zones 8-10"
         }
       ]
     },
@@ -10381,6 +10598,24 @@
           "hardiness_habitat": "hardy; prefers moist, even wet, limefree soils; fast-growing; lives up to 150 years;",
           "miscellaneous": "-- A.Camus : n° 414; -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- Related to Q.marilandica ; -- \"nigra\" after the blackish coulour of acorns and bark; -- Numerous hybrids, among them : x garlandensis E.J.Palmer with Q.falcata , x walteriana Ashe with Q.laevis , x sterilis Trel. with Q.marilandica , x capesii W.Wolf with Q.phellos , x neopalmeri Sudw. with Q.shumardii , x demarei Ashe with Q.velutina ;",
           "url": "https://oaksoftheworld.fr/quercus_nigra.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Water Oak",
+            "Possum Oak",
+            "Spotted Oak"
+          ],
+          "growth_habit": "Tardily deciduous, medium to large tree often 60'",
+          "leaves": "- 3 1/2\"\n- typically broad tipped with narrow triangular base\n- short petiole\n- thick and leathery\n- underleaf hairless or with tufts in vein axils\n- broaf leaf tips create \"fan\" shape at twig tips\n- variable in shape and size, often with several shallow lobes and juvemile leaves with more and more deep lobes\n- some leaves uniformly narrow like phellos and others, but always outnumbered by other leaf shapes",
+          "fruits": "- 1/2\"\n- cup very shallow\n- covering 1.4 or less of nut\n- scales tight",
+          "bark": "relatively snooth like phellos and others",
+          "twigs": "fairly slender",
+          "buds": "small",
+          "hardiness_habitat": "- common and widespread on upper edges of bottomland forests (w/ sweet gum and others) also in moist uplands and mesic habitats\n- frequently cultivated\n- zones 6-9"
         }
       ]
     },
@@ -11104,6 +11339,20 @@
           "fruits": "acorn 2-3 cm long; oblong to spindle-shaped; pointed, mucronate; single or paired; enclosed 1/4 to 1/3 by cup; cup sessile or nearly so, thin, flared, wider than nut, scales covered with orangish glandular hairs; maturing in 2 years, from August to October;",
           "miscellaneous": "-- A.Camus : n° 294; -- Subgenus Quercus, section Protobalanus ; -- Close to Q.chrysolepis ; -- Resembles Q.cedrosensis that have less rounded, greener leaves, and conspicuous scales; resembles also Q.chrysolepis whose cup is not wider than nut, and Q.turbinella whose leaves are smaller, with stalked acorns and without the flared cup ; -- No known hybrids;",
           "url": "https://oaksoftheworld.fr/quercus_palmeri.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Palmer Oak",
+            "Dunn Oak"
+          ],
+          "growth_habit": "Evergreen. Shrub or small tree usually under 12' forms dense thickets almost impenetrable due to rigid twigs and spiny leaves",
+          "leaves": "- 1 1/2\" \n- leathery, very spiny, thick, circular\n- underleaf waxy yellow",
+          "fruits": "- 1 1/4\"\n- solitary\n- cup relatively shallow yellowish, often flared, often short peduncle",
+          "hardiness_habitat": "Uncommon and local in disjunct locations, in canyon thickets, margins of chaparal.\nRare in CA more commin in AZ.\nNot cultivated"
         }
       ]
     },
@@ -11267,6 +11516,22 @@
           "hardiness_habitat": "zone 8; occurs in wet areas of coastal fog belt;",
           "miscellaneous": "-- Sub-genus Quercus, section Lobatae, Series Agrifoliae; -- U sually described as closely related to Q.wislizeni (and considered by Nixon 1997 as a synonym), but genetic studies of plants from Central California show some distinctions with those of North of Mexico justifying their classification as true species ( K.C. Nixon, 2002) ; Q. parvula differs from Q. wislizeni in having larger leaves (3-16 cm versus 2-5 cm), undersides dull olive green (vs shiny yellow-green), and acorn tip (abruptly tapered vs gradually tapered); moreover the habitats are different as well : Q. parvula is typical of wet costal areas, while Q. wislizeni is typical of arid slopes in the interior.",
           "url": "https://oaksoftheworld.fr/quercus_parvula.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Shreve Oak",
+            "Coast Oak",
+            "Santa Crus Island Oak",
+            "Tamalpais Oak"
+          ],
+          "growth_habit": "Evergreen, shrub or occasionally a small straight tree to 20'. Tree-like only along the central coast of CA.",
+          "leaves": "- 2 1/2\"\n- underleaf dull olive green",
+          "fruits": "- 1 1/2\"\n- large and fairly stout\n- abruptly tapered at tip",
+          "hardiness_habitat": "Locally commoon in relatively dry habitats often on edges of coastal Redwood forest\nNot cultivated"
         }
       ]
     },
@@ -11783,6 +12048,25 @@
           "hardiness_habitat": "hardy; prefers wet soils; fast growing;",
           "miscellaneous": "-- A. Camus : 410 -- Sub-genus Quercus, section Lobatae, subsection Phellos; -- Numerous hybrids, among them : x giffordi Trel. with Q.ilicifolia , x ludoviciana Sarg. with Q.pagoda ;",
           "url": "https://oaksoftheworld.fr/quercus_phellos.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Willow Oak",
+            "Peach Oak",
+            "Pin Oak",
+            "Swamp Willow Oak"
+          ],
+          "growth_habit": "Deciduous, large tree often to 80'",
+          "leaves": "- 4\"\n- very narrow w/ short petiole\n- underleaf sometimes fuzzy\n- fall color yellow to pale orange-brown\n- narrow leaves tand out stiffly all around the twig",
+          "fruits": "- 1/2\" \n- cup shallow\n- covers 1/4 - 1/3 nut\n- tight grayish scales",
+          "bark": "smooth with faint ridges",
+          "twigs": "very slender for an oak",
+          "buds": "smaller than similar species",
+          "hardiness_habitat": "- Common in bottomlands and other wet lowland, occassionaly on poorly drained uplands\n- Common in cultivation in yards and towns\n- Zones 7-9s"
         }
       ]
     },
@@ -12982,6 +13266,19 @@
           "hardiness_habitat": "prefers wet places, in mountains;",
           "miscellaneous": "-- A. Camus : tome 3, p. 424, n° 428; -- For C.H. Muller, and for Govaerts \u0026 Frodin (1998), it's a true species (fixed hybrid);",
           "url": "https://oaksoftheworld.fr/quercus_robusta.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Robust Oak"
+          ],
+          "range": "Found only in a few moist wooded canyons in the Chisos Mountains of W TX.",
+          "growth_habit": "Deciduous",
+          "leaves": "- 4\" \n- usually with several large teeth\n- widest at the base",
+          "miscellaneous": "Thought to be a hybrid of emoryi x gravesii"
         }
       ]
     },
@@ -14902,6 +15199,20 @@
           "fruits": "acorn subsessile, paired, maturing in 2 years; cup scales appressed, glabrescent;",
           "miscellaneous": "-- A.Camus : n° 429; -- Sub-genus Quercus, section Lobatae; -- Very rare; -- May be a hybrid between Q.gravesii and Q.hypoxantha ;",
           "url": "https://oaksoftheworld.fr/quercus_tardifolia.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Lateleaf Oak",
+            "Chisos Mountain Oak"
+          ],
+          "range": "Known only from two small clumps in the Chisos Mountains",
+          "growth_habit": "Evergreen",
+          "leaves": "- 3\"\n- fairly broad with few shallow lobes\n- base rounded\n- widest at middle\n- leathery and rough",
+          "miscellaneous": "may represent hybrid of emoryii and hypoxantha"
         }
       ]
     },
@@ -15174,6 +15485,24 @@
           "hardiness_habitat": "not quite hardy (zone 8); all types of soils without limestone;",
           "miscellaneous": "-- A.Camus : n° 294; -- Sub-genus Quercus, section Protobalanus; -- Discovered in Guadalupe Island in 1875; -- Threatened (IUCN Red List Category : EN). -- Resembles Q. agrifolia (which has convex leaves, secondary veins not so conspicuous), and Q. parvula (which has stalked acorns);",
           "url": "https://oaksoftheworld.fr/quercus_tomentella.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Channel Island Oak",
+            "Island Live Oak",
+            "Island Oak"
+          ],
+          "range": "Wild Only on 5 Southern Channel Islands",
+          "growth_habit": "Evergreen. Small tree often 30', broad and rounded. Resembles chrysolepis in general form but has larer thicker leaves with more promonent teeth and somewhat courrgated leaf blade",
+          "leaves": "- 3 1/2\"\n- leathery brittle with rusty hairs\n- wavy, strongly curled under\n- prominent parallel veins\n- underleaf brownish hairy",
+          "fruits": "-1 1/4\"\n- cup shallow, pale, wooly, solitary",
+          "twigs": "hairy to 2nd year",
+          "hardiness_habitat": "Rare and local in lower parts of steep canyons.",
+          "miscellaneous": "Hybridizes with chrysolepis on several islands. chrysolepis absent on Santa Rosa, usually found in lower elevations.\nVery rare in cultivation, but cultivated trees can grow taller than in the wild"
         }
       ]
     },
@@ -15589,6 +15918,18 @@
           "url": "https://floranorthamerica.org/Quercus_vacciniifolia",
           "logo": ""
         }
+      ],
+      "sources": [
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Huckleberry Oak"
+          ],
+          "growth_habit": "Shrub to about 5' tall"
+        }
       ]
     },
     {
@@ -15865,6 +16206,18 @@
           "hardiness_habitat": "not quite hardy;",
           "miscellaneous": "-- A.Camus : n° 299; -- Sub-genus Quercus, section Lobatae, Series Erythromexicanae; -- The Mexican species Q.bolanyosensis Trel. is sometimes considered as a true species (diagnosis here );",
           "url": "https://oaksoftheworld.fr/quercus_viminea.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Sonoran Oak"
+          ],
+          "range": "Known in US from a single specimen colleged in Santa Cruz County AZ",
+          "growth_habit": "Evergreen or drought deciduous",
+          "leaves": "- 2\"\n- small very narrow\n- base rounded\n- margins smooth or with small teeth"
         }
       ]
     },
@@ -16015,6 +16368,24 @@
           "hardiness_habitat": "hardy; occurs on arid slopes; all types of soils; slow-growing;",
           "miscellaneous": "-- A. Camus : n° 298; -- Sub-genus Quercus, section Lobatae, Series Agrifoliae; -- Discovered by Adolf Wislizenus (1810-1889) = physician of St Louis, of German origin, botanist and friend of G. Engelmann; -- Related to Q.kelloggii and to Q.agrifolia (with which it forms hybrids) -- Resembles Q.parvula , but the latter has stalked acorns and dull upper surface of leaves; Q.parvula deserves a species rank;",
           "url": "https://oaksoftheworld.fr/quercus_wislizeni.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Interior Live Oak",
+            "Sierra Live Oak",
+            "Highland Live Oak"
+          ],
+          "growth_habit": "Evergreen (leaves retained about two years). Shrub to medium tree often 30'. Usually short-trunked and broad spreading, crown varies from desne to open and airy. A multi-trunked shrub in S CA.",
+          "leaves": "- 1 1/2\" \n- snooth edged or spiny\n- underleaf shiny yellow-green",
+          "fruits": "- 1\"\n- usually stouter than agrifolia\n- cup deep\n- scales loose\n- nearly size of leaves",
+          "twigs": "usually hairy",
+          "buds": "pointed",
+          "hardiness_habitat": "- Common on dry slopes in foothill valleys often with other oaks, especially douglasii\n- Uncommon in cultivation, only on West Coast\n- Zones 8-9",
+          "miscellaneous": "Very similar to agrifolia and often found with it, but tends to have a narrower crown and smalle limbs, leaves thicker, leathery flat (never curled); leaves retained about 2 years, begin falling in 2nd summer/fall (vs leaves retained one year).\n\nExtensive hybrid swarms with agrifolia and parvula in San Francisco Bay area where habitats meet. \n\nSmall leaved shrubby variants also exist; e.g., car fructens a shrub w/ leaves 1 - 1 1/2\".\n\nAlso hybridizes with kellogii, x morehus."
         }
       ]
     },
