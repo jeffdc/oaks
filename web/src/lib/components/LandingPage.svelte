@@ -46,7 +46,7 @@
 		<section class="featured-section">
 			<div class="section-header">
 				<h3 class="section-title">Featured Species</h3>
-				<button class="shuffle-btn" on:click={pickFeaturedSpecies} title="Show another species">
+				<button class="shuffle-btn" on:click={pickFeaturedSpecies} aria-label="Show another random species">
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
 					</svg>
@@ -202,6 +202,13 @@
 	.shuffle-btn:hover {
 		background-color: var(--color-surface);
 		color: var(--color-forest-600);
+	}
+
+	.shuffle-btn:focus-visible {
+		outline: none;
+		background-color: var(--color-surface);
+		color: var(--color-forest-600);
+		box-shadow: 0 0 0 2px var(--color-forest-600);
 	}
 
 	.featured-section {

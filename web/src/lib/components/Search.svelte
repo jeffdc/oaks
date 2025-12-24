@@ -28,13 +28,17 @@
 
 <div class="search-container">
   <div class="relative group">
+    <label for="species-search" class="sr-only">Search species</label>
     <input
-      type="text"
+      type="search"
+      id="species-search"
       bind:this={inputElement}
       bind:value={inputValue}
       on:input={handleInput}
       placeholder="Search by name, author, synonym, or location..."
       class="search-input w-full pl-12 pr-12 py-3.5 text-base rounded-lg transition-all duration-200 focus:outline-none"
+      autocomplete="off"
+      spellcheck="false"
     />
     {#if inputValue}
       <button
@@ -66,6 +70,6 @@
   }
 
   .search-input::placeholder {
-    color: var(--color-white-60);
+    color: rgba(255, 255, 255, 0.75);  /* Improved contrast for accessibility */
   }
 </style>

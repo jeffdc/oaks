@@ -153,8 +153,8 @@
 
     <!-- Taxonomy path (serves as both navigation and taxonomy display) -->
     {#if species.taxonomy}
-      <nav class="taxonomy-nav">
-        <span class="taxonomy-label">Taxonomy:</span>
+      <nav class="taxonomy-nav" aria-label="Taxonomy breadcrumb">
+        <span class="taxonomy-label" aria-hidden="true">Taxonomy:</span>
         <a href="{base}/taxonomy/" class="taxonomy-link">
           <span class="taxonomy-name">Quercus</span>
           <span class="taxonomy-level-label">(genus)</span>

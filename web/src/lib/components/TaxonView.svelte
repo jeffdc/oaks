@@ -139,8 +139,8 @@
 
     <!-- Taxonomy path (below name, serves as both navigation and taxonomy display) -->
     {#if !isGenusLevel}
-      <nav class="taxonomy-nav">
-        <span class="taxonomy-label">Taxonomy:</span>
+      <nav class="taxonomy-nav" aria-label="Taxonomy breadcrumb">
+        <span class="taxonomy-label" aria-hidden="true">Taxonomy:</span>
         <a href="{base}/taxonomy/" class="taxonomy-link">
           <span class="taxonomy-name">Quercus</span>
           <span class="taxonomy-level-label">(genus)</span>
@@ -352,6 +352,12 @@
     box-shadow: var(--shadow-sm);
   }
 
+  .sub-taxon-card:focus-visible {
+    outline: none;
+    border-color: var(--color-forest-600);
+    box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.2);
+  }
+
   .sub-taxon-name {
     font-weight: 600;
     color: var(--color-forest-800);
@@ -396,6 +402,12 @@
     border-color: var(--color-forest-300);
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
+  }
+
+  .species-card:focus-visible {
+    outline: none;
+    border-color: var(--color-forest-600);
+    box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.2);
   }
 
   .species-name-line {
