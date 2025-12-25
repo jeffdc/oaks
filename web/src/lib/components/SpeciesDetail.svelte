@@ -315,7 +315,7 @@
               </a>
               {#if otherParent}
                 <span class="text-sm" style="color: var(--color-text-secondary);">
-                  (with Q. {otherParent})
+                  (with <a href="{getSpeciesUrl(otherParent)}" class="species-link">Q. {otherParent}</a>)
                 </span>
               {/if}
             </div>

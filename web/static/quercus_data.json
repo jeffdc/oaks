@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-24T19:16:55Z",
-    "exported_at": "2025-12-24T19:16:55Z",
+    "version": "2025-12-25T01:26:18Z",
+    "exported_at": "2025-12-25T01:26:18Z",
     "species_count": 734
   },
   "sources": [
@@ -70,6 +70,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_acerifolia",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUAC2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -479,6 +484,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/queagr/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUAG",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -628,6 +638,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_ajoensis",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUAJ",
+          "logo": "usda"
         }
       ]
     },
@@ -667,6 +682,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quealb/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUAL",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -698,6 +718,25 @@
           "hardiness_habitat": "hardy; prefers acidic, well drained moist soils; long-lived, up to 200 years and more;",
           "miscellaneous": "-- A. Camus : n° 278 ; -- Sub-genus Quercus, Section Quercus, Series Albae; -- Closely related to Q.bicolor and to Q.macrocarpa ;",
           "url": "https://oaksoftheworld.fr/quercus_alba.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Eastern White Oak",
+            "Stave Oak",
+            "Forkleaf Oak",
+            "Ridge White Oak"
+          ],
+          "growth_habit": "Deciduous. Med to large tree, often 80'. Most widespread of the white oak group. Majestic in old age.",
+          "leaves": "- 6 1/2\"\n- sharply tapered base\n- color generally more grayish bluish than other oaks, not glossy\n- moderate to deep rounded lobes\n- paler underleaf\n- mature leaves with short stalk\n- stiff do not droop or sway in breeze",
+          "fruits": "- 3/4\"\n- often short peduncle\n- shallow cup\n- germinate in Fall vs Res Oaks in Spring\\",
+          "bark": "Young/small trees:\n- pale ashy gray\n- in long strips that typically peel from one side\n\nMature trees:\n- long, peeling ridges or small blocks",
+          "twigs": "greenish to purple-gray\nformation appears stiffer than in red oak group",
+          "buds": "small and blunt",
+          "hardiness_habitat": "- Widespread and common in rich, moist, or dry soils; often on ridges and slopes.\n- May be NA's most abundant native tree.\n- Attracve and common in cultivation\n- Zones 3-9"
         }
       ]
     },
@@ -1114,6 +1153,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/queari/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUAR",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -1161,6 +1205,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_arkansana",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUAR2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -1351,6 +1400,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_austrina",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUAU",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -1646,6 +1700,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_berberidifolia",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUBE5",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -1797,6 +1856,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quebic/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUBI",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -1827,6 +1891,23 @@
           "hardiness_habitat": "hardy; prefers moist, lime-free soils; long-living;",
           "miscellaneous": "-- A. Camus : n° 189 ; -- Sub-genus Quercus, Section Quercus, Subsection Prinoideae; -- Related to Q.macrocarpa ;",
           "url": "https://oaksoftheworld.fr/quercus_bicolor.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Swamp White Oak",
+            "Swamp Oak"
+          ],
+          "growth_habit": "Deciduous. Large tree often 70'. Ofetn with twiggy tufts looking coarse and unkept.",
+          "leaves": "- 6 1/2\"\n- relatively few irregualr teeth or sharo shallow lobes\n- underleaf whitish",
+          "fruits": "- 1\"\n- cup deeply fringed\n- long thin peduncle",
+          "bark": "strips like alba but generally rougher, older trunks furrowed and blocky",
+          "buds": "relatively small, blunt, unlike montana or michauxii",
+          "hardiness_habitat": "Common in wet woods and swamps, bottomlands, flood plains.\nCommonly cultivated\nZones 4-8",
+          "miscellaneous": "Hybridizes commonly with michauxii where range overlaps. Hybrids tend to have more deeply lobed leaves and varying degrees of development of awns (fringe along the margin of the acorn cuo).\nApparently hybrids with macrocarpa are common in the Upper Midwest with intermediate leaf and acorn."
         }
       ]
     },
@@ -1911,6 +1992,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_boyntonii",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUBO2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -2015,6 +2101,13 @@
       "synonyms": [
         "oophora",
         "persica"
+      ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUBR2",
+          "logo": "usda"
+        }
       ],
       "sources": [
         {
@@ -2125,6 +2218,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_buckleyi",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUBU2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -2382,6 +2480,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_carmenensis",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUCA7",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -2515,6 +2618,13 @@
         "subgenus": "Quercus",
         "section": "Protobalanus"
       },
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUCE2",
+          "logo": "usda"
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -2599,6 +2709,13 @@
         "tournefortii",
         "tukhtensis"
       ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUCE",
+          "logo": "usda"
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -2680,6 +2797,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_chapmanii",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUCH",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -2778,6 +2900,13 @@
       "synonyms": [
         "acutissima subsp chenii (Nakai) A.Camus \n        1934 acutissima var. chenii (Nak.) Menitsky 1973 acutissima var. brevipetioleata C.Ho 1952 chenii var. linanensis M.C.Liu \u0026 X.L.Shenin 1992"
       ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUCH5",
+          "logo": "usda"
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -2818,6 +2947,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_chihuahuensis",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUCH4",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -2879,6 +3013,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quechr/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUCH2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -3232,6 +3371,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quecoc/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUCO2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -3492,6 +3636,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_cornelius-mulleri",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUCO7",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -4078,6 +4227,13 @@
         "pseudodentata",
         "stewardii"
       ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUDE4",
+          "logo": "usda"
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -4182,6 +4338,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_depressipes",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUDE3",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -4459,6 +4620,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quedou/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUDO",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -4509,6 +4675,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_dumosa",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUDU",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -4561,6 +4732,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_durata",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUDU4",
+          "logo": "usda"
         }
       ]
     },
@@ -4795,6 +4971,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/queell/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUEL",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -4945,6 +5126,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/queemo/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUEM",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -5006,6 +5192,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_engelmannii",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUEN",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -5316,6 +5507,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quefal/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUFA",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -5508,6 +5704,13 @@
         "spectabilis",
         "strigosa"
       ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUFR",
+          "logo": "usda"
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -5669,6 +5872,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_fusiformis",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUFU",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -5800,6 +6008,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quegam/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUGA",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -5903,6 +6116,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quegar/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUGA4",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -6053,6 +6271,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_geminata",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUGE2",
+          "logo": "usda"
         }
       ]
     },
@@ -6085,6 +6308,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_georgiana",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUGE",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -6296,6 +6524,13 @@
         "tranninhensis",
         "vaniotii"
       ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUGL2",
+          "logo": "usda"
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -6455,6 +6690,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_graciliformis",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUGR",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -6541,6 +6781,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_gravesii",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUGR2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -6669,6 +6914,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quegri/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUGR3",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -6812,6 +7062,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_havardii",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUHA3",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -6901,6 +7156,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_hemisphaerica",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUHE2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -7007,6 +7267,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_hinckleyi",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUHI",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -7280,6 +7545,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_hypoleucoides",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUHY",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -7461,6 +7731,13 @@
         "smilax",
         "variifolia"
       ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUIL2",
+          "logo": "usda"
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -7512,6 +7789,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_ilicifolia",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUIL",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -7610,6 +7892,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_imbricaria",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUIM",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -7685,6 +7972,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/queinc/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUIN",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -7746,6 +8038,13 @@
         "lusitanica Boiss.",
         "petiolaris Boiss.",
         "valentina K.Koch"
+      ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUIN6",
+          "logo": "usda"
+        }
       ],
       "sources": [
         {
@@ -7822,6 +8121,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_inopina",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUIN7",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -7902,6 +8206,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_intricata",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUIN3",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -8107,6 +8416,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_john-tuckeri",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUJO3",
+          "logo": "usda"
         }
       ]
     },
@@ -8184,6 +8498,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quekel/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUKE",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -8413,6 +8732,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_laceyi",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QULA",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -8508,6 +8832,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quelae/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QULA2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -8742,6 +9071,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_laurifolia",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QULA3",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -9020,6 +9354,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quelob/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QULO",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -9244,6 +9583,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quelyr/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QULY",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -9264,6 +9608,24 @@
           "hardiness_habitat": "hardy; prefers moist soils; slow-growing;",
           "miscellaneous": "-- A. Camus : n° 277 ; -- Sub-genus Quercus, Section Quercus, Subsection Prinoideae; -- Hybrids with Q.virginiana (= x comptoniae ), bicolor (= x humidicola ), macrocarpa (= x megaleia ), stellata (= x sterrettii) , michauxii (= x tottenii) ;",
           "url": "https://oaksoftheworld.fr/quercus_lyrata.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Overcup Oak",
+            "Swamp Post Oak",
+            "Swamp White Oak",
+            "Water White Oak"
+          ],
+          "growth_habit": "Deciduous, small to medium crooked tree usually under 60'. Closely related to macrocarpa.",
+          "leaves": "- 5 1/2\"\n- variable shape, often three equal squarish lobes at leaf tip, broad sinuses at midleaf, narrow base\n- underleag whitish when young, becoming green, sometimes hairy",
+          "fruits": "- 1\"\n- cup enclosing almost entire nut\n- stalk to 1 1/2\"\n- flaots on water\n\nnote immature acorns of other oaks are enclosed by cup, but much smaller",
+          "twigs": "gray-brown",
+          "buds": "small grayish",
+          "hardiness_habitat": "- Common in swamp forests, periodically inundated. especially in bottomlannds of lower Mississippi Valley\n- Uncommon in cultivation\n- Zones 5-9"
         }
       ]
     },
@@ -9430,6 +9792,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quemac/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUMA2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -9452,6 +9819,25 @@
           "hardiness_habitat": "hardy; all types of soils, including calcareous ones; reaches 150 years old;",
           "miscellaneous": "-- A. Camus : n° 279 ; -- Sub-genus Quercus, Section Quercus, Subsection Prinoideae; -- Related to Q.bicolor ; -- Hybridizes with : Q. alba (= x bebbiana), michauxii (= x byarsii), muehlenbergii ( = x deamii), stellata (= x guadalupensis), lyrata (= x megaleia), bicolor (= x schuettei) ;",
           "url": "https://oaksoftheworld.fr/quercus_macrocarpa.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Bur Oak",
+            "Missy-Cup Oak",
+            "Blue Oak"
+          ],
+          "growth_habit": "Deciduous. Medium to large tree, often 80'. Usually under 40' in northern and western parts of range.",
+          "leaves": "- 5 1/2\" but can be very large to 15\"\n- deepoly lobed at midleaf\n- broad tip\n- fiddle shaped\n- pale hairy underleaf\n- notable small and unlobed leaves can be found oin slow-growing trees, while large and oddly shaped leaves often frown in vigorous shoots",
+          "fruits": "- 2\" can be largest of any oak\n- very deep shaggy-fringed cup\n- stout peduncle\n- largest and most prominently fringed in the South.",
+          "bark": "pale gray and rugged, in long rectangular blocks",
+          "twigs": "corky wings in branchlets\ngray to reddish",
+          "buds": "hairy and blunt",
+          "hardiness_habitat": "Common in a wide range of conditions, from wet bottomlands, to dry, sandy ridges.\nWidely cultivated in cities and yards\nZones 3-8",
+          "miscellaneous": "Smaller more shrub like trees growing on bluffs and hillsides in the NW parts of its range are sometimes considered a separate species Quercus mandanensis."
         }
       ]
     },
@@ -9609,6 +9995,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quemar/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUMA3",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -9888,6 +10279,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_michauxii",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUMI",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -9919,6 +10315,24 @@
           "hardiness_habitat": "hardy; prefers moist or wet soils;",
           "miscellaneous": "-- Sub-genus Quercus, Section Quercus, Series Albae; -- Leaves resembling those of Q.montana ; -- André Michaux was a French botanist; -- For today's Authors ( in Flora of North America North of Mexico 1998), Q.michauxii and Q.prinus are synonyms, but this is ambiguous because, on one hand, the \"true\" Q.prinus L. (= Q.montana Willd.) has often been confused with Q.michauxii , and, on other hand, the name \" Q.prinus [auct. not L].\" has been often applied to Q.michauxii... that's why it is necessary to name Q.prinus L. \" Q.montana Willd.\" in order to avoid any confusion.",
           "url": "https://oaksoftheworld.fr/quercus_michauxii.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Basket Oak",
+            "Swamp Chestnut Oak",
+            "Cow Oak"
+          ],
+          "growth_habit": "Deciduous. Large tree often 90'.",
+          "leaves": "- 6\"\n- short petiole\n- 7-16 pairs of rounded teeth\n- underleaf whitish or with rusty hairs\n- widest past middle\n- eavy-edged to lobed\n- slightly more leathery than montana",
+          "fruits": "- 1 1/2\"\n- large cup\n- loose keeled scales\n- usually stalked\n- fringed with loose scales",
+          "bark": "pale, scaly, like bicolor",
+          "twigs": "gray-brown",
+          "buds": "reddish somewhat pointed",
+          "hardiness_habitat": "- Common and widespread in coastal plain bottomlands, mixed hardwood\n- Rarely cultivated\n- Zones 5-8"
         }
       ]
     },
@@ -9976,6 +10390,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_minima",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUMI2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -10077,6 +10496,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_mohriana",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUMO",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -10126,6 +10550,13 @@
         "liaotungensis",
         "undulatifolia",
         "wutaishanica"
+      ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUMO5",
+          "logo": "usda"
+        }
       ],
       "sources": [
         {
@@ -10234,6 +10665,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_montana",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUMO4",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -10264,6 +10700,25 @@
           "hardiness_habitat": "hardy; withstands poor, dry, rocky soils;",
           "miscellaneous": "-- A. Camus : n° 191, named Q.prinus L.; -- Sub-genus Quercus, Section Quercus, Series Albae; -- The name Q.prinus has been used for an other species ( Quercus michauxii) , so it is preferable to name this species Q.montana Willdenow , in order to avoid any confusion.",
           "url": "https://oaksoftheworld.fr/quercus_montana.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Chestnut Oak",
+            "Mountain Chestnut Oak",
+            "Rock Chestnut Oak",
+            "Rock oak",
+            "Tanbark Oak"
+          ],
+          "growth_habit": "Deciduous. Large tree often 70'.",
+          "leaves": "- 6\"\n- 7-16 pairs of usually rounded teeth\n- undeleaf pale green, not whitish",
+          "fruits": "- 1 1/8\"\n- fairly deep cup",
+          "bark": "dark deeply ridged bark\nrugged blocky ridges and deep furrows",
+          "buds": "Clustered end buds dull orange-brown pointed (more than michauxi)",
+          "hardiness_habitat": "- Common in uplands and dry woods, rocky slopes\n- Uncommon in cultivation\n- Zones 4-8"
         }
       ]
     },
@@ -10396,6 +10851,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quemue/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUMU",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -10427,6 +10887,22 @@
           "fruits": "acorn 2 cm long, ovoid; dark brown to black; stalkless or nearly so; singly or paired; enclosed 1/2 or 1/3 by the grey tomentose cup; maturing in 1 year in September; cotyledons distinct;",
           "miscellaneous": "-- A. Camus : n° 192 ; -- Sub-genus Quercus, Section Quercus, Subsection Prinoideae; -- Henry E. Muehlenberg (1753-1815) was a botanist from Pennsylvania;",
           "url": "https://oaksoftheworld.fr/quercus_muehlenbergii.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Common Chinkapin Oak",
+            "Chestnut Oak",
+            "Yellow Oak",
+            "Chinkapin Oak"
+          ],
+          "growth_habit": "Deciduous. Small to medoium tree often 50'.",
+          "leaves": "- 5\"\n- usually small, with jagged teeth but some are indistiguishable from michauxii and montana\n- underleaf whitish or tan, densely hairy",
+          "fruits": "- 3/4\"\n- cup scales thin, tight, covering 1/3 - 1/2 nut",
+          "hardiness_habitat": "- Uncommon and local in dry uplands; on clay and limestone soils on bluffs in FL\n- Uncommonly cultivated but tolerant of a varied settings\n- Zones 5-7"
         }
       ]
     },
@@ -10499,6 +10975,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_myrtifolia",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUMY",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -10577,6 +11058,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quenig/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUNI",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -10726,6 +11212,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/queobl/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUOB",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -10876,6 +11367,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_oglethorpensis",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUOG",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -11211,6 +11707,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_pacifica",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUPA6",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -11258,6 +11759,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_pagoda",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUPA5",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -11387,6 +11893,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quepal/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUPA2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -11496,6 +12007,13 @@
       },
       "synonyms": [
         "wislizenii f. \n        parvula (Greene) Trel. 1924"
+      ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUPA8",
+          "logo": "usda"
+        }
       ],
       "sources": [
         {
@@ -11867,6 +12385,13 @@
         "sublobata",
         "vulcanica Boiss. et Heldr."
       ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUPE2",
+          "logo": "usda"
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -12022,6 +12547,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quephe/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUPH",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -12245,6 +12775,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_polymorpha",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUPO2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -12466,6 +13001,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_prinoides",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUPR",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -12497,6 +13037,17 @@
           "hardiness_habitat": "hardy; prefers dry, acidic, sandy soils; withstands calcareous soils;",
           "miscellaneous": "-- A. Camus : n° 194 ; -- Sub-genus Quercus, Section Quercus, Subsection Prinoideae; -- Closely related to Q.muehlenbergii (variety ?), but Q.prinoides thrives in acidic, sandy soils, and Q.muehlenbergii in calcareous ones...Moreover Q.prinoides bears acorns even on young plants, and layers all around; for Zander and Pierce, 1979, both are identical...;",
           "url": "https://oaksoftheworld.fr/quercus_prinoides.htm"
+        },
+        {
+          "source_id": 4,
+          "source_name": "The Sibley Guide to Trees",
+          "license": "All Rights Reserved",
+          "is_preferred": false,
+          "local_names": [
+            "Dwarf Chinkapin Oak"
+          ],
+          "growth_habit": "Rarely a tree",
+          "leaves": "Very similar to muehlenbergii"
         }
       ]
     },
@@ -12786,6 +13337,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_pungens",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUPU",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -13163,6 +13719,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_robur",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QURO2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -13246,6 +13807,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_robusta",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QURO3",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -13361,6 +13927,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/querub/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QURU",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -13486,6 +14057,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_rugosa",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QURU4",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -13620,6 +14196,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_sadleriana",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUSA2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -14235,6 +14816,13 @@
         "serrata Thunb.",
         "stellatopilosa"
       ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUSE2",
+          "logo": "usda"
+        }
+      ],
       "sources": [
         {
           "source_id": 2,
@@ -14373,6 +14961,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/queshu/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUSH",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -14533,6 +15126,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_similis",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUSI2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -14593,6 +15191,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_sinuata",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUSI",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -14836,6 +15439,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/queste/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUST",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -14989,6 +15597,13 @@
         "bivoniana",
         "occidentalis",
         "suberosa"
+      ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUSU5",
+          "logo": "usda"
+        }
       ],
       "sources": [
         {
@@ -15181,6 +15796,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_tardifolia",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUTA",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -15306,6 +15926,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_texana",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUTE",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -15464,6 +16089,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_tomentella",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUTO",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -15567,6 +16197,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_toumeyi",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUTO2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -15776,6 +16411,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quetur/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUTU2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -15917,6 +16557,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_vacciniifolia",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUVA",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -15957,6 +16602,13 @@
         "chinensis",
         "moulei",
         "serrata Carruth."
+      ],
+      "external_links": [
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUVA3",
+          "logo": "usda"
+        }
       ],
       "sources": [
         {
@@ -15999,6 +16651,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_vaseyana",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUVA5",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -16067,6 +16724,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quevel/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUVE",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -16186,6 +16848,11 @@
           "name": "Flora of North America",
           "url": "https://floranorthamerica.org/Quercus_viminea",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUVI2",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -16254,6 +16921,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quevir/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUVI",
+          "logo": "usda"
         }
       ],
       "sources": [
@@ -16347,6 +17019,11 @@
           "name": "Fire Effects Information System",
           "url": "https://www.fs.usda.gov/database/feis/plants/tree/quewis/all.html",
           "logo": ""
+        },
+        {
+          "name": "USDA Plants Database",
+          "url": "https://plants.usda.gov/plant-profile/QUWI2",
+          "logo": "usda"
         }
       ],
       "sources": [
