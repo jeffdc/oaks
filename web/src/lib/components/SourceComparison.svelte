@@ -1,6 +1,7 @@
 <script>
   import { base } from '$app/paths';
   import { marked } from 'marked';
+  import DOMPurify from 'dompurify';
   import { getAllSources, formatSpeciesName } from '$lib/stores/dataStore.js';
 
   // Configure marked for safe rendering
@@ -57,13 +58,11 @@
     }
   }
 
-  // Render Markdown to HTML with sanitization
+  // Render Markdown to HTML with DOMPurify sanitization
   function renderMarkdown(text) {
     if (!text) return '';
-    let html = marked.parse(text);
-    html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-    html = html.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
-    return html;
+    const html = marked.parse(text);
+    return DOMPurify.sanitize(html);
   }
 
   // Render field value based on type

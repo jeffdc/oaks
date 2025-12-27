@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -64,17 +65,62 @@ func extractSection(body, heading string) string {
 	return strings.TrimSpace(rest[:nextLoc[0]])
 }
 
-// getEditor returns the user's preferred editor
-func getEditor() string {
-	if editor := os.Getenv("EDITOR"); editor != "" {
-		return editor
+// validateEditor checks that the editor path is safe to execute.
+// Returns the validated editor path or an error.
+func validateEditor(editor string) (string, error) {
+	// Reject empty editor
+	if editor == "" {
+		return "", fmt.Errorf("editor path is empty")
 	}
-	return "vi"
+
+	// Reject shell metacharacters that could enable command injection
+	dangerousChars := []string{";", "&", "|", "$", "`", "(", ")", "{", "}", "<", ">", "\n", "\r"}
+	for _, char := range dangerousChars {
+		if strings.Contains(editor, char) {
+			return "", fmt.Errorf("editor path contains dangerous character: %q", char)
+		}
+	}
+
+	// If it's an absolute path, verify it exists and is executable
+	if filepath.IsAbs(editor) {
+		info, err := os.Stat(editor)
+		if err != nil {
+			return "", fmt.Errorf("editor not found: %s", editor)
+		}
+		if info.IsDir() {
+			return "", fmt.Errorf("editor path is a directory: %s", editor)
+		}
+		// Check if file is executable (has any execute bit set)
+		if info.Mode().Perm()&0111 == 0 {
+			return "", fmt.Errorf("editor is not executable: %s", editor)
+		}
+		return editor, nil
+	}
+
+	// For relative paths or bare names, use LookPath to find the executable
+	path, err := exec.LookPath(editor)
+	if err != nil {
+		return "", fmt.Errorf("editor not found in PATH: %s", editor)
+	}
+
+	return path, nil
+}
+
+// getEditor returns the user's preferred editor
+func getEditor() (string, error) {
+	editor := os.Getenv("EDITOR")
+	if editor == "" {
+		editor = "vi"
+	}
+	return validateEditor(editor)
 }
 
 // openEditorWithExt opens the editor with the given content and file extension
 func openEditorWithExt(initialContent, ext string) (string, error) {
-	editor := getEditor()
+	editor, err := getEditor()
+	if err != nil {
+		return "", fmt.Errorf("invalid editor: %w", err)
+	}
 
 	tmpFile, err := os.CreateTemp("", "oak-*"+ext)
 	if err != nil {

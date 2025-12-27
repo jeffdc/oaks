@@ -2,6 +2,7 @@
   import { base } from '$app/paths';
   import { goto } from '$app/navigation';
   import { marked } from 'marked';
+  import DOMPurify from 'dompurify';
   import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName } from '$lib/stores/dataStore.js';
   import { getLogoIcon, getLinkLogoId } from '$lib/icons/index.js';
   import inaturalistLogo from '$lib/icons/inaturalist-logo.svg';
@@ -75,15 +76,11 @@
     return s.is_hybrid && !s.name.startsWith('×');
   }
 
-  // Render Markdown to HTML with sanitization
+  // Render Markdown to HTML with DOMPurify sanitization
   function renderMarkdown(text) {
     if (!text) return '';
-    // Use marked to parse markdown, then sanitize dangerous tags
-    let html = marked.parse(text);
-    // Remove script tags and on* event handlers for safety
-    html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-    html = html.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
-    return html;
+    const html = marked.parse(text);
+    return DOMPurify.sanitize(html);
   }
 
   // Map conservation status codes to full names

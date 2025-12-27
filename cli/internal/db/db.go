@@ -294,7 +294,9 @@ func (db *Database) GetTaxon(name string, level models.TaxonLevel) (*models.Taxo
 	t.Level = models.TaxonLevel(levelStr)
 
 	if linksJSON.Valid && linksJSON.String != "" {
-		json.Unmarshal([]byte(linksJSON.String), &t.Links)
+		if err := json.Unmarshal([]byte(linksJSON.String), &t.Links); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal taxon links for %s: %w", t.Name, err)
+		}
 	}
 	if t.Links == nil {
 		t.Links = []models.TaxonLink{}
@@ -334,7 +336,9 @@ func (db *Database) ListTaxa(level *models.TaxonLevel) ([]*models.Taxon, error) 
 		t.Level = models.TaxonLevel(levelStr)
 
 		if linksJSON.Valid && linksJSON.String != "" {
-			json.Unmarshal([]byte(linksJSON.String), &t.Links)
+			if err := json.Unmarshal([]byte(linksJSON.String), &t.Links); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal taxon links for %s: %w", t.Name, err)
+			}
 		}
 		if t.Links == nil {
 			t.Links = []models.TaxonLink{}
@@ -409,7 +413,9 @@ func (db *Database) SearchTaxa(query string) ([]*models.Taxon, error) {
 		t.Level = models.TaxonLevel(levelStr)
 
 		if linksJSON.Valid && linksJSON.String != "" {
-			json.Unmarshal([]byte(linksJSON.String), &t.Links)
+			if err := json.Unmarshal([]byte(linksJSON.String), &t.Links); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal taxon links for %s: %w", t.Name, err)
+			}
 		}
 		if t.Links == nil {
 			t.Links = []models.TaxonLink{}
@@ -497,35 +503,45 @@ func (db *Database) GetOakEntry(scientificName string) (*models.OakEntry, error)
 
 	// Unmarshal JSON arrays
 	if hybridsJSON.Valid {
-		json.Unmarshal([]byte(hybridsJSON.String), &entry.Hybrids)
+		if err := json.Unmarshal([]byte(hybridsJSON.String), &entry.Hybrids); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal hybrids for %s: %w", entry.ScientificName, err)
+		}
 	}
 	if entry.Hybrids == nil {
 		entry.Hybrids = []string{}
 	}
 
 	if relatedJSON.Valid {
-		json.Unmarshal([]byte(relatedJSON.String), &entry.CloselyRelatedTo)
+		if err := json.Unmarshal([]byte(relatedJSON.String), &entry.CloselyRelatedTo); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal closely_related_to for %s: %w", entry.ScientificName, err)
+		}
 	}
 	if entry.CloselyRelatedTo == nil {
 		entry.CloselyRelatedTo = []string{}
 	}
 
 	if subspeciesJSON.Valid {
-		json.Unmarshal([]byte(subspeciesJSON.String), &entry.SubspeciesVarieties)
+		if err := json.Unmarshal([]byte(subspeciesJSON.String), &entry.SubspeciesVarieties); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal subspecies_varieties for %s: %w", entry.ScientificName, err)
+		}
 	}
 	if entry.SubspeciesVarieties == nil {
 		entry.SubspeciesVarieties = []string{}
 	}
 
 	if synonymsJSON.Valid {
-		json.Unmarshal([]byte(synonymsJSON.String), &entry.Synonyms)
+		if err := json.Unmarshal([]byte(synonymsJSON.String), &entry.Synonyms); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal synonyms for %s: %w", entry.ScientificName, err)
+		}
 	}
 	if entry.Synonyms == nil {
 		entry.Synonyms = []string{}
 	}
 
 	if externalLinksJSON.Valid {
-		json.Unmarshal([]byte(externalLinksJSON.String), &entry.ExternalLinks)
+		if err := json.Unmarshal([]byte(externalLinksJSON.String), &entry.ExternalLinks); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal external_links for %s: %w", entry.ScientificName, err)
+		}
 	}
 	if entry.ExternalLinks == nil {
 		entry.ExternalLinks = []models.ExternalLink{}
@@ -630,35 +646,45 @@ func (db *Database) ListOakEntries() ([]*models.OakEntry, error) {
 
 		// Unmarshal JSON arrays
 		if hybridsJSON.Valid {
-			json.Unmarshal([]byte(hybridsJSON.String), &entry.Hybrids)
+			if err := json.Unmarshal([]byte(hybridsJSON.String), &entry.Hybrids); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal hybrids for %s: %w", entry.ScientificName, err)
+			}
 		}
 		if entry.Hybrids == nil {
 			entry.Hybrids = []string{}
 		}
 
 		if relatedJSON.Valid {
-			json.Unmarshal([]byte(relatedJSON.String), &entry.CloselyRelatedTo)
+			if err := json.Unmarshal([]byte(relatedJSON.String), &entry.CloselyRelatedTo); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal closely_related_to for %s: %w", entry.ScientificName, err)
+			}
 		}
 		if entry.CloselyRelatedTo == nil {
 			entry.CloselyRelatedTo = []string{}
 		}
 
 		if subspeciesJSON.Valid {
-			json.Unmarshal([]byte(subspeciesJSON.String), &entry.SubspeciesVarieties)
+			if err := json.Unmarshal([]byte(subspeciesJSON.String), &entry.SubspeciesVarieties); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal subspecies_varieties for %s: %w", entry.ScientificName, err)
+			}
 		}
 		if entry.SubspeciesVarieties == nil {
 			entry.SubspeciesVarieties = []string{}
 		}
 
 		if synonymsJSON.Valid {
-			json.Unmarshal([]byte(synonymsJSON.String), &entry.Synonyms)
+			if err := json.Unmarshal([]byte(synonymsJSON.String), &entry.Synonyms); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal synonyms for %s: %w", entry.ScientificName, err)
+			}
 		}
 		if entry.Synonyms == nil {
 			entry.Synonyms = []string{}
 		}
 
 		if externalLinksJSON.Valid {
-			json.Unmarshal([]byte(externalLinksJSON.String), &entry.ExternalLinks)
+			if err := json.Unmarshal([]byte(externalLinksJSON.String), &entry.ExternalLinks); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal external_links for %s: %w", entry.ScientificName, err)
+			}
 		}
 		if entry.ExternalLinks == nil {
 			entry.ExternalLinks = []models.ExternalLink{}
@@ -697,7 +723,10 @@ func (db *Database) SaveSpeciesSource(ss *models.SpeciesSource) error {
 	}
 
 	if ss.ID == 0 {
-		id, _ := result.LastInsertId()
+		id, err := result.LastInsertId()
+		if err != nil {
+			return fmt.Errorf("failed to get last insert id: %w", err)
+		}
 		ss.ID = id
 	}
 	return nil
@@ -756,7 +785,9 @@ func (db *Database) GetSpeciesSourceBySourceID(scientificName string, sourceID i
 
 	ss.IsPreferred = isPreferred != 0
 	if localNamesJSON.Valid {
-		json.Unmarshal([]byte(localNamesJSON.String), &ss.LocalNames)
+		if err := json.Unmarshal([]byte(localNamesJSON.String), &ss.LocalNames); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal local_names for %s: %w", ss.ScientificName, err)
+		}
 	}
 	if ss.LocalNames == nil {
 		ss.LocalNames = []string{}
@@ -793,7 +824,9 @@ func (db *Database) GetPreferredSpeciesSource(scientificName string) (*models.Sp
 
 	ss.IsPreferred = isPreferred != 0
 	if localNamesJSON.Valid {
-		json.Unmarshal([]byte(localNamesJSON.String), &ss.LocalNames)
+		if err := json.Unmarshal([]byte(localNamesJSON.String), &ss.LocalNames); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal local_names for %s: %w", ss.ScientificName, err)
+		}
 	}
 	if ss.LocalNames == nil {
 		ss.LocalNames = []string{}
@@ -819,7 +852,9 @@ func scanSpeciesSource(rows *sql.Rows) (*models.SpeciesSource, error) {
 
 	ss.IsPreferred = isPreferred != 0
 	if localNamesJSON.Valid {
-		json.Unmarshal([]byte(localNamesJSON.String), &ss.LocalNames)
+		if err := json.Unmarshal([]byte(localNamesJSON.String), &ss.LocalNames); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal local_names for %s: %w", ss.ScientificName, err)
+		}
 	}
 	if ss.LocalNames == nil {
 		ss.LocalNames = []string{}
