@@ -47,6 +47,9 @@ export const selectedSpecies = writable(null);
 // Store for data source info
 export const dataSource = writable({ from: null, version: null });
 
+// Semaphore to prevent concurrent data updates
+let isUpdating = false;
+
 // Derived store: filtered species based on search
 export const filteredSpecies = derived(
   [allSpecies, searchQuery],
@@ -67,9 +70,9 @@ export const filteredSpecies = derived(
       )) return true;
 
       // Search in local names (common names) from all sources
-      if (species.sources && species.sources.some(source =>
-        source.local_names && source.local_names.some(name =>
-          name.toLowerCase().includes(query)
+      if ((species.sources || []).some(source =>
+        (source.local_names || []).some(name =>
+          name && name.toLowerCase().includes(query)
         )
       )) return true;
 
@@ -196,43 +199,65 @@ export async function loadSpeciesData() {
  * Fetch JSON and populate IndexedDB
  */
 async function fetchAndCacheData() {
-  // Cache-bust to bypass CDN caching
-  const dataUrl = `${base}/quercus_data.json?t=${Date.now()}`;
-  const response = await fetch(dataUrl, {
-    cache: 'no-store'
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to load data: ${response.statusText}`);
+  // Prevent concurrent updates
+  if (isUpdating) {
+    // Wait briefly and retry - another update is in progress
+    await new Promise(resolve => setTimeout(resolve, 100));
+    if (isUpdating) {
+      throw new Error('Data update already in progress');
+    }
   }
 
-  const data = await response.json();
+  try {
+    isUpdating = true;
 
-  // Normalize data format (handle both old flat format and new format with metadata)
-  const normalizedData = normalizeJsonData(data);
+    // Cache-bust to bypass CDN caching
+    const dataUrl = `${base}/quercus_data.json?t=${Date.now()}`;
+    const response = await fetch(dataUrl, {
+      cache: 'no-store'
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to load data: ${response.statusText}`);
+    }
 
-  // Populate IndexedDB
-  await populateFromJson(normalizedData);
+    const data = await response.json();
 
-  // Load from IndexedDB (ensures consistent data format)
-  const species = await getAllSpecies();
-  allSpecies.set(species);
+    // Normalize data format (handle both old flat format and new format with metadata)
+    const normalizedData = normalizeJsonData(data);
 
-  // Load sources for search
-  const sources = await getAllSourcesInfo();
-  allSources.set(sources);
+    // Populate IndexedDB
+    await populateFromJson(normalizedData);
 
-  const metadata = await getMetadata();
-  dataSource.set({ from: 'json', version: metadata.dataVersion });
-  isLoading.set(false);
+    // Load from IndexedDB (ensures consistent data format)
+    const species = await getAllSpecies();
+    allSpecies.set(species);
 
-  return species;
+    // Load sources for search
+    const sources = await getAllSourcesInfo();
+    allSources.set(sources);
+
+    const metadata = await getMetadata();
+    dataSource.set({ from: 'json', version: metadata.dataVersion });
+    isLoading.set(false);
+
+    return species;
+  } finally {
+    isUpdating = false;
+  }
 }
 
 /**
  * Check if JSON has newer data than IndexedDB
  */
 async function checkForUpdates() {
+  // Prevent concurrent updates which could cause race conditions
+  if (isUpdating) {
+    return;
+  }
+
   try {
+    isUpdating = true;
+
     // Cache-bust to bypass both browser and CDN caching
     const dataUrl = `${base}/quercus_data.json?t=${Date.now()}`;
     const response = await fetch(dataUrl, {
@@ -260,6 +285,8 @@ async function checkForUpdates() {
     }
   } catch (err) {
     // Non-fatal - we already have data
+  } finally {
+    isUpdating = false;
   }
 }
 

@@ -39,7 +39,6 @@ def main():
     force_restart = '--restart' in sys.argv
     test_mode = '--test' in sys.argv
     no_cache = '--no-cache' in sys.argv
-    no_ssl_verify = '--no-ssl-verify' in sys.argv
     limit = None
 
     # Check for --limit=N argument
@@ -65,13 +64,6 @@ def main():
         if cache_count > 0:
             print(f"Cache enabled: {cache_count} pages cached")
 
-    # SSL verification settings
-    verify_ssl = not no_ssl_verify
-    if no_ssl_verify:
-        print("WARNING: SSL certificate verification disabled")
-        import urllib3
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    
     if force_restart:
         print("Force restart requested, ignoring previous progress...")
         clear_progress()
@@ -88,7 +80,7 @@ def main():
     # Fetch species list if we don't have it yet
     if not progress['species_links']:
         print("Fetching species list...")
-        list_html = fetch_page(LIST_URL, use_cache=use_cache, verify_ssl=verify_ssl)
+        list_html = fetch_page(LIST_URL, use_cache=use_cache)
         if not list_html:
             print("Failed to fetch species list")
             return
@@ -141,7 +133,7 @@ def main():
         print(f"\nProcessing {current_num}/{total}: {item['name']}")
         
         try:
-            page_html = fetch_page(item['url'], use_cache=use_cache, verify_ssl=verify_ssl)
+            page_html = fetch_page(item['url'], use_cache=use_cache)
             if not page_html:
                 print(f"  Failed to fetch page")
                 progress['failed'].append(item['url'])

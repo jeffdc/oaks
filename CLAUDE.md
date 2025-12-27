@@ -6,11 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. The project consists of three main components:
+The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. The project consists of four main components:
 
 1. **Python Scraper** - Extracts oak species data from oaksoftheworld.fr
 2. **Web Application** - Modern Svelte 5 PWA for browsing species data
 3. **CLI Tool** - Go-based command-line tool for managing taxonomic data (in development)
+4. **iOS App** - Native SwiftUI app for field identification (in development, on `ios-app` branch)
 
 ## Repository Structure
 
@@ -30,6 +31,8 @@ oaks/
 │   ├── internal/             # Internal packages (db, models, schema, editor)
 │   ├── go.mod                # cobra, go-sqlite3, yaml.v3, jsonschema
 │   └── docs/oak_cli.md       # CLI specification (historical)
+├── ios/                      # iOS app (SwiftUI, on ios-app branch)
+│   └── OakCompendium/        # Xcode project
 ├── tmp/                      # Temporary/working files (gitignored)
 │   ├── scraper/              # Scraper cache and progress files
 │   └── data/                 # Working data files (e.g., iNaturalist imports)

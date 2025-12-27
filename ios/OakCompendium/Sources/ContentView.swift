@@ -1,12 +1,11 @@
 import SwiftUI
 
+@MainActor
 struct ContentView: View {
+    @State private var viewModel = NotesViewModel()
+
     var body: some View {
-        NavigationStack {
-            Text("Oak Compendium")
-                .font(.largeTitle)
-                .navigationTitle("Oak Compendium")
-        }
+        NotesListView(viewModel: viewModel)
     }
 }
 

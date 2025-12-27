@@ -10,6 +10,13 @@
 		A1000001AAAAAAAA00000001 /* OakCompendiumApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002AAAAAAAA00000001 /* OakCompendiumApp.swift */; };
 		A1000003AAAAAAAA00000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004AAAAAAAA00000001 /* ContentView.swift */; };
 		A1000005AAAAAAAA00000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1000006AAAAAAAA00000001 /* Assets.xcassets */; };
+		B1000001BBBBBBBB00000001 /* TaxonomyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000002BBBBBBBB00000001 /* TaxonomyPath.swift */; };
+		B1000003BBBBBBBB00000001 /* NoteField.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000004BBBBBBBB00000001 /* NoteField.swift */; };
+		B1000005BBBBBBBB00000001 /* SpeciesNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000006BBBBBBBB00000001 /* SpeciesNote.swift */; };
+		B1000007BBBBBBBB00000001 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000008BBBBBBBB00000001 /* StorageService.swift */; };
+		C1000001CCCCCCCC00000001 /* NotesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000002CCCCCCCC00000001 /* NotesViewModel.swift */; };
+		C1000003CCCCCCCC00000001 /* NotesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000004CCCCCCCC00000001 /* NotesListView.swift */; };
+		C1000005CCCCCCCC00000001 /* NewNoteSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000006CCCCCCCC00000001 /* NewNoteSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -18,6 +25,13 @@
 		A1000004AAAAAAAA00000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A1000006AAAAAAAA00000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1000008AAAAAAAA00000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B1000002BBBBBBBB00000001 /* TaxonomyPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonomyPath.swift; sourceTree = "<group>"; };
+		B1000004BBBBBBBB00000001 /* NoteField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteField.swift; sourceTree = "<group>"; };
+		B1000006BBBBBBBB00000001 /* SpeciesNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesNote.swift; sourceTree = "<group>"; };
+		B1000008BBBBBBBB00000001 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
+		C1000002CCCCCCCC00000001 /* NotesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesViewModel.swift; sourceTree = "<group>"; };
+		C1000004CCCCCCCC00000001 /* NotesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesListView.swift; sourceTree = "<group>"; };
+		C1000006CCCCCCCC00000001 /* NewNoteSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewNoteSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +76,10 @@
 			children = (
 				A1000002AAAAAAAA00000001 /* OakCompendiumApp.swift */,
 				A1000004AAAAAAAA00000001 /* ContentView.swift */,
+				B100000ABBBBBBBB00000001 /* Models */,
+				C100000ACCCCCCCC00000001 /* ViewModels */,
+				C100000BCCCCCCCC00000001 /* Views */,
+				B100000BBBBBBBBB00000001 /* Services */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -72,6 +90,41 @@
 				A1000006AAAAAAAA00000001 /* Assets.xcassets */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		B100000ABBBBBBBB00000001 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B1000002BBBBBBBB00000001 /* TaxonomyPath.swift */,
+				B1000004BBBBBBBB00000001 /* NoteField.swift */,
+				B1000006BBBBBBBB00000001 /* SpeciesNote.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		B100000BBBBBBBBB00000001 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				B1000008BBBBBBBB00000001 /* StorageService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		C100000ACCCCCCCC00000001 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				C1000002CCCCCCCC00000001 /* NotesViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		C100000BCCCCCCCC00000001 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				C1000004CCCCCCCC00000001 /* NotesListView.swift */,
+				C1000006CCCCCCCC00000001 /* NewNoteSheet.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -145,6 +198,13 @@
 			files = (
 				A1000001AAAAAAAA00000001 /* OakCompendiumApp.swift in Sources */,
 				A1000003AAAAAAAA00000001 /* ContentView.swift in Sources */,
+				B1000001BBBBBBBB00000001 /* TaxonomyPath.swift in Sources */,
+				B1000003BBBBBBBB00000001 /* NoteField.swift in Sources */,
+				B1000005BBBBBBBB00000001 /* SpeciesNote.swift in Sources */,
+				B1000007BBBBBBBB00000001 /* StorageService.swift in Sources */,
+				C1000001CCCCCCCC00000001 /* NotesViewModel.swift in Sources */,
+				C1000003CCCCCCCC00000001 /* NotesListView.swift in Sources */,
+				C1000005CCCCCCCC00000001 /* NewNoteSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
