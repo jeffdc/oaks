@@ -6,11 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. The project consists of three main components:
+The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. The project consists of four main components:
 
 1. **Python Scraper** - Extracts oak species data from oaksoftheworld.fr
 2. **Web Application** - Modern Svelte 5 PWA for browsing species data
 3. **CLI Tool** - Go-based command-line tool for managing taxonomic data (in development)
+4. **iOS App** - Native SwiftUI app for field identification (in development, on `ios-app` branch)
 
 ## Repository Structure
 
@@ -30,6 +31,8 @@ oaks/
 │   ├── internal/             # Internal packages (db, models, schema, editor)
 │   ├── go.mod                # cobra, go-sqlite3, yaml.v3, jsonschema
 │   └── docs/oak_cli.md       # CLI specification (historical)
+├── ios/                      # iOS app (SwiftUI, on ios-app branch)
+│   └── OakCompendium/        # Xcode project
 ├── tmp/                      # Temporary/working files (gitignored)
 │   ├── scraper/              # Scraper cache and progress files
 │   └── data/                 # Working data files (e.g., iNaturalist imports)
@@ -611,6 +614,29 @@ go build -o oak .
 - This project uses Beads for issue tracking (see `.beads/` and session startup hook)
 - Before completing work: `bd sync --from-main` to pull latest beads
 - Commit messages: Present tense, imperative mood (see `CONTRIBUTING.md`)
+
+### Branch Workflow: iOS App Development
+
+**IMPORTANT FOR CLAUDE**: Check `git branch --show-current` before starting work. The branch shown in the session git status tells you which effort you're working on.
+
+**Active Branches**:
+- `main` - Web app, CLI, scrapers. Pushes trigger GitHub Actions deploy.
+- `ios-app` - iOS app development. Pushes do NOT trigger Actions (no deployment yet).
+
+**Branch-Specific Rules**:
+- When on `ios-app`: Only commit iOS-related changes. Do NOT switch to main or push to main.
+- When on `main`: Only commit web/CLI/scraper changes. Do NOT touch `ios/` directory.
+- **Stay on your branch** - if the session starts on `ios-app`, stay there unless explicitly asked to switch.
+
+**Beads Naming Convention**:
+- iOS issues: Prefix with `[iOS]` - e.g., `bd create --title="[iOS] Add speech recognition" --type=feature`
+- Web/CLI issues: No prefix needed (these are the default)
+- Filter iOS work: `bd list | grep iOS`
+
+**Merging iOS to Main** (when ready for production):
+1. Ensure all iOS beads are closed or moved
+2. `git checkout main && git merge ios-app`
+3. Push will trigger full CI/CD pipeline
 
 ### Critical: Files That Must Be Tracked
 - **`cli/oak_compendium.db`**: The SQLite database MUST be committed to git. This is the authoritative data source for the project. Do NOT add it to .gitignore or remove it from tracking.
