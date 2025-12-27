@@ -17,6 +17,8 @@
 		C1000001CCCCCCCC00000001 /* NotesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000002CCCCCCCC00000001 /* NotesViewModel.swift */; };
 		C1000003CCCCCCCC00000001 /* NotesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000004CCCCCCCC00000001 /* NotesListView.swift */; };
 		C1000005CCCCCCCC00000001 /* NewNoteSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000006CCCCCCCC00000001 /* NewNoteSheet.swift */; };
+		D1000001DDDDDDDD00000001 /* SpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1000002DDDDDDDD00000001 /* SpeechService.swift */; };
+		D1000003DDDDDDDD00000001 /* DictationModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1000004DDDDDDDD00000001 /* DictationModal.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +34,8 @@
 		C1000002CCCCCCCC00000001 /* NotesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesViewModel.swift; sourceTree = "<group>"; };
 		C1000004CCCCCCCC00000001 /* NotesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesListView.swift; sourceTree = "<group>"; };
 		C1000006CCCCCCCC00000001 /* NewNoteSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewNoteSheet.swift; sourceTree = "<group>"; };
+		D1000002DDDDDDDD00000001 /* SpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechService.swift; sourceTree = "<group>"; };
+		D1000004DDDDDDDD00000001 /* DictationModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationModal.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				B1000008BBBBBBBB00000001 /* StorageService.swift */,
+				D1000002DDDDDDDD00000001 /* SpeechService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -123,6 +128,7 @@
 			children = (
 				C1000004CCCCCCCC00000001 /* NotesListView.swift */,
 				C1000006CCCCCCCC00000001 /* NewNoteSheet.swift */,
+				D1000004DDDDDDDD00000001 /* DictationModal.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -205,6 +211,8 @@
 				C1000001CCCCCCCC00000001 /* NotesViewModel.swift in Sources */,
 				C1000003CCCCCCCC00000001 /* NotesListView.swift in Sources */,
 				C1000005CCCCCCCC00000001 /* NewNoteSheet.swift in Sources */,
+				D1000001DDDDDDDD00000001 /* SpeechService.swift in Sources */,
+				D1000003DDDDDDDD00000001 /* DictationModal.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
