@@ -395,33 +395,25 @@
               aria-selected={selectedSourceId === source.source_id}
               on:click={() => selectedSourceId = source.source_id}
             >
-              <span
-                class="source-tab-name-link"
-                role="link"
-                tabindex="0"
-                on:click|stopPropagation={() => goto(`${base}/sources/${source.source_id}/`)}
-                on:keydown|stopPropagation={(e) => e.key === 'Enter' && goto(`${base}/sources/${source.source_id}/`)}
-              >{source.source_name}</span>
+              <span class="source-tab-name">{source.source_name}</span>
               {#if source.is_preferred}
                 <span class="preferred-badge" title="Preferred source">★</span>
               {/if}
               {#if source.license}
                 <span class="license-icon" title={source.license === "All Rights Reserved" ? "All Rights Reserved" : source.license}>©</span>
               {/if}
-              {#if source.source_url}
-                <a
-                  href={source.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="source-tab-link"
-                  title="Visit source"
-                  on:click|stopPropagation
-                >
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              {/if}
+              <span
+                class="source-tab-link"
+                role="link"
+                tabindex="0"
+                title="View source details"
+                on:click|stopPropagation={() => goto(`${base}/sources/${source.source_id}/`)}
+                on:keydown|stopPropagation={(e) => e.key === 'Enter' && goto(`${base}/sources/${source.source_id}/`)}
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </span>
             </button>
           {/each}
           {#if sources.length > 1}
@@ -944,20 +936,6 @@
     white-space: nowrap;
   }
 
-  .source-tab-name-link {
-    white-space: nowrap;
-    color: inherit;
-    text-decoration: none;
-    transition: color 0.15s ease;
-    cursor: pointer;
-  }
-
-  .source-tab-name-link:hover {
-    color: var(--color-forest-600);
-    text-decoration: underline;
-    text-decoration-color: var(--color-forest-400);
-  }
-
   .preferred-badge {
     color: var(--color-oak-brown);
     font-size: 0.75rem;
@@ -976,6 +954,7 @@
     padding: 0.125rem;
     border-radius: 0.25rem;
     transition: all 0.15s ease;
+    cursor: pointer;
   }
 
   .source-tab-link:hover {
