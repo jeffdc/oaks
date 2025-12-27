@@ -4,10 +4,21 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/jeff/oaks/cli/internal/models"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+// escapeLike escapes special characters in SQL LIKE patterns.
+// This prevents user input from manipulating query semantics.
+// The escape character is '\' which must be specified in the LIKE clause.
+func escapeLike(s string) string {
+	s = strings.ReplaceAll(s, `\`, `\\`)
+	s = strings.ReplaceAll(s, `%`, `\%`)
+	s = strings.ReplaceAll(s, `_`, `\_`)
+	return s
+}
 
 // Database wraps the SQLite connection
 type Database struct {
@@ -388,10 +399,11 @@ func (db *Database) DeleteTaxon(name string, level models.TaxonLevel) error {
 
 // SearchTaxa searches taxa by name pattern (case-insensitive)
 func (db *Database) SearchTaxa(query string) ([]*models.Taxon, error) {
+	pattern := "%" + escapeLike(query) + "%"
 	rows, err := db.conn.Query(
 		`SELECT name, level, parent, author, notes, links FROM taxa
-		 WHERE name LIKE ? ORDER BY level, name`,
-		"%"+query+"%",
+		 WHERE name LIKE ? ESCAPE '\' ORDER BY level, name`,
+		pattern,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search taxa: %w", err)
@@ -548,10 +560,10 @@ func (db *Database) DeleteOakEntry(scientificName string) error {
 
 // SearchOakEntries searches for oak entries by name pattern
 func (db *Database) SearchOakEntries(query string) ([]string, error) {
-	pattern := "%" + query + "%"
+	pattern := "%" + escapeLike(query) + "%"
 	rows, err := db.conn.Query(
 		`SELECT scientific_name FROM oak_entries
-		 WHERE scientific_name LIKE ? ORDER BY scientific_name`,
+		 WHERE scientific_name LIKE ? ESCAPE '\' ORDER BY scientific_name`,
 		pattern,
 	)
 	if err != nil {
@@ -572,10 +584,10 @@ func (db *Database) SearchOakEntries(query string) ([]string, error) {
 
 // SearchSources searches for sources by name pattern
 func (db *Database) SearchSources(query string) ([]int64, error) {
-	pattern := "%" + query + "%"
+	pattern := "%" + escapeLike(query) + "%"
 	rows, err := db.conn.Query(
 		`SELECT id FROM sources
-		 WHERE name LIKE ? ORDER BY name`,
+		 WHERE name LIKE ? ESCAPE '\' ORDER BY name`,
 		pattern,
 	)
 	if err != nil {

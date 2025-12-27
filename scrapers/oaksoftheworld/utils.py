@@ -7,6 +7,7 @@ Handles caching, file I/O, progress tracking, and HTTP requests
 import os
 import json
 import time
+import hashlib
 import requests
 from pathlib import Path
 from urllib.parse import urlparse
@@ -23,25 +24,31 @@ DELAY_SECONDS = 0.25
 
 
 def get_cache_path(url):
-    """Generate a cache file path for a URL"""
+    """Generate a cache file path for a URL using a hash to prevent collisions"""
     os.makedirs(CACHE_DIR, exist_ok=True)
-    
-    # Use URL path as filename (more readable than hash)
+
+    # Use SHA-256 hash of full URL to prevent path collisions
+    # Different URLs with the same filename (e.g., /a/page.html vs /b/page.html)
+    # will get different cache files
+    url_hash = hashlib.sha256(url.encode('utf-8')).hexdigest()[:16]
+
+    # Keep original filename for readability, but prefix with hash
     parsed = urlparse(url)
     filename = parsed.path.split('/')[-1]
     if not filename or filename == '':
         filename = 'index.html'
-    
-    return os.path.join(CACHE_DIR, filename)
+
+    # Format: <hash>_<original_filename>
+    safe_filename = f"{url_hash}_{filename}"
+    return os.path.join(CACHE_DIR, safe_filename)
 
 
-def fetch_page(url, use_cache=True, verify_ssl=True):
+def fetch_page(url, use_cache=True):
     """Fetch a page with error handling, rate limiting, and caching
 
     Args:
         url: The URL to fetch
         use_cache: Whether to use cached version if available
-        verify_ssl: Whether to verify SSL certificates (default: True)
     """
     cache_path = get_cache_path(url)
 
@@ -54,10 +61,10 @@ def fetch_page(url, use_cache=True, verify_ssl=True):
         except Exception as e:
             print(f"  [CACHE] Error reading cache: {e}, fetching fresh")
 
-    # Fetch from web
+    # Fetch from web (always verify SSL for security)
     try:
         time.sleep(DELAY_SECONDS)
-        response = requests.get(url, timeout=10, verify=verify_ssl)
+        response = requests.get(url, timeout=10, verify=True)
         response.raise_for_status()
         html = response.text
 
