@@ -615,6 +615,35 @@ go build -o oak .
 - Before completing work: `bd sync --from-main` to pull latest beads
 - Commit messages: Present tense, imperative mood (see `CONTRIBUTING.md`)
 
+### Beads Naming
+Use component prefixes when creating beads:
+- `cli-` for CLI tool issues
+- `web-` for web application issues
+- `ios-` for iOS app issues
+
+Ask before introducing new prefixes.
+
+### Multi-Agent Workflows
+Multiple Claude Code agents can work in parallel on this project. To avoid conflicts:
+
+**Setup**: Run multiple terminal sessions in the same worktree, with each agent focused on a specific component:
+- Agent 1: `ios/` directory only
+- Agent 2: `web/` directory only
+- Agent 3: `cli/` directory only
+
+**Beads Coordination**:
+- All agents share the same beads database automatically
+- Each agent should run `bd sync` at session start and end
+- Use component prefixes (`ios-`, `web-`, `cli-`) when creating beads so agents can filter to their domain
+- Beads merge driver handles field-level conflicts if the same issue is edited by multiple agents
+
+**Git Coordination**:
+- Agents must stay in their designated directories to avoid merge conflicts
+- If git lock errors occur (one agent mid-commit while another commits), retry after a moment
+- For more isolation, use feature branches per agent (`ios-feature`, `web-feature`) and merge when done
+
+**Alternative - Git Worktrees**: For full isolation, create separate worktrees per agent. Note: daemon mode doesn't work with worktrees, so use `bd sync` manually or `--no-daemon`.
+
 ### Critical: Files That Must Be Tracked
 - **`cli/oak_compendium.db`**: The SQLite database MUST be committed to git. This is the authoritative data source for the project. Do NOT add it to .gitignore or remove it from tracking.
 
