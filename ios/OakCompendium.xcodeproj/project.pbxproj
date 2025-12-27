@@ -19,6 +19,10 @@
 		C1000005CCCCCCCC00000001 /* NewNoteSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000006CCCCCCCC00000001 /* NewNoteSheet.swift */; };
 		D1000001DDDDDDDD00000001 /* SpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1000002DDDDDDDD00000001 /* SpeechService.swift */; };
 		D1000003DDDDDDDD00000001 /* DictationModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1000004DDDDDDDD00000001 /* DictationModal.swift */; };
+		E1000001EEEEEEEE00000001 /* Source.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1000002EEEEEEEE00000001 /* Source.swift */; };
+		E1000003EEEEEEEE00000001 /* SpeciesReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1000004EEEEEEEE00000001 /* SpeciesReference.swift */; };
+		E1000005EEEEEEEE00000001 /* TaxonomyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1000006EEEEEEEE00000001 /* TaxonomyService.swift */; };
+		E1000007EEEEEEEE00000001 /* quercus_data.json in Resources */ = {isa = PBXBuildFile; fileRef = E1000008EEEEEEEE00000001 /* quercus_data.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +40,10 @@
 		C1000006CCCCCCCC00000001 /* NewNoteSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewNoteSheet.swift; sourceTree = "<group>"; };
 		D1000002DDDDDDDD00000001 /* SpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechService.swift; sourceTree = "<group>"; };
 		D1000004DDDDDDDD00000001 /* DictationModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationModal.swift; sourceTree = "<group>"; };
+		E1000002EEEEEEEE00000001 /* Source.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Source.swift; sourceTree = "<group>"; };
+		E1000004EEEEEEEE00000001 /* SpeciesReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesReference.swift; sourceTree = "<group>"; };
+		E1000006EEEEEEEE00000001 /* TaxonomyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonomyService.swift; sourceTree = "<group>"; };
+		E1000008EEEEEEEE00000001 /* quercus_data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = quercus_data.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				A1000006AAAAAAAA00000001 /* Assets.xcassets */,
+				E1000008EEEEEEEE00000001 /* quercus_data.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -102,6 +111,8 @@
 				B1000002BBBBBBBB00000001 /* TaxonomyPath.swift */,
 				B1000004BBBBBBBB00000001 /* NoteField.swift */,
 				B1000006BBBBBBBB00000001 /* SpeciesNote.swift */,
+				E1000002EEEEEEEE00000001 /* Source.swift */,
+				E1000004EEEEEEEE00000001 /* SpeciesReference.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -111,6 +122,7 @@
 			children = (
 				B1000008BBBBBBBB00000001 /* StorageService.swift */,
 				D1000002DDDDDDDD00000001 /* SpeechService.swift */,
+				E1000006EEEEEEEE00000001 /* TaxonomyService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -192,6 +204,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000005AAAAAAAA00000001 /* Assets.xcassets in Resources */,
+				E1000007EEEEEEEE00000001 /* quercus_data.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -213,6 +226,9 @@
 				C1000005CCCCCCCC00000001 /* NewNoteSheet.swift in Sources */,
 				D1000001DDDDDDDD00000001 /* SpeechService.swift in Sources */,
 				D1000003DDDDDDDD00000001 /* DictationModal.swift in Sources */,
+				E1000001EEEEEEEE00000001 /* Source.swift in Sources */,
+				E1000003EEEEEEEE00000001 /* SpeciesReference.swift in Sources */,
+				E1000005EEEEEEEE00000001 /* TaxonomyService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

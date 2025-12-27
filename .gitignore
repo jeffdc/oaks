@@ -56,6 +56,11 @@ web/.vite/
 # macOS
 .DS_Store
 
+# Xcode
+ios/OakCompendium.xcodeproj/xcuserdata/
+ios/OakCompendium.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcuserstate
+
 # Generated files (temp exports, not the main quercus_data.json)
 quercus_export.json
 
