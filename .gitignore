@@ -29,6 +29,7 @@ ENV/
 # IDE
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 *~
@@ -58,7 +59,7 @@ web/.vite/
 
 # Xcode
 ios/OakCompendium.xcodeproj/xcuserdata/
-ios/OakCompendium.xcodeproj/project.xcworkspace/xcuserdata/
+ios/OakCompendium.xcodeproj/project.xcworkspace/
 *.xcuserstate
 
 # Generated files (temp exports, not the main quercus_data.json)
