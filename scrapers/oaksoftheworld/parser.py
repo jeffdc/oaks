@@ -319,15 +319,41 @@ def parse_conservation_status(misc_text):
 
 
 def parse_hybrid_parents(synonym_text, species_name):
-    """Parse hybrid parent formula like 'alba x macrocarpa'"""
+    """Parse hybrid parent formula like 'alba x macrocarpa'
+
+    The parent formula is typically at the end of the synonym text in formats like:
+    - "cerris x suber"
+    - "alba X macrocarpa" (case insensitive)
+
+    We validate that both parent names:
+    - Are at least 3 characters long
+    - Contain only letters (no numbers, which would indicate years)
+    - Look like plausible species names
+    """
     if not synonym_text:
         return None, None, None
 
-    # Look for pattern: "species1 x species2"
-    match = re.search(r'(\w+)\s*x\s*(\w+)', synonym_text, re.IGNORECASE)
-    if match:
-        parent1 = f"Quercus {match.group(1)}"
-        parent2 = f"Quercus {match.group(2)}"
+    # Look for pattern: "species1 x species2" or "species1 X species2"
+    # Prefer matches near the end of the text (more likely to be correct)
+    # Species names must be alphabetic and at least 3 chars
+    pattern = r'([a-zA-Z]{3,})\s*[xX×]\s*([a-zA-Z]{3,})'
+
+    # Find all matches and use the last one (most likely the actual hybrid formula)
+    matches = list(re.finditer(pattern, synonym_text))
+
+    if matches:
+        # Use the last match (usually the actual formula at end of text)
+        match = matches[-1]
+        parent1_name = match.group(1).lower()
+        parent2_name = match.group(2).lower()
+
+        # Additional validation: reject common non-species words
+        invalid_words = {'var', 'subsp', 'nom', 'non', 'nec', 'illeg', 'inval'}
+        if parent1_name in invalid_words or parent2_name in invalid_words:
+            return None, None, None
+
+        parent1 = f"Quercus {parent1_name}"
+        parent2 = f"Quercus {parent2_name}"
         return synonym_text.strip(), parent1, parent2
 
     return None, None, None

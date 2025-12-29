@@ -54,9 +54,9 @@ Source-attributed descriptive data should be imported via import-oaksoftheworld.
 }
 
 func importBulk(database *db.Database, validator *schema.Validator, filePath string, srcID int64) error {
-	data, err := os.ReadFile(filePath)
+	data, err := readImportFile(filePath)
 	if err != nil {
-		return fmt.Errorf("failed to read import file: %w", err)
+		return err
 	}
 
 	var entries []models.OakEntry

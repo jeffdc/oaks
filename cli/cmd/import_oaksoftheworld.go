@@ -122,9 +122,9 @@ func runImportOaks(cmd *cobra.Command, args []string) error {
 	}
 
 	// Read JSON file
-	data, err := os.ReadFile(filePath)
+	data, err := readImportFile(filePath)
 	if err != nil {
-		return fmt.Errorf("failed to read file: %w", err)
+		return err
 	}
 
 	var scraperData ScraperData

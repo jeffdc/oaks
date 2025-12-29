@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/jeff/oaks/cli/internal/db"
 	"github.com/jeff/oaks/cli/internal/schema"
 	"github.com/spf13/cobra"
@@ -36,4 +39,31 @@ func getDB() (*db.Database, error) {
 // getSchema creates a new schema validator
 func getSchema() (*schema.Validator, error) {
 	return schema.FromFile(schemaPath)
+}
+
+// readImportFile validates and reads a file for import.
+// Validates that the path exists, is a regular file, and is readable.
+func readImportFile(filePath string) ([]byte, error) {
+	info, err := os.Stat(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, fmt.Errorf("file not found: %s", filePath)
+		}
+		return nil, fmt.Errorf("cannot access file: %w", err)
+	}
+
+	if info.IsDir() {
+		return nil, fmt.Errorf("path is a directory, not a file: %s", filePath)
+	}
+
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("path is not a regular file: %s", filePath)
+	}
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file: %w", err)
+	}
+
+	return data, nil
 }

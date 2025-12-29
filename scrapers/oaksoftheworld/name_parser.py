@@ -44,6 +44,43 @@ def strip_html_tags(text):
     return html.unescape(text)
 
 
+def strip_parenthetical_notes(text):
+    """
+    Strip parenthetical notes that appear between species name and author.
+
+    These are variant spellings or notes like:
+    - (fabri) in "fabrei (fabri) Hance"
+    - (-cus) in "gallaecica (-cus) Llamas & al."
+    - (auzandrii,) in "auzendei (auzandrii,) Gren. & Godr."
+
+    But NOT author citation parts like:
+    - (L.)Münchh. - note the parenthetical is attached to next word
+    - (Sarg.)Small
+
+    The key distinction: notes have whitespace after the closing paren,
+    author parts are directly attached to the following name.
+    """
+    # Pattern: opening paren, content, closing paren, followed by whitespace
+    # This captures notes like "(fabri) " but not "(L.)Münchh."
+    # We also handle patterns like "(x)" separately (hybrid markers)
+
+    # Repeatedly strip leading parenthetical notes
+    while True:
+        # Match: optional whitespace, open paren, content (not containing parens),
+        # close paren, followed by whitespace (not attached to next word)
+        match = re.match(r'^\s*\([^()]+\)\s+', text)
+        if match:
+            # Check if this looks like a hybrid marker (x) or (X)
+            content = match.group(0).strip()
+            if re.match(r'^\(x\)$', content, re.IGNORECASE):
+                break  # Don't strip hybrid markers
+            text = text[match.end():]
+        else:
+            break
+
+    return text.strip()
+
+
 def is_hybrid(text):
     """
     Check if text contains hybrid markers: (x) or x.
@@ -125,7 +162,10 @@ def parse_accepted_species(visible_text, url, species_from_url, raw_line):
         return None
 
     species_from_text = words[0].strip()
-    author = ' '.join(words[1:]).strip() if len(words) > 1 else None
+    # Get the rest and strip parenthetical notes before extracting author
+    remainder = ' '.join(words[1:]).strip() if len(words) > 1 else ''
+    remainder = strip_parenthetical_notes(remainder)
+    author = remainder if remainder else None
 
     # Ensure author is None if it's empty
     if author and not author.strip():
@@ -160,14 +200,18 @@ def parse_accepted_hybrid(visible_text, url, species_from_url, raw_line):
         text_after_x = re.sub(r'^[×x]\s*', '', visible_text, flags=re.IGNORECASE).strip()
         words = text_after_x.split()
         species_from_text = words[0].strip() if words else None
-        author = ' '.join(words[1:]).strip() if len(words) > 1 else None
+        remainder = ' '.join(words[1:]).strip() if len(words) > 1 else ''
     else:
         # Format: name (x) author or name(x)author
         # Remove (x) and x. markers
         text_no_marker = re.sub(r'\(x\)|x\.', '', visible_text, flags=re.IGNORECASE).strip()
         words = text_no_marker.split()
         species_from_text = words[0].strip() if words else None
-        author = ' '.join(words[1:]).strip() if len(words) > 1 else None
+        remainder = ' '.join(words[1:]).strip() if len(words) > 1 else ''
+
+    # Strip parenthetical notes before extracting author
+    remainder = strip_parenthetical_notes(remainder)
+    author = remainder if remainder else None
 
     # Ensure author is None if it's empty or just whitespace
     if author and not author.strip():
@@ -210,7 +254,10 @@ def parse_synonym_equals(visible_text, url, species_from_url, raw_line):
     # Extract synonym name and author (first word is name, rest is author)
     synonym_words = synonym_part.split()
     synonym_name = synonym_words[0].strip() if synonym_words else None
-    synonym_author = ' '.join(synonym_words[1:]).strip() if len(synonym_words) > 1 else None
+    synonym_remainder = ' '.join(synonym_words[1:]).strip() if len(synonym_words) > 1 else ''
+    # Strip parenthetical notes before extracting author
+    synonym_remainder = strip_parenthetical_notes(synonym_remainder)
+    synonym_author = synonym_remainder if synonym_remainder else None
 
     # Ensure synonym author is None if empty
     if synonym_author and not synonym_author.strip():
@@ -236,8 +283,10 @@ def parse_synonym_equals(visible_text, url, species_from_url, raw_line):
         accepted_name_text = None
         author_words = []
 
-    # Join the determined remaining author_words
-    accepted_author = ' '.join(author_words).strip() if author_words else None
+    # Join the determined remaining author_words and strip parenthetical notes
+    accepted_remainder = ' '.join(author_words).strip() if author_words else ''
+    accepted_remainder = strip_parenthetical_notes(accepted_remainder)
+    accepted_author = accepted_remainder if accepted_remainder else None
 
     # Ensure accepted author is None if empty
     if accepted_author and not accepted_author.strip():
@@ -285,7 +334,10 @@ def parse_synonym_see(visible_text, url, species_from_url, raw_line):
             # Extract name and author
             syn_words = syn.split()
             syn_name = syn_words[0].strip() if syn_words else None
-            syn_author = ' '.join(syn_words[1:]).strip() if len(syn_words) > 1 else None
+            syn_remainder = ' '.join(syn_words[1:]).strip() if len(syn_words) > 1 else ''
+            # Strip parenthetical notes before extracting author
+            syn_remainder = strip_parenthetical_notes(syn_remainder)
+            syn_author = syn_remainder if syn_remainder else None
 
             # Ensure author is None if empty
             if syn_author and not syn_author.strip():
@@ -300,7 +352,10 @@ def parse_synonym_see(visible_text, url, species_from_url, raw_line):
     # Extract accepted name and author
     accepted_words = accepted_part.split()
     accepted_name_text = accepted_words[0].strip() if accepted_words else None
-    accepted_author = ' '.join(accepted_words[1:]).strip() if len(accepted_words) > 1 else None
+    accepted_remainder = ' '.join(accepted_words[1:]).strip() if len(accepted_words) > 1 else ''
+    # Strip parenthetical notes before extracting author
+    accepted_remainder = strip_parenthetical_notes(accepted_remainder)
+    accepted_author = accepted_remainder if accepted_remainder else None
 
     # Ensure author is None if empty
     if accepted_author and not accepted_author.strip():
@@ -340,8 +395,10 @@ def parse_other_link(visible_text, url, species_from_url, raw_line):
     for i, word in enumerate(words):
         if word.lower() == species_from_url.lower():
             species_from_text = word
-            # Everything after is author
-            author = ' '.join(words[i+1:]).strip() if i+1 < len(words) else None
+            # Everything after is author (after stripping parenthetical notes)
+            remainder = ' '.join(words[i+1:]).strip() if i+1 < len(words) else ''
+            remainder = strip_parenthetical_notes(remainder)
+            author = remainder if remainder else None
             break
 
     # Ensure author is None if empty

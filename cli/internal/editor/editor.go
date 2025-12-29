@@ -85,14 +85,14 @@ func validateEditor(editor string) (string, error) {
 	if filepath.IsAbs(editor) {
 		info, err := os.Stat(editor)
 		if err != nil {
-			return "", fmt.Errorf("editor not found: %s", editor)
+			return "", fmt.Errorf("configured editor not found")
 		}
 		if info.IsDir() {
-			return "", fmt.Errorf("editor path is a directory: %s", editor)
+			return "", fmt.Errorf("configured editor path is a directory")
 		}
 		// Check if file is executable (has any execute bit set)
 		if info.Mode().Perm()&0111 == 0 {
-			return "", fmt.Errorf("editor is not executable: %s", editor)
+			return "", fmt.Errorf("configured editor is not executable")
 		}
 		return editor, nil
 	}
@@ -100,7 +100,7 @@ func validateEditor(editor string) (string, error) {
 	// For relative paths or bare names, use LookPath to find the executable
 	path, err := exec.LookPath(editor)
 	if err != nil {
-		return "", fmt.Errorf("editor not found in PATH: %s", editor)
+		return "", fmt.Errorf("editor %q not found in PATH", editor)
 	}
 
 	return path, nil
@@ -141,7 +141,7 @@ func openEditorWithExt(initialContent, ext string) (string, error) {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		return "", fmt.Errorf("editor '%s' exited with error: %w", editor, err)
+		return "", fmt.Errorf("editor exited with error: %w", err)
 	}
 
 	content, err := os.ReadFile(tmpPath)
