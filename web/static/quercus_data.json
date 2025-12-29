@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "2025-12-25T01:26:18Z",
-    "exported_at": "2025-12-25T01:26:18Z",
+    "version": "2025-12-29T16:46:10Z",
+    "exported_at": "2025-12-29T16:46:10Z",
     "species_count": 734
   },
   "sources": [
@@ -110,7 +110,7 @@
           "twigs": "grayish to reddish-brown",
           "buds": "realtively large and pale, similar to shumardii",
           "hardiness_habitat": "Dry slopes.\nVery rarely cultivated",
-          "miscellaneous": "Closelt realted to shumardii and sometimes considered the same species; differs in leaf shape, smaller leaves and acorns, and usually brighter red fall foilage."
+          "miscellaneous": "Closely realted to shumardii and sometimes considered the same species; differs in leaf shape, smaller leaves and acorns, and usually brighter red fall foilage."
         }
       ]
     },
@@ -736,7 +736,7 @@
           "bark": "Young/small trees:\n- pale ashy gray\n- in long strips that typically peel from one side\n\nMature trees:\n- long, peeling ridges or small blocks",
           "twigs": "greenish to purple-gray\nformation appears stiffer than in red oak group",
           "buds": "small and blunt",
-          "hardiness_habitat": "- Widespread and common in rich, moist, or dry soils; often on ridges and slopes.\n- May be NA's most abundant native tree.\n- Attracve and common in cultivation\n- Zones 3-9"
+          "hardiness_habitat": "- Widespread and common in rich, moist, or dry soils; often on ridges and slopes.\n- May be NA's most abundant native tree.\n- Attractive and common in cultivation\n- Zones 3-9"
         }
       ]
     },
@@ -2369,7 +2369,6 @@
       },
       "hybrids": [
         "× fontqueri",
-        "lagunai",
         "× lousae",
         "× amaralii",
         "× anselmii",
@@ -2408,7 +2407,7 @@
           "flowers": "between April and May; male catkins 4-8 cm long; pistillate flowers on short pedicel; perianth pubescent, with 6 short lobes; 3-4 styles",
           "fruits": "acorn 2.5-3.5 cm, ovoid cylindrical; short-stalked (0.5-1 cm); in clusters of 2-3; enclosed 1/3 by the cup; cup hemispherical with tomentose, lanceolate, bulging scales; mature in one year;",
           "hardiness_habitat": "hardy; prefers calcareous soils, even heavy and clayey; fast growing; reaches 300 years and more; in cultivation, fertile seeds are generally hybrids with Q.robur ;",
-          "miscellaneous": "-- A. Camus : tome 2, p. 150, n° 149; -- Sub-genus Quercus, Section Quercus, Series Roburoid; -- According to O. Schwarz (Monography of Oaks of Europe and Mediterranean Basin), in 1938, this species had yet disappeared from the Canary Islands due to human activities;",
+          "miscellaneous": "-- A. Camus : tome 2, p. 150, n° 149; -- Sub-genus Quercus, Section Quercus, Series Roburoid; -- According to O. Schwarz (Monography of Oaks of Europe and Mediterranean Basin), in 1938, this species had yet disappeared from the Canary Islands due to human activities; -- OOTW reports hybrid: Q. × lagunai (Q. canariensis × Q. fruticosa (lusitanica))",
           "url": "https://oaksoftheworld.fr/quercus_canariensis.htm"
         }
       ]
@@ -4212,8 +4211,6 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "fenchengensis",
-        "hopeiensis",
         "× mongolicodentata",
         "× maccormickii",
         "× maccormickoserrata",
@@ -4252,7 +4249,7 @@
           "flowers": "April-May; female flowers at the end of new shoots;",
           "fruits": "acorn 1.5-2.2 cm, ovoid, hairless; sessile cup 1 cm wide, with brownish tomentose, reflexed scales, covering 1/2 or 1/3 of nut; matures in 1 year;",
           "hardiness_habitat": "hardy; prefers acidic soils; slow growing; can't stand spring frost;",
-          "miscellaneous": "-- A. Camus : n° 122; -- Sub-genus Quercus, section Quercus; -- Wood hard, heavy; -- There is a wellknown cultivar, very nice : Q.'Pondaim' : it is probably a hybrid between Q. pon tica and Q.dentata (= daim io), hence the name. (photo = see Q.pontica )",
+          "miscellaneous": "-- A. Camus : n° 122; -- Sub-genus Quercus, section Quercus; -- Wood hard, heavy; -- There is a wellknown cultivar, very nice : Q.'Pondaim' : it is probably a hybrid between Q. pon tica and Q.dentata (= daim io), hence the name. (photo = see Q.pontica ) -- OOTW reports hybrid: Q. × fenchengensis (Q. aliena var. acutiserrata × Q. dentata) -- OOTW reports hybrid: Q. × hopeiensis (Q. dentata × Q. wutaishanica)",
           "url": "https://oaksoftheworld.fr/quercus_dentata.htm"
         }
       ]
@@ -5184,8 +5181,7 @@
         "section": "Quercus"
       },
       "hybrids": [
-        "× acutidens",
-        "grandidentata"
+        "× acutidens"
       ],
       "external_links": [
         {
@@ -5217,7 +5213,7 @@
           "flowers": "male flowers in April-May on 3-4 cm catkins;",
           "fruits": "acorn 1.5-2.5 cm long, pale grey, elliptic, subsessile, striate near apex; single or paired, on a very short rachis; cup enclosing 1/3 to 1/2 of nut, strongly warty near the base; maturing in 1 year;",
           "hardiness_habitat": "almost hardy (zone 8 but withstands -14°C); all types of dry and hot soils, but thrives better in moist ones;",
-          "miscellaneous": "-- Sub-genus Quercus, Section Quercus, Series Leucomexicanae, Group Glaucoideae; -- A. Camus : n° 181 ; -- Threatened (IUCN Red List Category : EN). -- Closely related to Q.oblongifolia Torr., and maybe conspecific, with cup scales deeper, larger and more warty; -- George Engelmann (1809-1884) was botanist at Saint-Louis, of German origin; -- Hybridizes with Q.dumosa and Q.lobata.",
+          "miscellaneous": "-- Sub-genus Quercus, Section Quercus, Series Leucomexicanae, Group Glaucoideae; -- A. Camus : n° 181 ; -- Threatened (IUCN Red List Category : EN). -- Closely related to Q.oblongifolia Torr., and maybe conspecific, with cup scales deeper, larger and more warty; -- George Engelmann (1809-1884) was botanist at Saint-Louis, of German origin; -- Hybridizes with Q.dumosa and Q.lobata. -- OOTW reports hybrid: Q. × grandidentata (Q. durata var. gabrielensis × Q. engelmannii) [syn. Q. × ewanii]",
           "url": "https://oaksoftheworld.fr/quercus_engelmannii.htm"
         }
       ]
@@ -5381,7 +5377,6 @@
       },
       "hybrids": [
         "× andresii",
-        "aruciensis",
         "× coutinhoi",
         "× duriensis",
         "× senneniana",
@@ -5426,7 +5421,7 @@
           "leaves": "4 x 1,5 cm; leathery; semi-evergreen; oval to oblong-elliptic; variable in shape; base cordate or rounded; apex obtuse; margin often wavy and revolute; 8-12 vein pairs, straight and parallel, ending in triangular, regular, acute, mucronate teeth; bright green above, with at first a short, stellate pubescence, becoming hairless; densely yellowish-grey tomentose beneath with small stellate hairs (120-150µ long rays); some intercalary veins ; petiole hairy 0,5-1,4 cm;",
           "flowers": "March-April; male catkins in clusters of 4-5; female catkins on short peduncle;",
           "fruits": "acorn cylindrical, 2.5 cm long, 1.3 cm wide, light yellow; singly or paires on a peduncle very short; enclosed 1/4 to 1/5 by cup; cup half-round, with oval or triangular, slightly lanceolate, convex, hairy scales; maturing in 1 year;",
-          "miscellaneous": "-- A. Camus : n° 152, t. 2, p.172; -- Sub-genus Quercus, Section Quercus, Series Roburoid; -- The specific name \"lusitanica\" must be avoided: it is too much ambiguous because applied to several species: 1/ Q. lusitanica Webb and auctores = Q.faginea Lam. 2/ Q. lusitanica Boiss. = Q. infectoria Oliv. 3/ Q. lusitanica Lam. = Q. fruticosa Brot.",
+          "miscellaneous": "-- A. Camus : n° 152, t. 2, p.172; -- Sub-genus Quercus, Section Quercus, Series Roburoid; -- The specific name \"lusitanica\" must be avoided: it is too much ambiguous because applied to several species: 1/ Q. lusitanica Webb and auctores = Q.faginea Lam. 2/ Q. lusitanica Boiss. = Q. infectoria Oliv. 3/ Q. lusitanica Lam. = Q. fruticosa Brot. -- OOTW reports hybrid: Q. × aruciensis (Q. faginea × Q. fruticosa)",
           "url": "https://oaksoftheworld.fr/quercus_faginea.htm"
         }
       ]
@@ -5646,9 +5641,6 @@
         "subgenus": "Cerris",
         "section": "Ilex"
       },
-      "hybrids": [
-        "parkeri"
-      ],
       "synonyms": [
         "dealbata Royle",
         "dilatata Royle",
@@ -5672,7 +5664,7 @@
           "flowers": "in April-May; fruits 16-18 months later, in winter; male flowers on 2-5 cm catkins, drooping and loose; female catkin1.5 cm long, with 3-4 flowers;",
           "fruits": "acorn 2-2.5 cm long, 1.6-1.8 cm in diameter; subsessile; pointed and mucronate; glabrous, brown at maturity; solitary on a very short peduncle; +enclosed 1/3 or 1/2 by cup; cup with appressed, pubescent scales; maturing in 2 years;",
           "hardiness_habitat": "not quite hardy (zone 8); all types of soils; thrives in shady sites; prefers wet climate;",
-          "miscellaneous": "-- A. Camus : tome 2, p. 5, n° 128; -- Sub-genus Cerris, Section Ilex;",
+          "miscellaneous": "-- A. Camus : tome 2, p. 5, n° 128; -- Sub-genus Cerris, Section Ilex; -- OOTW reports hybrid: Q. × parkeri (Q. floribunda × Q. leucotrichophora)",
           "url": "https://oaksoftheworld.fr/quercus_floribunda.htm"
         }
       ]
@@ -6508,7 +6500,6 @@
         "section": "Cyclobalanopsis"
       },
       "hybrids": [
-        "kiusiana",
         "× idzuensis"
       ],
       "synonyms": [
@@ -6547,7 +6538,7 @@
           "leaves": "6-13 x 2.5-5 cm; evergreen; oboval to oblong-elliptic; thick, leathery; entire, slightly serrate in apical 1/2; apex acuminate to caudate; base rounded or broadly cuneate; shiny dark green adaxially; blue green, pubescent beneath but glabrescent; young leaves pubescent, variable in color : brown, bronze, purple or green; 9-13 parallel, slightly curved, prominent beneath vein pairs; tertiary veins inconspicuous beneath; petiole 1-3 cm, yellow;",
           "flowers": "male flowers on catkins shorter than the leaves, drooping, with long bracts, 4-5 stamens; female inflorescences short, bearing 2-4 flowers;",
           "fruits": "acorn ovoid, oblong-ovoid or ellipsoid, 1-1.6 cm long, 0.9-1.4 cm in diameter; single or to 3; enclosed 1/3 or 1/2 by bowl-shaped cup; cup with 5-6 concentric rings, slightly hairy to hairless, 1-1.3 cm in diameter; maturing in 1 year;",
-          "miscellaneous": "-- A. Camus : n° 47; -- Sub-genus Cerris, Section Cyclobalanopsis; -- Section Glauca, sub-section Glaucae ( Menitsky ); -- This taxon is an element of a large complex, wide-spreading, described under many uncertain species names (such as Q.globosa (Lin \u0026 Liu) J.C.Liao 1970 = Cyclobalanopsis globosa T.P. Lin \u0026 T.S. Liu 1965, in Taiwan, which could be distinguished in having globose acorns);",
+          "miscellaneous": "-- A. Camus : n° 47; -- Sub-genus Cerris, Section Cyclobalanopsis; -- Section Glauca, sub-section Glaucae ( Menitsky ); -- This taxon is an element of a large complex, wide-spreading, described under many uncertain species names (such as Q.globosa (Lin \u0026 Liu) J.C.Liao 1970 = Cyclobalanopsis globosa T.P. Lin \u0026 T.S. Liu 1965, in Taiwan, which could be distinguished in having globose acorns); -- OOTW reports hybrid: Q. × kiusiana (Q. glauca × Q. hondae)",
           "url": "https://oaksoftheworld.fr/quercus_glauca.htm"
         }
       ]
@@ -9667,9 +9658,6 @@
         "subgenus": "Quercus",
         "section": "Quercus"
       },
-      "hybrids": [
-        "macon"
-      ],
       "synonyms": [
         "bornmuelleriana",
         "syspirensis"
@@ -9689,7 +9677,7 @@
           "leaves": "10-20 x 7-13 cm; obovate lanceolate to ovate; apex pointed, base cuneate; hard, leathery; margin with 8-12 pairs of shallow lobes; lobes are smaller near apex; grey green above, grey tomentose beneath; petiole pubescent 1-2 cm long;",
           "flowers": "male catkins pubescent, 5-8 cm long;",
           "fruits": "acorn 2.5 cm long; ovoid; sessile or nearly so; enclosed 1/2 by cup; cup with small, hairy, lanceolate scales; maturing in 1 year;",
-          "miscellaneous": "-- A. Camus : n° 125; -- Sub-genus Quercus, Section Quercus, Series Roburoid; -- Resembles Q.canariensis , but with pubescent twigs and dark red buds;",
+          "miscellaneous": "-- A. Camus : n° 125; -- Sub-genus Quercus, Section Quercus, Series Roburoid; -- Resembles Q.canariensis , but with pubescent twigs and dark red buds; -- OOTW reports hybrid: Q. × macon (Q. macranthera × Q. conferta (fainetto)) [cultivar]",
           "url": "https://oaksoftheworld.fr/quercus_macranthera.htm"
         }
       ]
@@ -9763,7 +9751,6 @@
         "complex": "lyrata"
       },
       "hybrids": [
-        "andrewsii",
         "× bebbiana",
         "× beckyae",
         "× burnetensis",
@@ -9817,7 +9804,7 @@
           "flowers": "pistillate and staminate flowers in early spring;",
           "fruits": "acorn 2.5-5 cm long; oval; pubescent at apex; stout peduncle 1-2 cm long; cup hairy, deep (enclosing 1/2 or more of nut), purplish, 2 cm in diameter; cotyledons distinct; maturing in 1 year;",
           "hardiness_habitat": "hardy; all types of soils, including calcareous ones; reaches 150 years old;",
-          "miscellaneous": "-- A. Camus : n° 279 ; -- Sub-genus Quercus, Section Quercus, Subsection Prinoideae; -- Related to Q.bicolor ; -- Hybridizes with : Q. alba (= x bebbiana), michauxii (= x byarsii), muehlenbergii ( = x deamii), stellata (= x guadalupensis), lyrata (= x megaleia), bicolor (= x schuettei) ;",
+          "miscellaneous": "-- A. Camus : n° 279 ; -- Sub-genus Quercus, Section Quercus, Subsection Prinoideae; -- Related to Q.bicolor ; -- Hybridizes with : Q. alba (= x bebbiana), michauxii (= x byarsii), muehlenbergii ( = x deamii), stellata (= x guadalupensis), lyrata (= x megaleia), bicolor (= x schuettei) ; -- OOTW reports hybrid: Q. × andrewsii (Q. macrocarpa × Q. × undulata)",
           "url": "https://oaksoftheworld.fr/quercus_macrocarpa.htm"
         },
         {
@@ -12352,10 +12339,7 @@
         "× rosacea",
         "× audleyensis",
         "× streimii",
-        "cantabrica",
-        "diversifrons",
         "× trabutii",
-        "roseoides",
         "× viverii",
         "× benkoi",
         "× vilmoriniana",
@@ -12409,7 +12393,7 @@
           "flowers": "April-May; male catkins golden brown, drooping, 5-8 cm long, pubescent; pistillate inflorescences towards tip of new shoot, 2-6 together;",
           "fruits": "acorn 1.5-4 cm long, 1-2.5 cm in diameter, ovoid; enclosed 1/3 by cup; cup sessile or nearly so, with appressed, brownish, pubescent, oval lanceolate scales, almost flat above; maturing in 1 year in September-October; stylopodium hairy; basal scar flat;",
           "hardiness_habitat": "hardy; not quite whithstanding late frost; all types of soils, including poor, calcareous ones, but prefers acidic and well drained ones; long-lived; fast growing;",
-          "miscellaneous": "-- A.Camus : n° 155; -- Sub-genus Quercus, Section Quercus, Series Roburoid. -- Differs from Q.pubescens in having a long petiole and hairless twigs; -- The natural hybrids of Q. petraea are : Q. x cantabrica , Q. x rosacea , Q. x salcedoi , Q. x streimii , Q. x tabajdiana , Q. x trabutii , Q. x viverii .",
+          "miscellaneous": "-- A.Camus : n° 155; -- Sub-genus Quercus, Section Quercus, Series Roburoid. -- Differs from Q.pubescens in having a long petiole and hairless twigs; -- The natural hybrids of Q. petraea are : Q. x cantabrica , Q. x rosacea , Q. x salcedoi , Q. x streimii , Q. x tabajdiana , Q. x trabutii , Q. x viverii . -- OOTW reports hybrid: Q. × cantabrica ((Q. petraea × Q. pyrenaica) × Q. robur subsp. broteroana) [complex hybrid] -- OOTW reports hybrid: Q. × diversifrons (Q. petraea × Q. virgiliana) -- OOTW reports hybrid: Q. × roseoides (Q. petraea × Q. × rosacea)",
           "url": "https://oaksoftheworld.fr/quercus_petraea.htm"
         }
       ]
@@ -13208,12 +13192,9 @@
       "hybrids": [
         "× albescens",
         "× baenitzii",
-        "barcarrotensis",
         "× streimii",
-        "budensis",
         "× kerneri",
         "× firmurensis",
-        "thellungii",
         "× anselmii",
         "× paui",
         "× beguinotii",
@@ -13249,7 +13230,7 @@
           "flowers": "April-May; male catkins abundant, tomentose, 5-10 cm long; male flowers with pale yellow, glabrous anthers; female flowers with 3-4(5) styles and narrow stigmas;",
           "fruits": "acorn 1-3 cm; sessile or on a short, tomentose peduncle; enclosed 1/3 by cup; basal scar slightly convex, stylopodium pubescent; cup with appressed, grey pubescent scales; maturing in 1 year;",
           "hardiness_habitat": "hardy; prefers warm places, calcareous soils; fast-growing;",
-          "miscellaneous": "-- A. Camus : n° 162 ; -- Sub-genus Quercus, Section Quercus, Series Roburoid. -- The term \" undulata \" inspired numerous Authors ! One can list the following : Q.undulata Engelm 1878 (= Q.sinuata Walt.), Q.undulata Kit.1863 (= Q.pubescens Willd.), Q.undulata Benth. 1841 (= Q.benthamii A.DC), Q.undulata K.Koch 1847 (= Q.lusitanica Lam.), Q.undulata Torr 1827 (= Q.x undulata complex Little 1979), Q.undulata Sarg., and A.DC ( describing more or less Q.x pauciloba ...), Q.undulata S. Wats. (= Q.gambelii Nutt.) ; So it is better to give up with it! The same for the term \" humilis \": Q.humilis Lam. = Q.lusitanica Lam. Q.humilis DC = Q.pyrenaica Willd. Q.humilis Walt. = Q.pumila Walt. Q.humilis Mill. = Q.pubescens Willd. And also the same for the term \" lanuginosa \": Q.lanuginosa Lam. = Q.cerris L. Q.lanuginosa (Lam.) Thuill. = Q.pubescens Willd. Q.lanuginosa Franch. = Q.franchetii Skan Q.lanuginosa Beck = Q.robur L. Q.lanuginosa D.Don = Q.lanata Sm in Rees -- The natural hybrids of Q. pubescens are : Q. x albescens , Q. x allorgeana , Q. x baenitzii , Q. x firmurensis , Q. x kerneri , Q. x paui , Q. x streimii , Q. x subglaucescens",
+          "miscellaneous": "-- A. Camus : n° 162 ; -- Sub-genus Quercus, Section Quercus, Series Roburoid. -- The term \" undulata \" inspired numerous Authors ! One can list the following : Q.undulata Engelm 1878 (= Q.sinuata Walt.), Q.undulata Kit.1863 (= Q.pubescens Willd.), Q.undulata Benth. 1841 (= Q.benthamii A.DC), Q.undulata K.Koch 1847 (= Q.lusitanica Lam.), Q.undulata Torr 1827 (= Q.x undulata complex Little 1979), Q.undulata Sarg., and A.DC ( describing more or less Q.x pauciloba ...), Q.undulata S. Wats. (= Q.gambelii Nutt.) ; So it is better to give up with it! The same for the term \" humilis \": Q.humilis Lam. = Q.lusitanica Lam. Q.humilis DC = Q.pyrenaica Willd. Q.humilis Walt. = Q.pumila Walt. Q.humilis Mill. = Q.pubescens Willd. And also the same for the term \" lanuginosa \": Q.lanuginosa Lam. = Q.cerris L. Q.lanuginosa (Lam.) Thuill. = Q.pubescens Willd. Q.lanuginosa Franch. = Q.franchetii Skan Q.lanuginosa Beck = Q.robur L. Q.lanuginosa D.Don = Q.lanata Sm in Rees -- The natural hybrids of Q. pubescens are : Q. x albescens , Q. x allorgeana , Q. x baenitzii , Q. x firmurensis , Q. x kerneri , Q. x paui , Q. x streimii , Q. x subglaucescens -- OOTW reports hybrid: Q. × barcarrotensis (Q. petraea subsp. huguetiana × Q. pubescens × Q. robur) [complex triple hybrid] -- OOTW reports hybrid: Q. × budensis (Q. pubescens × Q. virgiliana) -- OOTW reports hybrid: Q. × thellungii (Q. pubescens × Q. robur × Q. petraea) [syn. Q. × helvetica; complex triple hybrid]",
           "url": "https://oaksoftheworld.fr/quercus_pubescens.htm"
         }
       ]
@@ -13418,7 +13399,6 @@
       },
       "hybrids": [
         "× andegavensis",
-        "cantabrica",
         "× firmurensis",
         "× fontqueri",
         "× trabutii",
@@ -13454,7 +13434,7 @@
           "flowers": "long (3-8 cm), numerous, rich yellow male catkins in May; female catkins short, few-flowered;",
           "fruits": "acorn small, ovoid oblong; 2 to 4 on a peduncle to 3 cm long, or sessile; enclosed 1/3 by cup; cup pubescent, with pointed, appressed scales; maturing in 6 months in October-November;",
           "hardiness_habitat": "hardy; prefers acidic soils, even poor and dry; long lived;",
-          "miscellaneous": "-- Sub-genus Quercus, Section Quercus, Series Roburoid; -- A.Camus n° 127 -- Very rare outside its typical range; -- The natural hybrids of Q. pyrenaica are : Q. x andegavensis , Q. x cantabrica , Q. x diosdadoi , Q. x firmurensis , Q. x fontqueri , Q. x paui , Q. x trabutii , Q. x welwitschii",
+          "miscellaneous": "-- Sub-genus Quercus, Section Quercus, Series Roburoid; -- A.Camus n° 127 -- Very rare outside its typical range; -- The natural hybrids of Q. pyrenaica are : Q. x andegavensis , Q. x cantabrica , Q. x diosdadoi , Q. x firmurensis , Q. x fontqueri , Q. x paui , Q. x trabutii , Q. x welwitschii -- OOTW reports hybrid: Q. × cantabrica ((Q. petraea × Q. pyrenaica) × Q. robur subsp. broteroana) [complex hybrid]",
           "url": "https://oaksoftheworld.fr/quercus_pyrenaica.htm"
         }
       ]
@@ -13678,8 +13658,6 @@
         "× andegavensis",
         "× bimundorum",
         "× kerneri",
-        "thellungii",
-        "pendulina",
         "× warei",
         "× sargentii",
         "× macdanielii",
@@ -13744,7 +13722,7 @@
           "leaves": "5-12(-17) x 3-8(-11) cm; base auricled, asymmetrical; 2-5 pairs of rounded lobes, with sinuses obtuse and variable in depth; the blade is wider near apical 1/3; almost glabrous on both sides (possible uniseriate and solitary trichomes adaxially; the same ones abaxially, mostly on the midrib and at axils, and a lack of wax on the stigmas); dark dull green above; pale glaucous beneath; 5-7 vein pairs; petiole half-round in cross-section, hairless, yellowish, 0.4-0.7 cm long;",
           "flowers": "spring; male catkins yellow green, 2-6 cm long, with axis hairless; male perianth with 5-8 hairless stamens; pistillate inflorescences 3-10 cm long, hairless; female perianth with 4-6 short lobes;",
           "fruits": "acorn 1.5-4 cm, ovoid; dark brown; paired or several together on a long, thin, 4-10 cm long peduncle; enclosed 1/4 to 1/2 by cup; cup half-round, with triangular, appressed, slightly tomentose scales; maturing in 1 year;",
-          "miscellaneous": "-- A. Camus : n°163 ; -- Sub-genus Quercus, Section Quercus, Series Roburoid; -- \"lanuginosa\" is a term frequently used by Authors, so it is better not to use it, in order to avoid confusions ! - Q. lanuginosa Franchet 1899 nom. illeg. = Q. franchetii - Q. lanuginosa (Lam.)Thuill.1799 nom. illeg. = Q. pubescens - Q. lanuginosa Beck 1890 nom. illeg. = Q. robur (sic !) - Q. lanuginosa sensu Lam. 1778 nom. illeg. = Q. cerris L. 1753 - Q. lanuginosa D.Don 1825 nom. illeg. = Q. lanata -- The natural hybrids of Q. robur are : Q. x andegavensis , Q. x cantabrica , Q. x coutinhoi , Q. x gallaecica , Q. x haynaldiana , Q. x kerneri , Q. x rosacea , Q. x turneri -- Q. medwedewii Sosnowsky 1943 is for Menitsky an ecotype of Q. robur , in the Teberda River Valley (Caucasus), but for todays Authors and Botanists (Galushko, Melamud) this taxon is a true species, differing from robur in its small, greyish leaves and the short peduncle. Do not confuse the name \" medwedewii \" with \" medwediewii \" witch is the name given by A. Camus to a subspecies of Q. petraea !",
+          "miscellaneous": "-- A. Camus : n°163 ; -- Sub-genus Quercus, Section Quercus, Series Roburoid; -- \"lanuginosa\" is a term frequently used by Authors, so it is better not to use it, in order to avoid confusions ! - Q. lanuginosa Franchet 1899 nom. illeg. = Q. franchetii - Q. lanuginosa (Lam.)Thuill.1799 nom. illeg. = Q. pubescens - Q. lanuginosa Beck 1890 nom. illeg. = Q. robur (sic !) - Q. lanuginosa sensu Lam. 1778 nom. illeg. = Q. cerris L. 1753 - Q. lanuginosa D.Don 1825 nom. illeg. = Q. lanata -- The natural hybrids of Q. robur are : Q. x andegavensis , Q. x cantabrica , Q. x coutinhoi , Q. x gallaecica , Q. x haynaldiana , Q. x kerneri , Q. x rosacea , Q. x turneri -- Q. medwedewii Sosnowsky 1943 is for Menitsky an ecotype of Q. robur , in the Teberda River Valley (Caucasus), but for todays Authors and Botanists (Galushko, Melamud) this taxon is a true species, differing from robur in its small, greyish leaves and the short peduncle. Do not confuse the name \" medwedewii \" with \" medwediewii \" witch is the name given by A. Camus to a subspecies of Q. petraea ! -- OOTW reports hybrid: Q. × pendulina (Q. robur × Q. virgiliana) -- OOTW reports hybrid: Q. × thellungii (Q. pubescens × Q. robur × Q. petraea) [syn. Q. × helvetica; complex triple hybrid]",
           "url": "https://oaksoftheworld.fr/quercus_robur.htm"
         }
       ]
@@ -13860,10 +13838,8 @@
         "complex": "ilex"
       },
       "hybrids": [
-        "alvesii",
         "× autumnalis",
         "× eborense",
-        "urartensis",
         "× tentudaica",
         "× almeidae",
         "× diosdadoi"
@@ -13885,7 +13861,7 @@
           "flowers": "male perianths with glabrous, obtuse lobes; 5-12 stamens;",
           "fruits": "acorn larger than ilex , and sweet; apex round to pointed;",
           "hardiness_habitat": "not quite hardy (zone 7-8);",
-          "miscellaneous": "-- Today, this taxon is considered as a true species. -- See HERE the main differences with Q. ilex -- The natural hybrids of Q. rotundifolia are : Q. x airensis , Q. x autumnalis , Q. x diosdadoi , Q. x mixta , Q. x senneniana",
+          "miscellaneous": "-- Today, this taxon is considered as a true species. -- See HERE the main differences with Q. ilex -- The natural hybrids of Q. rotundifolia are : Q. x airensis , Q. x autumnalis , Q. x diosdadoi , Q. x mixta , Q. x senneniana -- OOTW reports hybrid: Q. × alvesii (Q. fruticosa × Q. rotundifolia) -- OOTW reports hybrid: Q. × urartensis (Q. subpyrenaica × Q. rotundifolia)",
           "url": "https://oaksoftheworld.fr/quercus_rotundifolia.htm"
         }
       ]
@@ -15586,7 +15562,6 @@
       },
       "hybrids": [
         "× morisii",
-        "fontanesii",
         "× numidica",
         "× amaralii",
         "× capeloana",
@@ -15625,7 +15600,7 @@
           "flowers": "early summer, on new shoots; numerous male catkins, erected at first, then drooping, yellow, with a tomentose rachis; male flowers with 5-6 stamens; female catkins 1-3 cm long, with tomentose rachis; female flowers perianth with 4-6 obtuse, tomentose lobes, and 3 short, glabrous styles;",
           "fruits": "acorn 1.5-3 cm long; ovoid; short peduncle; enclosed almost 1/2 by cup; cup conical, deep, with long, spreading scales; maturing in 1 year;",
           "hardiness_habitat": "not quite hardy (withstands -15° C); prefers lime-free soils; slow-growing;",
-          "miscellaneous": "-- A. Camus : n° 110; -- Sub-genus Cerris, Section Cerris, subsection Suber (with crenata ); -- The natural hybrids of Q. suber are : Q. x celtica , Q. x hispanica , Q. x morisii , Q. x pacensis , Q. x coscojosuberiformis",
+          "miscellaneous": "-- A. Camus : n° 110; -- Sub-genus Cerris, Section Cerris, subsection Suber (with crenata ); -- The natural hybrids of Q. suber are : Q. x celtica , Q. x hispanica , Q. x morisii , Q. x pacensis , Q. x coscojosuberiformis -- OOTW reports hybrid: Q. × fontanesii (Q. gussonei × Q. suber)",
           "url": "https://oaksoftheworld.fr/quercus_suber.htm"
         }
       ]
@@ -17616,8 +17591,6 @@
         "subgenus": "Cerris",
         "section": null
       },
-      "parent1": "ile",
-      "parent2": "f",
       "synonyms": [
         "mixta (x)"
       ],
@@ -18231,8 +18204,6 @@
         "subgenus": "Quercus",
         "section": "Quercus"
       },
-      "parent1": "1931",
-      "parent2": "anselmii",
       "synonyms": [
         "lusitanica \n          subsp cerrioides O.Schwarz 1936 sessiliflora var. cerrioides (Willk. et Costa) Willk. 1861 lanuginosa subsp. cerrioides (Willk. \u0026 Costa) Nyman 1881 lanuginosa var. cerrioides (Willk. et Costa) A.Camus 1935 lusitanica var. cerrioides (Willk. et Costa) O.Schwarz 1936 lanuginosa (Lam.)Thuil. subsp anselmii (Sennen) Sennen 1931 x anselmii Sennen 1936 lanuginosa var. sennenii A.Camus 1935 x desmotricha O.Schwarz 1936 canariensis X pubescens subsp . \n          subpyrenaica"
       ],
@@ -19414,8 +19385,6 @@
         "section": "Cerris",
         "subsection": "Suber"
       },
-      "parent1": "e",
-      "parent2": "A",
       "synonyms": [
         "crenata (x) Lam.",
         "pseudosuber Santi (x)"
@@ -20690,8 +20659,6 @@
         "subgenus": null,
         "section": null
       },
-      "parent1": "e",
-      "parent2": "Endl",
       "synonyms": [
         "prasina Bosc ex Endl. 1848 \n        nom. illeg. humilis Lam. var. prasina (Bosc ex Endl.)A.DC 1864 faginea var. prasina (Bosc)Samp. 1910 fruticosa Brot. f. prasina (Bosc ex Pers) O.Schwarz 1938 x angustifolia Villar ex Gonz.Albo (1936: coccifera X faginea"
       ],
@@ -21074,8 +21041,6 @@
         "subgenus": "Quercus",
         "section": "Lobatae"
       },
-      "parent1": "e",
-      "parent2": "E",
       "synonyms": [
         "schochiana \n        Dieck ex E.J.Palmer",
         "J. Arnold Arbor. 29(1): 40. 1948 palustris x phellos"
@@ -21509,8 +21474,7 @@
       "parent1": "Cyclobalanopsis",
       "parent2": "takaoyamensis",
       "hybrids": [
-        "× takaoyamensis",
-        "yokohamensis"
+        "× takaoyamensis"
       ],
       "synonyms": [
         "Cyclobalanopsis x takaoyamensis (Makino) Kudo \n          \u0026 Masam. 1930 acuta \n          X sessillifolia"
@@ -21523,7 +21487,7 @@
           "license": "All Rights Reserved",
           "is_preferred": false,
           "range": "Japan",
-          "miscellaneous": "-- Sub-genus Cerris, Section Cyclobalanopsis;",
+          "miscellaneous": "-- Sub-genus Cerris, Section Cyclobalanopsis; -- OOTW reports hybrid: Q. × yokohamensis (variety of Q. × takaoyamensis) [Q. × takaoyamensis var. yokohamensis]",
           "url": "https://oaksoftheworld.fr/quercus_takaoyamensis.htm"
         }
       ]
@@ -21629,8 +21593,6 @@
         "section": "Quercus",
         "subsection": "Galliferae"
       },
-      "parent1": "e",
-      "parent2": "Greuter",
       "synonyms": [
         "mirbeckii f. tlemcenensis (A.DC) \n        Trab. 1890 faginea var. tlemcenensis (A.DC) Jahand. \u0026 Maire 1932 broteroi (Cout.) Rivas-Martínez \u0026 C. Saénz subsp. tlemcenesis (DC.) F.M. \n        Vázquez \u0026 A. Coombes (2016: 29) faginea subsp. broteroi (Cout.) var. tlemcenensis \n        (A.DC.) A. Camus (1939: 180) x maroccana (Braun-Blanq. \u0026 Maire) Villar (1943: 3) tlemcenensis (A.DC.) Villar f. maroccana (Braun-Blanq. \u0026 Maire) Villar \n        (1938: 453) x fagineomirbeckii Villar (1938 450) x jahandiezii A. Camus (1939: 791) x marianica C. Vicioso (1950: 129) x pseudofaginea A.Camus (1939: 792) faginea subsp. tlemcenensis (A.DC.) Maire \u0026 Weiller ex Greuter \u0026 Burdet \n        1982 canariensis X faginea"
       ],
@@ -21815,9 +21777,6 @@
       },
       "parent1": "gambelii",
       "parent2": "turbinella",
-      "hybrids": [
-        "andrewsii"
-      ],
       "synonyms": [
         "fendleri (x)",
         "pauciloba (x)",
@@ -21840,7 +21799,7 @@
           "leaves": "evergreen; 4-9cm long, 3-5 wide, lustrous and light glaucous above, light brown tomentose beneath; margin with 2-5 pairs of pointed and mucronate lobes;",
           "fruits": "acorn 1.5-1.8cm long, mucronate, light brown, enclosed for 1/3 of length in bowl-shaped, reddish brown cup; maturing in 1 year;",
           "hardiness_habitat": "hardy; all types of soils.",
-          "miscellaneous": "-- A. Camus = n° 261; -- Sub-genus Quercus, Section Quercus; sub-section Undulatae; -- The species Q.gambelii hybridizes frequently, creating a population of hybrids described under the name \" Q. x undulata complex \" by Little in 1979, in order to change the name Q.undulata Torr.1827 ; the previous term was the name of a species whose common name is \"wavyleaf oak\", or \"Rocky Mountain shin oak\" ; J.M. Tucker, in 1971, had yet indentified the main parents of this hybrid species : Q. turbinella , Q  grisea , Q. havardii , Q.mohriana , Q arizonica and Q.muehlenbergii ; hybrids between Q  gambelii and an evergreen species are often semi-evergreen; -- The name \"undulata\" inspired many Authors ! One can list the following : Q.undulata Engelm 1878 (= Q.sinuata Walt.), Q.undulata Kit.1863 (= Q.pubescens Willd.), Q.undulata Benth. 1841 (= Q.benthamii A.DC), Q.undulata K.Koch 1847 (= Q.lusitanica Lam.), Q.undulata Torr 1827 (= Q.x undulata complex Little 1979), Q.undulata Sarg., and A.DC (more or less = Q.x pauciloba ...), Q.undulata S. Wats. (= Q.gambelii Nutt.);",
+          "miscellaneous": "-- A. Camus = n° 261; -- Sub-genus Quercus, Section Quercus; sub-section Undulatae; -- The species Q.gambelii hybridizes frequently, creating a population of hybrids described under the name \" Q. x undulata complex \" by Little in 1979, in order to change the name Q.undulata Torr.1827 ; the previous term was the name of a species whose common name is \"wavyleaf oak\", or \"Rocky Mountain shin oak\" ; J.M. Tucker, in 1971, had yet indentified the main parents of this hybrid species : Q. turbinella , Q  grisea , Q. havardii , Q.mohriana , Q arizonica and Q.muehlenbergii ; hybrids between Q  gambelii and an evergreen species are often semi-evergreen; -- The name \"undulata\" inspired many Authors ! One can list the following : Q.undulata Engelm 1878 (= Q.sinuata Walt.), Q.undulata Kit.1863 (= Q.pubescens Willd.), Q.undulata Benth. 1841 (= Q.benthamii A.DC), Q.undulata K.Koch 1847 (= Q.lusitanica Lam.), Q.undulata Torr 1827 (= Q.x undulata complex Little 1979), Q.undulata Sarg., and A.DC (more or less = Q.x pauciloba ...), Q.undulata S. Wats. (= Q.gambelii Nutt.); -- OOTW reports hybrid: Q. × andrewsii (Q. macrocarpa × Q. × undulata)",
           "url": "https://oaksoftheworld.fr/quercus_undulata.htm"
         }
       ]
@@ -22007,8 +21966,6 @@
         "subgenus": "Quercus",
         "section": "Quercus"
       },
-      "parent1": "1939",
-      "parent2": "mairei",
       "synonyms": [
         "henriquezii (x)",
         "mairei (x)"
