@@ -31,10 +31,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A1000007AAAAAAAA00000001 /* OakCompendium.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OakCompendium.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000002AAAAAAAA00000001 /* OakCompendiumApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OakCompendiumApp.swift; sourceTree = "<group>"; };
 		A1000004AAAAAAAA00000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A1000006AAAAAAAA00000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A1000007AAAAAAAA00000001 /* OakCompendium.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OakCompendium.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000008AAAAAAAA00000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1000002BBBBBBBB00000001 /* TaxonomyPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonomyPath.swift; sourceTree = "<group>"; };
 		B1000004BBBBBBBB00000001 /* NoteField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteField.swift; sourceTree = "<group>"; };
@@ -381,7 +381,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = JCWJLD5ZRX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = OakCompendium/Info.plist;
@@ -412,7 +412,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = JCWJLD5ZRX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = OakCompendium/Info.plist;
@@ -439,20 +439,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A1000014AAAAAAAA00000001 /* Build configuration list for PBXProject "OakCompendium" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A1000015AAAAAAAA00000001 /* Debug */,
-				A1000016AAAAAAAA00000001 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		A1000010AAAAAAAA00000001 /* Build configuration list for PBXNativeTarget "OakCompendium" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A1000017AAAAAAAA00000001 /* Debug */,
 				A1000018AAAAAAAA00000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1000014AAAAAAAA00000001 /* Build configuration list for PBXProject "OakCompendium" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1000015AAAAAAAA00000001 /* Debug */,
+				A1000016AAAAAAAA00000001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
