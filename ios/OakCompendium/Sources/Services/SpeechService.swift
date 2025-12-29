@@ -142,23 +142,39 @@ final class SpeechService: @unchecked Sendable {
 
         recognitionRequest.shouldReportPartialResults = true
         recognitionRequest.addsPunctuation = true
+        // Don't require on-device - allow server fallback
+        recognitionRequest.requiresOnDeviceRecognition = false
 
         // Start recognition task
         recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
             Task { @MainActor in
                 guard let self else { return }
+                // Ignore callbacks after we've stopped recording
+                guard self.recordingState == .recording else { return }
 
                 if let result {
                     self.transcribedText = result.bestTranscription.formattedString
+
+                    if result.isFinal {
+                        self.finishRecording()
+                    }
                 }
 
-                if let error {
-                    self.error = error
-                    self.stopRecording()
-                }
+                if let error = error as NSError? {
+                    // Ignorable errors that don't need to stop recording or show to user
+                    // 1107 = cancelled, 216 = no speech detected, 1110 = audio interrupted
+                    let ignoredErrors = [1107, 216, 1110]
 
-                if result?.isFinal == true {
-                    self.stopRecording()
+                    // Fatal errors that should stop recording
+                    // 1101 = assets not available (on-device recognition failed)
+                    let fatalErrors = [1101]
+
+                    if fatalErrors.contains(error.code) {
+                        self.error = SpeechError.recognizerUnavailable
+                        self.finishRecording()
+                    } else if !ignoredErrors.contains(error.code) {
+                        self.error = error
+                    }
                 }
             }
         }
@@ -185,21 +201,41 @@ final class SpeechService: @unchecked Sendable {
 
         recordingState = .processing
 
-        // Stop audio engine
+        // Stop audio engine first
         audioEngine?.stop()
         audioEngine?.inputNode.removeTap(onBus: 0)
-        audioEngine = nil
 
-        // End recognition request
+        // Signal end of audio to get final transcription
         recognitionRequest?.endAudio()
-        recognitionRequest = nil
 
-        // Cancel task if still running
-        recognitionTask?.cancel()
+        // Give a brief moment for final results, then clean up
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(300))
+            self.cleanupRecognition()
+        }
+    }
+
+    /// Called when recognition naturally finishes (isFinal = true)
+    @MainActor
+    private func finishRecording() {
+        guard recordingState == .recording || recordingState == .processing else { return }
+
+        // Stop audio if still running
+        audioEngine?.stop()
+        audioEngine?.inputNode.removeTap(onBus: 0)
+
+        cleanupRecognition()
+    }
+
+    /// Clean up recognition resources
+    @MainActor
+    private func cleanupRecognition() {
+        audioEngine = nil
+        recognitionRequest = nil
         recognitionTask = nil
 
         // Deactivate audio session
-        try? AVAudioSession.sharedInstance().setActive(false)
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
 
         recordingState = .idle
     }
@@ -207,15 +243,25 @@ final class SpeechService: @unchecked Sendable {
     /// Cancel recording and discard transcription
     @MainActor
     func cancelRecording() {
-        stopRecording()
+        guard recordingState != .idle else { return }
+
+        recordingState = .processing
+
+        // Stop audio
+        audioEngine?.stop()
+        audioEngine?.inputNode.removeTap(onBus: 0)
+
+        // Cancel the recognition task (this will trigger error 1107, which we ignore)
+        recognitionTask?.cancel()
+
+        cleanupRecognition()
         transcribedText = ""
     }
 
     /// Reset the service state
     @MainActor
     func reset() {
-        stopRecording()
-        transcribedText = ""
+        cancelRecording()
         error = nil
     }
 }

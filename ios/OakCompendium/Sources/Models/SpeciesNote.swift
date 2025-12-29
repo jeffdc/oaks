@@ -11,11 +11,15 @@ struct SpeciesNote: Identifiable, Codable, Hashable, Sendable {
     /// Photo file names (stored in app documents directory)
     var photoFileNames: [String]
 
+    /// ID of the source this note is attributed to
+    var sourceId: Int?
+
     init(
         id: UUID = UUID(),
         taxonomy: TaxonomyPath,
         fields: [NoteField: String] = [:],
         photoFileNames: [String] = [],
+        sourceId: Int? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -23,6 +27,7 @@ struct SpeciesNote: Identifiable, Codable, Hashable, Sendable {
         self.taxonomy = taxonomy
         self.fields = fields
         self.photoFileNames = photoFileNames
+        self.sourceId = sourceId
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -79,7 +84,7 @@ struct SpeciesNote: Identifiable, Codable, Hashable, Sendable {
 
 extension SpeciesNote {
     enum CodingKeys: String, CodingKey {
-        case id, taxonomy, fields, photoFileNames, createdAt, updatedAt
+        case id, taxonomy, fields, photoFileNames, sourceId, createdAt, updatedAt
     }
 
     init(from decoder: Decoder) throws {
@@ -87,6 +92,7 @@ extension SpeciesNote {
         id = try container.decode(UUID.self, forKey: .id)
         taxonomy = try container.decode(TaxonomyPath.self, forKey: .taxonomy)
         photoFileNames = try container.decodeIfPresent([String].self, forKey: .photoFileNames) ?? []
+        sourceId = try container.decodeIfPresent(Int.self, forKey: .sourceId)
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
 
@@ -106,6 +112,7 @@ extension SpeciesNote {
         try container.encode(id, forKey: .id)
         try container.encode(taxonomy, forKey: .taxonomy)
         try container.encode(photoFileNames, forKey: .photoFileNames)
+        try container.encodeIfPresent(sourceId, forKey: .sourceId)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(updatedAt, forKey: .updatedAt)
 

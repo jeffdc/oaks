@@ -41,8 +41,8 @@ final class NotesViewModel {
     }
 
     /// Create a new note
-    func createNote(taxonomy: TaxonomyPath) async -> SpeciesNote? {
-        let newNote = SpeciesNote(taxonomy: taxonomy)
+    func createNote(taxonomy: TaxonomyPath, sourceId: Int? = nil) async -> SpeciesNote? {
+        let newNote = SpeciesNote(taxonomy: taxonomy, sourceId: sourceId)
 
         do {
             notes = try await StorageService.shared.addNote(newNote)

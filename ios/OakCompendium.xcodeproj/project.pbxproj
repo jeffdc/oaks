@@ -23,6 +23,11 @@
 		E1000003EEEEEEEE00000001 /* SpeciesReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1000004EEEEEEEE00000001 /* SpeciesReference.swift */; };
 		E1000005EEEEEEEE00000001 /* TaxonomyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1000006EEEEEEEE00000001 /* TaxonomyService.swift */; };
 		E1000007EEEEEEEE00000001 /* quercus_data.json in Resources */ = {isa = PBXBuildFile; fileRef = E1000008EEEEEEEE00000001 /* quercus_data.json */; };
+		F1000001FFFFFFFF00000001 /* SourcesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000002FFFFFFFF00000001 /* SourcesViewModel.swift */; };
+		F1000003FFFFFFFF00000001 /* SourcesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000004FFFFFFFF00000001 /* SourcesListView.swift */; };
+		F1000005FFFFFFFF00000001 /* SourceFormSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000006FFFFFFFF00000001 /* SourceFormSheet.swift */; };
+		F1000007FFFFFFFF00000001 /* sources.json in Resources */ = {isa = PBXBuildFile; fileRef = F1000008FFFFFFFF00000001 /* sources.json */; };
+		G1000001GGGGGGGG00000001 /* NoteEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = G1000002GGGGGGGG00000001 /* NoteEditorView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +49,11 @@
 		E1000004EEEEEEEE00000001 /* SpeciesReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesReference.swift; sourceTree = "<group>"; };
 		E1000006EEEEEEEE00000001 /* TaxonomyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxonomyService.swift; sourceTree = "<group>"; };
 		E1000008EEEEEEEE00000001 /* quercus_data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = quercus_data.json; sourceTree = "<group>"; };
+		F1000002FFFFFFFF00000001 /* SourcesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourcesViewModel.swift; sourceTree = "<group>"; };
+		F1000004FFFFFFFF00000001 /* SourcesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourcesListView.swift; sourceTree = "<group>"; };
+		F1000006FFFFFFFF00000001 /* SourceFormSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceFormSheet.swift; sourceTree = "<group>"; };
+		F1000008FFFFFFFF00000001 /* sources.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sources.json; sourceTree = "<group>"; };
+		G1000002GGGGGGGG00000001 /* NoteEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +111,7 @@
 			children = (
 				A1000006AAAAAAAA00000001 /* Assets.xcassets */,
 				E1000008EEEEEEEE00000001 /* quercus_data.json */,
+				F1000008FFFFFFFF00000001 /* sources.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -131,6 +142,7 @@
 			isa = PBXGroup;
 			children = (
 				C1000002CCCCCCCC00000001 /* NotesViewModel.swift */,
+				F1000002FFFFFFFF00000001 /* SourcesViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -141,6 +153,9 @@
 				C1000004CCCCCCCC00000001 /* NotesListView.swift */,
 				C1000006CCCCCCCC00000001 /* NewNoteSheet.swift */,
 				D1000004DDDDDDDD00000001 /* DictationModal.swift */,
+				F1000004FFFFFFFF00000001 /* SourcesListView.swift */,
+				F1000006FFFFFFFF00000001 /* SourceFormSheet.swift */,
+				G1000002GGGGGGGG00000001 /* NoteEditorView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -205,6 +220,7 @@
 			files = (
 				A1000005AAAAAAAA00000001 /* Assets.xcassets in Resources */,
 				E1000007EEEEEEEE00000001 /* quercus_data.json in Resources */,
+				F1000007FFFFFFFF00000001 /* sources.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -229,6 +245,10 @@
 				E1000001EEEEEEEE00000001 /* Source.swift in Sources */,
 				E1000003EEEEEEEE00000001 /* SpeciesReference.swift in Sources */,
 				E1000005EEEEEEEE00000001 /* TaxonomyService.swift in Sources */,
+				F1000001FFFFFFFF00000001 /* SourcesViewModel.swift in Sources */,
+				F1000003FFFFFFFF00000001 /* SourcesListView.swift in Sources */,
+				F1000005FFFFFFFF00000001 /* SourceFormSheet.swift in Sources */,
+				G1000001GGGGGGGG00000001 /* NoteEditorView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

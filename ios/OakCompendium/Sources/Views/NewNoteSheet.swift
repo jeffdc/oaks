@@ -16,6 +16,10 @@ struct NewNoteSheet: View {
     @State private var manualSubgenus = "Quercus"
     @State private var manualSection = "Quercus"
 
+    // Source selection
+    @State private var sources: [Source] = []
+    @State private var selectedSourceId: Int?
+
     private let taxonomyService = TaxonomyService.shared
 
     var body: some View {
@@ -26,6 +30,8 @@ struct NewNoteSheet: View {
                 } else {
                     manualEntrySection
                 }
+
+                sourceSection
 
                 Section {
                     Toggle("Manual entry", isOn: $manualMode)
@@ -64,7 +70,47 @@ struct NewNoteSheet: View {
             .interactiveDismissDisabled(isCreating)
             .task {
                 await taxonomyService.loadData()
+                await loadSources()
             }
+        }
+    }
+
+    // MARK: - Source Section
+
+    private var sourceSection: some View {
+        Section("Source") {
+            Picker("Source", selection: $selectedSourceId) {
+                Text("None")
+                    .tag(nil as Int?)
+
+                ForEach(sources) { source in
+                    Label(source.displayName, systemImage: source.iconName)
+                        .tag(source.id as Int?)
+                }
+            }
+
+            if let sourceId = selectedSourceId,
+               let source = sources.first(where: { $0.id == sourceId }) {
+                HStack {
+                    Image(systemName: source.iconName)
+                        .foregroundStyle(.secondary)
+                    Text(source.sourceType.displayName)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private func loadSources() async {
+        do {
+            sources = try await StorageService.shared.loadSources()
+            // Default to Oak Compendium (personal observation) if available
+            if let oakCompendium = sources.first(where: { $0.id == 3 }) {
+                selectedSourceId = oakCompendium.id
+            }
+        } catch {
+            // Silently fail - source is optional
         }
     }
 
@@ -228,7 +274,7 @@ struct NewNoteSheet: View {
             )
         }
 
-        if await viewModel.createNote(taxonomy: taxonomy) != nil {
+        if await viewModel.createNote(taxonomy: taxonomy, sourceId: selectedSourceId) != nil {
             dismiss()
         }
 

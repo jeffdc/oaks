@@ -5,6 +5,7 @@ struct NotesListView: View {
     @Bindable var viewModel: NotesViewModel
     @State private var showingNewNote = false
     @State private var selectedNote: SpeciesNote?
+    @State private var sources: [Source] = []
 
     var body: some View {
         NavigationStack {
@@ -33,11 +34,26 @@ struct NotesListView: View {
             }
             .task {
                 await viewModel.loadNotes()
+                await loadSources()
             }
             .refreshable {
                 await viewModel.loadNotes()
+                await loadSources()
             }
         }
+    }
+
+    private func loadSources() async {
+        do {
+            sources = try await StorageService.shared.loadSources()
+        } catch {
+            // Silently fail
+        }
+    }
+
+    private func source(for note: SpeciesNote) -> Source? {
+        guard let sourceId = note.sourceId else { return nil }
+        return sources.first { $0.id == sourceId }
     }
 
     @MainActor
@@ -66,7 +82,7 @@ struct NotesListView: View {
             ForEach(viewModel.notesBySubgenus, id: \.subgenus) { section in
                 Section(section.subgenus) {
                     ForEach(section.notes) { note in
-                        NoteRowView(note: note)
+                        NoteRowView(note: note, source: source(for: note))
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 selectedNote = note
@@ -85,7 +101,7 @@ struct NotesListView: View {
         }
         .listStyle(.insetGrouped)
         .navigationDestination(item: $selectedNote) { note in
-            NoteDetailView(note: note, viewModel: viewModel)
+            NoteDetailView(note: note, source: source(for: note), viewModel: viewModel)
         }
     }
 }
@@ -93,6 +109,7 @@ struct NotesListView: View {
 /// Row view for a single note in the list
 struct NoteRowView: View {
     let note: SpeciesNote
+    let source: Source?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -118,6 +135,13 @@ struct NoteRowView: View {
                         .foregroundStyle(.tertiary)
                 }
 
+                if let source {
+                    Label(source.name, systemImage: source.iconName)
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                }
+
                 Spacer()
 
                 Text(note.updatedAt, style: .relative)
@@ -129,9 +153,10 @@ struct NoteRowView: View {
     }
 }
 
-/// Placeholder detail view (will be expanded in editor task)
+/// Detail view showing a species note with edit capability
 struct NoteDetailView: View {
-    let note: SpeciesNote
+    @State var note: SpeciesNote
+    let source: Source?
     @Bindable var viewModel: NotesViewModel
 
     var body: some View {
@@ -152,6 +177,13 @@ struct NoteDetailView: View {
                     Text(note.taxonomy.displayPath)
                         .font(.caption)
                         .foregroundStyle(.tertiary)
+
+                    if let source {
+                        Label(source.displayName, systemImage: source.iconName)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 2)
+                    }
                 }
                 .padding(.horizontal)
 
@@ -199,8 +231,15 @@ struct NoteDetailView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 NavigationLink("Edit") {
-                    Text("Editor coming soon...")
-                        .foregroundStyle(.secondary)
+                    NoteEditorView(
+                        note: $note,
+                        source: source,
+                        onSave: { updatedNote in
+                            Task {
+                                await viewModel.updateNote(updatedNote)
+                            }
+                        }
+                    )
                 }
             }
         }

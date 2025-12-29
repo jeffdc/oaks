@@ -1,0 +1,54 @@
+[
+  {
+    "id": 1,
+    "source_type": "Website",
+    "name": "iNaturalist",
+    "description": null,
+    "author": null,
+    "year": null,
+    "url": "https://www.inaturalist.org/taxa/47851-Quercus",
+    "isbn": null,
+    "doi": null,
+    "license": "CC0",
+    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/"
+  },
+  {
+    "id": 2,
+    "source_type": "Website",
+    "name": "Oaks of the World",
+    "description": "Comprehensive oak species database by oaksoftheworld.fr",
+    "author": null,
+    "year": null,
+    "url": "https://oaksoftheworld.fr",
+    "isbn": null,
+    "doi": null,
+    "license": "All Rights Reserved",
+    "license_url": null
+  },
+  {
+    "id": 3,
+    "source_type": "Personal Observation",
+    "name": "Oak Compendium",
+    "description": null,
+    "author": "Jeff Clark",
+    "year": 2025,
+    "url": null,
+    "isbn": null,
+    "doi": null,
+    "license": "All Rights Reserved",
+    "license_url": null
+  },
+  {
+    "id": 4,
+    "source_type": "Book",
+    "name": "The Sibley Guide to Trees",
+    "description": null,
+    "author": "David Allen Sibley",
+    "year": 2009,
+    "url": null,
+    "isbn": "978-0-375-415197",
+    "doi": null,
+    "license": "All Rights Reserved",
+    "license_url": null
+  }
+]

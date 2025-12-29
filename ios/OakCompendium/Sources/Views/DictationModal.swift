@@ -37,8 +37,9 @@ struct DictationModal: View {
                 // Recording controls
                 recordingControls
 
-                // Error display
-                if let error = speechService.error {
+                // Error display (only show non-transient errors)
+                if let error = speechService.error,
+                   !isIgnorableError(error) {
                     errorView(error)
                 }
 
@@ -221,6 +222,14 @@ struct DictationModal: View {
                 return "Processing..."
             }
         }
+    }
+
+    /// Check if an error is transient and can be ignored for display
+    private func isIgnorableError(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        // 1107 = cancelled, 216 = no speech detected, 1110 = audio interrupted, 1101 = assets unavailable
+        let ignoredCodes = [1107, 216, 1110, 1101]
+        return nsError.domain == "kAFAssistantErrorDomain" && ignoredCodes.contains(nsError.code)
     }
 
     // MARK: - Actions

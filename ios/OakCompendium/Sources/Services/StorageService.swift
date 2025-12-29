@@ -4,7 +4,8 @@ import Foundation
 actor StorageService {
     static let shared = StorageService()
 
-    private let fileName = "species_notes.json"
+    private let notesFileName = "species_notes.json"
+    private let sourcesFileName = "sources.json"
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
 
@@ -24,7 +25,16 @@ actor StorageService {
     }
 
     private var notesFileURL: URL {
-        documentsDirectory.appendingPathComponent(fileName)
+        documentsDirectory.appendingPathComponent(notesFileName)
+    }
+
+    private var sourcesFileURL: URL {
+        documentsDirectory.appendingPathComponent(sourcesFileName)
+    }
+
+    /// URL for bundled sources file (read-only seed data)
+    private var bundledSourcesURL: URL? {
+        Bundle.main.url(forResource: "sources", withExtension: "json")
     }
 
     var photosDirectory: URL {
@@ -33,7 +43,85 @@ actor StorageService {
         return url
     }
 
-    // MARK: - CRUD Operations
+    // MARK: - Source Operations
+
+    /// Load all sources, seeding from bundle if needed
+    func loadSources() async throws -> [Source] {
+        // If user sources file exists, use it
+        if FileManager.default.fileExists(atPath: sourcesFileURL.path) {
+            let data = try Data(contentsOf: sourcesFileURL)
+            return try decoder.decode([Source].self, from: data)
+        }
+
+        // Otherwise, seed from bundle
+        if let bundledURL = bundledSourcesURL {
+            let data = try Data(contentsOf: bundledURL)
+            let sources = try decoder.decode([Source].self, from: data)
+            // Save to documents for future edits
+            try await saveSources(sources)
+            return sources
+        }
+
+        // No bundled file, start with samples
+        let sources = Source.samples
+        try await saveSources(sources)
+        return sources
+    }
+
+    /// Save all sources to storage
+    func saveSources(_ sources: [Source]) async throws {
+        let data = try encoder.encode(sources)
+        try data.write(to: sourcesFileURL, options: .atomic)
+    }
+
+    /// Add a new source with auto-assigned ID
+    func addSource(_ source: Source) async throws -> [Source] {
+        var sources = try await loadSources()
+        // Assign next available ID
+        let maxId = sources.map(\.id).max() ?? 0
+        let newSource = Source(
+            id: maxId + 1,
+            sourceType: source.sourceType,
+            name: source.name,
+            description: source.description,
+            author: source.author,
+            year: source.year,
+            url: source.url,
+            isbn: source.isbn,
+            doi: source.doi,
+            license: source.license,
+            licenseUrl: source.licenseUrl
+        )
+        sources.append(newSource)
+        try await saveSources(sources)
+        return sources
+    }
+
+    /// Update an existing source
+    func updateSource(_ source: Source) async throws -> [Source] {
+        var sources = try await loadSources()
+        if let index = sources.firstIndex(where: { $0.id == source.id }) {
+            sources[index] = source
+            try await saveSources(sources)
+        }
+        return sources
+    }
+
+    /// Delete a source by ID
+    func deleteSource(id: Int) async throws -> [Source] {
+        var sources = try await loadSources()
+        sources.removeAll { $0.id == id }
+        try await saveSources(sources)
+        return sources
+    }
+
+    /// Find a source by ID
+    func findSource(id: Int) async throws -> Source? {
+        let sources = try await loadSources()
+        return sources.first { $0.id == id }
+    }
+
+    // MARK: - Notes Operations
 
     /// Load all notes from storage
     func loadNotes() async throws -> [SpeciesNote] {
