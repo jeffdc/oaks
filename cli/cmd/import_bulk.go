@@ -193,50 +193,30 @@ func applyResolutions(entry *models.OakEntry, resolutions map[string]string) {
 	}
 }
 
+// mergeStringSlices merges two string slices, returning the union without duplicates.
+// Items from 'add' are appended to 'base' only if not already present.
+func mergeStringSlices(base, add []string) []string {
+	if len(add) == 0 {
+		return base
+	}
+	seen := make(map[string]bool, len(base))
+	for _, s := range base {
+		seen[s] = true
+	}
+	for _, s := range add {
+		if !seen[s] {
+			base = append(base, s)
+			seen[s] = true
+		}
+	}
+	return base
+}
+
 func mergeEntries(existing, imported *models.OakEntry) {
-	// Merge synonyms
-	existingSynonyms := make(map[string]bool)
-	for _, s := range existing.Synonyms {
-		existingSynonyms[s] = true
-	}
-	for _, s := range imported.Synonyms {
-		if !existingSynonyms[s] {
-			existing.Synonyms = append(existing.Synonyms, s)
-		}
-	}
-
-	// Merge hybrids
-	existingHybrids := make(map[string]bool)
-	for _, h := range existing.Hybrids {
-		existingHybrids[h] = true
-	}
-	for _, h := range imported.Hybrids {
-		if !existingHybrids[h] {
-			existing.Hybrids = append(existing.Hybrids, h)
-		}
-	}
-
-	// Merge closely related
-	existingRelated := make(map[string]bool)
-	for _, r := range existing.CloselyRelatedTo {
-		existingRelated[r] = true
-	}
-	for _, r := range imported.CloselyRelatedTo {
-		if !existingRelated[r] {
-			existing.CloselyRelatedTo = append(existing.CloselyRelatedTo, r)
-		}
-	}
-
-	// Merge subspecies/varieties
-	existingSubsp := make(map[string]bool)
-	for _, s := range existing.SubspeciesVarieties {
-		existingSubsp[s] = true
-	}
-	for _, s := range imported.SubspeciesVarieties {
-		if !existingSubsp[s] {
-			existing.SubspeciesVarieties = append(existing.SubspeciesVarieties, s)
-		}
-	}
+	existing.Synonyms = mergeStringSlices(existing.Synonyms, imported.Synonyms)
+	existing.Hybrids = mergeStringSlices(existing.Hybrids, imported.Hybrids)
+	existing.CloselyRelatedTo = mergeStringSlices(existing.CloselyRelatedTo, imported.CloselyRelatedTo)
+	existing.SubspeciesVarieties = mergeStringSlices(existing.SubspeciesVarieties, imported.SubspeciesVarieties)
 
 	// For single-value fields, only update if existing is nil
 	if existing.Author == nil && imported.Author != nil {
