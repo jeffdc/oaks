@@ -137,7 +137,7 @@
 				<div class="browse-text">
 					<h4 class="browse-title browse-title-disabled">
 						Identification
-						<span class="coming-soon-badge">Coming Soon</span>
+						<span class="badge badge-uppercase badge-muted">Coming Soon</span>
 					</h4>
 					<p class="browse-description">Identify oaks by their characteristics</p>
 				</div>
@@ -155,7 +155,7 @@
 						<div class="source-info">
 							<span class="source-name">{source.source_name}</span>
 							{#if source.source_id === 3}
-								<span class="primary-badge">Primary</span>
+								<span class="badge badge-uppercase badge-forest-dark">Primary</span>
 							{/if}
 							<span class="source-stats">{source.species_count} species</span>
 						</div>
@@ -229,13 +229,6 @@
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: 1rem;
-	}
-
-	.section-title {
-		font-family: var(--font-serif);
-		font-size: 1.25rem;
-		font-weight: 600;
-		color: var(--color-text-primary);
 	}
 
 	.shuffle-btn {
@@ -338,10 +331,6 @@
 		margin-bottom: 2rem;
 	}
 
-	.browse-section .section-title {
-		margin-bottom: 1rem;
-	}
-
 	.browse-options {
 		display: flex;
 		flex-direction: column;
@@ -436,23 +425,8 @@
 		flex-wrap: wrap;
 	}
 
-	.coming-soon-badge {
-		font-size: 0.6875rem;
-		font-weight: 500;
-		text-transform: uppercase;
-		letter-spacing: 0.025em;
-		padding: 0.125rem 0.5rem;
-		background-color: var(--color-stone-200);
-		color: var(--color-text-tertiary);
-		border-radius: 9999px;
-	}
-
 	.sources-section {
 		margin-bottom: 2rem;
-	}
-
-	.sources-section .section-title {
-		margin-bottom: 1rem;
 	}
 
 	.sources-list {
@@ -525,17 +499,6 @@
 	.source-item-primary:hover {
 		border-color: var(--color-forest-500);
 		background-color: var(--color-forest-100);
-	}
-
-	.primary-badge {
-		font-size: 0.6875rem;
-		font-weight: 500;
-		text-transform: uppercase;
-		letter-spacing: 0.025em;
-		padding: 0.125rem 0.5rem;
-		background-color: var(--color-forest-600);
-		color: white;
-		border-radius: 9999px;
 	}
 
 	.version-section {

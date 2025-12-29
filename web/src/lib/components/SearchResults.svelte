@@ -22,7 +22,7 @@
 
 <div class="species-list">
 	{#if hasAnyResults}
-		<div class="counts-bar">
+		<div class="card counts-bar">
 			<span class="count-item">{$speciesCounts.speciesCount} species</span>
 			<span class="separator">|</span>
 			<span class="count-item">{$speciesCounts.hybridCount} hybrids</span>
@@ -85,7 +85,7 @@
 			{#if isSearching && hasSourceResults}
 				<div class="results-section">
 					<h3 class="section-label">Species</h3>
-					<ul class="results-list">
+					<ul class="card results-list">
 						{#each $filteredSpecies as species (species.name)}
 							{@const commonNames = getCommonNames(species)}
 							<li>
@@ -106,7 +106,7 @@
 					</ul>
 				</div>
 			{:else}
-				<ul class="results-list">
+				<ul class="card results-list">
 					{#each $filteredSpecies as species (species.name)}
 						{@const commonNames = getCommonNames(species)}
 						<li>
@@ -135,10 +135,6 @@
 		list-style: none;
 		padding: 0;
 		margin: 0;
-		background-color: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: 0.75rem;
-		box-shadow: var(--shadow-sm);
 		overflow: hidden;
 	}
 
@@ -200,10 +196,6 @@
 		gap: 0.75rem;
 		padding: 1rem 1.5rem;
 		margin-bottom: 1.5rem;
-		background-color: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: 0.75rem;
-		box-shadow: var(--shadow-sm);
 	}
 
 	.count-item {

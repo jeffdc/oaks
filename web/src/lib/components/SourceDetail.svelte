@@ -90,7 +90,7 @@
 
     <!-- Metadata section -->
     {#if hasMetadata}
-    <section class="metadata-section">
+    <section class="card metadata-section">
       <dl class="metadata-list">
         {#if source.source_type}
           <div class="metadata-item">
@@ -162,11 +162,11 @@
     <section class="coverage-section">
       <h2 class="section-title">Coverage</h2>
       <div class="stats-grid">
-        <div class="stat-card">
+        <div class="card stat-card">
           <span class="stat-value">{source.species_count}</span>
           <span class="stat-label">Species</span>
         </div>
-        <div class="stat-card">
+        <div class="card stat-card">
           <span class="stat-value">{source.coverage_percent}%</span>
           <span class="stat-label">of Database</span>
         </div>
@@ -217,21 +217,8 @@
     align-items: center;
     justify-content: center;
     padding: 4rem 2rem;
+    gap: 1rem;
     color: var(--color-text-secondary);
-  }
-
-  .loading-spinner {
-    width: 2rem;
-    height: 2rem;
-    border: 3px solid var(--color-border);
-    border-top-color: var(--color-forest-600);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 1rem;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
   }
 
   .not-found {
@@ -296,9 +283,6 @@
   .metadata-section {
     margin-bottom: 2rem;
     padding: 1.25rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
   }
 
   .metadata-list {
@@ -363,14 +347,6 @@
     color: var(--color-text-tertiary);
   }
 
-  .section-title {
-    font-family: var(--font-serif);
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: 1rem;
-  }
-
   .coverage-section {
     margin-bottom: 2.5rem;
   }
@@ -386,9 +362,6 @@
     display: flex;
     flex-direction: column;
     padding: 1.25rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
     text-align: center;
   }
 

@@ -141,3 +141,244 @@ textarea:focus-visible {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   Component Utilities
+   Shared styles used across multiple components
+   ========================================================================== */
+
+/* Prose content - for rendering markdown/rich text consistently */
+.prose-content {
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  font-size: 0.9375rem;
+}
+
+.prose-content :global(p) {
+  margin: 0 0 0.75rem 0;
+}
+
+.prose-content :global(p:last-child) {
+  margin-bottom: 0;
+}
+
+.prose-content :global(ul) {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.prose-content :global(ol) {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  list-style-type: decimal;
+}
+
+.prose-content :global(li) {
+  margin: 0.25rem 0;
+}
+
+.prose-content :global(a) {
+  color: var(--color-forest-700);
+  text-decoration: underline;
+  text-decoration-color: var(--color-forest-300);
+  transition: all 0.15s ease;
+}
+
+.prose-content :global(a:hover) {
+  color: var(--color-forest-600);
+  text-decoration-color: var(--color-forest-600);
+}
+
+.prose-content :global(strong) {
+  font-weight: 600;
+}
+
+.prose-content :global(em) {
+  font-style: italic;
+}
+
+.prose-content :global(code) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background-color: var(--color-forest-50);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+/* Compact variant for tighter spaces like table cells */
+.prose-content-compact {
+  font-size: 0.875rem;
+}
+
+.prose-content-compact :global(p) {
+  margin: 0 0 0.5rem 0;
+}
+
+.prose-content-compact :global(ul),
+.prose-content-compact :global(ol) {
+  margin: 0.25rem 0;
+  padding-left: 1.25rem;
+}
+
+.prose-content-compact :global(li) {
+  margin: 0.125rem 0;
+}
+
+/* Card utilities - for consistent card/section styling */
+.card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-sm {
+  border-radius: 0.5rem;
+}
+
+.card-interactive {
+  transition: all 0.15s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.card-interactive:hover {
+  border-color: var(--color-forest-400);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.card-interactive:focus-visible {
+  outline: none;
+  border-color: var(--color-forest-600);
+  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.15);
+}
+
+/* Forest-tinted card variant */
+.card-forest {
+  background-color: var(--color-forest-50);
+  border-color: var(--color-forest-200);
+}
+
+.card-forest.card-interactive:hover {
+  background-color: var(--color-forest-100);
+  border-color: var(--color-forest-300);
+}
+
+/* Taxonomy navigation breadcrumb */
+.taxonomy-nav {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.taxonomy-nav .taxonomy-label {
+  font-weight: 600;
+  color: var(--color-forest-700);
+  margin-right: 0.25rem;
+}
+
+.taxonomy-nav .taxonomy-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  text-decoration: none;
+  transition: color 0.15s ease;
+  border-bottom: none;
+}
+
+.taxonomy-nav .taxonomy-link:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--color-forest-400);
+}
+
+.taxonomy-nav .taxonomy-name {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--color-forest-700);
+}
+
+.taxonomy-nav .taxonomy-link:hover .taxonomy-name {
+  color: var(--color-forest-900);
+}
+
+.taxonomy-nav .taxonomy-level-label {
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+}
+
+.taxonomy-nav .taxonomy-separator {
+  color: var(--color-forest-400);
+}
+
+/* Badge/pill utilities */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  font-size: 0.6875rem;
+}
+
+/* Badge color variants */
+.badge-forest {
+  background-color: var(--color-forest-200);
+  color: var(--color-forest-700);
+}
+
+.badge-forest-light {
+  background-color: var(--color-forest-100);
+  color: var(--color-forest-900);
+}
+
+.badge-forest-dark {
+  background-color: var(--color-forest-600);
+  color: white;
+}
+
+.badge-muted {
+  background-color: var(--color-stone-100);
+  color: var(--color-text-secondary);
+}
+
+/* Section title utility */
+.section-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+}
+
+.section-title-sm {
+  font-size: 1rem;
+  color: var(--color-forest-800);
+}
+
+/* Loading spinner utility */
+.loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-forest-600);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

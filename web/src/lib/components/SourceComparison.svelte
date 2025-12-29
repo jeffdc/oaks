@@ -162,7 +162,7 @@
             <div class="value-cell">
               {#if renderValue(source, field)}
                 {#if field.type === 'markdown'}
-                  <div class="markdown-content">{@html renderMarkdown(renderValue(source, field))}</div>
+                  <div class="prose-content prose-content-compact">{@html renderMarkdown(renderValue(source, field))}</div>
                 {:else}
                   <div class="text-content">{renderValue(source, field)}</div>
                 {/if}
@@ -397,33 +397,6 @@
 
   .no-data {
     color: var(--color-text-tertiary);
-    font-style: italic;
-  }
-
-  /* Markdown content styling */
-  .markdown-content :global(p) {
-    margin: 0 0 0.5rem 0;
-  }
-
-  .markdown-content :global(p:last-child) {
-    margin-bottom: 0;
-  }
-
-  .markdown-content :global(ul),
-  .markdown-content :global(ol) {
-    margin: 0.25rem 0;
-    padding-left: 1.25rem;
-  }
-
-  .markdown-content :global(li) {
-    margin: 0.125rem 0;
-  }
-
-  .markdown-content :global(strong) {
-    font-weight: 600;
-  }
-
-  .markdown-content :global(em) {
     font-style: italic;
   }
 

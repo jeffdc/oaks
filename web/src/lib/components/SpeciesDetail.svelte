@@ -191,7 +191,7 @@
     <!-- Species name and badges -->
     <div class="species-current">
       <div class="species-current-left">
-        <span class="species-level">{species.is_hybrid ? 'Hybrid' : 'Species'}</span>
+        <span class="badge badge-uppercase badge-forest">{species.is_hybrid ? 'Hybrid' : 'Species'}</span>
         <h1 class="species-title">
           <em>Quercus {#if needsHybridSymbol(species)}× {/if}{species.name}</em>
           {#if species.author}<span class="author-text">{species.author}</span>{/if}
@@ -254,7 +254,7 @@
     <!-- SPECIES-INTRINSIC DATA (not source-dependent) -->
 
     {#if species.is_hybrid && (species.parent1 || species.parent2)}
-      <section class="detail-section full-width">
+      <section class="card card-sm detail-section full-width">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -263,7 +263,7 @@
         </h2>
         <div class="space-y-3">
           {#if species.parent_formula}
-            <p class="detail-text italic font-medium" style="color: var(--color-forest-700);">{species.parent_formula}</p>
+            <p class="prose-content italic font-medium" style="color: var(--color-forest-700);">{species.parent_formula}</p>
           {/if}
           <ul class="space-y-2">
             {#if species.parent1}
@@ -292,7 +292,7 @@
     {/if}
 
     {#if species.hybrids && species.hybrids.length > 0}
-      <section class="detail-section full-width">
+      <section class="card card-sm detail-section full-width">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -322,7 +322,7 @@
     {/if}
 
     {#if species.closely_related_to && species.closely_related_to.length > 0}
-      <section class="detail-section full-width">
+      <section class="card card-sm detail-section full-width">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
@@ -345,7 +345,7 @@
     {/if}
 
     {#if species.subspecies_varieties && species.subspecies_varieties.length > 0}
-      <section class="detail-section full-width">
+      <section class="card card-sm detail-section full-width">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -361,7 +361,7 @@
     {/if}
 
     {#if species.synonyms && species.synonyms.length > 0}
-      <section class="detail-section full-width">
+      <section class="card card-sm detail-section full-width">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
@@ -381,7 +381,7 @@
     <!-- SOURCE-DEPENDENT DATA -->
 
     {#if sources.length > 0}
-      <section class="source-container full-width">
+      <section class="card card-sm source-container full-width">
         <!-- Source tabs -->
         <div class="source-tabs" role="tablist">
           {#each sources as source}
@@ -438,7 +438,7 @@
                 </svg>
                 <span>Geographic Range</span>
               </h3>
-              <div class="field-text">{@html renderMarkdown(selectedSource.range)}</div>
+              <div class="prose-content">{@html renderMarkdown(selectedSource.range)}</div>
             </section>
           {/if}
 
@@ -450,7 +450,7 @@
                 </svg>
                 <span>Growth Habit</span>
               </h3>
-              <div class="field-text">{@html renderMarkdown(selectedSource.growth_habit)}</div>
+              <div class="prose-content">{@html renderMarkdown(selectedSource.growth_habit)}</div>
             </section>
           {/if}
 
@@ -462,7 +462,7 @@
                 </svg>
                 <span>Leaves</span>
               </h3>
-              <div class="field-text">{@html renderMarkdown(selectedSource.leaves)}</div>
+              <div class="prose-content">{@html renderMarkdown(selectedSource.leaves)}</div>
             </section>
           {/if}
 
@@ -474,7 +474,7 @@
                 </svg>
                 <span>Fruits</span>
               </h3>
-              <div class="field-text">{@html renderMarkdown(selectedSource.fruits)}</div>
+              <div class="prose-content">{@html renderMarkdown(selectedSource.fruits)}</div>
             </section>
           {/if}
 
@@ -486,7 +486,7 @@
                 </svg>
                 <span>Flowers</span>
               </h3>
-              <div class="field-text">{@html renderMarkdown(selectedSource.flowers)}</div>
+              <div class="prose-content">{@html renderMarkdown(selectedSource.flowers)}</div>
             </section>
           {/if}
 
@@ -498,7 +498,7 @@
                 </svg>
                 <span>Bark</span>
               </h3>
-              <div class="field-text">{@html renderMarkdown(selectedSource.bark)}</div>
+              <div class="prose-content">{@html renderMarkdown(selectedSource.bark)}</div>
             </section>
           {/if}
 
@@ -510,7 +510,7 @@
                 </svg>
                 <span>Twigs</span>
               </h3>
-              <div class="field-text">{@html renderMarkdown(selectedSource.twigs)}</div>
+              <div class="prose-content">{@html renderMarkdown(selectedSource.twigs)}</div>
             </section>
           {/if}
 
@@ -522,7 +522,7 @@
                 </svg>
                 <span>Buds</span>
               </h3>
-              <div class="field-text">{@html renderMarkdown(selectedSource.buds)}</div>
+              <div class="prose-content">{@html renderMarkdown(selectedSource.buds)}</div>
             </section>
           {/if}
 
@@ -550,7 +550,7 @@
                 </svg>
                 <span>Hardiness & Habitat</span>
               </h3>
-              <div class="field-text">{@html renderMarkdown(selectedSource.hardiness_habitat)}</div>
+              <div class="prose-content">{@html renderMarkdown(selectedSource.hardiness_habitat)}</div>
             </section>
           {/if}
 
@@ -562,14 +562,14 @@
                 </svg>
                 <span>Additional Information</span>
               </h3>
-              <div class="field-text">{@html renderMarkdown(selectedSource.miscellaneous)}</div>
+              <div class="prose-content">{@html renderMarkdown(selectedSource.miscellaneous)}</div>
             </section>
           {/if}
         </div>
       </section>
     {/if}
 
-    <section class="detail-section full-width">
+    <section class="card card-sm detail-section full-width">
       <h2 class="section-header">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -619,10 +619,6 @@
 
   .detail-section {
     padding: 1rem;
-    border-radius: 0.5rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    box-shadow: var(--shadow-sm);
   }
 
   /* Full-width sections span both columns */
@@ -646,12 +642,6 @@
     height: 1.125rem;
     color: var(--color-forest-600);
     flex-shrink: 0;
-  }
-
-  .detail-text {
-    color: var(--color-text-primary);
-    line-height: 1.7;
-    font-size: 0.9375rem;
   }
 
   .species-link {
@@ -754,57 +744,6 @@
     border-radius: 0.75rem;
   }
 
-  /* Taxonomy navigation (below species name) */
-  .taxonomy-nav {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-  }
-
-  .taxonomy-nav .taxonomy-label {
-    font-weight: 600;
-    color: var(--color-forest-700);
-    margin-right: 0.25rem;
-  }
-
-  .taxonomy-nav .taxonomy-link {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.25rem;
-    text-decoration: none;
-    transition: color 0.15s ease;
-    border-bottom: none;
-  }
-
-  .taxonomy-nav .taxonomy-link:hover {
-    text-decoration: underline;
-    text-decoration-color: var(--color-forest-400);
-  }
-
-  .taxonomy-name {
-    font-style: italic;
-    font-weight: 500;
-    color: var(--color-forest-700);
-  }
-
-  .taxonomy-nav .taxonomy-link:hover .taxonomy-name {
-    color: var(--color-forest-900);
-  }
-
-  .taxonomy-level-label {
-    font-size: 0.75rem;
-    font-style: normal;
-    font-weight: 400;
-    color: var(--color-text-tertiary);
-  }
-
-  .taxonomy-separator {
-    color: var(--color-forest-400);
-  }
-
   /* Current species row */
   .species-current {
     display: flex;
@@ -818,18 +757,6 @@
     align-items: center;
     gap: 0.75rem;
     flex-wrap: wrap;
-  }
-
-  .species-level {
-    display: inline-block;
-    padding: 0.25rem 0.625rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-forest-700);
-    background-color: var(--color-forest-200);
-    border-radius: 9999px;
   }
 
   .species-title {
@@ -880,10 +807,6 @@
 
   /* Source container and tabs */
   .source-container {
-    border-radius: 0.5rem;
-    border: 1px solid var(--color-border);
-    background-color: var(--color-surface);
-    box-shadow: var(--shadow-sm);
     overflow: hidden;
   }
 
@@ -1025,113 +948,10 @@
     flex-shrink: 0;
   }
 
-  .field-text {
-    color: var(--color-text-primary);
-    line-height: 1.6;
-    font-size: 0.9375rem;
-  }
-
-  /* Apply same markdown styles to field-text */
-  .field-text :global(p) {
-    margin: 0 0 0.75rem 0;
-  }
-
-  .field-text :global(p:last-child) {
-    margin-bottom: 0;
-  }
-
-  .field-text :global(ul) {
-    margin: 0.5rem 0;
-    padding-left: 1.5rem;
-    list-style-type: disc;
-  }
-
-  .field-text :global(ol) {
-    margin: 0.5rem 0;
-    padding-left: 1.5rem;
-    list-style-type: decimal;
-  }
-
-  .field-text :global(li) {
-    margin: 0.25rem 0;
-  }
-
-  .field-text :global(a) {
-    color: var(--color-forest-700);
-    text-decoration: underline;
-    text-decoration-color: var(--color-forest-300);
-    transition: all 0.15s ease;
-  }
-
-  .field-text :global(a:hover) {
-    color: var(--color-forest-600);
-    text-decoration-color: var(--color-forest-600);
-  }
-
-  .field-text :global(strong) {
-    font-weight: 600;
-  }
-
-  .field-text :global(em) {
-    font-style: italic;
-  }
-
   .external-links-container {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
   }
 
-  /* Markdown content styling */
-  .detail-text :global(p) {
-    margin: 0 0 0.75rem 0;
-  }
-
-  .detail-text :global(p:last-child) {
-    margin-bottom: 0;
-  }
-
-  .detail-text :global(ul) {
-    margin: 0.5rem 0;
-    padding-left: 1.5rem;
-    list-style-type: disc;
-  }
-
-  .detail-text :global(ol) {
-    margin: 0.5rem 0;
-    padding-left: 1.5rem;
-    list-style-type: decimal;
-  }
-
-  .detail-text :global(li) {
-    margin: 0.25rem 0;
-  }
-
-  .detail-text :global(a) {
-    color: var(--color-forest-700);
-    text-decoration: underline;
-    text-decoration-color: var(--color-forest-300);
-    transition: all 0.15s ease;
-  }
-
-  .detail-text :global(a:hover) {
-    color: var(--color-forest-600);
-    text-decoration-color: var(--color-forest-600);
-  }
-
-  .detail-text :global(strong) {
-    font-weight: 600;
-  }
-
-  .detail-text :global(em) {
-    font-style: italic;
-  }
-
-  .detail-text :global(code) {
-    font-family: monospace;
-    background-color: var(--color-forest-50);
-    padding: 0.125rem 0.25rem;
-    border-radius: 0.25rem;
-    font-size: 0.875em;
-  }
 </style>

@@ -116,10 +116,50 @@ All colors, shadows, and typography defined as CSS variables:
 
 ### Styling Approach
 
-- **Global styles**: `app.css` (Tailwind import + custom properties)
+- **Global styles**: `app.css` (Tailwind import + custom properties + component utilities)
 - **Component styles**: Scoped `<style>` blocks in `.svelte` files
 - **Hybrid approach**: Tailwind utilities for layout, custom properties for colors
 - **Consistency**: All components reference CSS variables for colors/shadows
+
+### Global Component Utilities (app.css)
+
+Shared utility classes for common patterns used across multiple components:
+
+```css
+/* Content rendering */
+.prose-content              /* Markdown/rich text styling */
+.prose-content-compact      /* Tighter spacing for tables */
+
+/* Cards */
+.card                       /* Base card with border, shadow, rounded corners */
+.card-sm                    /* Smaller border radius */
+.card-interactive           /* Hover/focus states for clickable cards */
+.card-forest                /* Forest-tinted background variant */
+
+/* Navigation */
+.taxonomy-nav               /* Taxonomy breadcrumb container */
+.taxonomy-nav .taxonomy-link, .taxonomy-name, .taxonomy-level-label, .taxonomy-separator
+
+/* Badges/Pills */
+.badge                      /* Base badge styling */
+.badge-uppercase            /* Uppercase with letter-spacing */
+.badge-forest               /* Green background */
+.badge-forest-light         /* Light green background */
+.badge-forest-dark          /* Dark green background */
+.badge-muted                /* Gray/muted background */
+
+/* Typography */
+.section-title              /* Section headings (1.25rem, serif) */
+.section-title-sm           /* Smaller variant (1rem) */
+
+/* Feedback */
+.loading-spinner            /* Animated spinner */
+```
+
+**When to use global utilities vs component styles:**
+- Use global utilities for patterns that appear in 2+ components
+- Keep component-specific styles in scoped `<style>` blocks
+- Prefer composition (multiple utility classes) over new one-off utilities
 
 ### Color Palette
 

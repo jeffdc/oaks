@@ -117,7 +117,7 @@
     <!-- Current taxon (name first) -->
     <div class="taxon-current">
       <div class="taxon-current-left">
-        <span class="taxon-level">{getTaxonLevelLabel(taxonPath.length)}</span>
+        <span class="badge badge-uppercase badge-forest">{getTaxonLevelLabel(taxonPath.length)}</span>
         <h1 class="taxon-name">
           {#if isGenusLevel}
             <em>Quercus</em>
@@ -158,8 +158,8 @@
 
   <!-- Sub-taxa (if any) -->
   {#if subTaxa.length > 0}
-    <section class="sub-taxa-section">
-      <h2 class="section-title">{getTaxonLevelLabelPlural(taxonPath.length + 1)}</h2>
+    <section class="card sub-taxa-section">
+      <h2 class="section-title section-title-sm">{getTaxonLevelLabelPlural(taxonPath.length + 1)}</h2>
       <div class="sub-taxa-grid">
         {#each subTaxa as subTaxon}
           <a href="{getTaxonUrl([...taxonPath, subTaxon.name])}" class="sub-taxon-card">
@@ -175,8 +175,8 @@
 
   <!-- Species list -->
   {#if matchingSpecies.length > 0}
-    <section class="species-section">
-      <h2 class="section-title">
+    <section class="card species-section">
+      <h2 class="section-title section-title-sm">
         {#if isGenusLevel}
           Species without subgenus assignment ({matchingSpecies.length})
         {:else}
@@ -214,56 +214,6 @@
     border-radius: 0.75rem;
   }
 
-  /* Taxonomy navigation (below taxon name) */
-  .taxonomy-nav {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-  }
-
-  .taxonomy-label {
-    font-weight: 600;
-    color: var(--color-forest-700);
-    margin-right: 0.25rem;
-  }
-
-  .taxonomy-link {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.25rem;
-    text-decoration: none;
-    transition: color 0.15s ease;
-  }
-
-  .taxonomy-link:hover {
-    text-decoration: underline;
-    text-decoration-color: var(--color-forest-400);
-  }
-
-  .taxonomy-name {
-    font-style: italic;
-    font-weight: 500;
-    color: var(--color-forest-700);
-  }
-
-  .taxonomy-link:hover .taxonomy-name {
-    color: var(--color-forest-900);
-  }
-
-  .taxonomy-level-label {
-    font-size: 0.75rem;
-    font-style: normal;
-    font-weight: 400;
-    color: var(--color-text-tertiary);
-  }
-
-  .taxonomy-separator {
-    color: var(--color-forest-400);
-  }
-
   /* Current taxon row */
   .taxon-current {
     display: flex;
@@ -277,18 +227,6 @@
     align-items: center;
     gap: 0.75rem;
     flex-wrap: wrap;
-  }
-
-  .taxon-level {
-    display: inline-block;
-    padding: 0.25rem 0.625rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-forest-700);
-    background-color: var(--color-forest-200);
-    border-radius: 9999px;
   }
 
   .taxon-name {
@@ -306,22 +244,10 @@
     flex-shrink: 0;
   }
 
-  /* Section titles */
-  .section-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-forest-800);
-    margin: 0 0 1rem 0;
-    font-family: var(--font-serif);
-  }
-
   /* Sub-taxa section */
   .sub-taxa-section {
     padding: 1.5rem;
     margin-bottom: 1.5rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
   }
 
   .sub-taxa-grid {
@@ -373,9 +299,6 @@
   /* Species section */
   .species-section {
     padding: 1.5rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
   }
 
   .species-grid {

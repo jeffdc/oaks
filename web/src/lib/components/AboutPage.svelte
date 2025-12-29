@@ -158,14 +158,6 @@
         margin-top: 1rem;
     }
 
-    .section-title {
-        font-family: var(--font-serif);
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--color-text-primary);
-        margin-bottom: 0.75rem;
-    }
-
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
