@@ -21,6 +21,27 @@ func escapeLike(s string) string {
 	return s
 }
 
+// sliceContains checks if a string slice contains a value
+func sliceContains(slice []string, value string) bool {
+	for _, v := range slice {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
+
+// sliceRemove removes a value from a string slice, returning the new slice
+func sliceRemove(slice []string, value string) []string {
+	result := make([]string, 0, len(slice))
+	for _, v := range slice {
+		if v != value {
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
 // Database wraps the SQLite connection
 type Database struct {
 	conn *sql.DB
@@ -444,8 +465,227 @@ func (db *Database) SearchTaxa(query string) ([]*models.Taxon, error) {
 	return taxa, rows.Err()
 }
 
-// SaveOakEntry saves or updates a complete oak entry
+// SaveOakEntry saves or updates a complete oak entry.
+// It also maintains bidirectional parent-child relationships:
+// when a hybrid's parents are set/changed, the parents' hybrids lists are updated.
 func (db *Database) SaveOakEntry(entry *models.OakEntry) error {
+	// Start transaction for atomic updates
+	tx, err := db.conn.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Get existing entry to compare parents (for bidirectional relationship updates)
+	existingEntry, err := db.getOakEntryTx(tx, entry.ScientificName)
+	if err != nil {
+		return fmt.Errorf("failed to get existing entry: %w", err)
+	}
+
+	// Compute parent changes
+	oldParents := make(map[string]bool)
+	newParents := make(map[string]bool)
+
+	if existingEntry != nil {
+		if existingEntry.Parent1 != nil && *existingEntry.Parent1 != "" {
+			oldParents[*existingEntry.Parent1] = true
+		}
+		if existingEntry.Parent2 != nil && *existingEntry.Parent2 != "" {
+			oldParents[*existingEntry.Parent2] = true
+		}
+	}
+
+	if entry.Parent1 != nil && *entry.Parent1 != "" {
+		newParents[*entry.Parent1] = true
+	}
+	if entry.Parent2 != nil && *entry.Parent2 != "" {
+		newParents[*entry.Parent2] = true
+	}
+
+	// Remove hybrid from parents that are no longer in the list
+	for parent := range oldParents {
+		if !newParents[parent] {
+			if err := db.removeHybridFromParentTx(tx, parent, entry.ScientificName); err != nil {
+				return fmt.Errorf("failed to remove hybrid from parent %s: %w", parent, err)
+			}
+		}
+	}
+
+	// Add hybrid to new parents
+	for parent := range newParents {
+		if !oldParents[parent] {
+			if err := db.addHybridToParentTx(tx, parent, entry.ScientificName); err != nil {
+				return fmt.Errorf("failed to add hybrid to parent %s: %w", parent, err)
+			}
+		}
+	}
+
+	// Save the entry itself
+	if err := db.saveOakEntryTx(tx, entry); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// getOakEntryTx gets an oak entry within a transaction
+func (db *Database) getOakEntryTx(tx *sql.Tx, scientificName string) (*models.OakEntry, error) {
+	row := tx.QueryRow(
+		`SELECT scientific_name, author, is_hybrid, conservation_status,
+		        subgenus, section, subsection, complex,
+		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
+		 FROM oak_entries WHERE scientific_name = ?`,
+		scientificName,
+	)
+
+	var entry models.OakEntry
+	var isHybrid int
+	var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON, externalLinksJSON sql.NullString
+
+	if err := row.Scan(
+		&entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
+		&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
+		&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON, &externalLinksJSON,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get oak entry: %w", err)
+	}
+
+	entry.IsHybrid = isHybrid != 0
+
+	// Unmarshal JSON arrays
+	if hybridsJSON.Valid {
+		if err := json.Unmarshal([]byte(hybridsJSON.String), &entry.Hybrids); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal hybrids for %s: %w", entry.ScientificName, err)
+		}
+	}
+	if entry.Hybrids == nil {
+		entry.Hybrids = []string{}
+	}
+
+	if relatedJSON.Valid {
+		if err := json.Unmarshal([]byte(relatedJSON.String), &entry.CloselyRelatedTo); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal closely_related_to for %s: %w", entry.ScientificName, err)
+		}
+	}
+	if entry.CloselyRelatedTo == nil {
+		entry.CloselyRelatedTo = []string{}
+	}
+
+	if subspeciesJSON.Valid {
+		if err := json.Unmarshal([]byte(subspeciesJSON.String), &entry.SubspeciesVarieties); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal subspecies_varieties for %s: %w", entry.ScientificName, err)
+		}
+	}
+	if entry.SubspeciesVarieties == nil {
+		entry.SubspeciesVarieties = []string{}
+	}
+
+	if synonymsJSON.Valid {
+		if err := json.Unmarshal([]byte(synonymsJSON.String), &entry.Synonyms); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal synonyms for %s: %w", entry.ScientificName, err)
+		}
+	}
+	if entry.Synonyms == nil {
+		entry.Synonyms = []string{}
+	}
+
+	if externalLinksJSON.Valid {
+		if err := json.Unmarshal([]byte(externalLinksJSON.String), &entry.ExternalLinks); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal external_links for %s: %w", entry.ScientificName, err)
+		}
+	}
+	if entry.ExternalLinks == nil {
+		entry.ExternalLinks = []models.ExternalLink{}
+	}
+
+	return &entry, nil
+}
+
+// removeHybridFromParentTx removes a hybrid from a parent's hybrids list within a transaction
+func (db *Database) removeHybridFromParentTx(tx *sql.Tx, parentName, hybridName string) error {
+	// Get parent's current hybrids list
+	var hybridsJSON sql.NullString
+	err := tx.QueryRow(
+		`SELECT hybrids FROM oak_entries WHERE scientific_name = ?`,
+		parentName,
+	).Scan(&hybridsJSON)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// Parent doesn't exist, nothing to do
+			return nil
+		}
+		return fmt.Errorf("failed to get parent hybrids: %w", err)
+	}
+
+	var hybrids []string
+	if hybridsJSON.Valid {
+		if err := json.Unmarshal([]byte(hybridsJSON.String), &hybrids); err != nil {
+			return fmt.Errorf("failed to unmarshal hybrids: %w", err)
+		}
+	}
+
+	// Remove the hybrid from the list
+	hybrids = sliceRemove(hybrids, hybridName)
+
+	// Save updated list
+	updatedJSON, err := json.Marshal(hybrids)
+	if err != nil {
+		return fmt.Errorf("failed to marshal hybrids: %w", err)
+	}
+
+	_, err = tx.Exec(
+		`UPDATE oak_entries SET hybrids = ? WHERE scientific_name = ?`,
+		string(updatedJSON), parentName,
+	)
+	return err
+}
+
+// addHybridToParentTx adds a hybrid to a parent's hybrids list within a transaction
+func (db *Database) addHybridToParentTx(tx *sql.Tx, parentName, hybridName string) error {
+	// Get parent's current hybrids list
+	var hybridsJSON sql.NullString
+	err := tx.QueryRow(
+		`SELECT hybrids FROM oak_entries WHERE scientific_name = ?`,
+		parentName,
+	).Scan(&hybridsJSON)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// Parent doesn't exist, nothing to do
+			return nil
+		}
+		return fmt.Errorf("failed to get parent hybrids: %w", err)
+	}
+
+	var hybrids []string
+	if hybridsJSON.Valid {
+		if err := json.Unmarshal([]byte(hybridsJSON.String), &hybrids); err != nil {
+			return fmt.Errorf("failed to unmarshal hybrids: %w", err)
+		}
+	}
+
+	// Add the hybrid if not already present
+	if !sliceContains(hybrids, hybridName) {
+		hybrids = append(hybrids, hybridName)
+	}
+
+	// Save updated list
+	updatedJSON, err := json.Marshal(hybrids)
+	if err != nil {
+		return fmt.Errorf("failed to marshal hybrids: %w", err)
+	}
+
+	_, err = tx.Exec(
+		`UPDATE oak_entries SET hybrids = ? WHERE scientific_name = ?`,
+		string(updatedJSON), parentName,
+	)
+	return err
+}
+
+// saveOakEntryTx saves an oak entry within a transaction
+func (db *Database) saveOakEntryTx(tx *sql.Tx, entry *models.OakEntry) error {
 	// Marshal JSON arrays
 	synonymsJSON, err := json.Marshal(entry.Synonyms)
 	if err != nil {
@@ -474,7 +714,7 @@ func (db *Database) SaveOakEntry(entry *models.OakEntry) error {
 		isHybrid = 1
 	}
 
-	_, err = db.conn.Exec(
+	_, err = tx.Exec(
 		`INSERT OR REPLACE INTO oak_entries (
 			scientific_name, author, is_hybrid, conservation_status,
 			subgenus, section, subsection, complex,
