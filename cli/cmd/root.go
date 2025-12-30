@@ -1,20 +1,26 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
+	"github.com/jeff/oaks/cli/internal/client"
 	"github.com/jeff/oaks/cli/internal/config"
 	"github.com/jeff/oaks/cli/internal/db"
 	"github.com/jeff/oaks/cli/internal/schema"
 )
 
 var (
-	dbPath      string
-	schemaPath  string
-	profileFlag string
+	dbPath           string
+	schemaPath       string
+	profileFlag      string
+	forceLocal       bool
+	forceRemote      bool
+	skipVersionCheck bool
 
 	// Resolved configuration (loaded on init)
 	cfg             *config.Config
@@ -37,18 +43,39 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&dbPath, "database", "d", "oak_compendium.db", "Path to the database file")
 	rootCmd.PersistentFlags().StringVarP(&schemaPath, "schema", "s", "schema/oak_schema.json", "Path to the schema file")
 	rootCmd.PersistentFlags().StringVarP(&profileFlag, "profile", "p", "", "API profile to use (from ~/.oak/config.yaml)")
+	rootCmd.PersistentFlags().BoolVar(&forceLocal, "local", false, "Force local database mode (ignore API profile)")
+	rootCmd.PersistentFlags().BoolVar(&forceRemote, "remote", false, "Force remote API mode (requires API profile)")
+	rootCmd.PersistentFlags().BoolVar(&skipVersionCheck, "skip-version-check", false, "Skip API version compatibility check")
 
 	// Load config and resolve profile before any command runs
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		// Validate --local and --remote are mutually exclusive
+		if forceLocal && forceRemote {
+			return fmt.Errorf("--local and --remote flags are mutually exclusive")
+		}
+
 		var err error
 		cfg, err = config.Load("")
 		if err != nil {
 			return fmt.Errorf("failed to load config: %w", err)
 		}
 
+		// If --local is set, use local mode regardless of profile
+		if forceLocal {
+			resolvedProfile = &config.ResolvedProfile{
+				Source: config.SourceLocal,
+			}
+			return nil
+		}
+
 		resolvedProfile, err = config.Resolve(cfg, profileFlag)
 		if err != nil {
 			return err
+		}
+
+		// If --remote is set but no API is configured, error
+		if forceRemote && resolvedProfile.IsLocal() {
+			return fmt.Errorf("--remote requires API configuration. Create ~/.oak/config.yaml with profiles or set OAK_API_URL")
 		}
 
 		return nil
@@ -92,24 +119,44 @@ func readImportFile(filePath string) ([]byte, error) {
 	return data, nil
 }
 
+// isRemoteMode returns true if operating against a remote API.
+func isRemoteMode() bool {
+	return resolvedProfile != nil && !resolvedProfile.IsLocal()
+}
+
+// getAPIClient creates a new API client from the resolved profile.
+// Returns an error if operating in local mode.
+func getAPIClient() (*client.Client, error) {
+	if resolvedProfile == nil || resolvedProfile.IsLocal() {
+		return nil, fmt.Errorf("cannot create API client: operating in local mode")
+	}
+
+	opts := []client.Option{}
+	if skipVersionCheck {
+		opts = append(opts, client.WithSkipVersionCheck(true))
+	}
+
+	return client.New(resolvedProfile, opts...)
+}
+
 // confirmRemoteOperation prompts the user to confirm a destructive operation
 // when operating against a remote profile. Returns true if confirmed.
 // For local operations, returns true without prompting.
-// This function will be used by delete, edit, and new commands when
-// operating against a remote API profile (see oaks-fnid).
-func confirmRemoteOperation(action, resource string) bool { //nolint:unused // Will be used by API client integration
+func confirmRemoteOperation(action, resource string) bool {
 	if resolvedProfile == nil || resolvedProfile.IsLocal() {
 		return true
 	}
 
-	fmt.Printf("%s %s from [%s]? (y/N): ", action, resource, resolvedProfile.Name)
+	fmt.Printf("%s %s on [%s]? (y/N): ", action, resource, resolvedProfile.Name)
 
-	var response string
-	if _, err := fmt.Scanln(&response); err != nil {
+	reader := bufio.NewReader(os.Stdin)
+	response, err := reader.ReadString('\n')
+	if err != nil {
 		return false // Treat read errors as "no"
 	}
 
-	return response == "y" || response == "Y"
+	response = strings.TrimSpace(strings.ToLower(response))
+	return response == "y" || response == "yes"
 }
 
 // getProfile returns the resolved profile. Useful for commands that need
