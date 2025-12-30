@@ -118,8 +118,17 @@ func (s *Server) setupRoutes() {
 			r.Delete("/sources/{id}", s.handleDeleteSource)
 		})
 
-		// Species-sources endpoints
-		r.Get("/species/{name}/sources", s.handleGetSpeciesSources)
+		// Species-sources endpoints (read - public)
+		r.Get("/species/{name}/sources", s.handleListSpeciesSources)
+		r.Get("/species/{name}/sources/{sourceId}", s.handleGetSpeciesSource)
+
+		// Species-sources endpoints (write - auth required)
+		r.Group(func(r chi.Router) {
+			r.Use(s.RequireAuth)
+			r.Post("/species/{name}/sources", s.handleCreateSpeciesSource)
+			r.Put("/species/{name}/sources/{sourceId}", s.handleUpdateSpeciesSource)
+			r.Delete("/species/{name}/sources/{sourceId}", s.handleDeleteSpeciesSource)
+		})
 
 		// Export endpoint
 		r.Get("/export", s.handleExport)
@@ -154,12 +163,3 @@ func (s *Server) Router() chi.Router {
 	return s.router
 }
 
-// Placeholder handlers - will be implemented in endpoint tasks
-
-func (s *Server) handleGetSpeciesSources(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
-
-func (s *Server) handleExport(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}

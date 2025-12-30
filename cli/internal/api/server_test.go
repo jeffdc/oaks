@@ -2,8 +2,6 @@ package api
 
 import (
 	"context"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 	"time"
 )
@@ -36,29 +34,3 @@ func TestShutdown(t *testing.T) {
 	}
 }
 
-func TestAPIRoutes_ReturnNotImplemented(t *testing.T) {
-	s := New(nil, "", nil, WithoutMiddleware())
-
-	// Only test endpoints that are still not implemented
-	routes := []struct {
-		method string
-		path   string
-	}{
-		{"GET", "/api/v1/species/alba/sources"},
-		{"GET", "/api/v1/export"},
-	}
-
-	for _, tc := range routes {
-		t.Run(tc.method+" "+tc.path, func(t *testing.T) {
-			req := httptest.NewRequest(tc.method, tc.path, http.NoBody)
-			w := httptest.NewRecorder()
-
-			s.Router().ServeHTTP(w, req)
-
-			if w.Code != http.StatusNotImplemented {
-				t.Errorf("expected status %d for %s %s, got %d",
-					http.StatusNotImplemented, tc.method, tc.path, w.Code)
-			}
-		})
-	}
-}
