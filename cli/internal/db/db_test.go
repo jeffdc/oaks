@@ -394,6 +394,137 @@ func TestOakEntryHybrid(t *testing.T) {
 	}
 }
 
+func TestBidirectionalHybridParentRelationship(t *testing.T) {
+	db, cleanup := testDB(t)
+	defer cleanup()
+
+	// Create parent species first
+	alba := &models.OakEntry{
+		ScientificName:      "alba",
+		Hybrids:             []string{},
+		CloselyRelatedTo:    []string{},
+		SubspeciesVarieties: []string{},
+		Synonyms:            []string{},
+		ExternalLinks:       []models.ExternalLink{},
+	}
+	macrocarpa := &models.OakEntry{
+		ScientificName:      "macrocarpa",
+		Hybrids:             []string{},
+		CloselyRelatedTo:    []string{},
+		SubspeciesVarieties: []string{},
+		Synonyms:            []string{},
+		ExternalLinks:       []models.ExternalLink{},
+	}
+	rubra := &models.OakEntry{
+		ScientificName:      "rubra",
+		Hybrids:             []string{},
+		CloselyRelatedTo:    []string{},
+		SubspeciesVarieties: []string{},
+		Synonyms:            []string{},
+		ExternalLinks:       []models.ExternalLink{},
+	}
+
+	for _, e := range []*models.OakEntry{alba, macrocarpa, rubra} {
+		if err := db.SaveOakEntry(e); err != nil {
+			t.Fatalf("SaveOakEntry(%s) failed: %v", e.ScientificName, err)
+		}
+	}
+
+	// Create hybrid with parents
+	parent1 := "alba"
+	parent2 := "macrocarpa"
+	hybrid := &models.OakEntry{
+		ScientificName:      "× bebbiana",
+		IsHybrid:            true,
+		Parent1:             &parent1,
+		Parent2:             &parent2,
+		Hybrids:             []string{},
+		CloselyRelatedTo:    []string{},
+		SubspeciesVarieties: []string{},
+		Synonyms:            []string{},
+		ExternalLinks:       []models.ExternalLink{},
+	}
+
+	if err := db.SaveOakEntry(hybrid); err != nil {
+		t.Fatalf("SaveOakEntry(hybrid) failed: %v", err)
+	}
+
+	// Verify parents now have the hybrid in their hybrids list
+	gotAlba, err := db.GetOakEntry("alba")
+	if err != nil {
+		t.Fatalf("GetOakEntry(alba) failed: %v", err)
+	}
+	if !sliceContains(gotAlba.Hybrids, "× bebbiana") {
+		t.Errorf("alba.Hybrids = %v, want to contain '× bebbiana'", gotAlba.Hybrids)
+	}
+
+	gotMacrocarpa, err := db.GetOakEntry("macrocarpa")
+	if err != nil {
+		t.Fatalf("GetOakEntry(macrocarpa) failed: %v", err)
+	}
+	if !sliceContains(gotMacrocarpa.Hybrids, "× bebbiana") {
+		t.Errorf("macrocarpa.Hybrids = %v, want to contain '× bebbiana'", gotMacrocarpa.Hybrids)
+	}
+
+	// Change one parent from macrocarpa to rubra
+	newParent2 := "rubra"
+	hybrid.Parent2 = &newParent2
+	if err := db.SaveOakEntry(hybrid); err != nil {
+		t.Fatalf("SaveOakEntry(hybrid with changed parent) failed: %v", err)
+	}
+
+	// Verify macrocarpa no longer has the hybrid
+	gotMacrocarpa, err = db.GetOakEntry("macrocarpa")
+	if err != nil {
+		t.Fatalf("GetOakEntry(macrocarpa) failed: %v", err)
+	}
+	if sliceContains(gotMacrocarpa.Hybrids, "× bebbiana") {
+		t.Errorf("macrocarpa.Hybrids = %v, want NOT to contain '× bebbiana' after parent change", gotMacrocarpa.Hybrids)
+	}
+
+	// Verify rubra now has the hybrid
+	gotRubra, err := db.GetOakEntry("rubra")
+	if err != nil {
+		t.Fatalf("GetOakEntry(rubra) failed: %v", err)
+	}
+	if !sliceContains(gotRubra.Hybrids, "× bebbiana") {
+		t.Errorf("rubra.Hybrids = %v, want to contain '× bebbiana'", gotRubra.Hybrids)
+	}
+
+	// Verify alba still has the hybrid (unchanged)
+	gotAlba, err = db.GetOakEntry("alba")
+	if err != nil {
+		t.Fatalf("GetOakEntry(alba) failed: %v", err)
+	}
+	if !sliceContains(gotAlba.Hybrids, "× bebbiana") {
+		t.Errorf("alba.Hybrids = %v, want to contain '× bebbiana' (unchanged)", gotAlba.Hybrids)
+	}
+
+	// Remove parent2 entirely
+	hybrid.Parent2 = nil
+	if err := db.SaveOakEntry(hybrid); err != nil {
+		t.Fatalf("SaveOakEntry(hybrid with nil parent2) failed: %v", err)
+	}
+
+	// Verify rubra no longer has the hybrid
+	gotRubra, err = db.GetOakEntry("rubra")
+	if err != nil {
+		t.Fatalf("GetOakEntry(rubra) failed: %v", err)
+	}
+	if sliceContains(gotRubra.Hybrids, "× bebbiana") {
+		t.Errorf("rubra.Hybrids = %v, want NOT to contain '× bebbiana' after parent removal", gotRubra.Hybrids)
+	}
+
+	// Verify alba still has the hybrid
+	gotAlba, err = db.GetOakEntry("alba")
+	if err != nil {
+		t.Fatalf("GetOakEntry(alba) failed: %v", err)
+	}
+	if !sliceContains(gotAlba.Hybrids, "× bebbiana") {
+		t.Errorf("alba.Hybrids = %v, want to contain '× bebbiana' (still parent1)", gotAlba.Hybrids)
+	}
+}
+
 func TestSearchOakEntries(t *testing.T) {
 	db, cleanup := testDB(t)
 	defer cleanup()
