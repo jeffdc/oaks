@@ -48,6 +48,7 @@ htmlcov/
 
 # Go build artifacts
 cli/oak
+api/oak-api
 
 # JavaScript/Node
 web/node_modules/
