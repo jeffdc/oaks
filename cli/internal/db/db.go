@@ -230,28 +230,6 @@ func (db *Database) UpdateSource(source *models.Source) error {
 	return nil
 }
 
-// ListSources lists all sources
-func (db *Database) ListSources() ([]*models.Source, error) {
-	rows, err := db.conn.Query(
-		`SELECT id, source_type, name, description, author, year, url, isbn, doi, notes, license, license_url
-		 FROM sources ORDER BY name`,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list sources: %w", err)
-	}
-	defer rows.Close()
-
-	var sources []*models.Source
-	for rows.Next() {
-		var s models.Source
-		if err := rows.Scan(&s.ID, &s.SourceType, &s.Name, &s.Description, &s.Author, &s.Year, &s.URL, &s.ISBN, &s.DOI, &s.Notes, &s.License, &s.LicenseURL); err != nil {
-			return nil, fmt.Errorf("failed to scan source: %w", err)
-		}
-		sources = append(sources, &s)
-	}
-	return sources, rows.Err()
-}
-
 // DeleteSource deletes a source by ID
 func (db *Database) DeleteSource(id int64) error {
 	result, err := db.conn.Exec(`DELETE FROM sources WHERE id = ?`, id)
@@ -341,50 +319,6 @@ func (db *Database) GetTaxon(name string, level models.TaxonLevel) (*models.Taxo
 	}
 
 	return &t, nil
-}
-
-// ListTaxa lists all taxa, optionally filtered by level
-func (db *Database) ListTaxa(level *models.TaxonLevel) ([]*models.Taxon, error) {
-	var rows *sql.Rows
-	var err error
-
-	if level != nil {
-		rows, err = db.conn.Query(
-			`SELECT name, level, parent, author, notes, links FROM taxa WHERE level = ? ORDER BY name`,
-			string(*level),
-		)
-	} else {
-		rows, err = db.conn.Query(
-			`SELECT name, level, parent, author, notes, links FROM taxa ORDER BY level, name`,
-		)
-	}
-	if err != nil {
-		return nil, fmt.Errorf("failed to list taxa: %w", err)
-	}
-	defer rows.Close()
-
-	var taxa []*models.Taxon
-	for rows.Next() {
-		var t models.Taxon
-		var levelStr string
-		var linksJSON sql.NullString
-		if err := rows.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes, &linksJSON); err != nil {
-			return nil, fmt.Errorf("failed to scan taxon: %w", err)
-		}
-		t.Level = models.TaxonLevel(levelStr)
-
-		if linksJSON.Valid && linksJSON.String != "" {
-			if err := json.Unmarshal([]byte(linksJSON.String), &t.Links); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal taxon links for %s: %w", t.Name, err)
-			}
-		}
-		if t.Links == nil {
-			t.Links = []models.TaxonLink{}
-		}
-
-		taxa = append(taxa, &t)
-	}
-	return taxa, rows.Err()
 }
 
 // ValidateTaxon checks if a taxon exists in the reference table
@@ -820,30 +754,6 @@ func (db *Database) DeleteOakEntry(scientificName string) error {
 	return nil
 }
 
-// SearchOakEntries searches for oak entries by name pattern
-func (db *Database) SearchOakEntries(query string) ([]string, error) {
-	pattern := "%" + escapeLike(query) + "%"
-	rows, err := db.conn.Query(
-		`SELECT scientific_name FROM oak_entries
-		 WHERE scientific_name LIKE ? ESCAPE '\' ORDER BY scientific_name`,
-		pattern,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to search oak entries: %w", err)
-	}
-	defer rows.Close()
-
-	var names []string
-	for rows.Next() {
-		var name string
-		if err := rows.Scan(&name); err != nil {
-			return nil, err
-		}
-		names = append(names, name)
-	}
-	return names, rows.Err()
-}
-
 // OakEntryFilter contains filter criteria for listing oak entries
 type OakEntryFilter struct {
 	Subgenus *string
@@ -1036,114 +946,9 @@ func scanOakEntries(rows *sql.Rows) ([]*models.OakEntry, error) {
 	return entries, rows.Err()
 }
 
-// SearchSources searches for sources by name pattern
-func (db *Database) SearchSources(query string) ([]int64, error) {
-	pattern := "%" + escapeLike(query) + "%"
-	rows, err := db.conn.Query(
-		`SELECT id FROM sources
-		 WHERE name LIKE ? ESCAPE '\' ORDER BY name`,
-		pattern,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to search sources: %w", err)
-	}
-	defer rows.Close()
-
-	var ids []int64
-	for rows.Next() {
-		var id int64
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	return ids, rows.Err()
-}
-
 // BeginTx starts a transaction for bulk operations
 func (db *Database) BeginTx() (*sql.Tx, error) {
 	return db.conn.Begin()
-}
-
-// ListOakEntries returns all oak entries (for export)
-func (db *Database) ListOakEntries() ([]*models.OakEntry, error) {
-	rows, err := db.conn.Query(
-		`SELECT scientific_name, author, is_hybrid, conservation_status,
-		        subgenus, section, subsection, complex,
-		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
-		 FROM oak_entries ORDER BY scientific_name`,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list oak entries: %w", err)
-	}
-	defer rows.Close()
-
-	var entries []*models.OakEntry
-	for rows.Next() {
-		var entry models.OakEntry
-		var isHybrid int
-		var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON, externalLinksJSON sql.NullString
-
-		if err := rows.Scan(
-			&entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
-			&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
-			&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON, &externalLinksJSON,
-		); err != nil {
-			return nil, fmt.Errorf("failed to scan oak entry: %w", err)
-		}
-
-		entry.IsHybrid = isHybrid != 0
-
-		// Unmarshal JSON arrays
-		if hybridsJSON.Valid {
-			if err := json.Unmarshal([]byte(hybridsJSON.String), &entry.Hybrids); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal hybrids for %s: %w", entry.ScientificName, err)
-			}
-		}
-		if entry.Hybrids == nil {
-			entry.Hybrids = []string{}
-		}
-
-		if relatedJSON.Valid {
-			if err := json.Unmarshal([]byte(relatedJSON.String), &entry.CloselyRelatedTo); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal closely_related_to for %s: %w", entry.ScientificName, err)
-			}
-		}
-		if entry.CloselyRelatedTo == nil {
-			entry.CloselyRelatedTo = []string{}
-		}
-
-		if subspeciesJSON.Valid {
-			if err := json.Unmarshal([]byte(subspeciesJSON.String), &entry.SubspeciesVarieties); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal subspecies_varieties for %s: %w", entry.ScientificName, err)
-			}
-		}
-		if entry.SubspeciesVarieties == nil {
-			entry.SubspeciesVarieties = []string{}
-		}
-
-		if synonymsJSON.Valid {
-			if err := json.Unmarshal([]byte(synonymsJSON.String), &entry.Synonyms); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal synonyms for %s: %w", entry.ScientificName, err)
-			}
-		}
-		if entry.Synonyms == nil {
-			entry.Synonyms = []string{}
-		}
-
-		if externalLinksJSON.Valid {
-			if err := json.Unmarshal([]byte(externalLinksJSON.String), &entry.ExternalLinks); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal external_links for %s: %w", entry.ScientificName, err)
-			}
-		}
-		if entry.ExternalLinks == nil {
-			entry.ExternalLinks = []models.ExternalLink{}
-		}
-
-		entries = append(entries, &entry)
-	}
-
-	return entries, rows.Err()
 }
 
 // SaveSpeciesSource saves or updates a species-source record

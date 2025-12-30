@@ -108,15 +108,6 @@ func TestSourceCRUD(t *testing.T) {
 	if *updated.Description != newDesc {
 		t.Errorf("Description = %q, want %q", *updated.Description, newDesc)
 	}
-
-	// List
-	sources, err := db.ListSources()
-	if err != nil {
-		t.Fatalf("ListSources failed: %v", err)
-	}
-	if len(sources) != 1 {
-		t.Errorf("expected 1 source, got %d", len(sources))
-	}
 }
 
 func TestGetSourceNotFound(t *testing.T) {
@@ -213,42 +204,6 @@ func TestTaxonCRUD(t *testing.T) {
 	}
 }
 
-func TestListTaxa(t *testing.T) {
-	db, cleanup := testDB(t)
-	defer cleanup()
-
-	taxa := []*models.Taxon{
-		{Name: "Quercus", Level: models.TaxonLevelSubgenus},
-		{Name: "Lobatae", Level: models.TaxonLevelSection},
-		{Name: "Agrifoliae", Level: models.TaxonLevelSection},
-	}
-
-	for _, taxon := range taxa {
-		if err := db.InsertTaxon(taxon); err != nil {
-			t.Fatalf("InsertTaxon failed: %v", err)
-		}
-	}
-
-	// List all
-	all, err := db.ListTaxa(nil)
-	if err != nil {
-		t.Fatalf("ListTaxa failed: %v", err)
-	}
-	if len(all) != 3 {
-		t.Errorf("expected 3 taxa, got %d", len(all))
-	}
-
-	// List by level
-	sectionLevel := models.TaxonLevelSection
-	sections, err := db.ListTaxa(&sectionLevel)
-	if err != nil {
-		t.Fatalf("ListTaxa by level failed: %v", err)
-	}
-	if len(sections) != 2 {
-		t.Errorf("expected 2 sections, got %d", len(sections))
-	}
-}
-
 func TestClearTaxa(t *testing.T) {
 	db, cleanup := testDB(t)
 	defer cleanup()
@@ -263,13 +218,13 @@ func TestClearTaxa(t *testing.T) {
 		t.Fatalf("ClearTaxa failed: %v", err)
 	}
 
-	// Verify empty
-	all, err := db.ListTaxa(nil)
+	// Verify cleared - getting the taxon should return nil
+	got, err := db.GetTaxon("Test", models.TaxonLevelSubgenus)
 	if err != nil {
-		t.Fatalf("ListTaxa failed: %v", err)
+		t.Fatalf("GetTaxon failed: %v", err)
 	}
-	if len(all) != 0 {
-		t.Errorf("expected 0 taxa after clear, got %d", len(all))
+	if got != nil {
+		t.Error("expected taxon to be cleared")
 	}
 }
 
@@ -525,68 +480,6 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 	}
 }
 
-func TestSearchOakEntries(t *testing.T) {
-	db, cleanup := testDB(t)
-	defer cleanup()
-
-	entries := []*models.OakEntry{
-		{ScientificName: "alba", Hybrids: []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{}},
-		{ScientificName: "rubra", Hybrids: []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{}},
-		{ScientificName: "palustris", Hybrids: []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{}},
-	}
-
-	for _, e := range entries {
-		if err := db.SaveOakEntry(e); err != nil {
-			t.Fatalf("SaveOakEntry failed: %v", err)
-		}
-	}
-
-	// Search for "a"
-	results, err := db.SearchOakEntries("a")
-	if err != nil {
-		t.Fatalf("SearchOakEntries failed: %v", err)
-	}
-	if len(results) != 3 { // all contain "a"
-		t.Errorf("expected 3 results, got %d", len(results))
-	}
-
-	// Search for "rub"
-	results, err = db.SearchOakEntries("rub")
-	if err != nil {
-		t.Fatalf("SearchOakEntries failed: %v", err)
-	}
-	if len(results) != 1 {
-		t.Errorf("expected 1 result, got %d", len(results))
-	}
-	if results[0] != "rubra" {
-		t.Errorf("expected rubra, got %s", results[0])
-	}
-}
-
-func TestListOakEntries(t *testing.T) {
-	db, cleanup := testDB(t)
-	defer cleanup()
-
-	entries := []*models.OakEntry{
-		{ScientificName: "alba", Hybrids: []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{}},
-		{ScientificName: "rubra", Hybrids: []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{}},
-	}
-
-	for _, e := range entries {
-		if err := db.SaveOakEntry(e); err != nil {
-			t.Fatalf("SaveOakEntry failed: %v", err)
-		}
-	}
-
-	all, err := db.ListOakEntries()
-	if err != nil {
-		t.Fatalf("ListOakEntries failed: %v", err)
-	}
-	if len(all) != 2 {
-		t.Errorf("expected 2 entries, got %d", len(all))
-	}
-}
-
 // SpeciesSource tests
 
 func TestSpeciesSourceCRUD(t *testing.T) {
@@ -761,30 +654,4 @@ func TestBeginTx(t *testing.T) {
 
 	// Rollback to clean up
 	tx.Rollback()
-}
-
-func TestSearchSources(t *testing.T) {
-	db, cleanup := testDB(t)
-	defer cleanup()
-
-	sources := []*models.Source{
-		{SourceType: "Website", Name: "Oaks of the World"},
-		{SourceType: "Website", Name: "iNaturalist"},
-		{SourceType: "Book", Name: "Oak Handbook"},
-	}
-
-	for _, s := range sources {
-		if _, err := db.InsertSource(s); err != nil {
-			t.Fatalf("InsertSource failed: %v", err)
-		}
-	}
-
-	// Search for "oak"
-	results, err := db.SearchSources("oak")
-	if err != nil {
-		t.Fatalf("SearchSources failed: %v", err)
-	}
-	if len(results) != 2 { // "Oaks of the World" and "Oak Handbook"
-		t.Errorf("expected 2 results, got %d", len(results))
-	}
 }

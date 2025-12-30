@@ -66,9 +66,6 @@ var taxaListCmd = &cobra.Command{
 
 Levels: subgenus, section, subsection, complex
 
-In remote mode (when an API profile is configured), fetches from the remote API.
-In local mode (default), fetches from the local database.
-
 Examples:
   oak taxa list
   oak taxa list subgenus
@@ -118,9 +115,6 @@ var taxaShowCmd = &cobra.Command{
 	Use:   "show <name> --level <level>",
 	Short: "Show taxon details",
 	Long: `Display detailed information about a specific taxon.
-
-In remote mode (when an API profile is configured), fetches from the remote API.
-In local mode (default), fetches from the local database.
 
 Examples:
   oak taxa show Lobatae --level section
@@ -270,29 +264,6 @@ func runTaxaImport(cmd *cobra.Command, args []string) error {
 }
 
 func runTaxaList(cmd *cobra.Command, args []string) error {
-	if isRemoteMode() {
-		return runTaxaListRemote(cmd)
-	}
-	return runTaxaListLocal(cmd)
-}
-
-func runTaxaListLocal(cmd *cobra.Command) error {
-	database, err := db.New(dbPath)
-	if err != nil {
-		return fmt.Errorf("failed to open database: %w", err)
-	}
-	defer database.Close()
-
-	taxa, err := database.ListTaxa(nil)
-	if err != nil {
-		return fmt.Errorf("failed to list taxa: %w", err)
-	}
-
-	printTaxaTree(cmd, taxa)
-	return nil
-}
-
-func runTaxaListRemote(cmd *cobra.Command) error {
 	apiClient, err := getAPIClient()
 	if err != nil {
 		return err
@@ -553,32 +524,6 @@ func runTaxaShow(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if isRemoteMode() {
-		return runTaxaShowRemote(name, level)
-	}
-	return runTaxaShowLocal(name, level)
-}
-
-func runTaxaShowLocal(name string, level models.TaxonLevel) error {
-	database, err := db.New(dbPath)
-	if err != nil {
-		return fmt.Errorf("failed to open database: %w", err)
-	}
-	defer database.Close()
-
-	taxon, err := database.GetTaxon(name, level)
-	if err != nil {
-		return err
-	}
-	if taxon == nil {
-		return fmt.Errorf("taxon not found: %s [%s]", name, level)
-	}
-
-	printTaxon(taxon)
-	return nil
-}
-
-func runTaxaShowRemote(name string, level models.TaxonLevel) error {
 	apiClient, err := getAPIClient()
 	if err != nil {
 		return err

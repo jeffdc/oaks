@@ -1,13 +1,10 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
-
-	"github.com/jeff/oaks/cli/internal/export"
 )
 
 var exportCmd = &cobra.Command{
@@ -20,11 +17,8 @@ with taxonomy embedded in each species and data grouped by source.
 
 If no output file is specified, writes to stdout.
 
-In remote mode (when an API profile is configured or --local is used),
-fetches data from the API. Otherwise exports from the local database.
-
 Examples:
-  oak export                      # Export from local database to stdout
+  oak export                      # Export to stdout
   oak export quercus_data.json    # Export to file
   oak export -o data.json         # Export to file using flag
   oak export --local data.json    # Export via embedded API
@@ -47,45 +41,6 @@ func runExport(cmd *cobra.Command, args []string) error {
 		outputPath = args[0]
 	}
 
-	if isRemoteMode() {
-		return runExportRemote(cmd, outputPath)
-	}
-	return runExportLocal(cmd, outputPath)
-}
-
-func runExportLocal(cmd *cobra.Command, outputPath string) error {
-	database, err := getDB()
-	if err != nil {
-		return fmt.Errorf("failed to open database: %w", err)
-	}
-	defer database.Close()
-
-	// Build export data
-	exportData, err := export.Build(database)
-	if err != nil {
-		return err
-	}
-
-	// Marshal to JSON
-	jsonData, err := json.MarshalIndent(exportData, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal JSON: %w", err)
-	}
-
-	// Write output
-	if outputPath == "" {
-		fmt.Println(string(jsonData))
-	} else {
-		if err := os.WriteFile(outputPath, jsonData, 0o644); err != nil { //nolint:gosec // export must be readable
-			return fmt.Errorf("failed to write output file: %w", err)
-		}
-		fmt.Fprintf(cmd.ErrOrStderr(), "Exported %d species to %s\n", exportData.Metadata.SpeciesCount, outputPath)
-	}
-
-	return nil
-}
-
-func runExportRemote(cmd *cobra.Command, outputPath string) error {
 	apiClient, err := getAPIClient()
 	if err != nil {
 		return err
@@ -110,7 +65,11 @@ func runExportRemote(cmd *cobra.Command, outputPath string) error {
 		if err := apiClient.ExportToWriter(file); err != nil {
 			return fmt.Errorf("API error: %w", err)
 		}
-		fmt.Fprintf(cmd.ErrOrStderr(), "Exported from [%s] to %s\n", apiClient.ProfileName(), outputPath)
+		if isActualRemote() {
+			fmt.Fprintf(cmd.ErrOrStderr(), "Exported from [%s] to %s\n", apiClient.ProfileName(), outputPath)
+		} else {
+			fmt.Fprintf(cmd.ErrOrStderr(), "Exported to %s\n", outputPath)
+		}
 	}
 
 	return nil

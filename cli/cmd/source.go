@@ -124,35 +124,13 @@ var sourceEditCmd = &cobra.Command{
 var sourceListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all sources",
-	Long: `Display all existing sources in a table format.
-
-In remote mode (when an API profile is configured), lists sources from the remote API.
-In local mode (default), lists sources from the local database.`,
+	Long:  `Display all existing sources in a table format.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if isRemoteMode() {
-			return runSourceListRemote()
-		}
-		return runSourceListLocal()
+		return runSourceList()
 	},
 }
 
-func runSourceListLocal() error {
-	database, err := getDB()
-	if err != nil {
-		return err
-	}
-	defer database.Close()
-
-	sources, err := database.ListSources()
-	if err != nil {
-		return err
-	}
-
-	printSourceList(sources)
-	return nil
-}
-
-func runSourceListRemote() error {
+func runSourceList() error {
 	apiClient, err := getAPIClient()
 	if err != nil {
 		return err
@@ -195,44 +173,18 @@ func printSourceList(sources []*models.Source) {
 var sourceShowCmd = &cobra.Command{
 	Use:   "show <id>",
 	Short: "Show source details",
-	Long: `Display detailed information about a specific source.
-
-In remote mode (when an API profile is configured), fetches from the remote API.
-In local mode (default), fetches from the local database.`,
-	Args: cobra.ExactArgs(1),
+	Long:  `Display detailed information about a specific source.`,
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		id, err := strconv.ParseInt(args[0], 10, 64)
 		if err != nil {
 			return fmt.Errorf("invalid source ID: %s", args[0])
 		}
-
-		if isRemoteMode() {
-			return runSourceShowRemote(id)
-		}
-		return runSourceShowLocal(id)
+		return runSourceShow(id)
 	},
 }
 
-func runSourceShowLocal(id int64) error {
-	database, err := getDB()
-	if err != nil {
-		return err
-	}
-	defer database.Close()
-
-	source, err := database.GetSource(id)
-	if err != nil {
-		return err
-	}
-	if source == nil {
-		return fmt.Errorf("source with ID %d not found", id)
-	}
-
-	printSource(source)
-	return nil
-}
-
-func runSourceShowRemote(id int64) error {
+func runSourceShow(id int64) error {
 	apiClient, err := getAPIClient()
 	if err != nil {
 		return err
