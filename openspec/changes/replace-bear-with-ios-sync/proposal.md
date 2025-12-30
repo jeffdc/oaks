@@ -10,12 +10,11 @@ The current workflow uses Bear app (macOS/iOS) for field note capture, with `oak
 - One-way sync only (CLI cannot push data back to Bear)
 - Bear's tag-based taxonomy is error-prone
 
-The in-development iOS app (`ios/OakCompendium`) already has structured note capture with taxonomy pickers, dedicated field editors, and photo support. Combined with the planned API server (epic `oaks-w973`), we can provide real-time sync between iOS and the central database.
+The in-development iOS app (`ios/OakCompendium`) already has structured note capture with taxonomy pickers, dedicated field editors, and photo support. Combined with the planned API server, we can provide real-time sync between iOS and the central database.
 
-## Related Beads
+## Related Work
 
-- **Epic**: `oaks-w973` - Build CRUD API for Oak Compendium
-- **Depends on**: `oaks-t41l` - API spec, `oaks-doc9` - API implementation, `oaks-0ps1` - iOS API integration
+- **Depends on**: OpenSpec change `add-crud-api-server` (API specification and implementation)
 - **Replaces**: Bear app workflow
 
 ## What Changes
@@ -23,8 +22,8 @@ The in-development iOS app (`ios/OakCompendium`) already has structured note cap
 ### CLI (`cli/`)
 - **REMOVED**: `oak import-bear` command (`cmd/import_bear.go`)
 - **REMOVED**: `oak generate-bear-notes` command (`cmd/generate_bear_notes.go`)
-- **ADDED**: `oak serve` command to run API server (covered by `oaks-doc9`)
-- **ADDED**: Notes CRUD endpoints: `GET/POST/PUT/DELETE /api/notes`
+- **ADDED**: `oak serve` command to run API server (covered by `add-crud-api-server`)
+- **ADDED**: Notes CRUD endpoints: `GET/POST/PUT/DELETE /api/v1/notes` (convenience layer over species_sources for source_id 3)
 - **MODIFIED**: Documentation and CLAUDE.md to reflect new workflow
 
 ### iOS App (`ios/OakCompendium/`)
@@ -44,7 +43,7 @@ The in-development iOS app (`ios/OakCompendium`) already has structured note cap
 - **Affected code**:
   - `cli/cmd/import_bear.go` (delete)
   - `cli/cmd/generate_bear_notes.go` (delete)
-  - `cli/cmd/serve.go` (new - covered by `oaks-doc9`)
+  - `cli/cmd/serve.go` (new - covered by `add-crud-api-server`)
   - `cli/internal/api/` (new - API handlers)
   - `ios/OakCompendium/Sources/Services/APIService.swift` (new)
   - `ios/OakCompendium/Sources/Services/StorageService.swift` (modify for caching)
@@ -66,7 +65,7 @@ The in-development iOS app (`ios/OakCompendium`) already has structured note cap
 ┌─────────────────────────────────────────────────────────────────┐
 │                     oak serve (API Server)                      │
 │                     GET/POST/PUT/DELETE                         │
-│                     /api/species, /api/notes, /api/taxonomy     │
+│                  /api/v1/species, /api/v1/notes, /api/v1/taxa   │
 └─────────────────────────────────────────────────────────────────┘
                                  │
                                  ▼

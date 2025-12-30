@@ -5,38 +5,38 @@
 The API server SHALL provide CRUD endpoints for managing species notes.
 
 #### Scenario: List all notes
-- **WHEN** client sends GET /api/notes
+- **WHEN** client sends GET /api/v1/notes
 - **THEN** server returns array of all notes with 200 status
 - **AND** each note includes id, scientificName, taxonomy, fields, sourceId, createdAt, updatedAt
 
 #### Scenario: List notes with species filter
-- **WHEN** client sends GET /api/notes?species=alba
+- **WHEN** client sends GET /api/v1/notes?species=alba
 - **THEN** server returns only notes matching the species name
 
 #### Scenario: Get single note
-- **WHEN** client sends GET /api/notes/:id with valid UUID
+- **WHEN** client sends GET /api/v1/notes/:id with valid UUID
 - **THEN** server returns the note with 200 status
 
 #### Scenario: Get non-existent note
-- **WHEN** client sends GET /api/notes/:id with unknown UUID
+- **WHEN** client sends GET /api/v1/notes/:id with unknown UUID
 - **THEN** server returns 404 status with error message
 
 #### Scenario: Create note
-- **WHEN** client sends POST /api/notes with valid note payload
+- **WHEN** client sends POST /api/v1/notes with valid note payload
 - **THEN** server creates the note in species_sources table
 - **AND** returns the created note with assigned ID and 201 status
 
 #### Scenario: Create note for unknown species
-- **WHEN** client sends POST /api/notes with species not in oak_entries
+- **WHEN** client sends POST /api/v1/notes with species not in oak_entries
 - **THEN** server returns 400 status with error message
 
 #### Scenario: Update note
-- **WHEN** client sends PUT /api/notes/:id with updated fields
+- **WHEN** client sends PUT /api/v1/notes/:id with updated fields
 - **THEN** server updates the note and returns 200 status
 - **AND** updatedAt timestamp is set to current time
 
 #### Scenario: Delete note
-- **WHEN** client sends DELETE /api/notes/:id
+- **WHEN** client sends DELETE /api/v1/notes/:id
 - **THEN** server removes the note and returns 204 status
 
 ---
@@ -47,22 +47,22 @@ The iOS app SHALL communicate with the API server via a dedicated APIService.
 
 #### Scenario: Fetch notes from server
 - **WHEN** app needs to display notes list
-- **THEN** APIService fetches from GET /api/notes
+- **THEN** APIService fetches from GET /api/v1/notes
 - **AND** results are cached locally for offline access
 
 #### Scenario: Create note via API
 - **WHEN** user creates a new note in the app
-- **THEN** APIService sends POST /api/notes
+- **THEN** APIService sends POST /api/v1/notes
 - **AND** local cache is updated with server response
 
 #### Scenario: Update note via API
 - **WHEN** user edits an existing note
-- **THEN** APIService sends PUT /api/notes/:id
+- **THEN** APIService sends PUT /api/v1/notes/:id
 - **AND** local cache is updated with server response
 
 #### Scenario: Delete note via API
 - **WHEN** user deletes a note
-- **THEN** APIService sends DELETE /api/notes/:id
+- **THEN** APIService sends DELETE /api/v1/notes/:id
 - **AND** note is removed from local cache
 
 ---
@@ -94,25 +94,28 @@ The iOS app SHALL support offline usage with automatic sync when connectivity is
 
 ---
 
-### Requirement: API Authentication
+### Requirement: API Authentication for Notes
 
-The API server SHALL require authentication for all endpoints except health check.
+The notes API SHALL follow the authentication model defined by the CRUD API (see `add-crud-api-server` spec):
+- Read operations (GET) are public
+- Write operations (POST, PUT, DELETE) require API key authentication
 
-#### Scenario: Valid API key
-- **WHEN** request includes valid Authorization: Bearer header
+#### Scenario: Read notes without authentication
+- **WHEN** client sends GET /api/v1/notes without Authorization header
+- **THEN** request is processed normally
+- **AND** notes data is returned
+
+#### Scenario: Write note with valid API key
+- **WHEN** client sends POST/PUT/DELETE to /api/v1/notes with valid `Authorization: Bearer <key>` header
 - **THEN** request is processed normally
 
-#### Scenario: Missing API key
-- **WHEN** request is missing Authorization header
+#### Scenario: Write note without API key
+- **WHEN** client sends POST/PUT/DELETE to /api/v1/notes without Authorization header
 - **THEN** server returns 401 Unauthorized
 
-#### Scenario: Invalid API key
-- **WHEN** request includes invalid Authorization header
+#### Scenario: Write note with invalid API key
+- **WHEN** client sends POST/PUT/DELETE to /api/v1/notes with invalid API key
 - **THEN** server returns 401 Unauthorized
-
-#### Scenario: Health check without auth
-- **WHEN** client sends GET /api/health without Authorization
-- **THEN** server returns 200 status (health check is public)
 
 ---
 
@@ -128,12 +131,13 @@ The API SHALL map iOS note fields to database columns consistently.
   | commonNames | local_names |
   | leaf | leaves |
   | acorn | fruits |
-  | bark | bark_twigs_buds |
-  | buds | bark_twigs_buds |
+  | bark | bark |
+  | twigs | twigs |
+  | buds | buds |
   | form | growth_habit |
   | rangeHabitat | range |
   | fieldNotes | miscellaneous |
-  | resources | miscellaneous (appended) |
+  | resources | url |
 
 #### Scenario: Source attribution
 - **WHEN** a note is created via API

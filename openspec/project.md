@@ -6,7 +6,7 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 
 - Aggregate oak species data from multiple authoritative sources
 - Provide offline-capable web and mobile apps for field identification
-- Enable structured note-taking and personal observations via Bear app integration
+- Enable structured note-taking and personal observations via API sync (replacing Bear app workflow)
 - Maintain source attribution for all data points
 
 ## Tech Stack
@@ -24,6 +24,12 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 - **CLI Framework**: Cobra
 - **Validation**: JSON Schema via jsonschema
 - **Serialization**: YAML via yaml.v3
+
+### API Server (planned, see `add-crud-api-server` change)
+- **Framework**: Chi router (net/http compatible)
+- **Auth**: API key for write operations only
+- **Deployment**: Fly.io with persistent volume
+- **Domain**: api.oakcompendium.com (planned)
 
 ### Python Scraper (`scrapers/oaksoftheworld/`)
 - **Libraries**: BeautifulSoup4, requests, lxml
@@ -78,7 +84,7 @@ Oak taxonomy follows: Genus → Subgenus → Section → Subsection → Complex 
 |----|--------|---------|
 | 1 | iNaturalist | Authoritative taxonomy |
 | 2 | Oaks of the World | Rich descriptive data |
-| 3 | Oak Compendium (Bear) | Personal observations (preferred for display) |
+| 3 | Oak Compendium | Personal observations via iOS app (preferred for display) |
 
 ### Species Names
 Stored WITHOUT "Quercus" prefix (e.g., "alba" not "Quercus alba")
@@ -95,8 +101,9 @@ Stored WITHOUT "Quercus" prefix (e.g., "alba" not "Quercus alba")
 ### Data Sources
 - **oaksoftheworld.fr**: Primary scraping target for species descriptions
 - **iNaturalist**: Taxonomy hierarchy and species list
-- **Bear App**: Personal notes via local SQLite at `~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/`
+- **Oak Compendium API**: Personal notes via RESTful API (replacing Bear App workflow, see `replace-bear-with-ios-sync` change)
 
 ### Deployment
 - **GitHub Pages**: Web app deployed via GitHub Actions on push to main
-- **GitHub Actions**: `.github/workflows/deploy.yml`
+- **Fly.io**: API server deployed via GitHub Actions (planned, see `add-crud-api-server`)
+- **GitHub Actions**: `.github/workflows/deploy.yml` (web), `.github/workflows/deploy-api.yml` (API, planned)

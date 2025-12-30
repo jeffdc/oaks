@@ -1,15 +1,32 @@
-## 1. API Notes Endpoints (builds on oaks-doc9)
+<!--
+IMPORTANT FOR WORKERS:
+Before starting this work:
+1. Ensure the `add-crud-api-server` epic (oaks-26qm) is complete - this change depends on it.
+2. Create beads for tasks using `bd create --title="..." --type=task --priority=1`.
+3. Track progress with beads, not this markdown file.
+4. Run `bd ready` to find tasks with no blockers.
 
-- [ ] 1.1 Add notes routes to API server (`/api/notes`)
-- [ ] 1.2 Implement GET /api/notes (list with filters)
-- [ ] 1.3 Implement GET /api/notes/:id (single note)
-- [ ] 1.4 Implement POST /api/notes (create)
-- [ ] 1.5 Implement PUT /api/notes/:id (update)
-- [ ] 1.6 Implement DELETE /api/notes/:id (delete)
+Recommended bead structure:
+- Parent epic: "ios: Replace Bear with iOS API sync"
+  - Child epic: "ios: API Notes Endpoints"
+  - Child epic: "ios: iOS API Integration"
+  - Child epic: "ios: iOS Offline Caching"
+  - Child epic: "cli: Remove Bear Integration"
+  - Child epic: "docs: Documentation Updates"
+-->
+
+## 1. API Notes Endpoints (builds on add-crud-api-server)
+
+- [ ] 1.1 Add notes routes to API server (`/api/v1/notes`)
+- [ ] 1.2 Implement GET /api/v1/notes (list with filters)
+- [ ] 1.3 Implement GET /api/v1/notes/:id (single note)
+- [ ] 1.4 Implement POST /api/v1/notes (create)
+- [ ] 1.5 Implement PUT /api/v1/notes/:id (update)
+- [ ] 1.6 Implement DELETE /api/v1/notes/:id (delete)
 - [ ] 1.7 Add field mapping layer (API fields ↔ DB columns)
 - [ ] 1.8 Write API tests for notes endpoints
 
-## 2. iOS API Integration (builds on oaks-0ps1)
+## 2. iOS API Integration
 
 - [ ] 2.1 Create `APIService.swift` with base networking
 - [ ] 2.2 Implement notes API client methods
