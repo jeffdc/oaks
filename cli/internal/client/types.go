@@ -1,0 +1,100 @@
+// Package client types mirror the API models for serialization.
+// These are separate from the CLI's internal models to avoid import cycles
+// and to allow the CLI client to work independently of the API module.
+package client
+
+// TaxonLevel represents the hierarchical level of a taxon.
+type TaxonLevel string
+
+const (
+	TaxonLevelSubgenus   TaxonLevel = "subgenus"
+	TaxonLevelSection    TaxonLevel = "section"
+	TaxonLevelSubsection TaxonLevel = "subsection"
+	TaxonLevelComplex    TaxonLevel = "complex"
+)
+
+// TaxonLink represents a labeled external link for a taxon.
+type TaxonLink struct {
+	Label string `json:"label" yaml:"label"`
+	URL   string `json:"url" yaml:"url"`
+}
+
+// ExternalLink represents an external reference link for a species.
+type ExternalLink struct {
+	Name string `json:"name" yaml:"name"`
+	URL  string `json:"url" yaml:"url"`
+	Logo string `json:"logo" yaml:"logo"`
+}
+
+// Taxon represents a taxonomic rank.
+type Taxon struct {
+	Name   string      `json:"name" yaml:"name"`
+	Level  TaxonLevel  `json:"level" yaml:"level"`
+	Parent *string     `json:"parent,omitempty" yaml:"parent,omitempty"`
+	Author *string     `json:"author,omitempty" yaml:"author,omitempty"`
+	Notes  *string     `json:"notes,omitempty" yaml:"notes,omitempty"`
+	Links  []TaxonLink `json:"links,omitempty" yaml:"links,omitempty"`
+}
+
+// SpeciesSource represents source-attributed descriptive data for a species.
+type SpeciesSource struct {
+	ID               int64    `json:"id" yaml:"id"`
+	ScientificName   string   `json:"scientific_name" yaml:"scientific_name"`
+	SourceID         int64    `json:"source_id" yaml:"source_id"`
+	LocalNames       []string `json:"local_names,omitempty" yaml:"local_names,omitempty"`
+	Range            *string  `json:"range,omitempty" yaml:"range,omitempty"`
+	GrowthHabit      *string  `json:"growth_habit,omitempty" yaml:"growth_habit,omitempty"`
+	Leaves           *string  `json:"leaves,omitempty" yaml:"leaves,omitempty"`
+	Flowers          *string  `json:"flowers,omitempty" yaml:"flowers,omitempty"`
+	Fruits           *string  `json:"fruits,omitempty" yaml:"fruits,omitempty"`
+	Bark             *string  `json:"bark,omitempty" yaml:"bark,omitempty"`
+	Twigs            *string  `json:"twigs,omitempty" yaml:"twigs,omitempty"`
+	Buds             *string  `json:"buds,omitempty" yaml:"buds,omitempty"`
+	HardinessHabitat *string  `json:"hardiness_habitat,omitempty" yaml:"hardiness_habitat,omitempty"`
+	Miscellaneous    *string  `json:"miscellaneous,omitempty" yaml:"miscellaneous,omitempty"`
+	URL              *string  `json:"url,omitempty" yaml:"url,omitempty"`
+	IsPreferred      bool     `json:"is_preferred" yaml:"is_preferred"`
+}
+
+// OakEntry represents an Oak taxonomic entry (species-intrinsic data).
+type OakEntry struct {
+	ScientificName     string  `json:"scientific_name" yaml:"scientific_name"`
+	Author             *string `json:"author,omitempty" yaml:"author,omitempty"`
+	IsHybrid           bool    `json:"is_hybrid" yaml:"is_hybrid"`
+	ConservationStatus *string `json:"conservation_status,omitempty" yaml:"conservation_status,omitempty"`
+
+	// Taxonomy
+	Subgenus   *string `json:"subgenus,omitempty" yaml:"subgenus,omitempty"`
+	Section    *string `json:"section,omitempty" yaml:"section,omitempty"`
+	Subsection *string `json:"subsection,omitempty" yaml:"subsection,omitempty"`
+	Complex    *string `json:"complex,omitempty" yaml:"complex,omitempty"`
+
+	// Hybrid parents
+	Parent1 *string `json:"parent1,omitempty" yaml:"parent1,omitempty"`
+	Parent2 *string `json:"parent2,omitempty" yaml:"parent2,omitempty"`
+
+	// Related species
+	Hybrids             []string `json:"hybrids,omitempty" yaml:"hybrids,omitempty"`
+	CloselyRelatedTo    []string `json:"closely_related_to,omitempty" yaml:"closely_related_to,omitempty"`
+	SubspeciesVarieties []string `json:"subspecies_varieties,omitempty" yaml:"subspecies_varieties,omitempty"`
+	Synonyms            []string `json:"synonyms,omitempty" yaml:"synonyms,omitempty"`
+
+	// External reference links
+	ExternalLinks []ExternalLink `json:"external_links,omitempty" yaml:"external_links,omitempty"`
+}
+
+// Source represents a source reference.
+type Source struct {
+	ID          int64   `json:"id" yaml:"id"`
+	SourceType  string  `json:"source_type" yaml:"source_type"`
+	Name        string  `json:"name" yaml:"name"`
+	Description *string `json:"description,omitempty" yaml:"description,omitempty"`
+	Author      *string `json:"author,omitempty" yaml:"author,omitempty"`
+	Year        *int    `json:"year,omitempty" yaml:"year,omitempty"`
+	URL         *string `json:"url,omitempty" yaml:"url,omitempty"`
+	ISBN        *string `json:"isbn,omitempty" yaml:"isbn,omitempty"`
+	DOI         *string `json:"doi,omitempty" yaml:"doi,omitempty"`
+	Notes       *string `json:"notes,omitempty" yaml:"notes,omitempty"`
+	License     *string `json:"license,omitempty" yaml:"license,omitempty"`
+	LicenseURL  *string `json:"license_url,omitempty" yaml:"license_url,omitempty"`
+}
