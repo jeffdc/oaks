@@ -676,6 +676,12 @@ Multiple Claude Code agents can work in parallel on this project. To avoid confl
 ### Critical: Files That Must Be Tracked
 - **`cli/oak_compendium.db`**: The SQLite database MUST be committed to git. This is the authoritative data source for the project. Do NOT add it to .gitignore or remove it from tracking.
 
+### Fly.io Deployment
+- **Region**: Always use `iad` (Ashburn, Virginia) for Fly.io resources
+- **App name**: `oak-compendium-api`
+- **Configuration**: `fly.toml` in project root
+- When creating volumes or machines, always specify `--region iad`
+
 ## Testing
 
 ### Scraper Testing

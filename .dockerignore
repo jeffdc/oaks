@@ -1,0 +1,33 @@
+# Git
+.git
+.gitignore
+
+# Node/Web
+web/node_modules
+web/dist
+web/.svelte-kit
+
+# Python
+venv
+__pycache__
+*.pyc
+scrapers/oaksoftheworld/tmp
+
+# Temp files
+tmp/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# iOS
+ios/
+
+# Beads
+.beads/
+
+# Other
+*.md
+LICENSE

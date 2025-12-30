@@ -1,5 +1,5 @@
 app = "oak-compendium-api"
-primary_region = "sjc"
+primary_region = "iad"
 
 [build]
   dockerfile = "cli/Dockerfile"

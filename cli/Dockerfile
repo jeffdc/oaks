@@ -2,9 +2,9 @@
 FROM golang:1.24-alpine AS builder
 RUN apk add --no-cache gcc musl-dev
 WORKDIR /app
-COPY go.mod go.sum ./
+COPY cli/go.mod cli/go.sum ./
 RUN go mod download
-COPY . .
+COPY cli/ .
 RUN CGO_ENABLED=1 go build -o oak .
 
 # Runtime stage
