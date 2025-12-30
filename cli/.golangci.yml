@@ -1,0 +1,119 @@
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    # Default linters
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    # Additional linters
+    - bodyclose
+    - copyloopvar
+    - durationcheck
+    - errname
+    - errorlint
+    - exhaustive
+    - gocognit
+    - goconst
+    - gocritic
+    - gofmt
+    - goimports
+    - gosec
+    - misspell
+    - nilerr
+    - noctx
+    - prealloc
+    - predeclared
+    - revive
+    - sqlclosecheck
+    - unconvert
+    - unparam
+    - wastedassign
+    - whitespace
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: false  # Allow explicit _ = err to ignore errors
+
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+
+  gocognit:
+    min-complexity: 20
+
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - performance
+      - style
+    disabled-checks:
+      - hugeParam  # Too noisy for structs passed by value
+
+  goimports:
+    local-prefixes: github.com/jeff/oaks
+
+  gosec:
+    excludes:
+      - G104  # Unhandled errors (covered by errcheck)
+      - G304  # File path from variable (necessary for CLI)
+
+  misspell:
+    locale: US
+
+  revive:
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+        disabled: true  # Allows APIError naming (stutters but more descriptive)
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+        disabled: true  # Not needed for internal packages
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
+      - name: empty-block
+      - name: superfluous-else
+      - name: unused-parameter
+        disabled: true  # Too noisy for interface implementations
+      - name: unreachable-code
+      - name: redefines-builtin-id
+
+  staticcheck:
+    checks:
+      - all
+
+issues:
+  exclude-rules:
+    # Test files can have longer functions and more complexity
+    - path: _test\.go
+      linters:
+        - gocognit
+        - goconst
+        - errcheck
+        - gosec
+
+    # Allow dot imports for testing frameworks
+    - path: _test\.go
+      text: "dot-imports"
+
+  max-issues-per-linter: 50
+  max-same-issues: 10
