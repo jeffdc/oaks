@@ -25,11 +25,11 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 - **Validation**: JSON Schema via jsonschema
 - **Serialization**: YAML via yaml.v3
 
-### API Server (planned, see `add-crud-api-server` change)
+### API Server (`cli/internal/api/`)
 - **Framework**: Chi router (net/http compatible)
 - **Auth**: API key for write operations only
 - **Deployment**: Fly.io with persistent volume
-- **Domain**: api.oakcompendium.com (planned)
+- **Domain**: api.oakcompendium.com
 
 ### Python Scraper (`scrapers/oaksoftheworld/`)
 - **Libraries**: BeautifulSoup4, requests, lxml
@@ -105,5 +105,5 @@ Stored WITHOUT "Quercus" prefix (e.g., "alba" not "Quercus alba")
 
 ### Deployment
 - **GitHub Pages**: Web app deployed via GitHub Actions on push to main
-- **Fly.io**: API server deployed via GitHub Actions (planned, see `add-crud-api-server`)
-- **GitHub Actions**: `.github/workflows/deploy.yml` (web), `.github/workflows/deploy-api.yml` (API, planned)
+- **Fly.io**: API server deployed via GitHub Actions on push to main (cli/ changes)
+- **GitHub Actions**: `.github/workflows/deploy.yml` (web), `.github/workflows/deploy-api.yml` (API), `.github/workflows/backup-api.yml` (daily backups)
