@@ -118,7 +118,80 @@ The CLI manages three data sources:
 
 ## Configuration
 
-### Database Location
+### Local vs Remote Mode
+
+The CLI can operate in two modes:
+- **Local mode** (default): Operates directly on a local SQLite database
+- **Remote mode**: Connects to an API server via HTTP
+
+By default, the CLI uses local mode. To use remote mode, configure a profile.
+
+### Profile Configuration
+
+Create `~/.oak/config.yaml` to configure API profiles:
+
+```yaml
+# ~/.oak/config.yaml
+
+profiles:
+  # Production API
+  prod:
+    url: https://oak-compendium-api.fly.dev
+    key: your-api-key-here
+
+  # Local development server
+  local-server:
+    url: http://localhost:8080
+    key: dev-key
+
+# Uncomment to default to a profile instead of local mode
+# default_profile: prod
+```
+
+### Profile Resolution Order
+
+The CLI resolves which profile to use in this order:
+
+1. `OAK_API_URL` + `OAK_API_KEY` environment variables (legacy, overrides all)
+2. `--profile <name>` flag
+3. `OAK_PROFILE` environment variable
+4. `default_profile` from config file
+5. No profile → local database mode (safe default)
+
+### Remote Mode Flags
+
+| Flag | Description |
+|------|-------------|
+| `--profile <name>` | Use the specified profile from config |
+| `--local` | Force local database mode (ignore any profile) |
+| `--remote` | Force remote mode (errors if no profile configured) |
+| `--skip-version-check` | Skip API version compatibility check |
+
+### Remote Mode Examples
+
+```bash
+# Use a specific profile
+./oak --profile prod find alba
+
+# Force local mode even if default_profile is set
+./oak --local find alba
+
+# Check which profile is active
+./oak config show
+
+# List all configured profiles
+./oak config list
+```
+
+### Destructive Operations
+
+When operating against a remote profile, destructive operations (create, edit, delete) require confirmation:
+
+```
+Delete "alba" on [prod]? (y/N):
+```
+
+### Database Location (Local Mode)
 
 Default: `oak_compendium.db` in current directory
 
@@ -151,6 +224,7 @@ cli/
 ├── main.go              # Entry point
 ├── cmd/                 # Cobra command implementations
 │   ├── root.go          # Root command and global flags
+│   ├── config.go        # Config show/list commands
 │   ├── find.go          # Search command
 │   ├── new.go           # Create entry
 │   ├── edit.go          # Edit entry
@@ -166,6 +240,8 @@ cli/
 │   ├── add_value.go     # Schema management
 │   └── remove_from_array.go
 ├── internal/
+│   ├── client/          # HTTP client for remote API
+│   ├── config/          # Profile configuration management
 │   ├── db/              # Database layer (repository pattern)
 │   ├── models/          # Data structures
 │   ├── schema/          # JSON schema validation

@@ -25,12 +25,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. The project consists of four main components:
+The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. The project consists of five main components:
 
 1. **Python Scraper** - Extracts oak species data from oaksoftheworld.fr
 2. **Web Application** - Modern Svelte 5 PWA for browsing species data
-3. **CLI Tool** - Go-based command-line tool for managing taxonomic data (in development)
-4. **iOS App** - Native SwiftUI app for field identification (in development, on `ios-app` branch)
+3. **API Server** - Go REST API for remote database access (deployed to Fly.io)
+4. **CLI Tool** - Go command-line tool for managing taxonomic data (local or remote)
+5. **iOS App** - Native SwiftUI app for field identification (in development, on `ios-app` branch)
 
 ## Repository Structure
 
@@ -45,9 +46,15 @@ oaks/
 ├── web/                      # Svelte 5 PWA (see web/CLAUDE.md for details)
 │   ├── src/                  # Svelte components and stores
 │   └── package.json          # Vite, Svelte 5, Tailwind 4
-├── cli/                      # Go CLI tool (in development)
+├── api/                      # Go API server (standalone)
+│   ├── main.go               # Server entry point
+│   ├── internal/             # Internal packages (handlers, db, models, export)
+│   ├── go.mod                # Separate Go module
+│   ├── Makefile              # Build, lint, test, docker targets
+│   └── Dockerfile            # Container deployment
+├── cli/                      # Go CLI tool
 │   ├── cmd/                  # Cobra command implementations
-│   ├── internal/             # Internal packages (db, models, schema, editor)
+│   ├── internal/             # Internal packages (db, models, client, config)
 │   ├── go.mod                # cobra, go-sqlite3, yaml.v3, jsonschema
 │   ├── Makefile              # Build, lint, test targets
 │   └── docs/oak_cli.md       # CLI specification (historical)
@@ -131,17 +138,55 @@ go install .
 - `make clean` - Remove build artifacts
 - `make setup` - Install dev tools (golangci-lint, goimports)
 
+**Local vs Remote Mode**:
+- By default, the CLI operates on the local SQLite database
+- Use `--profile <name>` to connect to a remote API server
+- Use `--local` to force local mode (ignore any configured profile)
+- Use `--remote` to force remote mode (errors if no profile configured)
+
+See `cli/README.md` for profile configuration and remote mode details.
+
 **IMPORTANT: Database Location**
 - The authoritative database is `cli/oak_compendium.db`
 - **Always run `oak` commands from the `cli/` directory** - the tool defaults to `oak_compendium.db` in the current working directory
 - If running from elsewhere, use `-d /path/to/cli/oak_compendium.db`
 - Never create database files outside `cli/`
 
-**Note**: The CLI is in early development. See `cli/docs/oak_cli.md` for historical specification (may be outdated).
+### API Server Workflow
+
+```bash
+cd api
+
+# Build
+make build       # Produces: oak-api binary
+
+# Run locally (uses ../cli/oak_compendium.db by default)
+make run
+
+# Or configure with environment variables
+OAK_DB_PATH=../cli/oak_compendium.db OAK_PORT=8080 ./oak-api
+
+# Docker build
+make docker-build
+```
+
+**Makefile Targets** (run from `api/` directory):
+- `make build` - Build the oak-api binary
+- `make run` - Build and run locally
+- `make lint` - Run golangci-lint
+- `make test` - Run tests
+- `make test-coverage` - Run tests with HTML coverage report
+- `make docker-build` - Build Docker image
+- `make clean` - Remove build artifacts
+
+**Environment Variables**:
+- `OAK_DB_PATH` - Path to SQLite database (default: `./oak_compendium.db`)
+- `OAK_PORT` - HTTP port (default: `8080`)
+- `OAK_API_KEY` - API key (or auto-reads from `~/.oak/api_key`)
 
 ## Data Flow Architecture
 
-The complete data pipeline from sources to browser:
+The complete data pipeline from sources to clients:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -160,7 +205,7 @@ The complete data pipeline from sources to browser:
           │                      │                       │
           ▼                      ▼                       ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         CLI TOOL (oak)                              │
+│                    CLI TOOL (oak) - LOCAL MODE                      │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  oak taxa import        oak import-           oak import-bear       │
@@ -169,29 +214,35 @@ The complete data pipeline from sources to browser:
 │         └──────────────────────┴───────────────────────┘            │
 │                                │                                    │
 │                                ▼                                    │
-│                    oak_compendium.db (SQLite)                       │
+│                    cli/oak_compendium.db (SQLite)                   │
 │                    ├── taxa (taxonomy hierarchy)                    │
 │                    ├── oak_entries (species)                        │
 │                    ├── sources (data sources)                       │
 │                    └── species_sources (source-attributed data)     │
-│                                │                                    │
-│                                ▼                                    │
-│                    oak export ../web/static/quercus_data.json       │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
                                  │
-                                 ▼
+         ┌───────────────────────┼───────────────────────┐
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐   ┌─────────────────────┐   ┌─────────────────────┐
+│   JSON Export   │   │    API Server       │   │   CLI Remote Mode   │
+├─────────────────┤   ├─────────────────────┤   ├─────────────────────┤
+│ oak export ...  │   │ api/ (Fly.io)       │   │ oak --profile prod  │
+│      │          │   │ Reads: SQLite DB    │   │ Uses: REST API      │
+│      ▼          │   │ Serves: REST API    │   │                     │
+│ quercus_data.   │   │                     │   │ Connects to API     │
+│ json            │   │ /api/v1/species     │   │ server via HTTP     │
+└────────┬────────┘   │ /api/v1/taxa        │◀──┤ for remote ops      │
+         │            │ /api/v1/sources     │   │                     │
+         │            │ /api/v1/export      │   └─────────────────────┘
+         │            └─────────────────────┘
+         ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                 web/static/quercus_data.json                        │
-│            (denormalized JSON, committed to repo)                   │
-└─────────────────────────────────────────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                         DEPLOYMENT                                  │
+│                      WEB APP DEPLOYMENT                             │
 ├─────────────────────────────────────────────────────────────────────┤
-│  git add/commit/push  ──▶  GitHub Actions  ──▶  GitHub Pages        │
-│                            (.github/workflows/deploy.yml)           │
+│  git push  ──▶  GitHub Actions  ──▶  GitHub Pages                   │
+│                 (.github/workflows/deploy.yml)                      │
 └─────────────────────────────────────────────────────────────────────┘
                                  │
                                  ▼
@@ -202,6 +253,47 @@ The complete data pipeline from sources to browser:
 │  2. Populate IndexedDB (via Dexie.js)                               │
 │  3. Query from IndexedDB for UI                                     │
 │  4. Service worker caches for offline                               │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### CLI↔API Architecture
+
+The CLI and API are separate Go modules that can operate independently:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        CLI (cli/)                                   │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────────────────┐ │
+│  │ cmd/        │    │ internal/   │    │ internal/client/        │ │
+│  │ (commands)  │───▶│ db/         │    │ (HTTP client for API)   │ │
+│  └─────────────┘    │ (SQLite)    │    └───────────┬─────────────┘ │
+│         │           └─────────────┘                │               │
+│         │                  ▲                       │               │
+│         │     Local mode   │                       │  Remote mode  │
+│         └──────────────────┘                       │               │
+│                                                    │               │
+│  Profile resolution: --profile flag → OAK_PROFILE │env → config   │
+│                                                    │               │
+└────────────────────────────────────────────────────┼───────────────┘
+                                                     │
+                                                     │ HTTPS
+                                                     ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        API Server (api/)                            │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────────────────┐ │
+│  │ main.go     │───▶│ handlers/   │───▶│ db/                     │ │
+│  │ (entry)     │    │ (REST API)  │    │ (SQLite)                │ │
+│  └─────────────┘    └─────────────┘    └─────────────────────────┘ │
+│                                                    │               │
+│  Deployed to: Fly.io (oak-compendium-api)          │               │
+│  Auth: API key via OAK_API_KEY or ~/.oak/api_key   │               │
+│                                                    ▼               │
+│                                         /data/oak_compendium.db    │
+│                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -676,11 +768,32 @@ Multiple Claude Code agents can work in parallel on this project. To avoid confl
 ### Critical: Files That Must Be Tracked
 - **`cli/oak_compendium.db`**: The SQLite database MUST be committed to git. This is the authoritative data source for the project. Do NOT add it to .gitignore or remove it from tracking.
 
+### CLI Profile Configuration
+
+To connect the CLI to a remote API server, create `~/.oak/config.yaml`:
+
+```yaml
+profiles:
+  prod:
+    url: https://oak-compendium-api.fly.dev
+    key: your-api-key-here
+  local-server:
+    url: http://localhost:8080
+    key: dev-key
+
+# Uncomment to default to remote instead of local
+# default_profile: prod
+```
+
+See `cli/README.md` for full profile configuration details.
+
 ### Fly.io Deployment
 - **Region**: Always use `iad` (Ashburn, Virginia) for Fly.io resources
 - **App name**: `oak-compendium-api`
+- **Dockerfile**: `api/Dockerfile`
 - **Configuration**: `fly.toml` in project root
 - When creating volumes or machines, always specify `--region iad`
+- See `api/README.md` for deployment instructions
 
 ## Testing
 
@@ -708,6 +821,13 @@ npm run dev            # Manual testing in browser
 ```bash
 cd cli
 go test ./...
+```
+
+### API Testing
+```bash
+cd api
+go test ./...
+make test-coverage  # With HTML coverage report
 ```
 
 ## Data Validation
