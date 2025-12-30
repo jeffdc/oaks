@@ -6,13 +6,19 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/jeff/oaks/cli/internal/config"
 	"github.com/jeff/oaks/cli/internal/db"
 	"github.com/jeff/oaks/cli/internal/schema"
 )
 
 var (
-	dbPath     string
-	schemaPath string
+	dbPath      string
+	schemaPath  string
+	profileFlag string
+
+	// Resolved configuration (loaded on init)
+	cfg             *config.Config
+	resolvedProfile *config.ResolvedProfile
 )
 
 var rootCmd = &cobra.Command{
@@ -30,6 +36,23 @@ func Execute() error {
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&dbPath, "database", "d", "oak_compendium.db", "Path to the database file")
 	rootCmd.PersistentFlags().StringVarP(&schemaPath, "schema", "s", "schema/oak_schema.json", "Path to the schema file")
+	rootCmd.PersistentFlags().StringVarP(&profileFlag, "profile", "p", "", "API profile to use (from ~/.oak/config.yaml)")
+
+	// Load config and resolve profile before any command runs
+	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		var err error
+		cfg, err = config.Load("")
+		if err != nil {
+			return fmt.Errorf("failed to load config: %w", err)
+		}
+
+		resolvedProfile, err = config.Resolve(cfg, profileFlag)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
 }
 
 // getDB creates a new database connection
@@ -67,4 +90,35 @@ func readImportFile(filePath string) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+// confirmRemoteOperation prompts the user to confirm a destructive operation
+// when operating against a remote profile. Returns true if confirmed.
+// For local operations, returns true without prompting.
+// This function will be used by delete, edit, and new commands when
+// operating against a remote API profile (see oaks-fnid).
+func confirmRemoteOperation(action, resource string) bool { //nolint:unused // Will be used by API client integration
+	if resolvedProfile == nil || resolvedProfile.IsLocal() {
+		return true
+	}
+
+	fmt.Printf("%s %s from [%s]? (y/N): ", action, resource, resolvedProfile.Name)
+
+	var response string
+	if _, err := fmt.Scanln(&response); err != nil {
+		return false // Treat read errors as "no"
+	}
+
+	return response == "y" || response == "Y"
+}
+
+// getProfile returns the resolved profile. Useful for commands that need
+// to check whether they're operating locally or remotely.
+func getProfile() *config.ResolvedProfile {
+	return resolvedProfile
+}
+
+// getConfig returns the loaded configuration.
+func getConfig() *config.Config {
+	return cfg
 }
