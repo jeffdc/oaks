@@ -55,8 +55,12 @@ oaks/
 │   └── Dockerfile            # Container deployment
 ├── cli/                      # Go CLI tool
 │   ├── cmd/                  # Cobra command implementations
-│   ├── internal/             # Internal packages (db, models, client, config)
-│   ├── go.mod                # cobra, go-sqlite3, yaml.v3, jsonschema
+│   ├── internal/             # Internal packages
+│   │   ├── client/           # HTTP client for API (used by all commands)
+│   │   ├── config/           # Profile configuration management
+│   │   ├── embedded/         # Embedded API server wrapper
+│   │   └── models/           # Data structures
+│   ├── go.mod                # cobra, yaml.v3
 │   ├── Makefile              # Build, lint, test targets
 │   └── docs/oak_cli.md       # CLI specification (historical)
 ├── ios/                      # iOS app (SwiftUI, on ios-app branch)
@@ -283,28 +287,43 @@ The complete data pipeline from sources to clients:
 
 ### CLI↔API Architecture
 
-The CLI and API are separate Go modules that can operate independently:
+The CLI uses an HTTP API client for all operations. In local/embedded mode, it starts an in-process API server. In remote mode, it connects to a standalone API server.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        CLI (cli/)                                   │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────────────────┐ │
-│  │ cmd/        │    │ internal/   │    │ internal/client/        │ │
-│  │ (commands)  │───▶│ db/         │    │ (HTTP client for API)   │ │
-│  └─────────────┘    │ (SQLite)    │    └───────────┬─────────────┘ │
-│         │           └─────────────┘                │               │
-│         │                  ▲                       │               │
-│         │     Local mode   │                       │  Remote mode  │
-│         └──────────────────┘                       │               │
-│                                                    │               │
-│  Profile resolution: --profile flag → OAK_PROFILE │env → config   │
-│                                                    │               │
-└────────────────────────────────────────────────────┼───────────────┘
-                                                     │
-                                                     │ HTTPS
-                                                     ▼
+│  ┌─────────────┐    ┌─────────────────────────────────────────────┐│
+│  │ cmd/        │───▶│           internal/client/                  ││
+│  │ (commands)  │    │        (HTTP client for API)                ││
+│  └─────────────┘    └───────────┬───────────────────────────────┬─┘│
+│                                 │                               │  │
+│                                 │                               │  │
+│                    ┌────────────▼────────────┐                  │  │
+│                    │   Embedded Mode         │                  │  │
+│                    │   (default, --local)    │                  │  │
+│                    │                         │                  │  │
+│                    │  ┌───────────────────┐  │                  │  │
+│                    │  │ internal/embedded │  │                  │  │
+│                    │  │ (in-process API)  │  │                  │  │
+│                    │  └─────────┬─────────┘  │                  │  │
+│                    │            │            │                  │  │
+│                    │  ┌─────────▼─────────┐  │                  │  │
+│                    │  │ oak_compendium.db │  │                  │  │
+│                    │  │     (SQLite)      │  │                  │  │
+│                    │  └───────────────────┘  │                  │  │
+│                    └─────────────────────────┘                  │  │
+│                                                                 │  │
+│  Profile resolution: --profile flag → OAK_PROFILE env → config  │  │
+│                                                                 │  │
+└─────────────────────────────────────────────────────────────────┼──┘
+                                                                  │
+                                              Remote Mode         │
+                                              (--profile prod)    │
+                                                                  │
+                                                     HTTPS        │
+                                                                  ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        API Server (api/)                            │
 ├─────────────────────────────────────────────────────────────────────┤
@@ -321,6 +340,12 @@ The CLI and API are separate Go modules that can operate independently:
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
+**Key Design Points**:
+- All CLI commands use the API client for data operations (unified code path)
+- In embedded mode, the API server runs in-process on a random localhost port
+- Remote mode uses the exact same client code, just pointed at an external server
+- The `internal/db/` package is only used by the embedded API server, not directly by commands
 
 ### Data Sources
 
@@ -674,11 +699,13 @@ The `oak export` command produces this denormalized format:
 
 Progress auto-saves every 10 species. Delete progress file or use `--restart` to start fresh.
 
-## CLI Tool Design (In Development)
+## CLI Tool Design
 
-The Go CLI (`oak`) manages taxonomic data with strict validation and source attribution.
+The Go CLI (`oak`) manages taxonomic data with strict validation and source attribution. It uses an HTTP API client for all operations, communicating with either an embedded local server or a remote API.
 
 ### Core Concepts
+
+**Unified API Architecture**: All commands use the same HTTP client code path, regardless of whether operating in embedded mode (local database) or remote mode (external API server).
 
 **Source-Attributed Data**: Every data point is linked to a specific source. Conflicts only occur when updating data from the *same* source.
 
@@ -700,8 +727,8 @@ oak import-bulk <file> --source-id <ID>  # Bulk import with conflict resolution
 
 **Technology Stack**:
 - Language: Go
-- Database: SQLite via `go-sqlite3`
 - CLI Framework: `cobra`
+- HTTP Client: Built-in net/http with retry logic
 - Validation: JSON Schema via `jsonschema`
 - Serialization: YAML via `yaml.v3`
 
@@ -754,7 +781,7 @@ go build -o oak .
 ### Code Style
 - **Python**: PEP 8, docstrings on functions, meaningful variable names
 - **JavaScript**: 2-space indent, see `web/CLAUDE.md` for Svelte conventions
-- **Go**: `gofmt`, Repository Pattern for DB access
+- **Go**: `gofmt`, API client pattern for data operations
 
 ### Git Workflow
 - This project uses Beads for issue tracking (see `.beads/` and session startup hook)
@@ -898,7 +925,8 @@ The web app fetches `/quercus_data.json` at startup. If schema changes:
 
 ### CLI Issues
 - **Build errors**: Run `go clean && go build -o oak .`
-- **Database locked**: Only one process can access SQLite at a time
+- **Database locked** (embedded mode): Only one process can access the local SQLite database at a time
+- **Connection refused** (remote mode): Check that the API server is running and the profile URL is correct
 
 ## Future Enhancements
 

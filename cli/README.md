@@ -118,13 +118,15 @@ The CLI manages three data sources:
 
 ## Configuration
 
-### Local vs Remote Mode
+### Embedded vs Remote Mode
 
-The CLI can operate in two modes:
-- **Local mode** (default): Operates directly on a local SQLite database
-- **Remote mode**: Connects to an API server via HTTP
+The CLI uses an HTTP API client for all operations. It supports two modes:
 
-By default, the CLI uses local mode. To use remote mode, configure a profile.
+- **Embedded mode** (default): Starts an in-process API server that operates on the local SQLite database. Commands communicate with this server via HTTP on localhost. This provides a unified code path regardless of mode.
+
+- **Remote mode**: Connects to an external API server (e.g., production on Fly.io) via HTTPS. Requires profile configuration.
+
+By default, the CLI uses embedded mode. To use remote mode, configure a profile.
 
 ### Profile Configuration
 
@@ -158,25 +160,28 @@ The CLI resolves which profile to use in this order:
 4. `default_profile` from config file
 5. No profile → local database mode (safe default)
 
-### Remote Mode Flags
+### Mode Flags
 
 | Flag | Description |
 |------|-------------|
-| `--profile <name>` | Use the specified profile from config |
-| `--local` | Force local database mode (ignore any profile) |
+| `--profile <name>` | Use the specified remote API profile from config |
+| `--local` | Force embedded mode (use local database, ignore any default_profile) |
 | `--remote` | Force remote mode (errors if no profile configured) |
-| `--skip-version-check` | Skip API version compatibility check |
+| `--skip-version-check` | Skip API version compatibility check (remote mode only) |
 
-### Remote Mode Examples
+### Mode Examples
 
 ```bash
-# Use a specific profile
+# Default: embedded mode (uses local database)
+./oak find alba
+
+# Use a specific remote profile
 ./oak --profile prod find alba
 
-# Force local mode even if default_profile is set
+# Force embedded mode even if default_profile is set in config
 ./oak --local find alba
 
-# Check which profile is active
+# Check which profile is active and current mode
 ./oak config show
 
 # List all configured profiles
@@ -191,7 +196,7 @@ When operating against a remote profile, destructive operations (create, edit, d
 Delete "alba" on [prod]? (y/N):
 ```
 
-### Database Location (Local Mode)
+### Database Location (Embedded Mode)
 
 Default: `oak_compendium.db` in current directory
 
@@ -199,6 +204,8 @@ Override with `-d` flag:
 ```bash
 ./oak -d /path/to/database.db find alba
 ```
+
+Note: The `-d` flag only applies in embedded mode. In remote mode, the database is managed by the API server.
 
 ### Schema Location
 
@@ -223,7 +230,7 @@ export EDITOR=vim
 cli/
 ├── main.go              # Entry point
 ├── cmd/                 # Cobra command implementations
-│   ├── root.go          # Root command and global flags
+│   ├── root.go          # Root command, global flags, mode resolution
 │   ├── config.go        # Config show/list commands
 │   ├── find.go          # Search command
 │   ├── new.go           # Create entry
@@ -240,12 +247,12 @@ cli/
 │   ├── add_value.go     # Schema management
 │   └── remove_from_array.go
 ├── internal/
-│   ├── client/          # HTTP client for remote API
+│   ├── client/          # HTTP client for API (used by all commands)
 │   ├── config/          # Profile configuration management
-│   ├── db/              # Database layer (repository pattern)
+│   ├── embedded/        # Embedded API server wrapper
 │   ├── models/          # Data structures
-│   ├── schema/          # JSON schema validation
-│   └── editor/          # $EDITOR workflow
+│   ├── editor/          # $EDITOR workflow
+│   └── schema/          # JSON schema validation
 ├── data/                # Seed files
 │   ├── quercus-taxonomy.yaml
 │   └── quercus-species.yaml
@@ -254,13 +261,18 @@ cli/
 └── oak_compendium.db    # SQLite database (committed to repo)
 ```
 
+### Architecture Note
+
+All CLI commands use the `internal/client` package for data operations. In embedded mode, the client communicates with an in-process API server (started automatically). In remote mode, it communicates with an external API server. This unified architecture ensures consistent behavior across modes.
+
 ## Technical Details
 
 - **Language**: Go
-- **Database**: SQLite via `go-sqlite3`
 - **CLI Framework**: Cobra
+- **HTTP Client**: Built-in net/http with retry logic
 - **Validation**: JSON Schema via `jsonschema`
 - **Serialization**: YAML via `yaml.v3`
+- **Database** (embedded mode): SQLite via `go-sqlite3` (in api module)
 
 ## Development
 
@@ -280,10 +292,11 @@ go test -run TestName      # Run specific test
 ```
 
 Test coverage includes:
-- `internal/db/`: Database operations (CRUD, search, transactions)
+- `internal/client/`: API client operations (HTTP requests, error handling, retries)
 - `internal/models/`: Model serialization and round-trip tests
 - `internal/schema/`: JSON schema validation
 - `internal/editor/`: Frontmatter parsing, section extraction
+- `cmd/`: Integration tests for embedded and remote modes
 
 ### Adding a New Command
 
