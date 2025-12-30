@@ -16,22 +16,17 @@ var newCmd = &cobra.Command{
 	Short: "Create a new Oak entry",
 	Long: `Creates a new Oak entry by opening your $EDITOR with a template.
 
-In remote mode (when an API profile is configured), creates the entry
-on the remote API after confirmation. In local mode (default), creates
-the entry in the local database.
+When connected to a remote API profile, prompts for confirmation before
+creating. Local operations (default or --local) proceed without confirmation.
 
 Examples:
   oak new alba             # Create in local database
-  oak new alba --remote    # Create on remote API
+  oak new alba --remote    # Create on remote API (with confirmation)
   oak new alba --local     # Force local creation`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := names.NormalizeHybridName(args[0])
-
-		if isRemoteMode() {
-			return runNewRemote(name)
-		}
-		return runNewLocal(name)
+		return runNew(name)
 	},
 }
 
@@ -39,12 +34,18 @@ func init() {
 	rootCmd.AddCommand(newCmd)
 }
 
-func runNewLocal(name string) error {
-	database, err := getDB()
+func runNew(name string) error {
+	apiClient, err := getAPIClient()
 	if err != nil {
 		return err
 	}
-	defer database.Close()
+
+	// Verify auth before doing any work (only for actual remote servers)
+	if isActualRemote() {
+		if err := apiClient.VerifyAuth(); err != nil {
+			return fmt.Errorf("authentication failed: %w", err)
+		}
+	}
 
 	validator, err := getSchema()
 	if err != nil {
@@ -52,50 +53,15 @@ func runNewLocal(name string) error {
 	}
 
 	// Check if entry already exists
-	existing, err := database.GetOakEntry(name)
-	if err != nil {
-		return err
-	}
-	if existing != nil {
-		return fmt.Errorf("oak entry '%s' already exists. Use 'oak edit' to modify it", name)
-	}
-
-	entry, err := editor.NewOakEntry(name, validator)
-	if err != nil {
-		return err
-	}
-
-	if err := database.SaveOakEntry(entry); err != nil {
-		return err
-	}
-
-	fmt.Printf("Created oak entry: %s\n", entry.ScientificName)
-	return nil
-}
-
-func runNewRemote(name string) error {
-	apiClient, err := getAPIClient()
-	if err != nil {
-		return err
-	}
-
-	// Verify auth before doing any work
-	if err := apiClient.VerifyAuth(); err != nil {
-		return fmt.Errorf("authentication failed: %w", err)
-	}
-
-	validator, err := getSchema()
-	if err != nil {
-		return err
-	}
-
-	// Check if entry already exists on remote
 	_, err = apiClient.GetSpecies(name)
 	if err == nil {
-		return fmt.Errorf("oak entry '%s' already exists on [%s]. Use 'oak edit' to modify it", name, apiClient.ProfileName())
+		if isActualRemote() {
+			return fmt.Errorf("oak entry '%s' already exists on [%s]. Use 'oak edit' to modify it", name, apiClient.ProfileName())
+		}
+		return fmt.Errorf("oak entry '%s' already exists. Use 'oak edit' to modify it", name)
 	}
 	if !client.IsNotFoundError(err) {
-		return fmt.Errorf("API error: %w", err)
+		return fmt.Errorf("failed to check existing entry: %w", err)
 	}
 
 	entry, err := editor.NewOakEntry(name, validator)
@@ -103,20 +69,24 @@ func runNewRemote(name string) error {
 		return err
 	}
 
-	// Confirm remote creation
-	if !confirmRemoteOperation("Create", entry.ScientificName) {
+	// Confirm only for actual remote servers
+	if isActualRemote() && !confirmRemoteOperation("Create", entry.ScientificName) {
 		fmt.Println("Canceled")
 		return nil
 	}
 
-	// Convert to API request
+	// Convert to API request and create
 	req := modelToSpeciesRequest(entry)
 	_, err = apiClient.CreateSpecies(req)
 	if err != nil {
-		return fmt.Errorf("API error: %w", err)
+		return fmt.Errorf("failed to create entry: %w", err)
 	}
 
-	fmt.Printf("Created oak entry on [%s]: %s\n", apiClient.ProfileName(), entry.ScientificName)
+	if isActualRemote() {
+		fmt.Printf("Created oak entry on [%s]: %s\n", apiClient.ProfileName(), entry.ScientificName)
+	} else {
+		fmt.Printf("Created oak entry: %s\n", entry.ScientificName)
+	}
 	return nil
 }
 

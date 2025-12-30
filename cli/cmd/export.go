@@ -20,27 +20,24 @@ with taxonomy embedded in each species and data grouped by source.
 
 If no output file is specified, writes to stdout.
 
-By default, exports from the local database. Use --from-api to fetch
-data from the remote API instead.
+In remote mode (when an API profile is configured or --local is used),
+fetches data from the API. Otherwise exports from the local database.
 
 Examples:
   oak export                      # Export from local database to stdout
   oak export quercus_data.json    # Export to file
   oak export -o data.json         # Export to file using flag
-  oak export --from-api data.json # Export from remote API to file`,
+  oak export --local data.json    # Export via embedded API
+  oak export --remote data.json   # Export from remote API`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runExport,
 }
 
-var (
-	exportOutput  string
-	exportFromAPI bool
-)
+var exportOutput string
 
 func init() {
 	rootCmd.AddCommand(exportCmd)
 	exportCmd.Flags().StringVarP(&exportOutput, "output", "o", "", "Output file path")
-	exportCmd.Flags().BoolVar(&exportFromAPI, "from-api", false, "Fetch export from remote API instead of local database")
 }
 
 func runExport(cmd *cobra.Command, args []string) error {
@@ -50,8 +47,8 @@ func runExport(cmd *cobra.Command, args []string) error {
 		outputPath = args[0]
 	}
 
-	if exportFromAPI {
-		return runExportFromAPI(cmd, outputPath)
+	if isRemoteMode() {
+		return runExportRemote(cmd, outputPath)
 	}
 	return runExportLocal(cmd, outputPath)
 }
@@ -88,12 +85,7 @@ func runExportLocal(cmd *cobra.Command, outputPath string) error {
 	return nil
 }
 
-func runExportFromAPI(cmd *cobra.Command, outputPath string) error {
-	// Export from API requires an API profile
-	if !isRemoteMode() {
-		return fmt.Errorf("--from-api requires API configuration. Create ~/.oak/config.yaml with profiles or set OAK_API_URL")
-	}
-
+func runExportRemote(cmd *cobra.Command, outputPath string) error {
 	apiClient, err := getAPIClient()
 	if err != nil {
 		return err

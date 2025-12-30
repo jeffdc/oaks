@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/jeff/oaks/cli/internal/client"
 	"github.com/jeff/oaks/cli/internal/editor"
 	"github.com/jeff/oaks/cli/internal/models"
 )
@@ -123,68 +124,130 @@ var sourceEditCmd = &cobra.Command{
 var sourceListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all sources",
-	Long:  `Display all existing sources in a table format.`,
+	Long: `Display all existing sources in a table format.
+
+In remote mode (when an API profile is configured), lists sources from the remote API.
+In local mode (default), lists sources from the local database.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		database, err := getDB()
-		if err != nil {
-			return err
+		if isRemoteMode() {
+			return runSourceListRemote()
 		}
-		defer database.Close()
-
-		sources, err := database.ListSources()
-		if err != nil {
-			return err
-		}
-
-		if len(sources) == 0 {
-			fmt.Println("No sources found.")
-			return nil
-		}
-
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tTYPE\tNAME")
-		fmt.Fprintln(w, "--\t----\t----")
-		for _, s := range sources {
-			name := s.Name
-			if len(name) > 50 {
-				name = name[:47] + "..."
-			}
-			fmt.Fprintf(w, "%d\t%s\t%s\n", s.ID, s.SourceType, name)
-		}
-		w.Flush()
-
-		return nil
+		return runSourceListLocal()
 	},
+}
+
+func runSourceListLocal() error {
+	database, err := getDB()
+	if err != nil {
+		return err
+	}
+	defer database.Close()
+
+	sources, err := database.ListSources()
+	if err != nil {
+		return err
+	}
+
+	printSourceList(sources)
+	return nil
+}
+
+func runSourceListRemote() error {
+	apiClient, err := getAPIClient()
+	if err != nil {
+		return err
+	}
+
+	sources, err := apiClient.ListSources()
+	if err != nil {
+		return fmt.Errorf("API error: %w", err)
+	}
+
+	// Convert to models for printing
+	modelSources := make([]*models.Source, len(sources))
+	for i, s := range sources {
+		modelSources[i] = clientSourceToModel(s)
+	}
+
+	printSourceList(modelSources)
+	return nil
+}
+
+func printSourceList(sources []*models.Source) {
+	if len(sources) == 0 {
+		fmt.Println("No sources found.")
+		return
+	}
+
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "ID\tTYPE\tNAME")
+	fmt.Fprintln(w, "--\t----\t----")
+	for _, s := range sources {
+		name := s.Name
+		if len(name) > 50 {
+			name = name[:47] + "..."
+		}
+		fmt.Fprintf(w, "%d\t%s\t%s\n", s.ID, s.SourceType, name)
+	}
+	w.Flush()
 }
 
 var sourceShowCmd = &cobra.Command{
 	Use:   "show <id>",
 	Short: "Show source details",
-	Long:  `Display detailed information about a specific source.`,
-	Args:  cobra.ExactArgs(1),
+	Long: `Display detailed information about a specific source.
+
+In remote mode (when an API profile is configured), fetches from the remote API.
+In local mode (default), fetches from the local database.`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		id, err := strconv.ParseInt(args[0], 10, 64)
 		if err != nil {
 			return fmt.Errorf("invalid source ID: %s", args[0])
 		}
 
-		database, err := getDB()
-		if err != nil {
-			return err
+		if isRemoteMode() {
+			return runSourceShowRemote(id)
 		}
-		defer database.Close()
+		return runSourceShowLocal(id)
+	},
+}
 
-		source, err := database.GetSource(id)
-		if err != nil {
-			return err
-		}
-		if source == nil {
+func runSourceShowLocal(id int64) error {
+	database, err := getDB()
+	if err != nil {
+		return err
+	}
+	defer database.Close()
+
+	source, err := database.GetSource(id)
+	if err != nil {
+		return err
+	}
+	if source == nil {
+		return fmt.Errorf("source with ID %d not found", id)
+	}
+
+	printSource(source)
+	return nil
+}
+
+func runSourceShowRemote(id int64) error {
+	apiClient, err := getAPIClient()
+	if err != nil {
+		return err
+	}
+
+	source, err := apiClient.GetSource(id)
+	if err != nil {
+		if client.IsNotFoundError(err) {
 			return fmt.Errorf("source with ID %d not found", id)
 		}
+		return fmt.Errorf("API error: %w", err)
+	}
 
-		printSource(source)
-		return nil
-	},
+	printSource(clientSourceToModel(source))
+	return nil
 }
 
 var sourceDeleteCmd = &cobra.Command{
@@ -266,6 +329,24 @@ func printSource(s *models.Source) {
 	}
 	if s.Notes != nil {
 		fmt.Printf("Notes:       %s\n", *s.Notes)
+	}
+}
+
+// clientSourceToModel converts a client.Source to models.Source.
+func clientSourceToModel(s *client.Source) *models.Source {
+	return &models.Source{
+		ID:          s.ID,
+		SourceType:  s.SourceType,
+		Name:        s.Name,
+		Description: s.Description,
+		Author:      s.Author,
+		Year:        s.Year,
+		URL:         s.URL,
+		ISBN:        s.ISBN,
+		DOI:         s.DOI,
+		Notes:       s.Notes,
+		License:     s.License,
+		LicenseURL:  s.LicenseURL,
 	}
 }
 

@@ -21,23 +21,18 @@ var deleteCmd = &cobra.Command{
 	Short: "Delete an Oak entry",
 	Long: `Delete an Oak entry from the database. Requires confirmation unless --force is used.
 
-In remote mode (when an API profile is configured), deletes the entry
-from the remote API with profile confirmation. In local mode (default),
-deletes from the local database.
+When connected to a remote API profile, shows the profile name in confirmation.
+Use --force to skip all confirmation prompts.
 
 Examples:
-  oak delete alba             # Delete from local database
-  oak delete alba --remote    # Delete from remote API
-  oak delete alba --local     # Force local deletion
+  oak delete alba             # Delete from local database (with confirmation)
+  oak delete alba --remote    # Delete from remote API (with confirmation)
+  oak delete alba --local     # Force local deletion (with confirmation)
   oak delete alba --force     # Skip confirmation prompt`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := names.NormalizeHybridName(args[0])
-
-		if isRemoteMode() {
-			return runDeleteRemote(name)
-		}
-		return runDeleteLocal(name)
+		return runDelete(name)
 	},
 }
 
@@ -46,23 +41,40 @@ func init() {
 	rootCmd.AddCommand(deleteCmd)
 }
 
-func runDeleteLocal(name string) error {
-	database, err := getDB()
+func runDelete(name string) error {
+	apiClient, err := getAPIClient()
 	if err != nil {
 		return err
 	}
-	defer database.Close()
 
-	existing, err := database.GetOakEntry(name)
+	// Verify auth before doing any work (only for actual remote servers)
+	if isActualRemote() {
+		if err := apiClient.VerifyAuth(); err != nil {
+			return fmt.Errorf("authentication failed: %w", err)
+		}
+	}
+
+	// Verify entry exists
+	_, err = apiClient.GetSpecies(name)
 	if err != nil {
-		return err
-	}
-	if existing == nil {
-		return fmt.Errorf("oak entry '%s' not found", name)
+		if client.IsNotFoundError(err) {
+			if isActualRemote() {
+				return fmt.Errorf("oak entry '%s' not found on [%s]", name, apiClient.ProfileName())
+			}
+			return fmt.Errorf("oak entry '%s' not found", name)
+		}
+		return fmt.Errorf("failed to fetch entry: %w", err)
 	}
 
+	// Confirmation prompt
 	if !forceDelete {
-		fmt.Printf("Are you sure you want to delete '%s'? [y/N]: ", name)
+		var prompt string
+		if isActualRemote() {
+			prompt = fmt.Sprintf("Delete %s from [%s]? (y/N): ", name, apiClient.ProfileName())
+		} else {
+			prompt = fmt.Sprintf("Are you sure you want to delete '%s'? [y/N]: ", name)
+		}
+		fmt.Print(prompt)
 		reader := bufio.NewReader(os.Stdin)
 		response, err := reader.ReadString('\n')
 		if err != nil {
@@ -75,53 +87,14 @@ func runDeleteLocal(name string) error {
 		}
 	}
 
-	if err := database.DeleteOakEntry(name); err != nil {
-		return err
-	}
-
-	fmt.Printf("Deleted oak entry: %s\n", name)
-	return nil
-}
-
-func runDeleteRemote(name string) error {
-	apiClient, err := getAPIClient()
-	if err != nil {
-		return err
-	}
-
-	// Verify auth before doing any work
-	if err := apiClient.VerifyAuth(); err != nil {
-		return fmt.Errorf("authentication failed: %w", err)
-	}
-
-	// Verify entry exists on remote
-	_, err = apiClient.GetSpecies(name)
-	if err != nil {
-		if client.IsNotFoundError(err) {
-			return fmt.Errorf("oak entry '%s' not found on [%s]", name, apiClient.ProfileName())
-		}
-		return fmt.Errorf("API error: %w", err)
-	}
-
-	// Confirmation prompt - always shows profile name for remote deletions
-	if !forceDelete {
-		fmt.Printf("Delete %s from [%s]? (y/N): ", name, apiClient.ProfileName())
-		reader := bufio.NewReader(os.Stdin)
-		response, err := reader.ReadString('\n')
-		if err != nil {
-			return err
-		}
-		response = strings.TrimSpace(strings.ToLower(response))
-		if response != "y" && response != "yes" {
-			fmt.Println("Canceled")
-			return nil
-		}
-	}
-
 	if err := apiClient.DeleteSpecies(name); err != nil {
-		return fmt.Errorf("API error: %w", err)
+		return fmt.Errorf("failed to delete entry: %w", err)
 	}
 
-	fmt.Printf("Deleted oak entry from [%s]: %s\n", apiClient.ProfileName(), name)
+	if isActualRemote() {
+		fmt.Printf("Deleted oak entry from [%s]: %s\n", apiClient.ProfileName(), name)
+	} else {
+		fmt.Printf("Deleted oak entry: %s\n", name)
+	}
 	return nil
 }

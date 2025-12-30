@@ -64,7 +64,7 @@ func init() {
 			return fmt.Errorf("failed to load config: %w", err)
 		}
 
-		// If --local is set, start embedded API server
+		// If --local is set, always use embedded server (even if a profile is configured)
 		if forceLocal {
 			embeddedServer, err = embedded.Start(embedded.Config{
 				DBPath: dbPath,
@@ -91,6 +91,25 @@ func init() {
 		// If --remote is set but no API is configured, error
 		if forceRemote && resolvedProfile.IsLocal() {
 			return fmt.Errorf("--remote requires API configuration. Create ~/.oak/config.yaml with profiles or set OAK_API_URL")
+		}
+
+		// If no remote profile resolved, start embedded server for local operations
+		// This allows all commands to use the unified API client path
+		if resolvedProfile.IsLocal() {
+			embeddedServer, err = embedded.Start(embedded.Config{
+				DBPath: dbPath,
+				Quiet:  true,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to start embedded server: %w", err)
+			}
+
+			resolvedProfile = &config.ResolvedProfile{
+				Name:   "local",
+				URL:    embeddedServer.URL(),
+				Key:    embeddedServer.APIKey(),
+				Source: config.SourceEmbedded,
+			}
 		}
 
 		return nil
@@ -146,8 +165,16 @@ func readImportFile(filePath string) ([]byte, error) {
 }
 
 // isRemoteMode returns true if operating against a remote API.
+// Note: With embedded server now used by default, this always returns true.
+// Use isActualRemote() to check if connecting to an actual remote server.
 func isRemoteMode() bool {
 	return resolvedProfile != nil && !resolvedProfile.IsLocal()
+}
+
+// isActualRemote returns true if operating against an actual remote server
+// (not the embedded local server). Use this for confirmation prompts.
+func isActualRemote() bool {
+	return resolvedProfile != nil && resolvedProfile.Source != config.SourceEmbedded
 }
 
 // getAPIClient creates a new API client from the resolved profile.

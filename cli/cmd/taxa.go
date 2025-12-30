@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 
+	"github.com/jeff/oaks/cli/internal/client"
 	"github.com/jeff/oaks/cli/internal/db"
 	"github.com/jeff/oaks/cli/internal/editor"
 	"github.com/jeff/oaks/cli/internal/models"
@@ -65,6 +66,9 @@ var taxaListCmd = &cobra.Command{
 
 Levels: subgenus, section, subsection, complex
 
+In remote mode (when an API profile is configured), fetches from the remote API.
+In local mode (default), fetches from the local database.
+
 Examples:
   oak taxa list
   oak taxa list subgenus
@@ -114,6 +118,9 @@ var taxaShowCmd = &cobra.Command{
 	Use:   "show <name> --level <level>",
 	Short: "Show taxon details",
 	Long: `Display detailed information about a specific taxon.
+
+In remote mode (when an API profile is configured), fetches from the remote API.
+In local mode (default), fetches from the local database.
 
 Examples:
   oak taxa show Lobatae --level section
@@ -263,21 +270,53 @@ func runTaxaImport(cmd *cobra.Command, args []string) error {
 }
 
 func runTaxaList(cmd *cobra.Command, args []string) error {
+	if isRemoteMode() {
+		return runTaxaListRemote(cmd)
+	}
+	return runTaxaListLocal(cmd)
+}
+
+func runTaxaListLocal(cmd *cobra.Command) error {
 	database, err := db.New(dbPath)
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
 	defer database.Close()
 
-	// Get all taxa
 	taxa, err := database.ListTaxa(nil)
 	if err != nil {
 		return fmt.Errorf("failed to list taxa: %w", err)
 	}
 
+	printTaxaTree(cmd, taxa)
+	return nil
+}
+
+func runTaxaListRemote(cmd *cobra.Command) error {
+	apiClient, err := getAPIClient()
+	if err != nil {
+		return err
+	}
+
+	resp, err := apiClient.ListTaxa(nil)
+	if err != nil {
+		return fmt.Errorf("API error: %w", err)
+	}
+
+	// Convert to models
+	taxa := make([]*models.Taxon, len(resp.Data))
+	for i, t := range resp.Data {
+		taxa[i] = clientTaxonToModel(t)
+	}
+
+	printTaxaTree(cmd, taxa)
+	return nil
+}
+
+func printTaxaTree(cmd *cobra.Command, taxa []*models.Taxon) {
 	if len(taxa) == 0 {
 		fmt.Fprintln(cmd.ErrOrStderr(), "No taxa found")
-		return nil
+		return
 	}
 
 	// Organize by level
@@ -371,8 +410,6 @@ func runTaxaList(cmd *cobra.Command, args []string) error {
 		}
 	}
 	fmt.Println()
-
-	return nil
 }
 
 // parseTaxonLevel converts a string to a TaxonLevel
@@ -516,6 +553,13 @@ func runTaxaShow(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	if isRemoteMode() {
+		return runTaxaShowRemote(name, level)
+	}
+	return runTaxaShowLocal(name, level)
+}
+
+func runTaxaShowLocal(name string, level models.TaxonLevel) error {
 	database, err := db.New(dbPath)
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
@@ -531,6 +575,25 @@ func runTaxaShow(cmd *cobra.Command, args []string) error {
 	}
 
 	printTaxon(taxon)
+	return nil
+}
+
+func runTaxaShowRemote(name string, level models.TaxonLevel) error {
+	apiClient, err := getAPIClient()
+	if err != nil {
+		return err
+	}
+
+	// Note: client.GetTaxon takes level first, then name
+	taxon, err := apiClient.GetTaxon(client.TaxonLevel(level), name)
+	if err != nil {
+		if client.IsNotFoundError(err) {
+			return fmt.Errorf("taxon not found: %s [%s]", name, level)
+		}
+		return fmt.Errorf("API error: %w", err)
+	}
+
+	printTaxon(clientTaxonToModel(taxon))
 	return nil
 }
 
@@ -590,4 +653,25 @@ func runTaxaFind(cmd *cobra.Command, args []string) error {
 	w.Flush()
 
 	return nil
+}
+
+// clientTaxonToModel converts a client.Taxon to models.Taxon.
+func clientTaxonToModel(t *client.Taxon) *models.Taxon {
+	// Convert links
+	var links []models.TaxonLink
+	if len(t.Links) > 0 {
+		links = make([]models.TaxonLink, len(t.Links))
+		for i, l := range t.Links {
+			links[i] = models.TaxonLink{Label: l.Label, URL: l.URL}
+		}
+	}
+
+	return &models.Taxon{
+		Name:   t.Name,
+		Level:  models.TaxonLevel(t.Level),
+		Parent: t.Parent,
+		Author: t.Author,
+		Notes:  t.Notes,
+		Links:  links,
+	}
 }
