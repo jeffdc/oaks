@@ -1,0 +1,1331 @@
+openapi: 3.0.3
+info:
+  title: Oak Compendium API
+  description: |
+    API for accessing the Quercus (oak) species database.
+
+    ## Authentication
+    Write operations (POST, PUT, DELETE) require Bearer token authentication.
+    Read operations are public.
+
+    ## Rate Limits
+    - Read endpoints: 10 requests/second per IP
+    - Write endpoints: 5 requests/second per IP
+    - Backup endpoints: 1 request/minute per IP
+  version: 1.0.0
+  contact:
+    name: Oak Compendium
+    url: https://oakcompendium.org
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://oak-compendium-api.fly.dev/api/v1
+    description: Production
+  - url: http://localhost:8080/api/v1
+    description: Local development
+
+tags:
+  - name: Species
+    description: Oak species entries
+  - name: Taxa
+    description: Taxonomic hierarchy (subgenera, sections, subsections, complexes)
+  - name: Sources
+    description: Data sources and references
+  - name: Species Sources
+    description: Source-attributed species data
+  - name: Export
+    description: Database export
+  - name: Health
+    description: Health check endpoints
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: API key from ~/.oak/api_key or OAK_API_KEY environment variable
+
+  schemas:
+    Species:
+      type: object
+      required:
+        - scientific_name
+        - is_hybrid
+      properties:
+        scientific_name:
+          type: string
+          description: Species name without "Quercus" prefix
+          example: alba
+          minLength: 2
+          maxLength: 100
+        author:
+          type: string
+          nullable: true
+          description: Taxonomic author
+          example: L.
+        is_hybrid:
+          type: boolean
+          description: Whether this is a hybrid
+          example: false
+        conservation_status:
+          type: string
+          nullable: true
+          enum: [EX, EW, CR, EN, VU, NT, LC, DD, NE]
+          description: IUCN conservation status code
+          example: LC
+        subgenus:
+          type: string
+          nullable: true
+          enum: [Quercus, Cerris, Cyclobalanopsis]
+          description: Subgenus name
+          example: Quercus
+        section:
+          type: string
+          nullable: true
+          description: Section name
+          example: Quercus
+        subsection:
+          type: string
+          nullable: true
+          description: Subsection name
+        complex:
+          type: string
+          nullable: true
+          description: Species complex name
+        parent1:
+          type: string
+          nullable: true
+          description: First hybrid parent (for hybrids)
+        parent2:
+          type: string
+          nullable: true
+          description: Second hybrid parent (for hybrids)
+        synonyms:
+          type: array
+          items:
+            type: string
+          description: Synonym names
+          example: ["alba var. repanda"]
+
+    SpeciesCreate:
+      type: object
+      required:
+        - scientific_name
+        - is_hybrid
+      properties:
+        scientific_name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        author:
+          type: string
+        is_hybrid:
+          type: boolean
+        conservation_status:
+          type: string
+          enum: [EX, EW, CR, EN, VU, NT, LC, DD, NE]
+        subgenus:
+          type: string
+          enum: [Quercus, Cerris, Cyclobalanopsis]
+        section:
+          type: string
+        subsection:
+          type: string
+        complex:
+          type: string
+        parent1:
+          type: string
+        parent2:
+          type: string
+        synonyms:
+          type: array
+          items:
+            type: string
+
+    SpeciesUpdate:
+      type: object
+      properties:
+        author:
+          type: string
+        is_hybrid:
+          type: boolean
+        conservation_status:
+          type: string
+          enum: [EX, EW, CR, EN, VU, NT, LC, DD, NE]
+        subgenus:
+          type: string
+          enum: [Quercus, Cerris, Cyclobalanopsis]
+        section:
+          type: string
+        subsection:
+          type: string
+        complex:
+          type: string
+        parent1:
+          type: string
+        parent2:
+          type: string
+        synonyms:
+          type: array
+          items:
+            type: string
+
+    SpeciesList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Species'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    SearchResult:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Species'
+        query:
+          type: string
+          example: white oak
+        count:
+          type: integer
+          example: 5
+
+    Taxon:
+      type: object
+      required:
+        - name
+        - level
+      properties:
+        name:
+          type: string
+          description: Taxon name
+          example: Quercus
+        level:
+          type: string
+          enum: [subgenus, section, subsection, complex]
+          description: Taxonomic level
+          example: section
+        parent:
+          type: string
+          nullable: true
+          description: Parent taxon name
+          example: Quercus
+        author:
+          type: string
+          nullable: true
+          description: Taxonomic author
+          example: L.
+        notes:
+          type: string
+          nullable: true
+          description: Notes about the taxon
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxonLink'
+
+    TaxonLink:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Wikipedia
+        url:
+          type: string
+          format: uri
+          example: https://en.wikipedia.org/wiki/Quercus_sect._Quercus
+
+    TaxonCreate:
+      type: object
+      required:
+        - name
+        - level
+      properties:
+        name:
+          type: string
+        level:
+          type: string
+          enum: [subgenus, section, subsection, complex]
+        parent:
+          type: string
+        author:
+          type: string
+        notes:
+          type: string
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxonLink'
+
+    TaxonList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Taxon'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Source:
+      type: object
+      required:
+        - source_type
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+          example: 1
+        source_type:
+          type: string
+          description: Type of source (website, book, paper, etc.)
+          example: website
+        name:
+          type: string
+          example: iNaturalist
+        description:
+          type: string
+          nullable: true
+        author:
+          type: string
+          nullable: true
+        year:
+          type: integer
+          nullable: true
+        url:
+          type: string
+          format: uri
+          nullable: true
+          example: https://inaturalist.org
+        isbn:
+          type: string
+          nullable: true
+        doi:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        license:
+          type: string
+          nullable: true
+          example: CC BY-NC 4.0
+        license_url:
+          type: string
+          format: uri
+          nullable: true
+
+    SourceCreate:
+      type: object
+      required:
+        - source_type
+        - name
+      properties:
+        source_type:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        author:
+          type: string
+        year:
+          type: integer
+        url:
+          type: string
+          format: uri
+        isbn:
+          type: string
+        doi:
+          type: string
+        notes:
+          type: string
+        license:
+          type: string
+        license_url:
+          type: string
+          format: uri
+
+    SpeciesSource:
+      type: object
+      required:
+        - source_id
+      properties:
+        scientific_name:
+          type: string
+          readOnly: true
+          example: alba
+        source_id:
+          type: integer
+          format: int64
+          example: 2
+        local_names:
+          type: array
+          items:
+            type: string
+          example: ["white oak", "eastern white oak"]
+        range:
+          type: string
+          nullable: true
+          example: Eastern North America
+        growth_habit:
+          type: string
+          nullable: true
+          example: Large deciduous tree to 30m
+        leaves:
+          type: string
+          nullable: true
+          example: Obovate, 12-22cm, 7-9 rounded lobes
+        flowers:
+          type: string
+          nullable: true
+        fruits:
+          type: string
+          nullable: true
+          example: Acorns 15-25mm, cup shallow
+        bark:
+          type: string
+          nullable: true
+        twigs:
+          type: string
+          nullable: true
+        buds:
+          type: string
+          nullable: true
+        hardiness_habitat:
+          type: string
+          nullable: true
+          example: USDA zones 3-9
+        miscellaneous:
+          type: string
+          nullable: true
+        url:
+          type: string
+          format: uri
+          nullable: true
+        is_preferred:
+          type: boolean
+          default: false
+          description: Whether this is the preferred source for display
+
+    SpeciesSourceCreate:
+      type: object
+      required:
+        - source_id
+      properties:
+        source_id:
+          type: integer
+          format: int64
+          minimum: 1
+        local_names:
+          type: array
+          items:
+            type: string
+        range:
+          type: string
+        growth_habit:
+          type: string
+        leaves:
+          type: string
+        flowers:
+          type: string
+        fruits:
+          type: string
+        bark:
+          type: string
+        twigs:
+          type: string
+        buds:
+          type: string
+        hardiness_habitat:
+          type: string
+        miscellaneous:
+          type: string
+        url:
+          type: string
+          format: uri
+        is_preferred:
+          type: boolean
+
+    ExportData:
+      type: object
+      properties:
+        species:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              author:
+                type: string
+              is_hybrid:
+                type: boolean
+              conservation_status:
+                type: string
+              taxonomy:
+                type: object
+                properties:
+                  genus:
+                    type: string
+                  subgenus:
+                    type: string
+                  section:
+                    type: string
+                  subsection:
+                    type: string
+                  complex:
+                    type: string
+              parent1:
+                type: string
+              parent2:
+                type: string
+              hybrids:
+                type: array
+                items:
+                  type: string
+              closely_related_to:
+                type: array
+                items:
+                  type: string
+              subspecies_varieties:
+                type: array
+                items:
+                  type: string
+              synonyms:
+                type: array
+                items:
+                  type: string
+              sources:
+                type: array
+                items:
+                  type: object
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 450
+        limit:
+          type: integer
+          example: 50
+        offset:
+          type: integer
+          example: 0
+        hasMore:
+          type: boolean
+          example: true
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum: [VALIDATION_ERROR, UNAUTHORIZED, NOT_FOUND, CONFLICT, RATE_LIMITED, INTERNAL_ERROR]
+            message:
+              type: string
+            details:
+              type: object
+
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: Validation failed
+            details:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                      message:
+                        type: string
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+
+    ReadyResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ready
+        database:
+          type: string
+          example: connected
+        error:
+          type: string
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: NOT_FOUND
+              message: "Species 'unknown' not found"
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: Missing authorization header
+
+    ValidationFailed:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+
+    Conflict:
+      description: Resource conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: CONFLICT
+              message: species already exists
+
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: rate limit exceeded
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Liveness check
+      description: Returns immediately if server is running
+      operationId: getHealth
+      responses:
+        '200':
+          description: Server is alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /health/ready:
+    get:
+      tags: [Health]
+      summary: Readiness check
+      description: Verifies database connectivity
+      operationId: getHealthReady
+      responses:
+        '200':
+          description: Server is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyResponse'
+        '503':
+          description: Server not ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyResponse'
+
+  /species:
+    get:
+      tags: [Species]
+      summary: List species
+      description: List all species with optional filtering and pagination
+      operationId: listSpecies
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 50
+          description: Number of results per page
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Offset for pagination
+        - name: subgenus
+          in: query
+          schema:
+            type: string
+            enum: [Quercus, Cerris, Cyclobalanopsis]
+          description: Filter by subgenus
+        - name: section
+          in: query
+          schema:
+            type: string
+          description: Filter by section
+        - name: hybrid
+          in: query
+          schema:
+            type: boolean
+          description: Filter by hybrid status
+      responses:
+        '200':
+          description: List of species
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpeciesList'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+
+    post:
+      tags: [Species]
+      summary: Create species
+      description: Create a new species entry
+      operationId: createSpecies
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpeciesCreate'
+      responses:
+        '201':
+          description: Species created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Species'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /species/search:
+    get:
+      tags: [Species]
+      summary: Search species
+      description: Search species by name, synonyms, or local names
+      operationId: searchSpecies
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 50
+          description: Maximum results
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResult'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /species/{name}:
+    get:
+      tags: [Species]
+      summary: Get species
+      description: Get a species by scientific name
+      operationId: getSpecies
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Scientific name (without Quercus prefix)
+      responses:
+        '200':
+          description: Species details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Species'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Species]
+      summary: Update species
+      description: Update an existing species
+      operationId: updateSpecies
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpeciesUpdate'
+      responses:
+        '200':
+          description: Species updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Species'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+    delete:
+      tags: [Species]
+      summary: Delete species
+      description: Delete a species and all its source data
+      operationId: deleteSpecies
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Species deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /taxa:
+    get:
+      tags: [Taxa]
+      summary: List taxa
+      description: List all taxa with optional level filter
+      operationId: listTaxa
+      parameters:
+        - name: level
+          in: query
+          schema:
+            type: string
+            enum: [subgenus, section, subsection, complex]
+          description: Filter by taxonomic level
+      responses:
+        '200':
+          description: List of taxa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaxonList'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+
+    post:
+      tags: [Taxa]
+      summary: Create taxon
+      description: Create a new taxon
+      operationId: createTaxon
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaxonCreate'
+      responses:
+        '201':
+          description: Taxon created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Taxon'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /taxa/{level}/{name}:
+    get:
+      tags: [Taxa]
+      summary: Get taxon
+      description: Get a taxon by level and name
+      operationId: getTaxon
+      parameters:
+        - name: level
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [subgenus, section, subsection, complex]
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Taxon details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Taxon'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Taxa]
+      summary: Update taxon
+      description: Update a taxon (name and level cannot be changed)
+      operationId: updateTaxon
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: level
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [subgenus, section, subsection, complex]
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaxonCreate'
+      responses:
+        '200':
+          description: Taxon updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Taxon'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+    delete:
+      tags: [Taxa]
+      summary: Delete taxon
+      operationId: deleteTaxon
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: level
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [subgenus, section, subsection, complex]
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Taxon deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /sources:
+    get:
+      tags: [Sources]
+      summary: List sources
+      description: List all data sources
+      operationId: listSources
+      responses:
+        '200':
+          description: List of sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Source'
+
+    post:
+      tags: [Sources]
+      summary: Create source
+      description: Create a new data source
+      operationId: createSource
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceCreate'
+      responses:
+        '201':
+          description: Source created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /sources/{id}:
+    get:
+      tags: [Sources]
+      summary: Get source
+      description: Get a source by ID
+      operationId: getSource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Source details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Sources]
+      summary: Update source
+      operationId: updateSource
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceCreate'
+      responses:
+        '200':
+          description: Source updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+    delete:
+      tags: [Sources]
+      summary: Delete source
+      operationId: deleteSource
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Source deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /species/{name}/sources:
+    get:
+      tags: [Species Sources]
+      summary: List species sources
+      description: List all source data for a species
+      operationId: listSpeciesSources
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Species scientific name
+      responses:
+        '200':
+          description: List of species sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SpeciesSource'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags: [Species Sources]
+      summary: Create species source
+      description: Add source data for a species
+      operationId: createSpeciesSource
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpeciesSourceCreate'
+      responses:
+        '201':
+          description: Species source created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpeciesSource'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /species/{name}/sources/{sourceId}:
+    get:
+      tags: [Species Sources]
+      summary: Get species source
+      description: Get source data for a specific species-source combination
+      operationId: getSpeciesSource
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sourceId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Species source details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpeciesSource'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Species Sources]
+      summary: Update species source
+      operationId: updateSpeciesSource
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sourceId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpeciesSourceCreate'
+      responses:
+        '200':
+          description: Species source updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpeciesSource'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+    delete:
+      tags: [Species Sources]
+      summary: Delete species source
+      operationId: deleteSpeciesSource
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sourceId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Species source deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /export:
+    get:
+      tags: [Export]
+      summary: Export database
+      description: |
+        Export the complete database as JSON.
+        Supports ETag caching - use If-None-Match header to check for updates.
+      operationId: exportData
+      responses:
+        '200':
+          description: Full database export
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: Content hash for caching
+            Cache-Control:
+              schema:
+                type: string
+              description: public, max-age=300
+            Last-Modified:
+              schema:
+                type: string
+              description: Last modification time
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportData'
+        '304':
+          description: Not modified (content unchanged since last request)

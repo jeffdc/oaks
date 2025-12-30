@@ -2,6 +2,8 @@
 
 The Oak Compendium API provides programmatic access to the Quercus species database.
 
+> **OpenAPI Spec**: See [openapi.yaml](./openapi.yaml) for the machine-readable specification. Import into Swagger UI, Postman, or other OpenAPI tools.
+
 ## Overview
 
 - **Base URL**: `https://oak-compendium-api.fly.dev/api/v1`
