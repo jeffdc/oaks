@@ -8,6 +8,7 @@ import (
 	"github.com/jeff/oaks/cli/internal/client"
 	"github.com/jeff/oaks/cli/internal/editor"
 	"github.com/jeff/oaks/cli/internal/models"
+	"github.com/jeff/oaks/cli/internal/names"
 )
 
 var newCmd = &cobra.Command{
@@ -25,7 +26,7 @@ Examples:
   oak new alba --local     # Force local creation`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := args[0]
+		name := names.NormalizeHybridName(args[0])
 
 		if isRemoteMode() {
 			return runNewRemote(name)

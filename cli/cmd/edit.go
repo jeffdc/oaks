@@ -7,6 +7,7 @@ import (
 
 	"github.com/jeff/oaks/cli/internal/client"
 	"github.com/jeff/oaks/cli/internal/editor"
+	"github.com/jeff/oaks/cli/internal/names"
 )
 
 var editCmd = &cobra.Command{
@@ -24,7 +25,7 @@ Examples:
   oak edit alba --local     # Force local edit`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := args[0]
+		name := names.NormalizeHybridName(args[0])
 
 		if isRemoteMode() {
 			return runEditRemote(name)

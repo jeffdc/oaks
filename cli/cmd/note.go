@@ -11,6 +11,7 @@ import (
 
 	"github.com/jeff/oaks/cli/internal/editor"
 	"github.com/jeff/oaks/cli/internal/models"
+	"github.com/jeff/oaks/cli/internal/names"
 )
 
 var (
@@ -73,7 +74,7 @@ func init() {
 }
 
 func runNote(cmd *cobra.Command, args []string) error {
-	speciesName := args[0]
+	speciesName := names.NormalizeHybridName(args[0])
 
 	database, err := getDB()
 	if err != nil {
@@ -137,7 +138,7 @@ func runNote(cmd *cobra.Command, args []string) error {
 }
 
 func runNoteList(cmd *cobra.Command, args []string) error {
-	speciesName := args[0]
+	speciesName := names.NormalizeHybridName(args[0])
 
 	database, err := getDB()
 	if err != nil {
@@ -236,7 +237,7 @@ func truncate(s string) string {
 }
 
 func runNoteDelete(cmd *cobra.Command, args []string) error {
-	speciesName := args[0]
+	speciesName := names.NormalizeHybridName(args[0])
 
 	database, err := getDB()
 	if err != nil {

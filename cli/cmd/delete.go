@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jeff/oaks/cli/internal/client"
+	"github.com/jeff/oaks/cli/internal/names"
 )
 
 var (
@@ -31,7 +32,7 @@ Examples:
   oak delete alba --force     # Skip confirmation prompt`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := args[0]
+		name := names.NormalizeHybridName(args[0])
 
 		if isRemoteMode() {
 			return runDeleteRemote(name)

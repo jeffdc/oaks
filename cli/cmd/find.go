@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+
+	"github.com/jeff/oaks/cli/internal/names"
 )
 
 const searchTypeBoth = "both"
@@ -29,7 +31,7 @@ Examples:
   oak find alba --local     # Force local search`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		query := args[0]
+		query := names.NormalizeHybridName(args[0])
 
 		if isRemoteMode() {
 			return runFindRemote(query)
