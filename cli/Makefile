@@ -1,6 +1,6 @@
 # Oak CLI Makefile
 
-.PHONY: build lint test check clean help
+.PHONY: build lint test check clean setup help
 
 # Default target
 all: build
@@ -29,6 +29,11 @@ check: lint test
 clean:
 	rm -f oak coverage.out coverage.html
 
+# Install development tools
+setup:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install golang.org/x/tools/cmd/goimports@latest
+
 # Show help
 help:
 	@echo "Available targets:"
@@ -38,3 +43,4 @@ help:
 	@echo "  test-coverage  Run tests with coverage report"
 	@echo "  check          Run lint + test"
 	@echo "  clean          Remove build artifacts"
+	@echo "  setup          Install development tools"
