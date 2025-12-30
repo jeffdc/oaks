@@ -14,6 +14,7 @@ import {
   getSourceInfo,
   getSpeciesBySource
 } from '../db.js';
+import { checkApiHealth, fetchExport, ApiError } from '../apiClient.js';
 
 // Re-export source helpers for component use
 export {
@@ -44,11 +45,43 @@ export const searchQuery = writable('');
 // Store for selected species (for detail view)
 export const selectedSpecies = writable(null);
 
-// Store for data source info
+// Store for data source info (from: 'api', 'indexeddb', 'json', 'api-update', 'json-update')
 export const dataSource = writable({ from: null, version: null });
+
+// Store for online/offline connectivity state
+export const isOnline = writable(navigator.onLine);
+
+// Store for API availability (online + API reachable)
+export const apiAvailable = writable(false);
 
 // Semaphore to prevent concurrent data updates
 let isUpdating = false;
+
+// Setup online/offline listeners
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    isOnline.set(true);
+    // Check API availability when coming online
+    checkApiAvailability();
+  });
+  window.addEventListener('offline', () => {
+    isOnline.set(false);
+    apiAvailable.set(false);
+  });
+}
+
+/**
+ * Check if the API is available and update the store
+ */
+async function checkApiAvailability() {
+  if (!navigator.onLine) {
+    apiAvailable.set(false);
+    return false;
+  }
+  const available = await checkApiHealth();
+  apiAvailable.set(available);
+  return available;
+}
 
 // Derived store: filtered species based on search
 export const filteredSpecies = derived(
@@ -150,11 +183,13 @@ export function formatSpeciesName(species, options = {}) {
 }
 
 /**
- * Load species data with IndexedDB caching
+ * Load species data with hybrid online/offline strategy
  * Strategy:
- * 1. If IndexedDB has data, load from there immediately (fast, offline-capable)
- * 2. Then check JSON for updates in background
- * 3. If IndexedDB is empty, fetch JSON and populate
+ * 1. If IndexedDB has cached data, load immediately (fast, offline-capable)
+ * 2. In background: check API for updates if online
+ * 3. If no cached data:
+ *    a. Try API first (if online)
+ *    b. Fall back to static JSON file
  */
 export async function loadSpeciesData() {
   try {
@@ -178,6 +213,7 @@ export async function loadSpeciesData() {
       isLoading.set(false);
 
       // Check for updates in background (non-blocking)
+      // Try API first, then fall back to JSON
       checkForUpdates().catch(err => {
         console.warn('Background update check failed:', err);
       });
@@ -185,7 +221,7 @@ export async function loadSpeciesData() {
       return species;
     }
 
-    // No cached data - fetch from JSON
+    // No cached data - try API first, then fall back to JSON
     return await fetchAndCacheData();
   } catch (err) {
     console.error('Error loading species data:', err);
@@ -196,7 +232,8 @@ export async function loadSpeciesData() {
 }
 
 /**
- * Fetch JSON and populate IndexedDB
+ * Fetch data and populate IndexedDB
+ * Strategy: Try API first, fall back to static JSON
  */
 async function fetchAndCacheData() {
   // Prevent concurrent updates
@@ -211,16 +248,37 @@ async function fetchAndCacheData() {
   try {
     isUpdating = true;
 
-    // Cache-bust to bypass CDN caching
-    const dataUrl = `${base}/quercus_data.json?t=${Date.now()}`;
-    const response = await fetch(dataUrl, {
-      cache: 'no-store'
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to load data: ${response.statusText}`);
+    let data;
+    let source = 'json';
+
+    // Try API first if online
+    if (navigator.onLine) {
+      try {
+        const isApiUp = await checkApiHealth();
+        if (isApiUp) {
+          apiAvailable.set(true);
+          data = await fetchExport();
+          source = 'api';
+        }
+      } catch (apiErr) {
+        console.warn('API fetch failed, falling back to static JSON:', apiErr.message);
+        apiAvailable.set(false);
+      }
     }
 
-    const data = await response.json();
+    // Fall back to static JSON if API failed or unavailable
+    if (!data) {
+      // Cache-bust to bypass CDN caching
+      const dataUrl = `${base}/quercus_data.json?t=${Date.now()}`;
+      const response = await fetch(dataUrl, {
+        cache: 'no-store'
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to load data: ${response.statusText}`);
+      }
+      data = await response.json();
+      source = 'json';
+    }
 
     // Normalize data format (handle both old flat format and new format with metadata)
     const normalizedData = normalizeJsonData(data);
@@ -237,7 +295,7 @@ async function fetchAndCacheData() {
     allSources.set(sources);
 
     const metadata = await getMetadata();
-    dataSource.set({ from: 'json', version: metadata.dataVersion });
+    dataSource.set({ from: source, version: metadata.dataVersion });
     isLoading.set(false);
 
     return species;
@@ -247,7 +305,8 @@ async function fetchAndCacheData() {
 }
 
 /**
- * Check if JSON has newer data than IndexedDB
+ * Check for data updates (background operation)
+ * Strategy: Try API first, fall back to static JSON
  */
 async function checkForUpdates() {
   // Prevent concurrent updates which could cause race conditions
@@ -255,17 +314,42 @@ async function checkForUpdates() {
     return;
   }
 
+  // Don't check for updates if offline
+  if (!navigator.onLine) {
+    return;
+  }
+
   try {
     isUpdating = true;
 
-    // Cache-bust to bypass both browser and CDN caching
-    const dataUrl = `${base}/quercus_data.json?t=${Date.now()}`;
-    const response = await fetch(dataUrl, {
-      cache: 'no-store'
-    });
-    if (!response.ok) return;
+    let data;
+    let source = 'json-update';
 
-    const data = await response.json();
+    // Try API first
+    try {
+      const isApiUp = await checkApiHealth();
+      if (isApiUp) {
+        apiAvailable.set(true);
+        data = await fetchExport();
+        source = 'api-update';
+      }
+    } catch (apiErr) {
+      console.warn('API update check failed, trying static JSON:', apiErr.message);
+      apiAvailable.set(false);
+    }
+
+    // Fall back to static JSON
+    if (!data) {
+      // Cache-bust to bypass both browser and CDN caching
+      const dataUrl = `${base}/quercus_data.json?t=${Date.now()}`;
+      const response = await fetch(dataUrl, {
+        cache: 'no-store'
+      });
+      if (!response.ok) return;
+      data = await response.json();
+      source = 'json-update';
+    }
+
     const normalizedData = normalizeJsonData(data);
 
     // populateFromJson checks version and only updates if newer
@@ -281,7 +365,7 @@ async function checkForUpdates() {
       allSources.set(sources);
 
       const metadata = await getMetadata();
-      dataSource.set({ from: 'json-update', version: metadata.dataVersion });
+      dataSource.set({ from: source, version: metadata.dataVersion });
     }
   } catch (err) {
     // Non-fatal - we already have data
@@ -293,6 +377,7 @@ async function checkForUpdates() {
 /**
  * Force refresh data from server, clearing IndexedDB cache
  * Use this when data appears stale despite updates
+ * Strategy: Try API first, fall back to static JSON
  */
 export async function forceRefresh() {
   try {
@@ -304,7 +389,7 @@ export async function forceRefresh() {
     await db.metadata.clear();
     await db.sources.clear();
 
-    // Fetch and cache fresh data
+    // Fetch and cache fresh data (will try API first)
     return await fetchAndCacheData();
   } catch (err) {
     error.set(err.message);

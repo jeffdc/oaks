@@ -1,6 +1,7 @@
 <script>
 	import { base } from '$app/paths';
 	import Search from './Search.svelte';
+	import { isOnline } from '$lib/stores/dataStore.js';
 </script>
 
 <header class="sticky top-0 z-40" role="banner" style="background: linear-gradient(135deg, var(--color-forest-800) 0%, var(--color-forest-700) 100%); box-shadow: var(--shadow-lg);">
@@ -15,6 +16,13 @@
 				<img src="{base}/oak-leaf-outline.svg" alt="" class="w-7 h-10 brightness-0 invert opacity-90" aria-hidden="true" />
 				<span class="text-xl font-bold text-white" style="font-family: var(--font-serif); letter-spacing: 0.01em;">Oak Compendium</span>
 			</a>
+
+			<!-- Offline indicator (only shown when offline) -->
+			{#if !$isOnline}
+				<span class="offline-badge" role="status" aria-live="polite">
+					Offline
+				</span>
+			{/if}
 
 			<!-- Search -->
 			<div class="flex-1 max-w-md ml-auto" role="search" aria-label="Search species">
@@ -58,5 +66,18 @@
 		outline: none;
 		background-color: var(--color-white-15);
 		box-shadow: 0 0 0 2px var(--color-white-30);
+	}
+
+	.offline-badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.25rem 0.625rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: #fef3c7;
+		background-color: rgba(217, 119, 6, 0.3);
+		border: 1px solid rgba(217, 119, 6, 0.5);
+		border-radius: 9999px;
+		letter-spacing: 0.025em;
 	}
 </style>
