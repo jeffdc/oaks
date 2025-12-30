@@ -1,0 +1,30 @@
+app = "oak-compendium-api"
+primary_region = "sjc"
+
+[build]
+  dockerfile = "cli/Dockerfile"
+
+[env]
+  OAK_DB_PATH = "/data/oak_compendium.db"
+  OAK_ENV = "production"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+[[mounts]]
+  source = "oak_data"
+  destination = "/data"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
