@@ -220,7 +220,7 @@ func (c *Client) doRequest(method, path string, body interface{}) (*http.Respons
 		req.Header.Set("Content-Type", "application/json")
 	}
 	if c.apiKey != "" {
-		req.Header.Set("X-API-Key", c.apiKey)
+		req.Header.Set("Authorization", "Bearer "+c.apiKey)
 	}
 
 	resp, err := c.httpClient.Do(req)
