@@ -604,6 +604,198 @@ func (db *Database) SearchOakEntries(query string) ([]string, error) {
 	return names, rows.Err()
 }
 
+// OakEntryFilter contains filter criteria for listing oak entries
+type OakEntryFilter struct {
+	Subgenus *string
+	Section  *string
+	Hybrid   *bool
+}
+
+// ListOakEntriesPaginated returns a paginated list of oak entries with optional filters
+func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryFilter) ([]*models.OakEntry, error) {
+	query := `SELECT scientific_name, author, is_hybrid, conservation_status,
+		        subgenus, section, subsection, complex,
+		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
+		 FROM oak_entries`
+
+	var args []interface{}
+	var conditions []string
+
+	if filter != nil {
+		if filter.Subgenus != nil {
+			conditions = append(conditions, "subgenus = ?")
+			args = append(args, *filter.Subgenus)
+		}
+		if filter.Section != nil {
+			conditions = append(conditions, "section = ?")
+			args = append(args, *filter.Section)
+		}
+		if filter.Hybrid != nil {
+			conditions = append(conditions, "is_hybrid = ?")
+			if *filter.Hybrid {
+				args = append(args, 1)
+			} else {
+				args = append(args, 0)
+			}
+		}
+	}
+
+	if len(conditions) > 0 {
+		query += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	query += " ORDER BY scientific_name LIMIT ? OFFSET ?"
+	args = append(args, limit, offset)
+
+	rows, err := db.conn.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list oak entries: %w", err)
+	}
+	defer rows.Close()
+
+	return scanOakEntries(rows)
+}
+
+// CountOakEntries returns the total count of oak entries matching the filter
+func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
+	query := `SELECT COUNT(*) FROM oak_entries`
+
+	var args []interface{}
+	var conditions []string
+
+	if filter != nil {
+		if filter.Subgenus != nil {
+			conditions = append(conditions, "subgenus = ?")
+			args = append(args, *filter.Subgenus)
+		}
+		if filter.Section != nil {
+			conditions = append(conditions, "section = ?")
+			args = append(args, *filter.Section)
+		}
+		if filter.Hybrid != nil {
+			conditions = append(conditions, "is_hybrid = ?")
+			if *filter.Hybrid {
+				args = append(args, 1)
+			} else {
+				args = append(args, 0)
+			}
+		}
+	}
+
+	if len(conditions) > 0 {
+		query += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	var count int
+	if err := db.conn.QueryRow(query, args...).Scan(&count); err != nil {
+		return 0, fmt.Errorf("failed to count oak entries: %w", err)
+	}
+	return count, nil
+}
+
+// SearchOakEntriesFull searches for oak entries by name pattern and returns full entries
+func (db *Database) SearchOakEntriesFull(query string, limit int) ([]*models.OakEntry, error) {
+	pattern := "%" + escapeLike(query) + "%"
+	rows, err := db.conn.Query(
+		`SELECT scientific_name, author, is_hybrid, conservation_status,
+		        subgenus, section, subsection, complex,
+		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
+		 FROM oak_entries
+		 WHERE scientific_name LIKE ? ESCAPE '\'
+		 ORDER BY scientific_name LIMIT ?`,
+		pattern, limit,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search oak entries: %w", err)
+	}
+	defer rows.Close()
+
+	return scanOakEntries(rows)
+}
+
+// OakEntryExists checks if an oak entry exists by scientific name
+func (db *Database) OakEntryExists(scientificName string) (bool, error) {
+	var count int
+	err := db.conn.QueryRow(
+		`SELECT COUNT(*) FROM oak_entries WHERE scientific_name = ?`,
+		scientificName,
+	).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("failed to check oak entry existence: %w", err)
+	}
+	return count > 0, nil
+}
+
+// scanOakEntries is a helper that scans rows into OakEntry objects
+func scanOakEntries(rows *sql.Rows) ([]*models.OakEntry, error) {
+	var entries []*models.OakEntry
+	for rows.Next() {
+		var entry models.OakEntry
+		var isHybrid int
+		var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON, externalLinksJSON sql.NullString
+
+		if err := rows.Scan(
+			&entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
+			&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
+			&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON, &externalLinksJSON,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan oak entry: %w", err)
+		}
+
+		entry.IsHybrid = isHybrid != 0
+
+		// Unmarshal JSON arrays
+		if hybridsJSON.Valid {
+			if err := json.Unmarshal([]byte(hybridsJSON.String), &entry.Hybrids); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal hybrids for %s: %w", entry.ScientificName, err)
+			}
+		}
+		if entry.Hybrids == nil {
+			entry.Hybrids = []string{}
+		}
+
+		if relatedJSON.Valid {
+			if err := json.Unmarshal([]byte(relatedJSON.String), &entry.CloselyRelatedTo); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal closely_related_to for %s: %w", entry.ScientificName, err)
+			}
+		}
+		if entry.CloselyRelatedTo == nil {
+			entry.CloselyRelatedTo = []string{}
+		}
+
+		if subspeciesJSON.Valid {
+			if err := json.Unmarshal([]byte(subspeciesJSON.String), &entry.SubspeciesVarieties); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal subspecies_varieties for %s: %w", entry.ScientificName, err)
+			}
+		}
+		if entry.SubspeciesVarieties == nil {
+			entry.SubspeciesVarieties = []string{}
+		}
+
+		if synonymsJSON.Valid {
+			if err := json.Unmarshal([]byte(synonymsJSON.String), &entry.Synonyms); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal synonyms for %s: %w", entry.ScientificName, err)
+			}
+		}
+		if entry.Synonyms == nil {
+			entry.Synonyms = []string{}
+		}
+
+		if externalLinksJSON.Valid {
+			if err := json.Unmarshal([]byte(externalLinksJSON.String), &entry.ExternalLinks); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal external_links for %s: %w", entry.ScientificName, err)
+			}
+		}
+		if entry.ExternalLinks == nil {
+			entry.ExternalLinks = []models.ExternalLink{}
+		}
+
+		entries = append(entries, &entry)
+	}
+
+	return entries, rows.Err()
+}
+
 // SearchSources searches for sources by name pattern
 func (db *Database) SearchSources(query string) ([]int64, error) {
 	pattern := "%" + escapeLike(query) + "%"
