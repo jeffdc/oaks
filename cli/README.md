@@ -214,3 +214,55 @@ Test coverage includes:
 1. Create `cmd/mycommand.go`
 2. Define the command using Cobra
 3. Register it in `init()` with `rootCmd.AddCommand()`
+
+## Deployment (Fly.io)
+
+The Oak Compendium API is deployed to Fly.io at https://oak-compendium-api.fly.dev
+
+### Initial Database Seeding
+
+To copy the local database to the production Fly.io volume:
+
+```bash
+# Remove existing empty database (if present)
+fly ssh console -C "rm /data/oak_compendium.db" --app oak-compendium-api
+
+# Upload the populated database
+fly ssh sftp put cli/oak_compendium.db /data/oak_compendium.db --app oak-compendium-api
+
+# Restart the app to pick up the new database
+fly apps restart oak-compendium-api
+
+# Verify the data
+curl -s "https://oak-compendium-api.fly.dev/api/v1/species?limit=3"
+```
+
+### Updating Production Data
+
+For subsequent database updates:
+
+```bash
+# Remove existing database
+fly ssh console -C "rm /data/oak_compendium.db" --app oak-compendium-api
+
+# Upload new version
+fly ssh sftp put cli/oak_compendium.db /data/oak_compendium.db --app oak-compendium-api
+
+# Restart app
+fly apps restart oak-compendium-api
+```
+
+Note: Fly's SFTP doesn't overwrite files, so you must remove the existing file first.
+
+### Verifying Production
+
+```bash
+# Check app status
+fly status --app oak-compendium-api
+
+# Check database record count
+fly ssh console -C "sqlite3 /data/oak_compendium.db 'SELECT COUNT(*) FROM oak_entries'" --app oak-compendium-api
+
+# Test API endpoints
+curl https://oak-compendium-api.fly.dev/api/v1/species/alba
+```
