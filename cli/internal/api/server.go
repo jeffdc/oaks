@@ -81,17 +81,42 @@ func (s *Server) setupRoutes() {
 
 	// API v1 routes
 	r.Route("/api/v1", func(r chi.Router) {
-		// Species endpoints
+		// Species endpoints (read - public)
 		r.Get("/species", s.handleListSpecies)
+		r.Get("/species/search", s.handleSearchSpecies) // Must be before {name} route
 		r.Get("/species/{name}", s.handleGetSpecies)
 
-		// Taxa endpoints
+		// Species endpoints (write - auth required)
+		r.Group(func(r chi.Router) {
+			r.Use(s.RequireAuth)
+			r.Post("/species", s.handleCreateSpecies)
+			r.Put("/species/{name}", s.handleUpdateSpecies)
+			r.Delete("/species/{name}", s.handleDeleteSpecies)
+		})
+
+		// Taxa endpoints (read - public)
 		r.Get("/taxa", s.handleListTaxa)
 		r.Get("/taxa/{level}/{name}", s.handleGetTaxon)
 
-		// Sources endpoints
+		// Taxa endpoints (write - auth required)
+		r.Group(func(r chi.Router) {
+			r.Use(s.RequireAuth)
+			r.Post("/taxa", s.handleCreateTaxon)
+			r.Put("/taxa/{level}/{name}", s.handleUpdateTaxon)
+			r.Delete("/taxa/{level}/{name}", s.handleDeleteTaxon)
+		})
+
+		// Sources endpoints (read - public)
 		r.Get("/sources", s.handleListSources)
 		r.Get("/sources/{id}", s.handleGetSource)
+
+		// Sources endpoints (write - auth required)
+		r.Group(func(r chi.Router) {
+			r.Use(s.RequireAuth)
+			r.Post("/sources", s.handleCreateSource)
+			r.Put("/sources/{id}", s.handleUpdateSource)
+			r.Delete("/sources/{id}", s.handleDeleteSource)
+		})
 
 		// Species-sources endpoints
 		r.Get("/species/{name}/sources", s.handleGetSpeciesSources)
@@ -130,30 +155,6 @@ func (s *Server) Router() chi.Router {
 }
 
 // Placeholder handlers - will be implemented in endpoint tasks
-
-func (s *Server) handleListSpecies(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
-
-func (s *Server) handleGetSpecies(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
-
-func (s *Server) handleListTaxa(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
-
-func (s *Server) handleGetTaxon(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
-
-func (s *Server) handleListSources(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
-
-func (s *Server) handleGetSource(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
 
 func (s *Server) handleGetSpeciesSources(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "not implemented", http.StatusNotImplemented)

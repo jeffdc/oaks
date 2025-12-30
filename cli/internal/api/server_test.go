@@ -39,16 +39,11 @@ func TestShutdown(t *testing.T) {
 func TestAPIRoutes_ReturnNotImplemented(t *testing.T) {
 	s := New(nil, "", nil, WithoutMiddleware())
 
+	// Only test endpoints that are still not implemented
 	routes := []struct {
 		method string
 		path   string
 	}{
-		{"GET", "/api/v1/species"},
-		{"GET", "/api/v1/species/alba"},
-		{"GET", "/api/v1/taxa"},
-		{"GET", "/api/v1/taxa/section/Quercus"},
-		{"GET", "/api/v1/sources"},
-		{"GET", "/api/v1/sources/1"},
 		{"GET", "/api/v1/species/alba/sources"},
 		{"GET", "/api/v1/export"},
 	}
