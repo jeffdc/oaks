@@ -7,11 +7,12 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
+
 	"github.com/jeff/oaks/cli/internal/db"
 	"github.com/jeff/oaks/cli/internal/editor"
 	"github.com/jeff/oaks/cli/internal/models"
-	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 // TaxaFile represents the structure of the taxa YAML file
@@ -153,17 +154,17 @@ func init() {
 
 	// Level flag for new, edit, delete, show
 	taxaNewCmd.Flags().StringVar(&taxaLevel, "level", "", "Taxon level (subgenus, section, subsection, complex)")
-	taxaNewCmd.MarkFlagRequired("level")
+	_ = taxaNewCmd.MarkFlagRequired("level")
 
 	taxaEditCmd.Flags().StringVar(&taxaLevel, "level", "", "Taxon level (subgenus, section, subsection, complex)")
-	taxaEditCmd.MarkFlagRequired("level")
+	_ = taxaEditCmd.MarkFlagRequired("level")
 
 	taxaDeleteCmd.Flags().StringVar(&taxaLevel, "level", "", "Taxon level (subgenus, section, subsection, complex)")
-	taxaDeleteCmd.MarkFlagRequired("level")
+	_ = taxaDeleteCmd.MarkFlagRequired("level")
 	taxaDeleteCmd.Flags().BoolVar(&taxaDeleteForce, "force", false, "Skip confirmation prompt")
 
 	taxaShowCmd.Flags().StringVar(&taxaLevel, "level", "", "Taxon level (subgenus, section, subsection, complex)")
-	taxaShowCmd.MarkFlagRequired("level")
+	_ = taxaShowCmd.MarkFlagRequired("level")
 }
 
 func runTaxaImport(cmd *cobra.Command, args []string) error {
@@ -494,7 +495,7 @@ func runTaxaDelete(cmd *cobra.Command, args []string) error {
 		}
 		response = strings.TrimSpace(strings.ToLower(response))
 		if response != "y" && response != "yes" {
-			fmt.Println("Cancelled")
+			fmt.Println("Canceled")
 			return nil
 		}
 	}

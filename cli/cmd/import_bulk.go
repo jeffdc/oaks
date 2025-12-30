@@ -8,11 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
+
 	"github.com/jeff/oaks/cli/internal/db"
 	"github.com/jeff/oaks/cli/internal/models"
 	"github.com/jeff/oaks/cli/internal/schema"
-	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 var sourceID int64
@@ -80,8 +81,9 @@ func importBulk(database *db.Database, validator *schema.Validator, filePath str
 	imported := 0
 	skipped := 0
 
-	for _, entry := range entries {
-		if err := validator.ValidateOakEntry(&entry); err != nil {
+	for i := range entries {
+		entry := &entries[i]
+		if err := validator.ValidateOakEntry(entry); err != nil {
 			fmt.Fprintf(os.Stderr, "Validation failed for '%s': %v\n", entry.ScientificName, err)
 			skipped++
 			continue
@@ -94,7 +96,7 @@ func importBulk(database *db.Database, validator *schema.Validator, filePath str
 
 		if existing != nil {
 			// Check for conflicts on intrinsic fields
-			conflicts := findConflicts(existing, &entry)
+			conflicts := findConflicts(existing, entry)
 			if len(conflicts) > 0 {
 				resolved, skip := resolveConflicts(entry.ScientificName, conflicts)
 				if skip {
@@ -103,15 +105,15 @@ func importBulk(database *db.Database, validator *schema.Validator, filePath str
 					continue
 				}
 				// Apply resolutions
-				applyResolutions(&entry, resolved)
+				applyResolutions(entry, resolved)
 			}
 
 			// Merge with existing entry
-			mergeEntries(existing, &entry)
-			entry = *existing
+			mergeEntries(existing, entry)
+			*entry = *existing
 		}
 
-		if err := database.SaveOakEntry(&entry); err != nil {
+		if err := database.SaveOakEntry(entry); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to save '%s': %v\n", entry.ScientificName, err)
 			skipped++
 			continue
@@ -247,6 +249,6 @@ func mergeEntries(existing, imported *models.OakEntry) {
 
 func init() {
 	importBulkCmd.Flags().Int64Var(&sourceID, "source-id", 0, "Source ID to attribute the data to (required)")
-	importBulkCmd.MarkFlagRequired("source-id")
+	_ = importBulkCmd.MarkFlagRequired("source-id")
 	rootCmd.AddCommand(importBulkCmd)
 }

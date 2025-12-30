@@ -9,14 +9,15 @@ import (
 	"regexp"
 	"strings"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/jeff/oaks/cli/internal/models"
 	"github.com/jeff/oaks/cli/internal/schema"
-	"gopkg.in/yaml.v3"
 )
 
 // parseFrontmatter extracts YAML frontmatter and body from markdown content
 // Returns frontmatter (without ---), body, and any error
-func parseFrontmatter(content string) (frontmatter string, body string, err error) {
+func parseFrontmatter(content string) (frontmatter, body string, err error) {
 	content = strings.TrimSpace(content)
 	if !strings.HasPrefix(content, "---") {
 		return "", content, nil
@@ -91,7 +92,7 @@ func validateEditor(editor string) (string, error) {
 			return "", fmt.Errorf("configured editor path is a directory")
 		}
 		// Check if file is executable (has any execute bit set)
-		if info.Mode().Perm()&0111 == 0 {
+		if info.Mode().Perm()&0o111 == 0 {
 			return "", fmt.Errorf("configured editor is not executable")
 		}
 		return editor, nil
@@ -152,11 +153,6 @@ func openEditorWithExt(initialContent, ext string) (string, error) {
 	return string(content), nil
 }
 
-// openEditor opens the editor with YAML content (.yaml extension)
-func openEditor(initialContent string) (string, error) {
-	return openEditorWithExt(initialContent, ".yaml")
-}
-
 // openEditorMarkdown opens the editor with markdown content (.md extension)
 func openEditorMarkdown(initialContent string) (string, error) {
 	return openEditorWithExt(initialContent, ".md")
@@ -165,7 +161,7 @@ func openEditorMarkdown(initialContent string) (string, error) {
 // waitForEnter waits for the user to press Enter
 func waitForEnter() {
 	reader := bufio.NewReader(os.Stdin)
-	reader.ReadString('\n')
+	_, _ = reader.ReadString('\n')
 }
 
 // oakEntryToMarkdown generates a markdown string for editing an oak entry
@@ -577,10 +573,10 @@ func NewSource() (*models.Source, error) {
 			return "", err
 		}
 		// Trim newline
-		if len(text) > 0 && text[len(text)-1] == '\n' {
+		if text != "" && text[len(text)-1] == '\n' {
 			text = text[:len(text)-1]
 		}
-		if len(text) > 0 && text[len(text)-1] == '\r' {
+		if text != "" && text[len(text)-1] == '\r' {
 			text = text[:len(text)-1]
 		}
 		return text, nil

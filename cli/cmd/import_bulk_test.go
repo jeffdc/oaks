@@ -163,7 +163,7 @@ func TestMergeEntries_SingleValueFields_ExistingNil(t *testing.T) {
 	subgenus := "Quercus"
 	section := "Quercus"
 	subsection := "Albae"
-	complex := "Alba"
+	cmplx := "Alba"
 	parent1 := "rubra"
 	parent2 := "velutina"
 
@@ -174,7 +174,7 @@ func TestMergeEntries_SingleValueFields_ExistingNil(t *testing.T) {
 		Subgenus:           &subgenus,
 		Section:            &section,
 		Subsection:         &subsection,
-		Complex:            &complex,
+		Complex:            &cmplx,
 		Parent1:            &parent1,
 		Parent2:            &parent2,
 	}
@@ -197,8 +197,8 @@ func TestMergeEntries_SingleValueFields_ExistingNil(t *testing.T) {
 	if existing.Subsection == nil || *existing.Subsection != subsection {
 		t.Errorf("Subsection not merged: got %v, want %q", existing.Subsection, subsection)
 	}
-	if existing.Complex == nil || *existing.Complex != complex {
-		t.Errorf("Complex not merged: got %v, want %q", existing.Complex, complex)
+	if existing.Complex == nil || *existing.Complex != cmplx {
+		t.Errorf("Complex not merged: got %v, want %q", existing.Complex, cmplx)
 	}
 	if existing.Parent1 == nil || *existing.Parent1 != parent1 {
 		t.Errorf("Parent1 not merged: got %v, want %q", existing.Parent1, parent1)

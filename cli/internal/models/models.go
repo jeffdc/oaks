@@ -4,10 +4,10 @@ package models
 type TaxonLevel string
 
 const (
-	TaxonLevelSubgenus    TaxonLevel = "subgenus"
-	TaxonLevelSection     TaxonLevel = "section"
-	TaxonLevelSubsection  TaxonLevel = "subsection"
-	TaxonLevelComplex     TaxonLevel = "complex"
+	TaxonLevelSubgenus   TaxonLevel = "subgenus"
+	TaxonLevelSection    TaxonLevel = "section"
+	TaxonLevelSubsection TaxonLevel = "subsection"
+	TaxonLevelComplex    TaxonLevel = "complex"
 )
 
 // TaxonLink represents a labeled external link for a taxon

@@ -6,8 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jeff/oaks/cli/internal/models"
 	"github.com/santhosh-tekuri/jsonschema/v5"
+
+	"github.com/jeff/oaks/cli/internal/models"
 )
 
 // Validator handles JSON schema validation for Oak entries
@@ -71,11 +72,7 @@ func (v *Validator) ValidateOakEntry(entry *models.OakEntry) error {
 	}
 
 	// Validate enumerations
-	if err := v.validateEnumerations(entry); err != nil {
-		return err
-	}
-
-	return nil
+	return v.validateEnumerations(entry)
 }
 
 // validateEnumerations checks field values against allowed enumerations
@@ -134,7 +131,7 @@ func (v *Validator) AddEnumValue(field, value string) error {
 		return fmt.Errorf("failed to marshal schema: %w", err)
 	}
 
-	if err := os.WriteFile(v.schemaPath, output, 0644); err != nil {
+	if err := os.WriteFile(v.schemaPath, output, 0o644); err != nil { //nolint:gosec // schema must be readable
 		return fmt.Errorf("failed to write schema file: %w", err)
 	}
 

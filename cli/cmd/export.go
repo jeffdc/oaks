@@ -6,8 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/jeff/oaks/cli/internal/models"
 	"github.com/spf13/cobra"
+
+	"github.com/jeff/oaks/cli/internal/models"
 )
 
 // ExportTaxonomy represents the nested taxonomy in export format
@@ -264,7 +265,7 @@ func runExport(cmd *cobra.Command, args []string) error {
 	if outputPath == "" {
 		fmt.Println(string(jsonData))
 	} else {
-		if err := os.WriteFile(outputPath, jsonData, 0644); err != nil {
+		if err := os.WriteFile(outputPath, jsonData, 0o644); err != nil { //nolint:gosec // export must be readable
 			return fmt.Errorf("failed to write output file: %w", err)
 		}
 		fmt.Fprintf(cmd.ErrOrStderr(), "Exported %d species to %s\n", len(exportData.Species), outputPath)

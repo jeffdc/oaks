@@ -3,8 +3,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/jeff/oaks/cli/internal/editor"
 	"github.com/spf13/cobra"
+
+	"github.com/jeff/oaks/cli/internal/editor"
 )
 
 var editCmd = &cobra.Command{

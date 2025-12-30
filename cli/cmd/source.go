@@ -8,9 +8,10 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/spf13/cobra"
+
 	"github.com/jeff/oaks/cli/internal/editor"
 	"github.com/jeff/oaks/cli/internal/models"
-	"github.com/spf13/cobra"
 )
 
 var sourceCmd = &cobra.Command{
@@ -20,11 +21,11 @@ var sourceCmd = &cobra.Command{
 }
 
 var (
-	srcNewType    string
-	srcNewName    string
-	srcNewURL     string
-	srcNewDesc    string
-	srcDelForce   bool
+	srcNewType  string
+	srcNewName  string
+	srcNewURL   string
+	srcNewDesc  string
+	srcDelForce bool
 )
 
 var sourceNewCmd = &cobra.Command{
@@ -227,7 +228,7 @@ Examples:
 			}
 			response = strings.TrimSpace(strings.ToLower(response))
 			if response != "y" && response != "yes" {
-				fmt.Println("Cancelled")
+				fmt.Println("Canceled")
 				return nil
 			}
 		}

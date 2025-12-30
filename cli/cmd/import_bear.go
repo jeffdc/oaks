@@ -10,8 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jeff/oaks/cli/internal/models"
 	"github.com/spf13/cobra"
+
+	"github.com/jeff/oaks/cli/internal/models"
 )
 
 const (
@@ -75,9 +76,9 @@ func init() {
 
 // BearNote represents a note from Bear
 type BearNote struct {
-	ID         int64
-	Title      string
-	Text       string
+	ID          int64
+	Title       string
+	Text        string
 	TaxonomyTag string
 }
 
@@ -138,7 +139,7 @@ func runImportBear(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get last import timestamp for incremental import
-	var lastImportCoreData float64 = 0
+	var lastImportCoreData float64
 	if !bearFullImport {
 		lastImportStr, err := database.GetMetadata(bearLastImportKey)
 		if err != nil {
@@ -270,6 +271,7 @@ func queryBearNotes(db *sql.DB, sinceTimestamp float64) ([]BearNote, error) {
 		modificationFilter = fmt.Sprintf("AND n.ZMODIFICATIONDATE > %f", sinceTimestamp)
 	}
 
+	//nolint:gosec // G201: filter is numeric float, not user input
 	query := fmt.Sprintf(`
 		WITH species_tags AS (
 			SELECT n.Z_PK as note_id, n.ZTITLE as title, n.ZTEXT as text, t.ZTITLE as tag,
@@ -498,32 +500,33 @@ func printParsedContent(parsed ParsedNote) {
 		fmt.Printf("    Common Names: %v\n", parsed.CommonNames)
 	}
 	if parsed.Leaves != "" {
-		fmt.Printf("    Leaves: %s\n", truncateStr(parsed.Leaves, 50))
+		fmt.Printf("    Leaves: %s\n", truncateStr(parsed.Leaves))
 	}
 	if parsed.Fruits != "" {
-		fmt.Printf("    Fruits: %s\n", truncateStr(parsed.Fruits, 50))
+		fmt.Printf("    Fruits: %s\n", truncateStr(parsed.Fruits))
 	}
 	if parsed.Bark != "" {
-		fmt.Printf("    Bark: %s\n", truncateStr(parsed.Bark, 50))
+		fmt.Printf("    Bark: %s\n", truncateStr(parsed.Bark))
 	}
 	if parsed.Buds != "" {
-		fmt.Printf("    Buds: %s\n", truncateStr(parsed.Buds, 50))
+		fmt.Printf("    Buds: %s\n", truncateStr(parsed.Buds))
 	}
 	if parsed.GrowthHabit != "" {
-		fmt.Printf("    Growth Habit: %s\n", truncateStr(parsed.GrowthHabit, 50))
+		fmt.Printf("    Growth Habit: %s\n", truncateStr(parsed.GrowthHabit))
 	}
 	if parsed.Range != "" {
-		fmt.Printf("    Range: %s\n", truncateStr(parsed.Range, 50))
+		fmt.Printf("    Range: %s\n", truncateStr(parsed.Range))
 	}
 	if parsed.FieldNotes != "" {
-		fmt.Printf("    Field Notes: %s\n", truncateStr(parsed.FieldNotes, 50))
+		fmt.Printf("    Field Notes: %s\n", truncateStr(parsed.FieldNotes))
 	}
 	if parsed.Resources != "" {
-		fmt.Printf("    Resources: %s\n", truncateStr(parsed.Resources, 50))
+		fmt.Printf("    Resources: %s\n", truncateStr(parsed.Resources))
 	}
 }
 
-func truncateStr(s string, maxLen int) string {
+func truncateStr(s string) string {
+	const maxLen = 50
 	if len(s) <= maxLen {
 		return s
 	}

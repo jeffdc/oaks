@@ -8,25 +8,25 @@ import (
 
 func TestParseFrontmatter(t *testing.T) {
 	tests := []struct {
-		name    string
-		input   string
-		wantFM  string
+		name     string
+		input    string
+		wantFM   string
 		wantBody string
-		wantErr bool
+		wantErr  bool
 	}{
 		{
-			name:    "valid frontmatter",
-			input:   "---\nfoo: bar\n---\n\n# Body\n\nContent here",
-			wantFM:  "foo: bar",
+			name:     "valid frontmatter",
+			input:    "---\nfoo: bar\n---\n\n# Body\n\nContent here",
+			wantFM:   "foo: bar",
 			wantBody: "# Body\n\nContent here",
-			wantErr: false,
+			wantErr:  false,
 		},
 		{
-			name:    "no frontmatter",
-			input:   "# Just body",
-			wantFM:  "",
+			name:     "no frontmatter",
+			input:    "# Just body",
+			wantFM:   "",
 			wantBody: "# Just body",
-			wantErr: false,
+			wantErr:  false,
 		},
 		{
 			name:    "unclosed frontmatter",
@@ -93,15 +93,15 @@ func TestOakEntryRoundTrip(t *testing.T) {
 	section := "Quercus"
 
 	original := &models.OakEntry{
-		ScientificName: "alba",
-		Author:         &author,
-		IsHybrid:       false,
-		Subgenus:       &subgenus,
-		Section:        &section,
-		Hybrids:        []string{"bebbiana", "jackiana"},
-		CloselyRelatedTo: []string{},
+		ScientificName:      "alba",
+		Author:              &author,
+		IsHybrid:            false,
+		Subgenus:            &subgenus,
+		Section:             &section,
+		Hybrids:             []string{"bebbiana", "jackiana"},
+		CloselyRelatedTo:    []string{},
 		SubspeciesVarieties: []string{},
-		Synonyms:       []string{},
+		Synonyms:            []string{},
 	}
 
 	md := oakEntryToMarkdown(original)

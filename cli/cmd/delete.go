@@ -43,8 +43,8 @@ var deleteCmd = &cobra.Command{
 				return err
 			}
 			response = strings.TrimSpace(strings.ToLower(response))
-			if response != "y" && response != "yes" {
-				fmt.Println("Cancelled")
+			if response != "y" && response != "yes" { //nolint:goconst // user-facing confirmation
+				fmt.Println("Canceled")
 				return nil
 			}
 		}

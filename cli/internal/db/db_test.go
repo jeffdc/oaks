@@ -9,7 +9,7 @@ import (
 )
 
 // testDB creates a temporary database for testing
-func testDB(t *testing.T) (*Database, func()) {
+func testDB(t *testing.T) (*Database, func()) { //nolint:gocritic // unnamedResult is fine for test helpers
 	t.Helper()
 
 	// Create temp file for SQLite
@@ -283,15 +283,15 @@ func TestOakEntryCRUD(t *testing.T) {
 	subgenus := "Quercus"
 	section := "Quercus"
 	entry := &models.OakEntry{
-		ScientificName: "alba",
-		Author:         &author,
-		IsHybrid:       false,
-		Subgenus:       &subgenus,
-		Section:        &section,
-		Hybrids:        []string{"bebbiana", "jackiana"},
-		CloselyRelatedTo: []string{"stellata"},
+		ScientificName:      "alba",
+		Author:              &author,
+		IsHybrid:            false,
+		Subgenus:            &subgenus,
+		Section:             &section,
+		Hybrids:             []string{"bebbiana", "jackiana"},
+		CloselyRelatedTo:    []string{"stellata"},
 		SubspeciesVarieties: []string{},
-		Synonyms:       []string{"alba var. repanda"},
+		Synonyms:            []string{"alba var. repanda"},
 		ExternalLinks: []models.ExternalLink{
 			{Name: "Wikipedia", URL: "https://en.wikipedia.org/wiki/Quercus_alba"},
 		},
@@ -364,15 +364,15 @@ func TestOakEntryHybrid(t *testing.T) {
 	parent1 := "alba"
 	parent2 := "macrocarpa"
 	entry := &models.OakEntry{
-		ScientificName: "× bebbiana",
-		IsHybrid:       true,
-		Parent1:        &parent1,
-		Parent2:        &parent2,
-		Hybrids:        []string{},
-		CloselyRelatedTo: []string{},
+		ScientificName:      "× bebbiana",
+		IsHybrid:            true,
+		Parent1:             &parent1,
+		Parent2:             &parent2,
+		Hybrids:             []string{},
+		CloselyRelatedTo:    []string{},
 		SubspeciesVarieties: []string{},
-		Synonyms:       []string{},
-		ExternalLinks:  []models.ExternalLink{},
+		Synonyms:            []string{},
+		ExternalLinks:       []models.ExternalLink{},
 	}
 
 	if err := db.SaveOakEntry(entry); err != nil {
@@ -465,7 +465,7 @@ func TestSpeciesSourceCRUD(t *testing.T) {
 	// First create the oak entry and source
 	if err := db.SaveOakEntry(&models.OakEntry{
 		ScientificName: "alba",
-		Hybrids: []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{},
+		Hybrids:        []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{},
 	}); err != nil {
 		t.Fatalf("SaveOakEntry failed: %v", err)
 	}
@@ -541,7 +541,7 @@ func TestListAllSpeciesSources(t *testing.T) {
 	// Setup
 	if err := db.SaveOakEntry(&models.OakEntry{
 		ScientificName: "alba",
-		Hybrids: []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{},
+		Hybrids:        []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{},
 	}); err != nil {
 		t.Fatalf("SaveOakEntry failed: %v", err)
 	}

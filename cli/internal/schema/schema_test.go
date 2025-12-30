@@ -16,7 +16,7 @@ func testSchemaPath(t *testing.T) string {
 }
 
 // createTempSchema creates a temporary schema file for testing modifications
-func createTempSchema(t *testing.T) (string, func()) {
+func createTempSchema(t *testing.T) (string, func()) { //nolint:gocritic // unnamedResult is fine for test helpers
 	t.Helper()
 
 	content := `{
@@ -39,7 +39,7 @@ func createTempSchema(t *testing.T) (string, func()) {
 	tmpDir := t.TempDir()
 	schemaPath := filepath.Join(tmpDir, "test_schema.json")
 
-	if err := os.WriteFile(schemaPath, []byte(content), 0644); err != nil {
+	if err := os.WriteFile(schemaPath, []byte(content), 0o644); err != nil {
 		t.Fatalf("failed to write temp schema: %v", err)
 	}
 
@@ -78,7 +78,7 @@ func TestFromFileInvalidJSON(t *testing.T) {
 	tmpDir := t.TempDir()
 	schemaPath := filepath.Join(tmpDir, "invalid.json")
 
-	if err := os.WriteFile(schemaPath, []byte("not valid json"), 0644); err != nil {
+	if err := os.WriteFile(schemaPath, []byte("not valid json"), 0o644); err != nil {
 		t.Fatalf("failed to write file: %v", err)
 	}
 

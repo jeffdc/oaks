@@ -83,7 +83,7 @@ func runGenerateBearNotes(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Found %d species in oak_compendium\n", len(allSpecies))
 
 	// Create output directory
-	if err := os.MkdirAll(bearNotesOutputDir, 0755); err != nil {
+	if err := os.MkdirAll(bearNotesOutputDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
@@ -106,7 +106,7 @@ func runGenerateBearNotes(cmd *cobra.Command, args []string) error {
 		filename := sanitizeFilename(species.ScientificName) + ".md"
 		filepath := filepath.Join(bearNotesOutputDir, filename)
 
-		if err := os.WriteFile(filepath, []byte(content), 0644); err != nil {
+		if err := os.WriteFile(filepath, []byte(content), 0o644); err != nil { //nolint:gosec // notes must be readable
 			fmt.Fprintf(os.Stderr, "Error writing %s: %v\n", filename, err)
 			continue
 		}
@@ -155,9 +155,8 @@ func getBearSpeciesNames(db *sql.DB) (map[string]bool, error) {
 func normalizeSpeciesName(name string) string {
 	// Remove "Quercus " prefix
 	name = strings.TrimPrefix(name, "Quercus ")
-	// Normalize hybrid notation
+	// Normalize hybrid notation: replace ASCII x with Unicode ×
 	name = strings.ReplaceAll(name, "x ", "× ")
-	name = strings.ReplaceAll(name, "× ", "× ")
 	// Trim and lowercase for comparison
 	return strings.ToLower(strings.TrimSpace(name))
 }

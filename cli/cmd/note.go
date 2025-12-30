@@ -7,9 +7,10 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/spf13/cobra"
+
 	"github.com/jeff/oaks/cli/internal/editor"
 	"github.com/jeff/oaks/cli/internal/models"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -60,10 +61,10 @@ Examples:
 
 func init() {
 	noteCmd.Flags().Int64Var(&noteSourceID, "source-id", 0, "Source ID to attribute the notes to (required)")
-	noteCmd.MarkFlagRequired("source-id")
+	_ = noteCmd.MarkFlagRequired("source-id")
 
 	noteDeleteCmd.Flags().Int64Var(&noteSourceID, "source-id", 0, "Source ID of the notes to delete (required)")
-	noteDeleteCmd.MarkFlagRequired("source-id")
+	_ = noteDeleteCmd.MarkFlagRequired("source-id")
 	noteDeleteCmd.Flags().BoolVar(&noteDeleteForce, "force", false, "Skip confirmation prompt")
 
 	noteCmd.AddCommand(noteListCmd)
@@ -186,34 +187,34 @@ func runNoteList(cmd *cobra.Command, args []string) error {
 			fmt.Fprintf(w, "Local names:\t%v\n", ss.LocalNames)
 		}
 		if ss.Range != nil && *ss.Range != "" {
-			fmt.Fprintf(w, "Range:\t%s\n", truncate(*ss.Range, 80))
+			fmt.Fprintf(w, "Range:\t%s\n", truncate(*ss.Range))
 		}
 		if ss.GrowthHabit != nil && *ss.GrowthHabit != "" {
-			fmt.Fprintf(w, "Growth habit:\t%s\n", truncate(*ss.GrowthHabit, 80))
+			fmt.Fprintf(w, "Growth habit:\t%s\n", truncate(*ss.GrowthHabit))
 		}
 		if ss.Leaves != nil && *ss.Leaves != "" {
-			fmt.Fprintf(w, "Leaves:\t%s\n", truncate(*ss.Leaves, 80))
+			fmt.Fprintf(w, "Leaves:\t%s\n", truncate(*ss.Leaves))
 		}
 		if ss.Flowers != nil && *ss.Flowers != "" {
-			fmt.Fprintf(w, "Flowers:\t%s\n", truncate(*ss.Flowers, 80))
+			fmt.Fprintf(w, "Flowers:\t%s\n", truncate(*ss.Flowers))
 		}
 		if ss.Fruits != nil && *ss.Fruits != "" {
-			fmt.Fprintf(w, "Fruits:\t%s\n", truncate(*ss.Fruits, 80))
+			fmt.Fprintf(w, "Fruits:\t%s\n", truncate(*ss.Fruits))
 		}
 		if ss.Bark != nil && *ss.Bark != "" {
-			fmt.Fprintf(w, "Bark:\t%s\n", truncate(*ss.Bark, 80))
+			fmt.Fprintf(w, "Bark:\t%s\n", truncate(*ss.Bark))
 		}
 		if ss.Twigs != nil && *ss.Twigs != "" {
-			fmt.Fprintf(w, "Twigs:\t%s\n", truncate(*ss.Twigs, 80))
+			fmt.Fprintf(w, "Twigs:\t%s\n", truncate(*ss.Twigs))
 		}
 		if ss.Buds != nil && *ss.Buds != "" {
-			fmt.Fprintf(w, "Buds:\t%s\n", truncate(*ss.Buds, 80))
+			fmt.Fprintf(w, "Buds:\t%s\n", truncate(*ss.Buds))
 		}
 		if ss.HardinessHabitat != nil && *ss.HardinessHabitat != "" {
-			fmt.Fprintf(w, "Hardiness/habitat:\t%s\n", truncate(*ss.HardinessHabitat, 80))
+			fmt.Fprintf(w, "Hardiness/habitat:\t%s\n", truncate(*ss.HardinessHabitat))
 		}
 		if ss.Miscellaneous != nil && *ss.Miscellaneous != "" {
-			fmt.Fprintf(w, "Miscellaneous:\t%s\n", truncate(*ss.Miscellaneous, 80))
+			fmt.Fprintf(w, "Miscellaneous:\t%s\n", truncate(*ss.Miscellaneous))
 		}
 		if ss.URL != nil && *ss.URL != "" {
 			fmt.Fprintf(w, "URL:\t%s\n", *ss.URL)
@@ -226,7 +227,8 @@ func runNoteList(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func truncate(s string, maxLen int) string {
+func truncate(s string) string {
+	const maxLen = 80
 	if len(s) <= maxLen {
 		return s
 	}
@@ -279,7 +281,7 @@ func runNoteDelete(cmd *cobra.Command, args []string) error {
 		}
 		response = strings.TrimSpace(strings.ToLower(response))
 		if response != "y" && response != "yes" {
-			fmt.Println("Cancelled")
+			fmt.Println("Canceled")
 			return nil
 		}
 	}

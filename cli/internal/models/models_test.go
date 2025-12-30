@@ -127,14 +127,14 @@ func TestOakEntryJSON(t *testing.T) {
 	author := "L. 1753"
 	subgenus := "Quercus"
 	entry := &OakEntry{
-		ScientificName: "alba",
-		Author:         &author,
-		IsHybrid:       false,
-		Subgenus:       &subgenus,
-		Hybrids:        []string{"bebbiana"},
-		CloselyRelatedTo: []string{},
+		ScientificName:      "alba",
+		Author:              &author,
+		IsHybrid:            false,
+		Subgenus:            &subgenus,
+		Hybrids:             []string{"bebbiana"},
+		CloselyRelatedTo:    []string{},
 		SubspeciesVarieties: []string{},
-		Synonyms:       []string{},
+		Synonyms:            []string{},
 		ExternalLinks: []ExternalLink{
 			{Name: "Wikipedia", URL: "https://en.wikipedia.org/wiki/Quercus_alba", Logo: "wikipedia"},
 		},

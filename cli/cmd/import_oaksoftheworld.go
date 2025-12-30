@@ -6,8 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jeff/oaks/cli/internal/models"
 	"github.com/spf13/cobra"
+
+	"github.com/jeff/oaks/cli/internal/models"
 )
 
 // ScraperSynonym handles both string and object formats for synonyms
@@ -99,7 +100,7 @@ Examples:
 
 func init() {
 	importOaksCmd.Flags().Int64Var(&oaksSourceID, "source-id", 0, "Source ID to attribute the data to (required)")
-	importOaksCmd.MarkFlagRequired("source-id")
+	_ = importOaksCmd.MarkFlagRequired("source-id")
 	rootCmd.AddCommand(importOaksCmd)
 }
 
@@ -140,9 +141,10 @@ func runImportOaks(cmd *cobra.Command, args []string) error {
 	sourcesImported := 0
 	errors := 0
 
-	for _, sp := range scraperData.Species {
+	for i := range scraperData.Species {
+		sp := &scraperData.Species[i]
 		// Convert to OakEntry (species-intrinsic data)
-		entry := convertToOakEntry(&sp)
+		entry := convertToOakEntry(sp)
 
 		// Check if entry exists
 		existing, err := database.GetOakEntry(entry.ScientificName)
@@ -171,7 +173,7 @@ func runImportOaks(cmd *cobra.Command, args []string) error {
 		}
 
 		// Convert to SpeciesSource (source-attributed data)
-		speciesSource := convertToSpeciesSource(&sp, oaksSourceID)
+		speciesSource := convertToSpeciesSource(sp, oaksSourceID)
 		if err := database.SaveSpeciesSource(speciesSource); err != nil {
 			fmt.Fprintf(os.Stderr, "Error saving species source for %s: %v\n", entry.ScientificName, err)
 			errors++
@@ -311,46 +313,46 @@ func convertToSpeciesSource(sp *ScraperSpecies, srcID int64) *models.SpeciesSour
 	return ss
 }
 
-func mergeOaksEntry(existing, new *models.OakEntry) {
+func mergeOaksEntry(existing, incoming *models.OakEntry) {
 	// Update fields that were empty
-	if existing.Author == nil && new.Author != nil {
-		existing.Author = new.Author
+	if existing.Author == nil && incoming.Author != nil {
+		existing.Author = incoming.Author
 	}
-	if existing.ConservationStatus == nil && new.ConservationStatus != nil {
-		existing.ConservationStatus = new.ConservationStatus
+	if existing.ConservationStatus == nil && incoming.ConservationStatus != nil {
+		existing.ConservationStatus = incoming.ConservationStatus
 	}
-	if existing.Subgenus == nil && new.Subgenus != nil {
-		existing.Subgenus = new.Subgenus
+	if existing.Subgenus == nil && incoming.Subgenus != nil {
+		existing.Subgenus = incoming.Subgenus
 	}
-	if existing.Section == nil && new.Section != nil {
-		existing.Section = new.Section
+	if existing.Section == nil && incoming.Section != nil {
+		existing.Section = incoming.Section
 	}
-	if existing.Subsection == nil && new.Subsection != nil {
-		existing.Subsection = new.Subsection
+	if existing.Subsection == nil && incoming.Subsection != nil {
+		existing.Subsection = incoming.Subsection
 	}
-	if existing.Complex == nil && new.Complex != nil {
-		existing.Complex = new.Complex
+	if existing.Complex == nil && incoming.Complex != nil {
+		existing.Complex = incoming.Complex
 	}
-	if existing.Parent1 == nil && new.Parent1 != nil {
-		existing.Parent1 = new.Parent1
+	if existing.Parent1 == nil && incoming.Parent1 != nil {
+		existing.Parent1 = incoming.Parent1
 	}
-	if existing.Parent2 == nil && new.Parent2 != nil {
-		existing.Parent2 = new.Parent2
+	if existing.Parent2 == nil && incoming.Parent2 != nil {
+		existing.Parent2 = incoming.Parent2
 	}
 
-	// Merge arrays (add new items not already present)
-	existing.Synonyms = mergeStringSlice(existing.Synonyms, new.Synonyms)
-	existing.Hybrids = mergeStringSlice(existing.Hybrids, new.Hybrids)
-	existing.CloselyRelatedTo = mergeStringSlice(existing.CloselyRelatedTo, new.CloselyRelatedTo)
-	existing.SubspeciesVarieties = mergeStringSlice(existing.SubspeciesVarieties, new.SubspeciesVarieties)
+	// Merge arrays (add incoming items not already present)
+	existing.Synonyms = mergeStringSlice(existing.Synonyms, incoming.Synonyms)
+	existing.Hybrids = mergeStringSlice(existing.Hybrids, incoming.Hybrids)
+	existing.CloselyRelatedTo = mergeStringSlice(existing.CloselyRelatedTo, incoming.CloselyRelatedTo)
+	existing.SubspeciesVarieties = mergeStringSlice(existing.SubspeciesVarieties, incoming.SubspeciesVarieties)
 }
 
-func mergeStringSlice(existing, new []string) []string {
+func mergeStringSlice(existing, incoming []string) []string {
 	seen := make(map[string]bool)
 	for _, s := range existing {
 		seen[s] = true
 	}
-	for _, s := range new {
+	for _, s := range incoming {
 		if !seen[s] {
 			existing = append(existing, s)
 			seen[s] = true

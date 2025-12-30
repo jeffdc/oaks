@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spf13/cobra"
+
 	"github.com/jeff/oaks/cli/internal/db"
 	"github.com/jeff/oaks/cli/internal/schema"
-	"github.com/spf13/cobra"
 )
 
 var (

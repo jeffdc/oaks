@@ -7,7 +7,8 @@ import (
 	"strings"
 
 	"github.com/jeff/oaks/cli/internal/models"
-	_ "github.com/mattn/go-sqlite3"
+
+	_ "github.com/mattn/go-sqlite3" // SQLite driver
 )
 
 // escapeLike escapes special characters in SQL LIKE patterns.
@@ -144,7 +145,7 @@ func (db *Database) initializeSchema() error {
 		`ALTER TABLE oak_entries ADD COLUMN external_links TEXT`,
 	}
 	for _, stmt := range migrations {
-		db.conn.Exec(stmt) // Ignore error - column may already exist
+		_, _ = db.conn.Exec(stmt) // Ignore error - column may already exist
 	}
 
 	return nil
