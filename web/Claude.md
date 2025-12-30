@@ -215,8 +215,11 @@ Shared utility classes for common patterns used across multiple components:
 
 ```bash
 npm install
-npm run dev        # Dev server at http://localhost:5173
+npm run dev          # Dev server, uses production API
+npm run dev:local    # Dev server, uses local API at localhost:8080
 ```
+
+**Tip**: Use `make dev` from the project root to start both the API server and web dev server together.
 
 ### Building
 

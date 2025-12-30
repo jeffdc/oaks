@@ -14,12 +14,23 @@ A comprehensive database and query tool for Quercus (oak) species and their hybr
 
 ## Quick Start
 
-### Browse Species (Web App)
+### Full Local Development (Web + API)
+
+```bash
+# Install web dependencies first
+cd web && npm install && cd ..
+
+# Start both API server (:8080) and web dev server (:5173)
+make dev
+```
+
+### Browse Species (Web App Only)
 
 ```bash
 cd web
 npm install
-npm run dev
+npm run dev          # Uses production API
+npm run dev:local    # Uses local API at localhost:8080
 # Open http://localhost:5173
 ```
 

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
+    "dev:local": "VITE_API_URL=http://localhost:8080 vite dev",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",

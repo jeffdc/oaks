@@ -37,6 +37,7 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 
 ```
 oaks/
+├── Makefile                  # Top-level dev commands (make dev, make build, etc.)
 ├── scrapers/oaksoftheworld/  # Python web scraper
 │   ├── scraper.py            # Main scraper orchestration
 │   ├── name_parser.py        # Parses species list (liste.htm)
@@ -67,6 +68,27 @@ oaks/
 ```
 
 ## Common Development Tasks
+
+### Full Stack Development (Recommended)
+
+The top-level Makefile coordinates all components:
+
+```bash
+# Start both API server (:8080) and web dev server (:5173)
+# Web app automatically connects to local API
+# Ctrl+C kills both
+make dev
+
+# Or run individually
+make dev-api    # API server only
+make dev-web    # Web dev server (connects to local API)
+
+# Other useful targets
+make build      # Build all components
+make test       # Run all tests
+make clean      # Clean all build artifacts
+make help       # Show all targets
+```
 
 ### Python Scraper Workflow
 
@@ -102,12 +124,15 @@ cd web
 npm install
 
 # Development server (http://localhost:5173)
-npm run dev
+npm run dev          # Uses production API (api.oakcompendium.com)
+npm run dev:local    # Uses local API (localhost:8080)
 
 # Production build
 npm run build      # Output: dist/
 npm run preview    # Preview production build
 ```
+
+**Note**: Prefer `make dev` from the project root to run both API and web together. The `dev:local` script is useful if you're only working on the web app and the API is already running.
 
 **Important**: The data file `web/static/quercus_data.json` is committed to the repo and served directly. The app loads this JSON and populates IndexedDB for offline queries. GitHub Actions deploys automatically on push to main. See `web/CLAUDE.md` for detailed architecture.
 
