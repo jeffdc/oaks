@@ -92,6 +92,12 @@ func (s *Server) setupRoutes() {
 		// Health endpoint also at /api/v1/health per spec
 		r.Get("/health", s.handleHealth)
 
+		// Auth verification endpoint (requires auth, read-only)
+		r.Group(func(r chi.Router) {
+			r.Use(s.ForceAuth)
+			r.Get("/auth/verify", s.handleAuthVerify)
+		})
+
 		// Species endpoints (read - public)
 		r.Get("/species", s.handleListSpecies)
 		r.Get("/species/search", s.handleSearchSpecies) // Must be before {name} route

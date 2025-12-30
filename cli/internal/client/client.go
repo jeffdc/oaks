@@ -193,6 +193,33 @@ func (c *Client) Health() (*HealthResponse, error) {
 	return &health, nil
 }
 
+// VerifyAuth verifies the API key is valid for write operations.
+// Call this before attempting write operations to fail fast on auth issues.
+func (c *Client) VerifyAuth() error {
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/api/v1/auth/verify", http.NoBody)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Must include auth header
+	if c.apiKey != "" {
+		req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("connection error: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return c.parseError(resp)
+	}
+
+	return nil
+}
+
 // doRequest performs an HTTP request with authentication and error handling.
 func (c *Client) doRequest(method, path string, body interface{}) (*http.Response, error) {
 	// Check compatibility on first request

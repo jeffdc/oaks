@@ -18,6 +18,12 @@ type ReadyResponse struct {
 	Error    string `json:"error,omitempty"`
 }
 
+// AuthVerifyResponse represents the response for auth verification.
+type AuthVerifyResponse struct {
+	Status  string `json:"status"`
+	Profile string `json:"profile,omitempty"`
+}
+
 // handleHealth handles liveness check - immediate 200 if server is running.
 // GET /health or GET /api/v1/health
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
@@ -60,5 +66,16 @@ func (s *Server) handleHealthReady(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(ReadyResponse{
 		Status:   "ready",
 		Database: "connected",
+	})
+}
+
+// handleAuthVerify verifies the API key is valid.
+// GET /api/v1/auth/verify (requires authentication)
+func (s *Server) handleAuthVerify(w http.ResponseWriter, r *http.Request) {
+	// If we get here, the ForceAuth middleware already validated the key
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(AuthVerifyResponse{
+		Status: "authenticated",
 	})
 }

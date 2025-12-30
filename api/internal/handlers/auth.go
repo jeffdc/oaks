@@ -49,6 +49,25 @@ func (s *Server) RequireAuth(next http.Handler) http.Handler {
 	})
 }
 
+// ForceAuth returns middleware that requires authentication for ALL methods.
+// Use this for endpoints that need auth but are read-only (e.g., auth verify).
+func (s *Server) ForceAuth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token := extractBearerToken(r)
+		if token == "" {
+			RespondUnauthorized(w, "Missing authorization header")
+			return
+		}
+
+		if !ValidateAPIKey(token, s.apiKey) {
+			RespondUnauthorized(w, "Invalid API key")
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 // extractBearerToken extracts the token from the Authorization header.
 // Expected format: "Bearer <token>"
 func extractBearerToken(r *http.Request) string {

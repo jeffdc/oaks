@@ -77,6 +77,11 @@ func runEditRemote(name string) error {
 		return err
 	}
 
+	// Verify auth before doing any work
+	if err := apiClient.VerifyAuth(); err != nil {
+		return fmt.Errorf("authentication failed: %w", err)
+	}
+
 	validator, err := getSchema()
 	if err != nil {
 		return err

@@ -89,6 +89,11 @@ func runDeleteRemote(name string) error {
 		return err
 	}
 
+	// Verify auth before doing any work
+	if err := apiClient.VerifyAuth(); err != nil {
+		return fmt.Errorf("authentication failed: %w", err)
+	}
+
 	// Verify entry exists on remote
 	_, err = apiClient.GetSpecies(name)
 	if err != nil {
