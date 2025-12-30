@@ -2,9 +2,14 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/jeff/oaks/cli/internal/config"
 )
@@ -477,5 +482,378 @@ func TestWithSkipVersionCheck(t *testing.T) {
 
 	if !c.skipVersion {
 		t.Error("skipVersion was not set to true")
+	}
+}
+
+func TestWithMaxRetries(t *testing.T) {
+	profile := &config.ResolvedProfile{
+		Name:   "test",
+		URL:    "https://example.com",
+		Source: config.SourceFlag,
+	}
+
+	c, err := New(profile, WithMaxRetries(5))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if c.maxRetries != 5 {
+		t.Errorf("maxRetries = %d, want 5", c.maxRetries)
+	}
+}
+
+func TestWithRetryDelay(t *testing.T) {
+	profile := &config.ResolvedProfile{
+		Name:   "test",
+		URL:    "https://example.com",
+		Source: config.SourceFlag,
+	}
+
+	c, err := New(profile, WithRetryDelay(2*time.Second, 20*time.Second))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if c.retryBaseDelay != 2*time.Second {
+		t.Errorf("retryBaseDelay = %v, want 2s", c.retryBaseDelay)
+	}
+	if c.retryMaxDelay != 20*time.Second {
+		t.Errorf("retryMaxDelay = %v, want 20s", c.retryMaxDelay)
+	}
+}
+
+func TestWithTimeout(t *testing.T) {
+	profile := &config.ResolvedProfile{
+		Name:   "test",
+		URL:    "https://example.com",
+		Source: config.SourceFlag,
+	}
+
+	c, err := New(profile, WithTimeout(60*time.Second))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if c.httpClient.Timeout != 60*time.Second {
+		t.Errorf("Timeout = %v, want 60s", c.httpClient.Timeout)
+	}
+}
+
+func TestCalculateBackoff(t *testing.T) {
+	profile := &config.ResolvedProfile{
+		Name:   "test",
+		URL:    "https://example.com",
+		Source: config.SourceFlag,
+	}
+	c, _ := New(profile, WithRetryDelay(1*time.Second, 10*time.Second))
+
+	tests := []struct {
+		attempt int
+		want    time.Duration
+	}{
+		{1, 1 * time.Second},  // base * 2^0 = 1s
+		{2, 2 * time.Second},  // base * 2^1 = 2s
+		{3, 4 * time.Second},  // base * 2^2 = 4s
+		{4, 8 * time.Second},  // base * 2^3 = 8s
+		{5, 10 * time.Second}, // capped at max
+		{6, 10 * time.Second}, // capped at max
+	}
+
+	for _, tt := range tests {
+		got := c.calculateBackoff(tt.attempt)
+		if got != tt.want {
+			t.Errorf("calculateBackoff(%d) = %v, want %v", tt.attempt, got, tt.want)
+		}
+	}
+}
+
+func TestIsRetryableError(t *testing.T) {
+	profile := &config.ResolvedProfile{
+		Name:   "test",
+		URL:    "https://example.com",
+		Source: config.SourceFlag,
+	}
+	c, _ := New(profile)
+
+	tests := []struct {
+		err  error
+		want bool
+	}{
+		{nil, false},
+		{errors.New("connection refused"), true},
+		{errors.New("dial tcp: connection reset"), true},
+		{errors.New("no such host"), true},
+		{errors.New("network is unreachable"), true},
+		{errors.New("i/o timeout"), true},
+		{errors.New("unexpected EOF"), true},
+		{errors.New("permission denied"), false},
+		{errors.New("not found"), false},
+	}
+
+	for _, tt := range tests {
+		got := c.isRetryableError(tt.err)
+		if got != tt.want {
+			t.Errorf("isRetryableError(%v) = %v, want %v", tt.err, got, tt.want)
+		}
+	}
+}
+
+func TestIsRetryableStatusCode(t *testing.T) {
+	profile := &config.ResolvedProfile{
+		Name:   "test",
+		URL:    "https://example.com",
+		Source: config.SourceFlag,
+	}
+	c, _ := New(profile)
+
+	tests := []struct {
+		code int
+		want bool
+	}{
+		{200, false},
+		{201, false},
+		{400, false},
+		{401, false},
+		{403, false},
+		{404, false},
+		{429, true}, // Rate limited
+		{500, true}, // Internal Server Error
+		{502, true}, // Bad Gateway
+		{503, true}, // Service Unavailable
+		{504, true}, // Gateway Timeout
+	}
+
+	for _, tt := range tests {
+		got := c.isRetryableStatusCode(tt.code)
+		if got != tt.want {
+			t.Errorf("isRetryableStatusCode(%d) = %v, want %v", tt.code, got, tt.want)
+		}
+	}
+}
+
+func TestRetryOnServerError(t *testing.T) {
+	attemptCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		attemptCount++
+		if attemptCount < 3 {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	}))
+	defer server.Close()
+
+	c := newTestClient(t, server)
+	// Use very short delays for testing
+	c.maxRetries = 3
+	c.retryBaseDelay = 1 * time.Millisecond
+	c.retryMaxDelay = 10 * time.Millisecond
+
+	resp, err := c.doRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Fatalf("doRequest error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if attemptCount != 3 {
+		t.Errorf("attemptCount = %d, want 3", attemptCount)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("StatusCode = %d, want 200", resp.StatusCode)
+	}
+}
+
+func TestRetryExhausted(t *testing.T) {
+	attemptCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		attemptCount++
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	defer server.Close()
+
+	c := newTestClient(t, server)
+	c.maxRetries = 2
+	c.retryBaseDelay = 1 * time.Millisecond
+	c.retryMaxDelay = 10 * time.Millisecond
+
+	resp, err := c.doRequest(http.MethodGet, "/test", nil)
+	if err == nil {
+		t.Error("expected error when retries exhausted")
+	}
+	// Close body if response was returned despite error
+	if resp != nil {
+		resp.Body.Close()
+	}
+
+	// Should have made maxRetries + 1 attempts
+	if attemptCount != 3 {
+		t.Errorf("attemptCount = %d, want 3", attemptCount)
+	}
+}
+
+func TestNoRetryOnClientError(t *testing.T) {
+	attemptCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		attemptCount++
+		w.WriteHeader(http.StatusBadRequest)
+	}))
+	defer server.Close()
+
+	c := newTestClient(t, server)
+	c.maxRetries = 3
+	c.retryBaseDelay = 1 * time.Millisecond
+
+	resp, err := c.doRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Fatalf("doRequest error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Should NOT retry on 4xx errors (except 429)
+	if attemptCount != 1 {
+		t.Errorf("attemptCount = %d, want 1 (no retries for 4xx)", attemptCount)
+	}
+}
+
+func TestRetryOnRateLimit(t *testing.T) {
+	attemptCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		attemptCount++
+		if attemptCount < 2 {
+			w.WriteHeader(http.StatusTooManyRequests)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	}))
+	defer server.Close()
+
+	c := newTestClient(t, server)
+	c.maxRetries = 3
+	c.retryBaseDelay = 1 * time.Millisecond
+	c.retryMaxDelay = 10 * time.Millisecond
+
+	resp, err := c.doRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Fatalf("doRequest error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if attemptCount != 2 {
+		t.Errorf("attemptCount = %d, want 2", attemptCount)
+	}
+}
+
+func TestConnectionError(t *testing.T) {
+	connErr := &ConnectionError{
+		URL:     "https://example.com",
+		Profile: "prod",
+		Err:     errors.New("connection refused"),
+	}
+
+	errStr := connErr.Error()
+	if !strings.Contains(errStr, "https://example.com") {
+		t.Errorf("error message missing URL: %s", errStr)
+	}
+	if !strings.Contains(errStr, "prod") {
+		t.Errorf("error message missing profile: %s", errStr)
+	}
+	if !strings.Contains(errStr, "connection refused") {
+		t.Errorf("error message missing underlying error: %s", errStr)
+	}
+
+	// Test Unwrap
+	if connErr.Unwrap().Error() != "connection refused" {
+		t.Error("Unwrap() should return underlying error")
+	}
+}
+
+func TestIsConnectionError(t *testing.T) {
+	connErr := &ConnectionError{
+		URL:     "https://example.com",
+		Profile: "prod",
+		Err:     errors.New("connection refused"),
+	}
+
+	if !IsConnectionError(connErr) {
+		t.Error("IsConnectionError should return true for ConnectionError")
+	}
+
+	wrappedErr := fmt.Errorf("wrapped: %w", connErr)
+	if !IsConnectionError(wrappedErr) {
+		t.Error("IsConnectionError should return true for wrapped ConnectionError")
+	}
+
+	if IsConnectionError(errors.New("other error")) {
+		t.Error("IsConnectionError should return false for non-ConnectionError")
+	}
+
+	if IsConnectionError(nil) {
+		t.Error("IsConnectionError should return false for nil")
+	}
+}
+
+func TestDefaultRetryConfiguration(t *testing.T) {
+	profile := &config.ResolvedProfile{
+		Name:   "test",
+		URL:    "https://example.com",
+		Source: config.SourceFlag,
+	}
+
+	c, err := New(profile)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if c.maxRetries != DefaultMaxRetries {
+		t.Errorf("maxRetries = %d, want %d", c.maxRetries, DefaultMaxRetries)
+	}
+	if c.retryBaseDelay != DefaultRetryBaseDelay {
+		t.Errorf("retryBaseDelay = %v, want %v", c.retryBaseDelay, DefaultRetryBaseDelay)
+	}
+	if c.retryMaxDelay != DefaultRetryMaxDelay {
+		t.Errorf("retryMaxDelay = %v, want %v", c.retryMaxDelay, DefaultRetryMaxDelay)
+	}
+}
+
+func TestRetryWithRequestBody(t *testing.T) {
+	attemptCount := 0
+	var receivedBodies []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		attemptCount++
+		body, _ := io.ReadAll(r.Body)
+		receivedBodies = append(receivedBodies, string(body))
+
+		if attemptCount < 2 {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	}))
+	defer server.Close()
+
+	c := newTestClient(t, server)
+	c.maxRetries = 3
+	c.retryBaseDelay = 1 * time.Millisecond
+	c.retryMaxDelay = 10 * time.Millisecond
+
+	body := map[string]string{"key": "value"}
+	resp, err := c.doRequest(http.MethodPost, "/test", body)
+	if err != nil {
+		t.Fatalf("doRequest error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if attemptCount != 2 {
+		t.Errorf("attemptCount = %d, want 2", attemptCount)
+	}
+
+	// Verify body was sent correctly on both attempts
+	for i, receivedBody := range receivedBodies {
+		if !strings.Contains(receivedBody, "value") {
+			t.Errorf("attempt %d: body missing expected content: %s", i+1, receivedBody)
+		}
 	}
 }
