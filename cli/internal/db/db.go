@@ -47,6 +47,11 @@ func (db *Database) Close() error {
 	return db.conn.Close()
 }
 
+// Ping verifies the database connection is alive
+func (db *Database) Ping() error {
+	return db.conn.Ping()
+}
+
 func (db *Database) initializeSchema() error {
 	statements := []string{
 		// Taxa reference table for validation

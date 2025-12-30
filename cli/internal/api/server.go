@@ -131,25 +131,6 @@ func (s *Server) Router() chi.Router {
 
 // Placeholder handlers - will be implemented in endpoint tasks
 
-func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte(`{"status":"ok"}`))
-}
-
-func (s *Server) handleHealthReady(w http.ResponseWriter, r *http.Request) {
-	// Check database connectivity
-	if s.db == nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusServiceUnavailable)
-		_, _ = w.Write([]byte(`{"status":"not ready","reason":"database not connected"}`))
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte(`{"status":"ready"}`))
-}
-
 func (s *Server) handleListSpecies(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "not implemented", http.StatusNotImplemented)
 }
