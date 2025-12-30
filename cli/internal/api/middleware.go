@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -242,6 +243,42 @@ func timeoutMiddleware(timeout time.Duration) func(next http.Handler) http.Handl
 	}
 }
 
+// maxBodySize is the maximum allowed request body size (1MB)
+const maxBodySize = 1 << 20 // 1MB
+
+// bodySizeLimitMiddleware limits the size of request bodies to prevent memory exhaustion
+func bodySizeLimitMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Only limit body size for methods that may have a body
+		if r.Method == "POST" || r.Method == "PUT" || r.Method == "PATCH" {
+			r.Body = http.MaxBytesReader(w, r.Body, maxBodySize)
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// securityHeadersMiddleware adds security headers to all responses
+func securityHeadersMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Prevent MIME type sniffing
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+
+		// Prevent clickjacking
+		w.Header().Set("X-Frame-Options", "DENY")
+
+		// Basic CSP for API - only allow same-origin
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
+
+		// Prevent XSS in older browsers
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+
+		// Disable caching for API responses (security-sensitive data)
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, private")
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 // corsMiddleware creates CORS middleware with the given configuration
 func corsMiddleware(config CORSConfig) func(next http.Handler) http.Handler {
 	return cors.Handler(cors.Options{
@@ -283,11 +320,14 @@ func isBackupEndpoint(path string) bool {
 
 // conditionalRateLimitMiddleware applies different rate limits based on request type
 func conditionalRateLimitMiddleware(config RateLimitConfig) func(next http.Handler) http.Handler {
-	// Create rate limit handlers for each type
-	limitHandler := func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusTooManyRequests)
-		_, _ = w.Write([]byte(`{"error":"rate limit exceeded"}`))
+	// Create rate limit handlers for each type with Retry-After header
+	makeLimitHandler := func(window time.Duration) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Retry-After", fmt.Sprintf("%d", int(window.Seconds())))
+			w.WriteHeader(http.StatusTooManyRequests)
+			_, _ = w.Write([]byte(`{"error":"rate limit exceeded"}`))
+		}
 	}
 
 	readLimitMiddleware := httprate.Limit(
@@ -296,7 +336,7 @@ func conditionalRateLimitMiddleware(config RateLimitConfig) func(next http.Handl
 		httprate.WithKeyFuncs(func(r *http.Request) (string, error) {
 			return GetClientIP(r.Context()), nil
 		}),
-		httprate.WithLimitHandler(limitHandler),
+		httprate.WithLimitHandler(makeLimitHandler(config.Window)),
 	)
 
 	writeLimitMiddleware := httprate.Limit(
@@ -305,7 +345,7 @@ func conditionalRateLimitMiddleware(config RateLimitConfig) func(next http.Handl
 		httprate.WithKeyFuncs(func(r *http.Request) (string, error) {
 			return GetClientIP(r.Context()), nil
 		}),
-		httprate.WithLimitHandler(limitHandler),
+		httprate.WithLimitHandler(makeLimitHandler(config.Window)),
 	)
 
 	backupLimitMiddleware := httprate.Limit(
@@ -314,7 +354,7 @@ func conditionalRateLimitMiddleware(config RateLimitConfig) func(next http.Handl
 		httprate.WithKeyFuncs(func(r *http.Request) (string, error) {
 			return GetClientIP(r.Context()), nil
 		}),
-		httprate.WithLimitHandler(limitHandler),
+		httprate.WithLimitHandler(makeLimitHandler(config.BackupWindow)),
 	)
 
 	return func(next http.Handler) http.Handler {
@@ -347,25 +387,31 @@ func conditionalRateLimitMiddleware(config RateLimitConfig) func(next http.Handl
 func (s *Server) SetupMiddleware(config MiddlewareConfig) {
 	r := s.router
 
-	// 1. RequestID - generate unique ID for tracing
+	// 1. Security headers - add to all responses
+	r.Use(securityHeadersMiddleware)
+
+	// 2. Body size limit - prevent memory exhaustion
+	r.Use(bodySizeLimitMiddleware)
+
+	// 3. RequestID - generate unique ID for tracing
 	r.Use(middleware.RequestID)
 	r.Use(requestIDMiddleware)
 
-	// 2. RealIP - extract client IP from headers
+	// 4. RealIP - extract client IP from headers
 	r.Use(realIPMiddleware)
 
-	// 3. Logger - structured request/response logging
+	// 5. Logger - structured request/response logging
 	r.Use(loggerMiddleware(config.Logger))
 
-	// 4. Recoverer - panic recovery
+	// 6. Recoverer - panic recovery
 	r.Use(recoverMiddleware(config.Logger))
 
-	// 5. Timeout - request timeout
+	// 7. Timeout - request timeout
 	r.Use(timeoutMiddleware(config.Timeout))
 
-	// 6. RateLimit - per-IP rate limiting (health endpoints exempt)
+	// 8. RateLimit - per-IP rate limiting (health endpoints exempt)
 	r.Use(conditionalRateLimitMiddleware(config.RateLimit))
 
-	// 7. CORS - cross-origin support
+	// 9. CORS - cross-origin support
 	r.Use(corsMiddleware(config.CORS))
 }
