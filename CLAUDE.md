@@ -49,6 +49,7 @@ oaks/
 │   ├── cmd/                  # Cobra command implementations
 │   ├── internal/             # Internal packages (db, models, schema, editor)
 │   ├── go.mod                # cobra, go-sqlite3, yaml.v3, jsonschema
+│   ├── Makefile              # Build, lint, test targets
 │   └── docs/oak_cli.md       # CLI specification (historical)
 ├── ios/                      # iOS app (SwiftUI, on ios-app branch)
 │   └── OakCompendium/        # Xcode project
@@ -109,7 +110,7 @@ npm run preview    # Preview production build
 cd cli
 
 # Build
-go build -o oak .
+make build       # or: go build -o oak .
 
 # Run directly (ALWAYS from cli/ directory)
 ./oak <subcommand>
@@ -120,6 +121,15 @@ go run . <subcommand>
 # Install to $GOPATH/bin
 go install .
 ```
+
+**Makefile Targets** (run from `cli/` directory):
+- `make build` - Build the oak binary
+- `make lint` - Run golangci-lint
+- `make test` - Run tests
+- `make test-coverage` - Run tests with HTML coverage report
+- `make check` - Run lint + test
+- `make clean` - Remove build artifacts
+- `make setup` - Install dev tools (golangci-lint, goimports)
 
 **IMPORTANT: Database Location**
 - The authoritative database is `cli/oak_compendium.db`
