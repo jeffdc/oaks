@@ -62,6 +62,37 @@ func DefaultConfigPath() string {
 	return filepath.Join(home, ".oak", "config.yaml")
 }
 
+// DefaultAPIKeyPath returns the default API key file path.
+func DefaultAPIKeyPath() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+	return filepath.Join(home, ".oak", "api_key")
+}
+
+// readAPIKeyFile reads the API key from ~/.oak/api_key if it exists.
+func readAPIKeyFile() string {
+	path := DefaultAPIKeyPath()
+	if path == "" {
+		return ""
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	// Trim whitespace/newlines from key
+	return string(data[:len(data)-countTrailingNewlines(data)])
+}
+
+func countTrailingNewlines(data []byte) int {
+	count := 0
+	for i := len(data) - 1; i >= 0 && (data[i] == '\n' || data[i] == '\r'); i-- {
+		count++
+	}
+	return count
+}
+
 // Load reads the configuration from the specified path.
 // Returns an empty config (not an error) if the file doesn't exist.
 func Load(path string) (*Config, error) {
@@ -113,10 +144,14 @@ func Resolve(cfg *Config, profileFlag string) (*ResolvedProfile, error) {
 		if !ok {
 			return nil, fmt.Errorf("profile %q not found in config", profileFlag)
 		}
+		key := profile.Key
+		if key == "" {
+			key = readAPIKeyFile() // Fallback to ~/.oak/api_key
+		}
 		return &ResolvedProfile{
 			Name:   profileFlag,
 			URL:    profile.URL,
-			Key:    profile.Key,
+			Key:    key,
 			Source: SourceFlag,
 		}, nil
 	}
@@ -127,10 +162,14 @@ func Resolve(cfg *Config, profileFlag string) (*ResolvedProfile, error) {
 		if !ok {
 			return nil, fmt.Errorf("profile %q (from %s) not found in config", envProfile, EnvProfile)
 		}
+		key := profile.Key
+		if key == "" {
+			key = readAPIKeyFile() // Fallback to ~/.oak/api_key
+		}
 		return &ResolvedProfile{
 			Name:   envProfile,
 			URL:    profile.URL,
-			Key:    profile.Key,
+			Key:    key,
 			Source: SourceEnv,
 		}, nil
 	}
@@ -141,10 +180,14 @@ func Resolve(cfg *Config, profileFlag string) (*ResolvedProfile, error) {
 		if !ok {
 			return nil, fmt.Errorf("default profile %q not found in config", cfg.DefaultProfile)
 		}
+		key := profile.Key
+		if key == "" {
+			key = readAPIKeyFile() // Fallback to ~/.oak/api_key
+		}
 		return &ResolvedProfile{
 			Name:   cfg.DefaultProfile,
 			URL:    profile.URL,
-			Key:    profile.Key,
+			Key:    key,
 			Source: SourceConfig,
 		}, nil
 	}
