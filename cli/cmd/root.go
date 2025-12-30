@@ -11,6 +11,7 @@ import (
 	"github.com/jeff/oaks/cli/internal/client"
 	"github.com/jeff/oaks/cli/internal/config"
 	"github.com/jeff/oaks/cli/internal/db"
+	"github.com/jeff/oaks/cli/internal/embedded"
 	"github.com/jeff/oaks/cli/internal/schema"
 )
 
@@ -25,6 +26,9 @@ var (
 	// Resolved configuration (loaded on init)
 	cfg             *config.Config
 	resolvedProfile *config.ResolvedProfile
+
+	// Embedded server for --local mode
+	embeddedServer *embedded.Server
 )
 
 var rootCmd = &cobra.Command{
@@ -43,7 +47,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&dbPath, "database", "d", "oak_compendium.db", "Path to the database file")
 	rootCmd.PersistentFlags().StringVarP(&schemaPath, "schema", "s", "schema/oak_schema.json", "Path to the schema file")
 	rootCmd.PersistentFlags().StringVarP(&profileFlag, "profile", "p", "", "API profile to use (from ~/.oak/config.yaml)")
-	rootCmd.PersistentFlags().BoolVar(&forceLocal, "local", false, "Force local database mode (ignore API profile)")
+	rootCmd.PersistentFlags().BoolVar(&forceLocal, "local", false, "Use embedded API server for local database operations")
 	rootCmd.PersistentFlags().BoolVar(&forceRemote, "remote", false, "Force remote API mode (requires API profile)")
 	rootCmd.PersistentFlags().BoolVar(&skipVersionCheck, "skip-version-check", false, "Skip API version compatibility check")
 
@@ -60,10 +64,21 @@ func init() {
 			return fmt.Errorf("failed to load config: %w", err)
 		}
 
-		// If --local is set, use local mode regardless of profile
+		// If --local is set, start embedded API server
 		if forceLocal {
+			embeddedServer, err = embedded.Start(embedded.Config{
+				DBPath: dbPath,
+				Quiet:  true,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to start embedded server: %w", err)
+			}
+
 			resolvedProfile = &config.ResolvedProfile{
-				Source: config.SourceLocal,
+				Name:   "embedded",
+				URL:    embeddedServer.URL(),
+				Key:    embeddedServer.APIKey(),
+				Source: config.SourceEmbedded,
 			}
 			return nil
 		}
@@ -78,6 +93,17 @@ func init() {
 			return fmt.Errorf("--remote requires API configuration. Create ~/.oak/config.yaml with profiles or set OAK_API_URL")
 		}
 
+		return nil
+	}
+
+	// Shutdown embedded server after command completes
+	rootCmd.PersistentPostRunE = func(cmd *cobra.Command, args []string) error {
+		if embeddedServer != nil {
+			if err := embeddedServer.Shutdown(); err != nil {
+				return fmt.Errorf("failed to shutdown embedded server: %w", err)
+			}
+			embeddedServer = nil
+		}
 		return nil
 	}
 }

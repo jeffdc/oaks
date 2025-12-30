@@ -44,6 +44,7 @@ const (
 	SourceConfig    = "config"
 	SourceLegacyEnv = "legacy-env"
 	SourceLocal     = "local"
+	SourceEmbedded  = "embedded"
 )
 
 // Environment variable names
