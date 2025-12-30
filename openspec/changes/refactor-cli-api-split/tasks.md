@@ -15,6 +15,7 @@
 - [ ] 2.6 Update all import paths in moved files
 - [ ] 2.7 Add version info to health endpoint response
 - [ ] 2.8 Verify API server builds: `cd api && go build`
+- [ ] 2.9 Create `api/Makefile` (build, lint, test, clean, docker-build)
 
 ## 3. CLI Profile Support
 - [ ] 3.1 Create `cli/internal/config/` package
@@ -64,6 +65,7 @@
 - [ ] 8.3 Create `api/README.md` for server documentation
 - [ ] 8.4 Update data flow diagram to show CLI↔API relationship
 - [ ] 8.5 Add example `~/.oak/config.yaml` to docs
+- [ ] 8.6 Update `CLAUDE.md` CLI/API workflow sections with new build instructions
 
 ## 9. Cleanup
 - [ ] 9.1 Remove old `cli/Dockerfile`
