@@ -177,3 +177,80 @@ export async function fetchSourceById(id) {
 export function getApiBaseUrl() {
   return API_BASE_URL;
 }
+
+// =============================================================================
+// Format Conversion Functions
+// =============================================================================
+// These convert from web format (export/display format) to API format (database format)
+
+/**
+ * Convert species from web format to API format
+ * Web format uses nested taxonomy object and 'name' field
+ * API format uses flat taxonomy fields and 'scientific_name'
+ * @param {Object} species - Species in web/export format
+ * @returns {Object} Species in API format (OakEntry)
+ */
+export function speciesToApiFormat(species) {
+  return {
+    scientific_name: species.name,
+    author: species.author || null,
+    is_hybrid: species.is_hybrid || false,
+    conservation_status: species.conservation_status || null,
+    // Flatten taxonomy object to top-level fields
+    subgenus: species.taxonomy?.subgenus || null,
+    section: species.taxonomy?.section || null,
+    subsection: species.taxonomy?.subsection || null,
+    complex: species.taxonomy?.complex || null,
+    // Hybrid parents
+    parent1: species.parent1 || null,
+    parent2: species.parent2 || null,
+    // Related species arrays
+    hybrids: species.hybrids || [],
+    closely_related_to: species.closely_related_to || [],
+    subspecies_varieties: species.subspecies_varieties || [],
+    // Synonyms: web format may have objects with {name, author}, API expects strings
+    synonyms: (species.synonyms || []).map(s => typeof s === 'string' ? s : s.name),
+    // External links (same format)
+    external_links: species.external_links || [],
+  };
+}
+
+/**
+ * Convert taxon from web format to API format
+ * Currently 1:1 mapping, but provides consistency and future flexibility
+ * @param {Object} taxon - Taxon in web format
+ * @returns {Object} Taxon in API format
+ */
+export function taxonToApiFormat(taxon) {
+  return {
+    name: taxon.name,
+    level: taxon.level,
+    parent: taxon.parent || null,
+    author: taxon.author || null,
+    notes: taxon.notes || null,
+    links: taxon.links || [],
+  };
+}
+
+/**
+ * Convert source from web format to API format
+ * Currently 1:1 mapping, but provides consistency and future flexibility
+ * @param {Object} source - Source in web format
+ * @returns {Object} Source in API format
+ */
+export function sourceToApiFormat(source) {
+  return {
+    id: source.id,
+    source_type: source.source_type,
+    name: source.name,
+    description: source.description || null,
+    author: source.author || null,
+    year: source.year || null,
+    url: source.url || null,
+    isbn: source.isbn || null,
+    doi: source.doi || null,
+    notes: source.notes || null,
+    license: source.license || null,
+    license_url: source.license_url || null,
+  };
+}

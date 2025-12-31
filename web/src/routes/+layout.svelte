@@ -4,6 +4,7 @@
 	import { updated } from '$app/stores';
 	import '../app.css';
 	import Header from '$lib/components/Header.svelte';
+	import Toast from '$lib/components/Toast.svelte';
 	import { loadSpeciesData, isLoading, error } from '$lib/stores/dataStore.js';
 
 	let { children } = $props();
@@ -87,6 +88,9 @@
 		{/if}
 	</main>
 </div>
+
+<!-- Toast notifications (fixed position, above all content) -->
+<Toast />
 
 <style>
 	/* Skip link - hidden until focused */

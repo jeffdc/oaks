@@ -53,6 +53,52 @@ const mockSpecies = [
   }
 ];
 
+// Additional test data for synonym format variations
+const mockSpeciesWithSynonymFormats = [
+  {
+    name: 'robur',
+    author: 'L.',
+    is_hybrid: false,
+    // String array format (API format)
+    synonyms: ['robur var. pedunculata', 'robur var. sessiliflora'],
+    sources: [{ source_id: 1, local_names: ['English oak'], range: 'Europe' }]
+  },
+  {
+    name: 'petraea',
+    author: 'Matt.',
+    is_hybrid: false,
+    // Object array format (export format)
+    synonyms: [
+      { name: 'petraea var. pubescens', author: 'DC.' },
+      { name: 'petraea subsp. huguetiana' }
+    ],
+    sources: [{ source_id: 1, local_names: ['sessile oak'], range: 'Europe' }]
+  },
+  {
+    name: 'ilex',
+    author: 'L.',
+    is_hybrid: false,
+    // Mixed format (edge case)
+    synonyms: [
+      'ilex var. rotundifolia',
+      { name: 'ilex var. angustifolia', author: 'Lam.' }
+    ],
+    sources: [{ source_id: 1, local_names: ['holm oak'], range: 'Mediterranean' }]
+  },
+  {
+    name: 'cerris',
+    author: 'L.',
+    is_hybrid: false,
+    // Null/undefined synonym name edge case
+    synonyms: [
+      { name: 'cerris var. austriaca' },
+      { name: null },  // Edge case: null name
+      'cerris var. haliphleos'
+    ],
+    sources: [{ source_id: 1, local_names: ['Turkey oak'], range: 'Southern Europe' }]
+  }
+];
+
 describe('formatSpeciesName', () => {
   it('formats full species name', () => {
     const species = { name: 'alba' };
@@ -100,6 +146,57 @@ describe('filteredSpecies store', () => {
     const result = get(filteredSpecies);
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe('alba');
+  });
+
+  describe('synonym format handling', () => {
+    beforeEach(() => {
+      allSpecies.set(mockSpeciesWithSynonymFormats);
+      searchQuery.set('');
+    });
+
+    it('filters by synonym in string array format', () => {
+      searchQuery.set('pedunculata');
+      const result = get(filteredSpecies);
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('robur');
+    });
+
+    it('filters by synonym in object array format', () => {
+      searchQuery.set('pubescens');
+      const result = get(filteredSpecies);
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('petraea');
+    });
+
+    it('filters by synonym in mixed format (string entry)', () => {
+      searchQuery.set('rotundifolia');
+      const result = get(filteredSpecies);
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('ilex');
+    });
+
+    it('filters by synonym in mixed format (object entry)', () => {
+      searchQuery.set('angustifolia');
+      const result = get(filteredSpecies);
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('ilex');
+    });
+
+    it('handles null synonym names gracefully', () => {
+      searchQuery.set('austriaca');
+      const result = get(filteredSpecies);
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('cerris');
+    });
+
+    it('does not crash when searching with null synonym in data', () => {
+      // Should not throw, and should still find cerris via valid synonyms
+      searchQuery.set('haliphleos');
+      expect(() => get(filteredSpecies)).not.toThrow();
+      const result = get(filteredSpecies);
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('cerris');
+    });
   });
 
   it('filters by local name (common name)', () => {
