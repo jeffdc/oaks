@@ -1,7 +1,11 @@
 <script>
   import { base } from '$app/paths';
-  import { formatSpeciesName } from '$lib/stores/dataStore.js';
-  import { fetchTaxaByLevel, fetchSpeciesByTaxon, fetchStats, ApiError } from '$lib/apiClient.js';
+  import { formatSpeciesName, forceRefresh } from '$lib/stores/dataStore.js';
+  import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
+  import { toast } from '$lib/stores/toastStore.js';
+  import { fetchTaxaByLevel, fetchSpeciesByTaxon, fetchStats, fetchTaxon, updateTaxon, deleteTaxon, ApiError } from '$lib/apiClient.js';
+  import TaxonEditForm from './TaxonEditForm.svelte';
+  import DeleteConfirmDialog from './DeleteConfirmDialog.svelte';
 
   let { taxonPath = [] } = $props(); // e.g., ['Quercus', 'Quercus', 'Albae']
 
@@ -59,6 +63,14 @@
     await loadData([...taxonPath]);
   }
 
+  // Edit/Delete modal state
+  let showEditForm = false;
+  let showDeleteDialog = false;
+  let isDeleting = false;
+  let editingTaxon = null;
+  let deletingTaxon = null;
+  let deleteCascadeInfo = null;
+
   // Determine the taxon level and name from the path
   let isGenusLevel = $derived(taxonPath.length === 0);
   let taxonLevel = $derived(getTaxonLevel(taxonPath.length));
@@ -98,6 +110,113 @@
   function getTaxonUrl(path) {
     if (path.length === 0) return `${base}/taxonomy/`;
     return `${base}/taxonomy/${path.map(encodeURIComponent).join('/')}/`;
+  }
+
+  // Get the taxon level for a child at the current depth
+  function getChildLevel(depth) {
+    const levels = ['subgenus', 'section', 'subsection', 'complex'];
+    return levels[depth] || 'taxon';
+  }
+
+  // Handle edit button click
+  async function handleEditClick(subTaxon, event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const level = getChildLevel(taxonPath.length);
+    try {
+      // Fetch the full taxon data from API
+      const taxonData = await fetchTaxon(level, subTaxon.name);
+      editingTaxon = { ...taxonData, level };
+      showEditForm = true;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(`Failed to load taxon: ${error.message}`);
+      } else {
+        toast.error('Failed to load taxon data');
+      }
+    }
+  }
+
+  // Handle delete button click
+  function handleDeleteClick(subTaxon, event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const level = getChildLevel(taxonPath.length);
+    deletingTaxon = { name: subTaxon.name, level, count: subTaxon.count };
+    // If there are species using this taxon, show error dialog
+    if (subTaxon.count > 0) {
+      deleteCascadeInfo = { count: subTaxon.count, type: 'species' };
+    } else {
+      deleteCascadeInfo = null;
+    }
+    showDeleteDialog = true;
+  }
+
+  // Handle save from edit form
+  async function handleSaveTaxon(formData) {
+    if (!editingTaxon) return null;
+
+    try {
+      await updateTaxon(editingTaxon.level, editingTaxon.name, formData);
+      toast.success(`${getLevelLabel(editingTaxon.level)} updated successfully`);
+      // Refresh data to show changes
+      await forceRefresh();
+      return null; // Success
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 400 && error.fieldErrors) {
+          return error.fieldErrors;
+        }
+        toast.error(`Failed to update: ${error.message}`);
+      } else {
+        toast.error('Failed to update taxon');
+      }
+      throw error;
+    }
+  }
+
+  // Handle delete confirmation
+  async function handleDeleteConfirm() {
+    if (!deletingTaxon) return;
+
+    isDeleting = true;
+    try {
+      await deleteTaxon(deletingTaxon.level, deletingTaxon.name);
+      toast.success(`${getLevelLabel(deletingTaxon.level)} deleted successfully`);
+      showDeleteDialog = false;
+      deletingTaxon = null;
+      deleteCascadeInfo = null;
+      // Refresh data to show changes
+      await forceRefresh();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(`Failed to delete: ${error.message}`);
+      } else {
+        toast.error('Failed to delete taxon');
+      }
+    } finally {
+      isDeleting = false;
+    }
+  }
+
+  // Handle delete cancel
+  function handleDeleteCancel() {
+    showDeleteDialog = false;
+    deletingTaxon = null;
+    deleteCascadeInfo = null;
+  }
+
+  // Get level label for messages
+  function getLevelLabel(level) {
+    const labels = {
+      subgenus: 'Subgenus',
+      section: 'Section',
+      subsection: 'Subsection',
+      complex: 'Complex'
+    };
+    return labels[level] || 'Taxon';
   }
 </script>
 
@@ -174,11 +293,41 @@
       <h2 class="section-title section-title-sm">{getTaxonLevelLabelPlural(taxonPath.length + 1)}</h2>
       <div class="sub-taxa-grid">
         {#each subTaxa as subTaxon}
-          <a href="{getTaxonUrl([...taxonPath, subTaxon.name])}" class="sub-taxon-card">
-            <span class="sub-taxon-name">
-              {#if taxonPath.length === 3}Q. {/if}{subTaxon.name}
-            </span>
-            <span class="sub-taxon-count">{subTaxon.count} species</span>
+          <a href="{getTaxonUrl([...taxonPath, subTaxon.name])}" class="sub-taxon-card" class:can-edit={$canEdit}>
+            <div class="sub-taxon-content">
+              <span class="sub-taxon-name">
+                {#if taxonPath.length === 3}Q. {/if}{subTaxon.name}
+              </span>
+              <span class="sub-taxon-count">{subTaxon.count} species</span>
+            </div>
+            {#if $canEdit}
+              <div class="taxon-actions">
+                <button
+                  type="button"
+                  class="taxon-action-btn taxon-action-edit"
+                  title="Edit {getChildLevel(taxonPath.length)}"
+                  on:click={(e) => handleEditClick(subTaxon, e)}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="taxon-action-btn taxon-action-delete"
+                  title="Delete {getChildLevel(taxonPath.length)}"
+                  on:click={(e) => handleDeleteClick(subTaxon, e)}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3,6 5,6 21,6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <line x1="10" y1="11" x2="10" y2="17" />
+                    <line x1="14" y1="11" x2="14" y2="17" />
+                  </svg>
+                </button>
+              </div>
+            {/if}
           </a>
         {/each}
       </div>
@@ -209,6 +358,28 @@
   {/if}
   {/if}
 </div>
+
+<!-- Edit Taxon Modal -->
+{#if showEditForm && editingTaxon}
+  <TaxonEditForm
+    taxon={editingTaxon}
+    isOpen={showEditForm}
+    onClose={() => { showEditForm = false; editingTaxon = null; }}
+    onSave={handleSaveTaxon}
+  />
+{/if}
+
+<!-- Delete Confirmation Dialog -->
+{#if showDeleteDialog && deletingTaxon}
+  <DeleteConfirmDialog
+    entityType="taxon"
+    entityName={deletingTaxon.name}
+    cascadeInfo={deleteCascadeInfo}
+    {isDeleting}
+    onConfirm={handleDeleteConfirm}
+    onCancel={handleDeleteCancel}
+  />
+{/if}
 
 <style>
   .taxon-view {
@@ -271,8 +442,9 @@
 
   .sub-taxon-card {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     padding: 1rem;
     background-color: var(--color-forest-50);
     border: 1px solid var(--color-forest-200);
@@ -282,6 +454,7 @@
     text-align: left;
     font-family: inherit;
     text-decoration: none;
+    gap: 0.5rem;
   }
 
   .sub-taxon-card:hover {
@@ -297,6 +470,14 @@
     box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.2);
   }
 
+  .sub-taxon-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+    min-width: 0;
+  }
+
   .sub-taxon-name {
     font-weight: 600;
     color: var(--color-forest-800);
@@ -307,6 +488,77 @@
     font-size: 0.8125rem;
     color: var(--color-text-tertiary);
     margin-top: 0.25rem;
+  }
+
+  /* Taxon action buttons */
+  .taxon-actions {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  /* Show on hover (desktop) */
+  .sub-taxon-card.can-edit:hover .taxon-actions {
+    opacity: 1;
+  }
+
+  .taxon-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .taxon-action-btn svg {
+    flex-shrink: 0;
+  }
+
+  .taxon-action-edit {
+    color: var(--color-forest-700);
+    background-color: var(--color-forest-100);
+  }
+
+  .taxon-action-edit:hover {
+    background-color: var(--color-forest-200);
+  }
+
+  .taxon-action-edit:focus-visible {
+    outline: 2px solid var(--color-forest-500);
+    outline-offset: 1px;
+  }
+
+  .taxon-action-delete {
+    color: #dc2626;
+    background-color: #fef2f2;
+  }
+
+  .taxon-action-delete:hover {
+    background-color: #fee2e2;
+  }
+
+  .taxon-action-delete:focus-visible {
+    outline: 2px solid #dc2626;
+    outline-offset: 1px;
+  }
+
+  /* Mobile: always show action buttons when canEdit */
+  @media (max-width: 640px) {
+    .sub-taxon-card.can-edit .taxon-actions {
+      opacity: 1;
+    }
+
+    .taxon-action-btn {
+      width: 2rem;
+      height: 2rem;
+    }
   }
 
   /* Species section */
