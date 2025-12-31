@@ -11,12 +11,14 @@
    * - Large touch targets for mobile
    * - Native scroll momentum on iOS
    * - Focus trap and keyboard navigation
+   * - Unsaved changes warning (via isDirty prop)
    *
    * Basic usage:
    *   <EditModal
    *     title="Edit Species"
    *     isOpen={showModal}
    *     isSaving={saving}
+   *     isDirty={hasChanges}
    *     onClose={() => showModal = false}
    *     onSave={handleSave}
    *   >
@@ -35,6 +37,11 @@
    *       <!-- Less frequently edited fields -->
    *     </FieldSection>
    *   </EditModal>
+   *
+   * Unsaved changes warning:
+   * When isDirty is true, the modal will:
+   * - Show a confirmation dialog on Cancel, Escape, backdrop click, or X button
+   * - Trigger the browser's native beforeunload warning on page close/refresh
    */
 
   /** @type {string} Modal title displayed in the header */
@@ -52,6 +59,9 @@
   /** @type {() => void} Handler called when Save button is clicked */
   export let onSave;
 
+  /** @type {boolean} Whether the form has unsaved changes */
+  export let isDirty = false;
+
   /** @type {HTMLElement|null} */
   let modalElement = null;
 
@@ -61,13 +71,41 @@
   /** @type {string} */
   const titleId = `modal-title-${Math.random().toString(36).substr(2, 9)}`;
 
+  /**
+   * Attempts to close the modal, showing a confirmation dialog if there are unsaved changes.
+   * @returns {boolean} Whether the close was allowed
+   */
+  function handleCloseAttempt() {
+    if (isDirty) {
+      const confirmed = confirm('You have unsaved changes. Discard them?');
+      if (!confirmed) {
+        return false;
+      }
+    }
+    onClose();
+    return true;
+  }
+
+  /**
+   * Handles the beforeunload event to warn about unsaved changes when closing/refreshing browser.
+   * @param {BeforeUnloadEvent} event
+   */
+  function handleBeforeUnload(event) {
+    if (isDirty && isOpen) {
+      event.preventDefault();
+      // Modern browsers ignore custom messages but still show a warning
+      event.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+      return event.returnValue;
+    }
+  }
+
   // Handle escape key
   function handleKeydown(event) {
     if (!isOpen) return;
 
     if (event.key === 'Escape' && !isSaving) {
       event.preventDefault();
-      onClose();
+      handleCloseAttempt();
       return;
     }
 
@@ -91,6 +129,17 @@
           event.preventDefault();
           firstElement?.focus();
         }
+      }
+    }
+  }
+
+  // Manage beforeunload listener based on isDirty and isOpen
+  $: {
+    if (typeof window !== 'undefined') {
+      if (isOpen && isDirty) {
+        window.addEventListener('beforeunload', handleBeforeUnload);
+      } else {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
       }
     }
   }
@@ -130,6 +179,7 @@
 
   onDestroy(() => {
     document.removeEventListener('keydown', handleKeydown);
+    window.removeEventListener('beforeunload', handleBeforeUnload);
     // Ensure body scroll is restored
     document.body.style.overflow = '';
   });
@@ -137,7 +187,7 @@
   function handleBackdropClick(event) {
     // Only close if clicking the backdrop itself, not modal content
     if (event.target === event.currentTarget && !isSaving) {
-      onClose();
+      handleCloseAttempt();
     }
   }
 </script>
@@ -162,7 +212,7 @@
           class="close-button"
           aria-label="Close modal"
           disabled={isSaving}
-          on:click={onClose}
+          on:click={handleCloseAttempt}
         >
           <svg
             width="20"
@@ -193,7 +243,7 @@
             type="button"
             class="btn btn-secondary"
             disabled={isSaving}
-            on:click={onClose}
+            on:click={handleCloseAttempt}
           >
             Cancel
           </button>

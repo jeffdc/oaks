@@ -34,7 +34,8 @@
   $: inputProps = {
     id: name,
     'aria-describedby': describedBy,
-    'aria-invalid': error ? true : undefined
+    'aria-invalid': error ? true : undefined,
+    'aria-required': required ? true : undefined
   };
 </script>
 
