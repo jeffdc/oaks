@@ -10,6 +10,9 @@ export const isLoading = writable(false);
 // Store for error state (used by components during API calls)
 export const error = writable(null);
 
+// Store for refresh state (separate from loading for better UX during data refresh)
+export const isRefreshing = writable(false);
+
 // =============================================================================
 // Search State
 // =============================================================================
@@ -191,6 +194,39 @@ export function getAllSources(species) {
 export function getSourceById(species, sourceId) {
   if (!species?.sources?.length) return null;
   return species.sources.find(s => s.source_id === sourceId) || null;
+}
+
+// Refresh version counter - increment to signal components to re-fetch
+let refreshVersion = 0;
+const refreshListeners = new Set();
+
+/**
+ * Force a data refresh after CRUD operations
+ * Signals all listening components to re-fetch their data
+ * @returns {Promise<void>}
+ */
+export async function forceRefresh() {
+  refreshVersion++;
+  isRefreshing.set(true);
+  // Notify all listeners
+  for (const listener of refreshListeners) {
+    try {
+      await listener();
+    } catch (err) {
+      console.warn('Refresh listener failed:', err);
+    }
+  }
+  isRefreshing.set(false);
+}
+
+/**
+ * Subscribe to refresh events
+ * @param {Function} callback - Called when forceRefresh() is invoked
+ * @returns {Function} Unsubscribe function
+ */
+export function onRefresh(callback) {
+  refreshListeners.add(callback);
+  return () => refreshListeners.delete(callback);
 }
 
 /**
