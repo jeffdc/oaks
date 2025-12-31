@@ -97,10 +97,11 @@ export const filteredSpecies = derived(
       // Search in author
       if (species.author && species.author.toLowerCase().includes(query)) return true;
 
-      // Search in synonyms
-      if (species.synonyms && species.synonyms.some(syn =>
-        syn.name && syn.name.toLowerCase().includes(query)
-      )) return true;
+      // Search in synonyms (handle both string[] and object[] formats)
+      if (species.synonyms && species.synonyms.some(syn => {
+        const synName = typeof syn === 'string' ? syn : syn.name;
+        return synName && synName.toLowerCase().includes(query);
+      })) return true;
 
       // Search in local names (common names) from all sources
       if ((species.sources || []).some(source =>
