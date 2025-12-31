@@ -442,20 +442,64 @@
         {/if}
       </div>
 
-      <div class="field">
-        <label for="taxon-parent" class="field-label">Parent</label>
-        <input
-          id="taxon-parent"
-          type="text"
-          class="field-input"
-          class:error={errors.parent}
-          bind:value={formData.parent}
-          placeholder="Parent taxon name (optional)"
-        />
-        {#if errors.parent}
-          <p class="error-message">{errors.parent}</p>
-        {/if}
-      </div>
+      {#if showParentField}
+        <div class="field">
+          <label for="taxon-parent" class="field-label">Parent</label>
+          <p class="field-hint">{parentHint}</p>
+          <div class="autocomplete-container">
+            <div class="input-wrapper">
+              <input
+                bind:this={parentInputElement}
+                id="taxon-parent"
+                type="text"
+                class="field-input"
+                class:error={errors.parent}
+                value={parentQuery}
+                placeholder="Search or select parent..."
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={isParentOpen && parentSuggestions.length > 0}
+                on:input={handleParentInput}
+                on:keydown={handleParentKeydown}
+                on:focus={handleParentFocus}
+                on:blur={handleParentBlur}
+              />
+              {#if parentQuery}
+                <button
+                  type="button"
+                  class="clear-button"
+                  aria-label="Clear parent"
+                  on:click={clearParent}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              {/if}
+            </div>
+            {#if isParentOpen && parentSuggestions.length > 0}
+              <ul class="suggestions-list" role="listbox">
+                {#each parentSuggestions as suggestion, index}
+                  <li
+                    class="suggestion-item"
+                    class:active={index === activeParentIndex}
+                    role="option"
+                    aria-selected={index === activeParentIndex}
+                    on:mousedown|preventDefault={() => selectParent(suggestion)}
+                    on:mouseenter={() => activeParentIndex = index}
+                  >
+                    {suggestion}
+                  </li>
+                {/each}
+              </ul>
+            {/if}
+          </div>
+          {#if errors.parent}
+            <p class="error-message">{errors.parent}</p>
+          {/if}
+        </div>
+      {/if}
 
       <div class="field">
         <label for="taxon-author" class="field-label">Author</label>
@@ -491,16 +535,13 @@
       </div>
 
       <div class="field">
-        <label for="taxon-links" class="field-label">Links</label>
-        <p class="field-hint">One URL per line</p>
-        <textarea
-          id="taxon-links"
-          class="field-textarea"
-          class:error={errors.links}
-          bind:value={linksText}
-          placeholder="https://example.com/taxon-info&#10;https://another-source.org/details"
-          rows="3"
-        ></textarea>
+        <label id="taxon-links-label" class="field-label">Links</label>
+        <p class="field-hint">Press Enter or comma to add URLs</p>
+        <TagInput
+          values={formData.links}
+          placeholder="Add URL..."
+          onChange={(values) => formData.links = values}
+        />
         {#if errors.links}
           <p class="error-message">{errors.links}</p>
         {/if}
@@ -564,6 +605,7 @@
   }
 
   .field-input,
+  .field-select,
   .field-textarea {
     width: 100%;
     padding: 0.5rem 0.75rem;
@@ -574,6 +616,10 @@
     border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .field-select {
+    cursor: pointer;
   }
 
   .field-input:disabled {
@@ -588,6 +634,7 @@
   }
 
   .field-input:focus,
+  .field-select:focus,
   .field-textarea:focus {
     outline: none;
     border-color: var(--color-forest-600);
@@ -595,11 +642,13 @@
   }
 
   .field-input.error,
+  .field-select.error,
   .field-textarea.error {
     border-color: var(--color-danger, #dc2626);
   }
 
   .field-input.error:focus,
+  .field-select.error:focus,
   .field-textarea.error:focus {
     box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
   }
@@ -614,6 +663,75 @@
     margin: 0;
     font-size: 0.8125rem;
     color: var(--color-danger, #dc2626);
+  }
+
+  /* Autocomplete styles for parent field */
+  .autocomplete-container {
+    position: relative;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-wrapper .field-input {
+    padding-right: 2.25rem;
+  }
+
+  .clear-button {
+    position: absolute;
+    right: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    color: var(--color-text-tertiary);
+    background: none;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .clear-button:hover {
+    color: var(--color-text-primary);
+    background-color: var(--color-border-light);
+  }
+
+  .suggestions-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 50;
+    max-height: 15rem;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.25rem;
+    list-style: none;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .suggestion-item {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9375rem;
+    color: var(--color-text-primary);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+  }
+
+  .suggestion-item:hover,
+  .suggestion-item.active {
+    background-color: var(--color-forest-50);
+    color: var(--color-forest-800);
   }
 
   /* Connection warning banner */
