@@ -5,6 +5,7 @@
   import TagInput from './TagInput.svelte';
   import { fetchTaxa } from '$lib/apiClient.js';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
+  import { MAX_LENGTHS, validateLength, validateUrl, getCharacterCount } from '$lib/utils/validation.js';
 
   /**
    * TaxonEditForm - Form for creating and editing taxon data
@@ -288,6 +289,12 @@
     // Name is required
     if (!formData.name || !formData.name.trim()) {
       newErrors.name = 'Name is required';
+    } else {
+      // Validate name length
+      const nameResult = validateLength(formData.name, MAX_LENGTHS.name);
+      if (!nameResult.valid) {
+        newErrors.name = nameResult.message;
+      }
     }
 
     // Level is required in create mode
@@ -295,12 +302,23 @@
       newErrors.level = 'Level is required';
     }
 
+    // Validate author length
+    const authorResult = validateLength(formData.author, MAX_LENGTHS.author);
+    if (!authorResult.valid) {
+      newErrors.author = authorResult.message;
+    }
+
+    // Validate notes length
+    const notesResult = validateLength(formData.notes, MAX_LENGTHS.notes);
+    if (!notesResult.valid) {
+      newErrors.notes = notesResult.message;
+    }
+
     // Validate URLs if any links provided
     for (const link of formData.links) {
-      try {
-        new URL(link);
-      } catch {
-        newErrors.links = 'Please enter valid URLs (one per line)';
+      const urlResult = validateUrl(link);
+      if (!urlResult.valid) {
+        newErrors.links = urlResult.message;
         break;
       }
     }
@@ -436,6 +454,7 @@
           class:error={errors.name}
           bind:value={formData.name}
           placeholder="Enter taxon name"
+          maxlength={MAX_LENGTHS.name}
         />
         {#if errors.name}
           <p class="error-message">{errors.name}</p>
@@ -510,6 +529,7 @@
           class:error={errors.author}
           bind:value={formData.author}
           placeholder="e.g., (DC.) A.Camus"
+          maxlength={MAX_LENGTHS.author}
         />
         {#if errors.author}
           <p class="error-message">{errors.author}</p>
@@ -528,10 +548,18 @@
           bind:value={formData.notes}
           placeholder="Additional notes about this taxon..."
           rows="4"
+          maxlength={MAX_LENGTHS.notes}
         ></textarea>
-        {#if errors.notes}
-          <p class="error-message">{errors.notes}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.notes}
+            <p class="error-message">{errors.notes}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.notes, MAX_LENGTHS.notes).remaining < 500}>
+            {formData.notes?.length || 0} / {MAX_LENGTHS.notes}
+          </span>
+        </div>
       </div>
 
       <div class="field">
@@ -663,6 +691,24 @@
     margin: 0;
     font-size: 0.8125rem;
     color: var(--color-danger, #dc2626);
+  }
+
+  .field-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .char-count {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .char-count.warning {
+    color: var(--color-warning-text, #b45309);
   }
 
   /* Autocomplete styles for parent field */

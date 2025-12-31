@@ -5,6 +5,7 @@
   import TagInput from './TagInput.svelte';
   import { allSpecies } from '$lib/stores/dataStore.js';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
+  import { MAX_LENGTHS, validateScientificName, validateLength } from '$lib/utils/validation.js';
 
   /**
    * SpeciesEditForm - Full species editing form using EditModal as wrapper
@@ -287,6 +288,18 @@
     // Required: scientific_name
     if (!formData.name.trim()) {
       newErrors.name = 'Species name is required';
+    } else {
+      // Validate scientific name characters and length
+      const nameValidation = validateScientificName(formData.name);
+      if (!nameValidation.valid) {
+        newErrors.name = nameValidation.message;
+      }
+    }
+
+    // Validate author length
+    const authorValidation = validateLength(formData.author, MAX_LENGTHS.author);
+    if (!authorValidation.valid) {
+      newErrors.author = authorValidation.message;
     }
 
     // If hybrid, should have at least one parent
@@ -406,6 +419,7 @@
             class:error={errors.name}
             bind:value={formData.name}
             placeholder="e.g., alba"
+            maxlength={MAX_LENGTHS.scientific_name}
             required
           />
         </div>
@@ -424,6 +438,7 @@
           class:error={errors.author}
           bind:value={formData.author}
           placeholder="e.g., L. 1753"
+          maxlength={MAX_LENGTHS.author}
         />
         {#if errors.author}
           <p class="error-message">{errors.author}</p>

@@ -2,6 +2,7 @@
   import EditModal from './EditModal.svelte';
   import FieldSection from './FieldSection.svelte';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
+  import { MAX_LENGTHS, validateLength, validateUrl, getCharacterCount } from '$lib/utils/validation.js';
 
   /**
    * SourceEditForm - Form for editing source metadata
@@ -127,24 +128,48 @@
     // Name is required
     if (!formData.name || !formData.name.trim()) {
       newErrors.name = 'Name is required';
+    } else {
+      // Validate name length
+      const nameResult = validateLength(formData.name, MAX_LENGTHS.name);
+      if (!nameResult.valid) {
+        newErrors.name = nameResult.message;
+      }
     }
 
-    // Validate URL if provided
-    if (formData.url && formData.url.trim()) {
-      try {
-        new URL(formData.url);
-      } catch {
-        newErrors.url = 'Please enter a valid URL';
-      }
+    // Validate author length
+    const authorResult = validateLength(formData.author, MAX_LENGTHS.author);
+    if (!authorResult.valid) {
+      newErrors.author = authorResult.message;
+    }
+
+    // Validate URL if provided (format and length)
+    const urlResult = validateUrl(formData.url);
+    if (!urlResult.valid) {
+      newErrors.url = urlResult.message;
     }
 
     // Validate license URL if provided
-    if (formData.license_url && formData.license_url.trim()) {
-      try {
-        new URL(formData.license_url);
-      } catch {
-        newErrors.license_url = 'Please enter a valid URL';
-      }
+    const licenseUrlResult = validateUrl(formData.license_url);
+    if (!licenseUrlResult.valid) {
+      newErrors.license_url = licenseUrlResult.message;
+    }
+
+    // Validate license length
+    const licenseResult = validateLength(formData.license, MAX_LENGTHS.license);
+    if (!licenseResult.valid) {
+      newErrors.license = licenseResult.message;
+    }
+
+    // Validate description length
+    const descResult = validateLength(formData.description, MAX_LENGTHS.description);
+    if (!descResult.valid) {
+      newErrors.description = descResult.message;
+    }
+
+    // Validate notes length
+    const notesResult = validateLength(formData.notes, MAX_LENGTHS.notes);
+    if (!notesResult.valid) {
+      newErrors.notes = notesResult.message;
     }
 
     // Validate DOI format if provided
@@ -270,6 +295,7 @@
           class:error={errors.name}
           bind:value={formData.name}
           placeholder="Enter source name"
+          maxlength={MAX_LENGTHS.name}
         />
         {#if errors.name}
           <p class="error-message">{errors.name}</p>
@@ -303,6 +329,7 @@
           class:error={errors.url}
           bind:value={formData.url}
           placeholder="https://example.com"
+          maxlength={MAX_LENGTHS.url}
         />
         {#if errors.url}
           <p class="error-message">{errors.url}</p>
@@ -321,6 +348,7 @@
           class:error={errors.author}
           bind:value={formData.author}
           placeholder="e.g., John Smith"
+          maxlength={MAX_LENGTHS.author}
         />
         {#if errors.author}
           <p class="error-message">{errors.author}</p>
@@ -388,6 +416,7 @@
           class:error={errors.license}
           bind:value={formData.license}
           placeholder="e.g., CC BY 4.0"
+          maxlength={MAX_LENGTHS.license}
         />
         {#if errors.license}
           <p class="error-message">{errors.license}</p>
@@ -403,6 +432,7 @@
           class:error={errors.license_url}
           bind:value={formData.license_url}
           placeholder="https://creativecommons.org/licenses/..."
+          maxlength={MAX_LENGTHS.url}
         />
         {#if errors.license_url}
           <p class="error-message">{errors.license_url}</p>
@@ -421,10 +451,18 @@
           bind:value={formData.description}
           placeholder="Brief description of this source..."
           rows="3"
+          maxlength={MAX_LENGTHS.description}
         ></textarea>
-        {#if errors.description}
-          <p class="error-message">{errors.description}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.description}
+            <p class="error-message">{errors.description}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.description, MAX_LENGTHS.description).remaining < 500}>
+            {formData.description?.length || 0} / {MAX_LENGTHS.description}
+          </span>
+        </div>
       </div>
 
       <div class="field">
@@ -436,10 +474,18 @@
           bind:value={formData.notes}
           placeholder="Additional notes..."
           rows="3"
+          maxlength={MAX_LENGTHS.notes}
         ></textarea>
-        {#if errors.notes}
-          <p class="error-message">{errors.notes}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.notes}
+            <p class="error-message">{errors.notes}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.notes, MAX_LENGTHS.notes).remaining < 500}>
+            {formData.notes?.length || 0} / {MAX_LENGTHS.notes}
+          </span>
+        </div>
       </div>
     </FieldSection>
   </form>
@@ -558,6 +604,24 @@
     margin: 0;
     font-size: 0.8125rem;
     color: var(--color-danger, #dc2626);
+  }
+
+  .field-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .char-count {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .char-count.warning {
+    color: var(--color-warning-text, #b45309);
   }
 
   /* Connection warning banner */

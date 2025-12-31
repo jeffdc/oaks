@@ -3,6 +3,7 @@
   import FieldSection from './FieldSection.svelte';
   import TagInput from './TagInput.svelte';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
+  import { MAX_LENGTHS, validateUrl, validateLength, validateLocalNames, getCharacterCount } from '$lib/utils/validation.js';
 
   /**
    * SpeciesSourceEditForm - Form for editing or creating source-attributed species data
@@ -115,27 +116,41 @@
     errors = {};
   }
 
-  /**
-   * Validate URL format
-   * @param {string} urlString
-   * @returns {boolean}
-   */
-  function isValidUrl(urlString) {
-    if (!urlString || !urlString.trim()) return true; // Empty is valid (optional field)
-    try {
-      new URL(urlString);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
   function validate() {
     const newErrors = {};
 
-    // Validate URL format if provided
-    if (formData.url && !isValidUrl(formData.url)) {
-      newErrors.url = 'Please enter a valid URL (e.g., https://example.com)';
+    // Validate local names (100 chars each)
+    const localNamesResult = validateLocalNames(formData.local_names);
+    if (!localNamesResult.valid) {
+      newErrors.local_names = localNamesResult.message;
+    }
+
+    // Validate text field lengths
+    const textFields = [
+      { field: 'range', value: formData.range },
+      { field: 'growth_habit', value: formData.growth_habit },
+      { field: 'leaves', value: formData.leaves },
+      { field: 'flowers', value: formData.flowers },
+      { field: 'fruits', value: formData.fruits },
+      { field: 'bark', value: formData.bark },
+      { field: 'twigs', value: formData.twigs },
+      { field: 'buds', value: formData.buds },
+      { field: 'hardiness_habitat', value: formData.hardiness_habitat },
+      { field: 'miscellaneous', value: formData.miscellaneous }
+    ];
+
+    for (const { field, value } of textFields) {
+      const maxLen = MAX_LENGTHS[field] || MAX_LENGTHS.miscellaneous;
+      const result = validateLength(value, maxLen);
+      if (!result.valid) {
+        newErrors[field] = result.message;
+      }
+    }
+
+    // Validate URL format and length
+    const urlResult = validateUrl(formData.url);
+    if (!urlResult.valid) {
+      newErrors.url = urlResult.message;
     }
 
     errors = newErrors;
@@ -263,10 +278,18 @@
           bind:value={formData.growth_habit}
           placeholder="Tree form, size, branching pattern..."
           rows="3"
+          maxlength={MAX_LENGTHS.growth_habit}
         />
-        {#if errors.growth_habit}
-          <p class="error-message">{errors.growth_habit}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.growth_habit}
+            <p class="error-message">{errors.growth_habit}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.growth_habit, MAX_LENGTHS.growth_habit).remaining < 500}>
+            {formData.growth_habit?.length || 0} / {MAX_LENGTHS.growth_habit}
+          </span>
+        </div>
       </div>
 
       <div class="field">
@@ -278,10 +301,18 @@
           bind:value={formData.range}
           placeholder="Geographic distribution, elevation range..."
           rows="3"
+          maxlength={MAX_LENGTHS.range}
         />
-        {#if errors.range}
-          <p class="error-message">{errors.range}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.range}
+            <p class="error-message">{errors.range}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.range, MAX_LENGTHS.range).remaining < 500}>
+            {formData.range?.length || 0} / {MAX_LENGTHS.range}
+          </span>
+        </div>
       </div>
 
       <div class="field">
@@ -293,10 +324,18 @@
           bind:value={formData.hardiness_habitat}
           placeholder="Climate zones, soil preferences, associated species..."
           rows="3"
+          maxlength={MAX_LENGTHS.hardiness_habitat}
         />
-        {#if errors.hardiness_habitat}
-          <p class="error-message">{errors.hardiness_habitat}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.hardiness_habitat}
+            <p class="error-message">{errors.hardiness_habitat}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.hardiness_habitat, MAX_LENGTHS.hardiness_habitat).remaining < 500}>
+            {formData.hardiness_habitat?.length || 0} / {MAX_LENGTHS.hardiness_habitat}
+          </span>
+        </div>
       </div>
     </FieldSection>
 
@@ -311,10 +350,18 @@
           bind:value={formData.leaves}
           placeholder="Leaf shape, size, color, texture..."
           rows="4"
+          maxlength={MAX_LENGTHS.leaves}
         />
-        {#if errors.leaves}
-          <p class="error-message">{errors.leaves}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.leaves}
+            <p class="error-message">{errors.leaves}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.leaves, MAX_LENGTHS.leaves).remaining < 500}>
+            {formData.leaves?.length || 0} / {MAX_LENGTHS.leaves}
+          </span>
+        </div>
       </div>
 
       <div class="field">
@@ -326,10 +373,18 @@
           bind:value={formData.flowers}
           placeholder="Catkin description, flowering time..."
           rows="3"
+          maxlength={MAX_LENGTHS.flowers}
         />
-        {#if errors.flowers}
-          <p class="error-message">{errors.flowers}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.flowers}
+            <p class="error-message">{errors.flowers}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.flowers, MAX_LENGTHS.flowers).remaining < 500}>
+            {formData.flowers?.length || 0} / {MAX_LENGTHS.flowers}
+          </span>
+        </div>
       </div>
 
       <div class="field">
@@ -341,10 +396,18 @@
           bind:value={formData.fruits}
           placeholder="Acorn shape, size, cup characteristics..."
           rows="4"
+          maxlength={MAX_LENGTHS.fruits}
         />
-        {#if errors.fruits}
-          <p class="error-message">{errors.fruits}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.fruits}
+            <p class="error-message">{errors.fruits}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.fruits, MAX_LENGTHS.fruits).remaining < 500}>
+            {formData.fruits?.length || 0} / {MAX_LENGTHS.fruits}
+          </span>
+        </div>
       </div>
     </FieldSection>
 
@@ -359,10 +422,18 @@
           bind:value={formData.bark}
           placeholder="Bark texture, color, patterns..."
           rows="3"
+          maxlength={MAX_LENGTHS.bark}
         />
-        {#if errors.bark}
-          <p class="error-message">{errors.bark}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.bark}
+            <p class="error-message">{errors.bark}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.bark, MAX_LENGTHS.bark).remaining < 500}>
+            {formData.bark?.length || 0} / {MAX_LENGTHS.bark}
+          </span>
+        </div>
       </div>
 
       <div class="field">
@@ -374,10 +445,18 @@
           bind:value={formData.twigs}
           placeholder="Twig color, texture, lenticels..."
           rows="3"
+          maxlength={MAX_LENGTHS.twigs}
         />
-        {#if errors.twigs}
-          <p class="error-message">{errors.twigs}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.twigs}
+            <p class="error-message">{errors.twigs}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.twigs, MAX_LENGTHS.twigs).remaining < 500}>
+            {formData.twigs?.length || 0} / {MAX_LENGTHS.twigs}
+          </span>
+        </div>
       </div>
 
       <div class="field">
@@ -389,10 +468,18 @@
           bind:value={formData.buds}
           placeholder="Bud shape, size, arrangement..."
           rows="3"
+          maxlength={MAX_LENGTHS.buds}
         />
-        {#if errors.buds}
-          <p class="error-message">{errors.buds}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.buds}
+            <p class="error-message">{errors.buds}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.buds, MAX_LENGTHS.buds).remaining < 500}>
+            {formData.buds?.length || 0} / {MAX_LENGTHS.buds}
+          </span>
+        </div>
       </div>
     </FieldSection>
 
@@ -407,10 +494,18 @@
           bind:value={formData.miscellaneous}
           placeholder="Uses, historical notes, other relevant information..."
           rows="4"
+          maxlength={MAX_LENGTHS.miscellaneous}
         />
-        {#if errors.miscellaneous}
-          <p class="error-message">{errors.miscellaneous}</p>
-        {/if}
+        <div class="field-footer">
+          {#if errors.miscellaneous}
+            <p class="error-message">{errors.miscellaneous}</p>
+          {:else}
+            <span></span>
+          {/if}
+          <span class="char-count" class:warning={getCharacterCount(formData.miscellaneous, MAX_LENGTHS.miscellaneous).remaining < 500}>
+            {formData.miscellaneous?.length || 0} / {MAX_LENGTHS.miscellaneous}
+          </span>
+        </div>
       </div>
 
       <div class="field">
@@ -422,6 +517,7 @@
           class:error={errors.url}
           bind:value={formData.url}
           placeholder="https://example.com/species-page"
+          maxlength={MAX_LENGTHS.url}
         />
         {#if errors.url}
           <p class="error-message">{errors.url}</p>
@@ -538,6 +634,24 @@
     margin: 0;
     font-size: 0.8125rem;
     color: var(--color-danger, #dc2626);
+  }
+
+  .field-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .char-count {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .char-count.warning {
+    color: var(--color-warning-text, #b45309);
   }
 
   /* Checkbox styles */
