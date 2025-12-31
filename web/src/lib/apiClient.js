@@ -10,6 +10,7 @@
 
 import { get } from 'svelte/store';
 import { authStore } from './stores/authStore.js';
+import { toast } from './stores/toastStore.js';
 
 // API configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.oakcompendium.com';
@@ -73,6 +74,13 @@ async function fetchApi(endpoint, options = {}) {
         const retryAfter = response.headers.get('Retry-After');
         const retrySeconds = retryAfter ? parseInt(retryAfter, 10) : null;
         throw new RateLimitError('Rate limit exceeded', retrySeconds);
+      }
+
+      // Handle 401 Unauthorized - clear stale API key and notify user
+      if (response.status === 401) {
+        authStore.clearKey();
+        toast.warning('Session expired. Please re-enter your API key.');
+        throw new ApiError('Unauthorized', 401, 'UNAUTHORIZED');
       }
 
       const errorBody = await response.json().catch(() => ({}));
