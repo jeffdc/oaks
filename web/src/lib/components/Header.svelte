@@ -46,12 +46,18 @@
 			</div>
 
 			<!-- Navigation (desktop) -->
-			<nav class="hidden sm:block" aria-label="Main navigation">
+			<nav class="hidden sm:flex items-center gap-1" aria-label="Main navigation">
+				{#if !$isAuthenticated}
+					<a href="{base}/settings/" class="nav-link">Settings</a>
+				{/if}
 				<a href="{base}/about/" class="nav-link">About</a>
 			</nav>
 
 			<!-- Navigation (mobile) -->
-			<nav class="flex sm:hidden items-center w-full justify-end" aria-label="Main navigation">
+			<nav class="flex sm:hidden items-center w-full justify-end gap-1" aria-label="Main navigation">
+				{#if !$isAuthenticated}
+					<a href="{base}/settings/" class="nav-link">Settings</a>
+				{/if}
 				<a href="{base}/about/" class="nav-link">About</a>
 			</nav>
 		</div>
