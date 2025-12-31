@@ -177,8 +177,15 @@
     }
 
     .section-toggle {
-      padding: 0.5rem 0;
-      margin: -0.5rem 0;
+      /* Minimum 44px touch target */
+      min-height: 2.75rem;
+      padding: 0.625rem 0;
+      margin: -0.625rem 0;
+    }
+
+    .toggle-icon {
+      width: 20px;
+      height: 20px;
     }
   }
 </style>

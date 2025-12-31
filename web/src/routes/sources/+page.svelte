@@ -474,8 +474,14 @@
 		}
 
 		.source-action-btn {
-			width: 2rem;
-			height: 2rem;
+			/* Minimum 44x44px touch target */
+			width: 2.75rem;
+			height: 2.75rem;
+		}
+
+		.source-action-btn svg {
+			width: 18px;
+			height: 18px;
 		}
 	}
 

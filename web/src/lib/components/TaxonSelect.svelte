@@ -406,4 +406,45 @@
     background-color: transparent;
     color: var(--color-text-tertiary);
   }
+
+  /* Mobile: Larger touch targets */
+  @media (max-width: 640px) {
+    .taxon-select,
+    .taxon-input {
+      /* Prevent zoom on iOS */
+      font-size: 1rem;
+      min-height: 2.75rem;
+      padding: 0.625rem 0.75rem;
+    }
+
+    .taxon-input {
+      padding-right: 2.75rem;
+    }
+
+    .clear-button {
+      /* Minimum 44x44px touch target */
+      width: 2.75rem;
+      height: 2.75rem;
+      right: 0.25rem;
+    }
+
+    .clear-button svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .suggestions-list {
+      /* More breathing room on mobile */
+      padding: 0.375rem;
+    }
+
+    .suggestion-item {
+      /* Minimum 44px height for touch */
+      min-height: 2.75rem;
+      padding: 0.75rem;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+    }
+  }
 </style>

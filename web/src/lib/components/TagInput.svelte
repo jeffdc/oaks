@@ -258,4 +258,46 @@
   .tag-input:disabled {
     cursor: not-allowed;
   }
+
+  /* Mobile: Larger touch targets and better wrapping */
+  @media (max-width: 640px) {
+    .tag-input-container {
+      min-height: 2.75rem;
+      padding: 0.5rem;
+      gap: 0.5rem;
+    }
+
+    .tag-list {
+      gap: 0.5rem;
+    }
+
+    .tag {
+      padding: 0.25rem 0.375rem 0.25rem 0.625rem;
+      font-size: 0.9375rem;
+    }
+
+    .tag-text {
+      /* Smaller max-width on narrow screens to prevent overflow */
+      max-width: min(150px, 40vw);
+    }
+
+    .tag-remove {
+      /* Minimum 44x44px touch target */
+      width: 2.75rem;
+      height: 2.75rem;
+      /* Visual size stays reasonable */
+      padding: 0.625rem;
+    }
+
+    .tag-remove svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .tag-input {
+      font-size: 1rem;
+      /* Prevent zoom on iOS when focusing */
+      min-height: 2.5rem;
+    }
+  }
 </style>

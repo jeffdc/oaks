@@ -1626,11 +1626,21 @@
     }
 
     .action-btn {
-      padding: 0.5rem;
+      /* Minimum 44x44px touch target */
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      padding: 0.75rem;
+    }
+
+    .action-btn svg {
+      width: 20px;
+      height: 20px;
     }
 
     .edit-disabled-hint {
-      padding: 0.375rem;
+      /* Minimum 44px touch target */
+      min-height: 2.75rem;
+      padding: 0.5rem;
     }
   }
 

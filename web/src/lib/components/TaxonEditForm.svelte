@@ -889,4 +889,62 @@
       transform: rotate(360deg);
     }
   }
+
+  /* Mobile: Larger touch targets and better UX */
+  @media (max-width: 640px) {
+    .field-input,
+    .field-select,
+    .field-textarea {
+      /* Prevent zoom on iOS */
+      font-size: 1rem;
+      min-height: 2.75rem;
+      padding: 0.625rem 0.75rem;
+    }
+
+    .field-textarea {
+      min-height: 5rem;
+    }
+
+    .input-wrapper .field-input {
+      padding-right: 2.75rem;
+    }
+
+    .clear-button {
+      /* Minimum 44x44px touch target */
+      width: 2.75rem;
+      height: 2.75rem;
+      right: 0.25rem;
+    }
+
+    .clear-button svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .suggestion-item {
+      /* Minimum 44px height for touch */
+      min-height: 2.75rem;
+      padding: 0.75rem;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .suggestions-list {
+      padding: 0.375rem;
+    }
+
+    /* Footer buttons take more space on mobile */
+    .btn {
+      min-height: 3rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+    }
+
+    /* Connection warning */
+    .connection-warning {
+      font-size: 0.9375rem;
+      padding: 0.875rem 1rem;
+    }
+  }
 </style>

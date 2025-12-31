@@ -783,4 +783,47 @@
       transform: rotate(360deg);
     }
   }
+
+  /* Mobile: Larger touch targets and better UX */
+  @media (max-width: 640px) {
+    .field-input,
+    .field-textarea {
+      /* Prevent zoom on iOS */
+      font-size: 1rem;
+      min-height: 2.75rem;
+      padding: 0.625rem 0.75rem;
+    }
+
+    .field-textarea {
+      min-height: 5rem;
+    }
+
+    /* Larger checkbox touch target */
+    .checkbox-label {
+      min-height: 2.75rem;
+      padding: 0.5rem 0;
+    }
+
+    .checkbox-input {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .checkbox-text {
+      font-size: 1rem;
+    }
+
+    /* Footer buttons take more space on mobile */
+    .btn {
+      min-height: 3rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+    }
+
+    /* Connection warning */
+    .connection-warning {
+      font-size: 0.9375rem;
+      padding: 0.875rem 1rem;
+    }
+  }
 </style>
