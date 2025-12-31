@@ -1,8 +1,12 @@
 <script>
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
-	import { searchQuery, searchResults, searchLoading, searchError, getPrimarySource } from '$lib/stores/dataStore.js';
-	import { fetchSpecies, ApiError } from '$lib/apiClient.js';
+	import { goto } from '$app/navigation';
+	import { searchQuery, searchResults, searchLoading, searchError, getPrimarySource, forceRefresh } from '$lib/stores/dataStore.js';
+	import { canEdit } from '$lib/stores/authStore.js';
+	import { toast } from '$lib/stores/toastStore.js';
+	import { fetchSpecies, createSpecies, ApiError } from '$lib/apiClient.js';
+	import SpeciesEditForm from './SpeciesEditForm.svelte';
 
 	// Local state for species list (for browsing mode - no search query)
 	let allSpecies = $state([]);
@@ -102,6 +106,47 @@
 	let hasTaxaResults = $derived(isSearching && searchTaxa.length > 0);
 	let hasSourceResults = $derived(isSearching && searchSources.length > 0);
 	let hasSpeciesResults = $derived(displaySpecies.length > 0);
+
+	// Create species modal state
+	let showCreateForm = $state(false);
+
+	function handleAddClick() {
+		showCreateForm = true;
+	}
+
+	// Handle save from create form
+	async function handleCreateSpecies(formData) {
+		try {
+			await createSpecies(formData);
+
+			// Success: show toast and refresh data
+			toast.success(`Species "${formData.name}" created successfully`);
+
+			// Refresh data in background
+			forceRefresh().catch(err => {
+				console.warn('Background refresh failed:', err);
+			});
+
+			// Navigate to the new species detail page
+			goto(`${base}/species/${encodeURIComponent(formData.name)}/`);
+
+			return null; // No errors - signal success to form
+		} catch (err) {
+			if (err instanceof ApiError) {
+				// 400 with field errors - return them so form can display
+				if (err.status === 400 && err.fieldErrors) {
+					return err.fieldErrors;
+				}
+
+				// Other API errors - show toast
+				toast.error(`Failed to create species: ${err.message}`);
+			} else {
+				toast.error('Failed to create species: Network error');
+			}
+
+			throw err; // Re-throw so form stays open
+		}
+	}
 </script>
 
 <div class="species-list">
@@ -149,6 +194,21 @@
 				<span class="count-item">{browseCounts.hybridCount} hybrids</span>
 				<span class="separator">|</span>
 				<span class="count-item count-total">{browseCounts.total} total</span>
+			{/if}
+
+			{#if $canEdit}
+				<button
+					type="button"
+					class="add-species-btn"
+					title="Add new species"
+					onclick={handleAddClick}
+				>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="12" y1="5" x2="12" y2="19"></line>
+						<line x1="5" y1="12" x2="19" y2="12"></line>
+					</svg>
+					<span>Add Species</span>
+				</button>
 			{/if}
 		</div>
 
@@ -280,6 +340,16 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Create Species Modal -->
+{#if showCreateForm}
+	<SpeciesEditForm
+		species={null}
+		isOpen={showCreateForm}
+		onClose={() => showCreateForm = false}
+		onSave={handleCreateSpecies}
+	/>
+{/if}
 
 <style>
 	.results-list {
@@ -469,5 +539,47 @@
 	.retry-button:focus-visible {
 		outline: none;
 		box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.3);
+	}
+
+	/* Add Species button */
+	.add-species-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		margin-left: auto;
+		padding: 0.5rem 0.875rem;
+		border-radius: 0.5rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.15s ease;
+		color: var(--color-forest-700);
+		background-color: var(--color-forest-100);
+		border: 1px solid var(--color-forest-200);
+	}
+
+	.add-species-btn:hover {
+		background-color: var(--color-forest-200);
+		border-color: var(--color-forest-300);
+	}
+
+	.add-species-btn:focus-visible {
+		outline: 2px solid var(--color-forest-500);
+		outline-offset: 2px;
+	}
+
+	.add-species-btn svg {
+		flex-shrink: 0;
+	}
+
+	/* Hide button text on small screens */
+	@media (max-width: 640px) {
+		.add-species-btn span {
+			display: none;
+		}
+
+		.add-species-btn {
+			padding: 0.5rem;
+		}
 	}
 </style>

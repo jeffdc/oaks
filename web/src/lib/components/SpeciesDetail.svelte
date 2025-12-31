@@ -3,8 +3,10 @@
   import { goto } from '$app/navigation';
   import { marked } from 'marked';
   import DOMPurify from 'dompurify';
-  import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName } from '$lib/stores/dataStore.js';
+  import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName, forceRefresh } from '$lib/stores/dataStore.js';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
+  import { toast } from '$lib/stores/toastStore.js';
+  import { updateSpecies, deleteSpecies, ApiError } from '$lib/apiClient.js';
   import { getLogoIcon, getLinkLogoId } from '$lib/icons/index.js';
   import inaturalistLogo from '$lib/icons/inaturalist-logo.svg';
   import SpeciesEditForm from './SpeciesEditForm.svelte';
@@ -44,23 +46,71 @@
   }
 
   // Handle save from edit form
-  async function handleSaveSpecies(updatedSpecies) {
-    // TODO: Implement actual save logic via API
-    console.log('Save species:', updatedSpecies);
-    showEditForm = false;
+  // Returns field errors array if validation failed, null on success
+  // Throws on network/server errors to keep modal open
+  async function handleSaveSpecies(formData) {
+    const originalName = species.name;
+    const newName = formData.name;
+    const nameChanged = originalName !== newName;
+
+    try {
+      await updateSpecies(originalName, formData);
+
+      // Success: show toast and refresh data
+      toast.success(`Species "${newName}" updated successfully`);
+
+      // Refresh data in background
+      forceRefresh().catch(err => {
+        console.warn('Background refresh failed:', err);
+      });
+
+      // Navigate if name changed
+      if (nameChanged) {
+        goto(`${base}/species/${encodeURIComponent(newName)}/`);
+      }
+
+      return null; // No errors - signal success to form
+    } catch (err) {
+      if (err instanceof ApiError) {
+        // 400 with field errors - return them so form can display
+        if (err.status === 400 && err.fieldErrors) {
+          return err.fieldErrors;
+        }
+
+        // Other API errors - show toast
+        toast.error(`Failed to update species: ${err.message}`);
+      } else {
+        toast.error('Failed to update species: Network error');
+      }
+
+      throw err; // Re-throw so form stays open
+    }
   }
 
   // Handle delete confirmation
   async function handleDeleteConfirm() {
     isDeleting = true;
     try {
-      // TODO: Implement actual delete logic via API
-      console.log('Delete species:', species.name);
+      await deleteSpecies(species.name);
+
+      // Success: show toast
+      toast.success(`Species "${species.name}" deleted successfully`);
+
       showDeleteDialog = false;
+
+      // Refresh data in background
+      forceRefresh().catch(err => {
+        console.warn('Background refresh failed:', err);
+      });
+
       // Navigate back to list after delete
       goto(`${base}/list/`);
-    } catch (error) {
-      console.error('Failed to delete species:', error);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(`Failed to delete species: ${err.message}`);
+      } else {
+        toast.error('Failed to delete species: Network error');
+      }
     } finally {
       isDeleting = false;
     }

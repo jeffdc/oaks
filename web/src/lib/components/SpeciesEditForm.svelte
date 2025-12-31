@@ -4,6 +4,7 @@
   import TaxonSelect from './TaxonSelect.svelte';
   import TagInput from './TagInput.svelte';
   import { allSpecies } from '$lib/stores/dataStore.js';
+  import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
 
   /**
    * SpeciesEditForm - Full species editing form using EditModal as wrapper
@@ -60,8 +61,21 @@
   // Track saving state
   let isSaving = false;
 
-  // Validation errors
+  // Validation errors (from client-side validation or server)
   let errors = {};
+
+  // Track if connection was lost mid-edit
+  let connectionLostDuringEdit = false;
+
+  // Watch canEdit - if it becomes false while editing, show warning
+  $: if (isOpen && !$canEdit && !connectionLostDuringEdit) {
+    connectionLostDuringEdit = true;
+  }
+
+  // Reset connection warning when modal reopens with connection available
+  $: if (isOpen && $canEdit) {
+    connectionLostDuringEdit = false;
+  }
 
   // Species autocomplete state for hybrid parents
   let parent1Query = '';
@@ -284,18 +298,67 @@
     return Object.keys(newErrors).length === 0;
   }
 
+  // Map API field names to form field names
+  function mapApiFieldToFormField(apiField) {
+    const fieldMap = {
+      'scientific_name': 'name',
+      'conservation_status': 'conservation_status',
+      'is_hybrid': 'is_hybrid',
+      'author': 'author',
+      'subgenus': 'taxonomy.subgenus',
+      'section': 'taxonomy.section',
+      'subsection': 'taxonomy.subsection',
+      'complex': 'taxonomy.complex',
+      'parent1': 'parent1',
+      'parent2': 'parent2',
+      'hybrids': 'hybrids',
+      'closely_related_to': 'closely_related_to',
+      'synonyms': 'synonyms',
+      'subspecies_varieties': 'subspecies_varieties'
+    };
+    return fieldMap[apiField] || apiField;
+  }
+
+  // Convert API field errors to form errors object
+  function mapFieldErrors(fieldErrors) {
+    const mapped = {};
+    for (const error of fieldErrors) {
+      const formField = mapApiFieldToFormField(error.field);
+      // Use the first error for each field
+      if (!mapped[formField]) {
+        mapped[formField] = error.message;
+      }
+    }
+    return mapped;
+  }
+
   async function handleSave() {
     if (!validate()) {
       return;
     }
 
+    // Check connection before saving
+    if (!$canEdit) {
+      return;
+    }
+
     isSaving = true;
     try {
-      await onSave(formData);
+      // Parent's onSave returns field errors array on 400, or null on success
+      const fieldErrors = await onSave(formData);
+
+      if (fieldErrors && fieldErrors.length > 0) {
+        // Map API field errors to form errors
+        errors = mapFieldErrors(fieldErrors);
+        return; // Don't close modal - keep showing errors
+      }
+
+      // Success - close modal
       onClose();
     } catch (error) {
+      // Error already handled by parent (toast shown)
+      // Modal stays open so user can retry
       console.error('Failed to save species:', error);
-      // Error handling could be enhanced with toast notification
     } finally {
       isSaving = false;
     }
@@ -314,6 +377,18 @@
   {onClose}
   onSave={handleSave}
 >
+  <!-- Connection warning banner -->
+  {#if connectionLostDuringEdit}
+    <div class="connection-warning" role="alert">
+      <svg class="warning-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+      </svg>
+      <span>Connection lost. Your changes are preserved.</span>
+    </div>
+  {/if}
+
   <form class="species-form" on:submit|preventDefault={handleSave}>
     <!-- Section 1: Core Information -->
     <FieldSection title="Core Information">
@@ -346,9 +421,13 @@
           id="species-author"
           type="text"
           class="field-input"
+          class:error={errors.author}
           bind:value={formData.author}
           placeholder="e.g., L. 1753"
         />
+        {#if errors.author}
+          <p class="error-message">{errors.author}</p>
+        {/if}
       </div>
 
       <!-- Is Hybrid checkbox -->
@@ -578,6 +657,32 @@
       </div>
     </FieldSection>
   </form>
+
+  <!-- Custom footer with connection-aware Save button -->
+  <svelte:fragment slot="footer">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      disabled={isSaving}
+      on:click={onClose}
+    >
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      disabled={isSaving || !$canEdit}
+      title={!$canEdit ? getCannotEditReason() : ''}
+      on:click={handleSave}
+    >
+      {#if isSaving}
+        <span class="btn-spinner"></span>
+        <span>Saving...</span>
+      {:else}
+        Save
+      {/if}
+    </button>
+  </svelte:fragment>
 </EditModal>
 
 <style>
@@ -770,5 +875,90 @@
   .suggestion-item.active {
     background-color: var(--color-forest-50);
     color: var(--color-forest-800);
+  }
+
+  /* Connection warning banner */
+  .connection-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: #92400e;
+    background-color: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 0.5rem;
+  }
+
+  .warning-icon {
+    flex-shrink: 0;
+    color: #f59e0b;
+  }
+
+  /* Footer button styles (matching EditModal) */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.5;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    min-height: 2.75rem;
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--color-forest-500);
+    outline-offset: 2px;
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    color: var(--color-text-primary);
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-background);
+    border-color: var(--color-text-tertiary);
+  }
+
+  .btn-primary {
+    color: white;
+    background-color: var(--color-forest-600);
+    border-color: var(--color-forest-600);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-forest-700);
+    border-color: var(--color-forest-700);
+  }
+
+  /* Spinner for save button */
+  .btn-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 </style>
