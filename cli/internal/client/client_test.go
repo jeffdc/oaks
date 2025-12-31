@@ -361,13 +361,16 @@ func TestParseError_UnauthorizedAddsProfileName(t *testing.T) {
 	defer server.Close()
 
 	c := newTestClient(t, server)
-	resp, _ := http.Get(server.URL)
+	resp, err := http.Get(server.URL)
+	if err != nil {
+		t.Fatalf("http.Get failed: %v", err)
+	}
 	defer resp.Body.Close()
 
-	err := c.parseError(resp)
-	apiErr, ok := err.(*APIError)
+	parseErr := c.parseError(resp)
+	apiErr, ok := parseErr.(*APIError)
 	if !ok {
-		t.Fatalf("expected *APIError, got %T", err)
+		t.Fatalf("expected *APIError, got %T", parseErr)
 	}
 	if apiErr.StatusCode != 401 {
 		t.Errorf("StatusCode = %d, want 401", apiErr.StatusCode)
@@ -392,13 +395,16 @@ func TestParseError_ValidationErrors(t *testing.T) {
 	defer server.Close()
 
 	c := newTestClient(t, server)
-	resp, _ := http.Get(server.URL)
+	resp, err := http.Get(server.URL)
+	if err != nil {
+		t.Fatalf("http.Get failed: %v", err)
+	}
 	defer resp.Body.Close()
 
-	err := c.parseError(resp)
-	multiErr, ok := err.(*MultiValidationError)
+	parseErr := c.parseError(resp)
+	multiErr, ok := parseErr.(*MultiValidationError)
 	if !ok {
-		t.Fatalf("expected *MultiValidationError, got %T", err)
+		t.Fatalf("expected *MultiValidationError, got %T", parseErr)
 	}
 	if len(multiErr.Errors) != 2 {
 		t.Errorf("expected 2 validation errors, got %d", len(multiErr.Errors))
