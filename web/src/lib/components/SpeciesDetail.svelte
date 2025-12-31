@@ -3,7 +3,7 @@
   import { goto } from '$app/navigation';
   import { marked } from 'marked';
   import DOMPurify from 'dompurify';
-  import { allSpecies, allSources, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName, forceRefresh } from '$lib/stores/dataStore.js';
+  import { allSpecies, allSources, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName, refreshData } from '$lib/stores/dataStore.js';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
   import { toast } from '$lib/stores/toastStore.js';
   import { updateSpecies, deleteSpecies, updateSpeciesSource, createSpeciesSource, deleteSpeciesSource, ApiError } from '$lib/apiClient.js';
@@ -75,9 +75,7 @@
       toast.success(`Species "${newName}" updated successfully`);
 
       // Refresh data in background
-      forceRefresh().catch(err => {
-        console.warn('Background refresh failed:', err);
-      });
+      refreshData();
 
       // Navigate if name changed
       if (nameChanged) {
@@ -114,9 +112,7 @@
       showDeleteDialog = false;
 
       // Refresh data in background
-      forceRefresh().catch(err => {
-        console.warn('Background refresh failed:', err);
-      });
+      refreshData();
 
       // Navigate back to list after delete
       goto(`${base}/list/`);
@@ -148,9 +144,7 @@
       toast.success('Source data updated successfully');
 
       // Refresh data in background
-      forceRefresh().catch(err => {
-        console.warn('Background refresh failed:', err);
-      });
+      refreshData();
 
       return null; // No errors - signal success to form
     } catch (err) {
@@ -194,9 +188,7 @@
       }
 
       // Refresh data in background
-      forceRefresh().catch(err => {
-        console.warn('Background refresh failed:', err);
-      });
+      refreshData();
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(`Failed to delete source data: ${err.message}`);
@@ -264,9 +256,7 @@
       showAddSourceForm = false;
 
       // Refresh data in background
-      forceRefresh().catch(err => {
-        console.warn('Background refresh failed:', err);
-      });
+      refreshData();
 
       return null; // No errors - signal success to form
     } catch (err) {

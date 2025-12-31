@@ -59,6 +59,7 @@ async function fetchApi(endpoint, options = {}) {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
+      cache: 'no-store',  // Prevent browser caching for API requests
       signal: controller.signal,
       headers: {
         'Accept': 'application/json',
@@ -382,7 +383,7 @@ export async function verifyApiKey(apiKey) {
       signal: controller.signal,
       headers: {
         'Accept': 'application/json',
-        'X-API-Key': apiKey
+        'Authorization': `Bearer ${apiKey}`
       }
     });
 
