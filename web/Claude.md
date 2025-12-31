@@ -39,8 +39,10 @@ web/
 │       │   ├── AboutPage.svelte
 │       │   └── UpdatePrompt.svelte
 │       ├── stores/
-│       │   └── dataStore.js  # Svelte stores for state management
+│       │   ├── dataStore.js  # Svelte stores for species/taxa data
+│       │   └── authStore.js  # Authentication state (API key, session)
 │       ├── db.js             # IndexedDB wrapper (Dexie.js)
+│       ├── apiClient.js      # HTTP client for API requests (editing)
 │       └── tests/            # Test files
 │           ├── setup.js      # Vitest setup
 │           ├── dataStore.test.js
@@ -365,6 +367,165 @@ Static site - can be deployed to:
 - Any static hosting
 
 Build output in `dist/` is fully self-contained.
+
+## Web Editing
+
+The web application supports full CRUD operations for species, taxa, and sources directly from the browser. This allows data management without needing CLI access.
+
+### Overview
+
+- **Create, Read, Update, Delete** for species, species sources, taxa, and sources
+- Requires API key authentication (same key format as CLI/iOS)
+- Changes persist to the SQLite database via the API server
+- Works in both local development (`make dev`) and production modes
+
+### Authentication
+
+**authStore** (`src/lib/stores/authStore.js`) manages authentication state:
+
+- API key stored in `localStorage` (persists across sessions)
+- 24-hour session timeout (auto-logout after inactivity)
+- `canEdit` derived store gates all edit UI elements
+- Session validated on app load and before each API call
+
+```javascript
+// Key exports from authStore
+export const apiKey = writable(null);      // Current API key
+export const canEdit = derived(...);        // Whether editing is enabled
+export function setApiKey(key) {...}        // Store key and start session
+export function clearApiKey() {...}         // Logout
+```
+
+### Edit Components
+
+**Modal and Form Infrastructure:**
+
+| Component | Purpose |
+|-----------|---------|
+| `EditModal.svelte` | Reusable modal wrapper with save/cancel/delete actions |
+| `SpeciesEditForm.svelte` | Edit core species fields (name, author, taxonomy, conservation) |
+| `SpeciesSourceEditForm.svelte` | Edit source-attributed data (leaves, range, etc.) |
+| `TaxonEditForm.svelte` | Edit taxa (subgenera, sections, subsections, complexes) |
+| `SourceEditForm.svelte` | Edit data sources (books, websites, etc.) |
+
+**Helper Components:**
+
+| Component | Purpose |
+|-----------|---------|
+| `FormField.svelte` | Labeled input/textarea with consistent styling |
+| `TagInput.svelte` | Multi-value input for arrays (synonyms, local names) |
+| `TaxonSelect.svelte` | Dropdown for taxonomy selection with hierarchy |
+| `DeleteConfirmDialog.svelte` | Confirmation dialog for destructive actions |
+| `Toast.svelte` | Feedback notifications (success/error messages) |
+| `LoadingSpinner.svelte` | Loading indicator for async operations |
+
+### Data Flow
+
+Edit operations follow this pattern:
+
+```
+User edits form → Submit → API call (POST/PUT/DELETE)
+                              ↓
+                    API updates SQLite database
+                              ↓
+                    refreshData() called
+                              ↓
+                    Fetch fresh quercus_data.json
+                              ↓
+                    Repopulate IndexedDB
+                              ↓
+                    UI reactively updates via stores
+```
+
+Key functions in `dataStore.js`:
+- `refreshData()`: Re-fetches JSON and repopulates IndexedDB
+- `loadSpeciesData()`: Initial data load (also used for refresh)
+
+### API Integration
+
+Edit operations use `apiClient.js` for HTTP requests:
+
+```javascript
+// Example API calls
+await apiClient.updateSpecies(name, speciesData);
+await apiClient.createSource(sourceData);
+await apiClient.deleteSpeciesSource(speciesName, sourceId);
+```
+
+All requests include the API key in the `X-API-Key` header.
+
+### Delete Cascade Behavior
+
+Understanding how deletions propagate is important for maintaining data integrity:
+
+| Entity | On Delete | Constraint |
+|--------|-----------|------------|
+| Species | Auto-deletes all species_sources | Cascades |
+| Taxon | Blocked if species reference it | 409 Conflict |
+| Source | Blocked if species_sources exist | 409 Conflict |
+| Species-Source | No dependents | Always allowed |
+
+**API Response Handling:**
+- `200/204`: Success, refresh data
+- `409 Conflict`: Show constraint error to user
+
+**Error Messages (from DeleteConfirmDialog):**
+- Species: "This will also remove data from X source(s)." (cascade warning)
+- Taxon: "Cannot delete: X species use this taxon." (blocked)
+- Taxon: "Cannot delete: this taxon has X child taxa." (blocked by children)
+- Source: "Cannot delete: X species have data from this source." (blocked)
+
+**UI Behavior:**
+- Species delete shows cascade warning with source count, allows proceeding
+- Taxon/Source delete blocks with clear error message and OK button only
+- All errors display in styled error box with red accent
+- Dialog title changes to "Cannot delete [entity type]" for blocked operations
+
+### Security Notes
+
+**Considerations for the current implementation:**
+
+1. **localStorage for API key**: The API key is stored in browser localStorage. This is acceptable for the single-user scenario but would be vulnerable to XSS attacks in a multi-user environment.
+
+2. **Single-user design**: The editing feature is designed for the project maintainer, not general public editing.
+
+3. **Concurrent tab limitations**: Multiple browser tabs may show stale data after edits. The `refreshData()` call only updates the current tab.
+
+4. **No offline editing**: Edits require an active connection to the API server. Offline mode is read-only.
+
+### Testing Locally
+
+1. **Start the development servers:**
+   ```bash
+   # From project root
+   make dev
+   # This starts API on :8080 and web on :5173
+   ```
+
+2. **Get a test API key:**
+   ```bash
+   cat ~/.oak/config.yaml
+   # Look for the 'key' field under your profile
+   ```
+
+3. **Enable editing in the app:**
+   - Navigate to Settings (gear icon in header)
+   - Enter the API key
+   - Click "Save"
+   - Edit buttons will appear throughout the UI
+
+4. **Verify connection:**
+   - Settings page shows "Connected" status when API key is valid
+   - Toast notifications confirm successful edits
+
+### Adding New Editable Fields
+
+To add a new field to an edit form:
+
+1. Add the field to the appropriate form component (e.g., `SpeciesEditForm.svelte`)
+2. Ensure the API endpoint handles the field
+3. Update the JSON export if the field should appear in the web view
+4. No changes needed to IndexedDB schema (dynamic structure)
 
 ## Future Enhancements
 
