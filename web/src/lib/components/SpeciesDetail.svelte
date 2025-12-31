@@ -232,11 +232,11 @@
 
   // Compute available sources (sources not already present for this species)
   $: existingSourceIds = new Set(sources.map(s => s.source_id));
-  $: availableSources = $allSources.filter(s => !existingSourceIds.has(s.id));
+  $: availableSources = $allSources.filter(s => !existingSourceIds.has(s.source_id));
 
   // Get source info for adding (when user selects from dropdown)
   $: addingSource = addingSourceId
-    ? { source_id: addingSourceId, source_name: $allSources.find(s => s.id === addingSourceId)?.source_name || 'Source' }
+    ? { source_id: addingSourceId, source_name: $allSources.find(s => s.source_id === addingSourceId)?.source_name || 'Source' }
     : null;
 
   // Handle add source button click - toggle dropdown
@@ -748,7 +748,7 @@
                     <button
                       type="button"
                       class="add-source-dropdown-item"
-                      on:click={() => handleSelectSourceToAdd(source.id)}
+                      on:click={() => handleSelectSourceToAdd(source.source_id)}
                     >
                       {source.source_name}
                     </button>

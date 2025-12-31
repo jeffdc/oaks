@@ -5,7 +5,7 @@
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
 
   /**
-   * SpeciesSourceEditForm - Form for editing source-attributed species data
+   * SpeciesSourceEditForm - Form for editing or creating source-attributed species data
    *
    * Uses EditModal as wrapper. Fields match the species_sources table:
    * - local_names (TagInput)
@@ -13,6 +13,10 @@
    *   hardiness_habitat, miscellaneous (textareas)
    * - url (text input with URL validation)
    * - is_preferred (checkbox)
+   *
+   * Supports two modes:
+   * - Edit mode (default): Pre-fills form from sourceData
+   * - Create mode (isCreateMode=true): Empty form for new source association
    */
 
   /** @type {string} Species name (epithet, e.g., "alba") */
@@ -21,6 +25,8 @@
   export let sourceData;
   /** @type {boolean} Whether the modal is open */
   export let isOpen = false;
+  /** @type {boolean} Whether this is create mode (empty form) vs edit mode (pre-filled) */
+  export let isCreateMode = false;
   /** @type {() => void} Handler called when modal should close */
   export let onClose;
   /** @type {(data: Object) => Promise<any>} Handler called with form data when save completes */
@@ -69,22 +75,43 @@
   }
 
   function initializeForm() {
-    formData = {
-      source_id: sourceData.source_id || null,
-      local_names: [...(sourceData.local_names || [])],
-      range: sourceData.range || '',
-      growth_habit: sourceData.growth_habit || '',
-      leaves: sourceData.leaves || '',
-      flowers: sourceData.flowers || '',
-      fruits: sourceData.fruits || '',
-      bark: sourceData.bark || '',
-      twigs: sourceData.twigs || '',
-      buds: sourceData.buds || '',
-      hardiness_habitat: sourceData.hardiness_habitat || '',
-      miscellaneous: sourceData.miscellaneous || '',
-      url: sourceData.url || '',
-      is_preferred: sourceData.is_preferred || false
-    };
+    if (isCreateMode) {
+      // Create mode: empty form but with source_id set
+      formData = {
+        source_id: sourceData.source_id || null,
+        local_names: [],
+        range: '',
+        growth_habit: '',
+        leaves: '',
+        flowers: '',
+        fruits: '',
+        bark: '',
+        twigs: '',
+        buds: '',
+        hardiness_habitat: '',
+        miscellaneous: '',
+        url: '',
+        is_preferred: false
+      };
+    } else {
+      // Edit mode: pre-fill from existing source data
+      formData = {
+        source_id: sourceData.source_id || null,
+        local_names: [...(sourceData.local_names || [])],
+        range: sourceData.range || '',
+        growth_habit: sourceData.growth_habit || '',
+        leaves: sourceData.leaves || '',
+        flowers: sourceData.flowers || '',
+        fruits: sourceData.fruits || '',
+        bark: sourceData.bark || '',
+        twigs: sourceData.twigs || '',
+        buds: sourceData.buds || '',
+        hardiness_habitat: sourceData.hardiness_habitat || '',
+        miscellaneous: sourceData.miscellaneous || '',
+        url: sourceData.url || '',
+        is_preferred: sourceData.is_preferred || false
+      };
+    }
     errors = {};
   }
 
@@ -181,10 +208,15 @@
     }
   }
 
-  // Modal title based on source name
-  $: modalTitle = sourceData?.source_name
-    ? `Edit ${sourceData.source_name} Data`
-    : 'Edit Source Data';
+  // Modal title based on mode and source name
+  $: modalTitle = isCreateMode
+    ? `Add ${sourceData?.source_name || 'Source'} Data`
+    : (sourceData?.source_name
+        ? `Edit ${sourceData.source_name} Data`
+        : 'Edit Source Data');
+
+  // Save button text based on mode
+  $: saveButtonText = isCreateMode ? 'Add' : 'Save';
 </script>
 
 <EditModal
@@ -429,9 +461,9 @@
     >
       {#if isSaving}
         <span class="btn-spinner"></span>
-        <span>Saving...</span>
+        <span>{isCreateMode ? 'Adding...' : 'Saving...'}</span>
       {:else}
-        Save
+        {saveButtonText}
       {/if}
     </button>
   </svelte:fragment>
