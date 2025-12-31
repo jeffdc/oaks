@@ -71,13 +71,18 @@
 		showDeleteDialog = true;
 	}
 
-	// Handle save from edit form
+	// Handle save from edit form (create or update)
 	async function handleSaveSource(formData) {
-		if (!editingSource) return null;
-
 		try {
-			await updateSource(editingSource.id, formData);
-			toast.success('Source updated successfully');
+			if (editingSource) {
+				// Update existing source
+				await updateSource(editingSource.id, formData);
+				toast.success('Source updated successfully');
+			} else {
+				// Create new source
+				await createSource(formData);
+				toast.success('Source created successfully');
+			}
 			// Refresh data to show changes
 			await forceRefresh();
 			sources = await getAllSourcesInfo();
@@ -87,9 +92,11 @@
 				if (error.status === 400 && error.fieldErrors) {
 					return error.fieldErrors;
 				}
-				toast.error(`Failed to update: ${error.message}`);
+				const action = editingSource ? 'update' : 'create';
+				toast.error(`Failed to ${action}: ${error.message}`);
 			} else {
-				toast.error('Failed to update source');
+				const action = editingSource ? 'update' : 'create';
+				toast.error(`Failed to ${action} source`);
 			}
 			throw error;
 		}
@@ -134,7 +141,22 @@
 
 <div class="sources-page">
 	<header class="page-header">
-		<h1 class="page-title">Data Sources</h1>
+		<div class="page-header-row">
+			<h1 class="page-title">Data Sources</h1>
+			{#if $canEdit}
+				<button
+					type="button"
+					class="create-btn"
+					on:click={handleCreateClick}
+				>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="12" y1="5" x2="12" y2="19" />
+						<line x1="5" y1="12" x2="19" y2="12" />
+					</svg>
+					Create Source
+				</button>
+			{/if}
+		</div>
 		<p class="page-subtitle">
 			The Oak Compendium draws from multiple sources to provide comprehensive information about oak species.
 		</p>
@@ -204,8 +226,8 @@
 	{/if}
 </div>
 
-<!-- Edit Source Modal -->
-{#if showEditForm && editingSource}
+<!-- Create/Edit Source Modal -->
+{#if showEditForm}
 	<SourceEditForm
 		source={editingSource}
 		isOpen={showEditForm}
@@ -236,12 +258,49 @@
 		margin-bottom: 2rem;
 	}
 
+	.page-header-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 0.5rem;
+	}
+
 	.page-title {
 		font-family: var(--font-serif);
 		font-size: 1.875rem;
 		font-weight: 700;
 		color: var(--color-forest-800);
-		margin-bottom: 0.5rem;
+		margin: 0;
+	}
+
+	.create-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.5rem 0.875rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: white;
+		background-color: var(--color-forest-600);
+		border: none;
+		border-radius: 0.5rem;
+		cursor: pointer;
+		transition: background-color 0.15s ease;
+		white-space: nowrap;
+	}
+
+	.create-btn:hover {
+		background-color: var(--color-forest-700);
+	}
+
+	.create-btn:focus-visible {
+		outline: 2px solid var(--color-forest-500);
+		outline-offset: 2px;
+	}
+
+	.create-btn svg {
+		flex-shrink: 0;
 	}
 
 	.page-subtitle {
