@@ -118,7 +118,18 @@
 			sources = await getAllSourcesInfo();
 		} catch (error) {
 			if (error instanceof ApiError) {
-				toast.error(`Failed to delete: ${error.message}`);
+				// Handle 409 Conflict - source has species data (constraint violation)
+				if (error.status === 409) {
+					// Update cascade info to show error state in dialog
+					deleteCascadeInfo = {
+						count: 0,
+						type: 'species',
+						message: 'Cannot delete: species have data from this source. Remove this source\'s data from all species first.'
+					};
+					// Dialog stays open and shows error state
+				} else {
+					toast.error(`Failed to delete: ${error.message}`);
+				}
 			} else {
 				toast.error('Failed to delete source');
 			}
