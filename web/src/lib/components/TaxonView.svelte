@@ -110,6 +110,41 @@
     return s.scientific_name || s.name;
   }
 
+  // Count child taxa for a specific taxon (for delete constraint checking)
+  function countChildTaxa(species, path, taxonName) {
+    const depth = path.length;
+    const childPath = [...path, taxonName];
+
+    // At depth 4 (complex level), there are no children
+    if (depth >= 3) return 0;
+
+    const childTaxa = new Set();
+
+    species.forEach(s => {
+      if (!s.taxonomy) return;
+
+      const t = s.taxonomy;
+      const [subgenus, section, subsection] = childPath;
+
+      // Check if species matches the child path
+      if (subgenus && t.subgenus !== subgenus) return;
+      if (section && t.section !== section) return;
+      if (subsection && t.subsection !== subsection) return;
+
+      // Get the grandchild taxon value (one level deeper)
+      let grandchildValue;
+      if (depth === 0) grandchildValue = t.section;       // subgenus → section
+      else if (depth === 1) grandchildValue = t.subsection; // section → subsection
+      else if (depth === 2) grandchildValue = t.complex;    // subsection → complex
+
+      if (grandchildValue && grandchildValue !== 'null') {
+        childTaxa.add(grandchildValue);
+      }
+    });
+
+    return childTaxa.size;
+  }
+
   // Build taxonomy path URL
   function getTaxonUrl(path) {
     if (path.length === 0) return `${base}/taxonomy/`;
@@ -149,8 +184,15 @@
 
     const level = getChildLevel(taxonPath.length);
     deletingTaxon = { name: subTaxon.name, level, count: subTaxon.count };
-    // If there are species using this taxon, show error dialog
-    if (subTaxon.count > 0) {
+
+    // Check for constraints: species count and child taxa count
+    const childCount = countChildTaxa($allSpecies, taxonPath, subTaxon.name);
+
+    if (childCount > 0) {
+      // Has child taxa - cannot delete
+      deleteCascadeInfo = { count: childCount, type: 'children' };
+    } else if (subTaxon.count > 0) {
+      // Has species using this taxon - cannot delete
       deleteCascadeInfo = { count: subTaxon.count, type: 'species' };
     } else {
       deleteCascadeInfo = null;
@@ -196,7 +238,12 @@
       await forceRefresh();
     } catch (error) {
       if (error instanceof ApiError) {
-        toast.error(`Failed to delete: ${error.message}`);
+        if (error.status === 409) {
+          // Constraint violation - show error in dialog instead of toast
+          deleteCascadeInfo = { message: error.message };
+        } else {
+          toast.error(`Failed to delete: ${error.message}`);
+        }
       } else {
         toast.error('Failed to delete taxon');
       }

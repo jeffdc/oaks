@@ -5,7 +5,7 @@
 	export let entityType;
 	/** @type {string} */
 	export let entityName;
-	/** @type {{ count: number, type: string, items?: string[] } | undefined} */
+	/** @type {{ count: number, type: string, items?: string[], message?: string } | undefined} */
 	export let cascadeInfo = undefined;
 	/** @type {boolean} */
 	export let isDeleting = false;
@@ -25,8 +25,9 @@
 	}
 
 	// Check if this is an error state (cannot delete)
-	// Species with blocking hybrids is also an error state
+	// Error if: has direct message (API error), taxon/source with cascade info, or species with blocking hybrids
 	$: isError = cascadeInfo && (
+		cascadeInfo.message ||
 		entityType === 'taxon' ||
 		entityType === 'source' ||
 		(entityType === 'species' && cascadeInfo.type === 'blocking_hybrids')
@@ -46,6 +47,11 @@
 	function getCascadeMessage() {
 		if (!cascadeInfo) return null;
 
+		// Support direct message from API errors (e.g., 409 constraint violations)
+		if (cascadeInfo.message) {
+			return cascadeInfo.message;
+		}
+
 		const { count, type } = cascadeInfo;
 
 		if (entityType === 'species') {
@@ -55,6 +61,9 @@
 			return `This will also remove data from ${count} source${count !== 1 ? 's' : ''}.`;
 		}
 		if (entityType === 'taxon') {
+			if (type === 'children') {
+				return `Cannot delete: this taxon has ${count} child tax${count === 1 ? 'on' : 'a'}.`;
+			}
 			return `Cannot delete: ${count} species use${count === 1 ? 's' : ''} this taxon.`;
 		}
 		if (entityType === 'source') {
