@@ -3,7 +3,7 @@
   import { formatSpeciesName, forceRefresh } from '$lib/stores/dataStore.js';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
   import { toast } from '$lib/stores/toastStore.js';
-  import { fetchTaxaByLevel, fetchSpeciesByTaxon, fetchStats, fetchTaxon, updateTaxon, deleteTaxon, ApiError } from '$lib/apiClient.js';
+  import { fetchTaxaByLevel, fetchSpeciesByTaxon, fetchStats, fetchTaxon, updateTaxon, deleteTaxon, createTaxon, ApiError } from '$lib/apiClient.js';
   import TaxonEditForm from './TaxonEditForm.svelte';
   import DeleteConfirmDialog from './DeleteConfirmDialog.svelte';
 
@@ -63,8 +63,9 @@
     await loadData([...taxonPath]);
   }
 
-  // Edit/Delete modal state
+  // Edit/Delete/Create modal state
   let showEditForm = false;
+  let showCreateForm = false;
   let showDeleteDialog = false;
   let isDeleting = false;
   let editingTaxon = null;
@@ -75,6 +76,9 @@
   let isGenusLevel = $derived(taxonPath.length === 0);
   let taxonLevel = $derived(getTaxonLevel(taxonPath.length));
   let taxonName = $derived(taxonPath[taxonPath.length - 1] || '');
+
+  // Default level for new taxa (child level of current view)
+  let defaultCreateLevel = $derived(getChildLevel(taxonPath.length));
 
   // Use API data directly
   let matchingSpecies = $derived(matchingSpeciesFromApi);
@@ -208,6 +212,33 @@
     deleteCascadeInfo = null;
   }
 
+  // Handle create button click
+  function handleCreateClick() {
+    showCreateForm = true;
+  }
+
+  // Handle save from create form
+  async function handleCreateTaxon(formData) {
+    try {
+      await createTaxon(formData);
+      toast.success(`${getLevelLabel(formData.level)} created successfully`);
+      // Refresh data to show new taxon
+      await forceRefresh();
+      showCreateForm = false;
+      return null; // Success
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 400 && error.fieldErrors) {
+          return error.fieldErrors;
+        }
+        toast.error(`Failed to create: ${error.message}`);
+      } else {
+        toast.error('Failed to create taxon');
+      }
+      throw error;
+    }
+  }
+
   // Get level label for messages
   function getLevelLabel(level) {
     const labels = {
@@ -259,13 +290,29 @@
           {/if}
         </h1>
       </div>
-      <p class="taxon-count">
-        {#if isGenusLevel}
-          {totalSpeciesCount} species
-        {:else}
-          {matchingSpecies.length} species
+      <div class="taxon-current-right">
+        {#if $canEdit && taxonPath.length < 4}
+          <button
+            type="button"
+            class="create-taxon-btn"
+            title={`Create new ${getChildLevel(taxonPath.length)}`}
+            onclick={handleCreateClick}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>Create Taxon</span>
+          </button>
         {/if}
-      </p>
+        <p class="taxon-count">
+          {#if isGenusLevel}
+            {totalSpeciesCount} species
+          {:else}
+            {matchingSpecies.length} species
+          {/if}
+        </p>
+      </div>
     </div>
 
     <!-- Taxonomy path (below name, serves as both navigation and taxonomy display) -->
@@ -369,6 +416,17 @@
   />
 {/if}
 
+<!-- Create Taxon Modal -->
+{#if showCreateForm}
+  <TaxonEditForm
+    taxon={null}
+    defaultLevel={defaultCreateLevel}
+    isOpen={showCreateForm}
+    onClose={() => { showCreateForm = false; }}
+    onSave={handleCreateTaxon}
+  />
+{/if}
+
 <!-- Delete Confirmation Dialog -->
 {#if showDeleteDialog && deletingTaxon}
   <DeleteConfirmDialog
@@ -421,10 +479,47 @@
     margin: 0;
   }
 
+  .taxon-current-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+
   .taxon-count {
     font-size: 0.9375rem;
     color: var(--color-text-secondary);
     margin: 0;
+    flex-shrink: 0;
+  }
+
+  /* Create Taxon button */
+  .create-taxon-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-forest-700);
+    background-color: white;
+    border: 1px solid var(--color-forest-300);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .create-taxon-btn:hover {
+    background-color: var(--color-forest-50);
+    border-color: var(--color-forest-400);
+  }
+
+  .create-taxon-btn:focus-visible {
+    outline: 2px solid var(--color-forest-500);
+    outline-offset: 2px;
+  }
+
+  .create-taxon-btn svg {
     flex-shrink: 0;
   }
 

@@ -1,28 +1,56 @@
 <script>
+  import { onMount } from 'svelte';
   import EditModal from './EditModal.svelte';
   import FieldSection from './FieldSection.svelte';
+  import TagInput from './TagInput.svelte';
+  import { fetchTaxa } from '$lib/apiClient.js';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
 
   /**
-   * TaxonEditForm - Form for editing taxon data
+   * TaxonEditForm - Form for creating and editing taxon data
    *
    * Uses EditModal as wrapper. Fields match the taxa table:
    * - name (text, required)
-   * - level (select, readonly - cannot change level)
-   * - parent (text)
+   * - level (select, editable only in create mode)
+   * - parent (TaxonSelect filtered by valid parent levels)
    * - author (text)
    * - notes (textarea)
-   * - links (array of strings)
+   * - links (TagInput for URLs)
+   *
+   * Parent hierarchy rules:
+   * - subgenus: no parent
+   * - section: parent must be subgenus
+   * - subsection: parent must be section
+   * - complex: parent must be subsection or section
+   *
+   * Create mode: Pass taxon=null and optionally defaultLevel
+   * Edit mode: Pass existing taxon object
    */
 
-  /** @type {Object} Taxon data for pre-fill */
-  export let taxon;
+  /** @type {Object|null} Taxon data for pre-fill (null for create mode) */
+  export let taxon = null;
+  /** @type {string} Default level for create mode (e.g., 'section') */
+  export let defaultLevel = 'subgenus';
   /** @type {boolean} Whether the modal is open */
   export let isOpen = false;
   /** @type {() => void} Handler called when modal should close */
   export let onClose;
   /** @type {(data: Object) => Promise<any>} Handler called with form data when save completes */
   export let onSave;
+
+  // Determine if we're in create mode
+  $: isCreateMode = !taxon;
+
+  // Available taxon levels for create mode dropdown
+  const taxonLevels = [
+    { value: 'subgenus', label: 'Subgenus' },
+    { value: 'section', label: 'Section' },
+    { value: 'subsection', label: 'Subsection' },
+    { value: 'complex', label: 'Complex' }
+  ];
+
+  // Fixed subgenus values (for parent selection when level is 'section')
+  const SUBGENERA = ['Quercus', 'Cerris', 'Cyclobalanopsis'];
 
   // Form state - initialized from taxon prop
   let formData = {
@@ -34,9 +62,6 @@
     links: []
   };
 
-  // Links as newline-separated text for easier editing
-  let linksText = '';
-
   // Track saving state
   let isSaving = false;
 
@@ -45,6 +70,19 @@
 
   // Track if connection was lost mid-edit
   let connectionLostDuringEdit = false;
+
+  // All taxa for parent autocomplete
+  /** @type {Array<{name: string, level: string, parent?: string}>} */
+  let allTaxa = [];
+
+  // Parent autocomplete state
+  let parentQuery = '';
+  /** @type {Array<string>} */
+  let parentSuggestions = [];
+  let isParentOpen = false;
+  let activeParentIndex = -1;
+  /** @type {HTMLInputElement|null} */
+  let parentInputElement = null;
 
   // Watch canEdit - if it becomes false while editing, show warning
   $: if (isOpen && !$canEdit && !connectionLostDuringEdit) {
@@ -57,33 +95,192 @@
   }
 
   // Initialize form when taxon changes or modal opens
-  $: if (isOpen && taxon) {
+  $: if (isOpen) {
     initializeForm();
   }
 
+  // Load taxa for parent autocomplete
+  onMount(async () => {
+    try {
+      allTaxa = await fetchTaxa();
+    } catch (err) {
+      console.error('Failed to load taxa:', err);
+      allTaxa = [];
+    }
+  });
+
   function initializeForm() {
-    formData = {
-      name: taxon.name || '',
-      level: taxon.level || '',
-      parent: taxon.parent || '',
-      author: taxon.author || '',
-      notes: taxon.notes || '',
-      links: [...(taxon.links || [])]
-    };
-    linksText = formData.links.join('\n');
+    if (taxon) {
+      // Edit mode: populate from existing taxon
+      formData = {
+        name: taxon.name || '',
+        level: taxon.level || '',
+        parent: taxon.parent || '',
+        author: taxon.author || '',
+        notes: taxon.notes || '',
+        links: [...(taxon.links || [])]
+      };
+      parentQuery = taxon.parent || '';
+    } else {
+      // Create mode: start with empty form
+      formData = {
+        name: '',
+        level: defaultLevel,
+        parent: '',
+        author: '',
+        notes: '',
+        links: []
+      };
+      parentQuery = '';
+    }
     errors = {};
+    isParentOpen = false;
+    activeParentIndex = -1;
   }
 
-  // Parse links from text
-  function parseLinks(text) {
-    return text
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
+  // Get valid parent levels based on current level
+  function getValidParentLevels(level) {
+    switch (level) {
+      case 'subgenus':
+        return []; // No parent allowed
+      case 'section':
+        return ['subgenus'];
+      case 'subsection':
+        return ['section'];
+      case 'complex':
+        return ['subsection', 'section'];
+      default:
+        return [];
+    }
   }
 
-  // Sync linksText to formData
-  $: formData.links = parseLinks(linksText);
+  // Check if parent field should be shown
+  $: showParentField = formData.level && formData.level !== 'subgenus';
+
+  // Get hint text for parent field
+  $: parentHint = (() => {
+    switch (formData.level) {
+      case 'section':
+        return 'Parent must be a subgenus';
+      case 'subsection':
+        return 'Parent must be a section';
+      case 'complex':
+        return 'Parent must be a section or subsection';
+      default:
+        return '';
+    }
+  })();
+
+  // Filter parent suggestions based on query and valid parent levels
+  $: {
+    const validLevels = getValidParentLevels(formData.level);
+    if (validLevels.length === 0) {
+      parentSuggestions = [];
+    } else if (validLevels.includes('subgenus')) {
+      // For sections, parent is subgenus - use fixed list
+      const query = parentQuery.toLowerCase().trim();
+      parentSuggestions = SUBGENERA.filter(s =>
+        !query || s.toLowerCase().includes(query)
+      );
+    } else {
+      // For subsection/complex, search taxa
+      const query = parentQuery.toLowerCase().trim();
+      parentSuggestions = allTaxa
+        .filter(t => {
+          if (!validLevels.includes(t.level)) return false;
+          if (!query) return true;
+          return t.name.toLowerCase().includes(query);
+        })
+        .map(t => t.name)
+        .sort()
+        .slice(0, 10);
+    }
+  }
+
+  function handleParentInput(event) {
+    parentQuery = event.target.value;
+    formData.parent = parentQuery;
+    isParentOpen = true;
+    activeParentIndex = -1;
+  }
+
+  function selectParent(name) {
+    formData.parent = name;
+    parentQuery = name;
+    isParentOpen = false;
+    activeParentIndex = -1;
+    parentInputElement?.focus();
+  }
+
+  function clearParent() {
+    formData.parent = '';
+    parentQuery = '';
+    isParentOpen = false;
+    activeParentIndex = -1;
+    parentInputElement?.focus();
+  }
+
+  function handleParentKeydown(event) {
+    if (!isParentOpen && event.key !== 'Escape') {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        isParentOpen = true;
+        event.preventDefault();
+        return;
+      }
+    }
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        if (parentSuggestions.length > 0) {
+          activeParentIndex = (activeParentIndex + 1) % parentSuggestions.length;
+        }
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        if (parentSuggestions.length > 0) {
+          activeParentIndex = activeParentIndex <= 0 ? parentSuggestions.length - 1 : activeParentIndex - 1;
+        }
+        break;
+      case 'Enter':
+        event.preventDefault();
+        if (activeParentIndex >= 0 && activeParentIndex < parentSuggestions.length) {
+          selectParent(parentSuggestions[activeParentIndex]);
+        } else {
+          isParentOpen = false;
+        }
+        break;
+      case 'Escape':
+        event.preventDefault();
+        isParentOpen = false;
+        activeParentIndex = -1;
+        break;
+      case 'Tab':
+        isParentOpen = false;
+        activeParentIndex = -1;
+        break;
+    }
+  }
+
+  function handleParentFocus() {
+    isParentOpen = true;
+  }
+
+  function handleParentBlur() {
+    // Delay close to allow click on suggestions
+    setTimeout(() => {
+      isParentOpen = false;
+      activeParentIndex = -1;
+    }, 150);
+  }
+
+  // Clear parent when level changes (in create mode)
+  function handleLevelChange() {
+    if (isCreateMode) {
+      formData.parent = '';
+      parentQuery = '';
+    }
+  }
 
   function validate() {
     const newErrors = {};
@@ -91,6 +288,11 @@
     // Name is required
     if (!formData.name || !formData.name.trim()) {
       newErrors.name = 'Name is required';
+    }
+
+    // Level is required in create mode
+    if (isCreateMode && (!formData.level || !formData.level.trim())) {
+      newErrors.level = 'Level is required';
     }
 
     // Validate URLs if any links provided
@@ -174,7 +376,7 @@
 </script>
 
 <EditModal
-  title="Edit {getLevelLabel(taxon?.level)}: {taxon?.name}"
+  title={isCreateMode ? 'Create Taxon' : `Edit ${getLevelLabel(taxon?.level)}: ${taxon?.name}`}
   {isOpen}
   {isSaving}
   {onClose}
@@ -196,15 +398,33 @@
     <!-- Section 1: Core Information -->
     <FieldSection title="Core Information">
       <div class="field">
-        <label for="taxon-level" class="field-label">Level</label>
-        <input
-          id="taxon-level"
-          type="text"
-          class="field-input"
-          value={getLevelLabel(formData.level)}
-          disabled
-        />
-        <p class="field-hint">Taxon level cannot be changed</p>
+        <label for="taxon-level" class="field-label">Level {#if isCreateMode}<span class="required">*</span>{/if}</label>
+        {#if isCreateMode}
+          <select
+            id="taxon-level"
+            class="field-select"
+            class:error={errors.level}
+            bind:value={formData.level}
+            on:change={handleLevelChange}
+          >
+            <option value="">Select level...</option>
+            {#each taxonLevels as level}
+              <option value={level.value}>{level.label}</option>
+            {/each}
+          </select>
+          {#if errors.level}
+            <p class="error-message">{errors.level}</p>
+          {/if}
+        {:else}
+          <input
+            id="taxon-level"
+            type="text"
+            class="field-input"
+            value={getLevelLabel(formData.level)}
+            disabled
+          />
+          <p class="field-hint">Taxon level cannot be changed</p>
+        {/if}
       </div>
 
       <div class="field">
