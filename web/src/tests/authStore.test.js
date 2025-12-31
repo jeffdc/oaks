@@ -259,4 +259,127 @@ describe('authStore', () => {
       });
     });
   });
+
+  describe('session timeout', () => {
+    it('isSessionValid returns true for fresh key', async () => {
+      setupValidSession('fresh-api-key');
+      const { authStore } = await import('../lib/stores/authStore.js');
+
+      expect(authStore.isSessionValid()).toBe(true);
+    });
+
+    it('isSessionValid returns false when no timestamp exists', async () => {
+      mockStore = { 'oak_api_key': 'key-without-timestamp' };
+      const { authStore } = await import('../lib/stores/authStore.js');
+
+      expect(authStore.isSessionValid()).toBe(false);
+    });
+
+    it('isSessionValid returns false after timeout', async () => {
+      // Set up an expired session (timestamp from 25 hours ago, default timeout is 24 hours)
+      const expiredTimestamp = Date.now() - (25 * 60 * 60 * 1000);
+      localStorageMock.setStore({
+        'oak_api_key': 'expired-key',
+        'oak_api_key_timestamp': String(expiredTimestamp)
+      });
+      const { authStore } = await import('../lib/stores/authStore.js');
+
+      expect(authStore.isSessionValid()).toBe(false);
+    });
+
+    it('isSessionValid respects custom timeout setting', async () => {
+      // Set up a session from 5 hours ago with 6 hour timeout
+      const fiveHoursAgo = Date.now() - (5 * 60 * 60 * 1000);
+      localStorageMock.setStore({
+        'oak_api_key': 'valid-key',
+        'oak_api_key_timestamp': String(fiveHoursAgo),
+        'oak_session_timeout_hours': '6'
+      });
+      const { authStore } = await import('../lib/stores/authStore.js');
+
+      expect(authStore.isSessionValid()).toBe(true);
+    });
+
+    it('isSessionValid returns false when custom timeout exceeded', async () => {
+      // Set up a session from 5 hours ago with 4 hour timeout
+      const fiveHoursAgo = Date.now() - (5 * 60 * 60 * 1000);
+      localStorageMock.setStore({
+        'oak_api_key': 'expired-key',
+        'oak_api_key_timestamp': String(fiveHoursAgo),
+        'oak_session_timeout_hours': '4'
+      });
+      const { authStore } = await import('../lib/stores/authStore.js');
+
+      expect(authStore.isSessionValid()).toBe(false);
+    });
+
+    it('getSessionTimeRemaining returns positive value for valid session', async () => {
+      setupValidSession('fresh-api-key');
+      const { authStore } = await import('../lib/stores/authStore.js');
+
+      const remaining = authStore.getSessionTimeRemaining();
+      expect(remaining).toBeGreaterThan(0);
+      // Should be close to 24 hours (default timeout)
+      const twentyFourHours = 24 * 60 * 60 * 1000;
+      expect(remaining).toBeLessThanOrEqual(twentyFourHours);
+    });
+
+    it('getSessionTimeRemaining returns 0 for expired session', async () => {
+      const expiredTimestamp = Date.now() - (25 * 60 * 60 * 1000);
+      localStorageMock.setStore({
+        'oak_api_key': 'expired-key',
+        'oak_api_key_timestamp': String(expiredTimestamp)
+      });
+      const { authStore } = await import('../lib/stores/authStore.js');
+
+      expect(authStore.getSessionTimeRemaining()).toBe(0);
+    });
+
+    it('getSessionTimeRemaining returns 0 when no timestamp exists', async () => {
+      mockStore = { 'oak_api_key': 'key-without-timestamp' };
+      const { authStore } = await import('../lib/stores/authStore.js');
+
+      expect(authStore.getSessionTimeRemaining()).toBe(0);
+    });
+
+    it('resetSessionTimestamp extends the session', async () => {
+      // Set up a session from 23 hours ago (almost expired)
+      const twentyThreeHoursAgo = Date.now() - (23 * 60 * 60 * 1000);
+      localStorageMock.setStore({
+        'oak_api_key': 'valid-key',
+        'oak_api_key_timestamp': String(twentyThreeHoursAgo)
+      });
+      const { authStore } = await import('../lib/stores/authStore.js');
+
+      // Should have less than 1 hour remaining
+      const remainingBefore = authStore.getSessionTimeRemaining();
+      expect(remainingBefore).toBeLessThan(60 * 60 * 1000);
+
+      // Reset the timestamp
+      authStore.resetSessionTimestamp();
+
+      // Now should have close to 24 hours remaining
+      const remainingAfter = authStore.getSessionTimeRemaining();
+      expect(remainingAfter).toBeGreaterThan(23 * 60 * 60 * 1000);
+    });
+  });
+
+  describe('session timeout configuration', () => {
+    it('getSessionTimeoutHours returns default value', async () => {
+      const { getSessionTimeoutHours } = await import('../lib/stores/authStore.js');
+      expect(getSessionTimeoutHours()).toBe(24);
+    });
+
+    it('getSessionTimeoutHours returns configured value', async () => {
+      mockStore = { 'oak_session_timeout_hours': '12' };
+      const { getSessionTimeoutHours } = await import('../lib/stores/authStore.js');
+      expect(getSessionTimeoutHours()).toBe(12);
+    });
+
+    it('setSessionTimeoutHours persists to localStorage', async () => {
+      const { setSessionTimeoutHours } = await import('../lib/stores/authStore.js');
+      setSessionTimeoutHours(8);
+      expect(localStorageMock.setItem).toHaveBeenCalledWith('oak_session_timeout_hours', '8');
+    });
+  });
 });

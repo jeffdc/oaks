@@ -1,10 +1,12 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   speciesToApiFormat,
   taxonToApiFormat,
   sourceToApiFormat,
   ApiError,
+  RateLimitError,
   fetchWithRetry,
+  verifyApiKey,
   createSpecies,
   updateSpecies,
   deleteSpecies,
@@ -18,6 +20,29 @@ import {
   updateSource,
   deleteSource
 } from '../lib/apiClient.js';
+
+// Mock authStore
+vi.mock('../lib/stores/authStore.js', () => {
+  const mockAuthStore = {
+    subscribe: vi.fn(),
+    setKey: vi.fn(),
+    clearKey: vi.fn()
+  };
+  return {
+    authStore: mockAuthStore,
+    isAuthenticated: { subscribe: vi.fn() }
+  };
+});
+
+// Mock toastStore
+vi.mock('../lib/stores/toastStore.js', () => ({
+  toast: {
+    warning: vi.fn(),
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn()
+  }
+}));
 
 describe('apiClient format conversion functions', () => {
   describe('speciesToApiFormat', () => {
@@ -362,6 +387,183 @@ describe('apiClient format conversion functions', () => {
     it('includes stack trace', () => {
       const error = new ApiError('Test', 500, 'TEST');
       expect(error.stack).toBeDefined();
+    });
+  });
+
+  describe('RateLimitError', () => {
+    it('creates error with retryAfter', () => {
+      const error = new RateLimitError('Rate limit exceeded', 60);
+
+      expect(error.message).toBe('Rate limit exceeded');
+      expect(error.status).toBe(429);
+      expect(error.code).toBe('RATE_LIMITED');
+      expect(error.retryAfter).toBe(60);
+      expect(error.name).toBe('RateLimitError');
+    });
+
+    it('is instanceof ApiError', () => {
+      const error = new RateLimitError('Rate limit exceeded');
+      expect(error).toBeInstanceOf(ApiError);
+    });
+
+    it('has null retryAfter when not provided', () => {
+      const error = new RateLimitError('Rate limit exceeded');
+      expect(error.retryAfter).toBeNull();
+    });
+  });
+});
+
+describe('verifyApiKey', () => {
+  let originalFetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it('returns true for valid API key', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ valid: true })
+    });
+
+    const result = await verifyApiKey('valid-api-key');
+
+    expect(result).toBe(true);
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/auth/verify'),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'X-API-Key': 'valid-api-key'
+        })
+      })
+    );
+  });
+
+  it('returns false for invalid API key (401)', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: () => Promise.resolve({ error: 'Invalid API key' })
+    });
+
+    const result = await verifyApiKey('invalid-api-key');
+
+    expect(result).toBe(false);
+  });
+
+  it('throws ApiError for non-401 error responses', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+      json: () => Promise.resolve({ error: 'Server error' })
+    });
+
+    await expect(verifyApiKey('some-api-key')).rejects.toThrow(ApiError);
+  });
+
+  it('throws ApiError on network error', async () => {
+    global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+
+    await expect(verifyApiKey('some-api-key')).rejects.toThrow(ApiError);
+  });
+
+  it('throws ApiError on timeout', async () => {
+    // Create an AbortError to simulate timeout
+    const abortError = new Error('The operation was aborted');
+    abortError.name = 'AbortError';
+
+    global.fetch = vi.fn().mockRejectedValue(abortError);
+
+    await expect(verifyApiKey('some-api-key')).rejects.toMatchObject({
+      code: 'TIMEOUT'
+    });
+  });
+});
+
+describe('401 response handling', () => {
+  let originalFetch;
+  let authStoreMock;
+  let toastMock;
+
+  beforeEach(async () => {
+    originalFetch = global.fetch;
+    vi.clearAllMocks();
+
+    // Import mocks after clearing
+    const authModule = await import('../lib/stores/authStore.js');
+    const toastModule = await import('../lib/stores/toastStore.js');
+    authStoreMock = authModule.authStore;
+    toastMock = toastModule.toast;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it('clears auth key on 401 response', async () => {
+    // Need to re-import the module to test internal fetchApi function
+    // We'll test this through a public function that uses fetchApi
+    const { fetchSpecies } = await import('../lib/apiClient.js');
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      statusText: 'Unauthorized',
+      headers: new Headers(),
+      json: () => Promise.resolve({ error: 'Unauthorized' })
+    });
+
+    try {
+      await fetchSpecies();
+    } catch {
+      // Expected to throw
+    }
+
+    expect(authStoreMock.clearKey).toHaveBeenCalled();
+  });
+
+  it('shows warning toast on 401 response', async () => {
+    const { fetchSpecies } = await import('../lib/apiClient.js');
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      statusText: 'Unauthorized',
+      headers: new Headers(),
+      json: () => Promise.resolve({ error: 'Unauthorized' })
+    });
+
+    try {
+      await fetchSpecies();
+    } catch {
+      // Expected to throw
+    }
+
+    expect(toastMock.warning).toHaveBeenCalledWith(
+      'Session expired. Please re-enter your API key.'
+    );
+  });
+
+  it('throws ApiError with UNAUTHORIZED code on 401', async () => {
+    const { fetchSpecies } = await import('../lib/apiClient.js');
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      statusText: 'Unauthorized',
+      headers: new Headers(),
+      json: () => Promise.resolve({ error: 'Unauthorized' })
+    });
+
+    await expect(fetchSpecies()).rejects.toMatchObject({
+      status: 401,
+      code: 'UNAUTHORIZED'
     });
   });
 });
