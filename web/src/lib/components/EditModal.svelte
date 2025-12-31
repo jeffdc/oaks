@@ -99,7 +99,40 @@
     }
   }
 
-  // Handle escape key
+  /**
+   * Gets all focusable elements within the modal, excluding hidden and disabled elements.
+   * @returns {HTMLElement[]}
+   */
+  function getFocusableElements() {
+    if (!modalElement) return [];
+
+    const selector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const elements = Array.from(modalElement.querySelectorAll(selector));
+
+    return elements.filter(el => {
+      // Skip disabled elements
+      if (el.disabled) return false;
+
+      // Skip elements with tabindex="-1"
+      if (el.getAttribute('tabindex') === '-1') return false;
+
+      // Skip hidden elements
+      const style = window.getComputedStyle(el);
+      if (style.display === 'none' || style.visibility === 'hidden') return false;
+
+      // Check if any ancestor has display:none (for collapsed sections)
+      let parent = el.parentElement;
+      while (parent && parent !== modalElement) {
+        const parentStyle = window.getComputedStyle(parent);
+        if (parentStyle.display === 'none') return false;
+        parent = parent.parentElement;
+      }
+
+      return true;
+    });
+  }
+
+  // Handle escape key and focus trap
   function handleKeydown(event) {
     if (!isOpen) return;
 
@@ -111,9 +144,9 @@
 
     // Focus trap - cycle through focusable elements
     if (event.key === 'Tab' && modalElement) {
-      const focusableElements = modalElement.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
+      const focusableElements = getFocusableElements();
+      if (focusableElements.length === 0) return;
+
       const firstElement = focusableElements[0];
       const lastElement = focusableElements[focusableElements.length - 1];
 
@@ -152,11 +185,11 @@
     // Focus the modal after it renders
     tick().then(() => {
       if (modalElement) {
-        // Focus the close button or first focusable element
-        const firstFocusable = modalElement.querySelector(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        firstFocusable?.focus();
+        // Focus the first focusable element (uses getFocusableElements to skip hidden/disabled)
+        const focusableElements = getFocusableElements();
+        if (focusableElements.length > 0) {
+          focusableElements[0].focus();
+        }
       }
     });
 

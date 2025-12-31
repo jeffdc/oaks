@@ -7,11 +7,13 @@
 </script>
 
 <!-- Toast container - fixed position at bottom-right (top-right on mobile) -->
-<div class="toast-container" aria-live="polite">
+<div class="toast-container">
   {#each toasts as t (t.id)}
     <div
       class="toast toast-{t.type}"
       role={t.type === 'error' ? 'alert' : 'status'}
+      aria-live={t.type === 'error' ? 'assertive' : 'polite'}
+      aria-atomic="true"
       in:fly={{ x: 100, duration: 300 }}
       out:fade={{ duration: 200 }}
     >
