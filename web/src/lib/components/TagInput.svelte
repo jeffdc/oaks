@@ -225,7 +225,7 @@
     background-color: var(--color-forest-200);
   }
 
-  .tag-remove:focus {
+  .tag-remove:focus-visible {
     outline: 2px solid var(--color-forest-600);
     outline-offset: 1px;
   }

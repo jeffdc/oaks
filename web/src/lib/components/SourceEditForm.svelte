@@ -262,6 +262,26 @@
       isSaving = false;
     }
   }
+
+  /**
+   * Prevents Enter from submitting the form when pressed in text fields.
+   * @param {KeyboardEvent} event
+   */
+  function handleFormKeydown(event) {
+    if (event.key === 'Enter') {
+      const target = event.target;
+      // Allow Enter on buttons and submit inputs
+      if (target.tagName === 'BUTTON' || target.type === 'submit') {
+        return;
+      }
+      // Allow Enter in textareas (for line breaks)
+      if (target.tagName === 'TEXTAREA') {
+        return;
+      }
+      // Prevent Enter from submitting form in text fields
+      event.preventDefault();
+    }
+  }
 </script>
 
 <EditModal
@@ -283,7 +303,7 @@
     </div>
   {/if}
 
-  <form class="source-form" on:submit|preventDefault={handleSave}>
+  <form class="source-form" on:submit|preventDefault={handleSave} on:keydown={handleFormKeydown}>
     <!-- Section 1: Core Information -->
     <FieldSection title="Core Information">
       <div class="field">

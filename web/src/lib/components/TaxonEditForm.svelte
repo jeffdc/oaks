@@ -391,6 +391,26 @@
     };
     return labels[level] || level;
   }
+
+  /**
+   * Prevents Enter from submitting the form when pressed in text fields.
+   * @param {KeyboardEvent} event
+   */
+  function handleFormKeydown(event) {
+    if (event.key === 'Enter') {
+      const target = event.target;
+      // Allow Enter on buttons and submit inputs
+      if (target.tagName === 'BUTTON' || target.type === 'submit') {
+        return;
+      }
+      // Allow Enter in textareas (for line breaks)
+      if (target.tagName === 'TEXTAREA') {
+        return;
+      }
+      // Prevent Enter from submitting form in text fields
+      event.preventDefault();
+    }
+  }
 </script>
 
 <EditModal
@@ -412,7 +432,7 @@
     </div>
   {/if}
 
-  <form class="taxon-form" on:submit|preventDefault={handleSave}>
+  <form class="taxon-form" on:submit|preventDefault={handleSave} on:keydown={handleFormKeydown}>
     <!-- Section 1: Core Information -->
     <FieldSection title="Core Information">
       <div class="field">
@@ -746,6 +766,11 @@
   .clear-button:hover {
     color: var(--color-text-primary);
     background-color: var(--color-border-light);
+  }
+
+  .clear-button:focus-visible {
+    outline: 2px solid var(--color-forest-600);
+    outline-offset: 1px;
   }
 
   .suggestions-list {

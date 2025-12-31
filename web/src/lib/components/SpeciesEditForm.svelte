@@ -381,6 +381,28 @@
   $: modalTitle = species
     ? `Edit Species: Quercus ${species.name}`
     : 'Create New Species';
+
+  /**
+   * Prevents Enter from submitting the form when pressed in text fields.
+   * Allows Enter in buttons (to trigger their action), textareas (for line breaks),
+   * and in cases where the event was already handled (e.g., autocomplete selection).
+   * @param {KeyboardEvent} event
+   */
+  function handleFormKeydown(event) {
+    if (event.key === 'Enter') {
+      const target = event.target;
+      // Allow Enter on buttons and submit inputs
+      if (target.tagName === 'BUTTON' || target.type === 'submit') {
+        return;
+      }
+      // Allow Enter in textareas (for line breaks)
+      if (target.tagName === 'TEXTAREA') {
+        return;
+      }
+      // Prevent Enter from submitting form in text fields
+      event.preventDefault();
+    }
+  }
 </script>
 
 <EditModal
@@ -402,7 +424,7 @@
     </div>
   {/if}
 
-  <form class="species-form" on:submit|preventDefault={handleSave}>
+  <form class="species-form" on:submit|preventDefault={handleSave} on:keydown={handleFormKeydown}>
     <!-- Section 1: Core Information -->
     <FieldSection title="Core Information">
       <!-- Scientific Name (required) -->
@@ -857,6 +879,11 @@
   .clear-button:hover {
     color: var(--color-text-primary);
     background-color: var(--color-border-light);
+  }
+
+  .clear-button:focus-visible {
+    outline: 2px solid var(--color-forest-600);
+    outline-offset: 1px;
   }
 
   .suggestions-list {

@@ -357,6 +357,11 @@
     background-color: var(--color-border-light);
   }
 
+  .clear-button:focus-visible {
+    outline: 2px solid var(--color-forest-600);
+    outline-offset: 1px;
+  }
+
   .suggestions-list {
     position: absolute;
     top: calc(100% + 4px);
