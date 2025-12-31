@@ -740,7 +740,7 @@ See `web/CLAUDE.md` for comprehensive documentation. Key points:
 - **State**: Svelte stores in `dataStore.js`
 - **Routing**: Browser History API (no router library)
 - **Styling**: Tailwind 4 + CSS custom properties
-- **PWA**: Full offline support via `vite-plugin-pwa`
+- **Offline**: IndexedDB caching via Dexie.js (no service worker)
 
 ## Development Environment Setup
 

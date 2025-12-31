@@ -15,8 +15,7 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 - **Framework**: Svelte 5 with runes
 - **Build**: Vite
 - **Styling**: Tailwind CSS 4 + CSS custom properties
-- **Storage**: IndexedDB via Dexie.js (offline-first PWA)
-- **PWA**: vite-plugin-pwa with service worker
+- **Offline Storage**: IndexedDB via Dexie.js (caches data for offline reads, no service worker)
 
 ### CLI Tool (`cli/`)
 - **Language**: Go

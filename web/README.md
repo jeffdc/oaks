@@ -1,6 +1,6 @@
 # Oak Compendium Web Application
 
-A web application for browsing and managing Quercus (oak) species data. Connects to the Oak Compendium API for data access.
+A web application for browsing and managing Quercus (oak) species data. Connects to the Oak Compendium API for data access with offline data caching via IndexedDB.
 
 ## Technology Stack
 
@@ -9,6 +9,7 @@ A web application for browsing and managing Quercus (oak) species data. Connects
 - **Build Tool**: Vite 6
 - **Adapter**: @sveltejs/adapter-static (GitHub Pages)
 - **Testing**: Vitest + @testing-library/svelte, Playwright (E2E)
+- **Offline Storage**: IndexedDB via Dexie.js
 
 ## Prerequisites
 
@@ -108,6 +109,14 @@ The app loads species data from `static/quercus_data.json`, which is:
 - Committed to the repo
 
 For editing operations, the app connects to the API server (production or local).
+
+## Offline Support
+
+- **IndexedDB Caching**: Species data cached locally for offline reads
+- **Network Required for Edits**: CRUD operations require API connectivity
+- **Offline Indicator**: Header shows status when network unavailable
+
+Note: This is not a full PWA - there is no service worker or install-to-homescreen capability.
 
 ## Deployment
 

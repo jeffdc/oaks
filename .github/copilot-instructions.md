@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. It combines a Python web scraper, a Svelte 5 PWA, and a Rust CLI tool for managing taxonomic data.
+The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. It combines a Python web scraper, a Svelte 5 web app, and a Go CLI tool for managing taxonomic data.
 
 **Key Features:**
 - Web scraper for oaksoftheworld.fr
-- Offline-first PWA with IndexedDB storage
+- Offline data caching with IndexedDB
 - Source-attributed taxonomic data model
 - Comprehensive species information (morphology, taxonomy, hybrids)
 
@@ -96,7 +96,7 @@ oaks/
 │   ├── name_parser.py        # Parse species list
 │   ├── parser.py             # Parse individual pages
 │   └── utils.py              # Caching, HTTP, progress
-├── web/                      # Svelte 5 PWA
+├── web/                      # Svelte 5 web app
 │   ├── src/                  # Components and stores
 │   └── vite.config.js        # Build config (copies JSON)
 ├── cli/                      # Rust CLI (in development)
