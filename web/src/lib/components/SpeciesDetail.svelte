@@ -3,10 +3,10 @@
   import { goto } from '$app/navigation';
   import { marked } from 'marked';
   import DOMPurify from 'dompurify';
-  import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName, forceRefresh } from '$lib/stores/dataStore.js';
+  import { allSpecies, allSources, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName, forceRefresh } from '$lib/stores/dataStore.js';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
   import { toast } from '$lib/stores/toastStore.js';
-  import { updateSpecies, deleteSpecies, updateSpeciesSource, ApiError } from '$lib/apiClient.js';
+  import { updateSpecies, deleteSpecies, updateSpeciesSource, createSpeciesSource, deleteSpeciesSource, ApiError } from '$lib/apiClient.js';
   import { getLogoIcon, getLinkLogoId } from '$lib/icons/index.js';
   import inaturalistLogo from '$lib/icons/inaturalist-logo.svg';
   import SpeciesEditForm from './SpeciesEditForm.svelte';
@@ -36,6 +36,16 @@
   // Source editing state
   let showSourceEditForm = false;
   let editingSourceId = null;
+
+  // Add source state
+  let showAddSourceDropdown = false;
+  let addingSourceId = null;
+  let showAddSourceForm = false;
+
+  // Source delete state
+  let showSourceDeleteDialog = false;
+  let deletingSourceId = null;
+  let isDeletingSource = false;
 
   // Get cascade info for delete (count of sources to be removed)
   $: cascadeInfo = sources.length > 0 ? { count: sources.length, type: 'sources' } : undefined;
@@ -160,8 +170,49 @@
     }
   }
 
+  // Handle source delete button click
+  function handleSourceDeleteClick(sourceId) {
+    deletingSourceId = sourceId;
+    showSourceDeleteDialog = true;
+  }
+
+  // Handle source delete confirmation
+  async function handleSourceDeleteConfirm() {
+    isDeletingSource = true;
+    try {
+      await deleteSpeciesSource(species.name, deletingSourceId);
+
+      // Success: show toast
+      toast.success('Source data deleted successfully');
+
+      showSourceDeleteDialog = false;
+      deletingSourceId = null;
+
+      // Reset selected source if we deleted the one being viewed
+      if (selectedSourceId === deletingSourceId) {
+        selectedSourceId = null;
+      }
+
+      // Refresh data in background
+      forceRefresh().catch(err => {
+        console.warn('Background refresh failed:', err);
+      });
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(`Failed to delete source data: ${err.message}`);
+      } else {
+        toast.error('Failed to delete source data: Network error');
+      }
+    } finally {
+      isDeletingSource = false;
+    }
+  }
+
   // Get source data for editing
   $: editingSource = editingSourceId ? sources.find(s => s.source_id === editingSourceId) : null;
+
+  // Get source data for deletion dialog
+  $: deletingSource = deletingSourceId ? sources.find(s => s.source_id === deletingSourceId) : null;
 
   // Get all sources and determine selected source
   $: sources = getAllSources(species);
@@ -178,6 +229,72 @@
     }
   }
   $: selectedSource = sources.find(s => s.source_id === selectedSourceId) || null;
+
+  // Compute available sources (sources not already present for this species)
+  $: existingSourceIds = new Set(sources.map(s => s.source_id));
+  $: availableSources = $allSources.filter(s => !existingSourceIds.has(s.id));
+
+  // Get source info for adding (when user selects from dropdown)
+  $: addingSource = addingSourceId
+    ? { source_id: addingSourceId, source_name: $allSources.find(s => s.id === addingSourceId)?.source_name || 'Source' }
+    : null;
+
+  // Handle add source button click - toggle dropdown
+  function handleAddSourceClick() {
+    showAddSourceDropdown = !showAddSourceDropdown;
+  }
+
+  // Handle selecting a source from the dropdown
+  function handleSelectSourceToAdd(sourceId) {
+    addingSourceId = sourceId;
+    showAddSourceDropdown = false;
+    showAddSourceForm = true;
+  }
+
+  // Handle save from add source form
+  async function handleCreateSource(formData) {
+    try {
+      await createSpeciesSource(species.name, formData);
+
+      // Success: show toast and refresh data
+      toast.success('Source data added successfully');
+
+      // Reset state
+      addingSourceId = null;
+      showAddSourceForm = false;
+
+      // Refresh data in background
+      forceRefresh().catch(err => {
+        console.warn('Background refresh failed:', err);
+      });
+
+      return null; // No errors - signal success to form
+    } catch (err) {
+      if (err instanceof ApiError) {
+        // 400 with field errors - return them so form can display
+        if (err.status === 400 && err.fieldErrors) {
+          return err.fieldErrors;
+        }
+
+        // Other API errors - show toast
+        toast.error(`Failed to add source data: ${err.message}`);
+      } else {
+        toast.error('Failed to add source data: Network error');
+      }
+
+      throw err; // Re-throw so form stays open
+    }
+  }
+
+  // Close dropdown when clicking outside
+  function handleClickOutside(event) {
+    if (showAddSourceDropdown) {
+      const dropdown = event.target.closest('.add-source-wrapper');
+      if (!dropdown) {
+        showAddSourceDropdown = false;
+      }
+    }
+  }
 
   // Build species detail URL
   function getSpeciesUrl(name) {
@@ -610,26 +727,72 @@
               <span>Compare</span>
             </a>
           {/if}
+          {#if $canEdit && availableSources.length > 0}
+            <div class="add-source-wrapper">
+              <button
+                type="button"
+                class="add-source-btn"
+                title="Add data from another source"
+                on:click={handleAddSourceClick}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Add Source</span>
+              </button>
+              {#if showAddSourceDropdown}
+                <div class="add-source-dropdown">
+                  <div class="add-source-dropdown-header">Select a source to add</div>
+                  {#each availableSources as source}
+                    <button
+                      type="button"
+                      class="add-source-dropdown-item"
+                      on:click={() => handleSelectSourceToAdd(source.id)}
+                    >
+                      {source.source_name}
+                    </button>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          {/if}
         </div>
 
         <!-- Source content -->
         <div class="source-content" role="tabpanel">
-          <!-- Source header with Edit button -->
+          <!-- Source header with Edit/Delete buttons -->
           <div class="source-content-header">
             <span class="source-content-title">Data from {selectedSource?.source_name || 'source'}</span>
             {#if $canEdit && selectedSource}
-              <button
-                type="button"
-                class="source-edit-btn"
-                title="Edit source data"
-                on:click={() => handleSourceEditClick(selectedSource.source_id)}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-                <span>Edit</span>
-              </button>
+              <div class="source-actions">
+                <button
+                  type="button"
+                  class="source-edit-btn"
+                  title="Edit source data"
+                  on:click={() => handleSourceEditClick(selectedSource.source_id)}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                  <span>Edit</span>
+                </button>
+                <button
+                  type="button"
+                  class="source-delete-btn"
+                  title="Delete source data"
+                  on:click={() => handleSourceDeleteClick(selectedSource.source_id)}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3,6 5,6 21,6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <line x1="10" y1="11" x2="10" y2="17" />
+                    <line x1="14" y1="11" x2="14" y2="17" />
+                  </svg>
+                  <span>Delete</span>
+                </button>
+              </div>
             {/if}
           </div>
 
@@ -833,6 +996,32 @@
     onSave={handleSaveSource}
   />
 {/if}
+
+<!-- Delete Source Data Confirmation Dialog -->
+{#if showSourceDeleteDialog && deletingSource}
+  <DeleteConfirmDialog
+    entityType="species-source"
+    entityName="{deletingSource.source_name} data for Quercus {species.name}"
+    isDeleting={isDeletingSource}
+    onConfirm={handleSourceDeleteConfirm}
+    onCancel={() => { showSourceDeleteDialog = false; deletingSourceId = null; }}
+  />
+{/if}
+
+<!-- Add Source Data Modal -->
+{#if showAddSourceForm && addingSource}
+  <SpeciesSourceEditForm
+    speciesName={species.name}
+    sourceData={addingSource}
+    isOpen={showAddSourceForm}
+    isCreateMode={true}
+    onClose={() => { showAddSourceForm = false; addingSourceId = null; }}
+    onSave={handleCreateSource}
+  />
+{/if}
+
+<!-- Click outside handler for dropdown -->
+<svelte:window on:click={handleClickOutside} />
 
 <style>
   .species-detail {
@@ -1151,6 +1340,89 @@
     height: 1rem;
   }
 
+  /* Add source button and dropdown */
+  .add-source-wrapper {
+    position: relative;
+    margin-left: 0.5rem;
+  }
+
+  .add-source-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    border: 1px dashed var(--color-forest-300);
+    background: transparent;
+    color: var(--color-forest-600);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    transition: all 0.15s ease;
+  }
+
+  .add-source-btn:hover {
+    background-color: var(--color-forest-50);
+    border-color: var(--color-forest-400);
+    color: var(--color-forest-700);
+  }
+
+  .add-source-btn:focus-visible {
+    outline: 2px solid var(--color-forest-500);
+    outline-offset: 2px;
+  }
+
+  .add-source-btn svg {
+    flex-shrink: 0;
+  }
+
+  .add-source-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.25rem;
+    min-width: 200px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    overflow: hidden;
+  }
+
+  .add-source-dropdown-header {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-forest-50);
+  }
+
+  .add-source-dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    text-align: left;
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+  }
+
+  .add-source-dropdown-item:hover {
+    background-color: var(--color-forest-50);
+  }
+
+  .add-source-dropdown-item:focus-visible {
+    outline: none;
+    background-color: var(--color-forest-100);
+  }
+
   .source-content {
     padding: 1rem;
     display: flex;
@@ -1198,6 +1470,41 @@
   }
 
   .source-edit-btn svg {
+    flex-shrink: 0;
+  }
+
+  .source-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .source-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #dc2626;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .source-delete-btn:hover {
+    background-color: #fee2e2;
+    border-color: #fca5a5;
+  }
+
+  .source-delete-btn:focus-visible {
+    outline: 2px solid #dc2626;
+    outline-offset: 2px;
+  }
+
+  .source-delete-btn svg {
     flex-shrink: 0;
   }
 
