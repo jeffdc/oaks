@@ -1,12 +1,44 @@
 <script>
-	import { authStore, isAuthenticated } from '$lib/stores/authStore.js';
+	import { authStore, isAuthenticated, sessionRemainingMs, getSessionTimeoutHours, setSessionTimeoutHours } from '$lib/stores/authStore.js';
 	import { verifyApiKey, ApiError } from '$lib/apiClient.js';
+	import { toast } from '$lib/stores/toastStore.js';
 
 	let apiKeyInput = $state('');
 	let showPassword = $state(false);
 	let isVerifying = $state(false);
 	let error = $state('');
 	let success = $state('');
+	let timeoutHours = $state(getSessionTimeoutHours());
+
+	/**
+	 * Format remaining time in human-readable format
+	 * @param {number} ms - milliseconds remaining
+	 */
+	function formatTimeRemaining(ms) {
+		if (ms <= 0) return 'Expired';
+
+		const hours = Math.floor(ms / (1000 * 60 * 60));
+		const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+
+		if (hours > 0) {
+			return `${hours}h ${minutes}m`;
+		}
+		return `${minutes}m`;
+	}
+
+	function handleResetSession() {
+		authStore.resetSessionTimestamp();
+		toast.success('Session extended');
+	}
+
+	function handleTimeoutChange(e) {
+		const hours = parseInt(e.target.value, 10);
+		if (hours > 0 && hours <= 168) { // 1 hour to 1 week
+			timeoutHours = hours;
+			setSessionTimeoutHours(hours);
+			toast.success(`Session timeout set to ${hours} hours`);
+		}
+	}
 
 	// Check if already authenticated on mount
 	$effect(() => {
@@ -171,9 +203,38 @@
 						{/if}
 					</dd>
 				</div>
+				{#if $isAuthenticated}
+					<div class="info-item">
+						<dt>Time Remaining</dt>
+						<dd>
+							<span class="time-remaining">{formatTimeRemaining($sessionRemainingMs)}</span>
+							<button
+								type="button"
+								onclick={handleResetSession}
+								class="btn-inline"
+								title="Extend session"
+							>
+								Reset
+							</button>
+						</dd>
+					</div>
+				{/if}
 				<div class="info-item">
 					<dt>Session Timeout</dt>
-					<dd>24 hours (server-side)</dd>
+					<dd>
+						<select
+							value={timeoutHours}
+							onchange={handleTimeoutChange}
+							class="timeout-select"
+						>
+							<option value="1">1 hour</option>
+							<option value="4">4 hours</option>
+							<option value="8">8 hours</option>
+							<option value="24">24 hours</option>
+							<option value="48">48 hours</option>
+							<option value="168">1 week</option>
+						</select>
+					</dd>
 				</div>
 			</dl>
 		</div>
@@ -387,6 +448,9 @@
 	.info-item dd {
 		margin: 0;
 		color: var(--color-text-primary);
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	.status-badge {
@@ -425,5 +489,44 @@
 		width: 1.25rem;
 		height: 1.25rem;
 		color: #d97706;
+	}
+
+	.time-remaining {
+		font-family: var(--font-mono, ui-monospace, monospace);
+		font-size: 0.8125rem;
+		margin-right: 0.5rem;
+	}
+
+	.btn-inline {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--color-forest-600);
+		background: transparent;
+		border: 1px solid var(--color-forest-300);
+		border-radius: 0.25rem;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.btn-inline:hover {
+		background: var(--color-forest-50);
+		border-color: var(--color-forest-400);
+	}
+
+	.timeout-select {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.8125rem;
+		border: 1px solid var(--color-border);
+		border-radius: 0.375rem;
+		background: white;
+		color: var(--color-text-primary);
+		cursor: pointer;
+	}
+
+	.timeout-select:focus {
+		outline: none;
+		border-color: var(--color-forest-500);
+		box-shadow: 0 0 0 2px rgba(34, 139, 34, 0.1);
 	}
 </style>

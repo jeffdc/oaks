@@ -11,16 +11,38 @@ vi.mock('../lib/apiClient.js', () => ({
   checkApiHealth: vi.fn().mockResolvedValue(true)
 }));
 
+// Mock toastStore to prevent side effects in tests
+vi.mock('../lib/stores/toastStore.js', () => ({
+  toast: {
+    warning: vi.fn(),
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn()
+  }
+}));
+
 // Mock localStorage before importing the store
-const localStorageMock = (() => {
-  let store = {};
-  return {
-    getItem: vi.fn((key) => store[key] ?? null),
-    setItem: vi.fn((key, value) => { store[key] = value; }),
-    removeItem: vi.fn((key) => { delete store[key]; }),
-    clear: vi.fn(() => { store = {}; })
+let mockStore = {};
+const localStorageMock = {
+  getItem: vi.fn((key) => mockStore[key] ?? null),
+  setItem: vi.fn((key, value) => { mockStore[key] = value; }),
+  removeItem: vi.fn((key) => { delete mockStore[key]; }),
+  clear: vi.fn(() => { mockStore = {}; }),
+  // Helper to set multiple values for session tests
+  setStore: (newStore) => { mockStore = { ...newStore }; }
+};
+
+/**
+ * Helper to set up a valid session with API key and timestamp
+ * @param {string} apiKey - The API key to store
+ */
+function setupValidSession(apiKey) {
+  const now = Date.now();
+  mockStore = {
+    'oak_api_key': apiKey,
+    'oak_api_key_timestamp': String(now)
   };
-})();
+}
 
 Object.defineProperty(global, 'localStorage', {
   value: localStorageMock,
@@ -45,26 +67,37 @@ describe('authStore', () => {
   beforeEach(async () => {
     // Clear mocks and localStorage between tests
     vi.clearAllMocks();
-    localStorageMock.clear();
+    mockStore = {};
 
     // Re-import the module to get fresh store state
     vi.resetModules();
   });
 
   it('initializes with empty string when localStorage is empty', async () => {
-    localStorageMock.getItem.mockReturnValue(null);
+    // mockStore is already empty from beforeEach
     const { authStore } = await import('../lib/stores/authStore.js');
     expect(get(authStore)).toBe('');
   });
 
-  it('initializes with stored key from localStorage', async () => {
-    localStorageMock.getItem.mockReturnValue('stored-api-key');
+  it('initializes with stored key from localStorage when session is valid', async () => {
+    setupValidSession('stored-api-key');
     const { authStore } = await import('../lib/stores/authStore.js');
     expect(get(authStore)).toBe('stored-api-key');
   });
 
+  it('clears expired session on initialization', async () => {
+    // Set up an expired session (timestamp from 25 hours ago)
+    const expiredTimestamp = Date.now() - (25 * 60 * 60 * 1000);
+    localStorageMock.setStore({
+      'oak_api_key': 'expired-key',
+      'oak_api_key_timestamp': String(expiredTimestamp)
+    });
+    const { authStore } = await import('../lib/stores/authStore.js');
+    expect(get(authStore)).toBe('');
+  });
+
   it('setKey updates store and persists to localStorage', async () => {
-    localStorageMock.getItem.mockReturnValue(null);
+    // mockStore is already empty from beforeEach
     const { authStore } = await import('../lib/stores/authStore.js');
 
     authStore.setKey('new-api-key');
@@ -74,36 +107,37 @@ describe('authStore', () => {
   });
 
   it('clearKey clears store and removes from localStorage', async () => {
-    localStorageMock.getItem.mockReturnValue('existing-key');
+    setupValidSession('existing-key');
     const { authStore } = await import('../lib/stores/authStore.js');
 
     authStore.clearKey();
 
     expect(get(authStore)).toBe('');
     expect(localStorageMock.removeItem).toHaveBeenCalledWith('oak_api_key');
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith('oak_api_key_timestamp');
   });
 
   describe('isAuthenticated derived store', () => {
     it('returns false when no key is set', async () => {
-      localStorageMock.getItem.mockReturnValue(null);
+      // mockStore is already empty from beforeEach
       const { isAuthenticated } = await import('../lib/stores/authStore.js');
       expect(get(isAuthenticated)).toBe(false);
     });
 
     it('returns false when key is empty string', async () => {
-      localStorageMock.getItem.mockReturnValue('');
+      mockStore = { 'oak_api_key': '' };
       const { isAuthenticated } = await import('../lib/stores/authStore.js');
       expect(get(isAuthenticated)).toBe(false);
     });
 
-    it('returns true when key is set', async () => {
-      localStorageMock.getItem.mockReturnValue('valid-api-key');
+    it('returns true when key is set with valid session', async () => {
+      setupValidSession('valid-api-key');
       const { isAuthenticated } = await import('../lib/stores/authStore.js');
       expect(get(isAuthenticated)).toBe(true);
     });
 
     it('updates reactively when key is set', async () => {
-      localStorageMock.getItem.mockReturnValue(null);
+      // mockStore is already empty from beforeEach
       const { authStore, isAuthenticated } = await import('../lib/stores/authStore.js');
 
       expect(get(isAuthenticated)).toBe(false);
@@ -113,7 +147,7 @@ describe('authStore', () => {
     });
 
     it('updates reactively when key is cleared', async () => {
-      localStorageMock.getItem.mockReturnValue('existing-key');
+      setupValidSession('existing-key');
       const { authStore, isAuthenticated } = await import('../lib/stores/authStore.js');
 
       expect(get(isAuthenticated)).toBe(true);
@@ -136,7 +170,7 @@ describe('authStore', () => {
 
     describe('canEdit derived store', () => {
       it('returns true when authenticated, online, and API available', async () => {
-        localStorageMock.getItem.mockReturnValue('valid-api-key');
+        setupValidSession('valid-api-key');
         const { canEdit, isOnline, apiAvailable } = await import('../lib/stores/authStore.js');
 
         isOnline.set(true);
@@ -146,7 +180,7 @@ describe('authStore', () => {
       });
 
       it('returns false when not authenticated', async () => {
-        localStorageMock.getItem.mockReturnValue(null);
+        localStorageMock.setStore({});
         const { canEdit, isOnline, apiAvailable } = await import('../lib/stores/authStore.js');
 
         isOnline.set(true);
@@ -156,7 +190,7 @@ describe('authStore', () => {
       });
 
       it('returns false when offline', async () => {
-        localStorageMock.getItem.mockReturnValue('valid-api-key');
+        setupValidSession('valid-api-key');
         const { canEdit, isOnline, apiAvailable } = await import('../lib/stores/authStore.js');
 
         isOnline.set(false);
@@ -166,7 +200,7 @@ describe('authStore', () => {
       });
 
       it('returns false when API unavailable', async () => {
-        localStorageMock.getItem.mockReturnValue('valid-api-key');
+        setupValidSession('valid-api-key');
         const { canEdit, isOnline, apiAvailable } = await import('../lib/stores/authStore.js');
 
         isOnline.set(true);
@@ -178,7 +212,7 @@ describe('authStore', () => {
 
     describe('getCannotEditReason', () => {
       it('returns null when can edit', async () => {
-        localStorageMock.getItem.mockReturnValue('valid-api-key');
+        setupValidSession('valid-api-key');
         const { getCannotEditReason, isOnline, apiAvailable } = await import('../lib/stores/authStore.js');
 
         isOnline.set(true);
@@ -188,14 +222,14 @@ describe('authStore', () => {
       });
 
       it('returns "Not authenticated" when no API key', async () => {
-        localStorageMock.getItem.mockReturnValue(null);
+        localStorageMock.setStore({});
         const { getCannotEditReason } = await import('../lib/stores/authStore.js');
 
         expect(getCannotEditReason()).toBe('Not authenticated');
       });
 
       it('returns "Offline" when offline', async () => {
-        localStorageMock.getItem.mockReturnValue('valid-api-key');
+        setupValidSession('valid-api-key');
         const { getCannotEditReason, isOnline } = await import('../lib/stores/authStore.js');
 
         isOnline.set(false);
@@ -204,7 +238,7 @@ describe('authStore', () => {
       });
 
       it('returns "API unavailable" when API is down', async () => {
-        localStorageMock.getItem.mockReturnValue('valid-api-key');
+        setupValidSession('valid-api-key');
         const { getCannotEditReason, isOnline, apiAvailable } = await import('../lib/stores/authStore.js');
 
         isOnline.set(true);
@@ -214,7 +248,7 @@ describe('authStore', () => {
       });
 
       it('returns first failing condition (priority order)', async () => {
-        localStorageMock.getItem.mockReturnValue(null);
+        localStorageMock.setStore({});
         const { getCannotEditReason, isOnline, apiAvailable } = await import('../lib/stores/authStore.js');
 
         isOnline.set(false);
