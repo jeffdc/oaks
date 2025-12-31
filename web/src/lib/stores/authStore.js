@@ -1,19 +1,26 @@
 // authStore.js - API key management with localStorage persistence
 import { writable, derived } from 'svelte/store';
+import { browser } from '$app/environment';
 
 const API_KEY_STORAGE_KEY = 'oak_api_key';
 
 function createAuthStore() {
-  const apiKey = writable(localStorage.getItem(API_KEY_STORAGE_KEY) || '');
+  // Only access localStorage in browser (not during SSR)
+  const initialValue = browser ? localStorage.getItem(API_KEY_STORAGE_KEY) || '' : '';
+  const apiKey = writable(initialValue);
 
   return {
     subscribe: apiKey.subscribe,
     setKey: (key) => {
-      localStorage.setItem(API_KEY_STORAGE_KEY, key);
+      if (browser) {
+        localStorage.setItem(API_KEY_STORAGE_KEY, key);
+      }
       apiKey.set(key);
     },
     clearKey: () => {
-      localStorage.removeItem(API_KEY_STORAGE_KEY);
+      if (browser) {
+        localStorage.removeItem(API_KEY_STORAGE_KEY);
+      }
       apiKey.set('');
     }
   };
