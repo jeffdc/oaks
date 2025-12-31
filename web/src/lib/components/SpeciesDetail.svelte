@@ -6,10 +6,11 @@
   import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName, forceRefresh } from '$lib/stores/dataStore.js';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
   import { toast } from '$lib/stores/toastStore.js';
-  import { updateSpecies, deleteSpecies, ApiError } from '$lib/apiClient.js';
+  import { updateSpecies, deleteSpecies, updateSpeciesSource, ApiError } from '$lib/apiClient.js';
   import { getLogoIcon, getLinkLogoId } from '$lib/icons/index.js';
   import inaturalistLogo from '$lib/icons/inaturalist-logo.svg';
   import SpeciesEditForm from './SpeciesEditForm.svelte';
+  import SpeciesSourceEditForm from './SpeciesSourceEditForm.svelte';
   import DeleteConfirmDialog from './DeleteConfirmDialog.svelte';
 
   // Configure marked for safe rendering
@@ -31,6 +32,10 @@
   let showEditForm = false;
   let showDeleteDialog = false;
   let isDeleting = false;
+
+  // Source editing state
+  let showSourceEditForm = false;
+  let editingSourceId = null;
 
   // Get cascade info for delete (count of sources to be removed)
   $: cascadeInfo = sources.length > 0 ? { count: sources.length, type: 'sources' } : undefined;
@@ -115,6 +120,48 @@
       isDeleting = false;
     }
   }
+
+  // Handle source edit button click
+  function handleSourceEditClick(sourceId) {
+    editingSourceId = sourceId;
+    showSourceEditForm = true;
+  }
+
+  // Handle save from source edit form
+  // Returns field errors array if validation failed, null on success
+  // Throws on network/server errors to keep modal open
+  async function handleSaveSource(formData) {
+    try {
+      await updateSpeciesSource(species.name, editingSourceId, formData);
+
+      // Success: show toast and refresh data
+      toast.success('Source data updated successfully');
+
+      // Refresh data in background
+      forceRefresh().catch(err => {
+        console.warn('Background refresh failed:', err);
+      });
+
+      return null; // No errors - signal success to form
+    } catch (err) {
+      if (err instanceof ApiError) {
+        // 400 with field errors - return them so form can display
+        if (err.status === 400 && err.fieldErrors) {
+          return err.fieldErrors;
+        }
+
+        // Other API errors - show toast
+        toast.error(`Failed to update source data: ${err.message}`);
+      } else {
+        toast.error('Failed to update source data: Network error');
+      }
+
+      throw err; // Re-throw so form stays open
+    }
+  }
+
+  // Get source data for editing
+  $: editingSource = editingSourceId ? sources.find(s => s.source_id === editingSourceId) : null;
 
   // Get all sources and determine selected source
   $: sources = getAllSources(species);
@@ -567,6 +614,25 @@
 
         <!-- Source content -->
         <div class="source-content" role="tabpanel">
+          <!-- Source header with Edit button -->
+          <div class="source-content-header">
+            <span class="source-content-title">Data from {selectedSource?.source_name || 'source'}</span>
+            {#if $canEdit && selectedSource}
+              <button
+                type="button"
+                class="source-edit-btn"
+                title="Edit source data"
+                on:click={() => handleSourceEditClick(selectedSource.source_id)}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+                <span>Edit</span>
+              </button>
+            {/if}
+          </div>
+
           {#if selectedSource?.range}
             <section class="source-field">
               <h3 class="field-header">
@@ -754,6 +820,17 @@
     {isDeleting}
     onConfirm={handleDeleteConfirm}
     onCancel={() => showDeleteDialog = false}
+  />
+{/if}
+
+<!-- Edit Source Data Modal -->
+{#if showSourceEditForm && editingSource}
+  <SpeciesSourceEditForm
+    speciesName={species.name}
+    sourceData={editingSource}
+    isOpen={showSourceEditForm}
+    onClose={() => { showSourceEditForm = false; editingSourceId = null; }}
+    onSave={handleSaveSource}
   />
 {/if}
 
@@ -1079,6 +1156,49 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .source-content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border-light, var(--color-border));
+  }
+
+  .source-content-title {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+
+  .source-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-forest-700);
+    background-color: var(--color-forest-50);
+    border: 1px solid var(--color-forest-200);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .source-edit-btn:hover {
+    background-color: var(--color-forest-100);
+    border-color: var(--color-forest-300);
+  }
+
+  .source-edit-btn:focus-visible {
+    outline: 2px solid var(--color-forest-500);
+    outline-offset: 2px;
+  }
+
+  .source-edit-btn svg {
+    flex-shrink: 0;
   }
 
   .source-field {
