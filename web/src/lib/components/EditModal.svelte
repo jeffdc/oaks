@@ -5,7 +5,14 @@
   /**
    * EditModal - Reusable modal container for edit forms
    *
-   * Usage:
+   * Features:
+   * - Fixed header/footer with scrollable content area
+   * - Full-screen on mobile devices (<640px)
+   * - Large touch targets for mobile
+   * - Native scroll momentum on iOS
+   * - Focus trap and keyboard navigation
+   *
+   * Basic usage:
    *   <EditModal
    *     title="Edit Species"
    *     isOpen={showModal}
@@ -14,6 +21,19 @@
    *     onSave={handleSave}
    *   >
    *     <form>...</form>
+   *   </EditModal>
+   *
+   * With FieldSection for grouped forms:
+   *   <EditModal title="Edit Species" ...>
+   *     <FieldSection title="Core Information">
+   *       <input type="text" ... />
+   *     </FieldSection>
+   *     <FieldSection title="Taxonomy">
+   *       <select>...</select>
+   *     </FieldSection>
+   *     <FieldSection title="Related Species" collapsible collapsed>
+   *       <!-- Less frequently edited fields -->
+   *     </FieldSection>
    *   </EditModal>
    */
 
@@ -214,7 +234,7 @@
     flex-direction: column;
     width: 100%;
     max-width: 40rem;
-    max-height: calc(100vh - 2rem);
+    max-height: 85vh;
     background-color: var(--color-surface);
     border-radius: 0.75rem;
     box-shadow: var(--shadow-xl);
@@ -222,6 +242,9 @@
   }
 
   .modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -243,13 +266,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: 2.5rem;
+    height: 2.5rem;
     padding: 0;
     color: var(--color-text-secondary);
     background: none;
     border: none;
-    border-radius: 0.375rem;
+    border-radius: 0.5rem;
     cursor: pointer;
     transition: background-color 0.15s ease, color 0.15s ease;
   }
@@ -257,6 +280,11 @@
   .close-button:hover:not(:disabled) {
     background-color: var(--color-forest-100);
     color: var(--color-forest-700);
+  }
+
+  .close-button:focus-visible {
+    outline: 2px solid var(--color-forest-500);
+    outline-offset: 2px;
   }
 
   .close-button:disabled {
@@ -269,9 +297,16 @@
     overflow-y: auto;
     padding: 1.25rem;
     min-height: 0;
+    /* Native scroll momentum on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
   }
 
   .modal-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -288,7 +323,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0.625rem 1.25rem;
     font-size: 0.9375rem;
     font-weight: 500;
     line-height: 1.5;
@@ -296,6 +331,13 @@
     border-radius: 0.5rem;
     cursor: pointer;
     transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    /* Minimum touch target size */
+    min-height: 2.75rem;
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--color-forest-500);
+    outline-offset: 2px;
   }
 
   .btn:disabled {
@@ -325,21 +367,71 @@
     border-color: var(--color-forest-700);
   }
 
-  /* Responsive adjustments */
+  /* Mobile: Full-screen modal */
   @media (max-width: 640px) {
     .modal-backdrop {
-      padding: 0.5rem;
+      padding: 0;
+      align-items: stretch;
     }
 
     .modal-container {
-      max-height: calc(100vh - 1rem);
+      max-width: none;
+      max-height: none;
+      height: 100%;
+      border-radius: 0;
+    }
+
+    .modal-header {
+      padding: 0.875rem 1rem;
+    }
+
+    .modal-title {
+      font-size: 1.125rem;
+    }
+
+    .modal-content {
+      padding: 1rem;
+    }
+
+    .modal-footer {
+      padding: 0.875rem 1rem;
+      /* Safe area for devices with home indicator */
+      padding-bottom: max(0.875rem, env(safe-area-inset-bottom));
+    }
+
+    /* Larger touch targets on mobile */
+    .btn {
+      min-height: 3rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+    }
+
+    .close-button {
+      width: 2.75rem;
+      height: 2.75rem;
+    }
+
+    .close-button svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  /* Small height devices (landscape phone) */
+  @media (max-height: 500px) {
+    .modal-container {
+      max-height: 100vh;
     }
 
     .modal-header,
-    .modal-content,
     .modal-footer {
-      padding-left: 1rem;
-      padding-right: 1rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .modal-content {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
     }
   }
 </style>
