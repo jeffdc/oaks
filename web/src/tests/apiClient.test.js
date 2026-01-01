@@ -438,7 +438,7 @@ describe('verifyApiKey', () => {
       expect.stringContaining('/api/v1/auth/verify'),
       expect.objectContaining({
         headers: expect.objectContaining({
-          'X-API-Key': 'valid-api-key'
+          'Authorization': 'Bearer valid-api-key'
         })
       })
     );

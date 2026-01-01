@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
@@ -44,9 +45,14 @@ func validateSpeciesSourceRequest(req SpeciesSourceRequest) []ValidationError {
 
 // handleListSpeciesSources handles GET /api/v1/species/{name}/sources
 func (s *Server) handleListSpeciesSources(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
-	if name == "" {
+	nameEncoded := chi.URLParam(r, "name")
+	if nameEncoded == "" {
 		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "species name is required")
+		return
+	}
+	name, err := url.PathUnescape(nameEncoded)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid species name encoding")
 		return
 	}
 
@@ -79,15 +85,20 @@ func (s *Server) handleListSpeciesSources(w http.ResponseWriter, r *http.Request
 
 // handleGetSpeciesSource handles GET /api/v1/species/{name}/sources/{sourceId}
 func (s *Server) handleGetSpeciesSource(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
-	if name == "" {
+	nameEncoded := chi.URLParam(r, "name")
+	if nameEncoded == "" {
 		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "species name is required")
+		return
+	}
+	name, err := url.PathUnescape(nameEncoded)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid species name encoding")
 		return
 	}
 
 	sourceIDParam := chi.URLParam(r, "sourceId")
-	sourceID, err := strconv.ParseInt(sourceIDParam, 10, 64)
-	if err != nil {
+	sourceID, parseErr := strconv.ParseInt(sourceIDParam, 10, 64)
+	if parseErr != nil {
 		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid source ID")
 		return
 	}
@@ -120,9 +131,14 @@ func (s *Server) handleGetSpeciesSource(w http.ResponseWriter, r *http.Request) 
 
 // handleCreateSpeciesSource handles POST /api/v1/species/{name}/sources
 func (s *Server) handleCreateSpeciesSource(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
-	if name == "" {
+	nameEncoded := chi.URLParam(r, "name")
+	if nameEncoded == "" {
 		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "species name is required")
+		return
+	}
+	name, err := url.PathUnescape(nameEncoded)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid species name encoding")
 		return
 	}
 
@@ -185,21 +201,26 @@ func (s *Server) handleCreateSpeciesSource(w http.ResponseWriter, r *http.Reques
 
 // handleUpdateSpeciesSource handles PUT /api/v1/species/{name}/sources/{sourceId}
 func (s *Server) handleUpdateSpeciesSource(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
-	if name == "" {
+	nameEncoded := chi.URLParam(r, "name")
+	if nameEncoded == "" {
 		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "species name is required")
+		return
+	}
+	name, err := url.PathUnescape(nameEncoded)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid species name encoding")
 		return
 	}
 
 	sourceIDParam := chi.URLParam(r, "sourceId")
-	sourceID, err := strconv.ParseInt(sourceIDParam, 10, 64)
-	if err != nil {
+	sourceID, parseErr := strconv.ParseInt(sourceIDParam, 10, 64)
+	if parseErr != nil {
 		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid source ID")
 		return
 	}
 
 	var req SpeciesSourceRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if decodeErr := json.NewDecoder(r.Body).Decode(&req); decodeErr != nil {
 		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid JSON body")
 		return
 	}
@@ -241,15 +262,20 @@ func (s *Server) handleUpdateSpeciesSource(w http.ResponseWriter, r *http.Reques
 
 // handleDeleteSpeciesSource handles DELETE /api/v1/species/{name}/sources/{sourceId}
 func (s *Server) handleDeleteSpeciesSource(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
-	if name == "" {
+	nameEncoded := chi.URLParam(r, "name")
+	if nameEncoded == "" {
 		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "species name is required")
+		return
+	}
+	name, err := url.PathUnescape(nameEncoded)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid species name encoding")
 		return
 	}
 
 	sourceIDParam := chi.URLParam(r, "sourceId")
-	sourceID, err := strconv.ParseInt(sourceIDParam, 10, 64)
-	if err != nil {
+	sourceID, parseErr := strconv.ParseInt(sourceIDParam, 10, 64)
+	if parseErr != nil {
 		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid source ID")
 		return
 	}

@@ -63,7 +63,8 @@ The web application SHALL allow authenticated users to create, update, and delet
 
 #### Scenario: Delete species
 - **WHEN** authenticated user clicks Delete on species detail
-- **THEN** confirmation dialog appears
+- **THEN** confirmation dialog appears showing species name and source data count
+- **AND** dialog warns "This will also remove data from X sources"
 - **AND** confirming sends DELETE request to API
 - **AND** user is redirected to species list
 - **AND** species is removed from list
@@ -76,25 +77,35 @@ The web application SHALL allow authenticated users to create, update, and delet
 
 ### Requirement: Species-Source Editing
 
-The web application SHALL allow authenticated users to manage source-attributed data for species.
+The web application SHALL allow authenticated users to manage source-attributed data for any source associated with a species. This is a core feature - each species can have data from multiple sources, and users must be able to edit any source's data.
 
-#### Scenario: Add source data to species
+#### Scenario: Edit button per source tab
+- **WHEN** authenticated user views species detail
+- **THEN** each source tab displays an Edit button
+- **AND** Edit button is specific to that source's data
+
+#### Scenario: Edit source data for displayed source
+- **WHEN** authenticated user views a source tab (e.g., "Oaks of the World")
+- **AND** clicks Edit on that tab
+- **THEN** form opens pre-filled with THAT source's data (leaves, range, local_names, etc.)
+- **AND** form clearly indicates which source is being edited
+- **AND** saving sends PUT to `/api/v1/species/{name}/sources/{source_id}`
+- **AND** source tab refreshes with updated data
+
+#### Scenario: Add source data from new source
 - **WHEN** authenticated user views species detail
 - **AND** clicks "Add Source Data"
-- **THEN** form opens for source-attributed fields
+- **THEN** form opens with source selector dropdown
+- **AND** dropdown shows sources not yet associated with this species
 - **AND** user selects source and enters data
 - **AND** saving sends POST to `/api/v1/species/{name}/sources`
-
-#### Scenario: Edit source data
-- **WHEN** authenticated user clicks Edit on a source section
-- **THEN** form opens with current source data
-- **AND** saving sends PUT to `/api/v1/species/{name}/sources/{source_id}`
+- **AND** new source tab appears in species detail
 
 #### Scenario: Delete source data
-- **WHEN** authenticated user clicks Delete on a source section
+- **WHEN** authenticated user clicks Delete on a source tab
 - **AND** confirms deletion
-- **THEN** DELETE request removes source data
-- **AND** source section is removed from display
+- **THEN** DELETE request removes that source's data for this species
+- **AND** source tab is removed from display
 
 ### Requirement: Taxa Editing
 
@@ -140,6 +151,22 @@ The web application SHALL allow authenticated users to create, update, and delet
 - **THEN** DELETE request removes source
 - **AND** source is removed from list
 
+### Requirement: Delete Confirmation
+
+The web application SHALL require explicit confirmation before executing any delete operation.
+
+#### Scenario: Delete confirmation required
+- **WHEN** authenticated user initiates any delete operation (species, taxon, source, species-source)
+- **THEN** confirmation dialog appears before the delete is executed
+- **AND** dialog clearly identifies what will be deleted
+- **AND** user must explicitly confirm to proceed
+- **AND** cancel returns user to previous state without changes
+
+#### Scenario: Delete confirmation shows cascade effects
+- **WHEN** deletion would cascade to related data
+- **THEN** confirmation dialog warns about cascade effects
+- **AND** dialog shows count of related records that will be deleted
+
 ### Requirement: Error Handling
 
 The web application SHALL gracefully handle authentication and API errors during write operations.
@@ -180,3 +207,78 @@ The web application SHALL maintain data consistency between local state and serv
 - **WHEN** entity is deleted successfully
 - **THEN** entity is removed from all views
 - **AND** user is navigated away from deleted entity
+
+### Requirement: Offline Behavior
+
+The web application SHALL disable editing when offline and handle connection changes gracefully.
+
+#### Scenario: Edit buttons hidden when offline
+- **WHEN** user is not connected to network
+- **AND** user is authenticated
+- **THEN** edit/create/delete buttons are hidden or disabled
+- **AND** tooltip indicates "Editing requires internet connection"
+
+#### Scenario: Connection lost during edit
+- **WHEN** user has edit form open
+- **AND** network connection is lost
+- **THEN** submit button is disabled
+- **AND** warning message appears "Connection lost. Your changes are preserved."
+- **AND** form data is retained
+
+#### Scenario: Connection restored during edit
+- **WHEN** user has edit form open with preserved data
+- **AND** network connection is restored
+- **THEN** submit button is re-enabled
+- **AND** warning message is cleared
+- **AND** user can submit the form
+
+#### Scenario: API unavailable while online
+- **WHEN** user is connected to network
+- **AND** API health check fails
+- **THEN** edit buttons are disabled
+- **AND** message indicates "API server unavailable"
+
+### Requirement: Rate Limit Handling
+
+The web application SHALL handle API rate limiting gracefully.
+
+#### Scenario: Rate limit exceeded
+- **WHEN** API returns 429 Too Many Requests
+- **THEN** error message displays "Too many requests. Please wait a moment and try again."
+- **AND** submit button is disabled
+- **AND** form data is preserved
+- **AND** button re-enables after Retry-After duration
+
+### Requirement: Success Feedback
+
+The web application SHALL provide clear feedback when operations succeed.
+
+#### Scenario: Edit success notification
+- **WHEN** species/taxon/source is updated successfully
+- **THEN** toast notification appears "Species updated successfully"
+- **AND** notification auto-dismisses after 3 seconds
+
+#### Scenario: Create success notification
+- **WHEN** species/taxon/source is created successfully
+- **THEN** toast notification appears "[Entity] created successfully"
+- **AND** notification auto-dismisses after 3 seconds
+
+#### Scenario: Delete success notification
+- **WHEN** species/taxon/source is deleted successfully
+- **THEN** toast notification appears "[Entity] deleted"
+- **AND** notification auto-dismisses after 3 seconds
+
+### Requirement: Validation Error Display
+
+The web application SHALL display validation errors clearly to help users correct their input.
+
+#### Scenario: Single field validation error
+- **WHEN** API returns validation error for one field
+- **THEN** error message appears below the field
+- **AND** field is highlighted with error styling
+
+#### Scenario: Multiple field validation errors
+- **WHEN** API returns validation errors for multiple fields
+- **THEN** error summary appears at top of form
+- **AND** each field shows its specific error below the input
+- **AND** form scrolls to first error

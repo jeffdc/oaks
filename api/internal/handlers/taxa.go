@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
@@ -104,13 +105,19 @@ func (s *Server) handleListTaxa(w http.ResponseWriter, r *http.Request) {
 // handleGetTaxon handles GET /api/v1/taxa/{level}/{name}
 func (s *Server) handleGetTaxon(w http.ResponseWriter, r *http.Request) {
 	levelParam := chi.URLParam(r, "level")
-	name := chi.URLParam(r, "name")
+	nameEncoded := chi.URLParam(r, "name")
 
 	level, valid := parseTaxonLevel(levelParam)
 	if !valid {
 		RespondValidationError(w, []ValidationError{
 			{Field: "level", Message: "must be one of: subgenus, section, subsection, complex"},
 		})
+		return
+	}
+
+	name, err := url.PathUnescape(nameEncoded)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid taxon name encoding")
 		return
 	}
 
@@ -191,13 +198,19 @@ func (s *Server) handleCreateTaxon(w http.ResponseWriter, r *http.Request) {
 // handleUpdateTaxon handles PUT /api/v1/taxa/{level}/{name}
 func (s *Server) handleUpdateTaxon(w http.ResponseWriter, r *http.Request) {
 	levelParam := chi.URLParam(r, "level")
-	name := chi.URLParam(r, "name")
+	nameEncoded := chi.URLParam(r, "name")
 
 	level, valid := parseTaxonLevel(levelParam)
 	if !valid {
 		RespondValidationError(w, []ValidationError{
 			{Field: "level", Message: "must be one of: subgenus, section, subsection, complex"},
 		})
+		return
+	}
+
+	name, err := url.PathUnescape(nameEncoded)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid taxon name encoding")
 		return
 	}
 
@@ -242,13 +255,19 @@ func (s *Server) handleUpdateTaxon(w http.ResponseWriter, r *http.Request) {
 // handleDeleteTaxon handles DELETE /api/v1/taxa/{level}/{name}
 func (s *Server) handleDeleteTaxon(w http.ResponseWriter, r *http.Request) {
 	levelParam := chi.URLParam(r, "level")
-	name := chi.URLParam(r, "name")
+	nameEncoded := chi.URLParam(r, "name")
 
 	level, valid := parseTaxonLevel(levelParam)
 	if !valid {
 		RespondValidationError(w, []ValidationError{
 			{Field: "level", Message: "must be one of: subgenus, section, subsection, complex"},
 		})
+		return
+	}
+
+	name, err := url.PathUnescape(nameEncoded)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid taxon name encoding")
 		return
 	}
 

@@ -229,9 +229,14 @@ func (s *Server) handleListSpecies(w http.ResponseWriter, r *http.Request) {
 
 // handleGetSpecies handles GET /api/v1/species/{name}
 func (s *Server) handleGetSpecies(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
-	if name == "" {
+	nameEncoded := chi.URLParam(r, "name")
+	if nameEncoded == "" {
 		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "species name is required")
+		return
+	}
+	name, err := url.PathUnescape(nameEncoded)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid species name encoding")
 		return
 	}
 
@@ -347,9 +352,14 @@ func (s *Server) handleCreateSpecies(w http.ResponseWriter, r *http.Request) {
 
 // handleUpdateSpecies handles PUT /api/v1/species/{name}
 func (s *Server) handleUpdateSpecies(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
-	if name == "" {
+	nameEncoded := chi.URLParam(r, "name")
+	if nameEncoded == "" {
 		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "species name is required")
+		return
+	}
+	name, err := url.PathUnescape(nameEncoded)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid species name encoding")
 		return
 	}
 
@@ -390,9 +400,14 @@ func (s *Server) handleUpdateSpecies(w http.ResponseWriter, r *http.Request) {
 
 // handleDeleteSpecies handles DELETE /api/v1/species/{name}
 func (s *Server) handleDeleteSpecies(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
-	if name == "" {
+	nameEncoded := chi.URLParam(r, "name")
+	if nameEncoded == "" {
 		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "species name is required")
+		return
+	}
+	name, err := url.PathUnescape(nameEncoded)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid species name encoding")
 		return
 	}
 
