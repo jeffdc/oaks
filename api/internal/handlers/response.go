@@ -100,3 +100,27 @@ func RespondInternalError(w http.ResponseWriter, message string) {
 	}
 	RespondError(w, http.StatusInternalServerError, ErrCodeInternal, message)
 }
+
+// CascadeConflictDetails contains details about blocking references
+type CascadeConflictDetails struct {
+	BlockingHybrids []string `json:"blocking_hybrids"`
+}
+
+// RespondCascadeConflict writes a 409 Conflict response for cascade protection
+func RespondCascadeConflict(w http.ResponseWriter, blockingHybrids []string) {
+	count := len(blockingHybrids)
+	message := fmt.Sprintf("Cannot delete: %d hybrid", count)
+	if count != 1 {
+		message += "s"
+	}
+	message += " reference this species as a parent"
+
+	resp := ErrorResponse{
+		Error: NewAPIErrorWithDetails(
+			ErrCodeConflict,
+			message,
+			CascadeConflictDetails{BlockingHybrids: blockingHybrids},
+		),
+	}
+	RespondJSON(w, http.StatusConflict, resp)
+}

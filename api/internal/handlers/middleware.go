@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"compress/gzip"
 	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -383,6 +386,93 @@ func conditionalRateLimitMiddleware(config RateLimitConfig) func(next http.Handl
 	}
 }
 
+// gzipMinSize is the minimum response size to trigger compression
+const gzipMinSize = 1024 // 1KB
+
+// gzipWriterPool reuses gzip writers to reduce allocations
+var gzipWriterPool = sync.Pool{
+	New: func() interface{} {
+		return gzip.NewWriter(io.Discard)
+	},
+}
+
+// gzipResponseWriter wraps http.ResponseWriter to compress responses
+type gzipResponseWriter struct {
+	http.ResponseWriter
+	gzipWriter *gzip.Writer
+	buffer     []byte
+	compressed bool
+}
+
+func (grw *gzipResponseWriter) Write(b []byte) (int, error) {
+	// If not yet decided on compression, buffer the data
+	if !grw.compressed && len(grw.buffer) < gzipMinSize {
+		grw.buffer = append(grw.buffer, b...)
+		// If buffer exceeds threshold, start compression
+		if len(grw.buffer) >= gzipMinSize {
+			grw.startCompression()
+		}
+		return len(b), nil
+	}
+
+	if grw.compressed {
+		return grw.gzipWriter.Write(b)
+	}
+
+	return grw.ResponseWriter.Write(b)
+}
+
+func (grw *gzipResponseWriter) startCompression() {
+	grw.compressed = true
+	grw.ResponseWriter.Header().Set("Content-Encoding", "gzip")
+	grw.ResponseWriter.Header().Del("Content-Length") // Length changes with compression
+	grw.gzipWriter = gzipWriterPool.Get().(*gzip.Writer)
+	grw.gzipWriter.Reset(grw.ResponseWriter)
+}
+
+func (grw *gzipResponseWriter) Close() error {
+	// Write any buffered data
+	if len(grw.buffer) > 0 {
+		if grw.compressed {
+			// Should have started compression already
+			_, _ = grw.gzipWriter.Write(grw.buffer)
+		} else {
+			// Buffer didn't exceed threshold, write uncompressed
+			_, _ = grw.ResponseWriter.Write(grw.buffer)
+		}
+		grw.buffer = nil
+	}
+
+	if grw.compressed && grw.gzipWriter != nil {
+		err := grw.gzipWriter.Close()
+		gzipWriterPool.Put(grw.gzipWriter)
+		return err
+	}
+	return nil
+}
+
+// gzipMiddleware compresses JSON responses above the minimum size threshold
+func gzipMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check if client accepts gzip
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// Only compress JSON responses
+		grw := &gzipResponseWriter{
+			ResponseWriter: w,
+			buffer:         make([]byte, 0, gzipMinSize),
+		}
+
+		next.ServeHTTP(grw, r)
+
+		// Close the gzip writer to flush any remaining data
+		_ = grw.Close()
+	})
+}
+
 // SetupMiddleware applies the full middleware chain to the server's router
 func (s *Server) SetupMiddleware(config MiddlewareConfig) {
 	r := s.router
@@ -414,4 +504,7 @@ func (s *Server) SetupMiddleware(config MiddlewareConfig) {
 
 	// 9. CORS - cross-origin support
 	r.Use(corsMiddleware(config.CORS))
+
+	// 10. Gzip compression - compress responses > 1KB for clients that accept it
+	r.Use(gzipMiddleware)
 }

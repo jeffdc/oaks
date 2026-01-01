@@ -100,7 +100,8 @@ func (s *Server) setupRoutes() {
 
 		// Species endpoints (read - public)
 		r.Get("/species", s.handleListSpecies)
-		r.Get("/species/search", s.handleSearchSpecies) // Must be before {name} route
+		r.Get("/species/search", s.handleSearchSpecies)   // Must be before {name} route
+		r.Get("/species/{name}/full", s.handleGetSpeciesFull) // Must be before {name} route
 		r.Get("/species/{name}", s.handleGetSpecies)
 
 		// Species endpoints (write - auth required)

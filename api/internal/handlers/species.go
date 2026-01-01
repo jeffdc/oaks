@@ -221,6 +221,30 @@ func (s *Server) handleGetSpecies(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, entry)
 }
 
+// handleGetSpeciesFull handles GET /api/v1/species/{name}/full
+// Returns species with all source data embedded, including source metadata
+func (s *Server) handleGetSpeciesFull(w http.ResponseWriter, r *http.Request) {
+	name := chi.URLParam(r, "name")
+	if name == "" {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "species name is required")
+		return
+	}
+
+	entry, err := s.db.GetOakEntryWithSources(name)
+	if err != nil {
+		s.logger.Error("failed to get full species", "name", name, "error", err)
+		RespondInternalError(w, "")
+		return
+	}
+
+	if entry == nil {
+		RespondNotFound(w, "Species", name)
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, entry)
+}
+
 // handleSearchSpecies handles GET /api/v1/species/search?q=
 func (s *Server) handleSearchSpecies(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
@@ -352,6 +376,18 @@ func (s *Server) handleDeleteSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 	if !exists {
 		RespondNotFound(w, "Species", name)
+		return
+	}
+
+	// Check for hybrids referencing this species as a parent (cascade protection)
+	blockingHybrids, err := s.db.GetHybridsReferencingParent(name)
+	if err != nil {
+		s.logger.Error("failed to check hybrid references for delete", "name", name, "error", err)
+		RespondInternalError(w, "")
+		return
+	}
+	if len(blockingHybrids) > 0 {
+		RespondCascadeConflict(w, blockingHybrids)
 		return
 	}
 

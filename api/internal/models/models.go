@@ -129,3 +129,16 @@ func NewSource(sourceType, name string) *Source {
 		Name:       name,
 	}
 }
+
+// SpeciesSourceWithMeta embeds SpeciesSource with source metadata
+type SpeciesSourceWithMeta struct {
+	SpeciesSource
+	SourceName string  `json:"source_name"`
+	SourceURL  *string `json:"source_url,omitempty"`
+}
+
+// SpeciesWithSources represents a species with all its source data embedded
+type SpeciesWithSources struct {
+	OakEntry
+	Sources []SpeciesSourceWithMeta `json:"sources"`
+}

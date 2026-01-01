@@ -1398,3 +1398,99 @@ func (db *Database) DeleteMetadata(key string) error {
 	}
 	return nil
 }
+
+// GetOakEntryWithSources returns a species with all its source data embedded
+// Sources are ordered by is_preferred DESC, source_id ASC
+func (db *Database) GetOakEntryWithSources(scientificName string) (*models.SpeciesWithSources, error) {
+	// Get the species entry first
+	entry, err := db.GetOakEntry(scientificName)
+	if err != nil {
+		return nil, err
+	}
+	if entry == nil {
+		return nil, nil
+	}
+
+	// Get sources with source metadata via join
+	rows, err := db.conn.Query(
+		`SELECT ss.id, ss.scientific_name, ss.source_id, ss.local_names, ss.range, ss.growth_habit,
+		        ss.leaves, ss.flowers, ss.fruits, ss.bark, ss.twigs, ss.buds, ss.hardiness_habitat,
+		        ss.miscellaneous, ss.url, ss.is_preferred,
+		        s.name, s.url
+		 FROM species_sources ss
+		 JOIN sources s ON ss.source_id = s.id
+		 WHERE ss.scientific_name = ?
+		 ORDER BY ss.is_preferred DESC, ss.source_id ASC`,
+		scientificName,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get species sources with metadata: %w", err)
+	}
+	defer rows.Close()
+
+	var sources []models.SpeciesSourceWithMeta
+	for rows.Next() {
+		var ssm models.SpeciesSourceWithMeta
+		var localNamesJSON sql.NullString
+		var isPreferred int
+
+		err := rows.Scan(
+			&ssm.ID, &ssm.ScientificName, &ssm.SourceID, &localNamesJSON, &ssm.Range, &ssm.GrowthHabit,
+			&ssm.Leaves, &ssm.Flowers, &ssm.Fruits, &ssm.Bark, &ssm.Twigs, &ssm.Buds, &ssm.HardinessHabitat,
+			&ssm.Miscellaneous, &ssm.URL, &isPreferred,
+			&ssm.SourceName, &ssm.SourceURL,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan species source with metadata: %w", err)
+		}
+
+		ssm.IsPreferred = isPreferred != 0
+		if localNamesJSON.Valid {
+			if err := json.Unmarshal([]byte(localNamesJSON.String), &ssm.LocalNames); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal local_names: %w", err)
+			}
+		}
+		if ssm.LocalNames == nil {
+			ssm.LocalNames = []string{}
+		}
+
+		sources = append(sources, ssm)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Ensure empty sources array instead of nil
+	if sources == nil {
+		sources = []models.SpeciesSourceWithMeta{}
+	}
+
+	return &models.SpeciesWithSources{
+		OakEntry: *entry,
+		Sources:  sources,
+	}, nil
+}
+
+// GetHybridsReferencingParent returns all hybrids that reference the given species as parent1 or parent2
+func (db *Database) GetHybridsReferencingParent(scientificName string) ([]string, error) {
+	rows, err := db.conn.Query(
+		`SELECT scientific_name FROM oak_entries
+		 WHERE is_hybrid = 1 AND (parent1 = ? OR parent2 = ?)
+		 ORDER BY scientific_name`,
+		scientificName, scientificName,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get hybrids referencing parent: %w", err)
+	}
+	defer rows.Close()
+
+	var hybrids []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, fmt.Errorf("failed to scan hybrid name: %w", err)
+		}
+		hybrids = append(hybrids, name)
+	}
+	return hybrids, rows.Err()
+}
