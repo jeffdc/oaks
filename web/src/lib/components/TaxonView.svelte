@@ -1,8 +1,45 @@
 <script>
+  import { onMount } from 'svelte';
   import { base } from '$app/paths';
-  import { allSpecies, formatSpeciesName } from '$lib/stores/dataStore.js';
+  import { formatSpeciesName } from '$lib/stores/dataStore.js';
+  import { fetchSpecies, ApiError } from '$lib/apiClient.js';
 
   export let taxonPath = []; // e.g., ['Quercus', 'Quercus', 'Albae']
+
+  // Local state for species list
+  let allSpecies = $state([]);
+  let isLoading = $state(true);
+  let error = $state(null);
+
+  // Fetch species on mount
+  onMount(async () => {
+    try {
+      isLoading = true;
+      error = null;
+      const species = await fetchSpecies();
+      allSpecies = species;
+    } catch (err) {
+      console.error('Failed to fetch species:', err);
+      error = err instanceof ApiError ? err.message : 'Failed to load species data';
+    } finally {
+      isLoading = false;
+    }
+  });
+
+  // Retry function for error state
+  async function retry() {
+    try {
+      isLoading = true;
+      error = null;
+      const species = await fetchSpecies();
+      allSpecies = species;
+    } catch (err) {
+      console.error('Failed to fetch species:', err);
+      error = err instanceof ApiError ? err.message : 'Failed to load species data';
+    } finally {
+      isLoading = false;
+    }
+  }
 
   // Determine the taxon level and name from the path
   $: isGenusLevel = taxonPath.length === 0;
@@ -10,10 +47,10 @@
   $: taxonName = taxonPath[taxonPath.length - 1] || '';
 
   // Filter species that belong to this taxon
-  $: matchingSpecies = getSpeciesInTaxon($allSpecies, taxonPath);
+  $: matchingSpecies = getSpeciesInTaxon(allSpecies, taxonPath);
 
   // Get sub-taxa (children of this taxon)
-  $: subTaxa = getSubTaxa($allSpecies, taxonPath);
+  $: subTaxa = getSubTaxa(allSpecies, taxonPath);
 
   function getTaxonLevel(depth) {
     const levels = ['genus', 'subgenus', 'section', 'subsection', 'complex'];
@@ -36,20 +73,37 @@
     return labels[pathIndex] || '';
   }
 
+  // Helper to get taxonomy fields (supports both flat API format and nested legacy format)
+  function getTaxonomy(s) {
+    return {
+      subgenus: s.subgenus || s.taxonomy?.subgenus,
+      section: s.section || s.taxonomy?.section,
+      subsection: s.subsection || s.taxonomy?.subsection,
+      complex: s.complex || s.taxonomy?.complex
+    };
+  }
+
+  // Helper to get species name (supports both API format and legacy format)
+  function getSpeciesName(s) {
+    return s.scientific_name || s.name;
+  }
+
   function getSpeciesInTaxon(species, path) {
     // At genus level, show only species without a subgenus assignment
     if (!path || path.length === 0) {
-      return species.filter(s => !s.taxonomy?.subgenus || s.taxonomy.subgenus === 'null')
-        .sort((a, b) => {
+      return species.filter(s => {
+        const t = getTaxonomy(s);
+        return !t.subgenus || t.subgenus === 'null';
+      }).sort((a, b) => {
           if (a.is_hybrid !== b.is_hybrid) return a.is_hybrid ? 1 : -1;
-          return a.name.localeCompare(b.name);
+          return getSpeciesName(a).localeCompare(getSpeciesName(b));
         });
     }
 
     return species.filter(s => {
-      if (!s.taxonomy) return false;
+      const t = getTaxonomy(s);
+      if (!t.subgenus && !t.section && !t.subsection && !t.complex) return false;
 
-      const t = s.taxonomy;
       const [subgenus, section, subsection, complex] = path;
 
       // Match based on path depth
@@ -62,7 +116,7 @@
     }).sort((a, b) => {
       // Non-hybrids first, then alphabetically
       if (a.is_hybrid !== b.is_hybrid) return a.is_hybrid ? 1 : -1;
-      return a.name.localeCompare(b.name);
+      return getSpeciesName(a).localeCompare(getSpeciesName(b));
     });
   }
 
@@ -75,9 +129,9 @@
     const childTaxa = new Map();
 
     species.forEach(s => {
-      if (!s.taxonomy) return;
+      const t = getTaxonomy(s);
+      if (!t.subgenus && !t.section && !t.subsection && !t.complex) return;
 
-      const t = s.taxonomy;
       const [subgenus, section, subsection, complex] = path;
 
       // Check if species matches current path
@@ -112,6 +166,28 @@
 </script>
 
 <div class="taxon-view">
+  <!-- Loading state -->
+  {#if isLoading}
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading taxonomy...</p>
+    </div>
+  <!-- Error state -->
+  {:else if error}
+    <div class="error-container">
+      <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+      </svg>
+      <p class="error-title">Unable to load taxonomy</p>
+      <p class="error-message">{error}</p>
+      <button onclick={retry} class="retry-button">
+        <svg class="retry-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Try again
+      </button>
+    </div>
+  {:else}
   <!-- Combined header with taxon name and taxonomy path -->
   <header class="taxon-header">
     <!-- Current taxon (name first) -->
@@ -130,7 +206,7 @@
       </div>
       <p class="taxon-count">
         {#if isGenusLevel}
-          {$allSpecies.length} species
+          {allSpecies.length} species
         {:else}
           {matchingSpecies.length} species
         {/if}
@@ -185,7 +261,7 @@
       </h2>
       <div class="species-grid">
         {#each matchingSpecies as species}
-          <a href="{base}/species/{encodeURIComponent(species.name)}/" class="species-card">
+          <a href="{base}/species/{encodeURIComponent(getSpeciesName(species))}/" class="species-card">
             <span class="species-name-line">
               <span class="species-name">{formatSpeciesName(species)}</span>
               {#if species.author}<span class="species-author">{species.author}</span>{/if}
@@ -194,6 +270,7 @@
         {/each}
       </div>
     </section>
+  {/if}
   {/if}
 </div>
 
@@ -353,5 +430,75 @@
     color: var(--color-text-tertiary);
     font-style: normal;
     font-weight: 400;
+  }
+
+  /* Loading state */
+  .loading-container {
+    padding: 5rem 1.5rem;
+    text-align: center;
+    background-color: var(--color-surface);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .loading-text {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-top: 1rem;
+  }
+
+  /* Error state */
+  .error-container {
+    padding: 5rem 1.5rem;
+    text-align: center;
+    background-color: var(--color-surface);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .error-icon {
+    width: 4rem;
+    height: 4rem;
+    color: var(--color-error, #dc2626);
+    margin: 0 auto 1rem;
+  }
+
+  .error-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .error-message {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .retry-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background-color: var(--color-forest-600);
+    color: white;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .retry-button:hover {
+    background-color: var(--color-forest-700);
+    transform: translateY(-1px);
+  }
+
+  .retry-icon {
+    width: 1rem;
+    height: 1rem;
   }
 </style>
