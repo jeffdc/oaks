@@ -198,14 +198,24 @@ describe('stores', () => {
   describe('clearSearch', () => {
     it('clears all search state', () => {
       searchQuery.set('test');
-      searchResults.set([{ scientific_name: 'alba' }]);
+      searchResults.set({
+        species: [{ scientific_name: 'alba' }],
+        taxa: [{ name: 'Quercus', level: 'section' }],
+        sources: [{ id: 1, name: 'Source' }],
+        counts: { species: 1, taxa: 1, sources: 1, total: 3 }
+      });
       searchError.set('Some error');
       searchLoading.set(true);
 
       clearSearch();
 
       expect(get(searchQuery)).toBe('');
-      expect(get(searchResults)).toEqual([]);
+      expect(get(searchResults)).toEqual({
+        species: [],
+        taxa: [],
+        sources: [],
+        counts: { species: 0, taxa: 0, sources: 0, total: 0 }
+      });
       expect(get(searchError)).toBeNull();
       expect(get(searchLoading)).toBe(false);
     });
