@@ -1,6 +1,6 @@
-# Oak Browser Web Application
+# Oak Compendium Web Application
 
-A Progressive Web App (PWA) for browsing Quercus (oak) species data with offline support.
+A web application for browsing and managing Quercus (oak) species data. Connects to the Oak Compendium API for data access.
 
 ## Technology Stack
 
@@ -8,7 +8,7 @@ A Progressive Web App (PWA) for browsing Quercus (oak) species data with offline
 - **Styling**: Tailwind CSS v4
 - **Build Tool**: Vite 6
 - **Adapter**: @sveltejs/adapter-static (GitHub Pages)
-- **PWA**: @vite-pwa/sveltekit
+- **Testing**: Vitest + @testing-library/svelte, Playwright (E2E)
 
 ## Prerequisites
 
@@ -19,14 +19,26 @@ A Progressive Web App (PWA) for browsing Quercus (oak) species data with offline
 
 ```bash
 npm install
-npm run dev        # Dev server at http://localhost:5173
+npm run dev          # Dev server, uses production API
+npm run dev:local    # Dev server, uses local API at localhost:8080
 ```
+
+**Tip**: Use `make dev` from the project root to start both API and web dev server together.
 
 ## Building
 
 ```bash
 npm run build      # Output to dist/
 npm run preview    # Preview production build
+```
+
+## Testing
+
+```bash
+npm run test           # Run tests once
+npm run test:watch     # Watch mode
+npm run test:coverage  # With coverage report
+npm run test:e2e       # Playwright E2E tests
 ```
 
 ## Project Structure
@@ -42,14 +54,36 @@ web/
 │   │   ├── list/            # Species list view
 │   │   ├── about/           # About page
 │   │   ├── taxonomy/        # Taxonomy tree + dynamic taxon views
-│   │   └── species/[name]/  # Species detail pages
+│   │   ├── species/[name]/  # Species detail pages
+│   │   ├── sources/         # Sources list and detail views
+│   │   └── compare/[name]/  # Source comparison view
 │   └── lib/
+│       ├── apiClient.js     # HTTP client for API
 │       ├── components/      # Svelte components
-│       ├── stores/          # State management (dataStore.js)
-│       └── db.js            # IndexedDB wrapper (Dexie.js)
+│       │   ├── Header.svelte
+│       │   ├── Search.svelte
+│       │   ├── SearchResults.svelte
+│       │   ├── LandingPage.svelte
+│       │   ├── SpeciesDetail.svelte
+│       │   ├── TaxonView.svelte
+│       │   ├── AboutPage.svelte
+│       │   ├── SourceDetail.svelte
+│       │   ├── SourceComparison.svelte
+│       │   ├── EditModal.svelte
+│       │   ├── DeleteConfirmDialog.svelte
+│       │   ├── FormField.svelte
+│       │   ├── TagInput.svelte
+│       │   ├── TaxonSelect.svelte
+│       │   ├── Toast.svelte
+│       │   └── LoadingSpinner.svelte
+│       ├── stores/
+│       │   ├── dataStore.js   # Species/taxa state
+│       │   ├── authStore.js   # Authentication state
+│       │   └── toastStore.js  # Toast notifications
+│       └── icons/           # SVG icons
 ├── static/                  # Static assets (icons, quercus_data.json)
 ├── svelte.config.js         # SvelteKit config
-├── vite.config.js           # Vite + PWA config
+├── vite.config.js           # Vite config
 └── package.json
 ```
 
@@ -62,26 +96,24 @@ web/
 | `/species/[name]/` | Species detail (e.g., `/species/alba/`) |
 | `/taxonomy/` | Taxonomy tree view |
 | `/taxonomy/[...path]/` | Taxon detail (e.g., `/taxonomy/Quercus/Quercus/`) |
+| `/sources/` | Data sources list |
+| `/sources/[id]/` | Source detail |
+| `/compare/[name]/` | Compare sources for a species |
 | `/about/` | About page |
 
 ## Data Source
 
 The app loads species data from `static/quercus_data.json`, which is:
-- Exported from the CLI: `oak export ../web/public/quercus_data.json`
+- Exported from the CLI: `oak export ../web/static/quercus_data.json`
 - Committed to the repo
-- Loaded into IndexedDB on first load for offline queries
 
-## PWA Features
-
-- **Offline Support**: Works without internet after initial load
-- **Installable**: Can be added to home screen on mobile/desktop
-- **Auto-Update**: Prompts user when new version is available
+For editing operations, the app connects to the API server (production or local).
 
 ## Deployment
 
 GitHub Actions auto-deploys to GitHub Pages on push to main.
 
-Base path is `/oaks` (configured in `svelte.config.js`).
+Custom domain: oakcompendium.org (base path `/`)
 
 ## Detailed Documentation
 
