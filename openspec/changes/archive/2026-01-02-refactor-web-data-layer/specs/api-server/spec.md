@@ -93,7 +93,7 @@ The API SHALL prevent deletion of species that are referenced as hybrid parents.
 
 ## REMOVED Requirements
 
-### Requirement: Export Endpoint
+### Requirement: Data Export
 
 The `/api/v1/export` endpoint SHALL be removed.
 
