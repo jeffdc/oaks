@@ -42,6 +42,9 @@ tmp/
 .pytest_cache/
 .coverage
 htmlcov/
+.playwright-mcp/
+web/playwright-report/
+web/test-results/
 
 # Logs
 *.log
