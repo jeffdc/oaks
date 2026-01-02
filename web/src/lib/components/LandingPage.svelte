@@ -26,12 +26,15 @@
 			]);
 			stats = statsData;
 			allSpecies = speciesData;
-			// Sort sources: Oak Compendium (ID 3) first, then alphabetical
-			sources = sourcesData.sort((a, b) => {
-				if (a.id === 3) return -1;
-				if (b.id === 3) return 1;
-				return (a.name || '').localeCompare(b.name || '');
-			});
+			// Filter to sources that have species data, sort: Oak Compendium (ID 3) first, then alphabetical
+			// Note: iNaturalist (ID 1) is used for taxonomy only, not species descriptions
+			sources = sourcesData
+				.filter(s => s.id !== 1) // Exclude iNaturalist (taxonomy-only source)
+				.sort((a, b) => {
+					if (a.id === 3) return -1;
+					if (b.id === 3) return 1;
+					return (a.name || '').localeCompare(b.name || '');
+				});
 			pickFeaturedSpecies();
 		} catch (err) {
 			console.error('Failed to load data:', err);
