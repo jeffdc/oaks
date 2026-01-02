@@ -396,15 +396,31 @@ var gzipWriterPool = sync.Pool{
 	},
 }
 
-// gzipResponseWriter wraps http.ResponseWriter to compress responses
+// gzipResponseWriter wraps http.ResponseWriter to compress responses.
+// It delays sending headers until the compression decision is made.
 type gzipResponseWriter struct {
 	http.ResponseWriter
-	gzipWriter *gzip.Writer
-	buffer     []byte
-	compressed bool
+	gzipWriter  *gzip.Writer
+	buffer      []byte
+	compressed  bool
+	statusCode  int  // Buffered status code
+	wroteHeader bool // Whether we've sent headers to the underlying writer
+}
+
+func (grw *gzipResponseWriter) WriteHeader(code int) {
+	// Buffer the status code but don't send it yet - we need to wait
+	// until we know if we're compressing to set Content-Encoding
+	if grw.statusCode == 0 {
+		grw.statusCode = code
+	}
 }
 
 func (grw *gzipResponseWriter) Write(b []byte) (int, error) {
+	// Default to 200 if WriteHeader wasn't called
+	if grw.statusCode == 0 {
+		grw.statusCode = http.StatusOK
+	}
+
 	// If not yet decided on compression, buffer the data
 	if !grw.compressed && len(grw.buffer) < gzipMinSize {
 		grw.buffer = append(grw.buffer, b...)
@@ -419,6 +435,11 @@ func (grw *gzipResponseWriter) Write(b []byte) (int, error) {
 		return grw.gzipWriter.Write(b)
 	}
 
+	// Not compressing and already decided - write directly
+	if !grw.wroteHeader {
+		grw.ResponseWriter.WriteHeader(grw.statusCode)
+		grw.wroteHeader = true
+	}
 	return grw.ResponseWriter.Write(b)
 }
 
@@ -426,6 +447,8 @@ func (grw *gzipResponseWriter) startCompression() {
 	grw.compressed = true
 	grw.ResponseWriter.Header().Set("Content-Encoding", "gzip")
 	grw.ResponseWriter.Header().Del("Content-Length") // Length changes with compression
+	grw.ResponseWriter.WriteHeader(grw.statusCode)
+	grw.wroteHeader = true
 	grw.gzipWriter = gzipWriterPool.Get().(*gzip.Writer)
 	grw.gzipWriter.Reset(grw.ResponseWriter)
 }
@@ -438,9 +461,22 @@ func (grw *gzipResponseWriter) Close() error {
 			_, _ = grw.gzipWriter.Write(grw.buffer)
 		} else {
 			// Buffer didn't exceed threshold, write uncompressed
+			if !grw.wroteHeader {
+				if grw.statusCode == 0 {
+					grw.statusCode = http.StatusOK
+				}
+				grw.ResponseWriter.WriteHeader(grw.statusCode)
+				grw.wroteHeader = true
+			}
 			_, _ = grw.ResponseWriter.Write(grw.buffer)
 		}
 		grw.buffer = nil
+	}
+
+	// Handle case where WriteHeader was called but no body written
+	if !grw.wroteHeader && grw.statusCode != 0 {
+		grw.ResponseWriter.WriteHeader(grw.statusCode)
+		grw.wroteHeader = true
 	}
 
 	if grw.compressed && grw.gzipWriter != nil {

@@ -1,44 +1,62 @@
 <script>
-  import { onMount } from 'svelte';
   import { base } from '$app/paths';
   import { formatSpeciesName } from '$lib/stores/dataStore.js';
-  import { fetchSpecies, ApiError } from '$lib/apiClient.js';
+  import { fetchTaxaByLevel, fetchSpeciesByTaxon, fetchStats, ApiError } from '$lib/apiClient.js';
 
   let { taxonPath = [] } = $props(); // e.g., ['Quercus', 'Quercus', 'Albae']
 
-  // Local state for species list
-  let allSpecies = $state([]);
+  // Local state
+  let subTaxaFromApi = $state([]); // Sub-taxa with species_count from API
+  let matchingSpeciesFromApi = $state([]); // Species at this taxon level
+  let totalSpeciesCount = $state(0); // Total species count for genus level
   let isLoading = $state(true);
   let error = $state(null);
 
-  // Fetch species on mount
-  onMount(async () => {
+  // Fetch data reactively when taxonPath changes
+  $effect(() => {
+    // Create a snapshot of taxonPath to use in the async function
+    const currentPath = [...taxonPath];
+    loadData(currentPath);
+  });
+
+  async function loadData(path) {
     try {
       isLoading = true;
       error = null;
-      const species = await fetchSpecies();
-      allSpecies = species;
+
+      const depth = path.length;
+
+      // Determine what child level to fetch
+      const childLevelMap = ['subgenus', 'section', 'subsection', 'complex'];
+      const childLevel = childLevelMap[depth];
+
+      // Fetch sub-taxa if we're not at the deepest level
+      if (childLevel) {
+        const taxa = await fetchTaxaByLevel(childLevel, path);
+        subTaxaFromApi = taxa;
+      } else {
+        subTaxaFromApi = [];
+      }
+
+      // Fetch species at this taxon level
+      matchingSpeciesFromApi = await fetchSpeciesByTaxon(path);
+
+      // For genus level, get total count from stats
+      if (depth === 0) {
+        const stats = await fetchStats();
+        totalSpeciesCount = stats.species_count + stats.hybrid_count;
+      }
     } catch (err) {
-      console.error('Failed to fetch species:', err);
-      error = err instanceof ApiError ? err.message : 'Failed to load species data';
+      console.error('Failed to fetch taxonomy data:', err);
+      error = err instanceof ApiError ? err.message : 'Failed to load taxonomy data';
     } finally {
       isLoading = false;
     }
-  });
+  }
 
   // Retry function for error state
   async function retry() {
-    try {
-      isLoading = true;
-      error = null;
-      const species = await fetchSpecies();
-      allSpecies = species;
-    } catch (err) {
-      console.error('Failed to fetch species:', err);
-      error = err instanceof ApiError ? err.message : 'Failed to load species data';
-    } finally {
-      isLoading = false;
-    }
+    await loadData([...taxonPath]);
   }
 
   // Determine the taxon level and name from the path
@@ -46,11 +64,9 @@
   let taxonLevel = $derived(getTaxonLevel(taxonPath.length));
   let taxonName = $derived(taxonPath[taxonPath.length - 1] || '');
 
-  // Filter species that belong to this taxon
-  let matchingSpecies = $derived(getSpeciesInTaxon(allSpecies, taxonPath));
-
-  // Get sub-taxa (children of this taxon)
-  let subTaxa = $derived(getSubTaxa(allSpecies, taxonPath));
+  // Use API data directly
+  let matchingSpecies = $derived(matchingSpeciesFromApi);
+  let subTaxa = $derived(subTaxaFromApi.map(t => ({ name: t.name, count: t.species_count })));
 
   function getTaxonLevel(depth) {
     const levels = ['genus', 'subgenus', 'section', 'subsection', 'complex'];
@@ -73,89 +89,9 @@
     return labels[pathIndex] || '';
   }
 
-  // Helper to get taxonomy fields (supports both flat API format and nested legacy format)
-  function getTaxonomy(s) {
-    return {
-      subgenus: s.subgenus || s.taxonomy?.subgenus,
-      section: s.section || s.taxonomy?.section,
-      subsection: s.subsection || s.taxonomy?.subsection,
-      complex: s.complex || s.taxonomy?.complex
-    };
-  }
-
   // Helper to get species name (supports both API format and legacy format)
   function getSpeciesName(s) {
     return s.scientific_name || s.name;
-  }
-
-  function getSpeciesInTaxon(species, path) {
-    // At genus level, show only species without a subgenus assignment
-    if (!path || path.length === 0) {
-      return species.filter(s => {
-        const t = getTaxonomy(s);
-        return !t.subgenus || t.subgenus === 'null';
-      }).sort((a, b) => {
-          if (a.is_hybrid !== b.is_hybrid) return a.is_hybrid ? 1 : -1;
-          return getSpeciesName(a).localeCompare(getSpeciesName(b));
-        });
-    }
-
-    return species.filter(s => {
-      const t = getTaxonomy(s);
-      if (!t.subgenus && !t.section && !t.subsection && !t.complex) return false;
-
-      const [subgenus, section, subsection, complex] = path;
-
-      // Match based on path depth
-      if (subgenus && t.subgenus !== subgenus) return false;
-      if (section && t.section !== section) return false;
-      if (subsection && t.subsection !== subsection) return false;
-      if (complex && t.complex !== complex) return false;
-
-      return true;
-    }).sort((a, b) => {
-      // Non-hybrids first, then alphabetically
-      if (a.is_hybrid !== b.is_hybrid) return a.is_hybrid ? 1 : -1;
-      return getSpeciesName(a).localeCompare(getSpeciesName(b));
-    });
-  }
-
-  function getSubTaxa(species, path) {
-    const depth = path.length;
-    const childLevel = getTaxonLevel(depth + 1);
-
-    if (depth >= 4) return []; // Complex is the deepest level with children
-
-    const childTaxa = new Map();
-
-    species.forEach(s => {
-      const t = getTaxonomy(s);
-      if (!t.subgenus && !t.section && !t.subsection && !t.complex) return;
-
-      const [subgenus, section, subsection, complex] = path;
-
-      // Check if species matches current path
-      if (subgenus && t.subgenus !== subgenus) return;
-      if (section && t.section !== section) return;
-      if (subsection && t.subsection !== subsection) return;
-      if (complex && t.complex !== complex) return;
-
-      // Get the child taxon value
-      let childValue;
-      if (depth === 0) childValue = t.subgenus;
-      else if (depth === 1) childValue = t.section;
-      else if (depth === 2) childValue = t.subsection;
-      else if (depth === 3) childValue = t.complex;
-
-      if (childValue && childValue !== 'null') {
-        const count = childTaxa.get(childValue) || 0;
-        childTaxa.set(childValue, count + 1);
-      }
-    });
-
-    return Array.from(childTaxa.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   // Build taxonomy path URL
@@ -206,7 +142,7 @@
       </div>
       <p class="taxon-count">
         {#if isGenusLevel}
-          {allSpecies.length} species
+          {totalSpeciesCount} species
         {:else}
           {matchingSpecies.length} species
         {/if}

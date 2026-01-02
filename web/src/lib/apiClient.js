@@ -143,12 +143,20 @@ export async function checkApiHealth() {
 }
 
 /**
+ * Fetch database stats (counts)
+ * @returns {Promise<Object>} Stats object with species_count, hybrid_count, taxa_count, source_count
+ */
+export async function fetchStats() {
+  return fetchApi('/api/v1/stats');
+}
+
+/**
  * Fetch all species from API
  * @returns {Promise<Array>} Array of species objects
  */
 export async function fetchSpecies() {
   const response = await fetchApi('/api/v1/species');
-  return response.species || response;
+  return response.data || response.species || response;
 }
 
 /**
@@ -170,13 +178,22 @@ export async function fetchSpeciesFull(name) {
 }
 
 /**
- * Search species by query
+ * Search species by query (species-only search)
  * @param {string} query - Search query
  * @returns {Promise<Array>} Matching species
  */
 export async function searchSpecies(query) {
   const response = await fetchApi(`/api/v1/species/search?q=${encodeURIComponent(query)}`);
-  return response.species || response;
+  return response.data || response.species || response;
+}
+
+/**
+ * Unified search across species, taxa, and sources
+ * @param {string} query - Search query
+ * @returns {Promise<Object>} Search results with species, taxa, sources arrays and counts
+ */
+export async function unifiedSearch(query) {
+  return fetchApi(`/api/v1/search?q=${encodeURIComponent(query)}`);
 }
 
 /**
@@ -185,7 +202,54 @@ export async function searchSpecies(query) {
  */
 export async function fetchTaxa() {
   const response = await fetchApi('/api/v1/taxa');
-  return response.taxa || response;
+  return response.data || response.taxa || response;
+}
+
+/**
+ * Fetch taxa by level with optional parent filtering
+ * @param {string} level - Taxon level (subgenus, section, subsection, complex)
+ * @param {Array<string>} parentPath - Parent taxon path for filtering
+ * @returns {Promise<Array>} Array of taxa objects with species_count
+ */
+export async function fetchTaxaByLevel(level, parentPath = []) {
+  let url = `/api/v1/taxa?level=${encodeURIComponent(level)}`;
+
+  // Filter by the immediate parent (last element in path)
+  if (parentPath.length > 0) {
+    const parent = parentPath[parentPath.length - 1];
+    if (parent) {
+      url += `&parent=${encodeURIComponent(parent)}`;
+    }
+  }
+
+  const response = await fetchApi(url);
+  return response.data || response.taxa || response;
+}
+
+/**
+ * Fetch species belonging to a specific taxon path
+ * @param {Array<string>} taxonPath - Taxon path (e.g., ['Quercus', 'Quercus', 'Albae'])
+ * @returns {Promise<Array>} Array of species objects
+ */
+export async function fetchSpeciesByTaxon(taxonPath = []) {
+  let url = '/api/v1/species?limit=1000'; // Get all species, not just 50
+
+  // Add taxon filters based on path
+  if (taxonPath.length >= 1 && taxonPath[0]) {
+    url += `&subgenus=${encodeURIComponent(taxonPath[0])}`;
+  }
+  if (taxonPath.length >= 2 && taxonPath[1]) {
+    url += `&section=${encodeURIComponent(taxonPath[1])}`;
+  }
+  if (taxonPath.length >= 3 && taxonPath[2]) {
+    url += `&subsection=${encodeURIComponent(taxonPath[2])}`;
+  }
+  if (taxonPath.length >= 4 && taxonPath[3]) {
+    url += `&complex=${encodeURIComponent(taxonPath[3])}`;
+  }
+
+  const response = await fetchApi(url);
+  return response.data || response.species || response;
 }
 
 /**
@@ -204,7 +268,8 @@ export async function fetchTaxon(level, name) {
  */
 export async function fetchSources() {
   const response = await fetchApi('/api/v1/sources');
-  return response.sources || response;
+  // Sources endpoint returns array directly
+  return Array.isArray(response) ? response : (response.data || response.sources || response);
 }
 
 /**
@@ -279,7 +344,7 @@ export async function deleteSpecies(name) {
  */
 export async function fetchSpeciesSources(speciesName) {
   const response = await fetchApi(`/api/v1/species/${encodeURIComponent(speciesName)}/sources`);
-  return response.sources || response;
+  return Array.isArray(response) ? response : (response.data || response.sources || response);
 }
 
 /**

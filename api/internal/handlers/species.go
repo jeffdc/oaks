@@ -15,11 +15,13 @@ import (
 
 // SpeciesListParams contains query parameters for species list endpoint
 type SpeciesListParams struct {
-	Limit    int
-	Offset   int
-	Subgenus *string
-	Section  *string
-	Hybrid   *bool
+	Limit      int
+	Offset     int
+	Subgenus   *string
+	Section    *string
+	Subsection *string
+	Complex    *string
+	Hybrid     *bool
 }
 
 // SpeciesRequest represents the request body for creating/updating a species
@@ -108,6 +110,16 @@ func parseSpeciesListParams(query url.Values) (*SpeciesListParams, []ValidationE
 		params.Section = &section
 	}
 
+	// Parse subsection filter
+	if subsection := query.Get("subsection"); subsection != "" {
+		params.Subsection = &subsection
+	}
+
+	// Parse complex filter
+	if complex := query.Get("complex"); complex != "" {
+		params.Complex = &complex
+	}
+
 	// Parse hybrid filter
 	if hybridStr := query.Get("hybrid"); hybridStr != "" {
 		hybrid := strings.ToLower(hybridStr) == "true"
@@ -168,9 +180,11 @@ func (s *Server) handleListSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filter := &db.OakEntryFilter{
-		Subgenus: params.Subgenus,
-		Section:  params.Section,
-		Hybrid:   params.Hybrid,
+		Subgenus:   params.Subgenus,
+		Section:    params.Section,
+		Subsection: params.Subsection,
+		Complex:    params.Complex,
+		Hybrid:     params.Hybrid,
 	}
 
 	// Get total count

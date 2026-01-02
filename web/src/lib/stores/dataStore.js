@@ -1,5 +1,5 @@
 import { writable, get } from 'svelte/store';
-import { searchSpecies as apiSearchSpecies } from '$lib/apiClient.js';
+import { unifiedSearch } from '$lib/apiClient.js';
 
 // Store for search query
 export const searchQuery = writable('');
@@ -14,8 +14,16 @@ export const error = writable(null);
 // Search State
 // =============================================================================
 
-// Store for search results (species from API)
-export const searchResults = writable([]);
+// Empty unified search results structure
+const emptySearchResults = {
+  species: [],
+  taxa: [],
+  sources: [],
+  counts: { species: 0, taxa: 0, sources: 0, total: 0 }
+};
+
+// Store for search results (unified: species, taxa, sources)
+export const searchResults = writable(emptySearchResults);
 
 // Store for search loading state
 export const searchLoading = writable(false);
@@ -27,7 +35,8 @@ export const searchError = writable(null);
 let searchAbortController = null;
 
 /**
- * Perform a search using the API
+ * Perform a unified search using the API
+ * Searches across species, taxa, and sources
  * Cancels any pending search request before starting a new one
  * @param {string} query - Search query
  */
@@ -45,7 +54,7 @@ export async function performSearch(query) {
   searchError.set(null);
 
   try {
-    const results = await apiSearchSpecies(query);
+    const results = await unifiedSearch(query);
     // Only update if this request wasn't aborted
     if (!searchAbortController.signal.aborted) {
       searchResults.set(results);
@@ -59,7 +68,7 @@ export async function performSearch(query) {
     // Only update error if this request wasn't aborted
     if (!searchAbortController.signal.aborted) {
       searchError.set(err.message || 'Search failed');
-      searchResults.set([]);
+      searchResults.set(emptySearchResults);
       searchLoading.set(false);
     }
   }
@@ -82,7 +91,7 @@ export function cancelSearch() {
 export function clearSearch() {
   cancelSearch();
   searchQuery.set('');
-  searchResults.set([]);
+  searchResults.set(emptySearchResults);
   searchError.set(null);
 }
 

@@ -26,12 +26,13 @@ type ExternalLink struct {
 // Taxon represents a taxonomic rank in the reference table
 // Hierarchy: Genus (Quercus) -> Subgenus -> Section -> Subsection -> Complex -> Species
 type Taxon struct {
-	Name   string      `json:"name" yaml:"name"`
-	Level  TaxonLevel  `json:"level" yaml:"level"`
-	Parent *string     `json:"parent,omitempty" yaml:"parent,omitempty"` // Parent taxon name
-	Author *string     `json:"author,omitempty" yaml:"author,omitempty"` // Taxonomic authority
-	Notes  *string     `json:"notes,omitempty" yaml:"notes,omitempty"`
-	Links  []TaxonLink `json:"links,omitempty" yaml:"links,omitempty"` // External reference links
+	Name         string      `json:"name" yaml:"name"`
+	Level        TaxonLevel  `json:"level" yaml:"level"`
+	Parent       *string     `json:"parent,omitempty" yaml:"parent,omitempty"` // Parent taxon name
+	Author       *string     `json:"author,omitempty" yaml:"author,omitempty"` // Taxonomic authority
+	Notes        *string     `json:"notes,omitempty" yaml:"notes,omitempty"`
+	Links        []TaxonLink `json:"links,omitempty" yaml:"links,omitempty"`   // External reference links
+	SpeciesCount int         `json:"species_count" yaml:"species_count"`       // Count of species in this taxon
 }
 
 // SpeciesSource represents source-attributed descriptive data for a species
@@ -141,4 +142,27 @@ type SpeciesSourceWithMeta struct {
 type SpeciesWithSources struct {
 	OakEntry
 	Sources []SpeciesSourceWithMeta `json:"sources"`
+}
+
+// SearchResultType indicates the type of search result
+type SearchResultType string
+
+const (
+	SearchResultTypeSpecies SearchResultType = "species"
+	SearchResultTypeTaxon   SearchResultType = "taxon"
+	SearchResultTypeSource  SearchResultType = "source"
+)
+
+// UnifiedSearchResults contains grouped search results from all entity types
+type UnifiedSearchResults struct {
+	Species []OakEntry `json:"species"`
+	Taxa    []Taxon    `json:"taxa"`
+	Sources []Source   `json:"sources"`
+	Query   string     `json:"query"`
+	Counts  struct {
+		Species int `json:"species"`
+		Taxa    int `json:"taxa"`
+		Sources int `json:"sources"`
+		Total   int `json:"total"`
+	} `json:"counts"`
 }

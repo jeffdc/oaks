@@ -1,10 +1,11 @@
 <script>
 	import { base } from '$app/paths';
 	import { getPrimarySource } from '$lib/stores/dataStore.js';
-	import { fetchSpecies, fetchSources, ApiError } from '$lib/apiClient.js';
+	import { fetchStats, fetchSpecies, fetchSources, ApiError } from '$lib/apiClient.js';
 	import { onMount } from 'svelte';
 
 	// Local state
+	let stats = $state({ species_count: 0, hybrid_count: 0 });
 	let allSpecies = $state([]);
 	let sources = $state([]);
 	let isLoading = $state(true);
@@ -12,22 +13,18 @@
 	let featuredSpecies = $state(null);
 	let featuredSource = $state(null);
 
-	// Computed counts
-	let totalCounts = $derived({
-		speciesCount: allSpecies.filter(s => !s.is_hybrid).length,
-		hybridCount: allSpecies.filter(s => s.is_hybrid).length
-	});
-
 	// Load data on mount
 	onMount(async () => {
 		try {
 			isLoading = true;
 			error = null;
-			// Fetch species and sources in parallel
-			const [speciesData, sourcesData] = await Promise.all([
+			// Fetch stats, species (for featured), and sources in parallel
+			const [statsData, speciesData, sourcesData] = await Promise.all([
+				fetchStats(),
 				fetchSpecies(),
 				fetchSources()
 			]);
+			stats = statsData;
 			allSpecies = speciesData;
 			// Sort sources: Oak Compendium (ID 3) first, then alphabetical
 			sources = sourcesData.sort((a, b) => {
@@ -69,8 +66,8 @@
 			<p class="welcome-subtitle error-text">{error}</p>
 		{:else}
 			<p class="welcome-subtitle">
-				A comprehensive database of <strong>{totalCounts.speciesCount}</strong> oak species
-				and <strong>{totalCounts.hybridCount}</strong> hybrids from around the globe.
+				A comprehensive database of <strong>{stats.species_count}</strong> oak species
+				and <strong>{stats.hybrid_count}</strong> hybrids from around the globe.
 			</p>
 		{/if}
 	</section>

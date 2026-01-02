@@ -92,6 +92,9 @@ func (s *Server) setupRoutes() {
 		// Health endpoint also at /api/v1/health per spec
 		r.Get("/health", s.handleHealth)
 
+		// Unified search endpoint (public)
+		r.Get("/search", s.handleUnifiedSearch)
+
 		// Auth verification endpoint (requires auth, read-only)
 		r.Group(func(r chi.Router) {
 			r.Use(s.ForceAuth)
@@ -150,6 +153,9 @@ func (s *Server) setupRoutes() {
 
 		// Export endpoint
 		r.Get("/export", s.handleExport)
+
+		// Stats endpoint (public, read-only)
+		r.Get("/stats", s.handleStats)
 	})
 }
 
