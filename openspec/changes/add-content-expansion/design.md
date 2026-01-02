@@ -62,16 +62,6 @@ Articles use simple string tags for categorization, not a separate tags table.
 - Normalized tags table - rejected, over-engineering for expected scale
 - Fixed enum of categories - rejected, too rigid
 
-### Decision: Render-Time Auto-Linking
-
-Species linking happens at render time, not stored in database.
-
-**Rationale**: Keeps content portable and avoids link rot when species are renamed/deleted. Linking logic can be improved without data migration.
-
-**Alternatives considered**:
-- Store resolved links in database - rejected, maintenance burden
-- Require explicit markdown links - rejected, poor authoring UX
-
 ### Decision: Backlinks Computed at Load Time
 
 Backlinks shown on species pages are computed when the page loads by scanning content.
@@ -295,7 +285,7 @@ All edge cases are handled by the Go parser (see `add-species-name-parser` spec,
 - **Unknown species**: If parser finds "Quercus unknownus" but species doesn't exist, text is left as-is (no link)
 - **Already linked**: If content contains `[Quercus alba](/species/alba)`, parser skips it (no double-linking)
 - **Code blocks**: Parser skips content inside markdown code blocks
-- **Infraspecific taxa**: `Quercus alba var. latiloba` links only `Quercus alba`, leaves `var. latiloba` as text
+- **Infraspecific taxa**: `Quercus alba var. latiloba` becomes `[Quercus alba var. latiloba](/species/alba)` - full text is link, target is species page
 - **Species renamed/deleted**: Old links become dead; content search can find stale `/species/oldname` references
 
 ## Risks / Trade-offs

@@ -6,11 +6,11 @@
 - **BLOCKED BY**: `refactor-web-data-layer` - This proposal assumes the web app uses direct API calls (no IndexedDB). Must complete first.
 
 ### Required Before Phase 3 Only
-- **BLOCKED BY**: `species-name-parser` in Go (bead `oaks-lqfj`) - Phase 3 (auto-linking) requires the species name parser. The existing `add-species-name-parser` proposal needs to be updated from JavaScript to Go.
+- **BLOCKED BY**: `add-wasm-species-linker` - Phase 3 (auto-linking) requires the species name parser. Uses Rust/WASM for client-side linking at render time (supersedes `add-species-name-parser`).
 
 ### Implementation Order
 1. **Phase 1 (Taxa Content)** and **Phase 2 (Articles)** can proceed in parallel once `refactor-web-data-layer` is complete
-2. **Phase 3 (Species Auto-Linking)** requires both earlier phases AND the species-name-parser to be complete
+2. **Phase 3 (Species Auto-Linking)** requires both earlier phases AND `add-wasm-species-linker` to be complete
 3. **Phase 4 (Integration)** depends on all prior phases
 
 ## Why
