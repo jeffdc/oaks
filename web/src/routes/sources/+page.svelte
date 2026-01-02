@@ -1,14 +1,21 @@
 <script>
 	import { base } from '$app/paths';
 	import { onMount } from 'svelte';
-	import { getAllSourcesInfo } from '$lib/stores/dataStore.js';
+	import { fetchSources, ApiError } from '$lib/apiClient.js';
 
-	let sources = [];
-	let isLoading = true;
+	let sources = $state([]);
+	let isLoading = $state(true);
+	let error = $state(null);
 
 	onMount(async () => {
-		sources = await getAllSourcesInfo();
-		isLoading = false;
+		try {
+			sources = await fetchSources();
+		} catch (err) {
+			console.error('Failed to fetch sources:', err);
+			error = err instanceof ApiError ? err.message : 'Failed to load sources';
+		} finally {
+			isLoading = false;
+		}
 	});
 </script>
 
@@ -29,25 +36,23 @@
 			<div class="loading-spinner"></div>
 			<p>Loading sources...</p>
 		</div>
+	{:else if error}
+		<div class="error-state">
+			<p>{error}</p>
+		</div>
 	{:else if sources.length === 0}
 		<p class="empty-state">No sources found.</p>
 	{:else}
 		<div class="sources-grid">
 			{#each sources as source}
-				<a href="{base}/sources/{source.source_id}/" class="source-card">
-					<h2 class="source-name">{source.source_name}</h2>
-					{#if source.license}
-						<span class="license-badge">{source.license}</span>
+				<a href="{base}/sources/{source.id}/" class="source-card">
+					<h2 class="source-name">{source.name}</h2>
+					{#if source.description}
+						<p class="source-description">{source.description}</p>
 					{/if}
-					<div class="source-stats">
-						<span class="stat">
-							<strong>{source.species_count}</strong> species
-						</span>
-						<span class="stat-separator">·</span>
-						<span class="stat">
-							<strong>{source.coverage_percent}%</strong> coverage
-						</span>
-					</div>
+					{#if source.source_type}
+						<span class="type-badge">{source.source_type}</span>
+					{/if}
 					<div class="card-arrow">
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -106,6 +111,12 @@
 		to { transform: rotate(360deg); }
 	}
 
+	.error-state {
+		text-align: center;
+		padding: 3rem;
+		color: var(--color-error, #dc2626);
+	}
+
 	.empty-state {
 		text-align: center;
 		padding: 3rem;
@@ -151,7 +162,14 @@
 		margin-bottom: 0.5rem;
 	}
 
-	.license-badge {
+	.source-description {
+		font-size: 0.9375rem;
+		color: var(--color-text-secondary);
+		line-height: 1.5;
+		margin-bottom: 0.75rem;
+	}
+
+	.type-badge {
 		display: inline-block;
 		font-size: 0.75rem;
 		font-weight: 500;
@@ -159,22 +177,7 @@
 		background-color: var(--color-stone-100);
 		color: var(--color-text-secondary);
 		border-radius: 9999px;
-		margin-bottom: 0.75rem;
-	}
-
-	.source-stats {
-		font-size: 0.9375rem;
-		color: var(--color-text-secondary);
-	}
-
-	.source-stats strong {
-		color: var(--color-forest-700);
-		font-weight: 600;
-	}
-
-	.stat-separator {
-		margin: 0 0.375rem;
-		color: var(--color-text-tertiary);
+		text-transform: capitalize;
 	}
 
 	.card-arrow {

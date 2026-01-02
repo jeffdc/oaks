@@ -5,7 +5,7 @@
 	export let entityType;
 	/** @type {string} */
 	export let entityName;
-	/** @type {{ count: number, type: string } | undefined} */
+	/** @type {{ count: number, type: string, items?: string[] } | undefined} */
 	export let cascadeInfo = undefined;
 	/** @type {boolean} */
 	export let isDeleting = false;
@@ -25,7 +25,12 @@
 	}
 
 	// Check if this is an error state (cannot delete)
-	$: isError = cascadeInfo && (entityType === 'taxon' || entityType === 'source');
+	// Species with blocking hybrids is also an error state
+	$: isError = cascadeInfo && (
+		entityType === 'taxon' ||
+		entityType === 'source' ||
+		(entityType === 'species' && cascadeInfo.type === 'blocking_hybrids')
+	);
 
 	// Get the appropriate title
 	$: title = isError
@@ -44,6 +49,9 @@
 		const { count, type } = cascadeInfo;
 
 		if (entityType === 'species') {
+			if (type === 'blocking_hybrids') {
+				return `Cannot delete: ${count} hybrid${count !== 1 ? 's' : ''} reference${count === 1 ? 's' : ''} this species as a parent.`;
+			}
 			return `This will also remove data from ${count} source${count !== 1 ? 's' : ''}.`;
 		}
 		if (entityType === 'taxon') {
@@ -56,6 +64,7 @@
 	}
 
 	$: cascadeMessage = getCascadeMessage();
+	$: blockingItems = cascadeInfo?.items || [];
 
 	// Handle keyboard events
 	function handleKeydown(event) {
@@ -89,6 +98,17 @@
 				<p class="cascade-message" class:error-message={isError}>
 					{cascadeMessage}
 				</p>
+			{/if}
+
+			{#if blockingItems.length > 0}
+				<div class="blocking-items">
+					<p class="blocking-items-label">Blocking hybrids:</p>
+					<ul class="blocking-items-list">
+						{#each blockingItems as item}
+							<li>Quercus {item}</li>
+						{/each}
+					</ul>
+				</div>
 			{/if}
 		</div>
 
@@ -188,6 +208,36 @@
 		border: 1px solid #fecaca;
 		padding: 0.75rem;
 		border-radius: 0.5rem;
+	}
+
+	.blocking-items {
+		margin-top: 0.75rem;
+		padding: 0.75rem;
+		background-color: #fef2f2;
+		border: 1px solid #fecaca;
+		border-radius: 0.5rem;
+	}
+
+	.blocking-items-label {
+		margin: 0 0 0.5rem 0;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: #991b1b;
+	}
+
+	.blocking-items-list {
+		margin: 0;
+		padding-left: 1.25rem;
+		font-size: 0.8125rem;
+		color: #991b1b;
+	}
+
+	.blocking-items-list li {
+		margin-bottom: 0.25rem;
+	}
+
+	.blocking-items-list li:last-child {
+		margin-bottom: 0;
 	}
 
 	.dialog-actions {

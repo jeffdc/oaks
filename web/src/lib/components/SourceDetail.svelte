@@ -1,44 +1,70 @@
 <script>
   import { base } from '$app/paths';
   import { onMount, tick } from 'svelte';
-  import { getSourceInfo, getSpeciesBySource } from '$lib/stores/dataStore.js';
+  import { fetchSourceById, fetchSpecies, ApiError } from '$lib/apiClient.js';
 
-  export let sourceId;
+  let { sourceId } = $props();
 
-  let source = null;
-  let speciesList = [];
-  let isLoading = true;
-  let showAllSpecies = false;
-  let gridElement;
-  let columnCount = 1;
+  let source = $state(null);
+  let speciesList = $state([]);
+  let isLoading = $state(true);
+  let error = $state(null);
+  let showAllSpecies = $state(false);
+  let gridElement = $state(null);
+  let columnCount = $state(1);
 
   // Number of rows to show before "Show more"
   const PREVIEW_ROWS = 10;
 
+  async function loadSourceData(id) {
+    try {
+      isLoading = true;
+      error = null;
+
+      // Fetch source details
+      const sourceData = await fetchSourceById(Number(id));
+      source = sourceData;
+
+      // Fetch all species and filter by source
+      if (sourceData) {
+        const allSpecies = await fetchSpecies();
+        // Filter species that have data from this source
+        speciesList = allSpecies.filter(species => {
+          // Check if species has sources array with matching source_id
+          if (species.sources && Array.isArray(species.sources)) {
+            return species.sources.some(s => s.source_id === Number(id));
+          }
+          return false;
+        }).sort((a, b) => a.name.localeCompare(b.name));
+      }
+    } catch (err) {
+      console.error('Failed to fetch source:', err);
+      error = err instanceof ApiError ? err.message : 'Failed to load source';
+      source = null;
+    } finally {
+      isLoading = false;
+    }
+  }
+
   onMount(() => {
-    loadSourceData();
+    loadSourceData(sourceId);
     window.addEventListener('resize', updateColumnCount);
     return () => window.removeEventListener('resize', updateColumnCount);
   });
 
-  // Update column count when grid element becomes available
-  $: if (gridElement) {
-    tick().then(updateColumnCount);
-  }
-
   // Reload when sourceId changes
-  $: if (sourceId) {
-    loadSourceData();
-  }
-
-  async function loadSourceData() {
-    isLoading = true;
-    source = await getSourceInfo(Number(sourceId));
-    if (source) {
-      speciesList = await getSpeciesBySource(Number(sourceId));
+  $effect(() => {
+    if (sourceId) {
+      loadSourceData(sourceId);
     }
-    isLoading = false;
-  }
+  });
+
+  // Update column count when grid element becomes available
+  $effect(() => {
+    if (gridElement) {
+      tick().then(updateColumnCount);
+    }
+  });
 
   function updateColumnCount() {
     if (!gridElement) return;
@@ -50,27 +76,32 @@
     else columnCount = 1;
   }
 
-  $: previewCount = columnCount * PREVIEW_ROWS;
-  $: displayedSpecies = showAllSpecies ? speciesList : speciesList.slice(0, previewCount);
-  $: hasMoreSpecies = speciesList.length > previewCount;
+  let previewCount = $derived(columnCount * PREVIEW_ROWS);
+  let displayedSpecies = $derived(showAllSpecies ? speciesList : speciesList.slice(0, previewCount));
+  let hasMoreSpecies = $derived(speciesList.length > previewCount);
 
   // Check if there's any metadata to display
-  $: hasMetadata = source && (
+  let hasMetadata = $derived(source && (
     source.source_type ||
     source.author ||
     source.year ||
     source.isbn ||
-    source.license ||
-    source.source_url ||
+    source.url ||
     source.description ||
     source.notes
-  );
+  ));
 </script>
 
 {#if isLoading}
   <div class="loading">
     <div class="loading-spinner"></div>
     <p>Loading source...</p>
+  </div>
+{:else if error}
+  <div class="not-found">
+    <h2>Error</h2>
+    <p>{error}</p>
+    <a href="{base}/" class="back-link">Return to home</a>
   </div>
 {:else if !source}
   <div class="not-found">
@@ -82,9 +113,9 @@
   <article class="source-detail">
     <!-- Header -->
     <header class="source-header">
-      <h1 class="source-name">{source.source_name}</h1>
-      {#if source.license}
-        <span class="license-badge">{source.license}</span>
+      <h1 class="source-name">{source.name}</h1>
+      {#if source.source_type}
+        <span class="type-badge">{source.source_type}</span>
       {/if}
     </header>
 
@@ -116,29 +147,12 @@
             <dd>{source.isbn}</dd>
           </div>
         {/if}
-        {#if source.license}
-          <div class="metadata-item">
-            <dt>License</dt>
-            <dd>
-              {#if source.license_url}
-                <a href={source.license_url} target="_blank" rel="noopener noreferrer" class="license-link">
-                  {source.license}
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              {:else}
-                {source.license}
-              {/if}
-            </dd>
-          </div>
-        {/if}
-        {#if source.source_url}
+        {#if source.url}
           <div class="metadata-item">
             <dt>Website</dt>
             <dd>
-              <a href={source.source_url} target="_blank" rel="noopener noreferrer" class="url-link">
-                {source.source_url}
+              <a href={source.url} target="_blank" rel="noopener noreferrer" class="url-link">
+                {source.url}
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
@@ -163,17 +177,14 @@
       <h2 class="section-title">Coverage</h2>
       <div class="stats-grid">
         <div class="card stat-card">
-          <span class="stat-value">{source.species_count}</span>
+          <span class="stat-value">{speciesList.length}</span>
           <span class="stat-label">Species</span>
-        </div>
-        <div class="card stat-card">
-          <span class="stat-value">{source.coverage_percent}%</span>
-          <span class="stat-label">of Database</span>
         </div>
       </div>
     </section>
 
     <!-- Species list -->
+    {#if speciesList.length > 0}
     <section class="species-section">
       <h2 class="section-title">Species with Data from This Source</h2>
 
@@ -192,7 +203,7 @@
       </div>
 
       {#if hasMoreSpecies}
-        <button class="toggle-btn" on:click={() => showAllSpecies = !showAllSpecies}>
+        <button class="toggle-btn" onclick={() => showAllSpecies = !showAllSpecies}>
           {#if showAllSpecies}
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
@@ -207,6 +218,7 @@
         </button>
       {/if}
     </section>
+    {/if}
   </article>
 {/if}
 
@@ -271,13 +283,14 @@
     color: var(--color-forest-800);
   }
 
-  .license-badge {
+  .type-badge {
     font-size: 0.75rem;
     font-weight: 500;
     padding: 0.25rem 0.625rem;
     background-color: var(--color-stone-100);
     color: var(--color-text-secondary);
     border-radius: 9999px;
+    text-transform: capitalize;
   }
 
   .metadata-section {
@@ -312,23 +325,18 @@
     color: var(--color-text-primary);
   }
 
-  .license-link,
   .url-link {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
     color: var(--color-forest-600);
     text-decoration: none;
+    word-break: break-all;
   }
 
-  .license-link:hover,
   .url-link:hover {
     color: var(--color-forest-700);
     text-decoration: underline;
-  }
-
-  .url-link {
-    word-break: break-all;
   }
 
   .description {

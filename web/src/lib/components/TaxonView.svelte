@@ -4,7 +4,7 @@
   import { formatSpeciesName } from '$lib/stores/dataStore.js';
   import { fetchSpecies, ApiError } from '$lib/apiClient.js';
 
-  export let taxonPath = []; // e.g., ['Quercus', 'Quercus', 'Albae']
+  let { taxonPath = [] } = $props(); // e.g., ['Quercus', 'Quercus', 'Albae']
 
   // Local state for species list
   let allSpecies = $state([]);
@@ -42,15 +42,15 @@
   }
 
   // Determine the taxon level and name from the path
-  $: isGenusLevel = taxonPath.length === 0;
-  $: taxonLevel = getTaxonLevel(taxonPath.length);
-  $: taxonName = taxonPath[taxonPath.length - 1] || '';
+  let isGenusLevel = $derived(taxonPath.length === 0);
+  let taxonLevel = $derived(getTaxonLevel(taxonPath.length));
+  let taxonName = $derived(taxonPath[taxonPath.length - 1] || '');
 
   // Filter species that belong to this taxon
-  $: matchingSpecies = getSpeciesInTaxon(allSpecies, taxonPath);
+  let matchingSpecies = $derived(getSpeciesInTaxon(allSpecies, taxonPath));
 
   // Get sub-taxa (children of this taxon)
-  $: subTaxa = getSubTaxa(allSpecies, taxonPath);
+  let subTaxa = $derived(getSubTaxa(allSpecies, taxonPath));
 
   function getTaxonLevel(depth) {
     const levels = ['genus', 'subgenus', 'section', 'subsection', 'complex'];

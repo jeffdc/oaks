@@ -1,54 +1,61 @@
 <script>
 	import { base } from '$app/paths';
-	import { allSpecies, totalCounts, dataSource, forceRefresh, getPrimarySource, getAllSourcesInfo } from '$lib/stores/dataStore.js';
+	import { getPrimarySource } from '$lib/stores/dataStore.js';
+	import { fetchSpecies, fetchSources, ApiError } from '$lib/apiClient.js';
 	import { onMount } from 'svelte';
 
-	let featuredSpecies = null;
-	let featuredSource = null;
-	let sources = [];
-	let isRefreshing = false;
+	// Local state
+	let allSpecies = $state([]);
+	let sources = $state([]);
+	let isLoading = $state(true);
+	let error = $state(null);
+	let featuredSpecies = $state(null);
+	let featuredSource = $state(null);
 
-	async function handleForceRefresh() {
-		if (isRefreshing) return;
-		isRefreshing = true;
+	// Computed counts
+	let totalCounts = $derived({
+		speciesCount: allSpecies.filter(s => !s.is_hybrid).length,
+		hybridCount: allSpecies.filter(s => s.is_hybrid).length
+	});
+
+	// Load data on mount
+	onMount(async () => {
 		try {
-			await forceRefresh();
-			// Reload sources after refresh
-			const allSources = await getAllSourcesInfo();
-			sources = allSources.sort((a, b) => {
-				if (a.source_id === 3) return -1;
-				if (b.source_id === 3) return 1;
-				const nameA = a.source_name || '';
-				const nameB = b.source_name || '';
-				return nameA.localeCompare(nameB);
+			isLoading = true;
+			error = null;
+			// Fetch species and sources in parallel
+			const [speciesData, sourcesData] = await Promise.all([
+				fetchSpecies(),
+				fetchSources()
+			]);
+			allSpecies = speciesData;
+			// Sort sources: Oak Compendium (ID 3) first, then alphabetical
+			sources = sourcesData.sort((a, b) => {
+				if (a.id === 3) return -1;
+				if (b.id === 3) return 1;
+				return (a.name || '').localeCompare(b.name || '');
 			});
 			pickFeaturedSpecies();
+		} catch (err) {
+			console.error('Failed to load data:', err);
+			error = err instanceof ApiError ? err.message : 'Failed to load data';
 		} finally {
-			isRefreshing = false;
+			isLoading = false;
 		}
-	}
-
-	// Pick a random non-hybrid species on mount and load sources
-	onMount(async () => {
-		pickFeaturedSpecies();
-		const allSources = await getAllSourcesInfo();
-		// Sort: Oak Compendium (ID 3) first, then alphabetical by name
-		sources = allSources.sort((a, b) => {
-			if (a.source_id === 3) return -1;
-			if (b.source_id === 3) return 1;
-			const nameA = a.source_name || '';
-			const nameB = b.source_name || '';
-			return nameA.localeCompare(nameB);
-		});
 	});
 
 	function pickFeaturedSpecies() {
-		const species = $allSpecies.filter(s => !s.is_hybrid && s.range);
-		if (species.length > 0) {
-			const randomIndex = Math.floor(Math.random() * species.length);
-			featuredSpecies = species[randomIndex];
+		const speciesWithRange = allSpecies.filter(s => !s.is_hybrid && (s.range || s.sources?.some(src => src.range)));
+		if (speciesWithRange.length > 0) {
+			const randomIndex = Math.floor(Math.random() * speciesWithRange.length);
+			featuredSpecies = speciesWithRange[randomIndex];
 			featuredSource = getPrimarySource(featuredSpecies);
 		}
+	}
+
+	// Get species name (supports both API format and legacy format)
+	function getSpeciesName(s) {
+		return s.scientific_name || s.name;
 	}
 </script>
 
@@ -56,10 +63,16 @@
 	<!-- Welcome section -->
 	<section class="welcome-section">
 		<h2 class="welcome-title">Explore the World of Oaks</h2>
-		<p class="welcome-subtitle">
-			A comprehensive database of <strong>{$totalCounts.speciesCount}</strong> oak species
-			and <strong>{$totalCounts.hybridCount}</strong> hybrids from around the globe.
-		</p>
+		{#if isLoading}
+			<p class="welcome-subtitle">Loading species data...</p>
+		{:else if error}
+			<p class="welcome-subtitle error-text">{error}</p>
+		{:else}
+			<p class="welcome-subtitle">
+				A comprehensive database of <strong>{totalCounts.speciesCount}</strong> oak species
+				and <strong>{totalCounts.hybridCount}</strong> hybrids from around the globe.
+			</p>
+		{/if}
 	</section>
 
 	<!-- Featured species -->
@@ -67,16 +80,16 @@
 		<section class="featured-section">
 			<div class="section-header">
 				<h3 class="section-title">Featured Species</h3>
-				<button class="shuffle-btn" on:click={pickFeaturedSpecies} aria-label="Show another random species">
+				<button class="shuffle-btn" onclick={pickFeaturedSpecies} aria-label="Show another random species">
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
 					</svg>
 				</button>
 			</div>
-			<a href="{base}/species/{encodeURIComponent(featuredSpecies.name)}/" class="featured-card">
+			<a href="{base}/species/{encodeURIComponent(getSpeciesName(featuredSpecies))}/" class="featured-card">
 				<div class="featured-content">
 					<h4 class="featured-name">
-						Quercus <span class="italic">{featuredSpecies.name}</span>
+						Quercus <span class="italic">{getSpeciesName(featuredSpecies)}</span>
 					</h4>
 					{#if featuredSpecies.author}
 						<p class="featured-author">{featuredSpecies.author}</p>
@@ -90,12 +103,12 @@
 							<span>{featuredSource?.range || featuredSpecies.range}</span>
 						</div>
 					{/if}
-					{#if featuredSpecies.taxonomy?.section}
+					{#if featuredSpecies.section || featuredSpecies.taxonomy?.section}
 						<div class="featured-taxonomy">
-							Section {featuredSpecies.taxonomy.section}
-							{#if featuredSpecies.taxonomy.subgenus}
+							Section {featuredSpecies.section || featuredSpecies.taxonomy?.section}
+							{#if featuredSpecies.subgenus || featuredSpecies.taxonomy?.subgenus}
 								<span class="taxonomy-separator">·</span>
-								Subgenus {featuredSpecies.taxonomy.subgenus}
+								Subgenus {featuredSpecies.subgenus || featuredSpecies.taxonomy?.subgenus}
 							{/if}
 						</div>
 					{/if}
@@ -151,13 +164,12 @@
 			<h3 class="section-title">Data Sources</h3>
 			<div class="sources-list">
 				{#each sources as source}
-					<a href="{base}/sources/{source.source_id}/" class="source-item" class:source-item-primary={source.source_id === 3}>
+					<a href="{base}/sources/{source.id}/" class="source-item" class:source-item-primary={source.id === 3}>
 						<div class="source-info">
-							<span class="source-name">{source.source_name}</span>
-							{#if source.source_id === 3}
+							<span class="source-name">{source.name}</span>
+							{#if source.id === 3}
 								<span class="badge badge-uppercase badge-forest-dark">Primary</span>
 							{/if}
-							<span class="source-stats">{source.species_count} species</span>
 						</div>
 						<svg class="source-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -167,31 +179,6 @@
 			</div>
 		</section>
 	{/if}
-
-	<!-- Data version info -->
-	<section class="version-section">
-		<div class="version-info">
-			<span class="version-label">Data version:</span>
-			<span class="version-value">{$dataSource.version || 'Loading...'}</span>
-			<button
-				class="refresh-btn"
-				on:click={handleForceRefresh}
-				disabled={isRefreshing}
-				title="Force refresh data from server"
-			>
-				{#if isRefreshing}
-					<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-					</svg>
-				{:else}
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-					</svg>
-				{/if}
-				Refresh
-			</button>
-		</div>
-	</section>
 </div>
 
 <style>
@@ -501,61 +488,8 @@
 		background-color: var(--color-forest-100);
 	}
 
-	.version-section {
-		margin-top: 2rem;
-		padding-top: 1.5rem;
-		border-top: 1px solid var(--color-border);
-	}
-
-	.version-info {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		font-size: 0.75rem;
-		color: var(--color-text-tertiary);
-	}
-
-	.version-label {
-		font-weight: 500;
-	}
-
-	.version-value {
-		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-	}
-
-	.refresh-btn {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-		padding: 0.25rem 0.5rem;
-		margin-left: 0.5rem;
-		font-size: 0.75rem;
-		color: var(--color-forest-600);
-		background-color: transparent;
-		border: 1px solid var(--color-forest-300);
-		border-radius: 0.25rem;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.refresh-btn:hover:not(:disabled) {
-		background-color: var(--color-forest-50);
-		border-color: var(--color-forest-400);
-	}
-
-	.refresh-btn:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.animate-spin {
-		animation: spin 1s linear infinite;
-	}
-
-	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
+	.error-text {
+		color: var(--color-error, #dc2626);
 	}
 
 	@media (min-width: 640px) {

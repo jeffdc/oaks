@@ -61,25 +61,25 @@
 	}
 
 	// Check if we're in search mode (have a query)
-	$: isSearching = $searchQuery && $searchQuery.length > 0;
+	let isSearching = $derived($searchQuery && $searchQuery.length > 0);
 
 	// Use search results when searching, otherwise show all species
-	$: displaySpecies = isSearching ? $searchResults : allSpecies;
+	let displaySpecies = $derived(isSearching ? $searchResults : allSpecies);
 
 	// Combined loading state
-	$: isLoading = isSearching ? $searchLoading : isLoadingList;
+	let isLoading = $derived(isSearching ? $searchLoading : isLoadingList);
 
 	// Combined error state
-	$: error = isSearching ? $searchError : listError;
+	let error = $derived(isSearching ? $searchError : listError);
 
 	// Compute counts from displayed species
-	$: speciesCounts = {
+	let speciesCounts = $derived({
 		speciesCount: displaySpecies.filter(s => !s.is_hybrid).length,
 		hybridCount: displaySpecies.filter(s => s.is_hybrid).length,
 		total: displaySpecies.length
-	};
+	});
 
-	$: hasSpeciesResults = displaySpecies.length > 0;
+	let hasSpeciesResults = $derived(displaySpecies.length > 0);
 </script>
 
 <div class="species-list">

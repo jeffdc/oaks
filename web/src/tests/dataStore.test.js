@@ -1,103 +1,216 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { get } from 'svelte/store';
 import {
-  allSpecies,
   searchQuery,
-  filteredSpecies,
-  speciesCounts,
-  totalCounts,
+  isLoading,
+  error,
+  searchResults,
+  searchLoading,
+  searchError,
+  cancelSearch,
+  clearSearch,
   formatSpeciesName,
-  findSpeciesByName
+  getPrimarySource,
+  getAllSources,
+  getSourceById,
+  getSourceCompleteness
 } from '../lib/stores/dataStore.js';
 
-// Sample test data
-const mockSpecies = [
-  {
-    name: 'alba',
-    author: 'L.',
-    is_hybrid: false,
-    synonyms: [{ name: 'alba var. repanda' }],
-    sources: [
-      {
-        source_id: 1,
-        local_names: ['white oak', 'eastern white oak'],
-        range: 'Eastern North America'
-      }
-    ]
-  },
-  {
-    name: 'rubra',
-    author: 'L.',
-    is_hybrid: false,
-    synonyms: [],
-    sources: [
-      {
-        source_id: 1,
-        local_names: ['red oak', 'northern red oak'],
-        range: 'Eastern United States'
-      }
-    ]
-  },
-  {
-    name: '× bebbiana',
-    author: 'C.K.Schneid.',
-    is_hybrid: true,
-    synonyms: [],
-    sources: [
-      {
-        source_id: 1,
-        local_names: [],
-        range: 'Eastern North America'
-      }
-    ]
-  }
-];
+// Test data for source helper functions
+const speciesWithMultipleSources = {
+  name: 'alba',
+  sources: [
+    {
+      source_id: 1,
+      source_name: 'iNaturalist',
+      is_preferred: false,
+      range: 'Eastern North America',
+      leaves: null,
+      local_names: []
+    },
+    {
+      source_id: 2,
+      source_name: 'Oaks of the World',
+      is_preferred: true,
+      range: 'Eastern North America; 0 to 1600 m',
+      leaves: '8-20 cm long, obovate',
+      flowers: 'Staminate catkins',
+      fruits: '1.5-2.5 cm long',
+      local_names: ['white oak', 'eastern white oak']
+    },
+    {
+      source_id: 3,
+      source_name: 'Personal Notes',
+      is_preferred: false,
+      range: null,
+      leaves: 'Distinctive rounded lobes',
+      local_names: []
+    }
+  ]
+};
 
-// Additional test data for synonym format variations
-const mockSpeciesWithSynonymFormats = [
-  {
-    name: 'robur',
-    author: 'L.',
-    is_hybrid: false,
-    // String array format (API format)
-    synonyms: ['robur var. pedunculata', 'robur var. sessiliflora'],
-    sources: [{ source_id: 1, local_names: ['English oak'], range: 'Europe' }]
-  },
-  {
-    name: 'petraea',
-    author: 'Matt.',
-    is_hybrid: false,
-    // Object array format (export format)
-    synonyms: [
-      { name: 'petraea var. pubescens', author: 'DC.' },
-      { name: 'petraea subsp. huguetiana' }
-    ],
-    sources: [{ source_id: 1, local_names: ['sessile oak'], range: 'Europe' }]
-  },
-  {
-    name: 'ilex',
-    author: 'L.',
-    is_hybrid: false,
-    // Mixed format (edge case)
-    synonyms: [
-      'ilex var. rotundifolia',
-      { name: 'ilex var. angustifolia', author: 'Lam.' }
-    ],
-    sources: [{ source_id: 1, local_names: ['holm oak'], range: 'Mediterranean' }]
-  },
-  {
-    name: 'cerris',
-    author: 'L.',
-    is_hybrid: false,
-    // Null/undefined synonym name edge case
-    synonyms: [
-      { name: 'cerris var. austriaca' },
-      { name: null },  // Edge case: null name
-      'cerris var. haliphleos'
-    ],
-    sources: [{ source_id: 1, local_names: ['Turkey oak'], range: 'Southern Europe' }]
-  }
-];
+const speciesWithSparsePreferred = {
+  name: 'rubra',
+  sources: [
+    {
+      source_id: 1,
+      is_preferred: true,
+      range: null,
+      leaves: null,
+      local_names: []
+    },
+    {
+      source_id: 2,
+      is_preferred: false,
+      range: 'Eastern United States',
+      leaves: 'Bristle-tipped lobes',
+      flowers: 'Catkins',
+      fruits: 'Acorn 2 cm',
+      local_names: ['red oak']
+    }
+  ]
+};
+
+const speciesWithNoPreferred = {
+  name: 'macrocarpa',
+  sources: [
+    {
+      source_id: 1,
+      range: 'Central North America',
+      leaves: null,
+      local_names: []
+    },
+    {
+      source_id: 2,
+      range: 'Great Plains to Eastern US',
+      leaves: 'Large, deeply lobed',
+      fruits: 'Large acorns with fringed caps',
+      local_names: ['bur oak']
+    }
+  ]
+};
+
+const speciesWithNoSources = {
+  name: 'unknown',
+  sources: []
+};
+
+describe('stores', () => {
+  describe('searchQuery', () => {
+    beforeEach(() => {
+      searchQuery.set('');
+    });
+
+    it('starts with empty string', () => {
+      expect(get(searchQuery)).toBe('');
+    });
+
+    it('can be updated', () => {
+      searchQuery.set('alba');
+      expect(get(searchQuery)).toBe('alba');
+    });
+  });
+
+  describe('isLoading', () => {
+    beforeEach(() => {
+      isLoading.set(false);
+    });
+
+    it('starts with false', () => {
+      expect(get(isLoading)).toBe(false);
+    });
+
+    it('can be set to true', () => {
+      isLoading.set(true);
+      expect(get(isLoading)).toBe(true);
+    });
+  });
+
+  describe('error', () => {
+    beforeEach(() => {
+      error.set(null);
+    });
+
+    it('starts with null', () => {
+      expect(get(error)).toBeNull();
+    });
+
+    it('can be set to an error message', () => {
+      error.set('Something went wrong');
+      expect(get(error)).toBe('Something went wrong');
+    });
+  });
+
+  describe('searchResults', () => {
+    beforeEach(() => {
+      searchResults.set([]);
+    });
+
+    it('starts with empty array', () => {
+      expect(get(searchResults)).toEqual([]);
+    });
+
+    it('can be set to an array of species', () => {
+      const results = [{ scientific_name: 'alba' }, { scientific_name: 'rubra' }];
+      searchResults.set(results);
+      expect(get(searchResults)).toEqual(results);
+    });
+  });
+
+  describe('searchLoading', () => {
+    beforeEach(() => {
+      searchLoading.set(false);
+    });
+
+    it('starts with false', () => {
+      expect(get(searchLoading)).toBe(false);
+    });
+
+    it('can be set to true', () => {
+      searchLoading.set(true);
+      expect(get(searchLoading)).toBe(true);
+    });
+  });
+
+  describe('searchError', () => {
+    beforeEach(() => {
+      searchError.set(null);
+    });
+
+    it('starts with null', () => {
+      expect(get(searchError)).toBeNull();
+    });
+
+    it('can be set to an error message', () => {
+      searchError.set('Search failed');
+      expect(get(searchError)).toBe('Search failed');
+    });
+  });
+
+  describe('cancelSearch', () => {
+    it('sets searchLoading to false', () => {
+      searchLoading.set(true);
+      cancelSearch();
+      expect(get(searchLoading)).toBe(false);
+    });
+  });
+
+  describe('clearSearch', () => {
+    it('clears all search state', () => {
+      searchQuery.set('test');
+      searchResults.set([{ scientific_name: 'alba' }]);
+      searchError.set('Some error');
+      searchLoading.set(true);
+
+      clearSearch();
+
+      expect(get(searchQuery)).toBe('');
+      expect(get(searchResults)).toEqual([]);
+      expect(get(searchError)).toBeNull();
+      expect(get(searchLoading)).toBe(false);
+    });
+  });
+});
 
 describe('formatSpeciesName', () => {
   it('formats full species name', () => {
@@ -116,289 +229,125 @@ describe('formatSpeciesName', () => {
   });
 });
 
-describe('filteredSpecies store', () => {
-  beforeEach(() => {
-    allSpecies.set(mockSpecies);
-    searchQuery.set('');
+describe('getPrimarySource', () => {
+  it('returns preferred source when it has substantial content', () => {
+    const primary = getPrimarySource(speciesWithMultipleSources);
+    expect(primary.source_id).toBe(2);
+    expect(primary.source_name).toBe('Oaks of the World');
   });
 
-  it('returns all species when search query is empty', () => {
-    const result = get(filteredSpecies);
-    expect(result).toHaveLength(3);
+  it('falls back to most complete source when preferred is sparse', () => {
+    const primary = getPrimarySource(speciesWithSparsePreferred);
+    expect(primary.source_id).toBe(2);
+    expect(primary.is_preferred).toBe(false);
   });
 
-  it('filters by species name', () => {
-    searchQuery.set('alba');
-    const result = get(filteredSpecies);
-    expect(result).toHaveLength(1);
-    expect(result[0].name).toBe('alba');
+  it('selects most complete source when no preferred flag set', () => {
+    const primary = getPrimarySource(speciesWithNoPreferred);
+    expect(primary.source_id).toBe(2);
   });
 
-  it('filters by author', () => {
-    searchQuery.set('Schneid');
-    const result = get(filteredSpecies);
-    expect(result).toHaveLength(1);
-    expect(result[0].name).toBe('× bebbiana');
+  it('returns null for species with empty sources array', () => {
+    expect(getPrimarySource(speciesWithNoSources)).toBeNull();
   });
 
-  it('filters by synonym', () => {
-    searchQuery.set('repanda');
-    const result = get(filteredSpecies);
-    expect(result).toHaveLength(1);
-    expect(result[0].name).toBe('alba');
+  it('returns null for species with undefined sources', () => {
+    expect(getPrimarySource({ name: 'test' })).toBeNull();
   });
 
-  describe('synonym format handling', () => {
-    beforeEach(() => {
-      allSpecies.set(mockSpeciesWithSynonymFormats);
-      searchQuery.set('');
-    });
-
-    it('filters by synonym in string array format', () => {
-      searchQuery.set('pedunculata');
-      const result = get(filteredSpecies);
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('robur');
-    });
-
-    it('filters by synonym in object array format', () => {
-      searchQuery.set('pubescens');
-      const result = get(filteredSpecies);
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('petraea');
-    });
-
-    it('filters by synonym in mixed format (string entry)', () => {
-      searchQuery.set('rotundifolia');
-      const result = get(filteredSpecies);
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('ilex');
-    });
-
-    it('filters by synonym in mixed format (object entry)', () => {
-      searchQuery.set('angustifolia');
-      const result = get(filteredSpecies);
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('ilex');
-    });
-
-    it('handles null synonym names gracefully', () => {
-      searchQuery.set('austriaca');
-      const result = get(filteredSpecies);
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('cerris');
-    });
-
-    it('does not crash when searching with null synonym in data', () => {
-      // Should not throw, and should still find cerris via valid synonyms
-      searchQuery.set('haliphleos');
-      expect(() => get(filteredSpecies)).not.toThrow();
-      const result = get(filteredSpecies);
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('cerris');
-    });
-  });
-
-  it('filters by local name (common name)', () => {
-    searchQuery.set('white oak');
-    const result = get(filteredSpecies);
-    expect(result).toHaveLength(1);
-    expect(result[0].name).toBe('alba');
-  });
-
-  it('filters by range', () => {
-    searchQuery.set('United States');
-    const result = get(filteredSpecies);
-    expect(result).toHaveLength(1);
-    expect(result[0].name).toBe('rubra');
-  });
-
-  it('is case insensitive', () => {
-    searchQuery.set('ALBA');
-    const result = get(filteredSpecies);
-    expect(result).toHaveLength(1);
-    expect(result[0].name).toBe('alba');
-  });
-
-  it('returns empty array when no matches', () => {
-    searchQuery.set('xyz123');
-    const result = get(filteredSpecies);
-    expect(result).toHaveLength(0);
+  it('returns null for null/undefined species', () => {
+    expect(getPrimarySource(null)).toBeNull();
+    expect(getPrimarySource(undefined)).toBeNull();
   });
 });
 
-describe('speciesCounts store', () => {
-  beforeEach(() => {
-    allSpecies.set(mockSpecies);
-    searchQuery.set('');
+describe('getAllSources', () => {
+  it('returns all sources for a species', () => {
+    const sources = getAllSources(speciesWithMultipleSources);
+    expect(sources).toHaveLength(3);
   });
 
-  it('counts species and hybrids correctly', () => {
-    const counts = get(speciesCounts);
-    expect(counts.speciesCount).toBe(2);
-    expect(counts.hybridCount).toBe(1);
-    expect(counts.total).toBe(3);
+  it('returns empty array for species with no sources', () => {
+    expect(getAllSources(speciesWithNoSources)).toEqual([]);
   });
 
-  it('updates counts when search filters results', () => {
-    searchQuery.set('alba');
-    const counts = get(speciesCounts);
-    expect(counts.speciesCount).toBe(1);
-    expect(counts.hybridCount).toBe(0);
-    expect(counts.total).toBe(1);
+  it('returns empty array for null/undefined species', () => {
+    expect(getAllSources(null)).toEqual([]);
+    expect(getAllSources(undefined)).toEqual([]);
   });
 });
 
-describe('totalCounts store', () => {
-  beforeEach(() => {
-    allSpecies.set(mockSpecies);
+describe('getSourceById', () => {
+  it('finds source by ID', () => {
+    const source = getSourceById(speciesWithMultipleSources, 2);
+    expect(source.source_name).toBe('Oaks of the World');
   });
 
-  it('counts total species independent of search', () => {
-    searchQuery.set('alba');
-    const counts = get(totalCounts);
-    expect(counts.speciesCount).toBe(2);
-    expect(counts.hybridCount).toBe(1);
-    expect(counts.total).toBe(3);
-  });
-});
-
-// Mock sources data for filteredSources tests
-const mockSources = [
-  {
-    source_id: 1,
-    source_name: 'iNaturalist',
-    author: 'Community',
-    species_count: 500
-  },
-  {
-    source_id: 2,
-    source_name: 'Oaks of the World',
-    author: 'Antoine Le Hardÿ de Beaulieu',
-    species_count: 450
-  },
-  {
-    source_id: 3,
-    source_name: 'Personal Notes',
-    author: null,
-    species_count: 50
-  }
-];
-
-describe('filteredSources store', () => {
-  beforeEach(async () => {
-    // Import allSources and set it up
-    const { allSources } = await import('../lib/stores/dataStore.js');
-    allSources.set(mockSources);
-    searchQuery.set('');
+  it('returns null for non-existent source ID', () => {
+    expect(getSourceById(speciesWithMultipleSources, 999)).toBeNull();
   });
 
-  it('returns empty array when search query is empty', async () => {
-    const { filteredSources } = await import('../lib/stores/dataStore.js');
-    const result = get(filteredSources);
-    expect(result).toHaveLength(0);
+  it('returns null for species with no sources', () => {
+    expect(getSourceById(speciesWithNoSources, 1)).toBeNull();
   });
 
-  it('filters by source name', async () => {
-    const { filteredSources, allSources } = await import('../lib/stores/dataStore.js');
-    allSources.set(mockSources);
-    searchQuery.set('iNaturalist');
-    const result = get(filteredSources);
-    expect(result).toHaveLength(1);
-    expect(result[0].source_name).toBe('iNaturalist');
-  });
-
-  it('filters by author name', async () => {
-    const { filteredSources, allSources } = await import('../lib/stores/dataStore.js');
-    allSources.set(mockSources);
-    searchQuery.set('Beaulieu');
-    const result = get(filteredSources);
-    expect(result).toHaveLength(1);
-    expect(result[0].source_name).toBe('Oaks of the World');
-  });
-
-  it('is case insensitive for source search', async () => {
-    const { filteredSources, allSources } = await import('../lib/stores/dataStore.js');
-    allSources.set(mockSources);
-    searchQuery.set('OAKS');
-    const result = get(filteredSources);
-    expect(result).toHaveLength(1);
-    expect(result[0].source_name).toBe('Oaks of the World');
-  });
-
-  it('returns empty array when no sources match', async () => {
-    const { filteredSources, allSources } = await import('../lib/stores/dataStore.js');
-    allSources.set(mockSources);
-    searchQuery.set('nonexistent');
-    const result = get(filteredSources);
-    expect(result).toHaveLength(0);
+  it('returns null for null/undefined species', () => {
+    expect(getSourceById(null, 1)).toBeNull();
+    expect(getSourceById(undefined, 1)).toBeNull();
   });
 });
 
-describe('searchResults store', () => {
-  beforeEach(async () => {
-    const { allSources } = await import('../lib/stores/dataStore.js');
-    allSpecies.set(mockSpecies);
-    allSources.set(mockSources);
-    searchQuery.set('');
+describe('getSourceCompleteness', () => {
+  it('counts populated string fields', () => {
+    const source = {
+      range: 'Eastern North America',
+      leaves: 'Large lobed leaves',
+      flowers: null,
+      fruits: ''
+    };
+    expect(getSourceCompleteness(source)).toBe(2);
   });
 
-  it('returns empty results when search query is empty', async () => {
-    const { searchResults } = await import('../lib/stores/dataStore.js');
-    const result = get(searchResults);
-    expect(result.species).toHaveLength(0);
-    expect(result.sources).toHaveLength(0);
-    expect(result.hasResults).toBe(false);
+  it('counts populated array fields', () => {
+    const source = {
+      local_names: ['white oak', 'eastern white oak'],
+      range: 'Eastern North America'
+    };
+    expect(getSourceCompleteness(source)).toBe(2);
   });
 
-  it('returns species results when searching for species', async () => {
-    const { searchResults, allSources } = await import('../lib/stores/dataStore.js');
-    allSources.set(mockSources);
-    searchQuery.set('alba');
-    const result = get(searchResults);
-    expect(result.species.length).toBeGreaterThan(0);
-    expect(result.hasResults).toBe(true);
+  it('does not count empty arrays', () => {
+    const source = {
+      local_names: [],
+      range: 'Eastern North America'
+    };
+    expect(getSourceCompleteness(source)).toBe(1);
   });
 
-  it('returns source results when searching for source name', async () => {
-    const { searchResults, allSources } = await import('../lib/stores/dataStore.js');
-    allSources.set(mockSources);
-    searchQuery.set('iNaturalist');
-    const result = get(searchResults);
-    expect(result.sources.length).toBeGreaterThan(0);
-    expect(result.hasResults).toBe(true);
+  it('returns 0 for empty source', () => {
+    expect(getSourceCompleteness({})).toBe(0);
   });
 
-  it('returns both species and sources when both match', async () => {
-    // Create data where both a species and source could match
-    const { searchResults, allSources } = await import('../lib/stores/dataStore.js');
-    allSources.set([{ source_id: 1, source_name: 'White Oak Database', author: null }]);
-    searchQuery.set('white');
-    const result = get(searchResults);
-    // 'white oak' matches in local_names of alba species
-    expect(result.hasResults).toBe(true);
-  });
-});
-
-describe('findSpeciesByName', () => {
-  beforeEach(() => {
-    allSpecies.set(mockSpecies);
+  it('returns 0 for null/undefined', () => {
+    expect(getSourceCompleteness(null)).toBe(0);
+    expect(getSourceCompleteness(undefined)).toBe(0);
   });
 
-  it('finds species by exact name', () => {
-    const result = findSpeciesByName('alba');
-    expect(result).not.toBeNull();
-    expect(result.name).toBe('alba');
-  });
-
-  it('finds hybrid species by name', () => {
-    const result = findSpeciesByName('× bebbiana');
-    expect(result).not.toBeNull();
-    expect(result.is_hybrid).toBe(true);
-  });
-
-  it('returns null/undefined for non-existent species', () => {
-    const result = findSpeciesByName('nonexistent');
-    expect(result).toBeFalsy();
+  it('correctly counts a fully populated source', () => {
+    const fullSource = {
+      local_names: ['oak'],
+      range: 'North America',
+      growth_habit: 'Tree',
+      leaves: 'Lobed',
+      flowers: 'Catkins',
+      fruits: 'Acorns',
+      bark: 'Furrowed',
+      twigs: 'Brown',
+      buds: 'Clustered',
+      hardiness_habitat: 'Zone 5',
+      miscellaneous: 'Notes',
+      url: 'https://example.com'
+    };
+    expect(getSourceCompleteness(fullSource)).toBe(12);
   });
 });

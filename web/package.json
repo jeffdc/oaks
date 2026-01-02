@@ -29,7 +29,6 @@
     "vitest": "^4.0.16"
   },
   "dependencies": {
-    "dexie": "^4.2.1",
     "dompurify": "^3.3.1",
     "marked": "^17.0.1"
   }

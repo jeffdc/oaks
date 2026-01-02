@@ -1,5 +1,4 @@
 <script>
-	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
 	import { formatSpeciesName } from '$lib/stores/dataStore.js';
@@ -11,15 +10,20 @@
 	let isLoading = $state(true);
 	let error = $state(null);
 	let notFound = $state(false);
+	let lastLoadedName = $state('');
 
-	$: speciesName = decodeURIComponent($page.params.name);
-	$: sourceParam = $page.url.searchParams.get('source');
-	$: initialSourceId = sourceParam ? Number(sourceParam) : null;
+	// Derived values
+	let speciesName = $derived(decodeURIComponent($page.params.name));
+	let sourceParam = $derived($page.url.searchParams.get('source'));
+	let initialSourceId = $derived(sourceParam ? Number(sourceParam) : null);
 
-	// Fetch species when name changes
-	$: if (speciesName) {
-		loadSpecies(speciesName);
-	}
+	// Effect to fetch species when name changes
+	$effect(() => {
+		if (speciesName && speciesName !== lastLoadedName) {
+			lastLoadedName = speciesName;
+			loadSpecies(speciesName);
+		}
+	});
 
 	async function loadSpecies(name) {
 		try {
