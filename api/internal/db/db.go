@@ -883,37 +883,72 @@ type OakEntryFilter struct {
 	Subsection *string
 	Complex    *string
 	Hybrid     *bool
+	SourceID   *int64
 }
 
 // ListOakEntriesPaginated returns a paginated list of oak entries with optional filters
 func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryFilter) ([]*models.OakEntry, error) {
-	query := `SELECT scientific_name, author, is_hybrid, conservation_status,
+	// Base SELECT - use DISTINCT when joining with species_sources
+	selectClause := `SELECT scientific_name, author, is_hybrid, conservation_status,
 		        subgenus, section, subsection, complex,
 		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
 		 FROM oak_entries`
 
 	var args []interface{}
 	var conditions []string
+	needsJoin := false
 
 	if filter != nil {
+		// Check if we need to join with species_sources
+		if filter.SourceID != nil {
+			needsJoin = true
+			selectClause = `SELECT DISTINCT oak_entries.scientific_name, oak_entries.author, oak_entries.is_hybrid, oak_entries.conservation_status,
+				oak_entries.subgenus, oak_entries.section, oak_entries.subsection, oak_entries.complex,
+				oak_entries.parent1, oak_entries.parent2, oak_entries.hybrids, oak_entries.closely_related_to, oak_entries.subspecies_varieties, oak_entries.synonyms, oak_entries.external_links
+			 FROM oak_entries
+			 INNER JOIN species_sources ON oak_entries.scientific_name = species_sources.scientific_name`
+			conditions = append(conditions, "species_sources.source_id = ?")
+			args = append(args, *filter.SourceID)
+		}
+
 		if filter.Subgenus != nil {
-			conditions = append(conditions, "subgenus = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.subgenus = ?")
+			} else {
+				conditions = append(conditions, "subgenus = ?")
+			}
 			args = append(args, *filter.Subgenus)
 		}
 		if filter.Section != nil {
-			conditions = append(conditions, "section = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.section = ?")
+			} else {
+				conditions = append(conditions, "section = ?")
+			}
 			args = append(args, *filter.Section)
 		}
 		if filter.Subsection != nil {
-			conditions = append(conditions, "subsection = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.subsection = ?")
+			} else {
+				conditions = append(conditions, "subsection = ?")
+			}
 			args = append(args, *filter.Subsection)
 		}
 		if filter.Complex != nil {
-			conditions = append(conditions, "complex = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.complex = ?")
+			} else {
+				conditions = append(conditions, "complex = ?")
+			}
 			args = append(args, *filter.Complex)
 		}
 		if filter.Hybrid != nil {
-			conditions = append(conditions, "is_hybrid = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.is_hybrid = ?")
+			} else {
+				conditions = append(conditions, "is_hybrid = ?")
+			}
 			if *filter.Hybrid {
 				args = append(args, 1)
 			} else {
@@ -922,11 +957,16 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 		}
 	}
 
+	query := selectClause
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")
 	}
 
-	query += " ORDER BY scientific_name LIMIT ? OFFSET ?"
+	if needsJoin {
+		query += " ORDER BY oak_entries.scientific_name LIMIT ? OFFSET ?"
+	} else {
+		query += " ORDER BY scientific_name LIMIT ? OFFSET ?"
+	}
 	args = append(args, limit, offset)
 
 	rows, err := db.conn.Query(query, args...)
@@ -940,30 +980,60 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 
 // CountOakEntries returns the total count of oak entries matching the filter
 func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
-	query := `SELECT COUNT(*) FROM oak_entries`
+	baseQuery := `SELECT COUNT(*) FROM oak_entries`
 
 	var args []interface{}
 	var conditions []string
+	needsJoin := false
 
 	if filter != nil {
+		// Check if we need to join with species_sources
+		if filter.SourceID != nil {
+			needsJoin = true
+			baseQuery = `SELECT COUNT(DISTINCT oak_entries.scientific_name) FROM oak_entries
+			 INNER JOIN species_sources ON oak_entries.scientific_name = species_sources.scientific_name`
+			conditions = append(conditions, "species_sources.source_id = ?")
+			args = append(args, *filter.SourceID)
+		}
+
 		if filter.Subgenus != nil {
-			conditions = append(conditions, "subgenus = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.subgenus = ?")
+			} else {
+				conditions = append(conditions, "subgenus = ?")
+			}
 			args = append(args, *filter.Subgenus)
 		}
 		if filter.Section != nil {
-			conditions = append(conditions, "section = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.section = ?")
+			} else {
+				conditions = append(conditions, "section = ?")
+			}
 			args = append(args, *filter.Section)
 		}
 		if filter.Subsection != nil {
-			conditions = append(conditions, "subsection = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.subsection = ?")
+			} else {
+				conditions = append(conditions, "subsection = ?")
+			}
 			args = append(args, *filter.Subsection)
 		}
 		if filter.Complex != nil {
-			conditions = append(conditions, "complex = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.complex = ?")
+			} else {
+				conditions = append(conditions, "complex = ?")
+			}
 			args = append(args, *filter.Complex)
 		}
 		if filter.Hybrid != nil {
-			conditions = append(conditions, "is_hybrid = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.is_hybrid = ?")
+			} else {
+				conditions = append(conditions, "is_hybrid = ?")
+			}
 			if *filter.Hybrid {
 				args = append(args, 1)
 			} else {
@@ -972,6 +1042,7 @@ func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
 		}
 	}
 
+	query := baseQuery
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")
 	}

@@ -48,6 +48,8 @@ export async function performSearch(query) {
 
   // Create new abort controller for this request
   searchAbortController = new AbortController();
+  // Capture local reference - the module-level variable may be nulled by cancelSearch()
+  const controller = searchAbortController;
 
   // Clear previous results and set loading state
   searchLoading.set(true);
@@ -56,7 +58,7 @@ export async function performSearch(query) {
   try {
     const results = await unifiedSearch(query);
     // Only update if this request wasn't aborted
-    if (!searchAbortController.signal.aborted) {
+    if (!controller.signal.aborted) {
       searchResults.set(results);
       searchLoading.set(false);
     }
@@ -66,7 +68,7 @@ export async function performSearch(query) {
       return;
     }
     // Only update error if this request wasn't aborted
-    if (!searchAbortController.signal.aborted) {
+    if (!controller.signal.aborted) {
       searchError.set(err.message || 'Search failed');
       searchResults.set(emptySearchResults);
       searchLoading.set(false);

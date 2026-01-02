@@ -178,6 +178,16 @@ export async function fetchSpeciesFull(name) {
 }
 
 /**
+ * Fetch species that have data from a specific source
+ * @param {number} sourceId - Source ID
+ * @returns {Promise<Array>} Array of species objects
+ */
+export async function fetchSpeciesBySource(sourceId) {
+  const response = await fetchApi(`/api/v1/species?source_id=${sourceId}&limit=1000`);
+  return response.data || response.species || response;
+}
+
+/**
  * Search species by query (species-only search)
  * @param {string} query - Search query
  * @returns {Promise<Array>} Matching species

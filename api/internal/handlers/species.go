@@ -22,6 +22,7 @@ type SpeciesListParams struct {
 	Subsection *string
 	Complex    *string
 	Hybrid     *bool
+	SourceID   *int64
 }
 
 // SpeciesRequest represents the request body for creating/updating a species
@@ -126,6 +127,19 @@ func parseSpeciesListParams(query url.Values) (*SpeciesListParams, []ValidationE
 		params.Hybrid = &hybrid
 	}
 
+	// Parse source_id filter
+	if sourceIDStr := query.Get("source_id"); sourceIDStr != "" {
+		sourceID, err := strconv.ParseInt(sourceIDStr, 10, 64)
+		if err != nil || sourceID < 1 {
+			errors = append(errors, ValidationError{
+				Field:   "source_id",
+				Message: "must be a positive integer",
+			})
+		} else {
+			params.SourceID = &sourceID
+		}
+	}
+
 	return params, errors
 }
 
@@ -185,6 +199,7 @@ func (s *Server) handleListSpecies(w http.ResponseWriter, r *http.Request) {
 		Subsection: params.Subsection,
 		Complex:    params.Complex,
 		Hybrid:     params.Hybrid,
+		SourceID:   params.SourceID,
 	}
 
 	// Get total count

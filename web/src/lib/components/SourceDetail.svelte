@@ -1,7 +1,7 @@
 <script>
   import { base } from '$app/paths';
   import { onMount, tick } from 'svelte';
-  import { fetchSourceById, fetchSpecies, ApiError } from '$lib/apiClient.js';
+  import { fetchSourceById, fetchSpeciesBySource, ApiError } from '$lib/apiClient.js';
 
   let { sourceId } = $props();
 
@@ -21,22 +21,19 @@
       isLoading = true;
       error = null;
 
-      // Fetch source details
-      const sourceData = await fetchSourceById(Number(id));
-      source = sourceData;
+      // Fetch source details and species in parallel
+      const [sourceData, speciesData] = await Promise.all([
+        fetchSourceById(Number(id)),
+        fetchSpeciesBySource(Number(id))
+      ]);
 
-      // Fetch all species and filter by source
-      if (sourceData) {
-        const allSpecies = await fetchSpecies();
-        // Filter species that have data from this source
-        speciesList = allSpecies.filter(species => {
-          // Check if species has sources array with matching source_id
-          if (species.sources && Array.isArray(species.sources)) {
-            return species.sources.some(s => s.source_id === Number(id));
-          }
-          return false;
-        }).sort((a, b) => a.name.localeCompare(b.name));
-      }
+      source = sourceData;
+      // Sort by species name
+      speciesList = (speciesData || []).sort((a, b) => {
+        const nameA = a.scientific_name || a.name || '';
+        const nameB = b.scientific_name || b.name || '';
+        return nameA.localeCompare(nameB);
+      });
     } catch (err) {
       console.error('Failed to fetch source:', err);
       error = err instanceof ApiError ? err.message : 'Failed to load source';
@@ -190,12 +187,13 @@
 
       <div class="species-grid" bind:this={gridElement}>
         {#each displayedSpecies as species}
-          <a href="{base}/species/{encodeURIComponent(species.name)}/?source={sourceId}" class="species-link">
+          {@const speciesName = species.scientific_name || species.name}
+          <a href="{base}/species/{encodeURIComponent(speciesName)}/?source={sourceId}" class="species-link">
             <span class="species-name">
               {#if species.is_hybrid}
-                Q. ×{species.name.startsWith('×') ? species.name.slice(1) : species.name}
+                Q. ×{speciesName.startsWith('×') ? speciesName.slice(1) : speciesName}
               {:else}
-                Q. {species.name}
+                Q. {speciesName}
               {/if}
             </span>
           </a>
