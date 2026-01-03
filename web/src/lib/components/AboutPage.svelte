@@ -159,7 +159,7 @@
             are open to all; write operations require authentication.
         </p>
         <p>
-            <a href="https://oak-compendium-api.fly.dev/api/v1/docs" target="_blank" rel="noopener noreferrer"
+            <a href="https://api.oakcompendium.org/api/v1/docs" target="_blank" rel="noopener noreferrer"
                 >View API Documentation</a
             >
         </p>
