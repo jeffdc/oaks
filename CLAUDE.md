@@ -784,11 +784,48 @@ go build -o oak .
 - **Go**: `gofmt`, API client pattern for data operations
 
 ### Git Workflow
-- This project uses Beads for issue tracking (see `.beads/` and session startup hook)
-- The beads daemon runs with auto-commit, auto-push, and auto-pull enabled
-- Beads syncs to `main` branch via a sparse worktree (do not checkout `main` directly)
-- For bug fixes on main: create a branch from `origin/main`, fix, then push to main
-- Commit messages: Present tense, imperative mood (see `CONTRIBUTING.md`)
+
+**IMPORTANT: Never checkout `main` directly.** The beads daemon uses a sparse worktree on `main` for auto-sync. Attempting to checkout `main` will fail.
+
+**Push approval rules:**
+| Change Type | Approval Required | Notes |
+|-------------|-------------------|-------|
+| Beads (`.beads/`) | No | Daemon auto-syncs to main |
+| Specs (`/openspec/`) | No | But must be manually pushed to main |
+| Everything else | **Yes** | Always ask user before pushing to main |
+
+**Workflow for small work (bugs, specs, small features):**
+```bash
+# Start from origin/main
+git fetch origin
+git checkout -b fix/descriptive-name origin/main
+
+# Do work, commit
+git add <files>
+git commit -m "Description"
+
+# For specs: push to main immediately
+git push origin fix/descriptive-name:main
+git checkout --detach origin/main
+git branch -d fix/descriptive-name
+
+# For code: ASK USER FIRST, then push if approved
+```
+
+**Workflow for large features:**
+```bash
+# Create a worktree for the feature
+git worktree add ../oaks-feature-name -b feature-name origin/main
+
+# Work in that directory until complete
+# When ready to merge: ASK USER FOR APPROVAL
+```
+
+**Specs rule:** When specs in `/openspec/` are modified (even while on a feature branch), ensure they get pushed to main. Create a separate branch from `origin/main` if needed.
+
+**Beads:** The daemon (auto-commit, auto-push, auto-pull) handles all beads sync automatically.
+
+**Commit messages:** Present tense, imperative mood.
 
 ### Beads Naming
 Use component prefixes when creating beads:
@@ -799,25 +836,11 @@ Use component prefixes when creating beads:
 Ask before introducing new prefixes.
 
 ### Multi-Agent Workflows
-Multiple Claude Code agents can work in parallel on this project. To avoid conflicts:
+For parallel agent work, use separate worktrees:
+- Main working dir: bugs, specs, small work
+- Feature worktrees: large features (e.g., `../oaks-feature-name`)
 
-**Setup**: Run multiple terminal sessions in the same worktree, with each agent focused on a specific component:
-- Agent 1: `ios/` directory only
-- Agent 2: `web/` directory only
-- Agent 3: `cli/` directory only
-
-**Beads Coordination**:
-- All agents share the same beads database automatically
-- The daemon handles sync automatically (no manual `bd sync` needed)
-- Use component prefixes (`ios-`, `web-`, `cli-`) when creating beads so agents can filter to their domain
-- Beads merge driver handles field-level conflicts if the same issue is edited by multiple agents
-
-**Git Coordination**:
-- Agents must stay in their designated directories to avoid merge conflicts
-- If git lock errors occur (one agent mid-commit while another commits), retry after a moment
-- For more isolation, use feature branches per agent (`ios-feature`, `web-feature`) and merge when done
-
-**Alternative - Git Worktrees**: For full isolation, create separate worktrees per agent. The daemon syncs beads to `main` via `sync.branch` configuration, so all worktrees share the same beads state.
+All worktrees share beads state via the daemon's `sync.branch=main` configuration.
 
 ### Critical: Files That Must Be Tracked
 - **`cli/oak_compendium.db`**: The SQLite database MUST be committed to git. This is the authoritative data source for the project. Do NOT add it to .gitignore or remove it from tracking.
