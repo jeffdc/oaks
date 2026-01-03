@@ -109,13 +109,30 @@ Copy this checklist into a beads issue for each release. Update status as you pr
 
 When asked to release the web app:
 
-### 1. Create Tracking Issue
+### 1. Setup and Sync (BEFORE any other work)
 
 ```bash
-bd create --title "Release web $(date +%Y.%m.%d.%H%M)" --type task --priority 1
+# Fetch latest from origin
+git fetch origin
+
+# Check if branch needs rebasing onto main
+git log --oneline HEAD..origin/main
+
+# If there are commits on main, rebase first
+git rebase origin/main
+
+# Create tracking issue
+bd create --title "Release web $(date +%Y.%m.%d.%H%M)" --type task --priority 0
+bd update <issue-id> --status in_progress
+
+# CRITICAL: Sync beads immediately so the tracking issue commit happens NOW
+# not at the end (which would bury the release commit)
+bd sync
 ```
 
-Add the checklist template to the issue description. This is your checkpoint log.
+This ensures:
+- We're up to date with main before starting
+- The beads commit for the tracking issue is early, not at the end
 
 ### 2. Branch Selection (Checkpoint 1)
 
@@ -195,11 +212,21 @@ git rebase -i main  # Interactive rebase to squash
 ### 8. Merge to Main (Checkpoint 8)
 
 ```bash
-git checkout main
-git pull origin main
-git merge <release-branch> --no-ff -m "Release web v${NEW_VERSION}"
-git push origin main
+# IMPORTANT: Don't checkout main directly (beads daemon uses it)
+# Push branch directly to main instead
+
+# First, ensure no uncommitted changes (especially beads)
+git status --porcelain
+# If beads changes exist, they should already be synced from step 1
+# If new beads changes appeared, sync them BEFORE the release commit
+
+# Push to main
+git push origin <release-branch>:main
 ```
+
+**Key point**: The release commit should be the LAST commit pushed to main.
+If beads changes appear after the release commit, they will become the "top"
+commit and the release notes will be buried. This is why we sync beads in step 1.
 
 ### 9. Monitor GitHub Actions (Checkpoint 9)
 
