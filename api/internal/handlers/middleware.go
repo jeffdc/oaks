@@ -262,7 +262,7 @@ func bodySizeLimitMiddleware(next http.Handler) http.Handler {
 
 // isDocsEndpoint returns true if the path is a documentation endpoint
 func isDocsEndpoint(path string) bool {
-	return path == "/docs" || path == "/api/v1/openapi.yaml"
+	return path == "/docs" || path == "/api/v1/docs" || path == "/api/v1/openapi.yaml"
 }
 
 // securityHeadersMiddleware adds security headers to all responses

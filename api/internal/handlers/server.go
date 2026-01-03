@@ -87,6 +87,11 @@ func (s *Server) setupRoutes() {
 	r.Get("/health", s.handleHealth)
 	r.Get("/health/ready", s.handleHealthReady)
 
+	// Convenience redirect for docs at root level
+	r.Get("/docs", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/api/v1/docs", http.StatusMovedPermanently)
+	})
+
 	// API v1 routes
 	r.Route("/api/v1", func(r chi.Router) {
 		// Documentation endpoints (public)
