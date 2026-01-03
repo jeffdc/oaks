@@ -276,13 +276,14 @@ func securityHeadersMiddleware(next http.Handler) http.Handler {
 
 		// Content Security Policy - permissive for docs, strict for API
 		if isDocsEndpoint(r.URL.Path) {
-			// Docs need external scripts (Redoc), fonts (Google Fonts), and inline styles
+			// Docs need external scripts (Redoc), fonts (Google Fonts), inline styles, and workers
 			w.Header().Set("Content-Security-Policy",
 				"default-src 'self'; "+
-					"script-src 'self' https://cdn.redoc.ly 'unsafe-inline'; "+
+					"script-src 'self' https://cdn.redoc.ly 'unsafe-inline' blob:; "+
 					"style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; "+
 					"font-src 'self' https://fonts.gstatic.com; "+
-					"img-src 'self' data:; "+
+					"img-src 'self' data: https://cdn.redoc.ly; "+
+					"worker-src 'self' blob:; "+
 					"connect-src 'self'; "+
 					"frame-ancestors 'none'")
 		} else {
