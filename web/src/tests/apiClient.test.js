@@ -1,9 +1,22 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   speciesToApiFormat,
   taxonToApiFormat,
   sourceToApiFormat,
-  ApiError
+  ApiError,
+  fetchWithRetry,
+  createSpecies,
+  updateSpecies,
+  deleteSpecies,
+  createSpeciesSource,
+  updateSpeciesSource,
+  deleteSpeciesSource,
+  createTaxon,
+  updateTaxon,
+  deleteTaxon,
+  createSource,
+  updateSource,
+  deleteSource
 } from '../lib/apiClient.js';
 
 describe('apiClient format conversion functions', () => {
@@ -315,6 +328,21 @@ describe('apiClient format conversion functions', () => {
       expect(error.name).toBe('ApiError');
     });
 
+    it('creates error with details object', () => {
+      const error = new ApiError('Cannot delete', 409, 'CONFLICT', {
+        blocking_hybrids: ['bebbiana', 'jackiana']
+      });
+
+      expect(error.status).toBe(409);
+      expect(error.code).toBe('CONFLICT');
+      expect(error.details).toEqual({ blocking_hybrids: ['bebbiana', 'jackiana'] });
+    });
+
+    it('defaults details to null when not provided', () => {
+      const error = new ApiError('Not found', 404, 'NOT_FOUND');
+      expect(error.details).toBeNull();
+    });
+
     it('is instanceof Error', () => {
       const error = new ApiError('Test error', 500, 'INTERNAL_ERROR');
       expect(error).toBeInstanceOf(Error);
@@ -334,6 +362,205 @@ describe('apiClient format conversion functions', () => {
     it('includes stack trace', () => {
       const error = new ApiError('Test', 500, 'TEST');
       expect(error.stack).toBeDefined();
+    });
+  });
+});
+
+describe('fetchWithRetry', () => {
+  it('returns result on first success', async () => {
+    const fn = vi.fn().mockResolvedValue('success');
+    const result = await fetchWithRetry(fn, { baseDelay: 10 });
+    expect(result).toBe('success');
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries on failure and succeeds', async () => {
+    const fn = vi.fn()
+      .mockRejectedValueOnce(new ApiError('Server error', 500, 'INTERNAL'))
+      .mockResolvedValueOnce('success');
+
+    const result = await fetchWithRetry(fn, { baseDelay: 10 });
+    expect(result).toBe('success');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries up to maxRetries times', async () => {
+    const fn = vi.fn().mockRejectedValue(new ApiError('Server error', 500, 'INTERNAL'));
+
+    await expect(fetchWithRetry(fn, { maxRetries: 3, baseDelay: 10 }))
+      .rejects.toThrow(ApiError);
+
+    expect(fn).toHaveBeenCalledTimes(4); // initial + 3 retries
+  });
+
+  it('does not retry on 4xx errors (except 408, 429)', async () => {
+    const fn = vi.fn().mockRejectedValue(new ApiError('Not found', 404, 'NOT_FOUND'));
+
+    await expect(fetchWithRetry(fn, { maxRetries: 3, baseDelay: 10 }))
+      .rejects.toThrow(ApiError);
+
+    expect(fn).toHaveBeenCalledTimes(1); // no retries
+  });
+
+  it('does not retry on 400 Bad Request', async () => {
+    const fn = vi.fn().mockRejectedValue(new ApiError('Bad request', 400, 'BAD_REQUEST'));
+
+    await expect(fetchWithRetry(fn, { maxRetries: 3, baseDelay: 10 }))
+      .rejects.toThrow(ApiError);
+
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry on 401 Unauthorized', async () => {
+    const fn = vi.fn().mockRejectedValue(new ApiError('Unauthorized', 401, 'UNAUTHORIZED'));
+
+    await expect(fetchWithRetry(fn, { maxRetries: 3, baseDelay: 10 }))
+      .rejects.toThrow(ApiError);
+
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry on 403 Forbidden', async () => {
+    const fn = vi.fn().mockRejectedValue(new ApiError('Forbidden', 403, 'FORBIDDEN'));
+
+    await expect(fetchWithRetry(fn, { maxRetries: 3, baseDelay: 10 }))
+      .rejects.toThrow(ApiError);
+
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries on 408 Request Timeout', async () => {
+    const fn = vi.fn()
+      .mockRejectedValueOnce(new ApiError('Timeout', 408, 'TIMEOUT'))
+      .mockResolvedValueOnce('success');
+
+    const result = await fetchWithRetry(fn, { baseDelay: 10 });
+    expect(result).toBe('success');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries on 429 Too Many Requests', async () => {
+    const fn = vi.fn()
+      .mockRejectedValueOnce(new ApiError('Rate limited', 429, 'RATE_LIMITED'))
+      .mockResolvedValueOnce('success');
+
+    const result = await fetchWithRetry(fn, { baseDelay: 10 });
+    expect(result).toBe('success');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries on 5xx server errors', async () => {
+    const fn = vi.fn()
+      .mockRejectedValueOnce(new ApiError('Bad gateway', 502, 'BAD_GATEWAY'))
+      .mockRejectedValueOnce(new ApiError('Service unavailable', 503, 'SERVICE_UNAVAILABLE'))
+      .mockResolvedValueOnce('success');
+
+    const result = await fetchWithRetry(fn, { baseDelay: 10 });
+    expect(result).toBe('success');
+    expect(fn).toHaveBeenCalledTimes(3);
+  });
+
+  it('retries on network errors', async () => {
+    const fn = vi.fn()
+      .mockRejectedValueOnce(new ApiError('Network error', 0, 'NETWORK_ERROR'))
+      .mockResolvedValueOnce('success');
+
+    const result = await fetchWithRetry(fn, { baseDelay: 10 });
+    expect(result).toBe('success');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it('uses exponential backoff', async () => {
+    vi.useFakeTimers();
+    const fn = vi.fn()
+      .mockRejectedValueOnce(new ApiError('Error', 500, 'INTERNAL'))
+      .mockRejectedValueOnce(new ApiError('Error', 500, 'INTERNAL'))
+      .mockResolvedValueOnce('success');
+
+    const promise = fetchWithRetry(fn, { baseDelay: 1000 });
+
+    // First call happens immediately
+    await vi.advanceTimersByTimeAsync(0);
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    // First retry after 1s
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(fn).toHaveBeenCalledTimes(2);
+
+    // Second retry after 2s (exponential: 1000 * 2^1)
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(fn).toHaveBeenCalledTimes(3);
+
+    const result = await promise;
+    expect(result).toBe('success');
+
+    vi.useRealTimers();
+  });
+
+  it('uses default options when none provided', async () => {
+    const fn = vi.fn().mockResolvedValue('success');
+    const result = await fetchWithRetry(fn);
+    expect(result).toBe('success');
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('mutation functions exist', () => {
+  // These tests verify the mutation functions are exported
+  // Full integration tests would require mocking fetch
+  describe('species mutations', () => {
+    it('exports createSpecies function', () => {
+      expect(typeof createSpecies).toBe('function');
+    });
+
+    it('exports updateSpecies function', () => {
+      expect(typeof updateSpecies).toBe('function');
+    });
+
+    it('exports deleteSpecies function', () => {
+      expect(typeof deleteSpecies).toBe('function');
+    });
+  });
+
+  describe('species-source mutations', () => {
+    it('exports createSpeciesSource function', () => {
+      expect(typeof createSpeciesSource).toBe('function');
+    });
+
+    it('exports updateSpeciesSource function', () => {
+      expect(typeof updateSpeciesSource).toBe('function');
+    });
+
+    it('exports deleteSpeciesSource function', () => {
+      expect(typeof deleteSpeciesSource).toBe('function');
+    });
+  });
+
+  describe('taxon mutations', () => {
+    it('exports createTaxon function', () => {
+      expect(typeof createTaxon).toBe('function');
+    });
+
+    it('exports updateTaxon function', () => {
+      expect(typeof updateTaxon).toBe('function');
+    });
+
+    it('exports deleteTaxon function', () => {
+      expect(typeof deleteTaxon).toBe('function');
+    });
+  });
+
+  describe('source mutations', () => {
+    it('exports createSource function', () => {
+      expect(typeof createSource).toBe('function');
+    });
+
+    it('exports updateSource function', () => {
+      expect(typeof updateSource).toBe('function');
+    });
+
+    it('exports deleteSource function', () => {
+      expect(typeof deleteSource).toBe('function');
     });
   });
 });

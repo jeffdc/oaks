@@ -3,7 +3,7 @@
   import { goto } from '$app/navigation';
   import { marked } from 'marked';
   import DOMPurify from 'dompurify';
-  import { allSpecies, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName } from '$lib/stores/dataStore.js';
+  import { getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName } from '$lib/stores/dataStore.js';
   import { getLogoIcon, getLinkLogoId } from '$lib/icons/index.js';
   import inaturalistLogo from '$lib/icons/inaturalist-logo.svg';
 
@@ -15,6 +15,9 @@
 
   export let species;
   export let initialSourceId = null;
+
+  // Get species name (support both API format and legacy format)
+  $: speciesName = species.scientific_name || species.name;
 
   // Source selection state
   let selectedSourceId = null;
@@ -36,15 +39,15 @@
   $: selectedSource = sources.find(s => s.source_id === selectedSourceId) || null;
 
   // Build species detail URL
-  function getSpeciesUrl(speciesName) {
-    return `${base}/species/${encodeURIComponent(speciesName)}/`;
+  function getSpeciesUrl(name) {
+    return `${base}/species/${encodeURIComponent(name)}/`;
   }
 
-  function getOtherParent(hybrid, currentSpecies) {
+  function getOtherParent(currentSpecies) {
     // Clean up parent names - remove Quercus prefix and × symbol
     const cleanName = (name) => name?.replace(/^Quercus\s+/, '').replace(/^×\s*/, '').trim();
-    const parent1 = cleanName(hybrid.parent1);
-    const parent2 = cleanName(hybrid.parent2);
+    const parent1 = cleanName(species.parent1);
+    const parent2 = cleanName(species.parent2);
     const current = cleanName(currentSpecies);
 
     if (parent1 && parent1.toLowerCase() !== current.toLowerCase()) {
@@ -55,25 +58,10 @@
     return null;
   }
 
-  // Find hybrid species by name, handling × prefix variations
-  function findHybridSpecies(hybridName) {
-    // Try exact match first
-    let found = $allSpecies.find(s => s.name === hybridName);
-    if (found) return found;
-
-    // Try with × prefix
-    found = $allSpecies.find(s => s.name === `× ${hybridName}`);
-    if (found) return found;
-
-    // Try without × prefix
-    const withoutPrefix = hybridName.replace(/^×\s*/, '');
-    found = $allSpecies.find(s => s.name === withoutPrefix || s.name === `× ${withoutPrefix}`);
-    return found || null;
-  }
-
   // Check if hybrid name already has × symbol (most do)
   function needsHybridSymbol(s) {
-    return s.is_hybrid && !s.name.startsWith('×');
+    const name = s.scientific_name || s.name;
+    return s.is_hybrid && !name.startsWith('×');
   }
 
   // Render Markdown to HTML with DOMPurify sanitization
@@ -132,16 +120,17 @@
     }
 
     // Add iNaturalist (uses full logo image instead of icon)
+    const name = species.scientific_name || species.name;
     links.push({
       name: 'iNaturalist',
-      url: `https://www.inaturalist.org/search?q=${encodeURIComponent('Quercus ' + species.name)}`,
+      url: `https://www.inaturalist.org/search?q=${encodeURIComponent('Quercus ' + name)}`,
       isInaturalist: true,
     });
 
     // Add Wikipedia
     links.push({
       name: 'Wikipedia',
-      url: `https://en.wikipedia.org/wiki/Quercus_${species.name.replace(/ /g, '_')}`,
+      url: `https://en.wikipedia.org/wiki/Quercus_${name.replace(/ /g, '_')}`,
       logoId: 'wikipedia',
     });
 
@@ -154,35 +143,44 @@
   $: sortedExternalLinks = getSortedExternalLinks(species);
 
   // Build taxonomy URL for a given level
+  // Supports both flat taxonomy (API format) and nested taxonomy (legacy format)
   function getTaxonUrl(level) {
-    if (!species.taxonomy) return `${base}/taxonomy/`;
+    // Get taxonomy fields - support both flat (API) and nested (legacy) format
+    const subgenus = species.subgenus || species.taxonomy?.subgenus;
+    const section = species.section || species.taxonomy?.section;
+    const subsection = species.subsection || species.taxonomy?.subsection;
+    const complex = species.complex || species.taxonomy?.complex;
 
-    const t = species.taxonomy;
+    if (!subgenus) return `${base}/taxonomy/`;
+
     const parts = [];
 
     // Build path based on the level clicked
-    if (t.subgenus) {
-      parts.push(t.subgenus);
+    if (subgenus) {
+      parts.push(subgenus);
       if (level === 'subgenus') return `${base}/taxonomy/${parts.map(encodeURIComponent).join('/')}/`;
     }
 
-    if (t.section) {
-      parts.push(t.section);
+    if (section) {
+      parts.push(section);
       if (level === 'section') return `${base}/taxonomy/${parts.map(encodeURIComponent).join('/')}/`;
     }
 
-    if (t.subsection) {
-      parts.push(t.subsection);
+    if (subsection) {
+      parts.push(subsection);
       if (level === 'subsection') return `${base}/taxonomy/${parts.map(encodeURIComponent).join('/')}/`;
     }
 
-    if (t.complex) {
-      parts.push(t.complex);
+    if (complex) {
+      parts.push(complex);
       if (level === 'complex') return `${base}/taxonomy/${parts.map(encodeURIComponent).join('/')}/`;
     }
 
     return `${base}/taxonomy/${parts.map(encodeURIComponent).join('/')}/`;
   }
+
+  // Helper to check if species has taxonomy data (flat or nested)
+  $: hasTaxonomy = species.subgenus || species.taxonomy?.subgenus;
 </script>
 
 <div class="species-detail">
@@ -193,7 +191,7 @@
       <div class="species-current-left">
         <span class="badge badge-uppercase badge-forest">{species.is_hybrid ? 'Hybrid' : 'Species'}</span>
         <h1 class="species-title">
-          <em>Quercus {#if needsHybridSymbol(species)}× {/if}{species.name}</em>
+          <em>Quercus {#if needsHybridSymbol(species)}× {/if}{speciesName}</em>
           {#if species.author}<span class="author-text">{species.author}</span>{/if}
         </h1>
       </div>
@@ -210,38 +208,43 @@
     </div>
 
     <!-- Taxonomy path (serves as both navigation and taxonomy display) -->
-    {#if species.taxonomy}
+    <!-- Supports both flat taxonomy (API format) and nested taxonomy (legacy format) -->
+    {#if hasTaxonomy}
+      {@const subgenus = species.subgenus || species.taxonomy?.subgenus}
+      {@const section = species.section || species.taxonomy?.section}
+      {@const subsection = species.subsection || species.taxonomy?.subsection}
+      {@const complex = species.complex || species.taxonomy?.complex}
       <nav class="taxonomy-nav" aria-label="Taxonomy breadcrumb">
         <span class="taxonomy-label" aria-hidden="true">Taxonomy:</span>
         <a href="{base}/taxonomy/" class="taxonomy-link">
           <span class="taxonomy-name">Quercus</span>
           <span class="taxonomy-level-label">(genus)</span>
         </a>
-        {#if species.taxonomy.subgenus}
+        {#if subgenus}
           <span class="taxonomy-separator">›</span>
           <a href="{getTaxonUrl('subgenus')}" class="taxonomy-link">
-            <span class="taxonomy-name">{species.taxonomy.subgenus}</span>
+            <span class="taxonomy-name">{subgenus}</span>
             <span class="taxonomy-level-label">(subgenus)</span>
           </a>
         {/if}
-        {#if species.taxonomy.section}
+        {#if section}
           <span class="taxonomy-separator">›</span>
           <a href="{getTaxonUrl('section')}" class="taxonomy-link">
-            <span class="taxonomy-name">{species.taxonomy.section}</span>
+            <span class="taxonomy-name">{section}</span>
             <span class="taxonomy-level-label">(section)</span>
           </a>
         {/if}
-        {#if species.taxonomy.subsection}
+        {#if subsection}
           <span class="taxonomy-separator">›</span>
           <a href="{getTaxonUrl('subsection')}" class="taxonomy-link">
-            <span class="taxonomy-name">{species.taxonomy.subsection}</span>
+            <span class="taxonomy-name">{subsection}</span>
             <span class="taxonomy-level-label">(subsection)</span>
           </a>
         {/if}
-        {#if species.taxonomy.complex}
+        {#if complex}
           <span class="taxonomy-separator">›</span>
           <a href="{getTaxonUrl('complex')}" class="taxonomy-link">
-            <span class="taxonomy-name">Q. {species.taxonomy.complex}</span>
+            <span class="taxonomy-name">Q. {complex}</span>
             <span class="taxonomy-level-label">(complex)</span>
           </a>
         {/if}
@@ -301,14 +304,14 @@
         </h2>
         <div class="hybrids-grid">
           {#each species.hybrids as hybridName}
-            {@const hybridSpecies = findHybridSpecies(hybridName)}
-            {@const otherParent = hybridSpecies ? getOtherParent(hybridSpecies, species.name) : null}
+            {@const otherParent = getOtherParent(speciesName)}
+            {@const displayName = hybridName.startsWith('×') ? hybridName : `× ${hybridName}`}
             <div class="hybrid-item">
               <a
-                href="{getSpeciesUrl(hybridSpecies?.name || hybridName)}"
+                href="{getSpeciesUrl(hybridName)}"
                 class="species-link font-semibold"
               >
-                Q. {hybridSpecies?.name?.startsWith('×') ? '' : '× '}{hybridSpecies?.name || hybridName}
+                Q. {displayName}
               </a>
               {#if otherParent}
                 <span class="text-sm" style="color: var(--color-text-secondary);">
@@ -415,7 +418,7 @@
           {/each}
           {#if sources.length > 1}
             <a
-              href="{base}/compare/{encodeURIComponent(species.name)}/"
+              href="{base}/compare/{encodeURIComponent(speciesName)}/"
               class="compare-sources-link"
               title="Compare all sources side-by-side"
             >

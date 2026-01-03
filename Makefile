@@ -5,7 +5,7 @@
 #   - cli/  - Go command-line tool
 #   - web/  - Svelte PWA
 
-.PHONY: dev dev-api dev-web build build-api build-cli test clean help
+.PHONY: dev dev-api dev-web build build-api build-cli test test-e2e test-regression clean help
 
 # Start both API and web dev servers
 # API runs on :8080, web on :5173
@@ -39,11 +39,18 @@ build-api:
 build-cli:
 	cd cli && $(MAKE) build
 
-# Run all tests
+# Run all unit tests
 test:
 	cd api && $(MAKE) test
 	cd cli && $(MAKE) test
 	cd web && npm test
+
+# Run E2E tests (requires build first)
+test-e2e:
+	cd web && npm run build && npm run test:e2e
+
+# Run full regression suite (unit tests + E2E)
+test-regression: test test-e2e
 
 # Clean all build artifacts
 clean:
@@ -65,6 +72,10 @@ help:
 	@echo "  make build-api  Build API server only"
 	@echo "  make build-cli  Build CLI tool only"
 	@echo ""
+	@echo "Testing:"
+	@echo "  make test            Run unit tests (fast)"
+	@echo "  make test-e2e        Run E2E tests with Playwright"
+	@echo "  make test-regression Run all tests (unit + E2E)"
+	@echo ""
 	@echo "Other:"
-	@echo "  make test       Run all tests"
 	@echo "  make clean      Clean build artifacts"

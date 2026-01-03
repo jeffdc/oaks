@@ -315,14 +315,21 @@ func (db *Database) UpdateTaxon(taxon *models.Taxon) error {
 // GetTaxon gets a taxon by name and level
 func (db *Database) GetTaxon(name string, level models.TaxonLevel) (*models.Taxon, error) {
 	row := db.conn.QueryRow(
-		`SELECT name, level, parent, author, notes, links FROM taxa WHERE name = ? AND level = ?`,
+		`SELECT t.name, t.level, t.parent, t.author, t.notes, t.links,
+		        (SELECT COUNT(*) FROM oak_entries o WHERE
+		            (t.level = 'subgenus' AND o.subgenus = t.name) OR
+		            (t.level = 'section' AND o.section = t.name) OR
+		            (t.level = 'subsection' AND o.subsection = t.name) OR
+		            (t.level = 'complex' AND o.complex = t.name)
+		        ) as species_count
+		 FROM taxa t WHERE t.name = ? AND t.level = ?`,
 		name, string(level),
 	)
 
 	var t models.Taxon
 	var levelStr string
 	var linksJSON sql.NullString
-	err := row.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes, &linksJSON)
+	err := row.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes, &linksJSON, &t.SpeciesCount)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -343,21 +350,46 @@ func (db *Database) GetTaxon(name string, level models.TaxonLevel) (*models.Taxo
 	return &t, nil
 }
 
-// ListTaxa lists all taxa, optionally filtered by level
-func (db *Database) ListTaxa(level *models.TaxonLevel) ([]*models.Taxon, error) {
+// TaxaListParams contains optional filters for listing taxa
+type TaxaListParams struct {
+	Level  *models.TaxonLevel
+	Parent *string
+}
+
+// ListTaxa lists all taxa, optionally filtered by level and parent
+func (db *Database) ListTaxa(params *TaxaListParams) ([]*models.Taxon, error) {
 	var rows *sql.Rows
 	var err error
+	var args []interface{}
 
-	if level != nil {
-		rows, err = db.conn.Query(
-			`SELECT name, level, parent, author, notes, links FROM taxa WHERE level = ? ORDER BY name`,
-			string(*level),
-		)
-	} else {
-		rows, err = db.conn.Query(
-			`SELECT name, level, parent, author, notes, links FROM taxa ORDER BY level, name`,
-		)
+	// Base query with species count subquery
+	baseQuery := `SELECT t.name, t.level, t.parent, t.author, t.notes, t.links,
+	                     (SELECT COUNT(*) FROM oak_entries o WHERE
+	                         (t.level = 'subgenus' AND o.subgenus = t.name) OR
+	                         (t.level = 'section' AND o.section = t.name) OR
+	                         (t.level = 'subsection' AND o.subsection = t.name) OR
+	                         (t.level = 'complex' AND o.complex = t.name)
+	                     ) as species_count
+	              FROM taxa t`
+
+	// Build WHERE clause
+	var conditions []string
+	if params != nil && params.Level != nil {
+		conditions = append(conditions, "t.level = ?")
+		args = append(args, string(*params.Level))
 	}
+	if params != nil && params.Parent != nil {
+		conditions = append(conditions, "t.parent = ?")
+		args = append(args, *params.Parent)
+	}
+
+	query := baseQuery
+	if len(conditions) > 0 {
+		query += " WHERE " + strings.Join(conditions, " AND ")
+	}
+	query += " ORDER BY t.name"
+
+	rows, err = db.conn.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list taxa: %w", err)
 	}
@@ -368,7 +400,7 @@ func (db *Database) ListTaxa(level *models.TaxonLevel) ([]*models.Taxon, error) 
 		var t models.Taxon
 		var levelStr string
 		var linksJSON sql.NullString
-		if err := rows.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes, &linksJSON); err != nil {
+		if err := rows.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes, &linksJSON, &t.SpeciesCount); err != nil {
 			return nil, fmt.Errorf("failed to scan taxon: %w", err)
 		}
 		t.Level = models.TaxonLevel(levelStr)
@@ -846,32 +878,77 @@ func (db *Database) SearchOakEntries(query string) ([]string, error) {
 
 // OakEntryFilter contains filter criteria for listing oak entries
 type OakEntryFilter struct {
-	Subgenus *string
-	Section  *string
-	Hybrid   *bool
+	Subgenus   *string
+	Section    *string
+	Subsection *string
+	Complex    *string
+	Hybrid     *bool
+	SourceID   *int64
 }
 
 // ListOakEntriesPaginated returns a paginated list of oak entries with optional filters
 func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryFilter) ([]*models.OakEntry, error) {
-	query := `SELECT scientific_name, author, is_hybrid, conservation_status,
+	// Base SELECT - use DISTINCT when joining with species_sources
+	selectClause := `SELECT scientific_name, author, is_hybrid, conservation_status,
 		        subgenus, section, subsection, complex,
 		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
 		 FROM oak_entries`
 
 	var args []interface{}
 	var conditions []string
+	needsJoin := false
 
 	if filter != nil {
+		// Check if we need to join with species_sources
+		if filter.SourceID != nil {
+			needsJoin = true
+			selectClause = `SELECT DISTINCT oak_entries.scientific_name, oak_entries.author, oak_entries.is_hybrid, oak_entries.conservation_status,
+				oak_entries.subgenus, oak_entries.section, oak_entries.subsection, oak_entries.complex,
+				oak_entries.parent1, oak_entries.parent2, oak_entries.hybrids, oak_entries.closely_related_to, oak_entries.subspecies_varieties, oak_entries.synonyms, oak_entries.external_links
+			 FROM oak_entries
+			 INNER JOIN species_sources ON oak_entries.scientific_name = species_sources.scientific_name`
+			conditions = append(conditions, "species_sources.source_id = ?")
+			args = append(args, *filter.SourceID)
+		}
+
 		if filter.Subgenus != nil {
-			conditions = append(conditions, "subgenus = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.subgenus = ?")
+			} else {
+				conditions = append(conditions, "subgenus = ?")
+			}
 			args = append(args, *filter.Subgenus)
 		}
 		if filter.Section != nil {
-			conditions = append(conditions, "section = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.section = ?")
+			} else {
+				conditions = append(conditions, "section = ?")
+			}
 			args = append(args, *filter.Section)
 		}
+		if filter.Subsection != nil {
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.subsection = ?")
+			} else {
+				conditions = append(conditions, "subsection = ?")
+			}
+			args = append(args, *filter.Subsection)
+		}
+		if filter.Complex != nil {
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.complex = ?")
+			} else {
+				conditions = append(conditions, "complex = ?")
+			}
+			args = append(args, *filter.Complex)
+		}
 		if filter.Hybrid != nil {
-			conditions = append(conditions, "is_hybrid = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.is_hybrid = ?")
+			} else {
+				conditions = append(conditions, "is_hybrid = ?")
+			}
 			if *filter.Hybrid {
 				args = append(args, 1)
 			} else {
@@ -880,11 +957,16 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 		}
 	}
 
+	query := selectClause
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")
 	}
 
-	query += " ORDER BY scientific_name LIMIT ? OFFSET ?"
+	if needsJoin {
+		query += " ORDER BY oak_entries.scientific_name LIMIT ? OFFSET ?"
+	} else {
+		query += " ORDER BY scientific_name LIMIT ? OFFSET ?"
+	}
 	args = append(args, limit, offset)
 
 	rows, err := db.conn.Query(query, args...)
@@ -898,22 +980,60 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 
 // CountOakEntries returns the total count of oak entries matching the filter
 func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
-	query := `SELECT COUNT(*) FROM oak_entries`
+	baseQuery := `SELECT COUNT(*) FROM oak_entries`
 
 	var args []interface{}
 	var conditions []string
+	needsJoin := false
 
 	if filter != nil {
+		// Check if we need to join with species_sources
+		if filter.SourceID != nil {
+			needsJoin = true
+			baseQuery = `SELECT COUNT(DISTINCT oak_entries.scientific_name) FROM oak_entries
+			 INNER JOIN species_sources ON oak_entries.scientific_name = species_sources.scientific_name`
+			conditions = append(conditions, "species_sources.source_id = ?")
+			args = append(args, *filter.SourceID)
+		}
+
 		if filter.Subgenus != nil {
-			conditions = append(conditions, "subgenus = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.subgenus = ?")
+			} else {
+				conditions = append(conditions, "subgenus = ?")
+			}
 			args = append(args, *filter.Subgenus)
 		}
 		if filter.Section != nil {
-			conditions = append(conditions, "section = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.section = ?")
+			} else {
+				conditions = append(conditions, "section = ?")
+			}
 			args = append(args, *filter.Section)
 		}
+		if filter.Subsection != nil {
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.subsection = ?")
+			} else {
+				conditions = append(conditions, "subsection = ?")
+			}
+			args = append(args, *filter.Subsection)
+		}
+		if filter.Complex != nil {
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.complex = ?")
+			} else {
+				conditions = append(conditions, "complex = ?")
+			}
+			args = append(args, *filter.Complex)
+		}
 		if filter.Hybrid != nil {
-			conditions = append(conditions, "is_hybrid = ?")
+			if needsJoin {
+				conditions = append(conditions, "oak_entries.is_hybrid = ?")
+			} else {
+				conditions = append(conditions, "is_hybrid = ?")
+			}
 			if *filter.Hybrid {
 				args = append(args, 1)
 			} else {
@@ -922,6 +1042,7 @@ func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
 		}
 	}
 
+	query := baseQuery
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")
 	}
@@ -1397,4 +1518,252 @@ func (db *Database) DeleteMetadata(key string) error {
 		return fmt.Errorf("failed to delete metadata: %w", err)
 	}
 	return nil
+}
+
+// GetOakEntryWithSources returns a species with all its source data embedded
+// Sources are ordered by is_preferred DESC, source_id ASC
+func (db *Database) GetOakEntryWithSources(scientificName string) (*models.SpeciesWithSources, error) {
+	// Get the species entry first
+	entry, err := db.GetOakEntry(scientificName)
+	if err != nil {
+		return nil, err
+	}
+	if entry == nil {
+		return nil, nil
+	}
+
+	// Get sources with source metadata via join
+	rows, err := db.conn.Query(
+		`SELECT ss.id, ss.scientific_name, ss.source_id, ss.local_names, ss.range, ss.growth_habit,
+		        ss.leaves, ss.flowers, ss.fruits, ss.bark, ss.twigs, ss.buds, ss.hardiness_habitat,
+		        ss.miscellaneous, ss.url, ss.is_preferred,
+		        s.name, s.url
+		 FROM species_sources ss
+		 JOIN sources s ON ss.source_id = s.id
+		 WHERE ss.scientific_name = ?
+		 ORDER BY ss.is_preferred DESC, ss.source_id ASC`,
+		scientificName,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get species sources with metadata: %w", err)
+	}
+	defer rows.Close()
+
+	var sources []models.SpeciesSourceWithMeta
+	for rows.Next() {
+		var ssm models.SpeciesSourceWithMeta
+		var localNamesJSON sql.NullString
+		var isPreferred int
+
+		err := rows.Scan(
+			&ssm.ID, &ssm.ScientificName, &ssm.SourceID, &localNamesJSON, &ssm.Range, &ssm.GrowthHabit,
+			&ssm.Leaves, &ssm.Flowers, &ssm.Fruits, &ssm.Bark, &ssm.Twigs, &ssm.Buds, &ssm.HardinessHabitat,
+			&ssm.Miscellaneous, &ssm.URL, &isPreferred,
+			&ssm.SourceName, &ssm.SourceURL,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan species source with metadata: %w", err)
+		}
+
+		ssm.IsPreferred = isPreferred != 0
+		if localNamesJSON.Valid {
+			if err := json.Unmarshal([]byte(localNamesJSON.String), &ssm.LocalNames); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal local_names: %w", err)
+			}
+		}
+		if ssm.LocalNames == nil {
+			ssm.LocalNames = []string{}
+		}
+
+		sources = append(sources, ssm)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Ensure empty sources array instead of nil
+	if sources == nil {
+		sources = []models.SpeciesSourceWithMeta{}
+	}
+
+	return &models.SpeciesWithSources{
+		OakEntry: *entry,
+		Sources:  sources,
+	}, nil
+}
+
+// Stats contains aggregate counts for the database
+type Stats struct {
+	SpeciesCount int `json:"species_count"`
+	HybridCount  int `json:"hybrid_count"`
+	TaxaCount    int `json:"taxa_count"`
+	SourceCount  int `json:"source_count"`
+}
+
+// GetStats returns aggregate counts for species, hybrids, taxa, and sources
+func (db *Database) GetStats() (*Stats, error) {
+	stats := &Stats{}
+
+	// Count species (non-hybrids)
+	if err := db.conn.QueryRow(`SELECT COUNT(*) FROM oak_entries WHERE is_hybrid = 0`).Scan(&stats.SpeciesCount); err != nil {
+		return nil, fmt.Errorf("failed to count species: %w", err)
+	}
+
+	// Count hybrids
+	if err := db.conn.QueryRow(`SELECT COUNT(*) FROM oak_entries WHERE is_hybrid = 1`).Scan(&stats.HybridCount); err != nil {
+		return nil, fmt.Errorf("failed to count hybrids: %w", err)
+	}
+
+	// Count taxa
+	if err := db.conn.QueryRow(`SELECT COUNT(*) FROM taxa`).Scan(&stats.TaxaCount); err != nil {
+		return nil, fmt.Errorf("failed to count taxa: %w", err)
+	}
+
+	// Count sources
+	if err := db.conn.QueryRow(`SELECT COUNT(*) FROM sources`).Scan(&stats.SourceCount); err != nil {
+		return nil, fmt.Errorf("failed to count sources: %w", err)
+	}
+
+	return stats, nil
+}
+
+// GetHybridsReferencingParent returns all hybrids that reference the given species as parent1 or parent2
+func (db *Database) GetHybridsReferencingParent(scientificName string) ([]string, error) {
+	rows, err := db.conn.Query(
+		`SELECT scientific_name FROM oak_entries
+		 WHERE is_hybrid = 1 AND (parent1 = ? OR parent2 = ?)
+		 ORDER BY scientific_name`,
+		scientificName, scientificName,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get hybrids referencing parent: %w", err)
+	}
+	defer rows.Close()
+
+	var hybrids []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, fmt.Errorf("failed to scan hybrid name: %w", err)
+		}
+		hybrids = append(hybrids, name)
+	}
+	return hybrids, rows.Err()
+}
+
+// UnifiedSearch searches across species, taxa, and sources
+// Species are searched by: scientific_name, author, synonyms, local_names (from species_sources)
+// Taxa are searched by: name
+// Sources are searched by: name, author
+func (db *Database) UnifiedSearch(query string, limit int) (*models.UnifiedSearchResults, error) {
+	result := &models.UnifiedSearchResults{
+		Query:   query,
+		Species: []models.OakEntry{},
+		Taxa:    []models.Taxon{},
+		Sources: []models.Source{},
+	}
+
+	pattern := "%" + escapeLike(query) + "%"
+
+	// Search species: scientific_name, author, synonyms (JSON), local_names (via species_sources)
+	speciesRows, err := db.conn.Query(
+		`SELECT DISTINCT o.scientific_name, o.author, o.is_hybrid, o.conservation_status,
+		        o.subgenus, o.section, o.subsection, o.complex,
+		        o.parent1, o.parent2, o.hybrids, o.closely_related_to, o.subspecies_varieties, o.synonyms, o.external_links
+		 FROM oak_entries o
+		 LEFT JOIN species_sources ss ON o.scientific_name = ss.scientific_name
+		 WHERE o.scientific_name LIKE ? ESCAPE '\'
+		    OR o.author LIKE ? ESCAPE '\'
+		    OR o.synonyms LIKE ? ESCAPE '\'
+		    OR ss.local_names LIKE ? ESCAPE '\'
+		 ORDER BY o.scientific_name LIMIT ?`,
+		pattern, pattern, pattern, pattern, limit,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search species: %w", err)
+	}
+	defer speciesRows.Close()
+
+	entries, err := scanOakEntries(speciesRows)
+	if err != nil {
+		return nil, err
+	}
+	for _, e := range entries {
+		result.Species = append(result.Species, *e)
+	}
+
+	// Search taxa by name
+	taxaRows, err := db.conn.Query(
+		`SELECT t.name, t.level, t.parent, t.author, t.notes, t.links,
+		        (SELECT COUNT(*) FROM oak_entries o WHERE
+		            (t.level = 'subgenus' AND o.subgenus = t.name) OR
+		            (t.level = 'section' AND o.section = t.name) OR
+		            (t.level = 'subsection' AND o.subsection = t.name) OR
+		            (t.level = 'complex' AND o.complex = t.name)
+		        ) as species_count
+		 FROM taxa t
+		 WHERE t.name LIKE ? ESCAPE '\'
+		 ORDER BY t.level, t.name LIMIT ?`,
+		pattern, limit,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search taxa: %w", err)
+	}
+	defer taxaRows.Close()
+
+	for taxaRows.Next() {
+		var t models.Taxon
+		var levelStr string
+		var linksJSON sql.NullString
+		if err := taxaRows.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Notes, &linksJSON, &t.SpeciesCount); err != nil {
+			return nil, fmt.Errorf("failed to scan taxon: %w", err)
+		}
+		t.Level = models.TaxonLevel(levelStr)
+
+		if linksJSON.Valid && linksJSON.String != "" {
+			if err := json.Unmarshal([]byte(linksJSON.String), &t.Links); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal taxon links for %s: %w", t.Name, err)
+			}
+		}
+		if t.Links == nil {
+			t.Links = []models.TaxonLink{}
+		}
+
+		result.Taxa = append(result.Taxa, t)
+	}
+	if err := taxaRows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Search sources by name and author
+	sourceRows, err := db.conn.Query(
+		`SELECT id, source_type, name, description, author, year, url, isbn, doi, notes, license, license_url
+		 FROM sources
+		 WHERE name LIKE ? ESCAPE '\' OR author LIKE ? ESCAPE '\'
+		 ORDER BY name LIMIT ?`,
+		pattern, pattern, limit,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search sources: %w", err)
+	}
+	defer sourceRows.Close()
+
+	for sourceRows.Next() {
+		var s models.Source
+		if err := sourceRows.Scan(&s.ID, &s.SourceType, &s.Name, &s.Description, &s.Author, &s.Year, &s.URL, &s.ISBN, &s.DOI, &s.Notes, &s.License, &s.LicenseURL); err != nil {
+			return nil, fmt.Errorf("failed to scan source: %w", err)
+		}
+		result.Sources = append(result.Sources, s)
+	}
+	if err := sourceRows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Set counts
+	result.Counts.Species = len(result.Species)
+	result.Counts.Taxa = len(result.Taxa)
+	result.Counts.Sources = len(result.Sources)
+	result.Counts.Total = result.Counts.Species + result.Counts.Taxa + result.Counts.Sources
+
+	return result, nil
 }

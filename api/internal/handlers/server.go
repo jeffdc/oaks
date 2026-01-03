@@ -92,6 +92,9 @@ func (s *Server) setupRoutes() {
 		// Health endpoint also at /api/v1/health per spec
 		r.Get("/health", s.handleHealth)
 
+		// Unified search endpoint (public)
+		r.Get("/search", s.handleUnifiedSearch)
+
 		// Auth verification endpoint (requires auth, read-only)
 		r.Group(func(r chi.Router) {
 			r.Use(s.ForceAuth)
@@ -100,7 +103,8 @@ func (s *Server) setupRoutes() {
 
 		// Species endpoints (read - public)
 		r.Get("/species", s.handleListSpecies)
-		r.Get("/species/search", s.handleSearchSpecies) // Must be before {name} route
+		r.Get("/species/search", s.handleSearchSpecies)   // Must be before {name} route
+		r.Get("/species/{name}/full", s.handleGetSpeciesFull) // Must be before {name} route
 		r.Get("/species/{name}", s.handleGetSpecies)
 
 		// Species endpoints (write - auth required)
@@ -149,6 +153,9 @@ func (s *Server) setupRoutes() {
 
 		// Export endpoint
 		r.Get("/export", s.handleExport)
+
+		// Stats endpoint (public, read-only)
+		r.Get("/stats", s.handleStats)
 	})
 }
 

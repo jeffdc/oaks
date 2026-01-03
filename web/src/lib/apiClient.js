@@ -14,13 +14,17 @@ const API_TIMEOUT = 10000; // 10 seconds
 
 /**
  * Custom error class for API errors
+ * @property {number} status - HTTP status code (0 for network errors)
+ * @property {string} code - Error code (e.g., 'CONFLICT', 'NOT_FOUND', 'NETWORK_ERROR')
+ * @property {Object} details - Additional error details (e.g., blocking_hybrids for 409)
  */
 export class ApiError extends Error {
-  constructor(message, status, code) {
+  constructor(message, status, code, details = null) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
+    this.details = details;
   }
 }
 
@@ -48,10 +52,14 @@ async function fetchApi(endpoint, options = {}) {
 
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
+      // Extract error info from response body
+      // API returns { error: { message, code, details } } format
+      const errorInfo = errorBody.error || errorBody;
       throw new ApiError(
-        errorBody.error || `API request failed: ${response.statusText}`,
+        errorInfo.message || errorBody.error || `API request failed: ${response.statusText}`,
         response.status,
-        errorBody.code
+        errorInfo.code || (response.status === 409 ? 'CONFLICT' : undefined),
+        errorInfo.details || null
       );
     }
 
@@ -77,6 +85,44 @@ async function fetchApi(endpoint, options = {}) {
 }
 
 /**
+ * Retry helper with exponential backoff
+ * Delays: 1s, 2s, 4s between retries (default)
+ * @param {Function} fn - Async function to retry
+ * @param {Object} options - Retry options
+ * @param {number} options.maxRetries - Maximum number of retries (default: 3)
+ * @param {number} options.baseDelay - Base delay in ms (default: 1000)
+ * @returns {Promise<any>} Result from fn
+ */
+export async function fetchWithRetry(fn, { maxRetries = 3, baseDelay = 1000 } = {}) {
+  let lastError;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+
+      // Don't retry on 4xx errors (client errors) except 408 (timeout) and 429 (rate limit)
+      if (err instanceof ApiError && err.status >= 400 && err.status < 500 &&
+          err.status !== 408 && err.status !== 429) {
+        throw err;
+      }
+
+      // If we've exhausted retries, throw the last error
+      if (attempt === maxRetries) {
+        throw err;
+      }
+
+      // Wait with exponential backoff before next retry
+      const delay = baseDelay * Math.pow(2, attempt);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError;
+}
+
+/**
  * Check if the API is reachable
  * @returns {Promise<boolean>} True if API is reachable
  */
@@ -97,12 +143,11 @@ export async function checkApiHealth() {
 }
 
 /**
- * Fetch full export data from API
- * This returns the same format as quercus_data.json
- * @returns {Promise<Object>} Export data with metadata, species, and sources
+ * Fetch database stats (counts)
+ * @returns {Promise<Object>} Stats object with species_count, hybrid_count, taxa_count, source_count
  */
-export async function fetchExport() {
-  return fetchApi('/api/v1/export');
+export async function fetchStats() {
+  return fetchApi('/api/v1/stats');
 }
 
 /**
@@ -111,11 +156,11 @@ export async function fetchExport() {
  */
 export async function fetchSpecies() {
   const response = await fetchApi('/api/v1/species');
-  return response.species || response;
+  return response.data || response.species || response;
 }
 
 /**
- * Fetch a single species by name
+ * Fetch a single species by name (basic info)
  * @param {string} name - Species name (epithet)
  * @returns {Promise<Object>} Species object
  */
@@ -124,13 +169,41 @@ export async function fetchSpeciesByName(name) {
 }
 
 /**
- * Search species by query
+ * Fetch a single species with all source data embedded
+ * @param {string} name - Species name (epithet)
+ * @returns {Promise<Object>} Species object with sources array
+ */
+export async function fetchSpeciesFull(name) {
+  return fetchApi(`/api/v1/species/${encodeURIComponent(name)}/full`);
+}
+
+/**
+ * Fetch species that have data from a specific source
+ * @param {number} sourceId - Source ID
+ * @returns {Promise<Array>} Array of species objects
+ */
+export async function fetchSpeciesBySource(sourceId) {
+  const response = await fetchApi(`/api/v1/species?source_id=${sourceId}&limit=1000`);
+  return response.data || response.species || response;
+}
+
+/**
+ * Search species by query (species-only search)
  * @param {string} query - Search query
  * @returns {Promise<Array>} Matching species
  */
 export async function searchSpecies(query) {
   const response = await fetchApi(`/api/v1/species/search?q=${encodeURIComponent(query)}`);
-  return response.species || response;
+  return response.data || response.species || response;
+}
+
+/**
+ * Unified search across species, taxa, and sources
+ * @param {string} query - Search query
+ * @returns {Promise<Object>} Search results with species, taxa, sources arrays and counts
+ */
+export async function unifiedSearch(query) {
+  return fetchApi(`/api/v1/search?q=${encodeURIComponent(query)}`);
 }
 
 /**
@@ -139,7 +212,54 @@ export async function searchSpecies(query) {
  */
 export async function fetchTaxa() {
   const response = await fetchApi('/api/v1/taxa');
-  return response.taxa || response;
+  return response.data || response.taxa || response;
+}
+
+/**
+ * Fetch taxa by level with optional parent filtering
+ * @param {string} level - Taxon level (subgenus, section, subsection, complex)
+ * @param {Array<string>} parentPath - Parent taxon path for filtering
+ * @returns {Promise<Array>} Array of taxa objects with species_count
+ */
+export async function fetchTaxaByLevel(level, parentPath = []) {
+  let url = `/api/v1/taxa?level=${encodeURIComponent(level)}`;
+
+  // Filter by the immediate parent (last element in path)
+  if (parentPath.length > 0) {
+    const parent = parentPath[parentPath.length - 1];
+    if (parent) {
+      url += `&parent=${encodeURIComponent(parent)}`;
+    }
+  }
+
+  const response = await fetchApi(url);
+  return response.data || response.taxa || response;
+}
+
+/**
+ * Fetch species belonging to a specific taxon path
+ * @param {Array<string>} taxonPath - Taxon path (e.g., ['Quercus', 'Quercus', 'Albae'])
+ * @returns {Promise<Array>} Array of species objects
+ */
+export async function fetchSpeciesByTaxon(taxonPath = []) {
+  let url = '/api/v1/species?limit=1000'; // Get all species, not just 50
+
+  // Add taxon filters based on path
+  if (taxonPath.length >= 1 && taxonPath[0]) {
+    url += `&subgenus=${encodeURIComponent(taxonPath[0])}`;
+  }
+  if (taxonPath.length >= 2 && taxonPath[1]) {
+    url += `&section=${encodeURIComponent(taxonPath[1])}`;
+  }
+  if (taxonPath.length >= 3 && taxonPath[2]) {
+    url += `&subsection=${encodeURIComponent(taxonPath[2])}`;
+  }
+  if (taxonPath.length >= 4 && taxonPath[3]) {
+    url += `&complex=${encodeURIComponent(taxonPath[3])}`;
+  }
+
+  const response = await fetchApi(url);
+  return response.data || response.species || response;
 }
 
 /**
@@ -158,7 +278,8 @@ export async function fetchTaxon(level, name) {
  */
 export async function fetchSources() {
   const response = await fetchApi('/api/v1/sources');
-  return response.sources || response;
+  // Sources endpoint returns array directly
+  return Array.isArray(response) ? response : (response.data || response.sources || response);
 }
 
 /**
@@ -176,6 +297,191 @@ export async function fetchSourceById(id) {
  */
 export function getApiBaseUrl() {
   return API_BASE_URL;
+}
+
+// =============================================================================
+// Species Mutations
+// =============================================================================
+
+/**
+ * Create a new species
+ * @param {Object} species - Species data in API format
+ * @returns {Promise<Object>} Created species
+ */
+export async function createSpecies(species) {
+  return fetchApi('/api/v1/species', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(species)
+  });
+}
+
+/**
+ * Update an existing species
+ * @param {string} name - Current species name
+ * @param {Object} species - Updated species data in API format
+ * @returns {Promise<Object>} Updated species
+ */
+export async function updateSpecies(name, species) {
+  return fetchApi(`/api/v1/species/${encodeURIComponent(name)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(species)
+  });
+}
+
+/**
+ * Delete a species
+ * Returns 409 Conflict with blocking hybrids list if species is a parent
+ * @param {string} name - Species name to delete
+ * @returns {Promise<void>}
+ * @throws {ApiError} With status 409 and details.blocking_hybrids if blocked
+ */
+export async function deleteSpecies(name) {
+  return fetchApi(`/api/v1/species/${encodeURIComponent(name)}`, {
+    method: 'DELETE'
+  });
+}
+
+// =============================================================================
+// Species-Source Mutations
+// =============================================================================
+
+/**
+ * Fetch species-source entries for a species
+ * @param {string} speciesName - Species name
+ * @returns {Promise<Array>} Array of species-source objects
+ */
+export async function fetchSpeciesSources(speciesName) {
+  const response = await fetchApi(`/api/v1/species/${encodeURIComponent(speciesName)}/sources`);
+  return Array.isArray(response) ? response : (response.data || response.sources || response);
+}
+
+/**
+ * Create a new species-source entry
+ * @param {string} speciesName - Species name
+ * @param {Object} speciesSource - Species-source data
+ * @returns {Promise<Object>} Created species-source
+ */
+export async function createSpeciesSource(speciesName, speciesSource) {
+  return fetchApi(`/api/v1/species/${encodeURIComponent(speciesName)}/sources`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(speciesSource)
+  });
+}
+
+/**
+ * Update a species-source entry
+ * @param {string} speciesName - Species name
+ * @param {number} sourceId - Source ID
+ * @param {Object} speciesSource - Updated species-source data
+ * @returns {Promise<Object>} Updated species-source
+ */
+export async function updateSpeciesSource(speciesName, sourceId, speciesSource) {
+  return fetchApi(`/api/v1/species/${encodeURIComponent(speciesName)}/sources/${sourceId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(speciesSource)
+  });
+}
+
+/**
+ * Delete a species-source entry
+ * @param {string} speciesName - Species name
+ * @param {number} sourceId - Source ID
+ * @returns {Promise<void>}
+ */
+export async function deleteSpeciesSource(speciesName, sourceId) {
+  return fetchApi(`/api/v1/species/${encodeURIComponent(speciesName)}/sources/${sourceId}`, {
+    method: 'DELETE'
+  });
+}
+
+// =============================================================================
+// Taxa Mutations
+// =============================================================================
+
+/**
+ * Create a new taxon
+ * @param {Object} taxon - Taxon data in API format
+ * @returns {Promise<Object>} Created taxon
+ */
+export async function createTaxon(taxon) {
+  return fetchApi('/api/v1/taxa', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(taxon)
+  });
+}
+
+/**
+ * Update an existing taxon
+ * @param {string} level - Taxon level
+ * @param {string} name - Taxon name
+ * @param {Object} taxon - Updated taxon data in API format
+ * @returns {Promise<Object>} Updated taxon
+ */
+export async function updateTaxon(level, name, taxon) {
+  return fetchApi(`/api/v1/taxa/${encodeURIComponent(level)}/${encodeURIComponent(name)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(taxon)
+  });
+}
+
+/**
+ * Delete a taxon
+ * @param {string} level - Taxon level
+ * @param {string} name - Taxon name
+ * @returns {Promise<void>}
+ */
+export async function deleteTaxon(level, name) {
+  return fetchApi(`/api/v1/taxa/${encodeURIComponent(level)}/${encodeURIComponent(name)}`, {
+    method: 'DELETE'
+  });
+}
+
+// =============================================================================
+// Source Mutations
+// =============================================================================
+
+/**
+ * Create a new source
+ * @param {Object} source - Source data in API format
+ * @returns {Promise<Object>} Created source
+ */
+export async function createSource(source) {
+  return fetchApi('/api/v1/sources', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(source)
+  });
+}
+
+/**
+ * Update an existing source
+ * @param {number} id - Source ID
+ * @param {Object} source - Updated source data in API format
+ * @returns {Promise<Object>} Updated source
+ */
+export async function updateSource(id, source) {
+  return fetchApi(`/api/v1/sources/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(source)
+  });
+}
+
+/**
+ * Delete a source
+ * @param {number} id - Source ID
+ * @returns {Promise<void>}
+ */
+export async function deleteSource(id) {
+  return fetchApi(`/api/v1/sources/${id}`, {
+    method: 'DELETE'
+  });
 }
 
 // =============================================================================

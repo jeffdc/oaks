@@ -1,5 +1,28 @@
 <script>
-    import { speciesCounts } from "$lib/stores/dataStore.js";
+    import { onMount } from 'svelte';
+    import { fetchSpecies, ApiError } from '$lib/apiClient.js';
+
+    // Local state for computing counts
+    let allSpecies = $state([]);
+    let isLoading = $state(true);
+
+    // Computed counts
+    let speciesCounts = $derived({
+        speciesCount: allSpecies.filter(s => !s.is_hybrid).length,
+        hybridCount: allSpecies.filter(s => s.is_hybrid).length,
+        total: allSpecies.length
+    });
+
+    onMount(async () => {
+        try {
+            allSpecies = await fetchSpecies();
+        } catch (err) {
+            console.error('Failed to fetch species for stats:', err);
+            // Stats will show 0 - acceptable for an about page
+        } finally {
+            isLoading = false;
+        }
+    });
 </script>
 
 <div class="about-page">
@@ -55,15 +78,15 @@
         <h3 class="section-title">Database Statistics</h3>
         <div class="stats-grid">
             <div class="stat-card">
-                <span class="stat-number">{$speciesCounts.speciesCount}</span>
+                <span class="stat-number">{isLoading ? '—' : speciesCounts.speciesCount}</span>
                 <span class="stat-label">Species</span>
             </div>
             <div class="stat-card">
-                <span class="stat-number">{$speciesCounts.hybridCount}</span>
+                <span class="stat-number">{isLoading ? '—' : speciesCounts.hybridCount}</span>
                 <span class="stat-label">Hybrids</span>
             </div>
             <div class="stat-card">
-                <span class="stat-number">{$speciesCounts.total}</span>
+                <span class="stat-number">{isLoading ? '—' : speciesCounts.total}</span>
                 <span class="stat-label">Total Entries</span>
             </div>
         </div>

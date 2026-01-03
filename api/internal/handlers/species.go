@@ -15,11 +15,14 @@ import (
 
 // SpeciesListParams contains query parameters for species list endpoint
 type SpeciesListParams struct {
-	Limit    int
-	Offset   int
-	Subgenus *string
-	Section  *string
-	Hybrid   *bool
+	Limit      int
+	Offset     int
+	Subgenus   *string
+	Section    *string
+	Subsection *string
+	Complex    *string
+	Hybrid     *bool
+	SourceID   *int64
 }
 
 // SpeciesRequest represents the request body for creating/updating a species
@@ -108,10 +111,33 @@ func parseSpeciesListParams(query url.Values) (*SpeciesListParams, []ValidationE
 		params.Section = &section
 	}
 
+	// Parse subsection filter
+	if subsection := query.Get("subsection"); subsection != "" {
+		params.Subsection = &subsection
+	}
+
+	// Parse complex filter
+	if complex := query.Get("complex"); complex != "" {
+		params.Complex = &complex
+	}
+
 	// Parse hybrid filter
 	if hybridStr := query.Get("hybrid"); hybridStr != "" {
 		hybrid := strings.ToLower(hybridStr) == "true"
 		params.Hybrid = &hybrid
+	}
+
+	// Parse source_id filter
+	if sourceIDStr := query.Get("source_id"); sourceIDStr != "" {
+		sourceID, err := strconv.ParseInt(sourceIDStr, 10, 64)
+		if err != nil || sourceID < 1 {
+			errors = append(errors, ValidationError{
+				Field:   "source_id",
+				Message: "must be a positive integer",
+			})
+		} else {
+			params.SourceID = &sourceID
+		}
 	}
 
 	return params, errors
@@ -168,9 +194,12 @@ func (s *Server) handleListSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filter := &db.OakEntryFilter{
-		Subgenus: params.Subgenus,
-		Section:  params.Section,
-		Hybrid:   params.Hybrid,
+		Subgenus:   params.Subgenus,
+		Section:    params.Section,
+		Subsection: params.Subsection,
+		Complex:    params.Complex,
+		Hybrid:     params.Hybrid,
+		SourceID:   params.SourceID,
 	}
 
 	// Get total count
@@ -209,6 +238,30 @@ func (s *Server) handleGetSpecies(w http.ResponseWriter, r *http.Request) {
 	entry, err := s.db.GetOakEntry(name)
 	if err != nil {
 		s.logger.Error("failed to get species", "name", name, "error", err)
+		RespondInternalError(w, "")
+		return
+	}
+
+	if entry == nil {
+		RespondNotFound(w, "Species", name)
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, entry)
+}
+
+// handleGetSpeciesFull handles GET /api/v1/species/{name}/full
+// Returns species with all source data embedded, including source metadata
+func (s *Server) handleGetSpeciesFull(w http.ResponseWriter, r *http.Request) {
+	name := chi.URLParam(r, "name")
+	if name == "" {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "species name is required")
+		return
+	}
+
+	entry, err := s.db.GetOakEntryWithSources(name)
+	if err != nil {
+		s.logger.Error("failed to get full species", "name", name, "error", err)
 		RespondInternalError(w, "")
 		return
 	}
@@ -352,6 +405,18 @@ func (s *Server) handleDeleteSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 	if !exists {
 		RespondNotFound(w, "Species", name)
+		return
+	}
+
+	// Check for hybrids referencing this species as a parent (cascade protection)
+	blockingHybrids, err := s.db.GetHybridsReferencingParent(name)
+	if err != nil {
+		s.logger.Error("failed to check hybrid references for delete", "name", name, "error", err)
+		RespondInternalError(w, "")
+		return
+	}
+	if len(blockingHybrids) > 0 {
+		RespondCascadeConflict(w, blockingHybrids)
 		return
 	}
 

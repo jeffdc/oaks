@@ -2,9 +2,11 @@
   import { goto } from '$app/navigation';
   import { base } from '$app/paths';
   import { page } from '$app/stores';
-  import { searchQuery } from '$lib/stores/dataStore.js';
+  import { searchQuery, searchResults, searchLoading, searchError, performSearch, cancelSearch } from '$lib/stores/dataStore.js';
 
   let inputElement;
+  let debounceTimer = null;
+  const DEBOUNCE_MS = 300;
 
   // Keep inputValue synced with the store (handles external clears like handleGoHome)
   $: inputValue = $searchQuery;
@@ -13,15 +15,37 @@
     const value = event.target.value;
     searchQuery.set(value);
 
+    // Clear existing debounce timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    // Cancel any pending search request
+    cancelSearch();
+
     // Navigate to list page when user starts typing (if not already there)
     if (value && !$page.url.pathname.endsWith('/list/')) {
       await goto(`${base}/list/`);
       // Restore focus after navigation
       inputElement?.focus();
     }
+
+    // Debounce the search
+    if (value.trim()) {
+      debounceTimer = setTimeout(() => {
+        performSearch(value.trim());
+      }, DEBOUNCE_MS);
+    }
   }
 
   function handleClear() {
+    // Clear debounce timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    // Cancel any pending search
+    cancelSearch();
+    // Clear the search query and results
     searchQuery.set('');
   }
 </script>

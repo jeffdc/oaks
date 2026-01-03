@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/jeff/oaks/api/internal/db"
 	"github.com/jeff/oaks/api/internal/models"
 )
 
@@ -22,22 +23,24 @@ type TaxonRequest struct {
 
 // TaxonResponse is the response for a single taxon.
 type TaxonResponse struct {
-	Name   string             `json:"name"`
-	Level  models.TaxonLevel  `json:"level"`
-	Parent *string            `json:"parent,omitempty"`
-	Author *string            `json:"author,omitempty"`
-	Notes  *string            `json:"notes,omitempty"`
-	Links  []models.TaxonLink `json:"links,omitempty"`
+	Name         string             `json:"name"`
+	Level        models.TaxonLevel  `json:"level"`
+	Parent       *string            `json:"parent,omitempty"`
+	Author       *string            `json:"author,omitempty"`
+	Notes        *string            `json:"notes,omitempty"`
+	Links        []models.TaxonLink `json:"links,omitempty"`
+	SpeciesCount int                `json:"species_count"`
 }
 
 // taxonToResponse converts a models.Taxon to TaxonResponse.
 func taxonToResponse(t *models.Taxon) TaxonResponse {
 	resp := TaxonResponse{
-		Name:   t.Name,
-		Level:  t.Level,
-		Parent: t.Parent,
-		Author: t.Author,
-		Notes:  t.Notes,
+		Name:         t.Name,
+		Level:        t.Level,
+		Parent:       t.Parent,
+		Author:       t.Author,
+		Notes:        t.Notes,
+		SpeciesCount: t.SpeciesCount,
 	}
 	if len(t.Links) > 0 {
 		resp.Links = t.Links
@@ -61,8 +64,9 @@ func parseTaxonLevel(s string) (models.TaxonLevel, bool) {
 
 // handleListTaxa handles GET /api/v1/taxa
 func (s *Server) handleListTaxa(w http.ResponseWriter, r *http.Request) {
+	params := &db.TaxaListParams{}
+
 	// Check for optional level filter
-	var levelPtr *models.TaxonLevel
 	if levelParam := r.URL.Query().Get("level"); levelParam != "" {
 		level, valid := parseTaxonLevel(levelParam)
 		if !valid {
@@ -71,10 +75,15 @@ func (s *Server) handleListTaxa(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
-		levelPtr = &level
+		params.Level = &level
 	}
 
-	taxa, err := s.db.ListTaxa(levelPtr)
+	// Check for optional parent filter
+	if parentParam := r.URL.Query().Get("parent"); parentParam != "" {
+		params.Parent = &parentParam
+	}
+
+	taxa, err := s.db.ListTaxa(params)
 	if err != nil {
 		s.logger.Error("failed to list taxa", "error", err)
 		RespondInternalError(w, "Failed to retrieve taxa")
