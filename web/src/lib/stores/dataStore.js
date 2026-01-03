@@ -1,5 +1,15 @@
 import { writable, get } from 'svelte/store';
+import { browser } from '$app/environment';
 import { unifiedSearch } from '$lib/apiClient.js';
+
+// Store for online/offline status
+export const isOnline = writable(browser ? navigator.onLine : true);
+
+// Set up online/offline event listeners (browser only)
+if (browser) {
+	window.addEventListener('online', () => isOnline.set(true));
+	window.addEventListener('offline', () => isOnline.set(false));
+}
 
 // Store for search query
 export const searchQuery = writable('');

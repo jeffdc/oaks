@@ -1,9 +1,11 @@
 <script>
   import { base } from '$app/paths';
   import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
   import { marked } from 'marked';
   import DOMPurify from 'dompurify';
-  import { allSpecies, allSources, getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName, refreshData } from '$lib/stores/dataStore.js';
+  import { getPrimarySource, getAllSources, getSourceCompleteness, formatSpeciesName, forceRefresh } from '$lib/stores/dataStore.js';
+  import { fetchSources } from '$lib/apiClient.js';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
   import { toast } from '$lib/stores/toastStore.js';
   import { updateSpecies, deleteSpecies, updateSpeciesSource, createSpeciesSource, deleteSpeciesSource, ApiError } from '$lib/apiClient.js';
@@ -47,6 +49,18 @@
   let deletingSourceId = null;
   let isDeletingSource = false;
 
+  // All available sources (fetched from API)
+  let allSourcesList = [];
+
+  // Load all sources on mount
+  onMount(async () => {
+    try {
+      allSourcesList = await fetchSources();
+    } catch (err) {
+      console.warn('Failed to load sources:', err);
+    }
+  });
+
   // Get cascade info for delete (count of sources to be removed)
   $: cascadeInfo = sources.length > 0 ? { count: sources.length, type: 'sources' } : undefined;
 
@@ -75,7 +89,7 @@
       toast.success(`Species "${newName}" updated successfully`);
 
       // Refresh data in background
-      refreshData();
+      forceRefresh();
 
       // Navigate if name changed
       if (nameChanged) {
@@ -112,7 +126,7 @@
       showDeleteDialog = false;
 
       // Refresh data in background
-      refreshData();
+      forceRefresh();
 
       // Navigate back to list after delete
       goto(`${base}/list/`);
@@ -144,7 +158,7 @@
       toast.success('Source data updated successfully');
 
       // Refresh data in background
-      refreshData();
+      forceRefresh();
 
       return null; // No errors - signal success to form
     } catch (err) {
@@ -188,7 +202,7 @@
       }
 
       // Refresh data in background
-      refreshData();
+      forceRefresh();
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(`Failed to delete source data: ${err.message}`);
@@ -224,11 +238,11 @@
 
   // Compute available sources (sources not already present for this species)
   $: existingSourceIds = new Set(sources.map(s => s.source_id));
-  $: availableSources = $allSources.filter(s => !existingSourceIds.has(s.source_id));
+  $: availableSources = allSourcesList.filter(s => !existingSourceIds.has(s.source_id));
 
   // Get source info for adding (when user selects from dropdown)
   $: addingSource = addingSourceId
-    ? { source_id: addingSourceId, source_name: $allSources.find(s => s.source_id === addingSourceId)?.source_name || 'Source' }
+    ? { source_id: addingSourceId, source_name: allSourcesList.find(s => s.source_id === addingSourceId)?.source_name || 'Source' }
     : null;
 
   // Handle add source button click - toggle dropdown
@@ -256,7 +270,7 @@
       showAddSourceForm = false;
 
       // Refresh data in background
-      refreshData();
+      forceRefresh();
 
       return null; // No errors - signal success to form
     } catch (err) {

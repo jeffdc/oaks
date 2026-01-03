@@ -64,13 +64,13 @@
   }
 
   // Edit/Delete/Create modal state
-  let showEditForm = false;
-  let showCreateForm = false;
-  let showDeleteDialog = false;
-  let isDeleting = false;
-  let editingTaxon = null;
-  let deletingTaxon = null;
-  let deleteCascadeInfo = null;
+  let showEditForm = $state(false);
+  let showCreateForm = $state(false);
+  let showDeleteDialog = $state(false);
+  let isDeleting = $state(false);
+  let editingTaxon = $state(null);
+  let deletingTaxon = $state(null);
+  let deleteCascadeInfo = $state(null);
 
   // Determine the taxon level and name from the path
   let isGenusLevel = $derived(taxonPath.length === 0);
@@ -110,40 +110,6 @@
     return s.scientific_name || s.name;
   }
 
-  // Count child taxa for a specific taxon (for delete constraint checking)
-  function countChildTaxa(species, path, taxonName) {
-    const depth = path.length;
-    const childPath = [...path, taxonName];
-
-    // At depth 4 (complex level), there are no children
-    if (depth >= 3) return 0;
-
-    const childTaxa = new Set();
-
-    species.forEach(s => {
-      if (!s.taxonomy) return;
-
-      const t = s.taxonomy;
-      const [subgenus, section, subsection] = childPath;
-
-      // Check if species matches the child path
-      if (subgenus && t.subgenus !== subgenus) return;
-      if (section && t.section !== section) return;
-      if (subsection && t.subsection !== subsection) return;
-
-      // Get the grandchild taxon value (one level deeper)
-      let grandchildValue;
-      if (depth === 0) grandchildValue = t.section;       // subgenus → section
-      else if (depth === 1) grandchildValue = t.subsection; // section → subsection
-      else if (depth === 2) grandchildValue = t.complex;    // subsection → complex
-
-      if (grandchildValue && grandchildValue !== 'null') {
-        childTaxa.add(grandchildValue);
-      }
-    });
-
-    return childTaxa.size;
-  }
 
   // Build taxonomy path URL
   function getTaxonUrl(path) {
@@ -185,16 +151,12 @@
     const level = getChildLevel(taxonPath.length);
     deletingTaxon = { name: subTaxon.name, level, count: subTaxon.count };
 
-    // Check for constraints: species count and child taxa count
-    const childCount = countChildTaxa($allSpecies, taxonPath, subTaxon.name);
-
-    if (childCount > 0) {
-      // Has child taxa - cannot delete
-      deleteCascadeInfo = { count: childCount, type: 'children' };
-    } else if (subTaxon.count > 0) {
+    // Pre-check species count constraint (API will also verify)
+    if (subTaxon.count > 0) {
       // Has species using this taxon - cannot delete
       deleteCascadeInfo = { count: subTaxon.count, type: 'species' };
     } else {
+      // No known constraints - API will check for child taxa
       deleteCascadeInfo = null;
     }
     showDeleteDialog = true;
@@ -400,7 +362,7 @@
                   type="button"
                   class="taxon-action-btn taxon-action-edit"
                   title="Edit {getChildLevel(taxonPath.length)}"
-                  on:click={(e) => handleEditClick(subTaxon, e)}
+                  onclick={(e) => handleEditClick(subTaxon, e)}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -411,7 +373,7 @@
                   type="button"
                   class="taxon-action-btn taxon-action-delete"
                   title="Delete {getChildLevel(taxonPath.length)}"
-                  on:click={(e) => handleDeleteClick(subTaxon, e)}
+                  onclick={(e) => handleDeleteClick(subTaxon, e)}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3,6 5,6 21,6" />

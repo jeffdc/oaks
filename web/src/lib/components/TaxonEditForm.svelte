@@ -432,7 +432,7 @@
     </div>
   {/if}
 
-  <form class="taxon-form" on:submit|preventDefault={handleSave} on:keydown={handleFormKeydown}>
+  <form class="taxon-form" onsubmit={(e) => { e.preventDefault(); handleSave(); }} onkeydown={handleFormKeydown}>
     <!-- Section 1: Core Information -->
     <FieldSection title="Core Information">
       <div class="field">
@@ -443,7 +443,7 @@
             class="field-select"
             class:error={errors.level}
             bind:value={formData.level}
-            on:change={handleLevelChange}
+            onchange={handleLevelChange}
           >
             <option value="">Select level...</option>
             {#each taxonLevels as level}
@@ -498,17 +498,17 @@
                 role="combobox"
                 aria-autocomplete="list"
                 aria-expanded={isParentOpen && parentSuggestions.length > 0}
-                on:input={handleParentInput}
-                on:keydown={handleParentKeydown}
-                on:focus={handleParentFocus}
-                on:blur={handleParentBlur}
+                oninput={handleParentInput}
+                onkeydown={handleParentKeydown}
+                onfocus={handleParentFocus}
+                onblur={handleParentBlur}
               />
               {#if parentQuery}
                 <button
                   type="button"
                   class="clear-button"
                   aria-label="Clear parent"
-                  on:click={clearParent}
+                  onclick={clearParent}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -525,8 +525,8 @@
                     class:active={index === activeParentIndex}
                     role="option"
                     aria-selected={index === activeParentIndex}
-                    on:mousedown|preventDefault={() => selectParent(suggestion)}
-                    on:mouseenter={() => activeParentIndex = index}
+                    onmousedown={(e) => { e.preventDefault(); selectParent(suggestion); }}
+                    onmouseenter={() => activeParentIndex = index}
                   >
                     {suggestion}
                   </li>
@@ -603,7 +603,7 @@
       type="button"
       class="btn btn-secondary"
       disabled={isSaving}
-      on:click={onClose}
+      onclick={onClose}
     >
       Cancel
     </button>
@@ -612,7 +612,7 @@
       class="btn btn-primary"
       disabled={isSaving || !$canEdit}
       title={!$canEdit ? getCannotEditReason() : ''}
-      on:click={handleSave}
+      onclick={handleSave}
     >
       {#if isSaving}
         <span class="btn-spinner"></span>

@@ -219,7 +219,8 @@
     return mapped;
   }
 
-  async function handleSave() {
+  async function handleSave(event) {
+    if (event) event.preventDefault();
     if (!validate()) {
       return;
     }
@@ -303,7 +304,7 @@
     </div>
   {/if}
 
-  <form class="source-form" on:submit|preventDefault={handleSave} on:keydown={handleFormKeydown}>
+  <form class="source-form" onsubmit={handleSave} onkeydown={handleFormKeydown}>
     <!-- Section 1: Core Information -->
     <FieldSection title="Core Information">
       <div class="field">
@@ -516,7 +517,7 @@
       type="button"
       class="btn btn-secondary"
       disabled={isSaving}
-      on:click={onClose}
+      onclick={onClose}
     >
       Cancel
     </button>
@@ -525,7 +526,7 @@
       class="btn btn-primary"
       disabled={isSaving || !$canEdit}
       title={!$canEdit ? getCannotEditReason() : ''}
-      on:click={handleSave}
+      onclick={handleSave}
     >
       {#if isSaving}
         <span class="btn-spinner"></span>

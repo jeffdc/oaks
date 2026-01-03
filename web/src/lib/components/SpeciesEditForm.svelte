@@ -3,7 +3,7 @@
   import FieldSection from './FieldSection.svelte';
   import TaxonSelect from './TaxonSelect.svelte';
   import TagInput from './TagInput.svelte';
-  import { allSpecies } from '$lib/stores/dataStore.js';
+  import { searchSpecies } from '$lib/apiClient.js';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
   import { MAX_LENGTHS, validateScientificName, validateLength } from '$lib/utils/validation.js';
 
@@ -143,18 +143,45 @@
     errors = {};
   }
 
-  // Filter species suggestions based on query
-  function filterSpecies(query) {
-    if (!query || query.length < 2) return [];
-    const q = query.toLowerCase();
-    return $allSpecies
-      .filter(s => s.name.toLowerCase().includes(q))
-      .slice(0, 8)
-      .map(s => s.name);
+  // Search species using API (debounced)
+  let searchTimeout1 = null;
+  let searchTimeout2 = null;
+
+  async function searchParentSpecies(query, targetIndex) {
+    if (!query || query.length < 2) {
+      if (targetIndex === 1) parent1Suggestions = [];
+      else parent2Suggestions = [];
+      return;
+    }
+    try {
+      const results = await searchSpecies(query);
+      const names = results.slice(0, 8).map(s => s.scientific_name || s.name);
+      if (targetIndex === 1) parent1Suggestions = names;
+      else parent2Suggestions = names;
+    } catch {
+      // Silently fail - autocomplete is not critical
+    }
   }
 
-  $: parent1Suggestions = filterSpecies(parent1Query);
-  $: parent2Suggestions = filterSpecies(parent2Query);
+  // Debounced reactive search for parent1
+  $: {
+    if (searchTimeout1) clearTimeout(searchTimeout1);
+    if (parent1Query && parent1Query.length >= 2) {
+      searchTimeout1 = setTimeout(() => searchParentSpecies(parent1Query, 1), 200);
+    } else {
+      parent1Suggestions = [];
+    }
+  }
+
+  // Debounced reactive search for parent2
+  $: {
+    if (searchTimeout2) clearTimeout(searchTimeout2);
+    if (parent2Query && parent2Query.length >= 2) {
+      searchTimeout2 = setTimeout(() => searchParentSpecies(parent2Query, 2), 200);
+    } else {
+      parent2Suggestions = [];
+    }
+  }
 
   function selectParent1(name) {
     formData.parent1 = name;
@@ -424,7 +451,7 @@
     </div>
   {/if}
 
-  <form class="species-form" on:submit|preventDefault={handleSave} on:keydown={handleFormKeydown}>
+  <form class="species-form" onsubmit={(e) => { e.preventDefault(); handleSave(); }} onkeydown={handleFormKeydown}>
     <!-- Section 1: Core Information -->
     <FieldSection title="Core Information">
       <!-- Scientific Name (required) -->
@@ -556,17 +583,17 @@
                 aria-autocomplete="list"
                 aria-expanded={parent1Open && parent1Suggestions.length > 0}
                 aria-labelledby="parent1-label"
-                on:input={handleParent1Input}
-                on:keydown={handleParent1Keydown}
-                on:focus={() => parent1Open = true}
-                on:blur={() => setTimeout(() => { parent1Open = false; }, 150)}
+                oninput={handleParent1Input}
+                onkeydown={handleParent1Keydown}
+                onfocus={() => parent1Open = true}
+                onblur={() => setTimeout(() => { parent1Open = false; }, 150)}
               />
               {#if parent1Query}
                 <button
                   type="button"
                   class="clear-button"
                   aria-label="Clear parent 1"
-                  on:click={clearParent1}
+                  onclick={clearParent1}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -583,8 +610,8 @@
                     class:active={index === activeParent1Index}
                     role="option"
                     aria-selected={index === activeParent1Index}
-                    on:mousedown|preventDefault={() => selectParent1(suggestion)}
-                    on:mouseenter={() => activeParent1Index = index}
+                    onmousedown={(e) => { e.preventDefault(); selectParent1(suggestion); }}
+                    onmouseenter={() => activeParent1Index = index}
                   >
                     Q. {suggestion}
                   </li>
@@ -608,17 +635,17 @@
                 aria-autocomplete="list"
                 aria-expanded={parent2Open && parent2Suggestions.length > 0}
                 aria-labelledby="parent2-label"
-                on:input={handleParent2Input}
-                on:keydown={handleParent2Keydown}
-                on:focus={() => parent2Open = true}
-                on:blur={() => setTimeout(() => { parent2Open = false; }, 150)}
+                oninput={handleParent2Input}
+                onkeydown={handleParent2Keydown}
+                onfocus={() => parent2Open = true}
+                onblur={() => setTimeout(() => { parent2Open = false; }, 150)}
               />
               {#if parent2Query}
                 <button
                   type="button"
                   class="clear-button"
                   aria-label="Clear parent 2"
-                  on:click={clearParent2}
+                  onclick={clearParent2}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -635,8 +662,8 @@
                     class:active={index === activeParent2Index}
                     role="option"
                     aria-selected={index === activeParent2Index}
-                    on:mousedown|preventDefault={() => selectParent2(suggestion)}
-                    on:mouseenter={() => activeParent2Index = index}
+                    onmousedown={(e) => { e.preventDefault(); selectParent2(suggestion); }}
+                    onmouseenter={() => activeParent2Index = index}
                   >
                     Q. {suggestion}
                   </li>
@@ -701,7 +728,7 @@
       type="button"
       class="btn btn-secondary"
       disabled={isSaving}
-      on:click={onClose}
+      onclick={onClose}
     >
       Cancel
     </button>
@@ -710,7 +737,7 @@
       class="btn btn-primary"
       disabled={isSaving || !$canEdit}
       title={!$canEdit ? getCannotEditReason() : ''}
-      on:click={handleSave}
+      onclick={handleSave}
     >
       {#if isSaving}
         <span class="btn-spinner"></span>
