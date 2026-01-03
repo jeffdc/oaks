@@ -260,6 +260,11 @@ func bodySizeLimitMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// isDocsEndpoint returns true if the path is a documentation endpoint
+func isDocsEndpoint(path string) bool {
+	return path == "/docs" || path == "/api/v1/openapi.yaml"
+}
+
 // securityHeadersMiddleware adds security headers to all responses
 func securityHeadersMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -269,8 +274,21 @@ func securityHeadersMiddleware(next http.Handler) http.Handler {
 		// Prevent clickjacking
 		w.Header().Set("X-Frame-Options", "DENY")
 
-		// Basic CSP for API - only allow same-origin
-		w.Header().Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
+		// Content Security Policy - permissive for docs, strict for API
+		if isDocsEndpoint(r.URL.Path) {
+			// Docs need external scripts (Redoc), fonts (Google Fonts), and inline styles
+			w.Header().Set("Content-Security-Policy",
+				"default-src 'self'; "+
+					"script-src 'self' https://cdn.redoc.ly 'unsafe-inline'; "+
+					"style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; "+
+					"font-src 'self' https://fonts.gstatic.com; "+
+					"img-src 'self' data:; "+
+					"connect-src 'self'; "+
+					"frame-ancestors 'none'")
+		} else {
+			// Strict CSP for API endpoints
+			w.Header().Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
+		}
 
 		// Prevent XSS in older browsers
 		w.Header().Set("X-XSS-Protection", "1; mode=block")
