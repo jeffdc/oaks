@@ -142,11 +142,12 @@ export const isOnline = writable(browser ? navigator.onLine : true);
 // API availability from periodic health checks
 export const apiAvailable = writable(true); // Optimistic default
 
-// Derived canEdit: all three conditions must be true
+// Derived canEdit: authenticated and online
+// Note: We don't check apiAvailable here - if API is down, operations will fail
+// with appropriate error messages, which is more user-friendly than blocking the UI
 export const canEdit = derived(
-  [isAuthenticated, isOnline, apiAvailable],
-  ([$isAuthenticated, $isOnline, $apiAvailable]) =>
-    $isAuthenticated && $isOnline && $apiAvailable
+  [isAuthenticated, isOnline],
+  ([$isAuthenticated, $isOnline]) => $isAuthenticated && $isOnline
 );
 
 /**
@@ -156,7 +157,6 @@ export const canEdit = derived(
 export function getCannotEditReason() {
   if (!get(isAuthenticated)) return 'Not authenticated';
   if (!get(isOnline)) return 'Offline';
-  if (!get(apiAvailable)) return 'API unavailable';
   return null;
 }
 

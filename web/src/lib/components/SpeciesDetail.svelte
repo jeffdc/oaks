@@ -78,7 +78,7 @@
   // Returns field errors array if validation failed, null on success
   // Throws on network/server errors to keep modal open
   async function handleSaveSpecies(formData) {
-    const originalName = species.name;
+    const originalName = species.scientific_name || species.name;
     const newName = formData.name;
     const nameChanged = originalName !== newName;
 
@@ -118,10 +118,10 @@
   async function handleDeleteConfirm() {
     isDeleting = true;
     try {
-      await deleteSpecies(species.name);
+      await deleteSpecies(speciesName);
 
       // Success: show toast
-      toast.success(`Species "${species.name}" deleted successfully`);
+      toast.success(`Species "${speciesName}" deleted successfully`);
 
       showDeleteDialog = false;
 
@@ -152,7 +152,7 @@
   // Throws on network/server errors to keep modal open
   async function handleSaveSource(formData) {
     try {
-      await updateSpeciesSource(species.name, editingSourceId, formData);
+      await updateSpeciesSource(speciesName, editingSourceId, formData);
 
       // Success: show toast and refresh data
       toast.success('Source data updated successfully');
@@ -188,7 +188,7 @@
   async function handleSourceDeleteConfirm() {
     isDeletingSource = true;
     try {
-      await deleteSpeciesSource(species.name, deletingSourceId);
+      await deleteSpeciesSource(speciesName, deletingSourceId);
 
       // Success: show toast
       toast.success('Source data deleted successfully');
@@ -260,7 +260,7 @@
   // Handle save from add source form
   async function handleCreateSource(formData) {
     try {
-      await createSpeciesSource(species.name, formData);
+      await createSpeciesSource(speciesName, formData);
 
       // Success: show toast and refresh data
       toast.success('Source data added successfully');
@@ -982,7 +982,7 @@
 {#if showDeleteDialog}
   <DeleteConfirmDialog
     entityType="species"
-    entityName={species.name}
+    entityName={speciesName}
     {cascadeInfo}
     {isDeleting}
     onConfirm={handleDeleteConfirm}
@@ -993,7 +993,7 @@
 <!-- Edit Source Data Modal -->
 {#if showSourceEditForm && editingSource}
   <SpeciesSourceEditForm
-    speciesName={species.name}
+    speciesName={speciesName}
     sourceData={editingSource}
     isOpen={showSourceEditForm}
     onClose={() => { showSourceEditForm = false; editingSourceId = null; }}
@@ -1005,7 +1005,7 @@
 {#if showSourceDeleteDialog && deletingSource}
   <DeleteConfirmDialog
     entityType="species-source"
-    entityName="{deletingSource.source_name} data for Quercus {species.name}"
+    entityName="{deletingSource.source_name} data for Quercus {speciesName}"
     isDeleting={isDeletingSource}
     onConfirm={handleSourceDeleteConfirm}
     onCancel={() => { showSourceDeleteDialog = false; deletingSourceId = null; }}
@@ -1015,7 +1015,7 @@
 <!-- Add Source Data Modal -->
 {#if showAddSourceForm && addingSource}
   <SpeciesSourceEditForm
-    speciesName={species.name}
+    speciesName={speciesName}
     sourceData={addingSource}
     isOpen={showAddSourceForm}
     isCreateMode={true}

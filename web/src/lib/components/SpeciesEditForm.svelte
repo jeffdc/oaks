@@ -96,16 +96,17 @@
   function initializeForm() {
     if (species) {
       // Edit mode - populate from species
+      // Support both API format (scientific_name, flat taxonomy) and legacy format (name, nested taxonomy)
       formData = {
-        name: species.name || '',
+        name: species.scientific_name || species.name || '',
         author: species.author || '',
         is_hybrid: species.is_hybrid || false,
         conservation_status: species.conservation_status || '',
         taxonomy: {
-          subgenus: species.taxonomy?.subgenus || '',
-          section: species.taxonomy?.section || '',
-          subsection: species.taxonomy?.subsection || '',
-          complex: species.taxonomy?.complex || ''
+          subgenus: species.subgenus || species.taxonomy?.subgenus || '',
+          section: species.section || species.taxonomy?.section || '',
+          subsection: species.subsection || species.taxonomy?.subsection || '',
+          complex: species.complex || species.taxonomy?.complex || ''
         },
         parent1: species.parent1 || '',
         parent2: species.parent2 || '',
@@ -406,7 +407,7 @@
 
   // Modal title based on mode
   $: modalTitle = species
-    ? `Edit Species: Quercus ${species.name}`
+    ? `Edit Species: Quercus ${species.scientific_name || species.name}`
     : 'Create New Species';
 
   /**

@@ -119,4 +119,10 @@
 	.update-banner button:hover {
 		background-color: var(--color-forest-100);
 	}
+
+	/* Hide focus outline on main content - it's only focused programmatically
+	   for screen reader accessibility, not for visual keyboard navigation */
+	main#main-content:focus {
+		outline: none;
+	}
 </style>
