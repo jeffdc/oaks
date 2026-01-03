@@ -252,6 +252,23 @@ Report status to user. If failed, investigate and report errors.
 bd close <issue-id> --reason "Released web v${NEW_VERSION}"
 ```
 
+### 12. Branch Cleanup
+
+After verifying production is working, delete the release branch:
+
+```bash
+# Delete local branch (use -D since remote tracking branch is stale)
+git branch -D <release-branch>
+
+# Delete remote branch
+git push origin --delete <release-branch>
+```
+
+**Note**: `-D` (force delete) is needed because the branch was pushed directly to `main`
+rather than merged, so the remote tracking branch (`origin/<release-branch>`) is stale.
+Git's `-d` flag incorrectly reports it as "not fully merged" when comparing against
+the outdated remote tracking branch.
+
 ---
 
 ## Recovering from Interruption
