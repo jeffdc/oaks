@@ -89,6 +89,10 @@ func (s *Server) setupRoutes() {
 
 	// API v1 routes
 	r.Route("/api/v1", func(r chi.Router) {
+		// Documentation endpoints (public)
+		r.Get("/docs", s.handleDocs)
+		r.Get("/openapi.yaml", s.handleOpenAPISpec)
+
 		// Health endpoint also at /api/v1/health per spec
 		r.Get("/health", s.handleHealth)
 
