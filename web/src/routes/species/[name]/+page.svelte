@@ -93,7 +93,7 @@
 <!-- Species detail -->
 {:else if species}
 	<div class="rounded-xl overflow-hidden" style="background-color: var(--color-surface); box-shadow: var(--shadow-xl);">
-		<SpeciesDetail {species} {initialSourceId} />
+		<SpeciesDetail {species} {initialSourceId} onDataChange={() => loadSpecies(speciesName)} />
 	</div>
 {/if}
 

@@ -151,6 +151,10 @@
             >
         </p>
     </section>
+
+    <footer class="version-footer">
+        <span class="version-text">Version {__APP_VERSION__}</span>
+    </footer>
 </div>
 
 <style>
@@ -211,36 +215,6 @@
         margin-top: 0.375rem;
     }
 
-    .source-list {
-        list-style: none;
-        padding: 0;
-        margin: 1rem 0 0 0;
-    }
-
-    .source-list li {
-        padding: 0.75rem 0;
-        border-bottom: 1px solid var(--color-border);
-    }
-
-    .source-list li:last-child {
-        border-bottom: none;
-    }
-
-    .source-list a {
-        font-weight: 600;
-        color: var(--color-forest-700);
-        text-decoration: none;
-    }
-
-    .source-list a:hover {
-        text-decoration: underline;
-    }
-
-    .source-desc {
-        color: var(--color-text-secondary);
-        font-size: 0.9375rem;
-    }
-
     .license-list {
         list-style: none;
         padding: 0;
@@ -261,5 +235,18 @@
         .stats-grid {
             grid-template-columns: 1fr;
         }
+    }
+
+    .version-footer {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--color-border);
+        text-align: center;
+    }
+
+    .version-text {
+        font-size: 0.8125rem;
+        color: var(--color-text-muted);
+        font-family: var(--font-mono, ui-monospace, monospace);
     }
 </style>

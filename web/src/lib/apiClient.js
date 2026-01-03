@@ -109,6 +109,11 @@ async function fetchApi(endpoint, options = {}) {
       );
     }
 
+    // Handle 204 No Content (common for DELETE operations)
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return null;
+    }
+
     return response.json();
   } catch (err) {
     clearTimeout(timeoutId);
@@ -224,7 +229,7 @@ export async function fetchStats() {
  * @returns {Promise<Array>} Array of species objects
  */
 export async function fetchSpecies() {
-  const response = await fetchApi('/api/v1/species');
+  const response = await fetchApi('/api/v1/species?limit=1000');
   return response.data || response.species || response;
 }
 

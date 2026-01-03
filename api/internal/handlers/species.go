@@ -27,17 +27,20 @@ type SpeciesListParams struct {
 
 // SpeciesRequest represents the request body for creating/updating a species
 type SpeciesRequest struct {
-	ScientificName     string   `json:"scientific_name"`
-	Author             *string  `json:"author,omitempty"`
-	IsHybrid           bool     `json:"is_hybrid"`
-	ConservationStatus *string  `json:"conservation_status,omitempty"`
-	Subgenus           *string  `json:"subgenus,omitempty"`
-	Section            *string  `json:"section,omitempty"`
-	Subsection         *string  `json:"subsection,omitempty"`
-	Complex            *string  `json:"complex,omitempty"`
-	Parent1            *string  `json:"parent1,omitempty"`
-	Parent2            *string  `json:"parent2,omitempty"`
-	Synonyms           []string `json:"synonyms,omitempty"`
+	ScientificName       string   `json:"scientific_name"`
+	Author               *string  `json:"author,omitempty"`
+	IsHybrid             bool     `json:"is_hybrid"`
+	ConservationStatus   *string  `json:"conservation_status,omitempty"`
+	Subgenus             *string  `json:"subgenus,omitempty"`
+	Section              *string  `json:"section,omitempty"`
+	Subsection           *string  `json:"subsection,omitempty"`
+	Complex              *string  `json:"complex,omitempty"`
+	Parent1              *string  `json:"parent1,omitempty"`
+	Parent2              *string  `json:"parent2,omitempty"`
+	Hybrids              []string `json:"hybrids,omitempty"`
+	CloselyRelatedTo     []string `json:"closely_related_to,omitempty"`
+	SubspeciesVarieties  []string `json:"subspecies_varieties,omitempty"`
+	Synonyms             []string `json:"synonyms,omitempty"`
 }
 
 const (
@@ -457,6 +460,15 @@ func requestToOakEntry(req *SpeciesRequest) *models.OakEntry {
 	entry.Complex = req.Complex
 	entry.Parent1 = req.Parent1
 	entry.Parent2 = req.Parent2
+	if req.Hybrids != nil {
+		entry.Hybrids = req.Hybrids
+	}
+	if req.CloselyRelatedTo != nil {
+		entry.CloselyRelatedTo = req.CloselyRelatedTo
+	}
+	if req.SubspeciesVarieties != nil {
+		entry.SubspeciesVarieties = req.SubspeciesVarieties
+	}
 	if req.Synonyms != nil {
 		entry.Synonyms = req.Synonyms
 	}
@@ -493,6 +505,15 @@ func mergeOakEntry(existing *models.OakEntry, req *SpeciesRequest) *models.OakEn
 	}
 	if req.Parent2 != nil {
 		entry.Parent2 = req.Parent2
+	}
+	if req.Hybrids != nil {
+		entry.Hybrids = req.Hybrids
+	}
+	if req.CloselyRelatedTo != nil {
+		entry.CloselyRelatedTo = req.CloselyRelatedTo
+	}
+	if req.SubspeciesVarieties != nil {
+		entry.SubspeciesVarieties = req.SubspeciesVarieties
 	}
 	if req.Synonyms != nil {
 		entry.Synonyms = req.Synonyms

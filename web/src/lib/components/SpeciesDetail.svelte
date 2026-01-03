@@ -23,6 +23,7 @@
 
   export let species;
   export let initialSourceId = null;
+  export let onDataChange = null;
 
   // Get species name (support both API format and legacy format)
   $: speciesName = species.scientific_name || species.name;
@@ -88,8 +89,9 @@
       // Success: show toast and refresh data
       toast.success(`Species "${newName}" updated successfully`);
 
-      // Refresh data in background
+      // Refresh data in background and notify parent
       forceRefresh();
+      if (onDataChange) onDataChange();
 
       // Navigate if name changed
       if (nameChanged) {
@@ -157,8 +159,9 @@
       // Success: show toast and refresh data
       toast.success('Source data updated successfully');
 
-      // Refresh data in background
+      // Refresh data in background and notify parent
       forceRefresh();
+      if (onDataChange) onDataChange();
 
       return null; // No errors - signal success to form
     } catch (err) {
@@ -201,8 +204,9 @@
         selectedSourceId = null;
       }
 
-      // Refresh data in background
+      // Refresh data in background and notify parent
       forceRefresh();
+      if (onDataChange) onDataChange();
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(`Failed to delete source data: ${err.message}`);
@@ -238,11 +242,11 @@
 
   // Compute available sources (sources not already present for this species)
   $: existingSourceIds = new Set(sources.map(s => s.source_id));
-  $: availableSources = allSourcesList.filter(s => !existingSourceIds.has(s.source_id));
+  $: availableSources = allSourcesList.filter(s => !existingSourceIds.has(s.id));
 
   // Get source info for adding (when user selects from dropdown)
   $: addingSource = addingSourceId
-    ? { source_id: addingSourceId, source_name: allSourcesList.find(s => s.source_id === addingSourceId)?.source_name || 'Source' }
+    ? { source_id: addingSourceId, source_name: allSourcesList.find(s => s.id === addingSourceId)?.name || 'Source' }
     : null;
 
   // Handle add source button click - toggle dropdown
@@ -269,8 +273,9 @@
       addingSourceId = null;
       showAddSourceForm = false;
 
-      // Refresh data in background
+      // Refresh data in background and notify parent
       forceRefresh();
+      if (onDataChange) onDataChange();
 
       return null; // No errors - signal success to form
     } catch (err) {
@@ -752,9 +757,9 @@
                     <button
                       type="button"
                       class="add-source-dropdown-item"
-                      on:click={() => handleSelectSourceToAdd(source.source_id)}
+                      on:click={() => handleSelectSourceToAdd(source.id)}
                     >
-                      {source.source_name}
+                      {source.name}
                     </button>
                   {/each}
                 </div>
@@ -1005,7 +1010,7 @@
 {#if showSourceDeleteDialog && deletingSource}
   <DeleteConfirmDialog
     entityType="species-source"
-    entityName="{deletingSource.source_name} data for Quercus {speciesName}"
+    entityName="This will delete the {deletingSource.source_name} information for Quercus {speciesName}."
     isDeleting={isDeletingSource}
     onConfirm={handleSourceDeleteConfirm}
     onCancel={() => { showSourceDeleteDialog = false; deletingSourceId = null; }}

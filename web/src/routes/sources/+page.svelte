@@ -44,7 +44,7 @@
 
 		try {
 			// Fetch the full source data from API
-			const sourceData = await fetchSourceById(source.source_id);
+			const sourceData = await fetchSourceById(source.id);
 			editingSource = sourceData;
 			showEditForm = true;
 		} catch (error) {
@@ -85,7 +85,7 @@
 			}
 			// Refresh data to show changes
 			await forceRefresh();
-			sources = await getAllSourcesInfo();
+			sources = await fetchSources();
 			return null; // Success
 		} catch (error) {
 			if (error instanceof ApiError) {
@@ -108,14 +108,14 @@
 
 		isDeleting = true;
 		try {
-			await deleteSource(deletingSource.source_id);
+			await deleteSource(deletingSource.id);
 			toast.success('Source deleted successfully');
 			showDeleteDialog = false;
 			deletingSource = null;
 			deleteCascadeInfo = null;
 			// Refresh data to show changes
 			await forceRefresh();
-			sources = await getAllSourcesInfo();
+			sources = await fetchSources();
 		} catch (error) {
 			if (error instanceof ApiError) {
 				// Handle 409 Conflict - source has species data (constraint violation)
@@ -251,7 +251,7 @@
 {#if showDeleteDialog && deletingSource}
 	<DeleteConfirmDialog
 		entityType="source"
-		entityName={deletingSource.source_name}
+		entityName={deletingSource.name}
 		cascadeInfo={deleteCascadeInfo}
 		{isDeleting}
 		onConfirm={handleDeleteConfirm}

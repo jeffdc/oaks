@@ -827,6 +827,24 @@ git worktree add ../oaks-feature-name -b feature-name origin/main
 
 **Commit messages:** Present tense, imperative mood.
 
+### Releasing
+
+When the user asks to release a component (web, api, ios):
+
+1. **Read `/RELEASING.md`** for the full process
+2. **Create a tracking beads issue** using the template in `.beads/templates/`
+3. **Follow the checkpoints** and update the issue as you progress
+4. **This is critical for recovery** - if the session dies, the next agent can resume from the last checkpoint
+
+Quick reference:
+```bash
+# Create release tracking issue
+bd create --title "Release web $(date +%Y.%m.%d.%H%M)" --type task --priority 0
+
+# Version format: YYYY.MM.DD.HHMM (e.g., 2025.01.03.1430)
+# Version file: /version.json
+```
+
 ### Beads Naming
 Use component prefixes when creating beads:
 - `cli-` for CLI tool issues

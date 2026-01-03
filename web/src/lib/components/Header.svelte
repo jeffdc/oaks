@@ -4,7 +4,7 @@
 	import { isOnline } from '$lib/stores/dataStore.js';
 </script>
 
-<header class="sticky top-0 z-40" role="banner" style="background: linear-gradient(135deg, var(--color-forest-800) 0%, var(--color-forest-700) 100%); box-shadow: var(--shadow-lg);">
+<header class="sticky top-0 z-40" style="background: linear-gradient(135deg, var(--color-forest-800) 0%, var(--color-forest-700) 100%); box-shadow: var(--shadow-lg);">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
 		<div class="flex flex-wrap items-center gap-4">
 			<!-- Logo and title -->
@@ -31,6 +31,7 @@
 
 			<!-- Navigation -->
 			<nav class="flex items-center gap-1" aria-label="Main navigation">
+				<a href="{base}/sources/" class="nav-link">Sources</a>
 				<a href="{base}/about/" class="nav-link">About</a>
 				<a href="{base}/settings/" class="settings-link" title="Settings" aria-label="Settings">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

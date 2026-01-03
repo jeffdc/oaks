@@ -232,6 +232,7 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby={titleId}
+    tabindex="-1"
     bind:this={modalElement}
     on:click={handleBackdropClick}
     on:keydown={handleKeydown}

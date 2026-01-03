@@ -36,10 +36,12 @@
 	// Get the appropriate title
 	$: title = isError
 		? `Cannot delete ${formatEntityType(entityType)}`
-		: `Delete ${formatEntityType(entityType)}?`;
+		: entityType === 'species-source'
+			? 'Delete source data?'
+			: `Delete ${formatEntityType(entityType)}?`;
 
-	// Get the entity display name (add Quercus prefix for species)
-	$: displayName = entityType === 'species' || entityType === 'species-source'
+	// Get the entity display name (add Quercus prefix for species only, not species-source)
+	$: displayName = entityType === 'species'
 		? `Quercus ${entityName}`
 		: entityName;
 

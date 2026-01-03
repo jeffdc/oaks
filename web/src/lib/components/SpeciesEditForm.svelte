@@ -3,6 +3,7 @@
   import FieldSection from './FieldSection.svelte';
   import TaxonSelect from './TaxonSelect.svelte';
   import TagInput from './TagInput.svelte';
+  import SpeciesAutocomplete from './SpeciesAutocomplete.svelte';
   import { searchSpecies } from '$lib/apiClient.js';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
   import { MAX_LENGTHS, validateScientificName, validateLength } from '$lib/utils/validation.js';
@@ -691,9 +692,9 @@
       <div class="field">
         <label id="related-label" class="field-label">Closely Related To</label>
         <p class="field-hint">Species that are closely related taxonomically</p>
-        <TagInput
+        <SpeciesAutocomplete
           values={formData.closely_related_to}
-          placeholder="Add related species..."
+          placeholder="Search for species..."
           onChange={(values) => formData.closely_related_to = values}
         />
       </div>

@@ -304,6 +304,7 @@
     </div>
   {/if}
 
+  <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <form class="source-form" onsubmit={handleSave} onkeydown={handleFormKeydown}>
     <!-- Section 1: Core Information -->
     <FieldSection title="Core Information">
