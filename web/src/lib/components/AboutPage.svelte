@@ -152,6 +152,19 @@
         </p>
     </section>
 
+    <section class="content-section">
+        <h3 class="section-title">API</h3>
+        <p>
+            The Oak Compendium provides a public REST API for programmatic access to species data. Read operations
+            are open to all; write operations require authentication.
+        </p>
+        <p>
+            <a href="https://oak-compendium-api.fly.dev/api/v1/docs" target="_blank" rel="noopener noreferrer"
+                >View API Documentation</a
+            >
+        </p>
+    </section>
+
     <footer class="version-footer">
         <span class="version-text">Version {__APP_VERSION__}</span>
     </footer>

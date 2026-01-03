@@ -4,6 +4,11 @@ info:
   description: |
     API for accessing the Quercus (oak) species database.
 
+    ## Data License
+    All data served by this API is **All Rights Reserved** unless otherwise noted.
+    Individual species entries may include data from third-party sources with their
+    own licensing terms; see the `sources` field for attribution details.
+
     ## Authentication
     Write operations (POST, PUT, DELETE) require Bearer token authentication.
     Read operations are public.
