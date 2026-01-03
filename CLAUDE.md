@@ -785,7 +785,9 @@ go build -o oak .
 
 ### Git Workflow
 - This project uses Beads for issue tracking (see `.beads/` and session startup hook)
-- Before completing work: `bd sync --from-main` to pull latest beads
+- The beads daemon runs with auto-commit, auto-push, and auto-pull enabled
+- Beads syncs to `main` branch via a sparse worktree (do not checkout `main` directly)
+- For bug fixes on main: create a branch from `origin/main`, fix, then push to main
 - Commit messages: Present tense, imperative mood (see `CONTRIBUTING.md`)
 
 ### Beads Naming
@@ -806,7 +808,7 @@ Multiple Claude Code agents can work in parallel on this project. To avoid confl
 
 **Beads Coordination**:
 - All agents share the same beads database automatically
-- Each agent should run `bd sync` at session start and end
+- The daemon handles sync automatically (no manual `bd sync` needed)
 - Use component prefixes (`ios-`, `web-`, `cli-`) when creating beads so agents can filter to their domain
 - Beads merge driver handles field-level conflicts if the same issue is edited by multiple agents
 
@@ -815,7 +817,7 @@ Multiple Claude Code agents can work in parallel on this project. To avoid confl
 - If git lock errors occur (one agent mid-commit while another commits), retry after a moment
 - For more isolation, use feature branches per agent (`ios-feature`, `web-feature`) and merge when done
 
-**Alternative - Git Worktrees**: For full isolation, create separate worktrees per agent. Note: daemon mode doesn't work with worktrees, so use `bd sync` manually or `--no-daemon`.
+**Alternative - Git Worktrees**: For full isolation, create separate worktrees per agent. The daemon syncs beads to `main` via `sync.branch` configuration, so all worktrees share the same beads state.
 
 ### Critical: Files That Must Be Tracked
 - **`cli/oak_compendium.db`**: The SQLite database MUST be committed to git. This is the authoritative data source for the project. Do NOT add it to .gitignore or remove it from tracking.
