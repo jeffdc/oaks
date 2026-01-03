@@ -199,14 +199,16 @@ describe('authStore', () => {
         expect(get(canEdit)).toBe(false);
       });
 
-      it('returns false when API unavailable', async () => {
+      it('returns true when API unavailable (API errors handled at request time)', async () => {
+        // Note: canEdit intentionally doesn't check apiAvailable
+        // API failures are handled with error messages, not by blocking the UI
         setupValidSession('valid-api-key');
         const { canEdit, isOnline, apiAvailable } = await import('../lib/stores/authStore.js');
 
         isOnline.set(true);
         apiAvailable.set(false);
 
-        expect(get(canEdit)).toBe(false);
+        expect(get(canEdit)).toBe(true);
       });
     });
 
@@ -237,14 +239,16 @@ describe('authStore', () => {
         expect(getCannotEditReason()).toBe('Offline');
       });
 
-      it('returns "API unavailable" when API is down', async () => {
+      it('returns null when API is down (errors handled at request time)', async () => {
+        // Note: getCannotEditReason intentionally doesn't check apiAvailable
+        // API failures are handled with error messages when requests fail
         setupValidSession('valid-api-key');
         const { getCannotEditReason, isOnline, apiAvailable } = await import('../lib/stores/authStore.js');
 
         isOnline.set(true);
         apiAvailable.set(false);
 
-        expect(getCannotEditReason()).toBe('API unavailable');
+        expect(getCannotEditReason()).toBe(null);
       });
 
       it('returns first failing condition (priority order)', async () => {

@@ -936,7 +936,9 @@ describe('CRUD Operations', () => {
         expect(get(canEdit)).toBe(false);
       });
 
-      it('canEdit is false when API unavailable', async () => {
+      it('canEdit is true when API unavailable (errors handled at request time)', async () => {
+        // Note: canEdit intentionally doesn't check apiAvailable
+        // API failures are handled with error messages, not by blocking the UI
         setupValidSession();
 
         Object.defineProperty(global.navigator, 'onLine', {
@@ -950,7 +952,7 @@ describe('CRUD Operations', () => {
         isOnline.set(true);
         apiAvailable.set(false);
 
-        expect(get(canEdit)).toBe(false);
+        expect(get(canEdit)).toBe(true);
       });
 
       it('canEdit is true when online, authenticated, and API available', async () => {
@@ -983,7 +985,9 @@ describe('CRUD Operations', () => {
         expect(getCannotEditReason()).toBe('Offline');
       });
 
-      it('returns "API unavailable" when API is down', async () => {
+      it('returns null when API is down (errors handled at request time)', async () => {
+        // Note: getCannotEditReason intentionally doesn't check apiAvailable
+        // API failures are handled with error messages when requests fail
         setupValidSession();
 
         const { getCannotEditReason, isOnline, apiAvailable } = await import('../lib/stores/authStore.js');
@@ -991,7 +995,7 @@ describe('CRUD Operations', () => {
         isOnline.set(true);
         apiAvailable.set(false);
 
-        expect(getCannotEditReason()).toBe('API unavailable');
+        expect(getCannotEditReason()).toBe(null);
       });
 
       it('returns "Not authenticated" when not logged in', async () => {
