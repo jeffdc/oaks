@@ -4,7 +4,7 @@
   import { onMount, tick } from 'svelte';
   import { fetchSourceById, fetchSpeciesBySource, updateSource, deleteSource, ApiError } from '$lib/apiClient.js';
   import { forceRefresh } from '$lib/stores/dataStore.js';
-  import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
+  import { canEdit } from '$lib/stores/authStore.js';
   import { toast } from '$lib/stores/toastStore.js';
   import SourceEditForm from './SourceEditForm.svelte';
   import DeleteConfirmDialog from './DeleteConfirmDialog.svelte';
@@ -232,15 +232,6 @@
             </svg>
             <span>Delete</span>
           </button>
-        {:else}
-          {@const reason = getCannotEditReason()}
-          <span class="edit-disabled-hint" title={reason}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-            <span class="edit-disabled-reason">{reason}</span>
-          </span>
         {/if}
       </div>
     </header>
@@ -507,29 +498,9 @@
     outline-offset: 2px;
   }
 
-  .edit-disabled-hint {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.375rem 0.625rem;
-    border-radius: 0.375rem;
-    font-size: 0.75rem;
-    color: var(--color-text-tertiary);
-    background-color: var(--color-border);
-  }
-
-  .edit-disabled-hint svg {
-    flex-shrink: 0;
-  }
-
-  .edit-disabled-reason {
-    white-space: nowrap;
-  }
-
   /* Hide button text on small screens */
   @media (max-width: 640px) {
-    .action-btn span,
-    .edit-disabled-reason {
+    .action-btn span {
       display: none;
     }
 
@@ -542,11 +513,6 @@
     .action-btn svg {
       width: 20px;
       height: 20px;
-    }
-
-    .edit-disabled-hint {
-      min-height: 2.75rem;
-      padding: 0.5rem;
     }
   }
 

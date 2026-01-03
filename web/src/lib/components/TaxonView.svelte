@@ -1,7 +1,7 @@
 <script>
   import { base } from '$app/paths';
   import { formatSpeciesName, forceRefresh } from '$lib/stores/dataStore.js';
-  import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
+  import { canEdit } from '$lib/stores/authStore.js';
   import { toast } from '$lib/stores/toastStore.js';
   import { fetchTaxaByLevel, fetchSpeciesByTaxon, fetchStats, fetchTaxon, updateTaxon, deleteTaxon, createTaxon, ApiError } from '$lib/apiClient.js';
   import TaxonEditForm from './TaxonEditForm.svelte';
