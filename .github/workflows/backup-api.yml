@@ -14,11 +14,11 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Create volume snapshot
-        run: fly volumes snapshots create vol_r63wgdmyjzn63wjr -a oak-compendium-api
+        run: flyctl volumes snapshots create vol_r63wgdmyjzn63wjr -a oak-compendium-api
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: List recent snapshots
-        run: fly volumes snapshots list vol_r63wgdmyjzn63wjr -a oak-compendium-api
+        run: flyctl volumes snapshots list vol_r63wgdmyjzn63wjr -a oak-compendium-api
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
