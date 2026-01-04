@@ -154,56 +154,117 @@ textarea:focus-visible {
   font-size: 0.9375rem;
 }
 
-.prose-content :global(p) {
+.prose-content p {
   margin: 0 0 0.75rem 0;
 }
 
-.prose-content :global(p:last-child) {
+.prose-content p:last-child {
   margin-bottom: 0;
 }
 
-.prose-content :global(ul) {
+.prose-content ul {
   margin: 0.5rem 0;
   padding-left: 1.5rem;
   list-style-type: disc;
 }
 
-.prose-content :global(ol) {
+.prose-content ol {
   margin: 0.5rem 0;
   padding-left: 1.5rem;
   list-style-type: decimal;
 }
 
-.prose-content :global(li) {
+.prose-content li {
   margin: 0.25rem 0;
 }
 
-.prose-content :global(a) {
+.prose-content a {
   color: var(--color-forest-700);
   text-decoration: underline;
   text-decoration-color: var(--color-forest-300);
   transition: all 0.15s ease;
 }
 
-.prose-content :global(a:hover) {
+.prose-content a:hover {
   color: var(--color-forest-600);
   text-decoration-color: var(--color-forest-600);
 }
 
-.prose-content :global(strong) {
+.prose-content strong {
   font-weight: 600;
 }
 
-.prose-content :global(em) {
+.prose-content em {
   font-style: italic;
 }
 
-.prose-content :global(code) {
+.prose-content code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   background-color: var(--color-forest-50);
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
   font-size: 0.875em;
+}
+
+.prose-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--font-serif);
+  color: var(--color-forest-900);
+  margin: 1.5rem 0 0.75rem 0;
+}
+
+.prose-content h1:first-child {
+  margin-top: 0;
+}
+
+.prose-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-family: var(--font-serif);
+  color: var(--color-forest-800);
+  margin: 1.5rem 0 0.75rem 0;
+}
+
+.prose-content h2:first-child {
+  margin-top: 0;
+}
+
+.prose-content h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-family: var(--font-serif);
+  color: var(--color-forest-700);
+  margin: 1.25rem 0 0.5rem 0;
+}
+
+.prose-content h3:first-child {
+  margin-top: 0;
+}
+
+.prose-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 1rem 0 0.5rem 0;
+}
+
+.prose-content h4:first-child {
+  margin-top: 0;
+}
+
+.prose-content blockquote {
+  border-left: 3px solid var(--color-forest-300);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.prose-content hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 1.5rem 0;
 }
 
 /* Compact variant for tighter spaces like table cells */

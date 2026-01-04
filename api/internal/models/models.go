@@ -26,13 +26,14 @@ type ExternalLink struct {
 // Taxon represents a taxonomic rank in the reference table
 // Hierarchy: Genus (Quercus) -> Subgenus -> Section -> Subsection -> Complex -> Species
 type Taxon struct {
-	Name         string      `json:"name" yaml:"name"`
-	Level        TaxonLevel  `json:"level" yaml:"level"`
-	Parent       *string     `json:"parent,omitempty" yaml:"parent,omitempty"` // Parent taxon name
-	Author       *string     `json:"author,omitempty" yaml:"author,omitempty"` // Taxonomic authority
-	Notes        *string     `json:"notes,omitempty" yaml:"notes,omitempty"`
-	Links        []TaxonLink `json:"links,omitempty" yaml:"links,omitempty"`   // External reference links
-	SpeciesCount int         `json:"species_count" yaml:"species_count"`       // Count of species in this taxon
+	Name             string      `json:"name" yaml:"name"`
+	Level            TaxonLevel  `json:"level" yaml:"level"`
+	Parent           *string     `json:"parent,omitempty" yaml:"parent,omitempty"`                       // Parent taxon name
+	Author           *string     `json:"author,omitempty" yaml:"author,omitempty"`                       // Taxonomic authority
+	Content          *string     `json:"content,omitempty" yaml:"content,omitempty"`                     // Freeform markdown content
+	ContentUpdatedAt *string     `json:"content_updated_at,omitempty" yaml:"content_updated_at,omitempty"` // ISO 8601 timestamp
+	Links            []TaxonLink `json:"links,omitempty" yaml:"links,omitempty"`                         // External reference links
+	SpeciesCount     int         `json:"species_count" yaml:"species_count"`                             // Count of species in this taxon
 }
 
 // SpeciesSource represents source-attributed descriptive data for a species
@@ -165,4 +166,28 @@ type UnifiedSearchResults struct {
 		Sources int `json:"sources"`
 		Total   int `json:"total"`
 	} `json:"counts"`
+}
+
+// Article represents a reference article (guide, book review, identification essay, etc.)
+type Article struct {
+	ID          int64    `json:"id" yaml:"id"`
+	Slug        string   `json:"slug" yaml:"slug"`
+	Title       string   `json:"title" yaml:"title"`
+	Author      string   `json:"author" yaml:"author"`
+	Content     *string  `json:"content,omitempty" yaml:"content,omitempty"`
+	Tags        []string `json:"tags,omitempty" yaml:"tags,omitempty"`
+	IsPublished bool     `json:"is_published" yaml:"is_published"`
+	CreatedAt   string   `json:"created_at" yaml:"created_at"`
+	UpdatedAt   string   `json:"updated_at" yaml:"updated_at"`
+	PublishedAt *string  `json:"published_at,omitempty" yaml:"published_at,omitempty"`
+}
+
+// NewArticle creates a new Article with default values
+func NewArticle(title, author string) *Article {
+	return &Article{
+		Title:       title,
+		Author:      author,
+		Tags:        []string{},
+		IsPublished: false,
+	}
 }

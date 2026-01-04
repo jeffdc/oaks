@@ -6,6 +6,7 @@
   import { fetchTaxaByLevel, fetchSpeciesByTaxon, fetchStats, fetchTaxon, updateTaxon, deleteTaxon, createTaxon, ApiError } from '$lib/apiClient.js';
   import TaxonEditForm from './TaxonEditForm.svelte';
   import DeleteConfirmDialog from './DeleteConfirmDialog.svelte';
+  import MarkdownRenderer from './MarkdownRenderer.svelte';
 
   let { taxonPath = [] } = $props(); // e.g., ['Quercus', 'Quercus', 'Albae']
 
@@ -13,6 +14,7 @@
   let subTaxaFromApi = $state([]); // Sub-taxa with species_count from API
   let matchingSpeciesFromApi = $state([]); // Species at this taxon level
   let totalSpeciesCount = $state(0); // Total species count for genus level
+  let currentTaxonData = $state(null); // Current taxon's full data (including content)
   let isLoading = $state(true);
   let error = $state(null);
 
@@ -27,6 +29,7 @@
     try {
       isLoading = true;
       error = null;
+      currentTaxonData = null;
 
       const depth = path.length;
 
@@ -49,6 +52,18 @@
       if (depth === 0) {
         const stats = await fetchStats();
         totalSpeciesCount = stats.species_count + stats.hybrid_count;
+      } else {
+        // For non-genus levels, fetch the current taxon's full data (including content)
+        const currentLevel = childLevelMap[depth - 1];
+        const currentName = path[path.length - 1];
+        if (currentLevel && currentName) {
+          try {
+            currentTaxonData = await fetchTaxon(currentLevel, currentName);
+          } catch (fetchErr) {
+            // Non-critical - taxon content is optional
+            console.warn('Could not fetch taxon data:', fetchErr);
+          }
+        }
       }
     } catch (err) {
       console.error('Failed to fetch taxonomy data:', err);
@@ -67,6 +82,7 @@
   let showEditForm = $state(false);
   let showCreateForm = $state(false);
   let showDeleteDialog = $state(false);
+  let showContentEditForm = $state(false);
   let isDeleting = $state(false);
   let editingTaxon = $state(null);
   let deletingTaxon = $state(null);
@@ -258,6 +274,43 @@
     };
     return labels[level] || 'Taxon';
   }
+
+  // Handle edit content button click for current taxon
+  function handleEditContentClick() {
+    if (!currentTaxonData) return;
+    editingTaxon = { ...currentTaxonData };
+    showContentEditForm = true;
+  }
+
+  // Handle save from content edit form
+  async function handleSaveContent(formData) {
+    if (!currentTaxonData) return null;
+
+    const childLevelMap = ['subgenus', 'section', 'subsection', 'complex'];
+    const currentLevel = childLevelMap[taxonPath.length - 1];
+
+    try {
+      await updateTaxon(currentLevel, currentTaxonData.name, formData);
+      toast.success('Content updated successfully');
+      // Refresh data to show changes
+      await forceRefresh();
+      showContentEditForm = false;
+      editingTaxon = null;
+      // Reload the current taxon data to reflect changes
+      await loadData([...taxonPath]);
+      return null; // Success
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 400 && error.fieldErrors) {
+          return error.fieldErrors;
+        }
+        toast.error(`Failed to update: ${error.message}`);
+      } else {
+        toast.error('Failed to update content');
+      }
+      throw error;
+    }
+  }
 </script>
 
 <div class="taxon-view">
@@ -342,6 +395,41 @@
       </nav>
     {/if}
   </header>
+
+  <!-- Content section (if taxon has content or user can edit) -->
+  {#if !isGenusLevel && (currentTaxonData?.content || $canEdit)}
+    <section class="card content-section">
+      <div class="content-header">
+        <h2 class="section-title section-title-sm">About this {taxonLevel}</h2>
+        <div class="content-header-right">
+          {#if currentTaxonData?.content_updated_at}
+            <span class="content-updated">
+              Updated {new Date(currentTaxonData.content_updated_at).toLocaleDateString()}
+            </span>
+          {/if}
+          {#if $canEdit && currentTaxonData}
+            <button
+              type="button"
+              class="edit-content-btn"
+              title={currentTaxonData.content ? 'Edit content' : 'Add content'}
+              onclick={handleEditContentClick}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              <span>{currentTaxonData.content ? 'Edit' : 'Add Content'}</span>
+            </button>
+          {/if}
+        </div>
+      </div>
+      {#if currentTaxonData?.content}
+        <MarkdownRenderer content={currentTaxonData.content} />
+      {:else if $canEdit}
+        <p class="no-content">No content yet. Click "Add Content" to describe this {taxonLevel}.</p>
+      {/if}
+    </section>
+  {/if}
 
   <!-- Sub-taxa (if any) -->
   {#if subTaxa.length > 0}
@@ -448,6 +536,16 @@
   />
 {/if}
 
+<!-- Content Edit Modal -->
+{#if showContentEditForm && editingTaxon}
+  <TaxonEditForm
+    taxon={editingTaxon}
+    isOpen={showContentEditForm}
+    onClose={() => { showContentEditForm = false; editingTaxon = null; }}
+    onSave={handleSaveContent}
+  />
+{/if}
+
 <style>
   .taxon-view {
     padding: 1rem;
@@ -530,6 +628,67 @@
 
   .create-taxon-btn svg {
     flex-shrink: 0;
+  }
+
+  /* Content section */
+  .content-section {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .content-header .section-title {
+    margin-bottom: 0;
+  }
+
+  .content-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .content-updated {
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+  }
+
+  .edit-content-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-forest-700);
+    background-color: var(--color-forest-50);
+    border: 1px solid var(--color-forest-200);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .edit-content-btn:hover {
+    background-color: var(--color-forest-100);
+    border-color: var(--color-forest-300);
+  }
+
+  .edit-content-btn:focus-visible {
+    outline: 2px solid var(--color-forest-500);
+    outline-offset: 2px;
+  }
+
+  .no-content {
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    margin: 0;
   }
 
   /* Sub-taxa section */

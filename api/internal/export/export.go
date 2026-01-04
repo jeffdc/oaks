@@ -26,6 +26,18 @@ func Build(database *db.Database) (*File, error) {
 		sourceMap[s.ID] = s
 	}
 
+	// Get all taxa
+	taxa, err := database.ListTaxa(nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list taxa: %w", err)
+	}
+
+	// Get published articles
+	articles, err := database.ListPublishedArticles()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list published articles: %w", err)
+	}
+
 	// Build export data with metadata
 	now := time.Now().UTC()
 	exportData := &File{
@@ -33,9 +45,13 @@ func Build(database *db.Database) (*File, error) {
 			Version:      now.Format("2006-01-02T15:04:05Z"), // ISO 8601 UTC timestamp as version
 			ExportedAt:   now.Format(time.RFC3339),
 			SpeciesCount: len(entries),
+			TaxaCount:    len(taxa),
+			ArticleCount: len(articles),
 		},
-		Sources: make([]Source, 0, len(sources)),
-		Species: make([]Species, 0, len(entries)),
+		Sources:  make([]Source, 0, len(sources)),
+		Taxa:     make([]Taxon, 0, len(taxa)),
+		Species:  make([]Species, 0, len(entries)),
+		Articles: make([]Article, 0, len(articles)),
 	}
 
 	// Build top-level sources array with full metadata
@@ -54,6 +70,30 @@ func Build(database *db.Database) (*File, error) {
 			License:     s.License,
 			LicenseURL:  s.LicenseURL,
 		})
+	}
+
+	// Build taxa array with content
+	for _, t := range taxa {
+		exportTaxon := Taxon{
+			Name:             t.Name,
+			Level:            string(t.Level),
+			Parent:           t.Parent,
+			Author:           t.Author,
+			Content:          t.Content,
+			ContentUpdatedAt: t.ContentUpdatedAt,
+			SpeciesCount:     t.SpeciesCount,
+		}
+		// Convert links
+		if len(t.Links) > 0 {
+			exportTaxon.Links = make([]TaxonLink, len(t.Links))
+			for i, link := range t.Links {
+				exportTaxon.Links[i] = TaxonLink{
+					Label: link.Label,
+					URL:   link.URL,
+				}
+			}
+		}
+		exportData.Taxa = append(exportData.Taxa, exportTaxon)
 	}
 
 	for _, entry := range entries {
@@ -129,6 +169,22 @@ func Build(database *db.Database) (*File, error) {
 		}
 
 		exportData.Species = append(exportData.Species, species)
+	}
+
+	// Build articles array (only published articles)
+	for _, a := range articles {
+		article := Article{
+			ID:          a.ID,
+			Slug:        a.Slug,
+			Title:       a.Title,
+			Author:      a.Author,
+			Content:     a.Content,
+			Tags:        nonEmptySlice(a.Tags),
+			CreatedAt:   a.CreatedAt,
+			UpdatedAt:   a.UpdatedAt,
+			PublishedAt: a.PublishedAt,
+		}
+		exportData.Articles = append(exportData.Articles, article)
 	}
 
 	return exportData, nil

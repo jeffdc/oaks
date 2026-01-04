@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -14,34 +15,36 @@ import (
 
 // TaxonRequest is the request body for creating or updating a taxon.
 type TaxonRequest struct {
-	Name   string             `json:"name"`
-	Level  models.TaxonLevel  `json:"level"`
-	Parent *string            `json:"parent,omitempty"`
-	Author *string            `json:"author,omitempty"`
-	Notes  *string            `json:"notes,omitempty"`
-	Links  []models.TaxonLink `json:"links,omitempty"`
+	Name    string             `json:"name"`
+	Level   models.TaxonLevel  `json:"level"`
+	Parent  *string            `json:"parent,omitempty"`
+	Author  *string            `json:"author,omitempty"`
+	Content *string            `json:"content,omitempty"`
+	Links   []models.TaxonLink `json:"links,omitempty"`
 }
 
 // TaxonResponse is the response for a single taxon.
 type TaxonResponse struct {
-	Name         string             `json:"name"`
-	Level        models.TaxonLevel  `json:"level"`
-	Parent       *string            `json:"parent,omitempty"`
-	Author       *string            `json:"author,omitempty"`
-	Notes        *string            `json:"notes,omitempty"`
-	Links        []models.TaxonLink `json:"links,omitempty"`
-	SpeciesCount int                `json:"species_count"`
+	Name             string             `json:"name"`
+	Level            models.TaxonLevel  `json:"level"`
+	Parent           *string            `json:"parent,omitempty"`
+	Author           *string            `json:"author,omitempty"`
+	Content          *string            `json:"content,omitempty"`
+	ContentUpdatedAt *string            `json:"content_updated_at,omitempty"`
+	Links            []models.TaxonLink `json:"links,omitempty"`
+	SpeciesCount     int                `json:"species_count"`
 }
 
 // taxonToResponse converts a models.Taxon to TaxonResponse.
 func taxonToResponse(t *models.Taxon) TaxonResponse {
 	resp := TaxonResponse{
-		Name:         t.Name,
-		Level:        t.Level,
-		Parent:       t.Parent,
-		Author:       t.Author,
-		Notes:        t.Notes,
-		SpeciesCount: t.SpeciesCount,
+		Name:             t.Name,
+		Level:            t.Level,
+		Parent:           t.Parent,
+		Author:           t.Author,
+		Content:          t.Content,
+		ContentUpdatedAt: t.ContentUpdatedAt,
+		SpeciesCount:     t.SpeciesCount,
 	}
 	if len(t.Links) > 0 {
 		resp.Links = t.Links
@@ -175,12 +178,17 @@ func (s *Server) handleCreateTaxon(w http.ResponseWriter, r *http.Request) {
 
 	// Create the taxon
 	taxon := &models.Taxon{
-		Name:   req.Name,
-		Level:  req.Level,
-		Parent: req.Parent,
-		Author: req.Author,
-		Notes:  req.Notes,
-		Links:  req.Links,
+		Name:    req.Name,
+		Level:   req.Level,
+		Parent:  req.Parent,
+		Author:  req.Author,
+		Content: req.Content,
+		Links:   req.Links,
+	}
+	// Set content_updated_at if content is provided
+	if req.Content != nil && *req.Content != "" {
+		now := time.Now().UTC().Format(time.RFC3339)
+		taxon.ContentUpdatedAt = &now
 	}
 	if taxon.Links == nil {
 		taxon.Links = []models.TaxonLink{}
@@ -238,7 +246,22 @@ func (s *Server) handleUpdateTaxon(w http.ResponseWriter, r *http.Request) {
 	// Update the taxon (name and level cannot be changed via PUT)
 	existing.Parent = req.Parent
 	existing.Author = req.Author
-	existing.Notes = req.Notes
+
+	// Track if content changed for timestamp update
+	contentChanged := false
+	if req.Content != nil {
+		// Content is being set (possibly to empty string to clear)
+		if existing.Content == nil || *existing.Content != *req.Content {
+			contentChanged = true
+		}
+		existing.Content = req.Content
+	}
+	// Update content_updated_at if content changed
+	if contentChanged {
+		now := time.Now().UTC().Format(time.RFC3339)
+		existing.ContentUpdatedAt = &now
+	}
+
 	if req.Links != nil {
 		existing.Links = req.Links
 	}

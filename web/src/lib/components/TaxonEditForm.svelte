@@ -3,6 +3,7 @@
   import EditModal from './EditModal.svelte';
   import FieldSection from './FieldSection.svelte';
   import TagInput from './TagInput.svelte';
+  import MarkdownEditor from './MarkdownEditor.svelte';
   import { fetchTaxa } from '$lib/apiClient.js';
   import { canEdit, getCannotEditReason } from '$lib/stores/authStore.js';
   import { MAX_LENGTHS, validateLength, validateUrl, getCharacterCount } from '$lib/utils/validation.js';
@@ -15,7 +16,7 @@
    * - level (select, editable only in create mode)
    * - parent (TaxonSelect filtered by valid parent levels)
    * - author (text)
-   * - notes (textarea)
+   * - content (markdown with preview)
    * - links (TagInput for URLs)
    *
    * Parent hierarchy rules:
@@ -59,7 +60,7 @@
     level: '',
     parent: '',
     author: '',
-    notes: '',
+    content: '',
     links: []
   };
 
@@ -118,7 +119,7 @@
         level: taxon.level || '',
         parent: taxon.parent || '',
         author: taxon.author || '',
-        notes: taxon.notes || '',
+        content: taxon.content || '',
         links: [...(taxon.links || [])]
       };
       parentQuery = taxon.parent || '';
@@ -129,7 +130,7 @@
         level: defaultLevel,
         parent: '',
         author: '',
-        notes: '',
+        content: '',
         links: []
       };
       parentQuery = '';
@@ -308,10 +309,10 @@
       newErrors.author = authorResult.message;
     }
 
-    // Validate notes length
-    const notesResult = validateLength(formData.notes, MAX_LENGTHS.notes);
-    if (!notesResult.valid) {
-      newErrors.notes = notesResult.message;
+    // Validate content length (use notes limit as it's similar freeform text)
+    const contentResult = validateLength(formData.content, MAX_LENGTHS.content || MAX_LENGTHS.notes || 10000);
+    if (!contentResult.valid) {
+      newErrors.content = contentResult.message;
     }
 
     // Validate URLs if any links provided
@@ -334,7 +335,7 @@
       'level': 'level',
       'parent': 'parent',
       'author': 'author',
-      'notes': 'notes',
+      'content': 'content',
       'links': 'links'
     };
     return fieldMap[apiField] || apiField;
@@ -557,29 +558,20 @@
       </div>
     </FieldSection>
 
-    <!-- Section 2: Additional Information -->
-    <FieldSection title="Additional Information" collapsible>
+    <!-- Section 2: Content -->
+    <FieldSection title="Content" collapsible startOpen={!!formData.content}>
       <div class="field">
-        <label for="taxon-notes" class="field-label">Notes</label>
-        <textarea
-          id="taxon-notes"
-          class="field-textarea"
-          class:error={errors.notes}
-          bind:value={formData.notes}
-          placeholder="Additional notes about this taxon..."
-          rows="4"
-          maxlength={MAX_LENGTHS.notes}
-        ></textarea>
-        <div class="field-footer">
-          {#if errors.notes}
-            <p class="error-message">{errors.notes}</p>
-          {:else}
-            <span></span>
-          {/if}
-          <span class="char-count" class:warning={getCharacterCount(formData.notes, MAX_LENGTHS.notes).remaining < 500}>
-            {formData.notes?.length || 0} / {MAX_LENGTHS.notes}
-          </span>
-        </div>
+        <label for="taxon-content" class="field-label">Content</label>
+        <p class="field-hint">Markdown content for this taxon (descriptions, notes, etc.)</p>
+        <MarkdownEditor
+          value={formData.content}
+          placeholder="Write about this taxon..."
+          onchange={(value) => formData.content = value}
+          rows={8}
+        />
+        {#if errors.content}
+          <p class="error-message">{errors.content}</p>
+        {/if}
       </div>
 
       <div class="field">

@@ -1,7 +1,9 @@
 <script>
 	import LoadingSpinner from './LoadingSpinner.svelte';
 
-	/** @type {'species' | 'taxon' | 'source' | 'species-source'} */
+	/** @type {boolean} Whether the dialog is open */
+	export let isOpen = false;
+	/** @type {'species' | 'taxon' | 'source' | 'species-source' | 'Article'} */
 	export let entityType;
 	/** @type {string} */
 	export let entityName;
@@ -12,7 +14,7 @@
 	/** @type {() => void} */
 	export let onConfirm;
 	/** @type {() => void} */
-	export let onCancel;
+	export let onClose;
 
 	// Format entity type for display
 	function formatEntityType(type) {
@@ -79,14 +81,15 @@
 
 	// Handle keyboard events
 	function handleKeydown(event) {
-		if (event.key === 'Escape') {
-			onCancel();
+		if (event.key === 'Escape' && isOpen) {
+			onClose();
 		}
 	}
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
 
+{#if isOpen}
 <!-- Modal backdrop -->
 <div
 	class="overlay"
@@ -130,7 +133,7 @@
 				<button
 					type="button"
 					class="btn btn-secondary"
-					onclick={onCancel}
+					onclick={onClose}
 				>
 					OK
 				</button>
@@ -139,7 +142,7 @@
 				<button
 					type="button"
 					class="btn btn-secondary"
-					onclick={onCancel}
+					onclick={onClose}
 					disabled={isDeleting}
 				>
 					Cancel
@@ -161,6 +164,7 @@
 		</div>
 	</div>
 </div>
+{/if}
 
 <style>
 	.overlay {

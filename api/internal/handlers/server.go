@@ -165,6 +165,19 @@ func (s *Server) setupRoutes() {
 
 		// Stats endpoint (public, read-only)
 		r.Get("/stats", s.handleStats)
+
+		// Articles endpoints (read - public for published, all for authenticated)
+		r.Get("/articles", s.handleListArticles)
+		r.Get("/articles/tags", s.handleListArticleTags) // Must be before {slug} route
+		r.Get("/articles/{slug}", s.handleGetArticle)
+
+		// Articles endpoints (write - auth required)
+		r.Group(func(r chi.Router) {
+			r.Use(s.RequireAuth)
+			r.Post("/articles", s.handleCreateArticle)
+			r.Put("/articles/{slug}", s.handleUpdateArticle)
+			r.Delete("/articles/{slug}", s.handleDeleteArticle)
+		})
 	})
 }
 

@@ -455,6 +455,52 @@ oak import-bear --dry-run
 
 ## Architecture Decisions
 
+### API Authentication (IMPORTANT - Read This First)
+
+**The API uses `Authorization: Bearer <token>` headers exclusively.**
+
+**Key Files:**
+- `api/internal/handlers/auth.go` - Authentication middleware and helpers
+- `web/src/lib/apiClient.js` - Web client auth implementation
+
+**Authentication Rules:**
+
+| HTTP Method | Auth Required | Middleware |
+|-------------|---------------|------------|
+| GET, HEAD, OPTIONS | No | Pass-through (public reads) |
+| POST, PUT, DELETE, PATCH | Yes | `RequireAuth()` |
+| Special endpoints (e.g., `/auth/verify`) | Yes (all methods) | `ForceAuth()` |
+
+**Server Implementation (`auth.go`):**
+
+```go
+// extractBearerToken() extracts from "Authorization: Bearer <token>"
+token := extractBearerToken(r)
+
+// isAuthenticated() helper for optional auth checks (e.g., show drafts)
+func (s *Server) isAuthenticated(r *http.Request) bool {
+    token := extractBearerToken(r)
+    return token != "" && ValidateAPIKey(token, s.apiKey)
+}
+```
+
+**Web Client Implementation (`apiClient.js`):**
+
+```javascript
+headers: {
+  'Authorization': `Bearer ${apiKey}`,
+  'Content-Type': 'application/json'
+}
+```
+
+**Common Mistakes to Avoid:**
+- ❌ Don't use `X-API-Key` header - we use `Authorization: Bearer` only
+- ❌ Don't require auth for GET requests - reads are public
+- ❌ Don't confuse `RequireAuth` (write-only) with `ForceAuth` (all methods)
+- ✅ Use `isAuthenticated()` helper for optional auth (like articles showing drafts)
+
+---
+
 ### IndexedDB for Offline PWA (Decision: 2025-12-14, Revised)
 
 **Decision**: Use IndexedDB (via Dexie.js wrapper) for structured, offline-capable data storage in the web application.

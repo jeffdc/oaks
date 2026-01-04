@@ -197,6 +197,28 @@ async function fetchApiAuthenticated(endpoint, options = {}) {
 }
 
 /**
+ * Fetch wrapper that uses authentication if available
+ * Unlike fetchApiAuthenticated, this doesn't fail if not authenticated.
+ * Useful for endpoints that return different data based on auth status.
+ * @param {string} endpoint - API endpoint (without base URL)
+ * @param {Object} options - Fetch options
+ * @returns {Promise<any>} Parsed JSON response
+ */
+async function fetchApiWithOptionalAuth(endpoint, options = {}) {
+  const apiKey = get(authStore);
+  const headers = { ...options.headers };
+
+  if (apiKey) {
+    headers['Authorization'] = `Bearer ${apiKey}`;
+  }
+
+  return fetchApi(endpoint, {
+    ...options,
+    headers
+  });
+}
+
+/**
  * Check if the API is reachable
  * @returns {Promise<boolean>} True if API is reachable
  */
@@ -727,6 +749,100 @@ export async function updateSpeciesSource(speciesName, sourceId, speciesSource) 
  */
 export async function deleteSpeciesSource(speciesName, sourceId) {
   await fetchApiAuthenticated(`/api/v1/species/${encodeURIComponent(speciesName)}/sources/${sourceId}`, {
+    method: 'DELETE'
+  });
+}
+
+// =============================================================================
+// Article Operations
+// =============================================================================
+
+/**
+ * Fetch all articles from API
+ * If authenticated, returns all articles (including drafts)
+ * If not authenticated, returns only published articles
+ * @param {Object} options - Optional filters
+ * @param {string} options.tag - Filter by tag
+ * @param {boolean} options.published - Filter by published status (auth only)
+ * @returns {Promise<Array>} Array of article objects
+ */
+export async function fetchArticles(options = {}) {
+  let url = '/api/v1/articles';
+  const params = new URLSearchParams();
+
+  if (options.tag) {
+    params.set('tag', options.tag);
+  }
+  if (options.published !== undefined) {
+    params.set('published', options.published.toString());
+  }
+
+  const queryString = params.toString();
+  if (queryString) {
+    url += '?' + queryString;
+  }
+
+  // Use optional auth to see unpublished articles when authenticated
+  const response = await fetchApiWithOptionalAuth(url);
+  return response.data || response.articles || response;
+}
+
+/**
+ * Fetch a single article by slug
+ * If authenticated, can access unpublished articles
+ * @param {string} slug - Article slug
+ * @returns {Promise<Object>} Article object
+ */
+export async function fetchArticle(slug) {
+  // Use optional auth to see unpublished articles when authenticated
+  return fetchApiWithOptionalAuth(`/api/v1/articles/${encodeURIComponent(slug)}`);
+}
+
+/**
+ * Fetch all article tags with counts
+ * If authenticated, includes tags from unpublished articles
+ * @returns {Promise<Array>} Array of {tag, count} objects
+ */
+export async function fetchArticleTags() {
+  // Use optional auth to see tags from unpublished articles when authenticated
+  return fetchApiWithOptionalAuth('/api/v1/articles/tags');
+}
+
+/**
+ * Create a new article
+ * @param {Object} article - Article data
+ * @returns {Promise<Object>} Created article with slug
+ * @throws {ApiError} On validation or auth errors
+ */
+export async function createArticle(article) {
+  return fetchApiAuthenticated('/api/v1/articles', {
+    method: 'POST',
+    body: JSON.stringify(article)
+  });
+}
+
+/**
+ * Update an existing article
+ * @param {string} slug - Article slug
+ * @param {Object} article - Article data
+ * @returns {Promise<Object>} Updated article
+ * @throws {ApiError} On validation, auth, or not found errors
+ */
+export async function updateArticle(slug, article) {
+  return fetchApiAuthenticated(`/api/v1/articles/${encodeURIComponent(slug)}`, {
+    method: 'PUT',
+    body: JSON.stringify(article)
+  });
+}
+
+/**
+ * Delete an article
+ * @param {string} slug - Article slug
+ * @returns {Promise<void>}
+ * @throws {ApiError} On auth or not found errors
+ */
+export async function deleteArticle(slug) {
+  await fetchApiAuthenticated(`/api/v1/articles/${encodeURIComponent(slug)}`, {
     method: 'DELETE'
   });
 }

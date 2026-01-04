@@ -58,9 +58,29 @@ type Species struct {
 
 // Metadata contains version info for cache invalidation.
 type Metadata struct {
-	Version      string `json:"version"`       // Timestamp-based version for cache invalidation
-	ExportedAt   string `json:"exported_at"`   // ISO 8601 timestamp
-	SpeciesCount int    `json:"species_count"` // Number of species in export
+	Version      string `json:"version"`        // Timestamp-based version for cache invalidation
+	ExportedAt   string `json:"exported_at"`    // ISO 8601 timestamp
+	SpeciesCount int    `json:"species_count"`  // Number of species in export
+	TaxaCount    int    `json:"taxa_count"`     // Number of taxa in export
+	ArticleCount int    `json:"article_count"`  // Number of articles in export
+}
+
+// TaxonLink represents an external reference link for a taxon.
+type TaxonLink struct {
+	Label string `json:"label"` // e.g., "iNaturalist", "Wikipedia"
+	URL   string `json:"url"`
+}
+
+// Taxon represents a taxon in export format.
+type Taxon struct {
+	Name             string      `json:"name"`
+	Level            string      `json:"level"` // subgenus, section, subsection, complex
+	Parent           *string     `json:"parent,omitempty"`
+	Author           *string     `json:"author,omitempty"`
+	Content          *string     `json:"content,omitempty"`
+	ContentUpdatedAt *string     `json:"content_updated_at,omitempty"`
+	Links            []TaxonLink `json:"links,omitempty"`
+	SpeciesCount     int         `json:"species_count"`
 }
 
 // Source represents full source metadata at top level.
@@ -79,9 +99,24 @@ type Source struct {
 	LicenseURL  *string `json:"license_url,omitempty"`
 }
 
+// Article represents a reference article in export format.
+type Article struct {
+	ID          int64    `json:"id"`
+	Slug        string   `json:"slug"`
+	Title       string   `json:"title"`
+	Author      string   `json:"author"`
+	Content     *string  `json:"content,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+	CreatedAt   string   `json:"created_at"`
+	UpdatedAt   string   `json:"updated_at"`
+	PublishedAt *string  `json:"published_at,omitempty"`
+}
+
 // File represents the complete export format.
 type File struct {
 	Metadata Metadata  `json:"metadata"`
 	Sources  []Source  `json:"sources"`
+	Taxa     []Taxon   `json:"taxa"`
 	Species  []Species `json:"species"`
+	Articles []Article `json:"articles,omitempty"`
 }

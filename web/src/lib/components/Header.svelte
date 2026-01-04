@@ -31,6 +31,7 @@
 
 			<!-- Navigation -->
 			<nav class="flex items-center gap-1" aria-label="Main navigation">
+				<a href="{base}/articles/" class="nav-link">Articles</a>
 				<a href="{base}/sources/" class="nav-link">Sources</a>
 				<a href="{base}/about/" class="nav-link">About</a>
 				<a href="{base}/settings/" class="settings-link" title="Settings" aria-label="Settings">
