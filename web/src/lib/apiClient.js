@@ -343,15 +343,27 @@ export async function fetchSpeciesByTaxon(taxonPath = []) {
   // Add taxon filters based on path
   if (taxonPath.length >= 1 && taxonPath[0]) {
     url += `&subgenus=${encodeURIComponent(taxonPath[0])}`;
+  } else if (taxonPath.length === 0) {
+    // At genus level, filter for species without subgenus assignment
+    url += '&no_subgenus=true';
   }
   if (taxonPath.length >= 2 && taxonPath[1]) {
     url += `&section=${encodeURIComponent(taxonPath[1])}`;
+  } else if (taxonPath.length === 1) {
+    // At subgenus level, filter for species without section assignment
+    url += '&no_section=true';
   }
   if (taxonPath.length >= 3 && taxonPath[2]) {
     url += `&subsection=${encodeURIComponent(taxonPath[2])}`;
+  } else if (taxonPath.length === 2) {
+    // At section level, filter for species without subsection assignment
+    url += '&no_subsection=true';
   }
   if (taxonPath.length >= 4 && taxonPath[3]) {
     url += `&complex=${encodeURIComponent(taxonPath[3])}`;
+  } else if (taxonPath.length === 3) {
+    // At subsection level, filter for species without complex assignment
+    url += '&no_complex=true';
   }
 
   const response = await fetchApi(url);

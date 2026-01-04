@@ -901,12 +901,16 @@ func (db *Database) SearchOakEntries(query string) ([]string, error) {
 
 // OakEntryFilter contains filter criteria for listing oak entries
 type OakEntryFilter struct {
-	Subgenus   *string
-	Section    *string
-	Subsection *string
-	Complex    *string
-	Hybrid     *bool
-	SourceID   *int64
+	Subgenus     *string
+	Section      *string
+	Subsection   *string
+	Complex      *string
+	Hybrid       *bool
+	SourceID     *int64
+	NoSubgenus   bool // Filter for species with NULL subgenus
+	NoSection    bool // Filter for species with NULL section
+	NoSubsection bool // Filter for species with NULL subsection
+	NoComplex    bool // Filter for species with NULL complex
 }
 
 // ListOakEntriesPaginated returns a paginated list of oak entries with optional filters
@@ -976,6 +980,36 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 				args = append(args, 1)
 			} else {
 				args = append(args, 0)
+			}
+		}
+
+		// Handle "no_*" filters for NULL taxonomy levels
+		if filter.NoSubgenus {
+			if needsJoin {
+				conditions = append(conditions, "(oak_entries.subgenus IS NULL OR oak_entries.subgenus = '')")
+			} else {
+				conditions = append(conditions, "(subgenus IS NULL OR subgenus = '')")
+			}
+		}
+		if filter.NoSection {
+			if needsJoin {
+				conditions = append(conditions, "(oak_entries.section IS NULL OR oak_entries.section = '')")
+			} else {
+				conditions = append(conditions, "(section IS NULL OR section = '')")
+			}
+		}
+		if filter.NoSubsection {
+			if needsJoin {
+				conditions = append(conditions, "(oak_entries.subsection IS NULL OR oak_entries.subsection = '')")
+			} else {
+				conditions = append(conditions, "(subsection IS NULL OR subsection = '')")
+			}
+		}
+		if filter.NoComplex {
+			if needsJoin {
+				conditions = append(conditions, "(oak_entries.complex IS NULL OR oak_entries.complex = '')")
+			} else {
+				conditions = append(conditions, "(complex IS NULL OR complex = '')")
 			}
 		}
 	}
@@ -1061,6 +1095,36 @@ func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
 				args = append(args, 1)
 			} else {
 				args = append(args, 0)
+			}
+		}
+
+		// Handle "no_*" filters for NULL taxonomy levels
+		if filter.NoSubgenus {
+			if needsJoin {
+				conditions = append(conditions, "(oak_entries.subgenus IS NULL OR oak_entries.subgenus = '')")
+			} else {
+				conditions = append(conditions, "(subgenus IS NULL OR subgenus = '')")
+			}
+		}
+		if filter.NoSection {
+			if needsJoin {
+				conditions = append(conditions, "(oak_entries.section IS NULL OR oak_entries.section = '')")
+			} else {
+				conditions = append(conditions, "(section IS NULL OR section = '')")
+			}
+		}
+		if filter.NoSubsection {
+			if needsJoin {
+				conditions = append(conditions, "(oak_entries.subsection IS NULL OR oak_entries.subsection = '')")
+			} else {
+				conditions = append(conditions, "(subsection IS NULL OR subsection = '')")
+			}
+		}
+		if filter.NoComplex {
+			if needsJoin {
+				conditions = append(conditions, "(oak_entries.complex IS NULL OR oak_entries.complex = '')")
+			} else {
+				conditions = append(conditions, "(complex IS NULL OR complex = '')")
 			}
 		}
 	}

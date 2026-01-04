@@ -15,14 +15,18 @@ import (
 
 // SpeciesListParams contains query parameters for species list endpoint
 type SpeciesListParams struct {
-	Limit      int
-	Offset     int
-	Subgenus   *string
-	Section    *string
-	Subsection *string
-	Complex    *string
-	Hybrid     *bool
-	SourceID   *int64
+	Limit       int
+	Offset      int
+	Subgenus    *string
+	Section     *string
+	Subsection  *string
+	Complex     *string
+	Hybrid      *bool
+	SourceID    *int64
+	NoSubgenus  bool // Filter for species with NULL subgenus
+	NoSection   bool // Filter for species with NULL section
+	NoSubsection bool // Filter for species with NULL subsection
+	NoComplex   bool // Filter for species with NULL complex
 }
 
 // SpeciesRequest represents the request body for creating/updating a species
@@ -143,6 +147,20 @@ func parseSpeciesListParams(query url.Values) (*SpeciesListParams, []ValidationE
 		}
 	}
 
+	// Parse "no_*" filters for NULL taxonomy levels
+	if noSubgenus := query.Get("no_subgenus"); noSubgenus != "" {
+		params.NoSubgenus = strings.ToLower(noSubgenus) == "true"
+	}
+	if noSection := query.Get("no_section"); noSection != "" {
+		params.NoSection = strings.ToLower(noSection) == "true"
+	}
+	if noSubsection := query.Get("no_subsection"); noSubsection != "" {
+		params.NoSubsection = strings.ToLower(noSubsection) == "true"
+	}
+	if noComplex := query.Get("no_complex"); noComplex != "" {
+		params.NoComplex = strings.ToLower(noComplex) == "true"
+	}
+
 	return params, errors
 }
 
@@ -197,12 +215,16 @@ func (s *Server) handleListSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filter := &db.OakEntryFilter{
-		Subgenus:   params.Subgenus,
-		Section:    params.Section,
-		Subsection: params.Subsection,
-		Complex:    params.Complex,
-		Hybrid:     params.Hybrid,
-		SourceID:   params.SourceID,
+		Subgenus:     params.Subgenus,
+		Section:      params.Section,
+		Subsection:   params.Subsection,
+		Complex:      params.Complex,
+		Hybrid:       params.Hybrid,
+		SourceID:     params.SourceID,
+		NoSubgenus:   params.NoSubgenus,
+		NoSection:    params.NoSection,
+		NoSubsection: params.NoSubsection,
+		NoComplex:    params.NoComplex,
 	}
 
 	// Get total count
