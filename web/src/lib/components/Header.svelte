@@ -1,7 +1,53 @@
 <script>
 	import { base } from '$app/paths';
+	import { goto } from '$app/navigation';
 	import Search from './Search.svelte';
-	import { isOnline } from '$lib/stores/dataStore.js';
+	import SpeciesEditForm from './SpeciesEditForm.svelte';
+	import { isOnline, forceRefresh } from '$lib/stores/dataStore.js';
+	import { canEdit } from '$lib/stores/authStore.js';
+	import { toast } from '$lib/stores/toastStore.js';
+	import { createSpecies, ApiError } from '$lib/apiClient.js';
+
+	// Create species modal state
+	let showCreateForm = $state(false);
+
+	function handleAddClick() {
+		showCreateForm = true;
+	}
+
+	// Handle save from create form
+	async function handleCreateSpecies(formData) {
+		try {
+			await createSpecies(formData);
+
+			// Success: show toast and refresh data
+			toast.success(`Species "${formData.name}" created successfully`);
+
+			// Refresh data in background
+			forceRefresh().catch(err => {
+				console.warn('Background refresh failed:', err);
+			});
+
+			// Navigate to the new species detail page
+			goto(`${base}/species/${encodeURIComponent(formData.name)}/`);
+
+			return null; // No errors - signal success to form
+		} catch (err) {
+			if (err instanceof ApiError) {
+				// 400 with field errors - return them so form can display
+				if (err.status === 400 && err.fieldErrors) {
+					return err.fieldErrors;
+				}
+
+				// Other API errors - show toast
+				toast.error(`Failed to create species: ${err.message}`);
+			} else {
+				toast.error('Failed to create species: Network error');
+			}
+
+			throw err; // Re-throw so form stays open
+		}
+	}
 </script>
 
 <header class="sticky top-0 z-40" style="background: linear-gradient(135deg, var(--color-forest-800) 0%, var(--color-forest-700) 100%); box-shadow: var(--shadow-lg);">
@@ -31,6 +77,20 @@
 
 			<!-- Navigation -->
 			<nav class="flex items-center gap-1" aria-label="Main navigation">
+				{#if $canEdit}
+					<button
+						type="button"
+						class="add-species-btn"
+						title="Add new species"
+						onclick={handleAddClick}
+					>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<line x1="12" y1="5" x2="12" y2="19"></line>
+							<line x1="5" y1="12" x2="19" y2="12"></line>
+						</svg>
+						<span class="add-species-text">Add Species</span>
+					</button>
+				{/if}
 				<a href="{base}/articles/" class="nav-link">Articles</a>
 				<a href="{base}/sources/" class="nav-link">Sources</a>
 				<a href="{base}/about/" class="nav-link">About</a>
@@ -43,6 +103,16 @@
 		</div>
 	</div>
 </header>
+
+<!-- Create Species Modal -->
+{#if showCreateForm}
+	<SpeciesEditForm
+		species={null}
+		isOpen={showCreateForm}
+		onClose={() => showCreateForm = false}
+		onSave={handleCreateSpecies}
+	/>
+{/if}
 
 <style>
 	a {
@@ -108,5 +178,40 @@
 		outline: none;
 		background-color: var(--color-white-15);
 		box-shadow: 0 0 0 2px var(--color-white-30);
+	}
+
+	.add-species-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.5rem 0.875rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-forest-800);
+		background-color: white;
+		border: none;
+		border-radius: 0.375rem;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.add-species-btn:hover {
+		background-color: var(--color-forest-50);
+	}
+
+	.add-species-btn:focus-visible {
+		outline: none;
+		box-shadow: 0 0 0 2px var(--color-white-30);
+	}
+
+	/* Hide text on small screens, show only icon */
+	@media (max-width: 640px) {
+		.add-species-text {
+			display: none;
+		}
+
+		.add-species-btn {
+			padding: 0.5rem;
+		}
 	}
 </style>

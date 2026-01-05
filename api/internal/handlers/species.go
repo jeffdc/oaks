@@ -531,6 +531,11 @@ func mergeSpecies(existing *models.Species, req *SpeciesRequest) *models.Species
 	// Start with the existing entry
 	entry := *existing
 
+	// Update scientific_name if provided (for renames)
+	if req.ScientificName != "" {
+		entry.ScientificName = req.ScientificName
+	}
+
 	// Update fields if provided in request
 	if req.Author != nil {
 		entry.Author = req.Author

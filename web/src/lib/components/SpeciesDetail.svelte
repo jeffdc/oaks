@@ -95,7 +95,9 @@
 
       // Navigate if name changed
       if (nameChanged) {
-        goto(`${base}/species/${encodeURIComponent(newName)}/`);
+        // Small delay to ensure DB transaction is fully committed before navigation
+        await new Promise(resolve => setTimeout(resolve, 100));
+        goto(`${base}/species/${encodeURIComponent(newName)}/`, { replaceState: true });
       }
 
       return null; // No errors - signal success to form

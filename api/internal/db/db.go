@@ -1118,12 +1118,12 @@ func (db *Database) saveSpeciesTx(tx *sql.Tx, entry *models.Species) error {
 	} else {
 		_, err = tx.Exec(
 			`UPDATE species SET
-				author = ?, is_hybrid = ?, conservation_status = ?,
+				scientific_name = ?, author = ?, is_hybrid = ?, conservation_status = ?,
 				subgenus = ?, section = ?, subsection = ?, complex = ?,
 				parent1 = ?, parent2 = ?, hybrids = ?, closely_related_to = ?,
 				subspecies_varieties = ?, synonyms = ?, external_links = ?
 			WHERE id = ?`,
-			entry.Author, isHybrid, entry.ConservationStatus,
+			entry.ScientificName, entry.Author, isHybrid, entry.ConservationStatus,
 			entry.Subgenus, entry.Section, entry.Subsection, entry.Complex,
 			entry.Parent1, entry.Parent2, string(hybridsJSON), string(relatedJSON),
 			string(subspeciesJSON), string(synonymsJSON), string(externalLinksJSON),
