@@ -113,6 +113,7 @@ func (s *Server) setupRoutes() {
 		// Species endpoints (read - public)
 		r.Get("/species", s.handleListSpecies)
 		r.Get("/species/search", s.handleSearchSpecies)   // Must be before {name} route
+		r.Get("/species/id/{id}", s.handleGetSpeciesByID) // Must be before {name} route
 		r.Get("/species/{name}/full", s.handleGetSpeciesFull) // Must be before {name} route
 		r.Get("/species/{name}", s.handleGetSpecies)
 
@@ -126,6 +127,7 @@ func (s *Server) setupRoutes() {
 
 		// Taxa endpoints (read - public)
 		r.Get("/taxa", s.handleListTaxa)
+		r.Get("/taxa/id/{id}", s.handleGetTaxonByID) // Must be before {level}/{name} route
 		r.Get("/taxa/{level}/{name}", s.handleGetTaxon)
 
 		// Taxa endpoints (write - auth required)

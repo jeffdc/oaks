@@ -280,6 +280,35 @@ func (s *Server) handleGetSpecies(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, entry)
 }
 
+// handleGetSpeciesByID handles GET /api/v1/species/id/{id}
+func (s *Server) handleGetSpeciesByID(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	if idStr == "" {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "species ID is required")
+		return
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid species ID: must be an integer")
+		return
+	}
+
+	entry, err := s.db.GetSpeciesByID(id)
+	if err != nil {
+		s.logger.Error("failed to get species by ID", "id", id, "error", err)
+		RespondInternalError(w, "")
+		return
+	}
+
+	if entry == nil {
+		RespondNotFound(w, "Species", idStr)
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, entry)
+}
+
 // handleGetSpeciesFull handles GET /api/v1/species/{name}/full
 // Returns species with all source data embedded, including source metadata
 func (s *Server) handleGetSpeciesFull(w http.ResponseWriter, r *http.Request) {

@@ -794,6 +794,146 @@ func TestGzipCompressionSmallResponseNotCompressed(t *testing.T) {
 	}
 }
 
+func TestGetSpeciesByID(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create a species
+	author := "L."
+	createReq := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+	}
+	body, _ := json.Marshal(createReq)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create status = %d, want %d. Body: %s", w.Code, http.StatusCreated, w.Body.String())
+	}
+
+	// Get the species by ID
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/id/1", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("get by ID status = %d, want %d. Body: %s", w.Code, http.StatusOK, w.Body.String())
+	}
+
+	var entry models.Species
+	if err := json.NewDecoder(w.Body).Decode(&entry); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+	if entry.ScientificName != "alba" {
+		t.Errorf("ScientificName = %s, want alba", entry.ScientificName)
+	}
+	if entry.ID != 1 {
+		t.Errorf("ID = %d, want 1", entry.ID)
+	}
+}
+
+func TestGetSpeciesByIDNotFound(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/species/id/999", nil)
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("get nonexistent by ID status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+}
+
+func TestGetSpeciesByIDInvalidID(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/species/id/abc", nil)
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("get with invalid ID status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestGetTaxonByID(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create a taxon
+	author := "Trel."
+	createReq := models.Taxon{
+		Name:   "Lobatae",
+		Level:  models.TaxonLevelSection,
+		Author: &author,
+	}
+	body, _ := json.Marshal(createReq)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/taxa", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create status = %d, want %d. Body: %s", w.Code, http.StatusCreated, w.Body.String())
+	}
+
+	// Get the taxon by ID
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/taxa/id/1", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("get by ID status = %d, want %d. Body: %s", w.Code, http.StatusOK, w.Body.String())
+	}
+
+	var taxon TaxonResponse
+	if err := json.NewDecoder(w.Body).Decode(&taxon); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+	if taxon.Name != "Lobatae" {
+		t.Errorf("Name = %s, want Lobatae", taxon.Name)
+	}
+	if taxon.Level != models.TaxonLevelSection {
+		t.Errorf("Level = %s, want section", taxon.Level)
+	}
+}
+
+func TestGetTaxonByIDNotFound(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/taxa/id/999", nil)
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("get nonexistent by ID status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+}
+
+func TestGetTaxonByIDInvalidID(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/taxa/id/abc", nil)
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("get with invalid ID status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
 func TestGzipCompressionNotRequestedNotCompressed(t *testing.T) {
 	server, cleanup := testServerWithMiddleware(t)
 	defer cleanup()

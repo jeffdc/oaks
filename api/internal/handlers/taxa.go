@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -133,6 +134,35 @@ func (s *Server) handleGetTaxon(w http.ResponseWriter, r *http.Request) {
 
 	if taxon == nil {
 		RespondNotFound(w, "Taxon", name+" ["+string(level)+"]")
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, taxonToResponse(taxon))
+}
+
+// handleGetTaxonByID handles GET /api/v1/taxa/id/{id}
+func (s *Server) handleGetTaxonByID(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	if idStr == "" {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "taxon ID is required")
+		return
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "invalid taxon ID: must be an integer")
+		return
+	}
+
+	taxon, err := s.db.GetTaxonByID(id)
+	if err != nil {
+		s.logger.Error("failed to get taxon by ID", "id", id, "error", err)
+		RespondInternalError(w, "Failed to retrieve taxon")
+		return
+	}
+
+	if taxon == nil {
+		RespondNotFound(w, "Taxon", idStr)
 		return
 	}
 
