@@ -1,7 +1,6 @@
 package db
 
 import (
-	"database/sql"
 	"os"
 	"path/filepath"
 	"testing"
@@ -62,114 +61,7 @@ func TestBeginTx(t *testing.T) {
 	}
 
 	// Rollback to clean up
-	tx.Rollback()
-}
-
-// createOldSchemaDB creates a database with the old schema (oak_entries table, no species table)
-// This simulates opening an existing database that needs migration
-func createOldSchemaDB(t *testing.T) (*Database, func()) {
-	t.Helper()
-
-	tmpDir := t.TempDir()
-	dbPath := filepath.Join(tmpDir, "test_old_schema.db")
-
-	// Open raw connection to create old schema
-	conn, err := sql.Open("sqlite3", dbPath)
-	if err != nil {
-		t.Fatalf("failed to open database: %v", err)
-	}
-
-	// Create old schema manually (bypass initializeSchema)
-	oldSchemaStatements := []string{
-		`CREATE TABLE taxa (
-			name TEXT NOT NULL,
-			level TEXT NOT NULL CHECK(level IN ('subgenus', 'section', 'subsection', 'complex')),
-			parent TEXT,
-			author TEXT,
-			content TEXT,
-			content_updated_at TEXT,
-			links TEXT,
-			PRIMARY KEY (name, level)
-		)`,
-		`CREATE TABLE sources (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			source_type TEXT NOT NULL,
-			name TEXT NOT NULL,
-			description TEXT,
-			author TEXT,
-			year INTEGER,
-			url TEXT,
-			isbn TEXT,
-			doi TEXT,
-			notes TEXT,
-			license TEXT,
-			license_url TEXT
-		)`,
-		`CREATE TABLE oak_entries (
-			scientific_name TEXT PRIMARY KEY,
-			author TEXT,
-			is_hybrid INTEGER NOT NULL DEFAULT 0,
-			conservation_status TEXT,
-			subgenus TEXT,
-			section TEXT,
-			subsection TEXT,
-			complex TEXT,
-			parent1 TEXT,
-			parent2 TEXT,
-			hybrids TEXT,
-			closely_related_to TEXT,
-			subspecies_varieties TEXT,
-			synonyms TEXT,
-			external_links TEXT
-		)`,
-		`CREATE TABLE species_sources (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			scientific_name TEXT NOT NULL,
-			source_id INTEGER NOT NULL,
-			local_names TEXT,
-			range TEXT,
-			growth_habit TEXT,
-			leaves TEXT,
-			flowers TEXT,
-			fruits TEXT,
-			bark TEXT,
-			twigs TEXT,
-			buds TEXT,
-			hardiness_habitat TEXT,
-			miscellaneous TEXT,
-			url TEXT,
-			is_preferred INTEGER NOT NULL DEFAULT 0,
-			FOREIGN KEY (scientific_name) REFERENCES oak_entries(scientific_name) ON DELETE CASCADE,
-			FOREIGN KEY (source_id) REFERENCES sources(id),
-			UNIQUE(scientific_name, source_id)
-		)`,
-		`CREATE TABLE import_metadata (
-			key TEXT PRIMARY KEY,
-			value TEXT
-		)`,
-	}
-
-	for _, stmt := range oldSchemaStatements {
-		if _, err := conn.Exec(stmt); err != nil {
-			conn.Close()
-			t.Fatalf("failed to create old schema: %v", err)
-		}
-	}
-
-	conn.Close()
-
-	// Now open with the Database wrapper which will run migration
-	db, err := New(dbPath)
-	if err != nil {
-		t.Fatalf("failed to open database after creating old schema: %v", err)
-	}
-
-	cleanup := func() {
-		db.Close()
-		os.Remove(dbPath)
-	}
-
-	return db, cleanup
+	_ = tx.Rollback()
 }
 
 func TestFreshDatabaseSchema(t *testing.T) {

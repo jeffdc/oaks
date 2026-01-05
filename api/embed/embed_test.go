@@ -66,7 +66,7 @@ func TestAPIKeyAuthentication(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to start embedded server: %v", err)
 	}
-	defer server.Shutdown()
+	defer func() { _ = server.Shutdown() }()
 
 	// Try to create a source without auth (should fail with 401)
 	req, _ := http.NewRequest("POST", server.URL()+"/api/v1/sources", nil)
