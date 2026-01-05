@@ -124,3 +124,27 @@ func RespondCascadeConflict(w http.ResponseWriter, blockingHybrids []string) {
 	}
 	RespondJSON(w, http.StatusConflict, resp)
 }
+
+// SynonymRedirectResponse is returned when a requested species name is a synonym
+type SynonymRedirectResponse struct {
+	SynonymOf string `json:"synonym_of"`
+}
+
+// AmbiguousSynonymResponse is returned when a synonym matches multiple species
+type AmbiguousSynonymResponse struct {
+	AmbiguousSynonym bool     `json:"ambiguous_synonym"`
+	Matches          []string `json:"matches"`
+}
+
+// RespondSynonymRedirect writes a 404 response with redirect info for a synonym
+func RespondSynonymRedirect(w http.ResponseWriter, targetName string) {
+	RespondJSON(w, http.StatusNotFound, SynonymRedirectResponse{SynonymOf: targetName})
+}
+
+// RespondAmbiguousSynonym writes a 404 response when a synonym matches multiple species
+func RespondAmbiguousSynonym(w http.ResponseWriter, matches []string) {
+	RespondJSON(w, http.StatusNotFound, AmbiguousSynonymResponse{
+		AmbiguousSynonym: true,
+		Matches:          matches,
+	})
+}
