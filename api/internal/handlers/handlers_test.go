@@ -978,3 +978,240 @@ func TestGzipCompressionNotRequestedNotCompressed(t *testing.T) {
 		t.Fatalf("failed to decode response: %v", err)
 	}
 }
+
+func TestSpeciesReferencesEndpoint(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create parent species
+	author := "L."
+	parent := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+	}
+	body, _ := json.Marshal(parent)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create parent status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Create another parent
+	parent2 := models.Species{
+		ScientificName: "macrocarpa",
+		Author:         &author,
+		IsHybrid:       false,
+	}
+	body, _ = json.Marshal(parent2)
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create parent2 status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Create a hybrid that references alba as parent1
+	p1 := "alba"
+	p2 := "macrocarpa"
+	hybrid := models.Species{
+		ScientificName: "× bebbiana",
+		IsHybrid:       true,
+		Parent1:        &p1,
+		Parent2:        &p2,
+	}
+	body, _ = json.Marshal(hybrid)
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create hybrid status = %d, want %d. Body: %s", w.Code, http.StatusCreated, w.Body.String())
+	}
+
+	// Create a species that lists alba in closely_related_to
+	related := models.Species{
+		ScientificName:   "stellata",
+		Author:           &author,
+		IsHybrid:         false,
+		CloselyRelatedTo: []string{"alba"},
+	}
+	body, _ = json.Marshal(related)
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create related status = %d, want %d. Body: %s", w.Code, http.StatusCreated, w.Body.String())
+	}
+
+	// Test: Get references to alba
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/references?name=alba", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("get references status = %d, want %d. Body: %s", w.Code, http.StatusOK, w.Body.String())
+	}
+
+	var resp map[string]interface{}
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	// Check count
+	count, ok := resp["count"].(float64)
+	if !ok || count != 2 {
+		t.Errorf("count = %v, want 2", resp["count"])
+	}
+
+	// Check data contains the expected references
+	data, ok := resp["data"].([]interface{})
+	if !ok {
+		t.Fatalf("data is not an array: %T", resp["data"])
+	}
+	if len(data) != 2 {
+		t.Errorf("data length = %d, want 2", len(data))
+	}
+
+	// Verify reference types
+	refTypes := make(map[string]string)
+	for _, item := range data {
+		ref := item.(map[string]interface{})
+		name := ref["scientific_name"].(string)
+		refType := ref["reference_type"].(string)
+		refTypes[name] = refType
+	}
+
+	if refTypes["stellata"] != "closely_related_to" {
+		t.Errorf("stellata reference_type = %s, want closely_related_to", refTypes["stellata"])
+	}
+	if refTypes["× bebbiana"] != "parent1" {
+		t.Errorf("× bebbiana reference_type = %s, want parent1", refTypes["× bebbiana"])
+	}
+}
+
+func TestSpeciesReferencesNoReferences(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create a species with no references
+	author := "L."
+	species := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+	}
+	body, _ := json.Marshal(species)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Get references - should return empty array, not 404
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/references?name=alba", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("get references status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var resp map[string]interface{}
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	count, ok := resp["count"].(float64)
+	if !ok || count != 0 {
+		t.Errorf("count = %v, want 0", resp["count"])
+	}
+
+	data, ok := resp["data"].([]interface{})
+	if !ok {
+		t.Fatalf("data is not an array: %T", resp["data"])
+	}
+	if len(data) != 0 {
+		t.Errorf("data length = %d, want 0", len(data))
+	}
+}
+
+func TestSpeciesReferencesMissingName(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Request without name parameter
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/species/references", nil)
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("get references without name status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestSpeciesReferencesHybridsField(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create alba with a hybrids list containing "bebbiana"
+	author := "L."
+	species := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+		Hybrids:        []string{"bebbiana", "jackiana"},
+	}
+	body, _ := json.Marshal(species)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Get references to bebbiana - should find alba via hybrids field
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/references?name=bebbiana", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("get references status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var resp map[string]interface{}
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	count, ok := resp["count"].(float64)
+	if !ok || count != 1 {
+		t.Errorf("count = %v, want 1", resp["count"])
+	}
+
+	data, ok := resp["data"].([]interface{})
+	if !ok || len(data) != 1 {
+		t.Fatalf("data length = %d, want 1", len(data))
+	}
+
+	ref := data[0].(map[string]interface{})
+	if ref["scientific_name"] != "alba" {
+		t.Errorf("scientific_name = %s, want alba", ref["scientific_name"])
+	}
+	if ref["reference_type"] != "hybrids" {
+		t.Errorf("reference_type = %s, want hybrids", ref["reference_type"])
+	}
+}
