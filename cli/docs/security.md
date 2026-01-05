@@ -45,7 +45,7 @@ db.conn.QueryRow("SELECT * FROM species WHERE name = ?", userInput)
 ```
 
 **LIKE Pattern Escaping:**
-Search queries use the `escapeLike()` helper function that escapes special characters (`%`, `_`, `\`) to prevent wildcard injection attacks (`db.go:14-22`).
+Search queries use the `escapeLike()` helper function that escapes special characters (`%`, `_`, `\`) to prevent wildcard injection attacks (`db.go`).
 
 ## Input Validation
 

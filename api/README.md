@@ -218,7 +218,15 @@ api/
 │   │   ├── health.go     # Health check endpoint
 │   │   ├── auth.go       # API key authentication
 │   │   └── middleware.go # Request logging, etc.
-│   ├── db/               # Database layer
+│   ├── db/               # Database layer (SQLite operations)
+│   │   ├── schema/       # SQL schema definition
+│   │   ├── db.go         # Core Database struct and utilities
+│   │   ├── species.go    # Species CRUD operations
+│   │   ├── taxa.go       # Taxa CRUD operations
+│   │   ├── sources.go    # Sources CRUD operations
+│   │   ├── articles.go   # Articles CRUD operations
+│   │   ├── search.go     # Search and stats queries
+│   │   └── ...           # Other domain files
 │   ├── models/           # Data structures
 │   └── export/           # JSON export logic
 ├── go.mod                # Go module definition

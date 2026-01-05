@@ -244,7 +244,7 @@ The complete data pipeline from sources to clients:
 │                                │                                    │
 │                                ▼                                    │
 │                    oak_compendium.db (SQLite, project root)         │
-│                    (see api/internal/db/db.go for schema)           │
+│                    (see api/internal/db/schema/schema.sql)          │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
                                  │
@@ -520,7 +520,7 @@ headers: {
 
 ### Database Schema
 
-The SQLite database schema is defined in `api/internal/db/db.go` (the `initializeSchema()` function). This is the single source of truth. To view the current schema:
+The SQLite database schema is defined in `api/internal/db/schema/schema.sql`. This is the single source of truth. To view the current schema:
 
 ```bash
 sqlite3 oak_compendium.db ".schema"
