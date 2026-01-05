@@ -142,16 +142,39 @@ describe('stores', () => {
   });
 
   describe('searchResults', () => {
+    const emptyResults = {
+      species: [],
+      taxa: [],
+      sources: [],
+      counts: { species: 0, taxa: 0, sources: 0, total: 0 }
+    };
+
     beforeEach(() => {
-      searchResults.set([]);
+      searchResults.set(emptyResults);
     });
 
-    it('starts with empty array', () => {
-      expect(get(searchResults)).toEqual([]);
+    it('starts with empty unified results structure', () => {
+      expect(get(searchResults)).toEqual(emptyResults);
     });
 
-    it('can be set to an array of species', () => {
-      const results = [{ scientific_name: 'alba' }, { scientific_name: 'rubra' }];
+    it('can be set to unified search results with species', () => {
+      const results = {
+        species: [{ scientific_name: 'alba' }, { scientific_name: 'rubra' }],
+        taxa: [],
+        sources: [],
+        counts: { species: 2, taxa: 0, sources: 0, total: 2 }
+      };
+      searchResults.set(results);
+      expect(get(searchResults)).toEqual(results);
+    });
+
+    it('can be set to unified search results with all types', () => {
+      const results = {
+        species: [{ scientific_name: 'alba' }],
+        taxa: [{ name: 'Quercus', level: 'section' }],
+        sources: [{ id: 1, name: 'Source' }],
+        counts: { species: 1, taxa: 1, sources: 1, total: 3 }
+      };
       searchResults.set(results);
       expect(get(searchResults)).toEqual(results);
     });
