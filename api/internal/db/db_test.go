@@ -1172,3 +1172,220 @@ func TestMigrationEmptyTables(t *testing.T) {
 		t.Fatal("after migration, oak_entries table should NOT exist")
 	}
 }
+
+// Tests for GetSpeciesByID and GetTaxonByID
+
+func TestGetSpeciesByID(t *testing.T) {
+	db, cleanup := testDB(t)
+	defer cleanup()
+
+	author := "L. 1753"
+	subgenus := "Quercus"
+	section := "Quercus"
+	entry := &models.Species{
+		ScientificName:      "alba",
+		Author:              &author,
+		IsHybrid:            false,
+		Subgenus:            &subgenus,
+		Section:             &section,
+		Hybrids:             []string{"bebbiana"},
+		CloselyRelatedTo:    []string{"stellata"},
+		SubspeciesVarieties: []string{},
+		Synonyms:            []string{"alba var. repanda"},
+		ExternalLinks:       []models.ExternalLink{},
+	}
+
+	// Save
+	if err := db.SaveSpecies(entry); err != nil {
+		t.Fatalf("SaveSpecies failed: %v", err)
+	}
+
+	// Get by name first to find the ID
+	byName, err := db.GetSpecies("alba")
+	if err != nil {
+		t.Fatalf("GetSpecies failed: %v", err)
+	}
+	if byName == nil {
+		t.Fatal("expected non-nil entry")
+	}
+
+	// Get by ID
+	byID, err := db.GetSpeciesByID(byName.ID)
+	if err != nil {
+		t.Fatalf("GetSpeciesByID failed: %v", err)
+	}
+	if byID == nil {
+		t.Fatal("expected non-nil entry from GetSpeciesByID")
+	}
+
+	// Verify fields match
+	if byID.ScientificName != byName.ScientificName {
+		t.Errorf("ScientificName = %q, want %q", byID.ScientificName, byName.ScientificName)
+	}
+	if byID.ID != byName.ID {
+		t.Errorf("ID = %d, want %d", byID.ID, byName.ID)
+	}
+	if *byID.Author != *byName.Author {
+		t.Errorf("Author = %q, want %q", *byID.Author, *byName.Author)
+	}
+	if len(byID.Hybrids) != len(byName.Hybrids) {
+		t.Errorf("Hybrids len = %d, want %d", len(byID.Hybrids), len(byName.Hybrids))
+	}
+}
+
+func TestGetSpeciesByIDNotFound(t *testing.T) {
+	db, cleanup := testDB(t)
+	defer cleanup()
+
+	// Try to get non-existent ID
+	got, err := db.GetSpeciesByID(99999)
+	if err != nil {
+		t.Fatalf("GetSpeciesByID should not error for non-existent ID: %v", err)
+	}
+	if got != nil {
+		t.Error("expected nil for non-existent ID")
+	}
+}
+
+func TestGetTaxonByID(t *testing.T) {
+	db, cleanup := testDB(t)
+	defer cleanup()
+
+	author := "Oerst."
+	taxon := &models.Taxon{
+		Name:   "Quercus",
+		Level:  models.TaxonLevelSubgenus,
+		Author: &author,
+		Links:  []models.TaxonLink{},
+	}
+
+	// Save
+	if err := db.InsertTaxon(taxon); err != nil {
+		t.Fatalf("InsertTaxon failed: %v", err)
+	}
+
+	// Get by name/level first to find the ID
+	byNameLevel, err := db.GetTaxon("Quercus", models.TaxonLevelSubgenus)
+	if err != nil {
+		t.Fatalf("GetTaxon failed: %v", err)
+	}
+	if byNameLevel == nil {
+		t.Fatal("expected non-nil taxon")
+	}
+
+	// Get by ID
+	byID, err := db.GetTaxonByID(byNameLevel.ID)
+	if err != nil {
+		t.Fatalf("GetTaxonByID failed: %v", err)
+	}
+	if byID == nil {
+		t.Fatal("expected non-nil taxon from GetTaxonByID")
+	}
+
+	// Verify fields match
+	if byID.Name != byNameLevel.Name {
+		t.Errorf("Name = %q, want %q", byID.Name, byNameLevel.Name)
+	}
+	if byID.ID != byNameLevel.ID {
+		t.Errorf("ID = %d, want %d", byID.ID, byNameLevel.ID)
+	}
+	if byID.Level != byNameLevel.Level {
+		t.Errorf("Level = %q, want %q", byID.Level, byNameLevel.Level)
+	}
+	if *byID.Author != *byNameLevel.Author {
+		t.Errorf("Author = %q, want %q", *byID.Author, *byNameLevel.Author)
+	}
+}
+
+func TestGetTaxonByIDNotFound(t *testing.T) {
+	db, cleanup := testDB(t)
+	defer cleanup()
+
+	// Try to get non-existent ID
+	got, err := db.GetTaxonByID(99999)
+	if err != nil {
+		t.Fatalf("GetTaxonByID should not error for non-existent ID: %v", err)
+	}
+	if got != nil {
+		t.Error("expected nil for non-existent ID")
+	}
+}
+
+func TestSaveSpeciesSourcePreservesID(t *testing.T) {
+	db, cleanup := testDB(t)
+	defer cleanup()
+
+	// Create a species
+	entry := &models.Species{
+		ScientificName:      "alba",
+		Hybrids:             []string{},
+		CloselyRelatedTo:    []string{},
+		SubspeciesVarieties: []string{},
+		Synonyms:            []string{},
+		ExternalLinks:       []models.ExternalLink{},
+	}
+	if err := db.SaveSpecies(entry); err != nil {
+		t.Fatalf("SaveSpecies failed: %v", err)
+	}
+
+	// Create a source
+	source := &models.Source{
+		SourceType:  "website",
+		Name:        "Test Source",
+		Description: nil,
+	}
+	sourceID, err := db.InsertSource(source)
+	if err != nil {
+		t.Fatalf("InsertSource failed: %v", err)
+	}
+
+	// Create a species source
+	ss := &models.SpeciesSource{
+		ScientificName: "alba",
+		SourceID:       sourceID,
+		LocalNames:     []string{"white oak"},
+		Range:          strPtr("Eastern North America"),
+		IsPreferred:    true,
+	}
+	if err := db.SaveSpeciesSource(ss); err != nil {
+		t.Fatalf("SaveSpeciesSource failed: %v", err)
+	}
+
+	// Get the original ID
+	originalID := ss.ID
+	if originalID == 0 {
+		t.Fatal("expected non-zero ID after first save")
+	}
+
+	// Update the species source (same species + source combination)
+	ss.LocalNames = []string{"white oak", "eastern white oak"}
+	ss.Range = strPtr("Updated range")
+	if err := db.SaveSpeciesSource(ss); err != nil {
+		t.Fatalf("SaveSpeciesSource update failed: %v", err)
+	}
+
+	// Verify the ID is preserved (not a new auto-incremented ID)
+	// With ON CONFLICT DO UPDATE, the ID should remain the same
+	sources, err := db.GetSpeciesSources("alba")
+	if err != nil {
+		t.Fatalf("GetSpeciesSources failed: %v", err)
+	}
+	if len(sources) != 1 {
+		t.Fatalf("expected 1 source, got %d", len(sources))
+	}
+	if sources[0].ID != originalID {
+		t.Errorf("ID changed from %d to %d after update (INSERT OR REPLACE bug)", originalID, sources[0].ID)
+	}
+
+	// Verify the data was updated
+	if len(sources[0].LocalNames) != 2 {
+		t.Errorf("LocalNames len = %d, want 2", len(sources[0].LocalNames))
+	}
+	if *sources[0].Range != "Updated range" {
+		t.Errorf("Range = %q, want 'Updated range'", *sources[0].Range)
+	}
+}
+
+func strPtr(s string) *string {
+	return &s
+}

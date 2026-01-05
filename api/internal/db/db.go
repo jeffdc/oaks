@@ -659,6 +659,44 @@ func (db *Database) GetTaxon(name string, level models.TaxonLevel) (*models.Taxo
 	return &t, nil
 }
 
+// GetTaxonByID retrieves a taxon by its integer ID
+func (db *Database) GetTaxonByID(id int64) (*models.Taxon, error) {
+	row := db.conn.QueryRow(
+		`SELECT t.id, t.name, t.level, t.parent, t.author, t.content, t.content_updated_at, t.links,
+		        (SELECT COUNT(*) FROM species sp WHERE
+		            (t.level = 'subgenus' AND sp.subgenus = t.name) OR
+		            (t.level = 'section' AND sp.section = t.name) OR
+		            (t.level = 'subsection' AND sp.subsection = t.name) OR
+		            (t.level = 'complex' AND sp.complex = t.name)
+		        ) as species_count
+		 FROM taxa t WHERE t.id = ?`,
+		id,
+	)
+
+	var t models.Taxon
+	var levelStr string
+	var linksJSON sql.NullString
+	err := row.Scan(&t.ID, &t.Name, &levelStr, &t.Parent, &t.Author, &t.Content, &t.ContentUpdatedAt, &linksJSON, &t.SpeciesCount)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get taxon by ID: %w", err)
+	}
+	t.Level = models.TaxonLevel(levelStr)
+
+	if linksJSON.Valid && linksJSON.String != "" {
+		if err := json.Unmarshal([]byte(linksJSON.String), &t.Links); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal taxon links for %s: %w", t.Name, err)
+		}
+	}
+	if t.Links == nil {
+		t.Links = []models.TaxonLink{}
+	}
+
+	return &t, nil
+}
+
 // TaxaListParams contains optional filters for listing taxa
 type TaxaListParams struct {
 	Level  *models.TaxonLevel
@@ -1175,6 +1213,82 @@ func (db *Database) GetSpecies(scientificName string) (*models.Species, error) {
 	return &entry, nil
 }
 
+// GetSpeciesByID retrieves a species by its integer ID
+func (db *Database) GetSpeciesByID(id int64) (*models.Species, error) {
+	row := db.conn.QueryRow(
+		`SELECT id, scientific_name, author, is_hybrid, conservation_status,
+		        subgenus, section, subsection, complex,
+		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
+		 FROM species WHERE id = ?`,
+		id,
+	)
+
+	var entry models.Species
+	var isHybrid int
+	var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON, externalLinksJSON sql.NullString
+
+	if err := row.Scan(
+		&entry.ID, &entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
+		&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
+		&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON, &externalLinksJSON,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get species by ID: %w", err)
+	}
+
+	entry.IsHybrid = isHybrid != 0
+
+	// Unmarshal JSON arrays
+	if hybridsJSON.Valid {
+		if err := json.Unmarshal([]byte(hybridsJSON.String), &entry.Hybrids); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal hybrids for %s: %w", entry.ScientificName, err)
+		}
+	}
+	if entry.Hybrids == nil {
+		entry.Hybrids = []string{}
+	}
+
+	if relatedJSON.Valid {
+		if err := json.Unmarshal([]byte(relatedJSON.String), &entry.CloselyRelatedTo); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal closely_related_to for %s: %w", entry.ScientificName, err)
+		}
+	}
+	if entry.CloselyRelatedTo == nil {
+		entry.CloselyRelatedTo = []string{}
+	}
+
+	if subspeciesJSON.Valid {
+		if err := json.Unmarshal([]byte(subspeciesJSON.String), &entry.SubspeciesVarieties); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal subspecies_varieties for %s: %w", entry.ScientificName, err)
+		}
+	}
+	if entry.SubspeciesVarieties == nil {
+		entry.SubspeciesVarieties = []string{}
+	}
+
+	if synonymsJSON.Valid {
+		if err := json.Unmarshal([]byte(synonymsJSON.String), &entry.Synonyms); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal synonyms for %s: %w", entry.ScientificName, err)
+		}
+	}
+	if entry.Synonyms == nil {
+		entry.Synonyms = []string{}
+	}
+
+	if externalLinksJSON.Valid {
+		if err := json.Unmarshal([]byte(externalLinksJSON.String), &entry.ExternalLinks); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal external_links for %s: %w", entry.ScientificName, err)
+		}
+	}
+	if entry.ExternalLinks == nil {
+		entry.ExternalLinks = []models.ExternalLink{}
+	}
+
+	return &entry, nil
+}
+
 // DeleteSpecies deletes a species
 func (db *Database) DeleteSpecies(scientificName string) error {
 	_, err := db.conn.Exec(
@@ -1621,11 +1735,25 @@ func (db *Database) SaveSpeciesSource(ss *models.SpeciesSource) error {
 	}
 
 	result, err := db.conn.Exec(
-		`INSERT OR REPLACE INTO species_sources (
+		`INSERT INTO species_sources (
 			species_id, source_id, local_names, range, growth_habit,
 			leaves, flowers, fruits, bark, twigs, buds, hardiness_habitat,
 			miscellaneous, url, is_preferred
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(species_id, source_id) DO UPDATE SET
+			local_names = excluded.local_names,
+			range = excluded.range,
+			growth_habit = excluded.growth_habit,
+			leaves = excluded.leaves,
+			flowers = excluded.flowers,
+			fruits = excluded.fruits,
+			bark = excluded.bark,
+			twigs = excluded.twigs,
+			buds = excluded.buds,
+			hardiness_habitat = excluded.hardiness_habitat,
+			miscellaneous = excluded.miscellaneous,
+			url = excluded.url,
+			is_preferred = excluded.is_preferred`,
 		speciesID, ss.SourceID, string(localNamesJSON), ss.Range, ss.GrowthHabit,
 		ss.Leaves, ss.Flowers, ss.Fruits, ss.Bark, ss.Twigs, ss.Buds, ss.HardinessHabitat,
 		ss.Miscellaneous, ss.URL, isPreferred,
