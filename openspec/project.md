@@ -50,10 +50,10 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 
 ### Architecture Patterns
 
-- **CLI as single source of truth**: All data flows through `cli/oak_compendium.db`
+- **Fly.io database is source of truth**: The authoritative database is hosted on Fly.io. Local `oak_compendium.db` (project root) is for development only.
 - **Source attribution**: Every data point linked to its source (iNaturalist, Oaks of the World, Personal Observation)
-- **Denormalized JSON export**: CLI exports to `web/static/quercus_data.json` for web consumption
-- **IndexedDB for offline**: Web app loads JSON once, populates IndexedDB for querying
+- **Stateless fetch-per-view**: Web app fetches data directly from API on each view (no client-side persistence)
+- **API-first architecture**: All clients (web, CLI) communicate via the REST API
 
 ### Testing Strategy
 
@@ -90,8 +90,8 @@ Stored WITHOUT "Quercus" prefix (e.g., "alba" not "Quercus alba")
 
 ## Important Constraints
 
-- **Database location**: `cli/oak_compendium.db` MUST be committed to git (authoritative source)
-- **Run CLI from `cli/` directory**: Tool defaults to `oak_compendium.db` in cwd
+- **Authoritative database**: The production database on Fly.io is the source of truth. Use `make download-db` to sync locally.
+- **Run CLI from project root**: Tool defaults to `oak_compendium.db` in cwd
 - **No destructive commands**: Never `rm` or `mv` without user confirmation
 - **Stay in project directories**: Don't operate outside `oaks/` without explicit approval
 

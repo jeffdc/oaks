@@ -59,7 +59,7 @@ docker-build:
 
 # Run the server locally (for development)
 run: build
-	OAK_DB_PATH=../cli/oak_compendium.db ./$(BINARY)
+	OAK_DB_PATH=../oak_compendium.db ./$(BINARY)
 
 # Check all (lint + test)
 check: lint test

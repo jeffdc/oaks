@@ -10,7 +10,7 @@ cd api
 # Build
 make build
 
-# Run locally (uses ../cli/oak_compendium.db)
+# Run locally (uses ../oak_compendium.db from project root)
 make run
 ```
 
@@ -146,23 +146,21 @@ fly secrets set OAK_API_KEY=your-api-key --app oak-compendium-api
 fly deploy --app oak-compendium-api
 ```
 
-### Database Seeding
+### Database Management
 
+**The Fly.io database is the authoritative source of truth.** The local `oak_compendium.db` (project root) is for development only.
+
+**Download from production:**
 ```bash
-# Upload database to volume
-fly ssh sftp put cli/oak_compendium.db /data/oak_compendium.db --app oak-compendium-api
-
-# Restart to pick up new database
-fly apps restart oak-compendium-api
+# From project root
+make download-db
 ```
 
-### Updating Database
-
-Fly's SFTP doesn't overwrite files, so remove first:
-
+**Upload to production** (after local changes):
 ```bash
+# Fly's SFTP doesn't overwrite files, so remove first
 fly ssh console -C "rm /data/oak_compendium.db" --app oak-compendium-api
-fly ssh sftp put cli/oak_compendium.db /data/oak_compendium.db --app oak-compendium-api
+fly ssh sftp put oak_compendium.db /data/oak_compendium.db --app oak-compendium-api
 fly apps restart oak-compendium-api
 ```
 

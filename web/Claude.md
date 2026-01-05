@@ -1,6 +1,6 @@
 # Quercus Compendium - Web Application
 
-A modern, responsive web application for browsing and exploring oak (Quercus) species data. Built as a Progressive Web App (PWA) with offline support.
+A modern, responsive web application for browsing and exploring oak (Quercus) species data.
 
 ## Tech Stack
 
@@ -9,8 +9,7 @@ A modern, responsive web application for browsing and exploring oak (Quercus) sp
 - **Static Adapter**: @sveltejs/adapter-static for GitHub Pages deployment
 - **Styling**: Tailwind CSS 4 + Custom CSS Variables
 - **Testing**: Vitest + @testing-library/svelte
-- **Offline Support**: IndexedDB caching via Dexie.js (no service worker)
-- **Data Source**: Static JSON (`static/quercus_data.json`, committed to repo)
+- **Data Source**: REST API (stateless fetch-per-view architecture)
 
 ## Project Structure
 
@@ -38,15 +37,13 @@ web/
 │       │   ├── TaxonView.svelte
 │       │   └── AboutPage.svelte
 │       ├── stores/
-│       │   ├── dataStore.js  # Svelte stores for species/taxa data
+│       │   ├── dataStore.js  # Svelte stores for UI state (search query, loading)
 │       │   └── authStore.js  # Authentication state (API key, session)
-│       ├── db.js             # IndexedDB wrapper (Dexie.js)
-│       ├── apiClient.js      # HTTP client for API requests (editing)
+│       ├── apiClient.js      # HTTP client for API requests
 │       └── tests/            # Test files
 │           ├── setup.js      # Vitest setup
-│           ├── dataStore.test.js
-│           └── db.test.js
-├── static/                   # Static assets (icons, data file)
+│           └── dataStore.test.js
+├── static/                   # Static assets (icons)
 ├── svelte.config.js          # SvelteKit config with static adapter
 ├── vite.config.js            # Vite config + PWA settings
 └── package.json              # Dependencies
@@ -56,18 +53,14 @@ web/
 
 ### State Management (dataStore.js)
 
-Uses Svelte stores for reactive state:
+Uses Svelte stores for UI state only (no data caching):
 
 - **Writable Stores**:
-  - `allSpecies`: All loaded species data
+  - `searchQuery`: Current search text
   - `isLoading`: Loading state flag
   - `error`: Error state
-  - `searchQuery`: Current search text
-  - `selectedSpecies`: Currently selected species for detail view
 
-- **Derived Stores**:
-  - `filteredSpecies`: Species filtered by search query (searches name, author, synonyms, local_names, range)
-  - `speciesCounts`: Calculates species count, hybrid count, and total from filtered results
+Note: Species data is NOT stored globally. Each component fetches its own data from the API on mount.
 
 ### Routing & Navigation
 
@@ -83,24 +76,27 @@ Uses Svelte stores for reactive state:
 - Navigation: Standard `<a href>` links with `$app/paths` base import
 - Browser back/forward buttons work correctly
 
-### Data Flow
+### Data Flow (Fetch-Per-View)
 
-1. App loads → `loadSpeciesData()` fetches `/quercus_data.json`
-2. Data stored in `allSpecies` store
-3. Search input updates `searchQuery` store
-4. `filteredSpecies` automatically recomputes via derived store
-5. Components reactively update via Svelte subscriptions (`$filteredSpecies`)
+Each route/component fetches its own data from the API on mount:
 
-### Offline Support
+| View | API Call | Data Returned |
+|------|----------|---------------|
+| Species list | `GET /api/v1/species` | All species (basic fields) |
+| Species detail | `GET /api/v1/species/{name}/full` | Single species with embedded sources |
+| Taxonomy browser | `GET /api/v1/taxa` | All taxa |
+| Search | `GET /api/v1/species/search?q=...` | Matching species |
 
-The app provides offline read access through IndexedDB caching:
+**Pattern**:
+```
+Component mounts
+  → Show loading spinner
+  → GET /api/v1/...
+  → Store in component state
+  → Render
+```
 
-- **Data Persistence**: Species data cached in IndexedDB via Dexie.js
-- **Offline Reads**: Cached data available without network connection
-- **Online Edits Only**: CRUD operations require API connectivity
-- **Offline Indicator**: Header shows status when network unavailable
-
-Note: This is not a full PWA - there is no service worker or install-to-homescreen capability.
+**No client-side persistence**: The API is the sole source of truth. No IndexedDB, no static JSON, no global data stores.
 
 ## Styling System
 
@@ -240,12 +236,11 @@ Tests are located in `src/tests/`. The test infrastructure uses:
 - **jsdom**: DOM environment simulation
 
 Current test coverage includes:
-- `dataStore.test.js`: Store filtering, counts, helper functions
-- `db.test.js`: Source selection and completeness helpers
+- `dataStore.test.js`: Store and helper functions
 
 ### Data Updates
 
-The data file `public/quercus_data.json` is committed to the repo. The CLI exports directly to this location. If data structure changes, no code changes needed unless new fields should be displayed. GitHub Actions auto-deploys on push to main.
+Data comes directly from the API. No static JSON files are used. When the API database is updated (via CLI or web editing), changes are immediately visible on page refresh.
 
 ## Important Conventions
 
@@ -336,17 +331,17 @@ Modify CSS variables in `app.css:4-38`
 
 ## Performance Considerations
 
-- **Data Loading**: Single JSON fetch on app load (all species ~2-3MB)
-- **Search**: Client-side filtering (fast enough for ~500 species)
-- **Caching**: IndexedDB caches species data for offline reads
+- **Data Loading**: Fetch-per-view (species list ~150KB gzipped)
+- **Search**: Uses API search endpoint (`/api/v1/species/search`)
+- **No Caching**: Each page load fetches fresh data from API
 - **Images**: SVG icons only (no species photos currently)
-- **Lazy Loading**: Not needed - single page app with minimal bundle
+- **Gzip**: API responses are gzip-compressed
 
 ## Browser Support
 
 - Modern browsers with ES6+ support
-- IndexedDB required for offline data caching
 - CSS custom properties required
+- Network connection required (no offline support)
 
 ## Deployment
 
@@ -418,18 +413,14 @@ User edits form → Submit → API call (POST/PUT/DELETE)
                               ↓
                     API updates SQLite database
                               ↓
-                    refreshData() called
+                    Re-fetch data for current view
                               ↓
-                    Fetch fresh quercus_data.json
+                    Update component state
                               ↓
-                    Repopulate IndexedDB
-                              ↓
-                    UI reactively updates via stores
+                    Show success toast
 ```
 
-Key functions in `dataStore.js`:
-- `refreshData()`: Re-fetches JSON and repopulates IndexedDB
-- `loadSpeciesData()`: Initial data load (also used for refresh)
+After successful edits, the component re-fetches its data from the API with retry logic (up to 3 retries with exponential backoff).
 
 ### API Integration
 
@@ -442,7 +433,7 @@ await apiClient.createSource(sourceData);
 await apiClient.deleteSpeciesSource(speciesName, sourceId);
 ```
 
-All requests include the API key in the `X-API-Key` header.
+All write requests include the API key in the `Authorization: Bearer <token>` header.
 
 ### Delete Cascade Behavior
 
@@ -479,9 +470,9 @@ Understanding how deletions propagate is important for maintaining data integrit
 
 2. **Single-user design**: The editing feature is designed for the project maintainer, not general public editing.
 
-3. **Concurrent tab limitations**: Multiple browser tabs may show stale data after edits. The `refreshData()` call only updates the current tab.
+3. **Concurrent tab limitations**: Multiple browser tabs may show stale data after edits. Only the current tab re-fetches data after an edit.
 
-4. **No offline editing**: Edits require an active connection to the API server. Offline mode is read-only.
+4. **No offline mode**: The app requires an active connection to the API server for all operations.
 
 ### Testing Locally
 
@@ -514,8 +505,7 @@ To add a new field to an edit form:
 
 1. Add the field to the appropriate form component (e.g., `SpeciesEditForm.svelte`)
 2. Ensure the API endpoint handles the field
-3. Update the JSON export if the field should appear in the web view
-4. No changes needed to IndexedDB schema (dynamic structure)
+3. Update display components if the field should appear in the web view
 
 ## Future Enhancements
 

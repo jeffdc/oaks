@@ -256,10 +256,11 @@ cli/
 ├── data/                # Seed files
 │   ├── quercus-taxonomy.yaml
 │   └── quercus-species.yaml
-├── schema/
-│   └── oak_schema.json  # Validation schema
-└── oak_compendium.db    # SQLite database (committed to repo)
+└── schema/
+    └── oak_schema.json  # Validation schema
 ```
+
+Note: The SQLite database (`oak_compendium.db`) is in the project root, not in `cli/`.
 
 ### Architecture Note
 
@@ -304,44 +305,38 @@ Test coverage includes:
 2. Define the command using Cobra
 3. Register it in `init()` with `rootCmd.AddCommand()`
 
-## Deployment (Fly.io)
+## Database Management
 
-The Oak Compendium API is deployed to Fly.io at https://oak-compendium-api.fly.dev
+**The authoritative database is hosted on Fly.io** at `/data/oak_compendium.db`. The local `oak_compendium.db` (project root) is for development only.
 
-### Initial Database Seeding
+### Downloading from Production
 
-To copy the local database to the production Fly.io volume:
+Use `make download-db` from the project root to sync the latest from Fly.io:
 
 ```bash
-# Remove existing empty database (if present)
+# From project root
+make download-db
+
+# This will overwrite oak_compendium.db with the production copy
+```
+
+### Uploading to Production
+
+After making local changes, upload to Fly.io:
+
+```bash
+# Remove existing database (Fly's SFTP doesn't overwrite)
 fly ssh console -C "rm /data/oak_compendium.db" --app oak-compendium-api
 
-# Upload the populated database
-fly ssh sftp put cli/oak_compendium.db /data/oak_compendium.db --app oak-compendium-api
+# Upload new version (from project root)
+fly ssh sftp put oak_compendium.db /data/oak_compendium.db --app oak-compendium-api
 
-# Restart the app to pick up the new database
+# Restart app
 fly apps restart oak-compendium-api
 
 # Verify the data
 curl -s "https://oak-compendium-api.fly.dev/api/v1/species?limit=3"
 ```
-
-### Updating Production Data
-
-For subsequent database updates:
-
-```bash
-# Remove existing database
-fly ssh console -C "rm /data/oak_compendium.db" --app oak-compendium-api
-
-# Upload new version
-fly ssh sftp put cli/oak_compendium.db /data/oak_compendium.db --app oak-compendium-api
-
-# Restart app
-fly apps restart oak-compendium-api
-```
-
-Note: Fly's SFTP doesn't overwrite files, so you must remove the existing file first.
 
 ### Verifying Production
 

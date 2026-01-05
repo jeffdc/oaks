@@ -5,7 +5,7 @@
 #   - cli/  - Go command-line tool
 #   - web/  - Svelte PWA
 
-.PHONY: dev dev-api dev-web build build-api build-cli test test-e2e test-regression clean help
+.PHONY: dev dev-api dev-web build build-api build-cli test test-e2e test-regression clean download-db help
 
 # Start both API and web dev servers
 # API runs on :8080, web on :5173
@@ -58,6 +58,14 @@ clean:
 	cd cli && $(MAKE) clean
 	cd web && rm -rf dist .svelte-kit
 
+# Download database from Fly.io (overwrites local copy)
+# The Fly.io database is the authoritative source of truth
+download-db:
+	@echo "Downloading database from Fly.io..."
+	@rm -f oak_compendium.db
+	fly ssh sftp get /data/oak_compendium.db oak_compendium.db --app oak-compendium-api
+	@echo "Database downloaded to oak_compendium.db"
+
 # Show help
 help:
 	@echo "Oak Compendium Makefile"
@@ -77,5 +85,8 @@ help:
 	@echo "  make test-e2e        Run E2E tests with Playwright"
 	@echo "  make test-regression Run all tests (unit + E2E)"
 	@echo ""
+	@echo "Database:"
+	@echo "  make download-db  Download database from Fly.io (overwrites local)"
+	@echo ""
 	@echo "Other:"
-	@echo "  make clean      Clean build artifacts"
+	@echo "  make clean        Clean build artifacts"

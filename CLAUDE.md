@@ -28,7 +28,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. The project consists of five main components:
 
 1. **Python Scraper** - Extracts oak species data from oaksoftheworld.fr
-2. **Web Application** - Modern Svelte 5 PWA for browsing species data
+2. **Web Application** - Modern Svelte 5 app for browsing and editing species data
 3. **API Server** - Go REST API for remote database access (deployed to Fly.io)
 4. **CLI Tool** - Go command-line tool for managing taxonomic data (local or remote)
 5. **iOS App** - Native SwiftUI app for field identification (in development, on `ios-app` branch)
@@ -65,10 +65,9 @@ oaks/
 │   └── docs/oak_cli.md       # CLI specification (historical)
 ├── ios/                      # iOS app (SwiftUI, on ios-app branch)
 │   └── OakCompendium/        # Xcode project
-├── tmp/                      # Temporary/working files (gitignored)
-│   ├── scraper/              # Scraper cache and progress files
-│   └── data/                 # Working data files (e.g., iNaturalist imports)
-└── web/static/quercus_data.json  # JSON export for web (committed to repo)
+└── tmp/                      # Temporary/working files (gitignored)
+    ├── scraper/              # Scraper cache and progress files
+    └── data/                 # Working data files (e.g., iNaturalist imports)
 ```
 
 ## Common Development Tasks
@@ -116,7 +115,8 @@ python3 scraper.py --test
 # Process specific number
 python3 scraper.py --limit=10
 
-# Output location: ../../web/static/quercus_data.json
+# Output location: ../../tmp/scraper/quercus_data.json
+# Import to database with: cd ../../cli && oak import-oaksoftheworld ../tmp/scraper/quercus_data.json
 ```
 
 ### Web Application Workflow
@@ -138,7 +138,7 @@ npm run preview    # Preview production build
 
 **Note**: Prefer `make dev` from the project root to run both API and web together. The `dev:local` script is useful if you're only working on the web app and the API is already running.
 
-**Important**: The data file `web/static/quercus_data.json` is committed to the repo and served directly. The app loads this JSON and populates IndexedDB for offline queries. GitHub Actions deploys automatically on push to main. See `web/CLAUDE.md` for detailed architecture.
+**Important**: The web app fetches data directly from the API (stateless fetch-per-view architecture). No static JSON files or client-side data storage. GitHub Actions deploys automatically on push to main. See `web/CLAUDE.md` for detailed architecture.
 
 ### CLI Tool Workflow
 
@@ -176,10 +176,10 @@ go install .
 See `cli/README.md` for profile configuration and remote mode details.
 
 **IMPORTANT: Database Location**
-- The authoritative database is `cli/oak_compendium.db`
-- **Always run `oak` commands from the `cli/` directory** - the tool defaults to `oak_compendium.db` in the current working directory
-- If running from elsewhere, use `-d /path/to/cli/oak_compendium.db`
-- Never create database files outside `cli/`
+- **The authoritative database is hosted on Fly.io** at `/data/oak_compendium.db`
+- The local copy at `oak_compendium.db` (project root) is for development/testing only
+- Use `make download-db` from the project root to sync the latest from Fly.io
+- Run `oak` commands from the project root, or use `-d` to specify the database path
 
 ### API Server Workflow
 
@@ -189,11 +189,11 @@ cd api
 # Build
 make build       # Produces: oak-api binary
 
-# Run locally (uses ../cli/oak_compendium.db by default)
+# Run locally (uses ../oak_compendium.db by default)
 make run
 
 # Or configure with environment variables
-OAK_DB_PATH=../cli/oak_compendium.db OAK_PORT=8080 ./oak-api
+OAK_DB_PATH=../oak_compendium.db OAK_PORT=8080 ./oak-api
 
 # Docker build
 make docker-build
@@ -243,45 +243,37 @@ The complete data pipeline from sources to clients:
 │         └──────────────────────┴───────────────────────┘            │
 │                                │                                    │
 │                                ▼                                    │
-│                    cli/oak_compendium.db (SQLite)                   │
-│                    ├── taxa (taxonomy hierarchy)                    │
-│                    ├── oak_entries (species)                        │
-│                    ├── sources (data sources)                       │
-│                    └── species_sources (source-attributed data)     │
+│                    oak_compendium.db (SQLite, project root)         │
+│                    (see api/internal/db/db.go for schema)           │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
                                  │
          ┌───────────────────────┼───────────────────────┐
          │                       │                       │
          ▼                       ▼                       ▼
-┌─────────────────┐   ┌─────────────────────┐   ┌─────────────────────┐
-│   JSON Export   │   │    API Server       │   │   CLI Remote Mode   │
-├─────────────────┤   ├─────────────────────┤   ├─────────────────────┤
-│ oak export ...  │   │ api/ (Fly.io)       │   │ oak --profile prod  │
-│      │          │   │ Reads: SQLite DB    │   │ Uses: REST API      │
-│      ▼          │   │ Serves: REST API    │   │                     │
-│ quercus_data.   │   │                     │   │ Connects to API     │
-│ json            │   │ /api/v1/species     │   │ server via HTTP     │
-└────────┬────────┘   │ /api/v1/taxa        │◀──┤ for remote ops      │
-         │            │ /api/v1/sources     │   │                     │
-         │            │ /api/v1/export      │   └─────────────────────┘
-         │            └─────────────────────┘
-         ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      WEB APP DEPLOYMENT                             │
+│                    API Server + CLI Remote Mode                     │
 ├─────────────────────────────────────────────────────────────────────┤
-│  git push  ──▶  GitHub Actions  ──▶  GitHub Pages                   │
-│                 (.github/workflows/deploy.yml)                      │
+│                                                                     │
+│  API Server (api/)               CLI Remote Mode                    │
+│  ├── Deployed to Fly.io          ├── oak --profile prod             │
+│  ├── Reads SQLite DB             ├── Uses REST API                  │
+│  └── Serves REST API             └── For remote operations          │
+│                                                                     │
+│  /api/v1/species                                                    │
+│  /api/v1/species/{name}/full  (with embedded sources)               │
+│  /api/v1/taxa                                                       │
+│  /api/v1/sources                                                    │
+│                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
                                  │
+                                 │  HTTPS
                                  ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      WEB APP (Svelte PWA)                           │
+│                      WEB APP + DEPLOYMENT                           │
 ├─────────────────────────────────────────────────────────────────────┤
-│  1. Fetch quercus_data.json                                         │
-│  2. Populate IndexedDB (via Dexie.js)                               │
-│  3. Query from IndexedDB for UI                                     │
-│  4. Service worker caches for offline                               │
+│  Web App: Svelte (fetch-per-view, no client persistence)            │
+│  Deployment: git push → GitHub Actions → GitHub Pages               │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -311,7 +303,7 @@ The CLI uses an HTTP API client for all operations. In local/embedded mode, it s
 │                    │            │            │                  │  │
 │                    │  ┌─────────▼─────────┐  │                  │  │
 │                    │  │ oak_compendium.db │  │                  │  │
-│                    │  │     (SQLite)      │  │                  │  │
+│                    │  │  (project root)   │  │                  │  │
 │                    │  └───────────────────┘  │                  │  │
 │                    └─────────────────────────┘                  │  │
 │                                                                 │  │
@@ -378,17 +370,17 @@ cd cli
 # Import notes from Bear app
 oak import-bear --source-id 3
 
-# Export to JSON for web app
-oak export ../web/static/quercus_data.json
+# Changes are immediately available via API (no export needed for web)
 ```
 
-**3. Deployment**
+**3. Updating Production Database**
 ```bash
-# From repository root
-git add web/static/quercus_data.json cli/oak_compendium.db
-git commit -m "Update species data"
-git push origin main
-# GitHub Actions automatically builds and deploys to GitHub Pages
+# Upload local database changes to Fly.io
+fly ssh console -C "rm /data/oak_compendium.db" --app oak-compendium-api
+fly ssh sftp put oak_compendium.db /data/oak_compendium.db --app oak-compendium-api
+fly apps restart oak-compendium-api
+
+# Web app fetches data from API, so database updates are reflected immediately
 ```
 
 ### Bear App Integration
@@ -415,6 +407,7 @@ Bear provides a low-friction way to capture field notes on iOS/macOS. Notes sync
 ### Leaf:
 ### Acorn:
 ### Bark:
+### Twigs:
 ### Buds:
 ### Form:
 ## Range & Habitat:
@@ -429,8 +422,9 @@ Bear provides a low-friction way to capture field notes on iOS/macOS. Notes sync
 | Common Name(s) | local_names |
 | Leaf | leaves |
 | Acorn | fruits |
-| Bark | bark |
-| Buds | buds |
+| Bark | bark (in species_sources) |
+| Twigs | twigs (in species_sources) |
+| Buds | buds (in species_sources) |
 | Form | growth_habit |
 | Range & Habitat | range |
 | Field Notes | miscellaneous |
@@ -447,11 +441,10 @@ oak import-bear --dry-run
 
 ### Key Design Decisions
 
-- **CLI is the single source of truth**: All data flows through the CLI database
+- **Fly.io database is the single source of truth**: The authoritative database is hosted on Fly.io. Local copies are for development only.
 - **Source attribution**: Every data point is linked to its source (iNaturalist, Oaks of the World, Personal Observation)
 - **Source 3 is preferred**: Personal observations take precedence over other sources for display
-- **Denormalized JSON export**: Optimized for web consumption, not storage efficiency
-- **IndexedDB for offline**: Browser-native storage with query capabilities
+- **API is sole source of truth for web**: Web app uses stateless fetch-per-view (no client-side persistence)
 
 ## Architecture Decisions
 
@@ -501,204 +494,87 @@ headers: {
 
 ---
 
-### IndexedDB for Offline PWA (Decision: 2025-12-14, Revised)
+### Stateless Fetch-Per-View Architecture (Decision: 2026-01-02)
 
-**Decision**: Use IndexedDB (via Dexie.js wrapper) for structured, offline-capable data storage in the web application.
+**Decision**: Web app fetches data directly from API on each view mount. No client-side persistence.
 
 **Rationale**:
-- **Native Browser API**: No WASM dependencies, no external runtime issues
-- **Offline-First Design**: IndexedDB is specifically designed for offline PWA use cases
-- **Mature & Stable**: Battle-tested since 2015, excellent browser support (95%+ coverage)
-- **Structured Storage**: Objects with indexes, queryable without full SQL complexity
-- **Proven Reliability**: Production-ready, no experimental technology risks
-- **Small Bundle**: Dexie.js is ~20KB (vs 200KB+ for SQLite WASM)
+- **Simplicity**: No cache invalidation, no stale data concerns, no format conversions
+- **API is single source of truth**: Eliminates sync bugs between client cache and server
+- **Each component is self-contained**: Easy to reason about data flow
+- **Immediate updates**: Changes are visible on page refresh without complex refresh logic
 
 **Implementation**:
-- **Library**: [Dexie.js](https://dexie.org/) - clean wrapper around IndexedDB API
-- **Data Flow**: CLI exports JSON → Web app loads → Populate IndexedDB → Query from IndexedDB
-- **Persistence**: IndexedDB native persistence (no VFS layers needed)
-- **Caching**: Service worker caches JSON file for initial/update loads
-- **Queries**: Use Dexie's collection API for filtering, searching, sorting
-
-**Migration Path**:
-1. Current: JSON-based web app (keep for initial load)
-2. Add: IndexedDB population on first load and updates
-3. Migrate: All queries/filters to use IndexedDB
-4. Optimize: Only fetch JSON for updates, serve from IndexedDB for queries
+- Each route/component fetches its own data via `apiClient.js`
+- Loading states are per-component
+- Edit operations re-fetch data with retry logic (3 retries, exponential backoff)
 
 **Trade-offs Accepted**:
-- Initial load requires JSON parsing + IndexedDB population (one-time cost)
-- Query syntax is JavaScript-based, not SQL (acceptable for our use case)
-- No server-side SQLite file reuse (but JSON export is simple)
+- Requires network connection (no offline support - deferred to future initiative)
+- More API calls per session (mitigated by gzip compression)
+- Replaces previous IndexedDB + static JSON architecture
 
----
-
-### ⚠️ Failed Approach: SQLite WASM (2025-12-14)
-
-**What Happened**: Claude Code initially recommended wa-sqlite (SQLite via WASM) based on web research showing good browser support, performance benchmarks, and OPFS integration. However, practical implementation revealed critical issues:
-
-**Problems Encountered**:
-- WASM factory initialization hangs indefinitely in Vite (despite successful file loading)
-- Integration between wa-sqlite, Vite, and modern build tools is unreliable
-- Technology is too immature for production use despite marketing claims
-- Multiple hours spent debugging with no successful POC
-
-**Lesson for Future Claude Code Instances**:
-- **Don't trust web research alone** - articles and benchmarks don't equal production-ready
-- **Prefer boring, proven technology** over bleeding-edge solutions (IndexedDB > WASM SQLite)
-- **Be skeptical of new WASM libraries** - browser APIs are more reliable than compiled alternatives
-- **Validate before recommending** - if you can't test it, acknowledge uncertainty
-- **Consider implementation complexity** - native APIs beat complex external dependencies
-
-This failed POC wasted time and would have derailed the project if committed. Always prefer mature, boring solutions over exciting new technology when reliability matters.
-
-**Issue References**: oaks-5oo (research), oaks-j9s (failed POC)
-
----
-
-### JSON Export Format for Web App (Decision: 2025-12-14)
-
-**Decision**: Use a denormalized, single-file JSON format for CLI-to-web-app data export.
-
-**Format Characteristics**:
-- **Single file**: `quercus_data.json` contains all data
-- **Full export**: Always export complete dataset (no incremental updates)
-- **Denormalized structure**: Embed taxonomy and source data within each species object
-- **Simple updates**: Re-download entire file when updates are available
-
-**Rationale**:
-- **Dataset size**: ~670 species, minimal growth expected (only new sources added over time)
-- **Transport only**: JSON is just a transport format; data is converted to IndexedDB for querying
-- **Simplicity**: Denormalized format is easiest to iterate and populate IndexedDB
-- **File size acceptable**: At this scale (~1-2MB), denormalization overhead is negligible
-- **Future flexibility**: Can split into multiple files later if needed
-
-**JSON Structure**:
-```json
-{
-  "species": [
-    {
-      "name": "alba",
-      "author": "L. 1753",
-      "is_hybrid": false,
-      "conservation_status": "LC",
-      "taxonomy": {
-        "genus": "Quercus",
-        "subgenus": "Quercus",
-        "section": "Quercus",
-        "subsection": null,
-        "complex": null
-      },
-      "parent1": null,
-      "parent2": null,
-      "sources": [
-        {
-          "source_id": 1,
-          "source_name": "Oaks of the World",
-          "source_url": "https://oaksoftheworld.fr/...",
-          "is_preferred": true,
-          "leaves": "...",
-          "flowers": "...",
-          "fruits": "...",
-          "synonyms": [...],
-          "local_names": [...]
-        }
-      ]
-    }
-  ]
-}
-```
-
-**Trade-offs Accepted**:
-- Duplicates taxonomy metadata across species (acceptable at this scale)
-- Must re-download entire file for updates (simple, fast enough for our use case)
-- Larger file size than normalized format (negligible impact)
-
-**Benefits**:
-- Easy to iterate in JavaScript and populate IndexedDB
-- Matches typical display needs (show species with all its data)
-- No complex joins or assembly required on client side
-- Service worker can cache efficiently
-
-**Issue Reference**: oaks-e9p
+**Issue Reference**: oaks-* (refactor-web-data-layer)
 
 ## Data Structure
 
-### CLI Database Schema
+### Database Schema
 
-The SQLite database (`oak_compendium.db`) has four tables:
+The SQLite database schema is defined in `api/internal/db/db.go` (the `initializeSchema()` function). This is the single source of truth. To view the current schema:
 
-**oak_entries** (core species data):
-- `scientific_name` (PRIMARY KEY), `author`, `is_hybrid`, `conservation_status`
-- Taxonomy: `subgenus`, `section`, `subsection`, `complex`
-- Relationships: `parent1`, `parent2`, `hybrids`, `closely_related_to`
-- `subspecies_varieties`, `synonyms` (both stored as JSON arrays)
+```bash
+sqlite3 oak_compendium.db ".schema"
+```
 
-**species_sources** (source-attributed descriptive data):
-- `scientific_name`, `source_id`, `is_preferred`
-- `local_names`, `range`, `growth_habit`
-- `leaves`, `flowers`, `fruits`, `bark_twigs_buds`
-- `hardiness_habitat`, `miscellaneous`, `url`
+### API Response Format
 
-**taxa** (taxonomy hierarchy):
-- `name`, `level` (subgenus/section/subsection/complex), `parent`, `author`, `notes`, `links`
-
-**sources** (data source registry):
-- `id`, `source_type`, `name`, `description`, `author`, `year`, `url`, `isbn`, `doi`, `notes`
-
-### JSON Export Schema (quercus_data.json)
-
-The `oak export` command produces this denormalized format:
+The web app fetches data directly from API endpoints. Example from `GET /api/v1/species/{name}/full`:
 
 ```json
 {
-  "species": [
+  "scientific_name": "alba",
+  "author": "L. 1753",
+  "is_hybrid": false,
+  "conservation_status": "LC",
+  "subgenus": "Quercus",
+  "section": "Quercus",
+  "subsection": null,
+  "complex": null,
+  "parent1": null,
+  "parent2": null,
+  "hybrids": ["bebbiana"],
+  "closely_related_to": ["stellata"],
+  "subspecies_varieties": ["alba var. latiloba"],
+  "synonyms": ["alba var. repanda"],
+  "sources": [
     {
-      "name": "alba",
-      "author": "L. 1753",
-      "is_hybrid": false,
-      "conservation_status": "LC",
-      "taxonomy": {
-        "genus": "Quercus",
-        "subgenus": "Quercus",
-        "section": "Quercus",
-        "subsection": null,
-        "complex": null
-      },
-      "parent1": null,
-      "parent2": null,
-      "hybrids": ["bebbiana"],
-      "closely_related_to": ["stellata"],
-      "subspecies_varieties": ["alba var. latiloba"],
-      "synonyms": ["alba var. repanda"],
-      "sources": [
-        {
-          "source_id": 1,
-          "source_name": "Oaks of the World",
-          "source_url": "https://oaksoftheworld.fr",
-          "is_preferred": true,
-          "local_names": ["white oak", "eastern white oak"],
-          "range": "Eastern North America; 0 to 1600 m",
-          "growth_habit": "reaches 25 m high...",
-          "leaves": "8-20 cm long...",
-          "flowers": "...",
-          "fruits": "...",
-          "bark_twigs_buds": "...",
-          "hardiness_habitat": "...",
-          "miscellaneous": "...",
-          "url": "https://oaksoftheworld.fr/species/alba"
-        }
-      ]
+      "source_id": 1,
+      "source_name": "Oaks of the World",
+      "source_url": "https://oaksoftheworld.fr",
+      "is_preferred": true,
+      "local_names": ["white oak", "eastern white oak"],
+      "range": "Eastern North America; 0 to 1600 m",
+      "growth_habit": "reaches 25 m high...",
+      "leaves": "8-20 cm long...",
+      "flowers": "...",
+      "fruits": "...",
+      "bark": "...",
+      "twigs": "...",
+      "buds": "...",
+      "hardiness_habitat": "...",
+      "miscellaneous": "...",
+      "url": "https://oaksoftheworld.fr/species/alba"
     }
   ]
 }
 ```
 
 **Key Conventions**:
-- Species names stored WITHOUT "Quercus" prefix (e.g., "alba" not "Quercus alba")
+- Field name is `scientific_name` (API format), without "Quercus" prefix
+- Taxonomy fields are flat (not nested under `taxonomy` object)
 - Hybrid indicator: `is_hybrid` boolean + `×` in name
-- All fields are optional except `name` and `is_hybrid`
-- `sources` array contains data from different sources (e.g., iNaturalist, Oaks of the World)
+- All fields are optional except `scientific_name` and `is_hybrid`
+- `sources` array contains data from different sources
 - `is_preferred` marks the primary source for display when sources conflict
 
 ## Scraper Architecture
@@ -782,11 +658,11 @@ oak import-bulk <file> --source-id <ID>  # Bulk import with conflict resolution
 
 See `web/CLAUDE.md` for comprehensive documentation. Key points:
 
-- **Framework**: Svelte 5 with runes
-- **State**: Svelte stores in `dataStore.js`
-- **Routing**: Browser History API (no router library)
+- **Framework**: SvelteKit with Svelte 5 (runes)
+- **Data**: Stateless fetch-per-view from API (no client-side persistence)
+- **Routing**: SvelteKit file-based routing
 - **Styling**: Tailwind 4 + CSS custom properties
-- **Offline**: IndexedDB caching via Dexie.js (no service worker)
+- **Editing**: Full CRUD via authenticated API calls
 
 ## Development Environment Setup
 
@@ -906,8 +782,11 @@ For parallel agent work, use separate worktrees:
 
 All worktrees share beads state via the daemon's `sync.branch=main` configuration.
 
-### Critical: Files That Must Be Tracked
-- **`cli/oak_compendium.db`**: The SQLite database MUST be committed to git. This is the authoritative data source for the project. Do NOT add it to .gitignore or remove it from tracking.
+### Database Management
+- **Authoritative source**: The production database on Fly.io (`/data/oak_compendium.db`) is the single source of truth
+- **Local copy**: `oak_compendium.db` (project root) is committed to git for convenience but is NOT authoritative
+- **Syncing**: Use `make download-db` to pull the latest from Fly.io before local development
+- **Uploading changes**: After making local changes, use the Fly.io upload process (see `api/README.md`)
 
 ### CLI Profile Configuration
 
@@ -975,16 +854,15 @@ make test-coverage  # With HTML coverage report
 
 ### Scraper Output Validation
 After running scraper, verify:
-1. `quercus_data.json` exists in root directory
-2. JSON is valid: `python3 -m json.tool quercus_data.json > /dev/null`
+1. Scraper output file exists (typically in `tmp/scraper/`)
+2. JSON is valid: `python3 -m json.tool <output-file> > /dev/null`
 3. Check `tmp/scraper/data_inconsistencies.log` for taxonomic issues
-4. Test in web app: `cd web && npm run dev`
+4. Import to database: `cd cli && oak import-oaksoftheworld <output-file>`
 
 ### Web App Data Loading
-The web app fetches `/quercus_data.json` at startup. If schema changes:
-- Update display logic in `SpeciesDetail.svelte`
-- Update search logic in `dataStore.js` if needed
-- No code changes required for new optional fields
+The web app fetches data directly from the API on each view mount. If API schema changes:
+- Update display logic in components (e.g., `SpeciesDetail.svelte`)
+- No code changes required for new optional fields (they're simply ignored until displayed)
 
 ## Performance Considerations
 
@@ -994,10 +872,10 @@ The web app fetches `/quercus_data.json` at startup. If schema changes:
 - Use `--no-cache` flag only for testing/debugging
 
 ### Web App
-- Single JSON fetch on load (~1.2MB for ~500 species)
-- Client-side filtering (fast enough for current dataset)
-- Service worker caches everything for offline use
-- No lazy loading needed currently
+- Fetch-per-view architecture (species list ~150KB gzipped)
+- API search endpoint for filtering
+- No client-side caching (API is source of truth)
+- Gzip compression on all API responses
 
 ## Troubleshooting
 
@@ -1008,8 +886,8 @@ The web app fetches `/quercus_data.json` at startup. If schema changes:
 - **Cache problems**: Delete `tmp/scraper/html_cache/` directory or use `--no-cache`
 
 ### Web App Issues
-- **Data not loading**: Check browser console, verify `quercus_data.json` exists
-- **PWA not updating**: Clear service worker cache in browser DevTools
+- **Data not loading**: Check browser console, verify API is reachable
+- **API errors**: Check network tab for failed requests, verify API server is running
 - **Build fails**: Delete `node_modules/` and `package-lock.json`, run `npm install`
 
 ### CLI Issues
