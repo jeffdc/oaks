@@ -353,6 +353,8 @@ func (s *Server) handleGetSpeciesFull(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleSearchSpecies handles GET /api/v1/species/search?q=
+// Returns species matching by scientific_name or synonyms.
+// When matched via synonym, includes matched_via_synonym field in result.
 func (s *Server) handleSearchSpecies(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	if query == "" {
@@ -368,21 +370,21 @@ func (s *Server) handleSearchSpecies(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	entries, err := s.db.SearchSpeciesFull(query, limit)
+	results, err := s.db.SearchSpeciesFull(query, limit)
 	if err != nil {
 		s.logger.Error("failed to search species", "query", query, "error", err)
 		RespondInternalError(w, "")
 		return
 	}
 
-	if entries == nil {
-		entries = []*models.Species{}
+	if results == nil {
+		results = []*models.SpeciesSearchResult{}
 	}
 
 	RespondJSON(w, http.StatusOK, map[string]interface{}{
-		"data":  entries,
+		"data":  results,
 		"query": query,
-		"count": len(entries),
+		"count": len(results),
 	})
 }
 

@@ -732,24 +732,126 @@ func (db *Database) CountSpecies(filter *SpeciesFilter) (int, error) {
 	return count, nil
 }
 
-// SearchSpeciesFull searches for species by name pattern and returns full entries
-func (db *Database) SearchSpeciesFull(query string, limit int) ([]*models.Species, error) {
+// SearchSpeciesFull searches for species by name pattern and synonyms, returns full entries
+// with metadata about how they matched (direct name match vs synonym match)
+func (db *Database) SearchSpeciesFull(query string, limit int) ([]*models.SpeciesSearchResult, error) {
 	pattern := "%" + escapeLike(query) + "%"
-	rows, err := db.conn.Query(
-		`SELECT id, scientific_name, author, is_hybrid, conservation_status,
-		        subgenus, section, subsection, complex,
-		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
-		 FROM species
-		 WHERE scientific_name LIKE ? ESCAPE '\'
-		 ORDER BY scientific_name LIMIT ?`,
-		pattern, limit,
+	lowerPattern := "%" + strings.ToLower(escapeLike(query)) + "%"
+
+	// Query searches both scientific_name and synonyms array
+	// - If name matches directly, matched_synonym is NULL
+	// - If only synonym matches, matched_synonym contains the first matching synonym
+	// - Name matches are prioritized in ordering
+	rows, err := db.conn.Query(`
+		SELECT
+			s.id, s.scientific_name, s.author, s.is_hybrid, s.conservation_status,
+			s.subgenus, s.section, s.subsection, s.complex,
+			s.parent1, s.parent2, s.hybrids, s.closely_related_to, s.subspecies_varieties, s.synonyms, s.external_links,
+			CASE
+				WHEN s.scientific_name LIKE ? ESCAPE '\' THEN NULL
+				ELSE (
+					SELECT syn.value FROM json_each(s.synonyms) AS syn
+					WHERE LOWER(syn.value) LIKE ? ESCAPE '\'
+					LIMIT 1
+				)
+			END as matched_synonym
+		FROM species s
+		WHERE s.scientific_name LIKE ? ESCAPE '\'
+		   OR EXISTS (
+			   SELECT 1 FROM json_each(s.synonyms) AS syn
+			   WHERE LOWER(syn.value) LIKE ? ESCAPE '\'
+		   )
+		ORDER BY
+			CASE WHEN s.scientific_name LIKE ? ESCAPE '\' THEN 0 ELSE 1 END,
+			s.scientific_name
+		LIMIT ?`,
+		pattern, lowerPattern, pattern, lowerPattern, pattern, limit,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search species: %w", err)
 	}
 	defer rows.Close()
 
-	return scanSpecies(rows)
+	return scanSpeciesSearchResults(rows)
+}
+
+// scanSpeciesSearchResults scans rows into SpeciesSearchResult objects
+func scanSpeciesSearchResults(rows *sql.Rows) ([]*models.SpeciesSearchResult, error) {
+	var results []*models.SpeciesSearchResult
+	for rows.Next() {
+		var entry models.Species
+		var isHybrid int
+		var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON, externalLinksJSON sql.NullString
+		var matchedSynonym sql.NullString
+
+		if err := rows.Scan(
+			&entry.ID, &entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
+			&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
+			&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON, &externalLinksJSON,
+			&matchedSynonym,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan species search result: %w", err)
+		}
+
+		entry.IsHybrid = isHybrid != 0
+
+		// Unmarshal JSON arrays
+		if hybridsJSON.Valid {
+			if err := json.Unmarshal([]byte(hybridsJSON.String), &entry.Hybrids); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal hybrids for %s: %w", entry.ScientificName, err)
+			}
+		}
+		if entry.Hybrids == nil {
+			entry.Hybrids = []string{}
+		}
+
+		if relatedJSON.Valid {
+			if err := json.Unmarshal([]byte(relatedJSON.String), &entry.CloselyRelatedTo); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal closely_related_to for %s: %w", entry.ScientificName, err)
+			}
+		}
+		if entry.CloselyRelatedTo == nil {
+			entry.CloselyRelatedTo = []string{}
+		}
+
+		if subspeciesJSON.Valid {
+			if err := json.Unmarshal([]byte(subspeciesJSON.String), &entry.SubspeciesVarieties); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal subspecies_varieties for %s: %w", entry.ScientificName, err)
+			}
+		}
+		if entry.SubspeciesVarieties == nil {
+			entry.SubspeciesVarieties = []string{}
+		}
+
+		if synonymsJSON.Valid {
+			if err := json.Unmarshal([]byte(synonymsJSON.String), &entry.Synonyms); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal synonyms for %s: %w", entry.ScientificName, err)
+			}
+		}
+		if entry.Synonyms == nil {
+			entry.Synonyms = []string{}
+		}
+
+		if externalLinksJSON.Valid {
+			if err := json.Unmarshal([]byte(externalLinksJSON.String), &entry.ExternalLinks); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal external_links for %s: %w", entry.ScientificName, err)
+			}
+		}
+		if entry.ExternalLinks == nil {
+			entry.ExternalLinks = []models.ExternalLink{}
+		}
+
+		result := &models.SpeciesSearchResult{
+			Species: entry,
+		}
+		if matchedSynonym.Valid {
+			result.MatchedViaSynonym = &matchedSynonym.String
+		}
+
+		results = append(results, result)
+	}
+
+	return results, rows.Err()
 }
 
 // SpeciesExists checks if a species exists by scientific name
