@@ -352,3 +352,52 @@ func getParentLevel(level string) string {
 		return ""
 	}
 }
+
+// SpeciesReference represents a species that references another species
+type SpeciesReference struct {
+	ScientificName string `json:"scientific_name"`
+	ReferenceType  string `json:"reference_type"` // parent1, parent2, hybrids, closely_related_to
+}
+
+// GetSpeciesReferences returns all species that reference the given name
+// in parent1, parent2, hybrids, or closely_related_to fields
+func (db *Database) GetSpeciesReferences(name string) ([]SpeciesReference, error) {
+	// Search string fields (parent1, parent2) with exact match
+	// and JSON arrays (hybrids, closely_related_to) with LIKE pattern
+	// The JSON pattern matches "name" in the array to avoid partial matches
+	jsonPattern := "%\"" + escapeLike(name) + "\"%"
+
+	rows, err := db.conn.Query(
+		`SELECT scientific_name,
+		        CASE
+		            WHEN parent1 = ? THEN 'parent1'
+		            WHEN parent2 = ? THEN 'parent2'
+		            WHEN hybrids LIKE ? ESCAPE '\' THEN 'hybrids'
+		            WHEN closely_related_to LIKE ? ESCAPE '\' THEN 'closely_related_to'
+		        END as reference_type
+		 FROM species
+		 WHERE parent1 = ? OR parent2 = ? OR hybrids LIKE ? ESCAPE '\' OR closely_related_to LIKE ? ESCAPE '\'
+		 ORDER BY scientific_name`,
+		name, name, jsonPattern, jsonPattern,
+		name, name, jsonPattern, jsonPattern,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get species references: %w", err)
+	}
+	defer rows.Close()
+
+	var refs []SpeciesReference
+	for rows.Next() {
+		var ref SpeciesReference
+		if err := rows.Scan(&ref.ScientificName, &ref.ReferenceType); err != nil {
+			return nil, fmt.Errorf("failed to scan species reference: %w", err)
+		}
+		refs = append(refs, ref)
+	}
+
+	if refs == nil {
+		refs = []SpeciesReference{}
+	}
+
+	return refs, rows.Err()
+}

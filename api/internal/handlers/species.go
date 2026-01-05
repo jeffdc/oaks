@@ -367,6 +367,29 @@ func (s *Server) handleSearchSpecies(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// handleGetSpeciesReferences handles GET /api/v1/species/references?name=
+// Returns species that reference the given name in parent1, parent2, hybrids, or closely_related_to
+func (s *Server) handleGetSpeciesReferences(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("name")
+	if name == "" {
+		RespondError(w, http.StatusBadRequest, ErrCodeValidation, "query parameter 'name' is required")
+		return
+	}
+
+	refs, err := s.db.GetSpeciesReferences(name)
+	if err != nil {
+		s.logger.Error("failed to get species references", "name", name, "error", err)
+		RespondInternalError(w, "")
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, map[string]interface{}{
+		"data":  refs,
+		"name":  name,
+		"count": len(refs),
+	})
+}
+
 // handleCreateSpecies handles POST /api/v1/species
 func (s *Server) handleCreateSpecies(w http.ResponseWriter, r *http.Request) {
 	var req SpeciesRequest
