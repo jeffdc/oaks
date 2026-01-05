@@ -14,6 +14,7 @@
   import SpeciesEditForm from './SpeciesEditForm.svelte';
   import SpeciesSourceEditForm from './SpeciesSourceEditForm.svelte';
   import DeleteConfirmDialog from './DeleteConfirmDialog.svelte';
+  import SpeciesPickerDialog from './SpeciesPickerDialog.svelte';
 
   // Configure marked for safe rendering
   marked.setOptions({
@@ -49,6 +50,9 @@
   let showSourceDeleteDialog = false;
   let deletingSourceId = null;
   let isDeletingSource = false;
+
+  // Synonymization state
+  let showSpeciesPicker = false;
 
   // All available sources (fetched from API)
   let allSourcesList = [];
@@ -143,6 +147,19 @@
     } finally {
       isDeleting = false;
     }
+  }
+
+  // Handle "Make Synonym Of..." button click
+  function handleMakeSynonymClick() {
+    showSpeciesPicker = true;
+  }
+
+  // Handle species picker selection - navigate to merge page
+  function handleSynonymTargetSelect(targetSpecies) {
+    showSpeciesPicker = false;
+    const currentName = species.scientific_name || species.name;
+    const targetName = targetSpecies.scientific_name || targetSpecies.name;
+    goto(`${base}/species/${encodeURIComponent(currentName)}/merge/${encodeURIComponent(targetName)}`);
   }
 
   // Handle source edit button click
@@ -490,6 +507,20 @@
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
             <span>Edit</span>
+          </button>
+          <button
+            type="button"
+            class="action-btn action-btn-synonym"
+            title="Make this species a synonym of another"
+            on:click={handleMakeSynonymClick}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 1l4 4-4 4" />
+              <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+              <path d="M7 23l-4-4 4-4" />
+              <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+            </svg>
+            <span>Make Synonym Of...</span>
           </button>
           <button
             type="button"
@@ -1028,6 +1059,15 @@
     isCreateMode={true}
     onClose={() => { showAddSourceForm = false; addingSourceId = null; }}
     onSave={handleCreateSource}
+  />
+{/if}
+
+<!-- Species Picker Dialog for Synonymization -->
+{#if showSpeciesPicker}
+  <SpeciesPickerDialog
+    currentSpecies={species}
+    onSelect={handleSynonymTargetSelect}
+    onCancel={() => showSpeciesPicker = false}
   />
 {/if}
 
@@ -1622,6 +1662,22 @@
 
   .action-btn-edit:focus-visible {
     outline: 2px solid var(--color-forest-500);
+    outline-offset: 2px;
+  }
+
+  .action-btn-synonym {
+    color: #9333ea;
+    background-color: #faf5ff;
+    border-color: #e9d5ff;
+  }
+
+  .action-btn-synonym:hover {
+    background-color: #f3e8ff;
+    border-color: #d8b4fe;
+  }
+
+  .action-btn-synonym:focus-visible {
+    outline: 2px solid #9333ea;
     outline-offset: 2px;
   }
 
