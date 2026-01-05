@@ -220,7 +220,7 @@
 					{#each searchTaxa as taxon (taxon.name + taxon.level)}
 						<li>
 							<a
-								href="{base}/taxonomy/{taxon.level}/{encodeURIComponent(taxon.name)}/"
+								href="{base}/taxonomy/{taxon.path ? taxon.path.map(encodeURIComponent).join('/') : encodeURIComponent(taxon.name)}/"
 								class="result-row taxon-row"
 							>
 								<div class="result-main">

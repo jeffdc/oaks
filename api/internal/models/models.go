@@ -35,6 +35,7 @@ type Taxon struct {
 	ContentUpdatedAt *string     `json:"content_updated_at,omitempty" yaml:"content_updated_at,omitempty"` // ISO 8601 timestamp
 	Links            []TaxonLink `json:"links,omitempty" yaml:"links,omitempty"`                           // External reference links
 	SpeciesCount     int         `json:"species_count" yaml:"species_count"`                               // Count of species in this taxon
+	Path             []string    `json:"path,omitempty" yaml:"path,omitempty"`                             // Full ancestry path for URL construction
 }
 
 // SpeciesSource represents source-attributed descriptive data for a species

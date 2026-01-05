@@ -224,6 +224,13 @@ func (db *Database) UnifiedSearch(query string, limit int) (*models.UnifiedSearc
 		return nil, err
 	}
 
+	// Compute ancestry paths for taxa results
+	if len(result.Taxa) > 0 {
+		if err := db.computeTaxaPaths(result.Taxa); err != nil {
+			return nil, fmt.Errorf("failed to compute taxa paths: %w", err)
+		}
+	}
+
 	// Search sources by name and author
 	sourceRows, err := db.conn.Query(
 		`SELECT id, source_type, name, description, author, year, url, isbn, doi, notes, license, license_url
@@ -255,4 +262,93 @@ func (db *Database) UnifiedSearch(query string, limit int) (*models.UnifiedSearc
 	result.Counts.Total = result.Counts.Species + result.Counts.Taxa + result.Counts.Sources
 
 	return result, nil
+}
+
+// taxonKey creates a composite key for taxon lookup (name + level)
+type taxonKey struct {
+	name  string
+	level string
+}
+
+// taxonInfo stores parent info for path computation
+type taxonInfo struct {
+	parent      *string
+	parentLevel string
+}
+
+// computeTaxaPaths computes the full ancestry path for each taxon in the slice.
+// The path is an array like ["Quercus", "Lobatae", "Phellos"] for URL construction.
+func (db *Database) computeTaxaPaths(taxa []models.Taxon) error {
+	// Build a lookup map of all taxa by (name, level) -> parent info
+	// We need this to walk up the parent chain correctly when there are
+	// multiple taxa with the same name at different levels (e.g., "Quercus")
+	rows, err := db.conn.Query(`SELECT name, level, parent FROM taxa`)
+	if err != nil {
+		return fmt.Errorf("failed to fetch taxa for path computation: %w", err)
+	}
+	defer rows.Close()
+
+	// Map from (name, level) to parent info
+	taxaMap := make(map[taxonKey]taxonInfo)
+	for rows.Next() {
+		var name, level string
+		var parent *string
+		if err := rows.Scan(&name, &level, &parent); err != nil {
+			return fmt.Errorf("failed to scan taxon: %w", err)
+		}
+		taxaMap[taxonKey{name, level}] = taxonInfo{
+			parent:      parent,
+			parentLevel: getParentLevel(level),
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	// Compute path for each taxon by walking up the parent chain
+	for i := range taxa {
+		path := []string{}
+		currentName := taxa[i].Name
+		currentLevel := string(taxa[i].Level)
+
+		// Walk up to ancestors, building path in reverse
+		// Use a visited set to prevent infinite loops
+		visited := make(map[taxonKey]bool)
+		for {
+			key := taxonKey{currentName, currentLevel}
+			if visited[key] {
+				break // Cycle detected
+			}
+			visited[key] = true
+
+			path = append([]string{currentName}, path...) // prepend
+
+			info, exists := taxaMap[key]
+			if !exists || info.parent == nil {
+				break
+			}
+			currentName = *info.parent
+			currentLevel = info.parentLevel
+		}
+
+		taxa[i].Path = path
+	}
+
+	return nil
+}
+
+// getParentLevel returns the parent level for a given taxon level
+func getParentLevel(level string) string {
+	switch level {
+	case "complex":
+		return "subsection"
+	case "subsection":
+		return "section"
+	case "section":
+		return "subgenus"
+	case "subgenus":
+		return "" // No parent level
+	default:
+		return ""
+	}
 }
