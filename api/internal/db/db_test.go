@@ -1,11 +1,15 @@
 package db
 
 import (
+	"database/sql"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/jeff/oaks/api/internal/models"
+
+	_ "github.com/mattn/go-sqlite3" // SQLite driver for migration tests
 )
 
 // testDB creates a temporary database for testing
@@ -479,4 +483,681 @@ func TestBeginTx(t *testing.T) {
 
 	// Rollback to clean up
 	tx.Rollback()
+}
+
+// Migration tests
+
+// createOldSchemaDB creates a database with the old schema (oak_entries table, no species table)
+// This simulates opening an existing database that needs migration
+func createOldSchemaDB(t *testing.T) (*Database, func()) {
+	t.Helper()
+
+	tmpDir := t.TempDir()
+	dbPath := filepath.Join(tmpDir, "test_old_schema.db")
+
+	// Open raw connection to create old schema
+	conn, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		t.Fatalf("failed to open database: %v", err)
+	}
+
+	// Create old schema manually (bypass initializeSchema)
+	oldSchemaStatements := []string{
+		`CREATE TABLE taxa (
+			name TEXT NOT NULL,
+			level TEXT NOT NULL CHECK(level IN ('subgenus', 'section', 'subsection', 'complex')),
+			parent TEXT,
+			author TEXT,
+			content TEXT,
+			content_updated_at TEXT,
+			links TEXT,
+			PRIMARY KEY (name, level)
+		)`,
+		`CREATE TABLE sources (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			source_type TEXT NOT NULL,
+			name TEXT NOT NULL,
+			description TEXT,
+			author TEXT,
+			year INTEGER,
+			url TEXT,
+			isbn TEXT,
+			doi TEXT,
+			notes TEXT,
+			license TEXT,
+			license_url TEXT
+		)`,
+		`CREATE TABLE oak_entries (
+			scientific_name TEXT PRIMARY KEY,
+			author TEXT,
+			is_hybrid INTEGER NOT NULL DEFAULT 0,
+			conservation_status TEXT,
+			subgenus TEXT,
+			section TEXT,
+			subsection TEXT,
+			complex TEXT,
+			parent1 TEXT,
+			parent2 TEXT,
+			hybrids TEXT,
+			closely_related_to TEXT,
+			subspecies_varieties TEXT,
+			synonyms TEXT,
+			external_links TEXT
+		)`,
+		`CREATE TABLE species_sources (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			scientific_name TEXT NOT NULL,
+			source_id INTEGER NOT NULL,
+			local_names TEXT,
+			range TEXT,
+			growth_habit TEXT,
+			leaves TEXT,
+			flowers TEXT,
+			fruits TEXT,
+			bark TEXT,
+			twigs TEXT,
+			buds TEXT,
+			hardiness_habitat TEXT,
+			miscellaneous TEXT,
+			url TEXT,
+			is_preferred INTEGER NOT NULL DEFAULT 0,
+			FOREIGN KEY (scientific_name) REFERENCES oak_entries(scientific_name) ON DELETE CASCADE,
+			FOREIGN KEY (source_id) REFERENCES sources(id),
+			UNIQUE(scientific_name, source_id)
+		)`,
+		`CREATE TABLE import_metadata (
+			key TEXT PRIMARY KEY,
+			value TEXT
+		)`,
+	}
+
+	for _, stmt := range oldSchemaStatements {
+		if _, err := conn.Exec(stmt); err != nil {
+			conn.Close()
+			t.Fatalf("failed to create old schema: %v", err)
+		}
+	}
+
+	conn.Close()
+
+	// Now open with the Database wrapper which will run migration
+	db, err := New(dbPath)
+	if err != nil {
+		t.Fatalf("failed to open database after creating old schema: %v", err)
+	}
+
+	cleanup := func() {
+		db.Close()
+		os.Remove(dbPath)
+	}
+
+	return db, cleanup
+}
+
+func TestMigrationFreshDatabase(t *testing.T) {
+	// Fresh database should use new schema from the start
+	db, cleanup := testDB(t)
+	defer cleanup()
+
+	// Check that species table does NOT exist (fresh DB uses old schema path since oak_entries doesn't exist)
+	// Actually, for a truly fresh DB, neither oak_entries nor species should exist initially
+	// The initializeSchema will create oak_entries (old schema) for fresh DBs
+
+	var tableName string
+	err := db.conn.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='oak_entries'`).Scan(&tableName)
+	if err != nil {
+		t.Fatalf("fresh database should have oak_entries table: %v", err)
+	}
+
+	// species table should NOT exist (no migration needed for fresh DB)
+	err = db.conn.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='species'`).Scan(&tableName)
+	if err == nil {
+		t.Fatal("fresh database should NOT have species table (no migration needed)")
+	}
+}
+
+func TestMigrationWithOldSchema(t *testing.T) {
+	// Create a database with old schema and data, verify migration works
+	tmpDir := t.TempDir()
+	dbPath := filepath.Join(tmpDir, "test_migration.db")
+
+	// Create old schema database manually
+	conn, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		t.Fatalf("failed to open database: %v", err)
+	}
+
+	// Create old schema
+	oldSchemaStatements := []string{
+		`CREATE TABLE taxa (
+			name TEXT NOT NULL,
+			level TEXT NOT NULL CHECK(level IN ('subgenus', 'section', 'subsection', 'complex')),
+			parent TEXT,
+			author TEXT,
+			content TEXT,
+			content_updated_at TEXT,
+			links TEXT,
+			PRIMARY KEY (name, level)
+		)`,
+		`CREATE TABLE sources (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			source_type TEXT NOT NULL,
+			name TEXT NOT NULL,
+			description TEXT,
+			author TEXT,
+			year INTEGER,
+			url TEXT,
+			isbn TEXT,
+			doi TEXT,
+			notes TEXT,
+			license TEXT,
+			license_url TEXT
+		)`,
+		`CREATE TABLE oak_entries (
+			scientific_name TEXT PRIMARY KEY,
+			author TEXT,
+			is_hybrid INTEGER NOT NULL DEFAULT 0,
+			conservation_status TEXT,
+			subgenus TEXT,
+			section TEXT,
+			subsection TEXT,
+			complex TEXT,
+			parent1 TEXT,
+			parent2 TEXT,
+			hybrids TEXT,
+			closely_related_to TEXT,
+			subspecies_varieties TEXT,
+			synonyms TEXT,
+			external_links TEXT
+		)`,
+		`CREATE TABLE species_sources (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			scientific_name TEXT NOT NULL,
+			source_id INTEGER NOT NULL,
+			local_names TEXT,
+			range TEXT,
+			growth_habit TEXT,
+			leaves TEXT,
+			flowers TEXT,
+			fruits TEXT,
+			bark TEXT,
+			twigs TEXT,
+			buds TEXT,
+			hardiness_habitat TEXT,
+			miscellaneous TEXT,
+			url TEXT,
+			is_preferred INTEGER NOT NULL DEFAULT 0,
+			FOREIGN KEY (scientific_name) REFERENCES oak_entries(scientific_name) ON DELETE CASCADE,
+			FOREIGN KEY (source_id) REFERENCES sources(id),
+			UNIQUE(scientific_name, source_id)
+		)`,
+	}
+
+	for _, stmt := range oldSchemaStatements {
+		if _, err := conn.Exec(stmt); err != nil {
+			conn.Close()
+			t.Fatalf("failed to create old schema: %v", err)
+		}
+	}
+
+	// Insert test data
+	_, err = conn.Exec(`INSERT INTO taxa (name, level, parent) VALUES ('Quercus', 'subgenus', NULL)`)
+	if err != nil {
+		conn.Close()
+		t.Fatalf("failed to insert taxa: %v", err)
+	}
+
+	_, err = conn.Exec(`INSERT INTO taxa (name, level, parent) VALUES ('Lobatae', 'section', 'Quercus')`)
+	if err != nil {
+		conn.Close()
+		t.Fatalf("failed to insert taxa: %v", err)
+	}
+
+	_, err = conn.Exec(`INSERT INTO oak_entries (scientific_name, author, is_hybrid, subgenus, section)
+		VALUES ('alba', 'L. 1753', 0, 'Quercus', 'Quercus')`)
+	if err != nil {
+		conn.Close()
+		t.Fatalf("failed to insert oak_entries: %v", err)
+	}
+
+	_, err = conn.Exec(`INSERT INTO oak_entries (scientific_name, author, is_hybrid, subgenus, section)
+		VALUES ('rubra', 'L.', 0, 'Quercus', 'Lobatae')`)
+	if err != nil {
+		conn.Close()
+		t.Fatalf("failed to insert oak_entries: %v", err)
+	}
+
+	_, err = conn.Exec(`INSERT INTO sources (source_type, name) VALUES ('website', 'Test Source')`)
+	if err != nil {
+		conn.Close()
+		t.Fatalf("failed to insert source: %v", err)
+	}
+
+	_, err = conn.Exec(`INSERT INTO species_sources (scientific_name, source_id, local_names, is_preferred)
+		VALUES ('alba', 1, '["white oak"]', 1)`)
+	if err != nil {
+		conn.Close()
+		t.Fatalf("failed to insert species_sources: %v", err)
+	}
+
+	conn.Close()
+
+	// Now open with New() which will trigger migration
+	db, err := New(dbPath)
+	if err != nil {
+		t.Fatalf("migration failed: %v", err)
+	}
+	defer db.Close()
+
+	// Verify species table exists and oak_entries is gone
+	var tableName string
+	err = db.conn.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='species'`).Scan(&tableName)
+	if err != nil {
+		t.Fatalf("after migration, species table should exist: %v", err)
+	}
+
+	err = db.conn.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='oak_entries'`).Scan(&tableName)
+	if err == nil {
+		t.Fatal("after migration, oak_entries table should NOT exist")
+	}
+
+	// Verify species data was migrated
+	var speciesCount int
+	err = db.conn.QueryRow(`SELECT COUNT(*) FROM species`).Scan(&speciesCount)
+	if err != nil {
+		t.Fatalf("failed to count species: %v", err)
+	}
+	if speciesCount != 2 {
+		t.Errorf("expected 2 species, got %d", speciesCount)
+	}
+
+	// Verify species have integer IDs
+	var id int
+	var name string
+	err = db.conn.QueryRow(`SELECT id, scientific_name FROM species WHERE scientific_name = 'alba'`).Scan(&id, &name)
+	if err != nil {
+		t.Fatalf("failed to get species by name: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive integer id, got %d", id)
+	}
+
+	// Verify taxa has integer ID
+	var taxaID int
+	var taxaName, taxaLevel string
+	err = db.conn.QueryRow(`SELECT id, name, level FROM taxa WHERE name = 'Quercus'`).Scan(&taxaID, &taxaName, &taxaLevel)
+	if err != nil {
+		t.Fatalf("failed to get taxon: %v", err)
+	}
+	if taxaID <= 0 {
+		t.Errorf("expected positive integer taxa id, got %d", taxaID)
+	}
+
+	// Verify species_sources uses species_id instead of scientific_name
+	// Check that scientific_name column doesn't exist
+	_, err = db.conn.Exec(`SELECT scientific_name FROM species_sources LIMIT 1`)
+	if err == nil {
+		t.Fatal("after migration, species_sources should NOT have scientific_name column")
+	}
+
+	// Check that species_id column exists and has correct data
+	var ssSpeciesID, ssSourceID int
+	err = db.conn.QueryRow(`SELECT species_id, source_id FROM species_sources WHERE species_id = ?`, id).Scan(&ssSpeciesID, &ssSourceID)
+	if err != nil {
+		t.Fatalf("failed to get species_sources by species_id: %v", err)
+	}
+	if ssSpeciesID != id {
+		t.Errorf("expected species_id %d, got %d", id, ssSpeciesID)
+	}
+	if ssSourceID != 1 {
+		t.Errorf("expected source_id 1, got %d", ssSourceID)
+	}
+}
+
+func TestMigrationIdempotent(t *testing.T) {
+	// Create a database with old schema, run migration twice
+	tmpDir := t.TempDir()
+	dbPath := filepath.Join(tmpDir, "test_idempotent.db")
+
+	// Create old schema database manually
+	conn, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		t.Fatalf("failed to open database: %v", err)
+	}
+
+	oldSchemaStatements := []string{
+		`CREATE TABLE taxa (
+			name TEXT NOT NULL,
+			level TEXT NOT NULL CHECK(level IN ('subgenus', 'section', 'subsection', 'complex')),
+			parent TEXT,
+			author TEXT,
+			content TEXT,
+			content_updated_at TEXT,
+			links TEXT,
+			PRIMARY KEY (name, level)
+		)`,
+		`CREATE TABLE sources (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			source_type TEXT NOT NULL,
+			name TEXT NOT NULL,
+			description TEXT,
+			author TEXT,
+			year INTEGER,
+			url TEXT,
+			isbn TEXT,
+			doi TEXT,
+			notes TEXT,
+			license TEXT,
+			license_url TEXT
+		)`,
+		`CREATE TABLE oak_entries (
+			scientific_name TEXT PRIMARY KEY,
+			author TEXT,
+			is_hybrid INTEGER NOT NULL DEFAULT 0,
+			conservation_status TEXT,
+			subgenus TEXT,
+			section TEXT,
+			subsection TEXT,
+			complex TEXT,
+			parent1 TEXT,
+			parent2 TEXT,
+			hybrids TEXT,
+			closely_related_to TEXT,
+			subspecies_varieties TEXT,
+			synonyms TEXT,
+			external_links TEXT
+		)`,
+		`CREATE TABLE species_sources (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			scientific_name TEXT NOT NULL,
+			source_id INTEGER NOT NULL,
+			local_names TEXT,
+			range TEXT,
+			growth_habit TEXT,
+			leaves TEXT,
+			flowers TEXT,
+			fruits TEXT,
+			bark TEXT,
+			twigs TEXT,
+			buds TEXT,
+			hardiness_habitat TEXT,
+			miscellaneous TEXT,
+			url TEXT,
+			is_preferred INTEGER NOT NULL DEFAULT 0,
+			FOREIGN KEY (scientific_name) REFERENCES oak_entries(scientific_name) ON DELETE CASCADE,
+			FOREIGN KEY (source_id) REFERENCES sources(id),
+			UNIQUE(scientific_name, source_id)
+		)`,
+	}
+
+	for _, stmt := range oldSchemaStatements {
+		if _, err := conn.Exec(stmt); err != nil {
+			conn.Close()
+			t.Fatalf("failed to create old schema: %v", err)
+		}
+	}
+
+	// Insert test data
+	_, err = conn.Exec(`INSERT INTO oak_entries (scientific_name, is_hybrid) VALUES ('alba', 0)`)
+	if err != nil {
+		conn.Close()
+		t.Fatalf("failed to insert oak_entries: %v", err)
+	}
+
+	conn.Close()
+
+	// First open - should trigger migration
+	db1, err := New(dbPath)
+	if err != nil {
+		t.Fatalf("first migration failed: %v", err)
+	}
+
+	var count1 int
+	err = db1.conn.QueryRow(`SELECT COUNT(*) FROM species`).Scan(&count1)
+	if err != nil {
+		db1.Close()
+		t.Fatalf("failed to count species after first migration: %v", err)
+	}
+
+	db1.Close()
+
+	// Second open - migration should be skipped (species table already exists)
+	db2, err := New(dbPath)
+	if err != nil {
+		t.Fatalf("second open failed: %v", err)
+	}
+	defer db2.Close()
+
+	var count2 int
+	err = db2.conn.QueryRow(`SELECT COUNT(*) FROM species`).Scan(&count2)
+	if err != nil {
+		t.Fatalf("failed to count species after second open: %v", err)
+	}
+
+	if count1 != count2 {
+		t.Errorf("species count changed after second open: %d -> %d", count1, count2)
+	}
+
+	// Verify no duplicates or corruption
+	if count2 != 1 {
+		t.Errorf("expected 1 species, got %d", count2)
+	}
+}
+
+func TestMigrationOrphanedDataCheck(t *testing.T) {
+	// Create a database with orphaned species_sources (no matching oak_entries)
+	tmpDir := t.TempDir()
+	dbPath := filepath.Join(tmpDir, "test_orphaned.db")
+
+	conn, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		t.Fatalf("failed to open database: %v", err)
+	}
+
+	oldSchemaStatements := []string{
+		`CREATE TABLE taxa (
+			name TEXT NOT NULL,
+			level TEXT NOT NULL CHECK(level IN ('subgenus', 'section', 'subsection', 'complex')),
+			parent TEXT,
+			author TEXT,
+			content TEXT,
+			content_updated_at TEXT,
+			links TEXT,
+			PRIMARY KEY (name, level)
+		)`,
+		`CREATE TABLE sources (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			source_type TEXT NOT NULL,
+			name TEXT NOT NULL,
+			description TEXT,
+			author TEXT,
+			year INTEGER,
+			url TEXT,
+			isbn TEXT,
+			doi TEXT,
+			notes TEXT,
+			license TEXT,
+			license_url TEXT
+		)`,
+		`CREATE TABLE oak_entries (
+			scientific_name TEXT PRIMARY KEY,
+			author TEXT,
+			is_hybrid INTEGER NOT NULL DEFAULT 0,
+			conservation_status TEXT,
+			subgenus TEXT,
+			section TEXT,
+			subsection TEXT,
+			complex TEXT,
+			parent1 TEXT,
+			parent2 TEXT,
+			hybrids TEXT,
+			closely_related_to TEXT,
+			subspecies_varieties TEXT,
+			synonyms TEXT,
+			external_links TEXT
+		)`,
+		`CREATE TABLE species_sources (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			scientific_name TEXT NOT NULL,
+			source_id INTEGER NOT NULL,
+			local_names TEXT,
+			range TEXT,
+			growth_habit TEXT,
+			leaves TEXT,
+			flowers TEXT,
+			fruits TEXT,
+			bark TEXT,
+			twigs TEXT,
+			buds TEXT,
+			hardiness_habitat TEXT,
+			miscellaneous TEXT,
+			url TEXT,
+			is_preferred INTEGER NOT NULL DEFAULT 0
+		)`,
+	}
+
+	for _, stmt := range oldSchemaStatements {
+		if _, err := conn.Exec(stmt); err != nil {
+			conn.Close()
+			t.Fatalf("failed to create old schema: %v", err)
+		}
+	}
+
+	// Insert oak_entries
+	_, err = conn.Exec(`INSERT INTO oak_entries (scientific_name, is_hybrid) VALUES ('alba', 0)`)
+	if err != nil {
+		conn.Close()
+		t.Fatalf("failed to insert oak_entries: %v", err)
+	}
+
+	// Insert source
+	_, err = conn.Exec(`INSERT INTO sources (source_type, name) VALUES ('website', 'Test')`)
+	if err != nil {
+		conn.Close()
+		t.Fatalf("failed to insert source: %v", err)
+	}
+
+	// Insert orphaned species_sources (scientific_name doesn't exist in oak_entries)
+	_, err = conn.Exec(`INSERT INTO species_sources (scientific_name, source_id, is_preferred) VALUES ('nonexistent', 1, 0)`)
+	if err != nil {
+		conn.Close()
+		t.Fatalf("failed to insert orphaned species_sources: %v", err)
+	}
+
+	conn.Close()
+
+	// Try to open - should fail due to orphaned data
+	_, err = New(dbPath)
+	if err == nil {
+		t.Fatal("expected migration to fail due to orphaned species_sources")
+	}
+
+	if !strings.Contains(err.Error(), "orphaned") {
+		t.Errorf("expected error about orphaned data, got: %v", err)
+	}
+}
+
+func TestMigrationEmptyTables(t *testing.T) {
+	// Migration should work even if tables are empty
+	tmpDir := t.TempDir()
+	dbPath := filepath.Join(tmpDir, "test_empty.db")
+
+	conn, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		t.Fatalf("failed to open database: %v", err)
+	}
+
+	oldSchemaStatements := []string{
+		`CREATE TABLE taxa (
+			name TEXT NOT NULL,
+			level TEXT NOT NULL CHECK(level IN ('subgenus', 'section', 'subsection', 'complex')),
+			parent TEXT,
+			author TEXT,
+			content TEXT,
+			content_updated_at TEXT,
+			links TEXT,
+			PRIMARY KEY (name, level)
+		)`,
+		`CREATE TABLE sources (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			source_type TEXT NOT NULL,
+			name TEXT NOT NULL,
+			description TEXT,
+			author TEXT,
+			year INTEGER,
+			url TEXT,
+			isbn TEXT,
+			doi TEXT,
+			notes TEXT,
+			license TEXT,
+			license_url TEXT
+		)`,
+		`CREATE TABLE oak_entries (
+			scientific_name TEXT PRIMARY KEY,
+			author TEXT,
+			is_hybrid INTEGER NOT NULL DEFAULT 0,
+			conservation_status TEXT,
+			subgenus TEXT,
+			section TEXT,
+			subsection TEXT,
+			complex TEXT,
+			parent1 TEXT,
+			parent2 TEXT,
+			hybrids TEXT,
+			closely_related_to TEXT,
+			subspecies_varieties TEXT,
+			synonyms TEXT,
+			external_links TEXT
+		)`,
+		`CREATE TABLE species_sources (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			scientific_name TEXT NOT NULL,
+			source_id INTEGER NOT NULL,
+			local_names TEXT,
+			range TEXT,
+			growth_habit TEXT,
+			leaves TEXT,
+			flowers TEXT,
+			fruits TEXT,
+			bark TEXT,
+			twigs TEXT,
+			buds TEXT,
+			hardiness_habitat TEXT,
+			miscellaneous TEXT,
+			url TEXT,
+			is_preferred INTEGER NOT NULL DEFAULT 0,
+			FOREIGN KEY (scientific_name) REFERENCES oak_entries(scientific_name) ON DELETE CASCADE,
+			FOREIGN KEY (source_id) REFERENCES sources(id),
+			UNIQUE(scientific_name, source_id)
+		)`,
+	}
+
+	for _, stmt := range oldSchemaStatements {
+		if _, err := conn.Exec(stmt); err != nil {
+			conn.Close()
+			t.Fatalf("failed to create old schema: %v", err)
+		}
+	}
+
+	conn.Close()
+
+	// Open - should migrate successfully even with empty tables
+	db, err := New(dbPath)
+	if err != nil {
+		t.Fatalf("migration with empty tables failed: %v", err)
+	}
+	defer db.Close()
+
+	// Verify species table exists
+	var tableName string
+	err = db.conn.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='species'`).Scan(&tableName)
+	if err != nil {
+		t.Fatalf("after migration, species table should exist: %v", err)
+	}
+
+	// Verify oak_entries is gone
+	err = db.conn.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='oak_entries'`).Scan(&tableName)
+	if err == nil {
+		t.Fatal("after migration, oak_entries table should NOT exist")
+	}
 }
