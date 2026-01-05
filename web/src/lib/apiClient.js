@@ -303,6 +303,15 @@ export async function unifiedSearch(query) {
 }
 
 /**
+ * Fetch species that reference the given species name
+ * @param {string} name - Species name to find references for
+ * @returns {Promise<Object>} Object with count and data array of references
+ */
+export async function fetchSpeciesReferences(name) {
+  return fetchApi(`/api/v1/species/references?name=${encodeURIComponent(name)}`);
+}
+
+/**
  * Fetch all taxa from API
  * @returns {Promise<Array>} Array of taxa objects
  */
