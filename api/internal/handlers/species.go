@@ -273,6 +273,25 @@ func (s *Server) handleGetSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if entry == nil {
+		// Species not found - check if it's a synonym
+		matches, err := s.db.FindSpeciesWithSynonym(name)
+		if err != nil {
+			s.logger.Error("failed to search synonyms", "name", name, "error", err)
+			RespondInternalError(w, "")
+			return
+		}
+
+		if len(matches) == 1 {
+			// Found as synonym of exactly one species
+			RespondSynonymRedirect(w, matches[0])
+			return
+		} else if len(matches) > 1 {
+			// Found as synonym of multiple species (ambiguous)
+			RespondAmbiguousSynonym(w, matches)
+			return
+		}
+
+		// Not found anywhere
 		RespondNotFound(w, "Species", name)
 		return
 	}

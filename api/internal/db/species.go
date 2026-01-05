@@ -781,6 +781,35 @@ func (db *Database) ListAllSpecies() ([]*models.Species, error) {
 	return scanSpecies(rows)
 }
 
+// FindSpeciesWithSynonym searches for species that have the given name in their synonyms array.
+// Returns a list of scientific names that have this synonym. The search is case-insensitive.
+func (db *Database) FindSpeciesWithSynonym(synonymName string) ([]string, error) {
+	// Use SQLite's JSON functions to search within the synonyms array
+	// json_each() expands the array, and we check for case-insensitive matches
+	rows, err := db.conn.Query(`
+		SELECT DISTINCT s.scientific_name
+		FROM species s, json_each(s.synonyms) AS syn
+		WHERE LOWER(syn.value) = LOWER(?)
+		ORDER BY s.scientific_name`,
+		synonymName,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search synonyms: %w", err)
+	}
+	defer rows.Close()
+
+	var names []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, fmt.Errorf("failed to scan synonym result: %w", err)
+		}
+		names = append(names, name)
+	}
+
+	return names, rows.Err()
+}
+
 // scanSpecies is a helper that scans rows into Species objects
 func scanSpecies(rows *sql.Rows) ([]*models.Species, error) {
 	var entries []*models.Species

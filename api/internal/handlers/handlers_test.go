@@ -1215,3 +1215,233 @@ func TestSpeciesReferencesHybridsField(t *testing.T) {
 		t.Errorf("reference_type = %s, want hybrids", ref["reference_type"])
 	}
 }
+
+func TestGetSpeciesSynonymRedirect(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create a species with synonyms
+	author := "L."
+	species := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+		Synonyms:       []string{"alba var. repanda", "quercus repanda"},
+	}
+	body, _ := json.Marshal(species)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Request a synonym - should get 404 with synonym_of
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/alba%20var.%20repanda", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("get synonym status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+
+	var resp SynonymRedirectResponse
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	if resp.SynonymOf != "alba" {
+		t.Errorf("synonym_of = %s, want alba", resp.SynonymOf)
+	}
+}
+
+func TestGetSpeciesSynonymRedirectCaseInsensitive(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create a species with synonyms
+	author := "L."
+	species := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+		Synonyms:       []string{"Quercus Repanda"},
+	}
+	body, _ := json.Marshal(species)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Request with different case - should still match
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/quercus%20repanda", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("get synonym status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+
+	var resp SynonymRedirectResponse
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	if resp.SynonymOf != "alba" {
+		t.Errorf("synonym_of = %s, want alba", resp.SynonymOf)
+	}
+}
+
+func TestGetSpeciesAmbiguousSynonym(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create two species with the same synonym
+	author := "L."
+	species1 := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+		Synonyms:       []string{"disputed name"},
+	}
+	body, _ := json.Marshal(species1)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species1 status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	species2 := models.Species{
+		ScientificName: "robur",
+		Author:         &author,
+		IsHybrid:       false,
+		Synonyms:       []string{"disputed name"},
+	}
+	body, _ = json.Marshal(species2)
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species2 status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Request the ambiguous synonym
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/disputed%20name", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("get ambiguous synonym status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+
+	var resp AmbiguousSynonymResponse
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	if !resp.AmbiguousSynonym {
+		t.Error("expected ambiguous_synonym = true")
+	}
+
+	if len(resp.Matches) != 2 {
+		t.Fatalf("matches length = %d, want 2", len(resp.Matches))
+	}
+
+	// Matches should be sorted alphabetically
+	if resp.Matches[0] != "alba" || resp.Matches[1] != "robur" {
+		t.Errorf("matches = %v, want [alba, robur]", resp.Matches)
+	}
+}
+
+func TestGetSpeciesNotFoundNoSynonym(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create a species (to ensure database is working)
+	author := "L."
+	species := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+		Synonyms:       []string{"alba var. repanda"},
+	}
+	body, _ := json.Marshal(species)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Request a name that doesn't exist and isn't a synonym
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/nonexistent", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("get nonexistent status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+
+	// Should be standard error response, not synonym redirect
+	var resp ErrorResponse
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	if resp.Error.Code != ErrCodeNotFound {
+		t.Errorf("error code = %s, want %s", resp.Error.Code, ErrCodeNotFound)
+	}
+}
+
+func TestGetSpeciesExistsNoSynonymLookup(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create a species
+	author := "L."
+	species := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+	}
+	body, _ := json.Marshal(species)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Request the species - should return normally (200)
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/alba", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("get species status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var resp models.Species
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	if resp.ScientificName != "alba" {
+		t.Errorf("scientific_name = %s, want alba", resp.ScientificName)
+	}
+}
