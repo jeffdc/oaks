@@ -1242,7 +1242,9 @@
 
   /* Source container and tabs */
   .source-container {
-    overflow: hidden;
+    /* Note: overflow: hidden was removed to allow the add-source dropdown to be visible
+       when there are no existing sources. The dropdown is positioned absolutely and
+       needs to overflow the container boundaries. */
   }
 
   .source-container.full-width {
@@ -1397,6 +1399,12 @@
     box-shadow: var(--shadow-lg);
     z-index: 100;
     overflow: hidden;
+  }
+
+  /* When no sources exist, position dropdown to the left since button is on the left */
+  .add-source-wrapper.no-sources .add-source-dropdown {
+    right: auto;
+    left: 0;
   }
 
   .add-source-dropdown-header {
