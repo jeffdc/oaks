@@ -32,7 +32,7 @@ func (db *Database) SaveSpecies(entry *models.Species) error {
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	// Get existing entry to compare parents (for bidirectional relationship updates)
 	existingEntry, err := db.getSpeciesTx(tx, entry.ScientificName)

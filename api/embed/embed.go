@@ -105,7 +105,7 @@ func Start(cfg Config) (*Server, error) {
 
 	// Wait briefly to ensure server is accepting connections
 	if err := embedded.waitForReady(); err != nil {
-		embedded.Shutdown()
+		_ = embedded.Shutdown()
 		return nil, fmt.Errorf("embedded server failed to start: %w", err)
 	}
 
