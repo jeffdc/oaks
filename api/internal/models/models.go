@@ -26,14 +26,15 @@ type ExternalLink struct {
 // Taxon represents a taxonomic rank in the reference table
 // Hierarchy: Genus (Quercus) -> Subgenus -> Section -> Subsection -> Complex -> Species
 type Taxon struct {
+	ID               int64       `json:"id" yaml:"id"`
 	Name             string      `json:"name" yaml:"name"`
 	Level            TaxonLevel  `json:"level" yaml:"level"`
-	Parent           *string     `json:"parent,omitempty" yaml:"parent,omitempty"`                       // Parent taxon name
-	Author           *string     `json:"author,omitempty" yaml:"author,omitempty"`                       // Taxonomic authority
-	Content          *string     `json:"content,omitempty" yaml:"content,omitempty"`                     // Freeform markdown content
+	Parent           *string     `json:"parent,omitempty" yaml:"parent,omitempty"`                         // Parent taxon name
+	Author           *string     `json:"author,omitempty" yaml:"author,omitempty"`                         // Taxonomic authority
+	Content          *string     `json:"content,omitempty" yaml:"content,omitempty"`                       // Freeform markdown content
 	ContentUpdatedAt *string     `json:"content_updated_at,omitempty" yaml:"content_updated_at,omitempty"` // ISO 8601 timestamp
-	Links            []TaxonLink `json:"links,omitempty" yaml:"links,omitempty"`                         // External reference links
-	SpeciesCount     int         `json:"species_count" yaml:"species_count"`                             // Count of species in this taxon
+	Links            []TaxonLink `json:"links,omitempty" yaml:"links,omitempty"`                           // External reference links
+	SpeciesCount     int         `json:"species_count" yaml:"species_count"`                               // Count of species in this taxon
 }
 
 // SpeciesSource represents source-attributed descriptive data for a species
@@ -57,9 +58,10 @@ type SpeciesSource struct {
 	IsPreferred      bool     `json:"is_preferred" yaml:"is_preferred"`
 }
 
-// OakEntry represents an Oak taxonomic entry (species-intrinsic data)
+// Species represents an Oak taxonomic entry (species-intrinsic data)
 // Source-attributed descriptive data is stored separately in species_sources
-type OakEntry struct {
+type Species struct {
+	ID                 int64   `json:"id" yaml:"id"`
 	ScientificName     string  `json:"scientific_name" yaml:"scientific_name"`
 	Author             *string `json:"author,omitempty" yaml:"author,omitempty"`
 	IsHybrid           bool    `json:"is_hybrid" yaml:"is_hybrid"`
@@ -85,9 +87,9 @@ type OakEntry struct {
 	ExternalLinks []ExternalLink `json:"external_links,omitempty" yaml:"external_links,omitempty"`
 }
 
-// NewOakEntry creates a new empty OakEntry with the given scientific name
-func NewOakEntry(scientificName string) *OakEntry {
-	return &OakEntry{
+// NewSpecies creates a new empty Species with the given scientific name
+func NewSpecies(scientificName string) *Species {
+	return &Species{
 		ScientificName:      scientificName,
 		IsHybrid:            false,
 		Hybrids:             []string{},
@@ -141,7 +143,7 @@ type SpeciesSourceWithMeta struct {
 
 // SpeciesWithSources represents a species with all its source data embedded
 type SpeciesWithSources struct {
-	OakEntry
+	Species
 	Sources []SpeciesSourceWithMeta `json:"sources"`
 }
 
@@ -156,10 +158,10 @@ const (
 
 // UnifiedSearchResults contains grouped search results from all entity types
 type UnifiedSearchResults struct {
-	Species []OakEntry `json:"species"`
-	Taxa    []Taxon    `json:"taxa"`
-	Sources []Source   `json:"sources"`
-	Query   string     `json:"query"`
+	Species []Species `json:"species"`
+	Taxa    []Taxon   `json:"taxa"`
+	Sources []Source  `json:"sources"`
+	Query   string    `json:"query"`
 	Counts  struct {
 		Species int `json:"species"`
 		Taxa    int `json:"taxa"`

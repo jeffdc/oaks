@@ -94,7 +94,7 @@ func TestSpeciesCRUD(t *testing.T) {
 
 	// Create a species
 	author := "L."
-	createReq := models.OakEntry{
+	createReq := models.Species{
 		ScientificName: "alba",
 		Author:         &author,
 		IsHybrid:       false,
@@ -120,7 +120,7 @@ func TestSpeciesCRUD(t *testing.T) {
 		t.Fatalf("get status = %d, want %d", w.Code, http.StatusOK)
 	}
 
-	var entry models.OakEntry
+	var entry models.Species
 	if err := json.NewDecoder(w.Body).Decode(&entry); err != nil {
 		t.Fatalf("failed to decode response: %v", err)
 	}
@@ -148,7 +148,7 @@ func TestSpeciesCRUD(t *testing.T) {
 
 	// Update species
 	conservation := "LC"
-	updateReq := models.OakEntry{
+	updateReq := models.Species{
 		ScientificName:     "alba",
 		Author:             &author,
 		ConservationStatus: &conservation,
@@ -308,7 +308,7 @@ func TestSpeciesSourcesCRUD(t *testing.T) {
 
 	// First create a species and a source
 	author := "L."
-	species := models.OakEntry{
+	species := models.Species{
 		ScientificName: "alba",
 		Author:         &author,
 	}
@@ -391,7 +391,7 @@ func TestExport(t *testing.T) {
 
 	// Create some test data
 	author := "L."
-	species := models.OakEntry{
+	species := models.Species{
 		ScientificName: "alba",
 		Author:         &author,
 	}
@@ -427,7 +427,7 @@ func TestAuthRequired(t *testing.T) {
 
 	// Try to create without auth
 	author := "L."
-	species := models.OakEntry{
+	species := models.Species{
 		ScientificName: "alba",
 		Author:         &author,
 	}
@@ -460,7 +460,7 @@ func TestConflictError(t *testing.T) {
 
 	// Create a species
 	author := "L."
-	species := models.OakEntry{
+	species := models.Species{
 		ScientificName: "alba",
 		Author:         &author,
 	}
@@ -495,7 +495,7 @@ func TestSpeciesFullEndpoint(t *testing.T) {
 	// Create a species
 	author := "L."
 	subgenus := "Quercus"
-	species := models.OakEntry{
+	species := models.Species{
 		ScientificName: "alba",
 		Author:         &author,
 		Subgenus:       &subgenus,
@@ -601,7 +601,7 @@ func TestDeleteCascadeProtection(t *testing.T) {
 
 	// Create two parent species
 	author := "L."
-	parent1 := models.OakEntry{
+	parent1 := models.Species{
 		ScientificName: "alba",
 		Author:         &author,
 		IsHybrid:       false,
@@ -618,7 +618,7 @@ func TestDeleteCascadeProtection(t *testing.T) {
 		t.Fatalf("create parent1 status = %d, want %d", w.Code, http.StatusCreated)
 	}
 
-	parent2 := models.OakEntry{
+	parent2 := models.Species{
 		ScientificName: "macrocarpa",
 		Author:         &author,
 		IsHybrid:       false,
@@ -638,7 +638,7 @@ func TestDeleteCascadeProtection(t *testing.T) {
 	// Create a hybrid that references both parents
 	p1 := "alba"
 	p2 := "macrocarpa"
-	hybrid := models.OakEntry{
+	hybrid := models.Species{
 		ScientificName: "× bebbiana",
 		IsHybrid:       true,
 		Parent1:        &p1,
@@ -720,7 +720,7 @@ func TestGzipCompression(t *testing.T) {
 	// Create multiple species to generate a large response
 	author := "L."
 	for i := 0; i < 50; i++ {
-		species := models.OakEntry{
+		species := models.Species{
 			ScientificName: "species" + strings.Repeat("x", 20) + string(rune('A'+i%26)) + string(rune('a'+i/26)),
 			Author:         &author,
 			IsHybrid:       false,
@@ -764,7 +764,7 @@ func TestGzipCompression(t *testing.T) {
 	}
 
 	// Verify it's valid JSON with species data
-	var listResp ListResponse[*models.OakEntry]
+	var listResp ListResponse[*models.Species]
 	if err := json.Unmarshal(body, &listResp); err != nil {
 		t.Fatalf("failed to decode response: %v", err)
 	}
@@ -801,7 +801,7 @@ func TestGzipCompressionNotRequestedNotCompressed(t *testing.T) {
 	// Create species to have some data
 	author := "L."
 	for i := 0; i < 50; i++ {
-		species := models.OakEntry{
+		species := models.Species{
 			ScientificName: "species" + strings.Repeat("y", 20) + string(rune('A'+i%26)) + string(rune('a'+i/26)),
 			Author:         &author,
 			IsHybrid:       false,
@@ -833,7 +833,7 @@ func TestGzipCompressionNotRequestedNotCompressed(t *testing.T) {
 	}
 
 	// Verify it's valid JSON (not gzipped)
-	var listResp ListResponse[*models.OakEntry]
+	var listResp ListResponse[*models.Species]
 	if err := json.Unmarshal(w.Body.Bytes(), &listResp); err != nil {
 		t.Fatalf("failed to decode response: %v", err)
 	}

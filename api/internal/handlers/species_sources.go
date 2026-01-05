@@ -57,7 +57,7 @@ func (s *Server) handleListSpeciesSources(w http.ResponseWriter, r *http.Request
 	}
 
 	// Check if species exists
-	exists, err := s.db.OakEntryExists(name)
+	exists, err := s.db.SpeciesExists(name)
 	if err != nil {
 		s.logger.Error("failed to check species existence", "name", name, "error", err)
 		RespondInternalError(w, "")
@@ -104,7 +104,7 @@ func (s *Server) handleGetSpeciesSource(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Check if species exists
-	exists, err := s.db.OakEntryExists(name)
+	exists, err := s.db.SpeciesExists(name)
 	if err != nil {
 		s.logger.Error("failed to check species existence", "name", name, "error", err)
 		RespondInternalError(w, "")
@@ -154,7 +154,7 @@ func (s *Server) handleCreateSpeciesSource(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Check if species exists
-	exists, err := s.db.OakEntryExists(name)
+	exists, err := s.db.SpeciesExists(name)
 	if err != nil {
 		s.logger.Error("failed to check species existence", "name", name, "error", err)
 		RespondInternalError(w, "")
@@ -226,7 +226,7 @@ func (s *Server) handleUpdateSpeciesSource(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Check if species exists
-	exists, err := s.db.OakEntryExists(name)
+	exists, err := s.db.SpeciesExists(name)
 	if err != nil {
 		s.logger.Error("failed to check species existence", "name", name, "error", err)
 		RespondInternalError(w, "")
@@ -281,7 +281,7 @@ func (s *Server) handleDeleteSpeciesSource(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Check if species exists
-	exists, err := s.db.OakEntryExists(name)
+	exists, err := s.db.SpeciesExists(name)
 	if err != nil {
 		s.logger.Error("failed to check species existence", "name", name, "error", err)
 		RespondInternalError(w, "")

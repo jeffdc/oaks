@@ -116,139 +116,9 @@ func (db *Database) initializeSchema() error {
 		return nil
 	}
 
-	// Check if we're already on the new schema (species table exists)
-	var tableName string
-	err = db.conn.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='species'`).Scan(&tableName)
-	if err == nil {
-		// New schema already exists, just ensure all tables are present
-		return db.ensureNewSchema()
-	}
-
-	// Old schema path - create tables with old schema
-	statements := []string{
-		// Taxa reference table for validation
-		// Hierarchy: Genus (Quercus) -> Subgenus -> Section -> Subsection -> Complex -> Species
-		`CREATE TABLE IF NOT EXISTS taxa (
-			name TEXT NOT NULL,
-			level TEXT NOT NULL CHECK(level IN ('subgenus', 'section', 'subsection', 'complex')),
-			parent TEXT,
-			author TEXT,
-			content TEXT,
-			content_updated_at TEXT,
-			links TEXT,
-			PRIMARY KEY (name, level)
-		)`,
-		`CREATE INDEX IF NOT EXISTS idx_taxa_level ON taxa(level)`,
-		`CREATE INDEX IF NOT EXISTS idx_taxa_parent ON taxa(parent)`,
-
-		// Sources table
-		`CREATE TABLE IF NOT EXISTS sources (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			source_type TEXT NOT NULL,
-			name TEXT NOT NULL,
-			description TEXT,
-			author TEXT,
-			year INTEGER,
-			url TEXT,
-			isbn TEXT,
-			doi TEXT,
-			notes TEXT,
-			license TEXT,
-			license_url TEXT
-		)`,
-
-		// Oak entries with taxonomy and hybrid support
-		`CREATE TABLE IF NOT EXISTS oak_entries (
-			scientific_name TEXT PRIMARY KEY,
-			author TEXT,
-			is_hybrid INTEGER NOT NULL DEFAULT 0,
-			conservation_status TEXT,
-			subgenus TEXT,
-			section TEXT,
-			subsection TEXT,
-			complex TEXT,
-			parent1 TEXT,
-			parent2 TEXT,
-			hybrids TEXT,
-			closely_related_to TEXT,
-			subspecies_varieties TEXT,
-			synonyms TEXT,
-			external_links TEXT
-		)`,
-		`CREATE INDEX IF NOT EXISTS idx_oak_entries_subgenus ON oak_entries(subgenus)`,
-		`CREATE INDEX IF NOT EXISTS idx_oak_entries_section ON oak_entries(section)`,
-		`CREATE INDEX IF NOT EXISTS idx_oak_entries_hybrid ON oak_entries(is_hybrid)`,
-
-		// Species-source junction table for source-attributed descriptive data
-		// One row = everything source X says about species Y
-		`CREATE TABLE IF NOT EXISTS species_sources (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			scientific_name TEXT NOT NULL,
-			source_id INTEGER NOT NULL,
-			local_names TEXT,
-			range TEXT,
-			growth_habit TEXT,
-			leaves TEXT,
-			flowers TEXT,
-			fruits TEXT,
-			bark TEXT,
-			twigs TEXT,
-			buds TEXT,
-			hardiness_habitat TEXT,
-			miscellaneous TEXT,
-			url TEXT,
-			is_preferred INTEGER NOT NULL DEFAULT 0,
-			FOREIGN KEY (scientific_name) REFERENCES oak_entries(scientific_name) ON DELETE CASCADE,
-			FOREIGN KEY (source_id) REFERENCES sources(id),
-			UNIQUE(scientific_name, source_id)
-		)`,
-		`CREATE INDEX IF NOT EXISTS idx_species_sources_name ON species_sources(scientific_name)`,
-		`CREATE INDEX IF NOT EXISTS idx_species_sources_source ON species_sources(source_id)`,
-
-		// Import metadata for tracking incremental imports
-		`CREATE TABLE IF NOT EXISTS import_metadata (
-			key TEXT PRIMARY KEY,
-			value TEXT
-		)`,
-
-		// Articles table for reference articles (guides, book reviews, etc.)
-		`CREATE TABLE IF NOT EXISTS articles (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			slug TEXT UNIQUE NOT NULL,
-			title TEXT NOT NULL,
-			author TEXT NOT NULL,
-			content TEXT,
-			tags TEXT,
-			is_published INTEGER NOT NULL DEFAULT 0,
-			created_at TEXT NOT NULL,
-			updated_at TEXT NOT NULL,
-			published_at TEXT
-		)`,
-		`CREATE INDEX IF NOT EXISTS idx_articles_slug ON articles(slug)`,
-		`CREATE INDEX IF NOT EXISTS idx_articles_published ON articles(is_published)`,
-	}
-
-	for _, stmt := range statements {
-		if _, err := db.conn.Exec(stmt); err != nil {
-			return fmt.Errorf("failed to execute schema statement: %w", err)
-		}
-	}
-
-	// Run migrations for new columns (ignore errors if column already exists)
-	migrations := []string{
-		`ALTER TABLE oak_entries ADD COLUMN external_links TEXT`,
-		// Taxa content migration: rename notes to content, add content_updated_at
-		`ALTER TABLE taxa ADD COLUMN content TEXT`,
-		`ALTER TABLE taxa ADD COLUMN content_updated_at TEXT`,
-	}
-	for _, stmt := range migrations {
-		_, _ = db.conn.Exec(stmt) // Ignore error - column may already exist
-	}
-
-	// Migrate data from notes to content if notes column exists and content is empty
-	_, _ = db.conn.Exec(`UPDATE taxa SET content = notes WHERE content IS NULL AND notes IS NOT NULL`)
-
-	return nil
+	// For new databases (no oak_entries or species table exists), use new schema
+	// This also handles the case where species table already exists
+	return db.ensureNewSchema()
 }
 
 // ensureNewSchema creates all tables using the new schema (with integer IDs)
@@ -754,12 +624,12 @@ func (db *Database) UpdateTaxon(taxon *models.Taxon) error {
 // GetTaxon gets a taxon by name and level
 func (db *Database) GetTaxon(name string, level models.TaxonLevel) (*models.Taxon, error) {
 	row := db.conn.QueryRow(
-		`SELECT t.name, t.level, t.parent, t.author, t.content, t.content_updated_at, t.links,
-		        (SELECT COUNT(*) FROM oak_entries o WHERE
-		            (t.level = 'subgenus' AND o.subgenus = t.name) OR
-		            (t.level = 'section' AND o.section = t.name) OR
-		            (t.level = 'subsection' AND o.subsection = t.name) OR
-		            (t.level = 'complex' AND o.complex = t.name)
+		`SELECT t.id, t.name, t.level, t.parent, t.author, t.content, t.content_updated_at, t.links,
+		        (SELECT COUNT(*) FROM species sp WHERE
+		            (t.level = 'subgenus' AND sp.subgenus = t.name) OR
+		            (t.level = 'section' AND sp.section = t.name) OR
+		            (t.level = 'subsection' AND sp.subsection = t.name) OR
+		            (t.level = 'complex' AND sp.complex = t.name)
 		        ) as species_count
 		 FROM taxa t WHERE t.name = ? AND t.level = ?`,
 		name, string(level),
@@ -768,7 +638,7 @@ func (db *Database) GetTaxon(name string, level models.TaxonLevel) (*models.Taxo
 	var t models.Taxon
 	var levelStr string
 	var linksJSON sql.NullString
-	err := row.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Content, &t.ContentUpdatedAt, &linksJSON, &t.SpeciesCount)
+	err := row.Scan(&t.ID, &t.Name, &levelStr, &t.Parent, &t.Author, &t.Content, &t.ContentUpdatedAt, &linksJSON, &t.SpeciesCount)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -802,12 +672,12 @@ func (db *Database) ListTaxa(params *TaxaListParams) ([]*models.Taxon, error) {
 	var args []interface{}
 
 	// Base query with species count subquery
-	baseQuery := `SELECT t.name, t.level, t.parent, t.author, t.content, t.content_updated_at, t.links,
-	                     (SELECT COUNT(*) FROM oak_entries o WHERE
-	                         (t.level = 'subgenus' AND o.subgenus = t.name) OR
-	                         (t.level = 'section' AND o.section = t.name) OR
-	                         (t.level = 'subsection' AND o.subsection = t.name) OR
-	                         (t.level = 'complex' AND o.complex = t.name)
+	baseQuery := `SELECT t.id, t.name, t.level, t.parent, t.author, t.content, t.content_updated_at, t.links,
+	                     (SELECT COUNT(*) FROM species sp WHERE
+	                         (t.level = 'subgenus' AND sp.subgenus = t.name) OR
+	                         (t.level = 'section' AND sp.section = t.name) OR
+	                         (t.level = 'subsection' AND sp.subsection = t.name) OR
+	                         (t.level = 'complex' AND sp.complex = t.name)
 	                     ) as species_count
 	              FROM taxa t`
 
@@ -839,7 +709,7 @@ func (db *Database) ListTaxa(params *TaxaListParams) ([]*models.Taxon, error) {
 		var t models.Taxon
 		var levelStr string
 		var linksJSON sql.NullString
-		if err := rows.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Content, &t.ContentUpdatedAt, &linksJSON, &t.SpeciesCount); err != nil {
+		if err := rows.Scan(&t.ID, &t.Name, &levelStr, &t.Parent, &t.Author, &t.Content, &t.ContentUpdatedAt, &linksJSON, &t.SpeciesCount); err != nil {
 			return nil, fmt.Errorf("failed to scan taxon: %w", err)
 		}
 		t.Level = models.TaxonLevel(levelStr)
@@ -936,10 +806,10 @@ func (db *Database) SearchTaxa(query string) ([]*models.Taxon, error) {
 	return taxa, rows.Err()
 }
 
-// SaveOakEntry saves or updates a complete oak entry.
+// SaveSpecies saves or updates a complete species entry.
 // It also maintains bidirectional parent-child relationships:
 // when a hybrid's parents are set/changed, the parents' hybrids lists are updated.
-func (db *Database) SaveOakEntry(entry *models.OakEntry) error {
+func (db *Database) SaveSpecies(entry *models.Species) error {
 	// Start transaction for atomic updates
 	tx, err := db.conn.Begin()
 	if err != nil {
@@ -948,7 +818,7 @@ func (db *Database) SaveOakEntry(entry *models.OakEntry) error {
 	defer tx.Rollback()
 
 	// Get existing entry to compare parents (for bidirectional relationship updates)
-	existingEntry, err := db.getOakEntryTx(tx, entry.ScientificName)
+	existingEntry, err := db.getSpeciesTx(tx, entry.ScientificName)
 	if err != nil {
 		return fmt.Errorf("failed to get existing entry: %w", err)
 	}
@@ -992,36 +862,36 @@ func (db *Database) SaveOakEntry(entry *models.OakEntry) error {
 	}
 
 	// Save the entry itself
-	if err := db.saveOakEntryTx(tx, entry); err != nil {
+	if err := db.saveSpeciesTx(tx, entry); err != nil {
 		return err
 	}
 
 	return tx.Commit()
 }
 
-// getOakEntryTx gets an oak entry within a transaction
-func (db *Database) getOakEntryTx(tx *sql.Tx, scientificName string) (*models.OakEntry, error) {
+// getSpeciesTx gets a species within a transaction
+func (db *Database) getSpeciesTx(tx *sql.Tx, scientificName string) (*models.Species, error) {
 	row := tx.QueryRow(
-		`SELECT scientific_name, author, is_hybrid, conservation_status,
+		`SELECT id, scientific_name, author, is_hybrid, conservation_status,
 		        subgenus, section, subsection, complex,
 		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
-		 FROM oak_entries WHERE scientific_name = ?`,
+		 FROM species WHERE scientific_name = ?`,
 		scientificName,
 	)
 
-	var entry models.OakEntry
+	var entry models.Species
 	var isHybrid int
 	var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON, externalLinksJSON sql.NullString
 
 	if err := row.Scan(
-		&entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
+		&entry.ID, &entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
 		&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
 		&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON, &externalLinksJSON,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("failed to get oak entry: %w", err)
+		return nil, fmt.Errorf("failed to get species: %w", err)
 	}
 
 	entry.IsHybrid = isHybrid != 0
@@ -1080,7 +950,7 @@ func (db *Database) removeHybridFromParentTx(tx *sql.Tx, parentName, hybridName 
 	// Get parent's current hybrids list
 	var hybridsJSON sql.NullString
 	err := tx.QueryRow(
-		`SELECT hybrids FROM oak_entries WHERE scientific_name = ?`,
+		`SELECT hybrids FROM species WHERE scientific_name = ?`,
 		parentName,
 	).Scan(&hybridsJSON)
 	if err != nil {
@@ -1108,7 +978,7 @@ func (db *Database) removeHybridFromParentTx(tx *sql.Tx, parentName, hybridName 
 	}
 
 	_, err = tx.Exec(
-		`UPDATE oak_entries SET hybrids = ? WHERE scientific_name = ?`,
+		`UPDATE species SET hybrids = ? WHERE scientific_name = ?`,
 		string(updatedJSON), parentName,
 	)
 	return err
@@ -1119,7 +989,7 @@ func (db *Database) addHybridToParentTx(tx *sql.Tx, parentName, hybridName strin
 	// Get parent's current hybrids list
 	var hybridsJSON sql.NullString
 	err := tx.QueryRow(
-		`SELECT hybrids FROM oak_entries WHERE scientific_name = ?`,
+		`SELECT hybrids FROM species WHERE scientific_name = ?`,
 		parentName,
 	).Scan(&hybridsJSON)
 	if err != nil {
@@ -1149,14 +1019,14 @@ func (db *Database) addHybridToParentTx(tx *sql.Tx, parentName, hybridName strin
 	}
 
 	_, err = tx.Exec(
-		`UPDATE oak_entries SET hybrids = ? WHERE scientific_name = ?`,
+		`UPDATE species SET hybrids = ? WHERE scientific_name = ?`,
 		string(updatedJSON), parentName,
 	)
 	return err
 }
 
-// saveOakEntryTx saves an oak entry within a transaction
-func (db *Database) saveOakEntryTx(tx *sql.Tx, entry *models.OakEntry) error {
+// saveSpeciesTx saves a species within a transaction
+func (db *Database) saveSpeciesTx(tx *sql.Tx, entry *models.Species) error {
 	// Marshal JSON arrays
 	synonymsJSON, err := json.Marshal(entry.Synonyms)
 	if err != nil {
@@ -1185,47 +1055,73 @@ func (db *Database) saveOakEntryTx(tx *sql.Tx, entry *models.OakEntry) error {
 		isHybrid = 1
 	}
 
-	_, err = tx.Exec(
-		`INSERT OR REPLACE INTO oak_entries (
-			scientific_name, author, is_hybrid, conservation_status,
-			subgenus, section, subsection, complex,
-			parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		entry.ScientificName, entry.Author, isHybrid, entry.ConservationStatus,
-		entry.Subgenus, entry.Section, entry.Subsection, entry.Complex,
-		entry.Parent1, entry.Parent2, string(hybridsJSON), string(relatedJSON),
-		string(subspeciesJSON), string(synonymsJSON), string(externalLinksJSON),
-	)
-	if err != nil {
-		return fmt.Errorf("failed to insert oak entry: %w", err)
+	// Use INSERT OR REPLACE, which handles the unique constraint on scientific_name
+	// If entry.ID is 0, this is a new entry; otherwise we're updating
+	if entry.ID == 0 {
+		result, err := tx.Exec(
+			`INSERT INTO species (
+				scientific_name, author, is_hybrid, conservation_status,
+				subgenus, section, subsection, complex,
+				parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			entry.ScientificName, entry.Author, isHybrid, entry.ConservationStatus,
+			entry.Subgenus, entry.Section, entry.Subsection, entry.Complex,
+			entry.Parent1, entry.Parent2, string(hybridsJSON), string(relatedJSON),
+			string(subspeciesJSON), string(synonymsJSON), string(externalLinksJSON),
+		)
+		if err != nil {
+			return fmt.Errorf("failed to insert species: %w", err)
+		}
+		id, err := result.LastInsertId()
+		if err != nil {
+			return fmt.Errorf("failed to get last insert id: %w", err)
+		}
+		entry.ID = id
+	} else {
+		_, err = tx.Exec(
+			`UPDATE species SET
+				author = ?, is_hybrid = ?, conservation_status = ?,
+				subgenus = ?, section = ?, subsection = ?, complex = ?,
+				parent1 = ?, parent2 = ?, hybrids = ?, closely_related_to = ?,
+				subspecies_varieties = ?, synonyms = ?, external_links = ?
+			WHERE id = ?`,
+			entry.Author, isHybrid, entry.ConservationStatus,
+			entry.Subgenus, entry.Section, entry.Subsection, entry.Complex,
+			entry.Parent1, entry.Parent2, string(hybridsJSON), string(relatedJSON),
+			string(subspeciesJSON), string(synonymsJSON), string(externalLinksJSON),
+			entry.ID,
+		)
+		if err != nil {
+			return fmt.Errorf("failed to update species: %w", err)
+		}
 	}
 
 	return nil
 }
 
-// GetOakEntry gets an oak entry by scientific name
-func (db *Database) GetOakEntry(scientificName string) (*models.OakEntry, error) {
+// GetSpecies gets a species by scientific name
+func (db *Database) GetSpecies(scientificName string) (*models.Species, error) {
 	row := db.conn.QueryRow(
-		`SELECT scientific_name, author, is_hybrid, conservation_status,
+		`SELECT id, scientific_name, author, is_hybrid, conservation_status,
 		        subgenus, section, subsection, complex,
 		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
-		 FROM oak_entries WHERE scientific_name = ?`,
+		 FROM species WHERE scientific_name = ?`,
 		scientificName,
 	)
 
-	var entry models.OakEntry
+	var entry models.Species
 	var isHybrid int
 	var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON, externalLinksJSON sql.NullString
 
 	if err := row.Scan(
-		&entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
+		&entry.ID, &entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
 		&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
 		&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON, &externalLinksJSON,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("failed to get oak entry: %w", err)
+		return nil, fmt.Errorf("failed to get species: %w", err)
 	}
 
 	entry.IsHybrid = isHybrid != 0
@@ -1279,28 +1175,28 @@ func (db *Database) GetOakEntry(scientificName string) (*models.OakEntry, error)
 	return &entry, nil
 }
 
-// DeleteOakEntry deletes an oak entry
-func (db *Database) DeleteOakEntry(scientificName string) error {
+// DeleteSpecies deletes a species
+func (db *Database) DeleteSpecies(scientificName string) error {
 	_, err := db.conn.Exec(
-		`DELETE FROM oak_entries WHERE scientific_name = ?`,
+		`DELETE FROM species WHERE scientific_name = ?`,
 		scientificName,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to delete oak entry: %w", err)
+		return fmt.Errorf("failed to delete species: %w", err)
 	}
 	return nil
 }
 
-// SearchOakEntries searches for oak entries by name pattern
-func (db *Database) SearchOakEntries(query string) ([]string, error) {
+// SearchSpeciesNames searches for species by name pattern
+func (db *Database) SearchSpeciesNames(query string) ([]string, error) {
 	pattern := "%" + escapeLike(query) + "%"
 	rows, err := db.conn.Query(
-		`SELECT scientific_name FROM oak_entries
+		`SELECT scientific_name FROM species
 		 WHERE scientific_name LIKE ? ESCAPE '\' ORDER BY scientific_name`,
 		pattern,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to search oak entries: %w", err)
+		return nil, fmt.Errorf("failed to search species: %w", err)
 	}
 	defer rows.Close()
 
@@ -1315,8 +1211,8 @@ func (db *Database) SearchOakEntries(query string) ([]string, error) {
 	return names, rows.Err()
 }
 
-// OakEntryFilter contains filter criteria for listing oak entries
-type OakEntryFilter struct {
+// SpeciesFilter contains filter criteria for listing species
+type SpeciesFilter struct {
 	Subgenus     *string
 	Section      *string
 	Subsection   *string
@@ -1329,13 +1225,13 @@ type OakEntryFilter struct {
 	NoComplex    bool // Filter for species with NULL complex
 }
 
-// ListOakEntriesPaginated returns a paginated list of oak entries with optional filters
-func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryFilter) ([]*models.OakEntry, error) {
+// ListSpeciesPaginated returns a paginated list of species with optional filters
+func (db *Database) ListSpeciesPaginated(limit, offset int, filter *SpeciesFilter) ([]*models.Species, error) {
 	// Base SELECT - use DISTINCT when joining with species_sources
-	selectClause := `SELECT scientific_name, author, is_hybrid, conservation_status,
+	selectClause := `SELECT id, scientific_name, author, is_hybrid, conservation_status,
 		        subgenus, section, subsection, complex,
 		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
-		 FROM oak_entries`
+		 FROM species`
 
 	var args []interface{}
 	var conditions []string
@@ -1345,18 +1241,18 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 		// Check if we need to join with species_sources
 		if filter.SourceID != nil {
 			needsJoin = true
-			selectClause = `SELECT DISTINCT oak_entries.scientific_name, oak_entries.author, oak_entries.is_hybrid, oak_entries.conservation_status,
-				oak_entries.subgenus, oak_entries.section, oak_entries.subsection, oak_entries.complex,
-				oak_entries.parent1, oak_entries.parent2, oak_entries.hybrids, oak_entries.closely_related_to, oak_entries.subspecies_varieties, oak_entries.synonyms, oak_entries.external_links
-			 FROM oak_entries
-			 INNER JOIN species_sources ON oak_entries.scientific_name = species_sources.scientific_name`
+			selectClause = `SELECT DISTINCT species.id, species.scientific_name, species.author, species.is_hybrid, species.conservation_status,
+				species.subgenus, species.section, species.subsection, species.complex,
+				species.parent1, species.parent2, species.hybrids, species.closely_related_to, species.subspecies_varieties, species.synonyms, species.external_links
+			 FROM species
+			 INNER JOIN species_sources ON species.id = species_sources.species_id`
 			conditions = append(conditions, "species_sources.source_id = ?")
 			args = append(args, *filter.SourceID)
 		}
 
 		if filter.Subgenus != nil {
 			if needsJoin {
-				conditions = append(conditions, "oak_entries.subgenus = ?")
+				conditions = append(conditions, "species.subgenus = ?")
 			} else {
 				conditions = append(conditions, "subgenus = ?")
 			}
@@ -1364,7 +1260,7 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 		}
 		if filter.Section != nil {
 			if needsJoin {
-				conditions = append(conditions, "oak_entries.section = ?")
+				conditions = append(conditions, "species.section = ?")
 			} else {
 				conditions = append(conditions, "section = ?")
 			}
@@ -1372,7 +1268,7 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 		}
 		if filter.Subsection != nil {
 			if needsJoin {
-				conditions = append(conditions, "oak_entries.subsection = ?")
+				conditions = append(conditions, "species.subsection = ?")
 			} else {
 				conditions = append(conditions, "subsection = ?")
 			}
@@ -1380,7 +1276,7 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 		}
 		if filter.Complex != nil {
 			if needsJoin {
-				conditions = append(conditions, "oak_entries.complex = ?")
+				conditions = append(conditions, "species.complex = ?")
 			} else {
 				conditions = append(conditions, "complex = ?")
 			}
@@ -1388,7 +1284,7 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 		}
 		if filter.Hybrid != nil {
 			if needsJoin {
-				conditions = append(conditions, "oak_entries.is_hybrid = ?")
+				conditions = append(conditions, "species.is_hybrid = ?")
 			} else {
 				conditions = append(conditions, "is_hybrid = ?")
 			}
@@ -1402,28 +1298,28 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 		// Handle "no_*" filters for NULL taxonomy levels
 		if filter.NoSubgenus {
 			if needsJoin {
-				conditions = append(conditions, "(oak_entries.subgenus IS NULL OR oak_entries.subgenus = '')")
+				conditions = append(conditions, "(species.subgenus IS NULL OR species.subgenus = '')")
 			} else {
 				conditions = append(conditions, "(subgenus IS NULL OR subgenus = '')")
 			}
 		}
 		if filter.NoSection {
 			if needsJoin {
-				conditions = append(conditions, "(oak_entries.section IS NULL OR oak_entries.section = '')")
+				conditions = append(conditions, "(species.section IS NULL OR species.section = '')")
 			} else {
 				conditions = append(conditions, "(section IS NULL OR section = '')")
 			}
 		}
 		if filter.NoSubsection {
 			if needsJoin {
-				conditions = append(conditions, "(oak_entries.subsection IS NULL OR oak_entries.subsection = '')")
+				conditions = append(conditions, "(species.subsection IS NULL OR species.subsection = '')")
 			} else {
 				conditions = append(conditions, "(subsection IS NULL OR subsection = '')")
 			}
 		}
 		if filter.NoComplex {
 			if needsJoin {
-				conditions = append(conditions, "(oak_entries.complex IS NULL OR oak_entries.complex = '')")
+				conditions = append(conditions, "(species.complex IS NULL OR species.complex = '')")
 			} else {
 				conditions = append(conditions, "(complex IS NULL OR complex = '')")
 			}
@@ -1436,7 +1332,7 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 	}
 
 	if needsJoin {
-		query += " ORDER BY oak_entries.scientific_name LIMIT ? OFFSET ?"
+		query += " ORDER BY species.scientific_name LIMIT ? OFFSET ?"
 	} else {
 		query += " ORDER BY scientific_name LIMIT ? OFFSET ?"
 	}
@@ -1444,16 +1340,16 @@ func (db *Database) ListOakEntriesPaginated(limit, offset int, filter *OakEntryF
 
 	rows, err := db.conn.Query(query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list oak entries: %w", err)
+		return nil, fmt.Errorf("failed to list species: %w", err)
 	}
 	defer rows.Close()
 
-	return scanOakEntries(rows)
+	return scanSpecies(rows)
 }
 
-// CountOakEntries returns the total count of oak entries matching the filter
-func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
-	baseQuery := `SELECT COUNT(*) FROM oak_entries`
+// CountSpecies returns the total count of species matching the filter
+func (db *Database) CountSpecies(filter *SpeciesFilter) (int, error) {
+	baseQuery := `SELECT COUNT(*) FROM species`
 
 	var args []interface{}
 	var conditions []string
@@ -1463,15 +1359,15 @@ func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
 		// Check if we need to join with species_sources
 		if filter.SourceID != nil {
 			needsJoin = true
-			baseQuery = `SELECT COUNT(DISTINCT oak_entries.scientific_name) FROM oak_entries
-			 INNER JOIN species_sources ON oak_entries.scientific_name = species_sources.scientific_name`
+			baseQuery = `SELECT COUNT(DISTINCT species.id) FROM species
+			 INNER JOIN species_sources ON species.id = species_sources.species_id`
 			conditions = append(conditions, "species_sources.source_id = ?")
 			args = append(args, *filter.SourceID)
 		}
 
 		if filter.Subgenus != nil {
 			if needsJoin {
-				conditions = append(conditions, "oak_entries.subgenus = ?")
+				conditions = append(conditions, "species.subgenus = ?")
 			} else {
 				conditions = append(conditions, "subgenus = ?")
 			}
@@ -1479,7 +1375,7 @@ func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
 		}
 		if filter.Section != nil {
 			if needsJoin {
-				conditions = append(conditions, "oak_entries.section = ?")
+				conditions = append(conditions, "species.section = ?")
 			} else {
 				conditions = append(conditions, "section = ?")
 			}
@@ -1487,7 +1383,7 @@ func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
 		}
 		if filter.Subsection != nil {
 			if needsJoin {
-				conditions = append(conditions, "oak_entries.subsection = ?")
+				conditions = append(conditions, "species.subsection = ?")
 			} else {
 				conditions = append(conditions, "subsection = ?")
 			}
@@ -1495,7 +1391,7 @@ func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
 		}
 		if filter.Complex != nil {
 			if needsJoin {
-				conditions = append(conditions, "oak_entries.complex = ?")
+				conditions = append(conditions, "species.complex = ?")
 			} else {
 				conditions = append(conditions, "complex = ?")
 			}
@@ -1503,7 +1399,7 @@ func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
 		}
 		if filter.Hybrid != nil {
 			if needsJoin {
-				conditions = append(conditions, "oak_entries.is_hybrid = ?")
+				conditions = append(conditions, "species.is_hybrid = ?")
 			} else {
 				conditions = append(conditions, "is_hybrid = ?")
 			}
@@ -1517,28 +1413,28 @@ func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
 		// Handle "no_*" filters for NULL taxonomy levels
 		if filter.NoSubgenus {
 			if needsJoin {
-				conditions = append(conditions, "(oak_entries.subgenus IS NULL OR oak_entries.subgenus = '')")
+				conditions = append(conditions, "(species.subgenus IS NULL OR species.subgenus = '')")
 			} else {
 				conditions = append(conditions, "(subgenus IS NULL OR subgenus = '')")
 			}
 		}
 		if filter.NoSection {
 			if needsJoin {
-				conditions = append(conditions, "(oak_entries.section IS NULL OR oak_entries.section = '')")
+				conditions = append(conditions, "(species.section IS NULL OR species.section = '')")
 			} else {
 				conditions = append(conditions, "(section IS NULL OR section = '')")
 			}
 		}
 		if filter.NoSubsection {
 			if needsJoin {
-				conditions = append(conditions, "(oak_entries.subsection IS NULL OR oak_entries.subsection = '')")
+				conditions = append(conditions, "(species.subsection IS NULL OR species.subsection = '')")
 			} else {
 				conditions = append(conditions, "(subsection IS NULL OR subsection = '')")
 			}
 		}
 		if filter.NoComplex {
 			if needsJoin {
-				conditions = append(conditions, "(oak_entries.complex IS NULL OR oak_entries.complex = '')")
+				conditions = append(conditions, "(species.complex IS NULL OR species.complex = '')")
 			} else {
 				conditions = append(conditions, "(complex IS NULL OR complex = '')")
 			}
@@ -1552,58 +1448,58 @@ func (db *Database) CountOakEntries(filter *OakEntryFilter) (int, error) {
 
 	var count int
 	if err := db.conn.QueryRow(query, args...).Scan(&count); err != nil {
-		return 0, fmt.Errorf("failed to count oak entries: %w", err)
+		return 0, fmt.Errorf("failed to count species: %w", err)
 	}
 	return count, nil
 }
 
-// SearchOakEntriesFull searches for oak entries by name pattern and returns full entries
-func (db *Database) SearchOakEntriesFull(query string, limit int) ([]*models.OakEntry, error) {
+// SearchSpeciesFull searches for species by name pattern and returns full entries
+func (db *Database) SearchSpeciesFull(query string, limit int) ([]*models.Species, error) {
 	pattern := "%" + escapeLike(query) + "%"
 	rows, err := db.conn.Query(
-		`SELECT scientific_name, author, is_hybrid, conservation_status,
+		`SELECT id, scientific_name, author, is_hybrid, conservation_status,
 		        subgenus, section, subsection, complex,
 		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
-		 FROM oak_entries
+		 FROM species
 		 WHERE scientific_name LIKE ? ESCAPE '\'
 		 ORDER BY scientific_name LIMIT ?`,
 		pattern, limit,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to search oak entries: %w", err)
+		return nil, fmt.Errorf("failed to search species: %w", err)
 	}
 	defer rows.Close()
 
-	return scanOakEntries(rows)
+	return scanSpecies(rows)
 }
 
-// OakEntryExists checks if an oak entry exists by scientific name
-func (db *Database) OakEntryExists(scientificName string) (bool, error) {
+// SpeciesExists checks if a species exists by scientific name
+func (db *Database) SpeciesExists(scientificName string) (bool, error) {
 	var count int
 	err := db.conn.QueryRow(
-		`SELECT COUNT(*) FROM oak_entries WHERE scientific_name = ?`,
+		`SELECT COUNT(*) FROM species WHERE scientific_name = ?`,
 		scientificName,
 	).Scan(&count)
 	if err != nil {
-		return false, fmt.Errorf("failed to check oak entry existence: %w", err)
+		return false, fmt.Errorf("failed to check species existence: %w", err)
 	}
 	return count > 0, nil
 }
 
-// scanOakEntries is a helper that scans rows into OakEntry objects
-func scanOakEntries(rows *sql.Rows) ([]*models.OakEntry, error) {
-	var entries []*models.OakEntry
+// scanSpecies is a helper that scans rows into Species objects
+func scanSpecies(rows *sql.Rows) ([]*models.Species, error) {
+	var entries []*models.Species
 	for rows.Next() {
-		var entry models.OakEntry
+		var entry models.Species
 		var isHybrid int
 		var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON, externalLinksJSON sql.NullString
 
 		if err := rows.Scan(
-			&entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
+			&entry.ID, &entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
 			&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
 			&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON, &externalLinksJSON,
 		); err != nil {
-			return nil, fmt.Errorf("failed to scan oak entry: %w", err)
+			return nil, fmt.Errorf("failed to scan species: %w", err)
 		}
 
 		entry.IsHybrid = isHybrid != 0
@@ -1689,85 +1585,20 @@ func (db *Database) BeginTx() (*sql.Tx, error) {
 	return db.conn.Begin()
 }
 
-// ListOakEntries returns all oak entries (for export)
-func (db *Database) ListOakEntries() ([]*models.OakEntry, error) {
+// ListAllSpecies returns all species (for export)
+func (db *Database) ListAllSpecies() ([]*models.Species, error) {
 	rows, err := db.conn.Query(
-		`SELECT scientific_name, author, is_hybrid, conservation_status,
+		`SELECT id, scientific_name, author, is_hybrid, conservation_status,
 		        subgenus, section, subsection, complex,
 		        parent1, parent2, hybrids, closely_related_to, subspecies_varieties, synonyms, external_links
-		 FROM oak_entries ORDER BY scientific_name`,
+		 FROM species ORDER BY scientific_name`,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list oak entries: %w", err)
+		return nil, fmt.Errorf("failed to list species: %w", err)
 	}
 	defer rows.Close()
 
-	var entries []*models.OakEntry
-	for rows.Next() {
-		var entry models.OakEntry
-		var isHybrid int
-		var hybridsJSON, relatedJSON, subspeciesJSON, synonymsJSON, externalLinksJSON sql.NullString
-
-		if err := rows.Scan(
-			&entry.ScientificName, &entry.Author, &isHybrid, &entry.ConservationStatus,
-			&entry.Subgenus, &entry.Section, &entry.Subsection, &entry.Complex,
-			&entry.Parent1, &entry.Parent2, &hybridsJSON, &relatedJSON, &subspeciesJSON, &synonymsJSON, &externalLinksJSON,
-		); err != nil {
-			return nil, fmt.Errorf("failed to scan oak entry: %w", err)
-		}
-
-		entry.IsHybrid = isHybrid != 0
-
-		// Unmarshal JSON arrays
-		if hybridsJSON.Valid {
-			if err := json.Unmarshal([]byte(hybridsJSON.String), &entry.Hybrids); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal hybrids for %s: %w", entry.ScientificName, err)
-			}
-		}
-		if entry.Hybrids == nil {
-			entry.Hybrids = []string{}
-		}
-
-		if relatedJSON.Valid {
-			if err := json.Unmarshal([]byte(relatedJSON.String), &entry.CloselyRelatedTo); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal closely_related_to for %s: %w", entry.ScientificName, err)
-			}
-		}
-		if entry.CloselyRelatedTo == nil {
-			entry.CloselyRelatedTo = []string{}
-		}
-
-		if subspeciesJSON.Valid {
-			if err := json.Unmarshal([]byte(subspeciesJSON.String), &entry.SubspeciesVarieties); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal subspecies_varieties for %s: %w", entry.ScientificName, err)
-			}
-		}
-		if entry.SubspeciesVarieties == nil {
-			entry.SubspeciesVarieties = []string{}
-		}
-
-		if synonymsJSON.Valid {
-			if err := json.Unmarshal([]byte(synonymsJSON.String), &entry.Synonyms); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal synonyms for %s: %w", entry.ScientificName, err)
-			}
-		}
-		if entry.Synonyms == nil {
-			entry.Synonyms = []string{}
-		}
-
-		if externalLinksJSON.Valid {
-			if err := json.Unmarshal([]byte(externalLinksJSON.String), &entry.ExternalLinks); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal external_links for %s: %w", entry.ScientificName, err)
-			}
-		}
-		if entry.ExternalLinks == nil {
-			entry.ExternalLinks = []models.ExternalLink{}
-		}
-
-		entries = append(entries, &entry)
-	}
-
-	return entries, rows.Err()
+	return scanSpecies(rows)
 }
 
 // SaveSpeciesSource saves or updates a species-source record
@@ -1782,13 +1613,20 @@ func (db *Database) SaveSpeciesSource(ss *models.SpeciesSource) error {
 		isPreferred = 1
 	}
 
+	// First, look up the species_id from the scientific_name
+	var speciesID int64
+	err = db.conn.QueryRow(`SELECT id FROM species WHERE scientific_name = ?`, ss.ScientificName).Scan(&speciesID)
+	if err != nil {
+		return fmt.Errorf("failed to find species %s: %w", ss.ScientificName, err)
+	}
+
 	result, err := db.conn.Exec(
 		`INSERT OR REPLACE INTO species_sources (
-			scientific_name, source_id, local_names, range, growth_habit,
+			species_id, source_id, local_names, range, growth_habit,
 			leaves, flowers, fruits, bark, twigs, buds, hardiness_habitat,
 			miscellaneous, url, is_preferred
 		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		ss.ScientificName, ss.SourceID, string(localNamesJSON), ss.Range, ss.GrowthHabit,
+		speciesID, ss.SourceID, string(localNamesJSON), ss.Range, ss.GrowthHabit,
 		ss.Leaves, ss.Flowers, ss.Fruits, ss.Bark, ss.Twigs, ss.Buds, ss.HardinessHabitat,
 		ss.Miscellaneous, ss.URL, isPreferred,
 	)
@@ -1809,10 +1647,12 @@ func (db *Database) SaveSpeciesSource(ss *models.SpeciesSource) error {
 // GetSpeciesSources returns all source data for a species
 func (db *Database) GetSpeciesSources(scientificName string) ([]*models.SpeciesSource, error) {
 	rows, err := db.conn.Query(
-		`SELECT id, scientific_name, source_id, local_names, range, growth_habit,
-		        leaves, flowers, fruits, bark, twigs, buds, hardiness_habitat,
-		        miscellaneous, url, is_preferred
-		 FROM species_sources WHERE scientific_name = ? ORDER BY is_preferred DESC, source_id`,
+		`SELECT ss.id, sp.scientific_name, ss.source_id, ss.local_names, ss.range, ss.growth_habit,
+		        ss.leaves, ss.flowers, ss.fruits, ss.bark, ss.twigs, ss.buds, ss.hardiness_habitat,
+		        ss.miscellaneous, ss.url, ss.is_preferred
+		 FROM species_sources ss
+		 JOIN species sp ON ss.species_id = sp.id
+		 WHERE sp.scientific_name = ? ORDER BY ss.is_preferred DESC, ss.source_id`,
 		scientificName,
 	)
 	if err != nil {
@@ -1834,10 +1674,12 @@ func (db *Database) GetSpeciesSources(scientificName string) ([]*models.SpeciesS
 // GetSpeciesSourceBySourceID returns source data for a specific species+source combination
 func (db *Database) GetSpeciesSourceBySourceID(scientificName string, sourceID int64) (*models.SpeciesSource, error) {
 	row := db.conn.QueryRow(
-		`SELECT id, scientific_name, source_id, local_names, range, growth_habit,
-		        leaves, flowers, fruits, bark, twigs, buds, hardiness_habitat,
-		        miscellaneous, url, is_preferred
-		 FROM species_sources WHERE scientific_name = ? AND source_id = ?`,
+		`SELECT ss.id, sp.scientific_name, ss.source_id, ss.local_names, ss.range, ss.growth_habit,
+		        ss.leaves, ss.flowers, ss.fruits, ss.bark, ss.twigs, ss.buds, ss.hardiness_habitat,
+		        ss.miscellaneous, ss.url, ss.is_preferred
+		 FROM species_sources ss
+		 JOIN species sp ON ss.species_id = sp.id
+		 WHERE sp.scientific_name = ? AND ss.source_id = ?`,
 		scientificName, sourceID,
 	)
 
@@ -1873,10 +1715,12 @@ func (db *Database) GetSpeciesSourceBySourceID(scientificName string, sourceID i
 // GetPreferredSpeciesSource returns the preferred source data for a species
 func (db *Database) GetPreferredSpeciesSource(scientificName string) (*models.SpeciesSource, error) {
 	row := db.conn.QueryRow(
-		`SELECT id, scientific_name, source_id, local_names, range, growth_habit,
-		        leaves, flowers, fruits, bark, twigs, buds, hardiness_habitat,
-		        miscellaneous, url, is_preferred
-		 FROM species_sources WHERE scientific_name = ? ORDER BY is_preferred DESC LIMIT 1`,
+		`SELECT ss.id, sp.scientific_name, ss.source_id, ss.local_names, ss.range, ss.growth_habit,
+		        ss.leaves, ss.flowers, ss.fruits, ss.bark, ss.twigs, ss.buds, ss.hardiness_habitat,
+		        ss.miscellaneous, ss.url, ss.is_preferred
+		 FROM species_sources ss
+		 JOIN species sp ON ss.species_id = sp.id
+		 WHERE sp.scientific_name = ? ORDER BY ss.is_preferred DESC LIMIT 1`,
 		scientificName,
 	)
 
@@ -1940,10 +1784,12 @@ func scanSpeciesSource(rows *sql.Rows) (*models.SpeciesSource, error) {
 // ListAllSpeciesSources returns all species_sources records (for export)
 func (db *Database) ListAllSpeciesSources() ([]*models.SpeciesSource, error) {
 	rows, err := db.conn.Query(
-		`SELECT id, scientific_name, source_id, local_names, range, growth_habit,
-		        leaves, flowers, fruits, bark, twigs, buds, hardiness_habitat,
-		        miscellaneous, url, is_preferred
-		 FROM species_sources ORDER BY scientific_name, is_preferred DESC`,
+		`SELECT ss.id, sp.scientific_name, ss.source_id, ss.local_names, ss.range, ss.growth_habit,
+		        ss.leaves, ss.flowers, ss.fruits, ss.bark, ss.twigs, ss.buds, ss.hardiness_habitat,
+		        ss.miscellaneous, ss.url, ss.is_preferred
+		 FROM species_sources ss
+		 JOIN species sp ON ss.species_id = sp.id
+		 ORDER BY sp.scientific_name, ss.is_preferred DESC`,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list species sources: %w", err)
@@ -1964,7 +1810,9 @@ func (db *Database) ListAllSpeciesSources() ([]*models.SpeciesSource, error) {
 // DeleteSpeciesSource deletes a species-source record by scientific name and source ID
 func (db *Database) DeleteSpeciesSource(scientificName string, sourceID int64) error {
 	result, err := db.conn.Exec(
-		`DELETE FROM species_sources WHERE scientific_name = ? AND source_id = ?`,
+		`DELETE FROM species_sources
+		 WHERE species_id = (SELECT id FROM species WHERE scientific_name = ?)
+		 AND source_id = ?`,
 		scientificName, sourceID,
 	)
 	if err != nil {
@@ -2023,11 +1871,11 @@ func (db *Database) DeleteMetadata(key string) error {
 	return nil
 }
 
-// GetOakEntryWithSources returns a species with all its source data embedded
+// GetSpeciesWithSources returns a species with all its source data embedded
 // Sources are ordered by is_preferred DESC, source_id ASC
-func (db *Database) GetOakEntryWithSources(scientificName string) (*models.SpeciesWithSources, error) {
+func (db *Database) GetSpeciesWithSources(scientificName string) (*models.SpeciesWithSources, error) {
 	// Get the species entry first
-	entry, err := db.GetOakEntry(scientificName)
+	entry, err := db.GetSpecies(scientificName)
 	if err != nil {
 		return nil, err
 	}
@@ -2037,13 +1885,14 @@ func (db *Database) GetOakEntryWithSources(scientificName string) (*models.Speci
 
 	// Get sources with source metadata via join
 	rows, err := db.conn.Query(
-		`SELECT ss.id, ss.scientific_name, ss.source_id, ss.local_names, ss.range, ss.growth_habit,
+		`SELECT ss.id, sp.scientific_name, ss.source_id, ss.local_names, ss.range, ss.growth_habit,
 		        ss.leaves, ss.flowers, ss.fruits, ss.bark, ss.twigs, ss.buds, ss.hardiness_habitat,
 		        ss.miscellaneous, ss.url, ss.is_preferred,
 		        s.name, s.url
 		 FROM species_sources ss
+		 JOIN species sp ON ss.species_id = sp.id
 		 JOIN sources s ON ss.source_id = s.id
-		 WHERE ss.scientific_name = ?
+		 WHERE sp.scientific_name = ?
 		 ORDER BY ss.is_preferred DESC, ss.source_id ASC`,
 		scientificName,
 	)
@@ -2090,8 +1939,8 @@ func (db *Database) GetOakEntryWithSources(scientificName string) (*models.Speci
 	}
 
 	return &models.SpeciesWithSources{
-		OakEntry: *entry,
-		Sources:  sources,
+		Species: *entry,
+		Sources: sources,
 	}, nil
 }
 
@@ -2108,12 +1957,12 @@ func (db *Database) GetStats() (*Stats, error) {
 	stats := &Stats{}
 
 	// Count species (non-hybrids)
-	if err := db.conn.QueryRow(`SELECT COUNT(*) FROM oak_entries WHERE is_hybrid = 0`).Scan(&stats.SpeciesCount); err != nil {
+	if err := db.conn.QueryRow(`SELECT COUNT(*) FROM species WHERE is_hybrid = 0`).Scan(&stats.SpeciesCount); err != nil {
 		return nil, fmt.Errorf("failed to count species: %w", err)
 	}
 
 	// Count hybrids
-	if err := db.conn.QueryRow(`SELECT COUNT(*) FROM oak_entries WHERE is_hybrid = 1`).Scan(&stats.HybridCount); err != nil {
+	if err := db.conn.QueryRow(`SELECT COUNT(*) FROM species WHERE is_hybrid = 1`).Scan(&stats.HybridCount); err != nil {
 		return nil, fmt.Errorf("failed to count hybrids: %w", err)
 	}
 
@@ -2133,7 +1982,7 @@ func (db *Database) GetStats() (*Stats, error) {
 // GetHybridsReferencingParent returns all hybrids that reference the given species as parent1 or parent2
 func (db *Database) GetHybridsReferencingParent(scientificName string) ([]string, error) {
 	rows, err := db.conn.Query(
-		`SELECT scientific_name FROM oak_entries
+		`SELECT scientific_name FROM species
 		 WHERE is_hybrid = 1 AND (parent1 = ? OR parent2 = ?)
 		 ORDER BY scientific_name`,
 		scientificName, scientificName,
@@ -2161,7 +2010,7 @@ func (db *Database) GetHybridsReferencingParent(scientificName string) ([]string
 func (db *Database) UnifiedSearch(query string, limit int) (*models.UnifiedSearchResults, error) {
 	result := &models.UnifiedSearchResults{
 		Query:   query,
-		Species: []models.OakEntry{},
+		Species: []models.Species{},
 		Taxa:    []models.Taxon{},
 		Sources: []models.Source{},
 	}
@@ -2170,16 +2019,16 @@ func (db *Database) UnifiedSearch(query string, limit int) (*models.UnifiedSearc
 
 	// Search species: scientific_name, author, synonyms (JSON), local_names (via species_sources)
 	speciesRows, err := db.conn.Query(
-		`SELECT DISTINCT o.scientific_name, o.author, o.is_hybrid, o.conservation_status,
-		        o.subgenus, o.section, o.subsection, o.complex,
-		        o.parent1, o.parent2, o.hybrids, o.closely_related_to, o.subspecies_varieties, o.synonyms, o.external_links
-		 FROM oak_entries o
-		 LEFT JOIN species_sources ss ON o.scientific_name = ss.scientific_name
-		 WHERE o.scientific_name LIKE ? ESCAPE '\'
-		    OR o.author LIKE ? ESCAPE '\'
-		    OR o.synonyms LIKE ? ESCAPE '\'
+		`SELECT DISTINCT sp.id, sp.scientific_name, sp.author, sp.is_hybrid, sp.conservation_status,
+		        sp.subgenus, sp.section, sp.subsection, sp.complex,
+		        sp.parent1, sp.parent2, sp.hybrids, sp.closely_related_to, sp.subspecies_varieties, sp.synonyms, sp.external_links
+		 FROM species sp
+		 LEFT JOIN species_sources ss ON sp.id = ss.species_id
+		 WHERE sp.scientific_name LIKE ? ESCAPE '\'
+		    OR sp.author LIKE ? ESCAPE '\'
+		    OR sp.synonyms LIKE ? ESCAPE '\'
 		    OR ss.local_names LIKE ? ESCAPE '\'
-		 ORDER BY o.scientific_name LIMIT ?`,
+		 ORDER BY sp.scientific_name LIMIT ?`,
 		pattern, pattern, pattern, pattern, limit,
 	)
 	if err != nil {
@@ -2187,7 +2036,7 @@ func (db *Database) UnifiedSearch(query string, limit int) (*models.UnifiedSearc
 	}
 	defer speciesRows.Close()
 
-	entries, err := scanOakEntries(speciesRows)
+	entries, err := scanSpecies(speciesRows)
 	if err != nil {
 		return nil, err
 	}
@@ -2197,12 +2046,12 @@ func (db *Database) UnifiedSearch(query string, limit int) (*models.UnifiedSearc
 
 	// Search taxa by name
 	taxaRows, err := db.conn.Query(
-		`SELECT t.name, t.level, t.parent, t.author, t.content, t.content_updated_at, t.links,
-		        (SELECT COUNT(*) FROM oak_entries o WHERE
-		            (t.level = 'subgenus' AND o.subgenus = t.name) OR
-		            (t.level = 'section' AND o.section = t.name) OR
-		            (t.level = 'subsection' AND o.subsection = t.name) OR
-		            (t.level = 'complex' AND o.complex = t.name)
+		`SELECT t.id, t.name, t.level, t.parent, t.author, t.content, t.content_updated_at, t.links,
+		        (SELECT COUNT(*) FROM species sp WHERE
+		            (t.level = 'subgenus' AND sp.subgenus = t.name) OR
+		            (t.level = 'section' AND sp.section = t.name) OR
+		            (t.level = 'subsection' AND sp.subsection = t.name) OR
+		            (t.level = 'complex' AND sp.complex = t.name)
 		        ) as species_count
 		 FROM taxa t
 		 WHERE t.name LIKE ? ESCAPE '\'
@@ -2218,7 +2067,7 @@ func (db *Database) UnifiedSearch(query string, limit int) (*models.UnifiedSearc
 		var t models.Taxon
 		var levelStr string
 		var linksJSON sql.NullString
-		if err := taxaRows.Scan(&t.Name, &levelStr, &t.Parent, &t.Author, &t.Content, &t.ContentUpdatedAt, &linksJSON, &t.SpeciesCount); err != nil {
+		if err := taxaRows.Scan(&t.ID, &t.Name, &levelStr, &t.Parent, &t.Author, &t.Content, &t.ContentUpdatedAt, &linksJSON, &t.SpeciesCount); err != nil {
 			return nil, fmt.Errorf("failed to scan taxon: %w", err)
 		}
 		t.Level = models.TaxonLevel(levelStr)

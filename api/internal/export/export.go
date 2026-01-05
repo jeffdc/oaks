@@ -10,10 +10,10 @@ import (
 
 // Build creates an export File from the database.
 func Build(database *db.Database) (*File, error) {
-	// Get all oak entries
-	entries, err := database.ListOakEntries()
+	// Get all species
+	entries, err := database.ListAllSpecies()
 	if err != nil {
-		return nil, fmt.Errorf("failed to list oak entries: %w", err)
+		return nil, fmt.Errorf("failed to list species: %w", err)
 	}
 
 	// Get all sources for lookup

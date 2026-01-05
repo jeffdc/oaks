@@ -214,7 +214,7 @@ func (s *Server) handleListSpecies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filter := &db.OakEntryFilter{
+	filter := &db.SpeciesFilter{
 		Subgenus:     params.Subgenus,
 		Section:      params.Section,
 		Subsection:   params.Subsection,
@@ -228,7 +228,7 @@ func (s *Server) handleListSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get total count
-	total, err := s.db.CountOakEntries(filter)
+	total, err := s.db.CountSpecies(filter)
 	if err != nil {
 		s.logger.Error("failed to count species", "error", err)
 		RespondInternalError(w, "")
@@ -236,7 +236,7 @@ func (s *Server) handleListSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get paginated entries
-	entries, err := s.db.ListOakEntriesPaginated(params.Limit, params.Offset, filter)
+	entries, err := s.db.ListSpeciesPaginated(params.Limit, params.Offset, filter)
 	if err != nil {
 		s.logger.Error("failed to list species", "error", err)
 		RespondInternalError(w, "")
@@ -245,7 +245,7 @@ func (s *Server) handleListSpecies(w http.ResponseWriter, r *http.Request) {
 
 	// Ensure we never return nil
 	if entries == nil {
-		entries = []*models.OakEntry{}
+		entries = []*models.Species{}
 	}
 
 	resp := NewListResponse(entries, total, params.Limit, params.Offset)
@@ -265,7 +265,7 @@ func (s *Server) handleGetSpecies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entry, err := s.db.GetOakEntry(name)
+	entry, err := s.db.GetSpecies(name)
 	if err != nil {
 		s.logger.Error("failed to get species", "name", name, "error", err)
 		RespondInternalError(w, "")
@@ -289,7 +289,7 @@ func (s *Server) handleGetSpeciesFull(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entry, err := s.db.GetOakEntryWithSources(name)
+	entry, err := s.db.GetSpeciesWithSources(name)
 	if err != nil {
 		s.logger.Error("failed to get full species", "name", name, "error", err)
 		RespondInternalError(w, "")
@@ -320,7 +320,7 @@ func (s *Server) handleSearchSpecies(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	entries, err := s.db.SearchOakEntriesFull(query, limit)
+	entries, err := s.db.SearchSpeciesFull(query, limit)
 	if err != nil {
 		s.logger.Error("failed to search species", "query", query, "error", err)
 		RespondInternalError(w, "")
@@ -328,7 +328,7 @@ func (s *Server) handleSearchSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if entries == nil {
-		entries = []*models.OakEntry{}
+		entries = []*models.Species{}
 	}
 
 	RespondJSON(w, http.StatusOK, map[string]interface{}{
@@ -353,7 +353,7 @@ func (s *Server) handleCreateSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if species already exists
-	exists, err := s.db.OakEntryExists(req.ScientificName)
+	exists, err := s.db.SpeciesExists(req.ScientificName)
 	if err != nil {
 		s.logger.Error("failed to check species existence", "name", req.ScientificName, "error", err)
 		RespondInternalError(w, "")
@@ -365,8 +365,8 @@ func (s *Server) handleCreateSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create the entry
-	entry := requestToOakEntry(&req)
-	if err := s.db.SaveOakEntry(entry); err != nil {
+	entry := requestToSpecies(&req)
+	if err := s.db.SaveSpecies(entry); err != nil {
 		s.logger.Error("failed to create species", "name", req.ScientificName, "error", err)
 		RespondInternalError(w, "")
 		return
@@ -401,7 +401,7 @@ func (s *Server) handleUpdateSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get existing entry
-	existing, err := s.db.GetOakEntry(name)
+	existing, err := s.db.GetSpecies(name)
 	if err != nil {
 		s.logger.Error("failed to get species for update", "name", name, "error", err)
 		RespondInternalError(w, "")
@@ -413,8 +413,8 @@ func (s *Server) handleUpdateSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Merge updates into existing entry
-	entry := mergeOakEntry(existing, &req)
-	if err := s.db.SaveOakEntry(entry); err != nil {
+	entry := mergeSpecies(existing, &req)
+	if err := s.db.SaveSpecies(entry); err != nil {
 		s.logger.Error("failed to update species", "name", name, "error", err)
 		RespondInternalError(w, "")
 		return
@@ -437,7 +437,7 @@ func (s *Server) handleDeleteSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if species exists
-	exists, err := s.db.OakEntryExists(name)
+	exists, err := s.db.SpeciesExists(name)
 	if err != nil {
 		s.logger.Error("failed to check species existence for delete", "name", name, "error", err)
 		RespondInternalError(w, "")
@@ -461,7 +461,7 @@ func (s *Server) handleDeleteSpecies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete the entry (cascades to species_sources via ON DELETE CASCADE)
-	if err := s.db.DeleteOakEntry(name); err != nil {
+	if err := s.db.DeleteSpecies(name); err != nil {
 		s.logger.Error("failed to delete species", "name", name, "error", err)
 		RespondInternalError(w, "")
 		return
@@ -470,9 +470,9 @@ func (s *Server) handleDeleteSpecies(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// requestToOakEntry converts a SpeciesRequest to an OakEntry
-func requestToOakEntry(req *SpeciesRequest) *models.OakEntry {
-	entry := models.NewOakEntry(req.ScientificName)
+// requestToSpecies converts a SpeciesRequest to a Species
+func requestToSpecies(req *SpeciesRequest) *models.Species {
+	entry := models.NewSpecies(req.ScientificName)
 	entry.Author = req.Author
 	entry.IsHybrid = req.IsHybrid
 	entry.ConservationStatus = req.ConservationStatus
@@ -497,8 +497,8 @@ func requestToOakEntry(req *SpeciesRequest) *models.OakEntry {
 	return entry
 }
 
-// mergeOakEntry merges updates from a request into an existing entry
-func mergeOakEntry(existing *models.OakEntry, req *SpeciesRequest) *models.OakEntry {
+// mergeSpecies merges updates from a request into an existing species
+func mergeSpecies(existing *models.Species, req *SpeciesRequest) *models.Species {
 	// Start with the existing entry
 	entry := *existing
 

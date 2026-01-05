@@ -61,7 +61,7 @@ func TestOakEntryCRUD(t *testing.T) {
 	author := "L. 1753"
 	subgenus := "Quercus"
 	section := "Quercus"
-	entry := &models.OakEntry{
+	entry := &models.Species{
 		ScientificName:      "alba",
 		Author:              &author,
 		IsHybrid:            false,
@@ -77,12 +77,12 @@ func TestOakEntryCRUD(t *testing.T) {
 	}
 
 	// Save
-	if err := db.SaveOakEntry(entry); err != nil {
+	if err := db.SaveSpecies(entry); err != nil {
 		t.Fatalf("SaveOakEntry failed: %v", err)
 	}
 
 	// Get
-	got, err := db.GetOakEntry("alba")
+	got, err := db.GetSpecies("alba")
 	if err != nil {
 		t.Fatalf("GetOakEntry failed: %v", err)
 	}
@@ -110,11 +110,11 @@ func TestOakEntryCRUD(t *testing.T) {
 
 	// Update (via SaveOakEntry which uses INSERT OR REPLACE)
 	got.Hybrids = append(got.Hybrids, "fernowii")
-	if err := db.SaveOakEntry(got); err != nil {
+	if err := db.SaveSpecies(got); err != nil {
 		t.Fatalf("SaveOakEntry update failed: %v", err)
 	}
 
-	updated, err := db.GetOakEntry("alba")
+	updated, err := db.GetSpecies("alba")
 	if err != nil {
 		t.Fatalf("GetOakEntry after update failed: %v", err)
 	}
@@ -123,11 +123,11 @@ func TestOakEntryCRUD(t *testing.T) {
 	}
 
 	// Delete
-	if err := db.DeleteOakEntry("alba"); err != nil {
+	if err := db.DeleteSpecies("alba"); err != nil {
 		t.Fatalf("DeleteOakEntry failed: %v", err)
 	}
 
-	deleted, err := db.GetOakEntry("alba")
+	deleted, err := db.GetSpecies("alba")
 	if err != nil {
 		t.Fatalf("GetOakEntry after delete failed: %v", err)
 	}
@@ -142,7 +142,7 @@ func TestOakEntryHybrid(t *testing.T) {
 
 	parent1 := "alba"
 	parent2 := "macrocarpa"
-	entry := &models.OakEntry{
+	entry := &models.Species{
 		ScientificName:      "× bebbiana",
 		IsHybrid:            true,
 		Parent1:             &parent1,
@@ -154,11 +154,11 @@ func TestOakEntryHybrid(t *testing.T) {
 		ExternalLinks:       []models.ExternalLink{},
 	}
 
-	if err := db.SaveOakEntry(entry); err != nil {
+	if err := db.SaveSpecies(entry); err != nil {
 		t.Fatalf("SaveOakEntry failed: %v", err)
 	}
 
-	got, err := db.GetOakEntry("× bebbiana")
+	got, err := db.GetSpecies("× bebbiana")
 	if err != nil {
 		t.Fatalf("GetOakEntry failed: %v", err)
 	}
@@ -178,7 +178,7 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 	defer cleanup()
 
 	// Create parent species first
-	alba := &models.OakEntry{
+	alba := &models.Species{
 		ScientificName:      "alba",
 		Hybrids:             []string{},
 		CloselyRelatedTo:    []string{},
@@ -186,7 +186,7 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 		Synonyms:            []string{},
 		ExternalLinks:       []models.ExternalLink{},
 	}
-	macrocarpa := &models.OakEntry{
+	macrocarpa := &models.Species{
 		ScientificName:      "macrocarpa",
 		Hybrids:             []string{},
 		CloselyRelatedTo:    []string{},
@@ -194,7 +194,7 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 		Synonyms:            []string{},
 		ExternalLinks:       []models.ExternalLink{},
 	}
-	rubra := &models.OakEntry{
+	rubra := &models.Species{
 		ScientificName:      "rubra",
 		Hybrids:             []string{},
 		CloselyRelatedTo:    []string{},
@@ -203,8 +203,8 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 		ExternalLinks:       []models.ExternalLink{},
 	}
 
-	for _, e := range []*models.OakEntry{alba, macrocarpa, rubra} {
-		if err := db.SaveOakEntry(e); err != nil {
+	for _, e := range []*models.Species{alba, macrocarpa, rubra} {
+		if err := db.SaveSpecies(e); err != nil {
 			t.Fatalf("SaveOakEntry(%s) failed: %v", e.ScientificName, err)
 		}
 	}
@@ -212,7 +212,7 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 	// Create hybrid with parents
 	parent1 := "alba"
 	parent2 := "macrocarpa"
-	hybrid := &models.OakEntry{
+	hybrid := &models.Species{
 		ScientificName:      "× bebbiana",
 		IsHybrid:            true,
 		Parent1:             &parent1,
@@ -224,12 +224,12 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 		ExternalLinks:       []models.ExternalLink{},
 	}
 
-	if err := db.SaveOakEntry(hybrid); err != nil {
+	if err := db.SaveSpecies(hybrid); err != nil {
 		t.Fatalf("SaveOakEntry(hybrid) failed: %v", err)
 	}
 
 	// Verify parents now have the hybrid in their hybrids list
-	gotAlba, err := db.GetOakEntry("alba")
+	gotAlba, err := db.GetSpecies("alba")
 	if err != nil {
 		t.Fatalf("GetOakEntry(alba) failed: %v", err)
 	}
@@ -237,7 +237,7 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 		t.Errorf("alba.Hybrids = %v, want to contain '× bebbiana'", gotAlba.Hybrids)
 	}
 
-	gotMacrocarpa, err := db.GetOakEntry("macrocarpa")
+	gotMacrocarpa, err := db.GetSpecies("macrocarpa")
 	if err != nil {
 		t.Fatalf("GetOakEntry(macrocarpa) failed: %v", err)
 	}
@@ -248,12 +248,12 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 	// Change one parent from macrocarpa to rubra
 	newParent2 := "rubra"
 	hybrid.Parent2 = &newParent2
-	if err := db.SaveOakEntry(hybrid); err != nil {
+	if err := db.SaveSpecies(hybrid); err != nil {
 		t.Fatalf("SaveOakEntry(hybrid with changed parent) failed: %v", err)
 	}
 
 	// Verify macrocarpa no longer has the hybrid
-	gotMacrocarpa, err = db.GetOakEntry("macrocarpa")
+	gotMacrocarpa, err = db.GetSpecies("macrocarpa")
 	if err != nil {
 		t.Fatalf("GetOakEntry(macrocarpa) failed: %v", err)
 	}
@@ -262,7 +262,7 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 	}
 
 	// Verify rubra now has the hybrid
-	gotRubra, err := db.GetOakEntry("rubra")
+	gotRubra, err := db.GetSpecies("rubra")
 	if err != nil {
 		t.Fatalf("GetOakEntry(rubra) failed: %v", err)
 	}
@@ -271,7 +271,7 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 	}
 
 	// Verify alba still has the hybrid (unchanged)
-	gotAlba, err = db.GetOakEntry("alba")
+	gotAlba, err = db.GetSpecies("alba")
 	if err != nil {
 		t.Fatalf("GetOakEntry(alba) failed: %v", err)
 	}
@@ -281,12 +281,12 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 
 	// Remove parent2 entirely
 	hybrid.Parent2 = nil
-	if err := db.SaveOakEntry(hybrid); err != nil {
+	if err := db.SaveSpecies(hybrid); err != nil {
 		t.Fatalf("SaveOakEntry(hybrid with nil parent2) failed: %v", err)
 	}
 
 	// Verify rubra no longer has the hybrid
-	gotRubra, err = db.GetOakEntry("rubra")
+	gotRubra, err = db.GetSpecies("rubra")
 	if err != nil {
 		t.Fatalf("GetOakEntry(rubra) failed: %v", err)
 	}
@@ -295,7 +295,7 @@ func TestBidirectionalHybridParentRelationship(t *testing.T) {
 	}
 
 	// Verify alba still has the hybrid
-	gotAlba, err = db.GetOakEntry("alba")
+	gotAlba, err = db.GetSpecies("alba")
 	if err != nil {
 		t.Fatalf("GetOakEntry(alba) failed: %v", err)
 	}
@@ -309,7 +309,7 @@ func TestBidirectionalHybridDoesNotDuplicateExisting(t *testing.T) {
 	defer cleanup()
 
 	// Create parent species with pre-existing hybrid in list
-	alba := &models.OakEntry{
+	alba := &models.Species{
 		ScientificName:      "alba",
 		Hybrids:             []string{"× bebbiana"},
 		CloselyRelatedTo:    []string{},
@@ -317,7 +317,7 @@ func TestBidirectionalHybridDoesNotDuplicateExisting(t *testing.T) {
 		Synonyms:            []string{},
 		ExternalLinks:       []models.ExternalLink{},
 	}
-	macrocarpa := &models.OakEntry{
+	macrocarpa := &models.Species{
 		ScientificName:      "macrocarpa",
 		Hybrids:             []string{},
 		CloselyRelatedTo:    []string{},
@@ -326,8 +326,8 @@ func TestBidirectionalHybridDoesNotDuplicateExisting(t *testing.T) {
 		ExternalLinks:       []models.ExternalLink{},
 	}
 
-	for _, e := range []*models.OakEntry{alba, macrocarpa} {
-		if err := db.SaveOakEntry(e); err != nil {
+	for _, e := range []*models.Species{alba, macrocarpa} {
+		if err := db.SaveSpecies(e); err != nil {
 			t.Fatalf("SaveOakEntry(%s) failed: %v", e.ScientificName, err)
 		}
 	}
@@ -335,7 +335,7 @@ func TestBidirectionalHybridDoesNotDuplicateExisting(t *testing.T) {
 	// Create hybrid that references alba (which already has it in list)
 	parent1 := "alba"
 	parent2 := "macrocarpa"
-	hybrid := &models.OakEntry{
+	hybrid := &models.Species{
 		ScientificName:      "× bebbiana",
 		IsHybrid:            true,
 		Parent1:             &parent1,
@@ -347,12 +347,12 @@ func TestBidirectionalHybridDoesNotDuplicateExisting(t *testing.T) {
 		ExternalLinks:       []models.ExternalLink{},
 	}
 
-	if err := db.SaveOakEntry(hybrid); err != nil {
+	if err := db.SaveSpecies(hybrid); err != nil {
 		t.Fatalf("SaveOakEntry(hybrid) failed: %v", err)
 	}
 
 	// Verify alba still has only one instance of the hybrid
-	gotAlba, err := db.GetOakEntry("alba")
+	gotAlba, err := db.GetSpecies("alba")
 	if err != nil {
 		t.Fatalf("GetOakEntry(alba) failed: %v", err)
 	}
@@ -376,7 +376,7 @@ func TestBidirectionalHybridWithNonExistentParent(t *testing.T) {
 	// This should not fail, just skip updating the parents
 	parent1 := "nonexistent1"
 	parent2 := "nonexistent2"
-	hybrid := &models.OakEntry{
+	hybrid := &models.Species{
 		ScientificName:      "× testHybrid",
 		IsHybrid:            true,
 		Parent1:             &parent1,
@@ -388,12 +388,12 @@ func TestBidirectionalHybridWithNonExistentParent(t *testing.T) {
 		ExternalLinks:       []models.ExternalLink{},
 	}
 
-	if err := db.SaveOakEntry(hybrid); err != nil {
+	if err := db.SaveSpecies(hybrid); err != nil {
 		t.Fatalf("SaveOakEntry(hybrid with non-existent parents) should not fail: %v", err)
 	}
 
 	// Verify the hybrid was saved correctly
-	got, err := db.GetOakEntry("× testHybrid")
+	got, err := db.GetSpecies("× testHybrid")
 	if err != nil {
 		t.Fatalf("GetOakEntry failed: %v", err)
 	}
@@ -409,20 +409,20 @@ func TestSearchOakEntries(t *testing.T) {
 	db, cleanup := testDB(t)
 	defer cleanup()
 
-	entries := []*models.OakEntry{
+	entries := []*models.Species{
 		{ScientificName: "alba", Hybrids: []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{}},
 		{ScientificName: "rubra", Hybrids: []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{}},
 		{ScientificName: "palustris", Hybrids: []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{}},
 	}
 
 	for _, e := range entries {
-		if err := db.SaveOakEntry(e); err != nil {
+		if err := db.SaveSpecies(e); err != nil {
 			t.Fatalf("SaveOakEntry failed: %v", err)
 		}
 	}
 
 	// Search for "a"
-	results, err := db.SearchOakEntries("a")
+	results, err := db.SearchSpeciesNames("a")
 	if err != nil {
 		t.Fatalf("SearchOakEntries failed: %v", err)
 	}
@@ -431,7 +431,7 @@ func TestSearchOakEntries(t *testing.T) {
 	}
 
 	// Search for "rub"
-	results, err = db.SearchOakEntries("rub")
+	results, err = db.SearchSpeciesNames("rub")
 	if err != nil {
 		t.Fatalf("SearchOakEntries failed: %v", err)
 	}
@@ -447,18 +447,18 @@ func TestListOakEntries(t *testing.T) {
 	db, cleanup := testDB(t)
 	defer cleanup()
 
-	entries := []*models.OakEntry{
+	entries := []*models.Species{
 		{ScientificName: "alba", Hybrids: []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{}},
 		{ScientificName: "rubra", Hybrids: []string{}, CloselyRelatedTo: []string{}, SubspeciesVarieties: []string{}, Synonyms: []string{}, ExternalLinks: []models.ExternalLink{}},
 	}
 
 	for _, e := range entries {
-		if err := db.SaveOakEntry(e); err != nil {
+		if err := db.SaveSpecies(e); err != nil {
 			t.Fatalf("SaveOakEntry failed: %v", err)
 		}
 	}
 
-	all, err := db.ListOakEntries()
+	all, err := db.ListAllSpecies()
 	if err != nil {
 		t.Fatalf("ListOakEntries failed: %v", err)
 	}
@@ -595,24 +595,35 @@ func createOldSchemaDB(t *testing.T) (*Database, func()) {
 }
 
 func TestMigrationFreshDatabase(t *testing.T) {
-	// Fresh database should use new schema from the start
+	// Fresh database should use new schema from the start (species table, not oak_entries)
 	db, cleanup := testDB(t)
 	defer cleanup()
 
-	// Check that species table does NOT exist (fresh DB uses old schema path since oak_entries doesn't exist)
-	// Actually, for a truly fresh DB, neither oak_entries nor species should exist initially
-	// The initializeSchema will create oak_entries (old schema) for fresh DBs
-
 	var tableName string
-	err := db.conn.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='oak_entries'`).Scan(&tableName)
+
+	// species table should exist (fresh DBs use new schema)
+	err := db.conn.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='species'`).Scan(&tableName)
 	if err != nil {
-		t.Fatalf("fresh database should have oak_entries table: %v", err)
+		t.Fatalf("fresh database should have species table: %v", err)
 	}
 
-	// species table should NOT exist (no migration needed for fresh DB)
-	err = db.conn.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='species'`).Scan(&tableName)
+	// oak_entries table should NOT exist (fresh DBs use new schema)
+	err = db.conn.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='oak_entries'`).Scan(&tableName)
 	if err == nil {
-		t.Fatal("fresh database should NOT have species table (no migration needed)")
+		t.Fatal("fresh database should NOT have oak_entries table (old schema)")
+	}
+
+	// species table should have id column (integer primary key)
+	var cid int
+	var name, typ string
+	var notnull, pk int
+	var dfltValue interface{}
+	err = db.conn.QueryRow(`PRAGMA table_info(species)`).Scan(&cid, &name, &typ, &notnull, &dfltValue, &pk)
+	if err != nil {
+		t.Fatalf("failed to get species table info: %v", err)
+	}
+	if name != "id" || pk != 1 {
+		t.Fatalf("species table first column should be 'id' primary key, got %s (pk=%d)", name, pk)
 	}
 }
 
