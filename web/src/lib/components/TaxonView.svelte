@@ -532,7 +532,7 @@
     cascadeInfo={deleteCascadeInfo}
     {isDeleting}
     onConfirm={handleDeleteConfirm}
-    onCancel={handleDeleteCancel}
+    onClose={handleDeleteCancel}
   />
 {/if}
 

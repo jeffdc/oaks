@@ -356,9 +356,9 @@
     entityType="source"
     entityName={source.name}
     {isDeleting}
-    cascadeInfo={deleteError ? { message: deleteError } : undefined}
+    cascadeInfo={deleteError ? { count: 0, type: 'error', message: deleteError } : undefined}
     onConfirm={handleDeleteConfirm}
-    onCancel={() => { showDeleteDialog = false; deleteError = null; }}
+    onClose={() => { showDeleteDialog = false; deleteError = null; }}
   />
 {/if}
 

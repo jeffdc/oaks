@@ -334,7 +334,8 @@
   // Render Markdown to HTML with DOMPurify sanitization
   function renderMarkdown(text) {
     if (!text) return '';
-    const html = marked.parse(text);
+    // marked.parse returns string synchronously when async option is false (default)
+    const html = /** @type {string} */ (marked.parse(text));
     return DOMPurify.sanitize(html);
   }
 
@@ -682,121 +683,121 @@
 
     <!-- SOURCE-DEPENDENT DATA -->
 
-    {#if sources.length > 0}
-      <section class="card card-sm source-container full-width">
-        <!-- Source tabs -->
-        <div class="source-tabs" role="tablist">
-          {#each sources as source}
-            <button
-              class="source-tab"
-              class:active={selectedSourceId === source.source_id}
-              role="tab"
-              aria-selected={selectedSourceId === source.source_id}
-              on:click={() => selectedSourceId = source.source_id}
+    <section class="card card-sm source-container full-width">
+      <!-- Source tabs -->
+      <div class="source-tabs" role="tablist">
+        {#each sources as source}
+          <button
+            class="source-tab"
+            class:active={selectedSourceId === source.source_id}
+            role="tab"
+            aria-selected={selectedSourceId === source.source_id}
+            on:click={() => selectedSourceId = source.source_id}
+          >
+            <span class="source-tab-name">{source.source_name}</span>
+            {#if source.is_preferred}
+              <span class="preferred-badge" title="Preferred source">★</span>
+            {/if}
+            {#if source.license}
+              <span class="license-icon" title={source.license === "All Rights Reserved" ? "All Rights Reserved" : source.license}>©</span>
+            {/if}
+            <span
+              class="source-tab-link"
+              role="link"
+              tabindex="0"
+              title="View source details"
+              on:click|stopPropagation={() => goto(`${base}/sources/${source.source_id}/`)}
+              on:keydown|stopPropagation={(e) => e.key === 'Enter' && goto(`${base}/sources/${source.source_id}/`)}
             >
-              <span class="source-tab-name">{source.source_name}</span>
-              {#if source.is_preferred}
-                <span class="preferred-badge" title="Preferred source">★</span>
-              {/if}
-              {#if source.license}
-                <span class="license-icon" title={source.license === "All Rights Reserved" ? "All Rights Reserved" : source.license}>©</span>
-              {/if}
-              <span
-                class="source-tab-link"
-                role="link"
-                tabindex="0"
-                title="View source details"
-                on:click|stopPropagation={() => goto(`${base}/sources/${source.source_id}/`)}
-                on:keydown|stopPropagation={(e) => e.key === 'Enter' && goto(`${base}/sources/${source.source_id}/`)}
-              >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </span>
-            </button>
-          {/each}
-          {#if sources.length > 1}
-            <a
-              href="{base}/compare/{encodeURIComponent(speciesName)}/"
-              class="compare-sources-link"
-              title="Compare all sources side-by-side"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Compare</span>
-            </a>
-          {/if}
-          {#if $canEdit && availableSources.length > 0}
-            <div class="add-source-wrapper">
-              <button
-                type="button"
-                class="add-source-btn"
-                title="Add data from another source"
-                on:click={handleAddSourceClick}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                <span>Add Source</span>
-              </button>
-              {#if showAddSourceDropdown}
-                <div class="add-source-dropdown">
-                  <div class="add-source-dropdown-header">Select a source to add</div>
-                  {#each availableSources as source}
-                    <button
-                      type="button"
-                      class="add-source-dropdown-item"
-                      on:click={() => handleSelectSourceToAdd(source.id)}
-                    >
-                      {source.name}
-                    </button>
-                  {/each}
-                </div>
-              {/if}
-            </div>
-          {/if}
-        </div>
-
-        <!-- Source content -->
-        <div class="source-content" role="tabpanel">
-          <!-- Source header with Edit/Delete buttons -->
-          <div class="source-content-header">
-            <span class="source-content-title">Data from {selectedSource?.source_name || 'source'}</span>
-            {#if $canEdit && selectedSource}
-              <div class="source-actions">
-                <button
-                  type="button"
-                  class="source-edit-btn"
-                  title="Edit source data"
-                  on:click={() => handleSourceEditClick(selectedSource.source_id)}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                  </svg>
-                  <span>Edit</span>
-                </button>
-                <button
-                  type="button"
-                  class="source-delete-btn"
-                  title="Delete source data"
-                  on:click={() => handleSourceDeleteClick(selectedSource.source_id)}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3,6 5,6 21,6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    <line x1="10" y1="11" x2="10" y2="17" />
-                    <line x1="14" y1="11" x2="14" y2="17" />
-                  </svg>
-                  <span>Delete</span>
-                </button>
+            </span>
+          </button>
+        {/each}
+        {#if sources.length > 1}
+          <a
+            href="{base}/compare/{encodeURIComponent(speciesName)}/"
+            class="compare-sources-link"
+            title="Compare all sources side-by-side"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+            </svg>
+            <span>Compare</span>
+          </a>
+        {/if}
+        {#if $canEdit && availableSources.length > 0}
+          <div class="add-source-wrapper" class:no-sources={sources.length === 0}>
+            <button
+              type="button"
+              class="add-source-btn"
+              title="Add data from another source"
+              on:click={handleAddSourceClick}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span>Add Source</span>
+            </button>
+            {#if showAddSourceDropdown}
+              <div class="add-source-dropdown">
+                <div class="add-source-dropdown-header">Select a source to add</div>
+                {#each availableSources as source}
+                  <button
+                    type="button"
+                    class="add-source-dropdown-item"
+                    on:click={() => handleSelectSourceToAdd(source.id)}
+                  >
+                    {source.name}
+                  </button>
+                {/each}
               </div>
             {/if}
           </div>
+        {/if}
+      </div>
 
-          {#if selectedSource?.range}
+        <!-- Source content -->
+        {#if sources.length > 0}
+          <div class="source-content" role="tabpanel">
+            <!-- Source header with Edit/Delete buttons -->
+            <div class="source-content-header">
+              <span class="source-content-title">Data from {selectedSource?.source_name || 'source'}</span>
+              {#if $canEdit && selectedSource}
+                <div class="source-actions">
+                  <button
+                    type="button"
+                    class="source-edit-btn"
+                    title="Edit source data"
+                    on:click={() => handleSourceEditClick(selectedSource.source_id)}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="source-delete-btn"
+                    title="Delete source data"
+                    on:click={() => handleSourceDeleteClick(selectedSource.source_id)}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3,6 5,6 21,6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      <line x1="10" y1="11" x2="10" y2="17" />
+                      <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                    <span>Delete</span>
+                  </button>
+                </div>
+              {/if}
+            </div>
+
+            {#if selectedSource?.range}
             <section class="source-field">
               <h3 class="field-header">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -932,9 +933,17 @@
               <div class="prose-content">{@html renderMarkdown(selectedSource.miscellaneous)}</div>
             </section>
           {/if}
-        </div>
+          </div>
+        {:else}
+          <!-- Empty state when no sources exist -->
+          <div class="source-content source-empty-state">
+            <p class="empty-message">No source data available for this species.</p>
+            {#if $canEdit && availableSources.length > 0}
+              <p class="empty-hint">Use the "Add Source" button above to add information from a data source.</p>
+            {/if}
+          </div>
+        {/if}
       </section>
-    {/if}
 
     <section class="card card-sm detail-section full-width">
       <h2 class="section-header">
@@ -982,7 +991,7 @@
     {cascadeInfo}
     {isDeleting}
     onConfirm={handleDeleteConfirm}
-    onCancel={() => showDeleteDialog = false}
+    onClose={() => showDeleteDialog = false}
   />
 {/if}
 
@@ -1004,7 +1013,7 @@
     entityName="This will delete the {deletingSource.source_name} information for Quercus {speciesName}."
     isDeleting={isDeletingSource}
     onConfirm={handleSourceDeleteConfirm}
-    onCancel={() => { showSourceDeleteDialog = false; deletingSourceId = null; }}
+    onClose={() => { showSourceDeleteDialog = false; deletingSourceId = null; }}
   />
 {/if}
 
@@ -1421,6 +1430,29 @@
   .add-source-dropdown-item:focus-visible {
     outline: none;
     background-color: var(--color-forest-100);
+  }
+
+  /* When no sources exist, position add button without margin-left */
+  .add-source-wrapper.no-sources {
+    margin-left: 0;
+  }
+
+  /* Empty state for species with no source data */
+  .source-empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+
+  .empty-message {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+  }
+
+  .empty-hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
   }
 
   .source-content {

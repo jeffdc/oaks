@@ -3,8 +3,10 @@
 
 /** @type {import('@sveltejs/kit').HandleClientError} */
 export function handleError({ error, event, status, message }) {
-	const errorMessage = error?.message || message || '';
-	const errorName = error?.name || '';
+	// Cast error to access properties (SvelteKit types it as unknown)
+	const err = /** @type {{ message?: string, name?: string }} */ (error);
+	const errorMessage = err?.message || message || '';
+	const errorName = err?.name || '';
 
 	// Check if this is a stale deployment error
 	const isStaleDeployment =

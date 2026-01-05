@@ -182,9 +182,9 @@
    */
   function handleFormKeydown(event) {
     if (event.key === 'Enter') {
-      const target = event.target;
+      const target = /** @type {HTMLElement} */ (event.target);
       // Allow Enter on buttons and submit inputs
-      if (target.tagName === 'BUTTON' || target.type === 'submit') {
+      if (target.tagName === 'BUTTON' || ('type' in target && target.type === 'submit')) {
         return;
       }
       // Allow Enter in textareas (for line breaks)
@@ -278,7 +278,7 @@
     </FieldSection>
 
     <!-- Section 2: Content -->
-    <FieldSection title="Content" collapsible startOpen={true}>
+    <FieldSection title="Content" collapsible>
       <div class="field">
         <label for="article-content" class="field-label">Content</label>
         <p class="field-hint">Write your article using Markdown formatting</p>

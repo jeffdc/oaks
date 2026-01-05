@@ -2,6 +2,10 @@
     import { onMount } from 'svelte';
     import { fetchSpecies, ApiError } from '$lib/apiClient.js';
 
+    // Vite injects __APP_VERSION__ at build time
+    // @ts-ignore - Vite define
+    const appVersion = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
+
     // Local state for computing counts
     let allSpecies = $state([]);
     let isLoading = $state(true);
@@ -166,7 +170,7 @@
     </section>
 
     <footer class="version-footer">
-        <span class="version-text">Version {__APP_VERSION__}</span>
+        <span class="version-text">Version {appVersion}</span>
     </footer>
 </div>
 

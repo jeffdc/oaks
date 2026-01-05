@@ -399,9 +399,9 @@
    */
   function handleFormKeydown(event) {
     if (event.key === 'Enter') {
-      const target = event.target;
+      const target = /** @type {HTMLElement} */ (event.target);
       // Allow Enter on buttons and submit inputs
-      if (target.tagName === 'BUTTON' || target.type === 'submit') {
+      if (target.tagName === 'BUTTON' || ('type' in target && target.type === 'submit')) {
         return;
       }
       // Allow Enter in textareas (for line breaks)
@@ -559,7 +559,7 @@
     </FieldSection>
 
     <!-- Section 2: Content -->
-    <FieldSection title="Content" collapsible startOpen={!!formData.content}>
+    <FieldSection title="Content" collapsible collapsed={!formData.content}>
       <div class="field">
         <label for="taxon-content" class="field-label">Content</label>
         <p class="field-hint">Markdown content for this taxon (descriptions, notes, etc.)</p>

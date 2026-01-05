@@ -13,7 +13,8 @@
   // Render markdown to sanitized HTML
   let renderedHtml = $derived.by(() => {
     if (!content) return '';
-    const rawHtml = marked.parse(content);
+    // marked.parse returns string synchronously when async option is false (default)
+    const rawHtml = /** @type {string} */ (marked.parse(content));
     return DOMPurify.sanitize(rawHtml);
   });
 </script>

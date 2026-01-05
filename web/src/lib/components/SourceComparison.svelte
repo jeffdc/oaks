@@ -61,7 +61,8 @@
   // Render Markdown to HTML with DOMPurify sanitization
   function renderMarkdown(text) {
     if (!text) return '';
-    const html = marked.parse(text);
+    // marked.parse returns string synchronously when async option is false (default)
+    const html = /** @type {string} */ (marked.parse(text));
     return DOMPurify.sanitize(html);
   }
 

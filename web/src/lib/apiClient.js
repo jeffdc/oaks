@@ -139,9 +139,9 @@ async function fetchApi(endpoint, options = {}) {
  * Retry helper with exponential backoff
  * Delays: 1s, 2s, 4s between retries (default)
  * @param {Function} fn - Async function to retry
- * @param {Object} options - Retry options
- * @param {number} options.maxRetries - Maximum number of retries (default: 3)
- * @param {number} options.baseDelay - Base delay in ms (default: 1000)
+ * @param {Object} [options] - Retry options
+ * @param {number} [options.maxRetries=3] - Maximum number of retries
+ * @param {number} [options.baseDelay=1000] - Base delay in ms
  * @returns {Promise<any>} Result from fn
  */
 export async function fetchWithRetry(fn, { maxRetries = 3, baseDelay = 1000 } = {}) {
@@ -773,9 +773,9 @@ export async function deleteSpeciesSource(speciesName, sourceId) {
  * Fetch all articles from API
  * If authenticated, returns all articles (including drafts)
  * If not authenticated, returns only published articles
- * @param {Object} options - Optional filters
- * @param {string} options.tag - Filter by tag
- * @param {boolean} options.published - Filter by published status (auth only)
+ * @param {Object} [options] - Optional filters
+ * @param {string} [options.tag] - Filter by tag
+ * @param {boolean} [options.published] - Filter by published status (auth only)
  * @returns {Promise<Array>} Array of article objects
  */
 export async function fetchArticles(options = {}) {

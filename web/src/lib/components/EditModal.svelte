@@ -107,11 +107,12 @@
     if (!modalElement) return [];
 
     const selector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-    const elements = Array.from(modalElement.querySelectorAll(selector));
+    /** @type {HTMLElement[]} */
+    const elements = /** @type {HTMLElement[]} */ (Array.from(modalElement.querySelectorAll(selector)));
 
     return elements.filter(el => {
       // Skip disabled elements
-      if (el.disabled) return false;
+      if ('disabled' in el && el.disabled) return false;
 
       // Skip elements with tabindex="-1"
       if (el.getAttribute('tabindex') === '-1') return false;
@@ -180,7 +181,7 @@
   // Focus management when modal opens/closes
   $: if (isOpen) {
     // Store reference to previously focused element
-    previouslyFocused = document.activeElement;
+    previouslyFocused = /** @type {HTMLElement|null} */ (document.activeElement);
 
     // Focus the modal after it renders
     tick().then(() => {

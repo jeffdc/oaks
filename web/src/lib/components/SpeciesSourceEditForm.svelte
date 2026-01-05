@@ -239,9 +239,9 @@
    */
   function handleFormKeydown(event) {
     if (event.key === 'Enter') {
-      const target = event.target;
+      const target = /** @type {HTMLElement} */ (event.target);
       // Allow Enter on buttons and submit inputs
-      if (target.tagName === 'BUTTON' || target.type === 'submit') {
+      if (target.tagName === 'BUTTON' || ('type' in target && target.type === 'submit')) {
         return;
       }
       // Allow Enter in textareas (for line breaks)
