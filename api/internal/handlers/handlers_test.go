@@ -1445,3 +1445,337 @@ func TestGetSpeciesExistsNoSynonymLookup(t *testing.T) {
 		t.Errorf("scientific_name = %s, want alba", resp.ScientificName)
 	}
 }
+
+func TestSearchSpeciesMatchesName(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create a species with synonyms
+	author := "L."
+	species := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+		Synonyms:       []string{"white_oak", "quercus_alba"},
+	}
+	body, _ := json.Marshal(species)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Search by name - should NOT include matched_via_synonym
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/search?q=alba", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("search status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var resp map[string]interface{}
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	count := resp["count"].(float64)
+	if count != 1 {
+		t.Fatalf("count = %v, want 1", count)
+	}
+
+	data := resp["data"].([]interface{})
+	result := data[0].(map[string]interface{})
+
+	if result["scientific_name"] != "alba" {
+		t.Errorf("scientific_name = %s, want alba", result["scientific_name"])
+	}
+
+	// matched_via_synonym should NOT be present (or be null) when matched by name
+	if matched, exists := result["matched_via_synonym"]; exists && matched != nil {
+		t.Errorf("matched_via_synonym should not be present when matched by name, got %v", matched)
+	}
+}
+
+func TestSearchSpeciesMatchesSynonym(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create a species with synonyms
+	author := "L."
+	species := models.Species{
+		ScientificName: "ashei",
+		Author:         &author,
+		IsHybrid:       false,
+		Synonyms:       []string{"asheana", "old_name"},
+	}
+	body, _ := json.Marshal(species)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Search by synonym - should include matched_via_synonym
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/search?q=asheana", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("search status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var resp map[string]interface{}
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	count := resp["count"].(float64)
+	if count != 1 {
+		t.Fatalf("count = %v, want 1", count)
+	}
+
+	data := resp["data"].([]interface{})
+	result := data[0].(map[string]interface{})
+
+	if result["scientific_name"] != "ashei" {
+		t.Errorf("scientific_name = %s, want ashei", result["scientific_name"])
+	}
+
+	matched, exists := result["matched_via_synonym"]
+	if !exists || matched == nil {
+		t.Fatal("matched_via_synonym should be present when matched by synonym")
+	}
+	if matched != "asheana" {
+		t.Errorf("matched_via_synonym = %s, want asheana", matched)
+	}
+}
+
+func TestSearchSpeciesMatchesSynonymCaseInsensitive(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create a species with mixed-case synonym
+	author := "L."
+	species := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+		Synonyms:       []string{"Quercus Alba"},
+	}
+	body, _ := json.Marshal(species)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Search with different case - should still match
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/search?q=quercus%20alba", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("search status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var resp map[string]interface{}
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	count := resp["count"].(float64)
+	if count != 1 {
+		t.Fatalf("count = %v, want 1", count)
+	}
+
+	data := resp["data"].([]interface{})
+	result := data[0].(map[string]interface{})
+
+	matched := result["matched_via_synonym"]
+	if matched != "Quercus Alba" {
+		t.Errorf("matched_via_synonym = %v, want 'Quercus Alba'", matched)
+	}
+}
+
+func TestSearchSpeciesNoResults(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create a species
+	author := "L."
+	species := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+		Synonyms:       []string{"white_oak"},
+	}
+	body, _ := json.Marshal(species)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Search for something that doesn't exist
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/search?q=nonexistent", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("search status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var resp map[string]interface{}
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	count := resp["count"].(float64)
+	if count != 0 {
+		t.Errorf("count = %v, want 0", count)
+	}
+}
+
+func TestSearchSpeciesMixedResults(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create multiple species
+	author := "L."
+
+	// Species 1: name matches "rub"
+	species1 := models.Species{
+		ScientificName: "rubra",
+		Author:         &author,
+		IsHybrid:       false,
+		Synonyms:       []string{"red_oak"},
+	}
+	body, _ := json.Marshal(species1)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species1 status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Species 2: synonym matches "rub" (rubresca)
+	species2 := models.Species{
+		ScientificName: "palustris",
+		Author:         &author,
+		IsHybrid:       false,
+		Synonyms:       []string{"rubresca", "pin_oak"},
+	}
+	body, _ = json.Marshal(species2)
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species2 status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Search for "rub" - should find both
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/search?q=rub", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("search status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var resp map[string]interface{}
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	count := resp["count"].(float64)
+	if count != 2 {
+		t.Fatalf("count = %v, want 2", count)
+	}
+
+	data := resp["data"].([]interface{})
+
+	// Build a map of results for easier checking
+	results := make(map[string]interface{})
+	for _, item := range data {
+		r := item.(map[string]interface{})
+		results[r["scientific_name"].(string)] = r["matched_via_synonym"]
+	}
+
+	// rubra should NOT have matched_via_synonym (matched by name)
+	if matched := results["rubra"]; matched != nil {
+		t.Errorf("rubra should not have matched_via_synonym, got %v", matched)
+	}
+
+	// palustris should have matched_via_synonym = "rubresca"
+	if matched := results["palustris"]; matched != "rubresca" {
+		t.Errorf("palustris matched_via_synonym = %v, want 'rubresca'", matched)
+	}
+}
+
+func TestSearchSpeciesNameMatchPrioritized(t *testing.T) {
+	server, cleanup := testServer(t)
+	defer cleanup()
+
+	// Create a species where both name AND synonym match the query
+	author := "L."
+	species := models.Species{
+		ScientificName: "alba",
+		Author:         &author,
+		IsHybrid:       false,
+		Synonyms:       []string{"alba_old", "white_oak"},
+	}
+	body, _ := json.Marshal(species)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/species", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer test-api-key")
+	w := httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create species status = %d, want %d", w.Code, http.StatusCreated)
+	}
+
+	// Search for "alba" - matches both name and synonym
+	// Name match should take priority, so no matched_via_synonym
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/species/search?q=alba", nil)
+	w = httptest.NewRecorder()
+	server.Router().ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("search status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var resp map[string]interface{}
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	count := resp["count"].(float64)
+	if count != 1 {
+		t.Fatalf("count = %v, want 1", count)
+	}
+
+	data := resp["data"].([]interface{})
+	result := data[0].(map[string]interface{})
+
+	// Should NOT have matched_via_synonym because name matched
+	if matched, exists := result["matched_via_synonym"]; exists && matched != nil {
+		t.Errorf("matched_via_synonym should be nil when name matches, got %v", matched)
+	}
+}

@@ -171,6 +171,14 @@ type UnifiedSearchResults struct {
 	} `json:"counts"`
 }
 
+// SpeciesSearchResult wraps a Species with optional match metadata
+// When a species is found via a synonym match (rather than direct name match),
+// MatchedViaSynonym contains the synonym that matched.
+type SpeciesSearchResult struct {
+	Species
+	MatchedViaSynonym *string `json:"matched_via_synonym,omitempty"`
+}
+
 // Article represents a reference article (guide, book review, identification essay, etc.)
 type Article struct {
 	ID          int64    `json:"id" yaml:"id"`
