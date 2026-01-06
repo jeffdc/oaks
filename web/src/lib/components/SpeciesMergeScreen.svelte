@@ -6,7 +6,17 @@
    */
 
   import { base } from '$app/paths';
-  import { fetchSpeciesFull, fetchSpeciesReferences, ApiError } from '$lib/apiClient.js';
+  import { goto } from '$app/navigation';
+  import {
+    fetchSpeciesFull,
+    fetchSpeciesReferences,
+    updateSpecies,
+    createSpeciesSource,
+    updateSpeciesSource,
+    deleteSpecies,
+    ApiError
+  } from '$lib/apiClient.js';
+  import { toast } from '$lib/stores/toastStore.js';
   import LoadingSpinner from './LoadingSpinner.svelte';
   import MergeFieldRow from './MergeFieldRow.svelte';
   import MergeDataLossWarning from './MergeDataLossWarning.svelte';
@@ -67,6 +77,12 @@
   // Track which sources have been unchecked for data loss warning
   // Format: { [sourceId]: boolean } - true if unchecked (data loss)
   let uncheckedSourceIds = $state({});
+
+  // Save operation state
+  let showConfirmDialog = $state(false);
+  let saving = $state(false);
+  let saveError = $state(null);
+  let completedSteps = $state([]);
 
   // Compute list of unchecked source names for the warning
   let uncheckedSources = $derived(() => {
@@ -147,6 +163,44 @@
     return issues;
   });
 
+  // Compute sources that will be transferred (synonym-only sources that are checked)
+  let sourcesToTransfer = $derived(() => {
+    if (!synonymData?.sources) return [];
+
+    const targetSourceIds = new Set((targetData?.sources || []).map(s => s.source_id));
+
+    return synonymData.sources.filter(source => {
+      const isSynonymOnly = !targetSourceIds.has(source.source_id);
+      const isChecked = uncheckedSourceIds[source.source_id] !== true;
+      return isSynonymOnly && isChecked;
+    });
+  });
+
+  // Compute synonyms that will be added to target
+  let synonymsToAdd = $derived(() => {
+    if (!synonymData) return [];
+
+    const existingSynonyms = new Set(
+      (targetData?.synonyms || []).map(s => s.toLowerCase())
+    );
+
+    const newSynonyms = [];
+
+    // Add the synonym species name itself
+    if (!existingSynonyms.has(synonymData.scientific_name.toLowerCase())) {
+      newSynonyms.push(synonymData.scientific_name);
+    }
+
+    // Add the synonym's existing synonyms
+    for (const syn of synonymData.synonyms || []) {
+      if (!existingSynonyms.has(syn.toLowerCase())) {
+        newSynonyms.push(syn);
+      }
+    }
+
+    return newSynonyms;
+  });
+
   // Format species name for display (handle hybrids)
   function formatName(name, isHybrid) {
     if (!name) return '';
@@ -164,9 +218,27 @@
     error = null;
 
     try {
-      // Fetch both species and references in parallel
-      const [synonymResult, targetResult, refsResult] = await Promise.all([
-        fetchSpeciesFull(synonymName),
+      // Fetch synonym first to check if it was already merged
+      let synonymResult;
+      try {
+        synonymResult = await fetchSpeciesFull(synonymName);
+      } catch (synonymErr) {
+        // If synonym returns a redirect (already merged), redirect to target
+        if (synonymErr instanceof ApiError &&
+            synonymErr.status === 404 &&
+            synonymErr.code === 'SYNONYM_REDIRECT' &&
+            synonymErr.details?.synonym_of) {
+          // The synonym was already merged, redirect to the target species
+          goto(`${base}/species/${encodeURIComponent(targetName)}/`, {
+            replaceState: true
+          });
+          return;
+        }
+        throw synonymErr;
+      }
+
+      // Fetch target and references
+      const [targetResult, refsResult] = await Promise.all([
         fetchSpeciesFull(targetName),
         fetchSpeciesReferences(synonymName)
       ]);
@@ -201,6 +273,193 @@
   function handleCancel() {
     // Navigate back to the synonym's species page
     window.history.back();
+  }
+
+  function handleSaveClick() {
+    // Show confirmation dialog
+    saveError = null;
+    completedSteps = [];
+    showConfirmDialog = true;
+  }
+
+  function handleConfirmCancel() {
+    showConfirmDialog = false;
+  }
+
+  async function handleConfirmMerge() {
+    saving = true;
+    saveError = null;
+    completedSteps = [];
+
+    try {
+      // Step 1: Update target species
+      const updatedSynonyms = [
+        ...(targetData.synonyms || []),
+        ...synonymsToAdd()
+      ];
+
+      const speciesUpdate = {
+        name: targetData.scientific_name,
+        author: editedTarget.author,
+        is_hybrid: targetData.is_hybrid,
+        conservation_status: editedTarget.conservation_status,
+        taxonomy: {
+          subgenus: editedTarget.subgenus,
+          section: editedTarget.section,
+          subsection: editedTarget.subsection,
+          complex: editedTarget.complex
+        },
+        parent1: editedTarget.parent1,
+        parent2: editedTarget.parent2,
+        synonyms: updatedSynonyms,
+        hybrids: targetData.hybrids || [],
+        closely_related_to: targetData.closely_related_to || [],
+        subspecies_varieties: targetData.subspecies_varieties || [],
+        external_links: targetData.external_links || []
+      };
+
+      await updateSpecies(targetName, speciesUpdate);
+      completedSteps = [...completedSteps, 'Updated target species'];
+
+      // Step 2: Transfer source records
+      const targetSourceIds = new Set((targetData?.sources || []).map(s => s.source_id));
+      const sourcesToCreate = sourcesToTransfer();
+
+      for (const source of sourcesToCreate) {
+        const sourceData = {
+          source_id: source.source_id,
+          local_names: source.local_names || [],
+          range: source.range || null,
+          growth_habit: source.growth_habit || null,
+          leaves: source.leaves || null,
+          flowers: source.flowers || null,
+          fruits: source.fruits || null,
+          bark: source.bark || null,
+          twigs: source.twigs || null,
+          buds: source.buds || null,
+          hardiness_habitat: source.hardiness_habitat || null,
+          miscellaneous: source.miscellaneous || null,
+          url: source.url || null,
+          is_preferred: false  // New sources are not preferred
+        };
+
+        await createSpeciesSource(targetName, sourceData);
+        completedSteps = [...completedSteps, `Transferred source: ${source.source_name || `Source ${source.source_id}`}`];
+      }
+
+      // Step 3: Update parent references
+      const parentRefs = groupedReferences().asParent;
+      for (const ref of parentRefs) {
+        // Fetch the species, update the parent field, save
+        const refSpecies = await fetchSpeciesFull(ref.scientific_name);
+        const refUpdate = {
+          name: refSpecies.scientific_name,
+          author: refSpecies.author,
+          is_hybrid: refSpecies.is_hybrid,
+          conservation_status: refSpecies.conservation_status,
+          taxonomy: {
+            subgenus: refSpecies.subgenus,
+            section: refSpecies.section,
+            subsection: refSpecies.subsection,
+            complex: refSpecies.complex
+          },
+          parent1: ref.parentField === 'parent1' ? targetData.scientific_name : refSpecies.parent1,
+          parent2: ref.parentField === 'parent2' ? targetData.scientific_name : refSpecies.parent2,
+          synonyms: refSpecies.synonyms || [],
+          hybrids: refSpecies.hybrids || [],
+          closely_related_to: refSpecies.closely_related_to || [],
+          subspecies_varieties: refSpecies.subspecies_varieties || [],
+          external_links: refSpecies.external_links || []
+        };
+
+        await updateSpecies(ref.scientific_name, refUpdate);
+        completedSteps = [...completedSteps, `Updated ${ref.parentField} reference in ${ref.scientific_name}`];
+      }
+
+      // Step 4: Update array references (hybrids, closely_related_to)
+      const hybridRefs = groupedReferences().inHybrids;
+      for (const ref of hybridRefs) {
+        const refSpecies = await fetchSpeciesFull(ref.scientific_name);
+        const updatedHybrids = (refSpecies.hybrids || []).map(h =>
+          h.toLowerCase() === synonymData.scientific_name.toLowerCase() ? targetData.scientific_name : h
+        );
+
+        const refUpdate = {
+          name: refSpecies.scientific_name,
+          author: refSpecies.author,
+          is_hybrid: refSpecies.is_hybrid,
+          conservation_status: refSpecies.conservation_status,
+          taxonomy: {
+            subgenus: refSpecies.subgenus,
+            section: refSpecies.section,
+            subsection: refSpecies.subsection,
+            complex: refSpecies.complex
+          },
+          parent1: refSpecies.parent1,
+          parent2: refSpecies.parent2,
+          synonyms: refSpecies.synonyms || [],
+          hybrids: updatedHybrids,
+          closely_related_to: refSpecies.closely_related_to || [],
+          subspecies_varieties: refSpecies.subspecies_varieties || [],
+          external_links: refSpecies.external_links || []
+        };
+
+        await updateSpecies(ref.scientific_name, refUpdate);
+        completedSteps = [...completedSteps, `Updated hybrids array in ${ref.scientific_name}`];
+      }
+
+      const relatedRefs = groupedReferences().inCloselyRelated;
+      for (const ref of relatedRefs) {
+        const refSpecies = await fetchSpeciesFull(ref.scientific_name);
+        const updatedRelated = (refSpecies.closely_related_to || []).map(r =>
+          r.toLowerCase() === synonymData.scientific_name.toLowerCase() ? targetData.scientific_name : r
+        );
+
+        const refUpdate = {
+          name: refSpecies.scientific_name,
+          author: refSpecies.author,
+          is_hybrid: refSpecies.is_hybrid,
+          conservation_status: refSpecies.conservation_status,
+          taxonomy: {
+            subgenus: refSpecies.subgenus,
+            section: refSpecies.section,
+            subsection: refSpecies.subsection,
+            complex: refSpecies.complex
+          },
+          parent1: refSpecies.parent1,
+          parent2: refSpecies.parent2,
+          synonyms: refSpecies.synonyms || [],
+          hybrids: refSpecies.hybrids || [],
+          closely_related_to: updatedRelated,
+          subspecies_varieties: refSpecies.subspecies_varieties || [],
+          external_links: refSpecies.external_links || []
+        };
+
+        await updateSpecies(ref.scientific_name, refUpdate);
+        completedSteps = [...completedSteps, `Updated closely_related_to array in ${ref.scientific_name}`];
+      }
+
+      // Step 5: Delete synonym species (MUST BE LAST)
+      await deleteSpecies(synonymName);
+      completedSteps = [...completedSteps, 'Deleted synonym species'];
+
+      // Success! Show toast and redirect
+      const displayName = formatName(synonymData.scientific_name, synonymData.is_hybrid);
+      const displayTarget = formatName(targetData.scientific_name, targetData.is_hybrid);
+      toast.success(`Successfully merged ${displayName} into ${displayTarget}`);
+
+      // Redirect to target species page
+      await goto(`${base}/species/${encodeURIComponent(targetName)}/`, { replaceState: true });
+
+    } catch (err) {
+      console.error('Merge failed:', err);
+      saveError = {
+        message: err instanceof ApiError ? err.message : 'An unexpected error occurred',
+        completedSteps: [...completedSteps]
+      };
+    } finally {
+      saving = false;
+    }
   }
 </script>
 
@@ -428,13 +687,136 @@
 
     <!-- Action bar -->
     <footer class="action-bar">
-      <button type="button" class="btn btn-secondary" onclick={handleCancel}>
+      <button type="button" class="btn btn-secondary" onclick={handleCancel} disabled={saving}>
         Cancel
       </button>
-      <button type="button" class="btn btn-primary" disabled>
-        Save Merge
+      <button type="button" class="btn btn-primary" onclick={handleSaveClick} disabled={saving || selfReferenceIssues().length > 0}>
+        {#if saving}
+          <span class="btn-spinner"></span>
+          Saving...
+        {:else}
+          Save Merge
+        {/if}
       </button>
     </footer>
+  {/if}
+
+  <!-- Confirmation Dialog -->
+  {#if showConfirmDialog}
+    <div class="dialog-overlay" onclick={handleConfirmCancel}>
+      <div class="dialog" onclick={(e) => e.stopPropagation()}>
+        {#if saveError}
+          <!-- Error state -->
+          <h2 class="dialog-title dialog-title-error">Merge Partially Failed</h2>
+          <div class="dialog-content">
+            <div class="completed-steps">
+              {#each saveError.completedSteps as step}
+                <div class="step step-success">
+                  <svg class="step-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                  </svg>
+                  <span>{step}</span>
+                </div>
+              {/each}
+              <div class="step step-error">
+                <svg class="step-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4.28 4.28a.75.75 0 011.06 0L10 8.94l4.66-4.66a.75.75 0 111.06 1.06L11.06 10l4.66 4.66a.75.75 0 11-1.06 1.06L10 11.06l-4.66 4.66a.75.75 0 01-1.06-1.06L8.94 10 4.28 5.34a.75.75 0 010-1.06z" clip-rule="evenodd" />
+                </svg>
+                <span>Failed: {saveError.message}</span>
+              </div>
+            </div>
+            <p class="error-note">
+              The synonym "{formatName(synonymData.scientific_name, synonymData.is_hybrid)}" was NOT deleted.
+              You can fix the issue and try again, or refresh to start over.
+            </p>
+          </div>
+          <div class="dialog-actions">
+            <button type="button" class="btn btn-secondary" onclick={handleConfirmCancel}>
+              Close
+            </button>
+          </div>
+        {:else if saving}
+          <!-- Saving state -->
+          <h2 class="dialog-title">Merging Species...</h2>
+          <div class="dialog-content">
+            <div class="saving-spinner">
+              <LoadingSpinner size="md" />
+            </div>
+            <div class="completed-steps">
+              {#each completedSteps as step}
+                <div class="step step-success">
+                  <svg class="step-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                  </svg>
+                  <span>{step}</span>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {:else}
+          <!-- Confirmation state -->
+          <h2 class="dialog-title">Confirm Merge</h2>
+          <div class="dialog-content">
+            <p class="confirm-intro">
+              You are about to merge "{formatName(synonymData.scientific_name, synonymData.is_hybrid)}"
+              into "{formatName(targetData.scientific_name, targetData.is_hybrid)}". This will:
+            </p>
+            <ul class="confirm-list">
+              {#if synonymsToAdd().length > 0}
+                <li class="confirm-item confirm-item-add">
+                  <svg class="confirm-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                  </svg>
+                  <span>Add {synonymsToAdd().length} {synonymsToAdd().length === 1 ? 'synonym' : 'synonyms'} to {targetData.scientific_name}</span>
+                </li>
+              {/if}
+              <li class="confirm-item confirm-item-add">
+                <svg class="confirm-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                </svg>
+                <span>Update {targetData.scientific_name} with merged field values</span>
+              </li>
+              {#if sourcesToTransfer().length > 0}
+                <li class="confirm-item confirm-item-add">
+                  <svg class="confirm-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                  </svg>
+                  <span>Transfer {sourcesToTransfer().length} source {sourcesToTransfer().length === 1 ? 'record' : 'records'} to {targetData.scientific_name}</span>
+                </li>
+              {/if}
+              {#if referenceCount > 0}
+                <li class="confirm-item confirm-item-add">
+                  <svg class="confirm-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                  </svg>
+                  <span>Update {referenceCount} other {referenceCount === 1 ? 'species' : 'species'} that reference {synonymData.scientific_name}</span>
+                </li>
+              {/if}
+              <li class="confirm-item confirm-item-delete">
+                <svg class="confirm-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4.28 4.28a.75.75 0 011.06 0L10 8.94l4.66-4.66a.75.75 0 111.06 1.06L11.06 10l4.66 4.66a.75.75 0 11-1.06 1.06L10 11.06l-4.66 4.66a.75.75 0 01-1.06-1.06L8.94 10 4.28 5.34a.75.75 0 010-1.06z" clip-rule="evenodd" />
+                </svg>
+                <span>Delete "{formatName(synonymData.scientific_name, synonymData.is_hybrid)}" permanently</span>
+              </li>
+            </ul>
+            <div class="confirm-warning">
+              <svg class="warning-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+              </svg>
+              <span>This action cannot be undone.</span>
+            </div>
+          </div>
+          <div class="dialog-actions">
+            <button type="button" class="btn btn-secondary" onclick={handleConfirmCancel}>
+              Cancel
+            </button>
+            <button type="button" class="btn btn-danger" onclick={handleConfirmMerge}>
+              Confirm Merge
+            </button>
+          </div>
+        {/if}
+      </div>
+    </div>
   {/if}
 </div>
 
@@ -800,6 +1182,189 @@
     background-color: var(--color-forest-700);
   }
 
+  /* Button spinner */
+  .btn-spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 0.5rem;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Danger button */
+  .btn-danger {
+    background-color: var(--color-error, #dc2626);
+    color: white;
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    background-color: #b91c1c;
+  }
+
+  /* Dialog overlay */
+  .dialog-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+  }
+
+  .dialog {
+    background-color: var(--color-surface);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-xl);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .dialog-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+    padding: 1.5rem 1.5rem 0;
+  }
+
+  .dialog-title-error {
+    color: var(--color-error, #dc2626);
+  }
+
+  .dialog-content {
+    padding: 1rem 1.5rem;
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 0 1.5rem 1.5rem;
+  }
+
+  /* Confirmation list */
+  .confirm-intro {
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+  }
+
+  .confirm-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .confirm-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+  }
+
+  .confirm-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+
+  .confirm-item-add .confirm-icon {
+    color: var(--color-forest-600);
+  }
+
+  .confirm-item-delete .confirm-icon {
+    color: var(--color-error, #dc2626);
+  }
+
+  .confirm-item-delete {
+    color: var(--color-error, #dc2626);
+  }
+
+  .confirm-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background-color: rgba(234, 179, 8, 0.1);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #a16207;
+  }
+
+  .warning-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #ca8a04;
+    flex-shrink: 0;
+  }
+
+  /* Saving state */
+  .saving-spinner {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .completed-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  .step-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+
+  .step-success .step-icon {
+    color: var(--color-forest-600);
+  }
+
+  .step-error {
+    color: var(--color-error, #dc2626);
+  }
+
+  .step-error .step-icon {
+    color: var(--color-error, #dc2626);
+  }
+
+  .error-note {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin: 1rem 0 0 0;
+    padding: 0.75rem 1rem;
+    background-color: var(--color-background);
+    border-radius: 0.5rem;
+    line-height: 1.5;
+  }
+
   /* Responsive */
   @media (max-width: 768px) {
     .merge-screen {
@@ -812,6 +1377,11 @@
 
     .merge-title {
       font-size: 1.25rem;
+    }
+
+    .dialog {
+      max-width: 100%;
+      margin: 1rem;
     }
   }
 </style>

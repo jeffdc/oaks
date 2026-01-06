@@ -101,6 +101,18 @@ async function fetchApi(endpoint, options = {}) {
       // Extract error info from response body
       // API returns { error: { message, code, details } } format
       const errorInfo = errorBody.error || errorBody;
+
+      // For 404 errors, check for synonym redirect info
+      // API returns { synonym_of: "target" } or { ambiguous_synonym: true, matches: [...] }
+      if (response.status === 404 && (errorBody.synonym_of || errorBody.ambiguous_synonym)) {
+        throw new ApiError(
+          errorInfo.message || 'Not found',
+          404,
+          errorBody.ambiguous_synonym ? 'AMBIGUOUS_SYNONYM' : 'SYNONYM_REDIRECT',
+          errorBody  // Store the full body for synonym handling
+        );
+      }
+
       throw new ApiError(
         errorInfo.message || errorBody.error || `API request failed: ${response.statusText}`,
         response.status,
