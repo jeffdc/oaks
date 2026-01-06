@@ -84,6 +84,10 @@
   let saveError = $state(null);
   let completedSteps = $state([]);
 
+  // Dirty state tracking for cancel confirmation
+  let initialState = $state(null);
+  let showDiscardDialog = $state(false);
+
   // Compute list of unchecked source names for the warning
   let uncheckedSources = $derived(() => {
     if (!synonymData?.sources) return [];
@@ -204,13 +208,56 @@
   // Format species name for display (handle hybrids)
   function formatName(name, isHybrid) {
     if (!name) return '';
+    // Remove any existing × prefix to avoid duplication
+    const cleanName = name.replace(/^×\s*/, '');
     const prefix = isHybrid ? '\u00d7 ' : '';
-    return prefix + name;
+    return prefix + cleanName;
+  }
+
+  // Get current form state for dirty checking
+  function getCurrentFormState() {
+    return {
+      editedTarget: {
+        author: editedTarget.author,
+        conservation_status: editedTarget.conservation_status,
+        subgenus: editedTarget.subgenus,
+        section: editedTarget.section,
+        subsection: editedTarget.subsection,
+        complex: editedTarget.complex,
+        parent1: editedTarget.parent1,
+        parent2: editedTarget.parent2
+      },
+      uncheckedSourceIds: { ...uncheckedSourceIds }
+    };
+  }
+
+  // Check if form has unsaved changes
+  function isDirty() {
+    if (!initialState) return false;
+    const current = getCurrentFormState();
+    return JSON.stringify(current) !== JSON.stringify(initialState);
   }
 
   // Load data on mount
   $effect(() => {
     loadData();
+  });
+
+  // Warn on browser back/refresh if there are unsaved changes
+  $effect(() => {
+    function handleBeforeUnload(e) {
+      if (isDirty()) {
+        e.preventDefault();
+        // Modern browsers ignore custom messages, but returnValue is still required
+        e.returnValue = '';
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   });
 
   async function loadData() {
@@ -258,6 +305,9 @@
         parent1: targetData.parent1 || null,
         parent2: targetData.parent2 || null
       };
+
+      // Snapshot state for dirty checking (after auto-population)
+      initialState = getCurrentFormState();
     } catch (err) {
       console.error('Failed to load merge data:', err);
       if (err instanceof ApiError && err.status === 404) {
@@ -271,8 +321,21 @@
   }
 
   function handleCancel() {
-    // Navigate back to the synonym's species page
-    window.history.back();
+    if (isDirty()) {
+      showDiscardDialog = true;
+      return;
+    }
+    // Navigate immediately if no changes
+    goto(`${base}/species/${encodeURIComponent(synonymName)}/`);
+  }
+
+  function handleDiscardCancel() {
+    showDiscardDialog = false;
+  }
+
+  function handleDiscardConfirm() {
+    showDiscardDialog = false;
+    goto(`${base}/species/${encodeURIComponent(synonymName)}/`);
   }
 
   function handleSaveClick() {
@@ -815,6 +878,29 @@
             </button>
           </div>
         {/if}
+      </div>
+    </div>
+  {/if}
+
+  <!-- Discard Changes Dialog -->
+  {#if showDiscardDialog}
+    <div class="dialog-overlay" onclick={handleDiscardCancel}>
+      <div class="dialog" onclick={(e) => e.stopPropagation()}>
+        <h2 class="dialog-title">Discard Changes?</h2>
+        <div class="dialog-content">
+          <p class="discard-message">
+            You have unsaved changes. Are you sure you want to discard them and return to
+            <span class="discard-species-name">{formatName(synonymData?.scientific_name, synonymData?.is_hybrid)}</span>?
+          </p>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-secondary" onclick={handleDiscardCancel}>
+            Keep Editing
+          </button>
+          <button type="button" class="btn btn-danger" onclick={handleDiscardConfirm}>
+            Discard Changes
+          </button>
+        </div>
       </div>
     </div>
   {/if}
@@ -1363,6 +1449,20 @@
     background-color: var(--color-background);
     border-radius: 0.5rem;
     line-height: 1.5;
+  }
+
+  /* Discard dialog */
+  .discard-message {
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .discard-species-name {
+    font-style: italic;
+    font-family: var(--font-serif);
+    color: var(--color-text-primary);
   }
 
   /* Responsive */
