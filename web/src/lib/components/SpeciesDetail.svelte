@@ -329,11 +329,12 @@
     return `${base}/species/${encodeURIComponent(name)}/`;
   }
 
-  function getOtherParent(currentSpecies) {
+  // Get the other parent of a hybrid (the one that isn't the current species)
+  function getOtherParent(hybrid, currentSpecies) {
     // Clean up parent names - remove Quercus prefix and × symbol
     const cleanName = (name) => name?.replace(/^Quercus\s+/, '').replace(/^×\s*/, '').trim();
-    const parent1 = cleanName(species.parent1);
-    const parent2 = cleanName(species.parent2);
+    const parent1 = cleanName(hybrid.parent1);
+    const parent2 = cleanName(hybrid.parent2);
     const current = cleanName(currentSpecies);
 
     if (parent1 && parent1.toLowerCase() !== current.toLowerCase()) {
@@ -627,21 +628,21 @@
       </section>
     {/if}
 
-    {#if species.hybrids && species.hybrids.length > 0}
+    {#if species.hybrids_with_parents && species.hybrids_with_parents.length > 0}
       <section class="card card-sm detail-section full-width">
         <h2 class="section-header">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>
-          <span>Known Hybrids ({species.hybrids.length})</span>
+          <span>Known Hybrids ({species.hybrids_with_parents.length})</span>
         </h2>
         <div class="hybrids-grid">
-          {#each species.hybrids as hybridName}
-            {@const otherParent = getOtherParent(speciesName)}
-            {@const displayName = hybridName.startsWith('×') ? hybridName : `× ${hybridName}`}
+          {#each species.hybrids_with_parents as hybrid}
+            {@const otherParent = getOtherParent(hybrid, speciesName)}
+            {@const displayName = hybrid.name.startsWith('×') ? hybrid.name : `× ${hybrid.name}`}
             <div class="hybrid-item">
               <a
-                href="{getSpeciesUrl(hybridName)}"
+                href="{getSpeciesUrl(hybrid.name)}"
                 class="species-link font-semibold"
               >
                 Q. {displayName}
@@ -651,6 +652,29 @@
                   (with <a href="{getSpeciesUrl(otherParent)}" class="species-link">Q. {otherParent}</a>)
                 </span>
               {/if}
+            </div>
+          {/each}
+        </div>
+      </section>
+    {:else if species.hybrids && species.hybrids.length > 0}
+      <!-- Fallback for legacy data without parent info -->
+      <section class="card card-sm detail-section full-width">
+        <h2 class="section-header">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          <span>Known Hybrids ({species.hybrids.length})</span>
+        </h2>
+        <div class="hybrids-grid">
+          {#each species.hybrids as hybridName}
+            {@const displayName = hybridName.startsWith('×') ? hybridName : `× ${hybridName}`}
+            <div class="hybrid-item">
+              <a
+                href="{getSpeciesUrl(hybridName)}"
+                class="species-link font-semibold"
+              >
+                Q. {displayName}
+              </a>
             </div>
           {/each}
         </div>

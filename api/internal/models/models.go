@@ -142,10 +142,18 @@ type SpeciesSourceWithMeta struct {
 	SourceURL  *string `json:"source_url,omitempty"`
 }
 
+// HybridWithParents represents a hybrid species with its parent information
+type HybridWithParents struct {
+	Name    string  `json:"name"`
+	Parent1 *string `json:"parent1,omitempty"`
+	Parent2 *string `json:"parent2,omitempty"`
+}
+
 // SpeciesWithSources represents a species with all its source data embedded
 type SpeciesWithSources struct {
 	Species
-	Sources []SpeciesSourceWithMeta `json:"sources"`
+	Sources            []SpeciesSourceWithMeta `json:"sources"`
+	HybridsWithParents []HybridWithParents     `json:"hybrids_with_parents,omitempty"`
 }
 
 // SearchResultType indicates the type of search result

@@ -83,10 +83,21 @@ func (db *Database) GetSpeciesWithSources(scientificName string) (*models.Specie
 		sources = []models.SpeciesSourceWithMeta{}
 	}
 
-	return &models.SpeciesWithSources{
+	result := &models.SpeciesWithSources{
 		Species: *entry,
 		Sources: sources,
-	}, nil
+	}
+
+	// Enrich hybrids with parent data
+	if len(entry.Hybrids) > 0 {
+		hybridsWithParents, err := db.getHybridsWithParents(entry.Hybrids)
+		if err == nil {
+			result.HybridsWithParents = hybridsWithParents
+		}
+		// On error, leave HybridsWithParents nil (graceful degradation)
+	}
+
+	return result, nil
 }
 
 // GetStats returns aggregate counts for species, hybrids, taxa, and sources
@@ -138,6 +149,39 @@ func (db *Database) GetHybridsReferencingParent(scientificName string) ([]string
 		hybrids = append(hybrids, name)
 	}
 	return hybrids, rows.Err()
+}
+
+// getHybridsWithParents returns parent information for a list of hybrid names
+func (db *Database) getHybridsWithParents(hybridNames []string) ([]models.HybridWithParents, error) {
+	if len(hybridNames) == 0 {
+		return []models.HybridWithParents{}, nil
+	}
+
+	result := make([]models.HybridWithParents, 0, len(hybridNames))
+
+	for _, name := range hybridNames {
+		var parent1, parent2 sql.NullString
+		err := db.conn.QueryRow(
+			`SELECT parent1, parent2 FROM species WHERE scientific_name = ?`,
+			name,
+		).Scan(&parent1, &parent2)
+
+		hwp := models.HybridWithParents{Name: name}
+
+		if err == nil {
+			if parent1.Valid {
+				hwp.Parent1 = &parent1.String
+			}
+			if parent2.Valid {
+				hwp.Parent2 = &parent2.String
+			}
+		}
+		// If error (species not found), we still include the name with nil parents
+
+		result = append(result, hwp)
+	}
+
+	return result, nil
 }
 
 // UnifiedSearch searches across species, taxa, and sources
