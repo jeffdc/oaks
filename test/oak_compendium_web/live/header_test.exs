@@ -8,11 +8,8 @@ defmodule OakCompendiumWeb.HeaderTest do
       {:ok, _view, html} = live(conn, ~p"/")
 
       assert html =~ "Oak Compendium"
-      assert html =~ ~s(href="/list")
-      assert html =~ ~s(href="/taxonomy")
-      assert html =~ ~s(href="/search")
-      assert html =~ ~s(href="/sources")
       assert html =~ ~s(href="/articles")
+      assert html =~ ~s(href="/sources")
       assert html =~ ~s(href="/about")
       assert html =~ ~s(href="/settings")
     end
@@ -24,25 +21,17 @@ defmodule OakCompendiumWeb.HeaderTest do
       assert html =~ ~s(href="#main-content")
     end
 
-    test "renders mobile menu toggle", %{conn: conn} do
+    test "renders search input", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/")
 
-      assert html =~ ~s(aria-label="Toggle menu")
-      assert html =~ ~s(id="mobile-menu")
+      assert html =~ ~s(id="header-search")
+      assert html =~ "Search by name"
     end
 
-    test "renders footer", %{conn: conn} do
+    test "renders oak leaf logo", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/")
 
-      assert html =~ "A comprehensive database of"
-      assert html =~ "GitHub"
-    end
-
-    test "highlights active nav link on species list page", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list")
-
-      # The /list link should have active class
-      assert html =~ "nav-link-active"
+      assert html =~ "oak-leaf-outline.svg"
     end
 
     test "highlights active nav link on about page", %{conn: conn} do

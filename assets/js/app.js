@@ -27,26 +27,148 @@ import topbar from "../vendor/topbar"
 
 const Hooks = {
   ...colocatedHooks,
-  ApiKeySettings: {
+  SearchSync: {
     mounted() {
+      this._headerInput = document.getElementById("header-search")
+      this._headerForm = this._headerInput?.closest("form")
+      if (!this._headerInput) return
+
+      // Fill header with current query
+      const query = this.el.dataset.query || ""
+      this._headerInput.value = query
+
+      // Debounced input handler → push LiveView event
+      this._debounceTimer = null
+      this._inputHandler = (e) => {
+        clearTimeout(this._debounceTimer)
+        this._debounceTimer = setTimeout(() => {
+          this.pushEvent("search", {q: e.target.value})
+        }, 300)
+      }
+      this._headerInput.addEventListener("input", this._inputHandler)
+
+      // Prevent form submit; use LiveView navigation instead
+      this._submitHandler = (e) => {
+        e.preventDefault()
+        clearTimeout(this._debounceTimer)
+        this.pushEvent("search", {q: this._headerInput.value})
+      }
+      this._headerForm?.addEventListener("submit", this._submitHandler)
+    },
+
+    updated() {
+      if (this._headerInput && this._headerInput !== document.activeElement) {
+        this._headerInput.value = this.el.dataset.query || ""
+      }
+    },
+
+    destroyed() {
+      clearTimeout(this._debounceTimer)
+      if (this._headerInput && this._inputHandler) {
+        this._headerInput.removeEventListener("input", this._inputHandler)
+      }
+      if (this._headerForm && this._submitHandler) {
+        this._headerForm.removeEventListener("submit", this._submitHandler)
+      }
+    }
+  },
+  ApiKeySettings: {
+    _defaultTimeout: 24,
+    _timer: null,
+
+    mounted() {
+      this._setupHandlers()
+      this._initSession()
+    },
+
+    updated() {
+      this._startTimer()
+    },
+
+    destroyed() {
+      this._clearTimer()
+    },
+
+    _getTimeoutHours() {
+      return parseInt(localStorage.getItem("oak:session_timeout_hours") || this._defaultTimeout, 10)
+    },
+
+    _getTimeoutMs() {
+      return this._getTimeoutHours() * 60 * 60 * 1000
+    },
+
+    _getRemainingMs() {
+      const timestamp = localStorage.getItem("oak:session_timestamp")
+      if (!timestamp) return 0
+      const elapsed = Date.now() - parseInt(timestamp, 10)
+      return Math.max(0, this._getTimeoutMs() - elapsed)
+    },
+
+    _formatTime(ms) {
+      if (ms <= 0) return "Expired"
+      const hours = Math.floor(ms / (1000 * 60 * 60))
+      const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60))
+      if (hours > 0) return `${hours}h ${minutes}m`
+      return `${minutes}m`
+    },
+
+    _clearTimer() {
+      if (this._timer) {
+        clearInterval(this._timer)
+        this._timer = null
+      }
+    },
+
+    _startTimer() {
+      this._clearTimer()
+      this._updateTimeDisplay()
+      this._timer = setInterval(() => this._updateTimeDisplay(), 60000)
+    },
+
+    _updateTimeDisplay() {
+      const el = this.el.querySelector("#session-time-remaining")
+      if (!el) return
+      const remaining = this._getRemainingMs()
+      el.textContent = this._formatTime(remaining)
+      if (remaining <= 0 && localStorage.getItem("oak:api_key")) {
+        localStorage.removeItem("oak:api_key")
+        localStorage.removeItem("oak:session_timestamp")
+        this._clearTimer()
+        this.pushEvent("save_result", {status: "cleared"})
+      }
+    },
+
+    _initSession() {
+      // Set timeout select to stored value
+      const timeoutSelect = this.el.querySelector("#session-timeout-select")
+      if (timeoutSelect) {
+        timeoutSelect.value = this._getTimeoutHours().toString()
+      }
+
+      // Check existing key and session validity
+      const stored = localStorage.getItem("oak:api_key")
+      if (stored) {
+        const remaining = this._getRemainingMs()
+        if (remaining > 0) {
+          const input = this.el.querySelector("#api-key-input")
+          if (input) input.value = stored
+          this.pushEvent("auth_status", {authenticated: true})
+        } else {
+          // Session expired
+          localStorage.removeItem("oak:api_key")
+          localStorage.removeItem("oak:session_timestamp")
+        }
+      }
+
+      this._startTimer()
+    },
+
+    _setupHandlers() {
       const input = this.el.querySelector("#api-key-input")
       const saveBtn = this.el.querySelector("#save-api-key")
-      const verifyBtn = this.el.querySelector("#verify-api-key")
+      const clearBtn = this.el.querySelector("#clear-api-key")
 
-      // Load existing key into input
-      const stored = localStorage.getItem("oak:api_key")
-      if (stored) input.value = stored
-
-      saveBtn.addEventListener("click", () => {
-        const key = input.value.trim()
-        if (key) {
-          localStorage.setItem("oak:api_key", key)
-        } else {
-          localStorage.removeItem("oak:api_key")
-        }
-      })
-
-      verifyBtn.addEventListener("click", async () => {
+      saveBtn.addEventListener("click", async () => {
         const key = input.value.trim()
         if (!key) {
           this.pushEvent("verify_result", {status: "invalid"})
@@ -56,9 +178,41 @@ const Hooks = {
           const resp = await fetch("/api/v1/auth/verify", {
             headers: {"Authorization": `Bearer ${key}`}
           })
-          this.pushEvent("verify_result", {status: resp.ok ? "ok" : "invalid"})
+          if (resp.ok) {
+            localStorage.setItem("oak:api_key", key)
+            localStorage.setItem("oak:session_timestamp", Date.now().toString())
+            this.pushEvent("save_result", {status: "saved"})
+          } else {
+            this.pushEvent("verify_result", {status: "invalid"})
+          }
         } catch (_e) {
           this.pushEvent("verify_result", {status: "error"})
+        }
+      })
+
+      clearBtn.addEventListener("click", () => {
+        localStorage.removeItem("oak:api_key")
+        localStorage.removeItem("oak:session_timestamp")
+        input.value = ""
+        this.pushEvent("save_result", {status: "cleared"})
+      })
+
+      // Reset session button (delegated since it may not exist yet)
+      this.el.addEventListener("click", (e) => {
+        if (e.target.id === "reset-session-btn" || e.target.closest("#reset-session-btn")) {
+          localStorage.setItem("oak:session_timestamp", Date.now().toString())
+          this._updateTimeDisplay()
+        }
+      })
+
+      // Timeout select (delegated since it may not exist yet)
+      this.el.addEventListener("change", (e) => {
+        if (e.target.id === "session-timeout-select") {
+          const hours = parseInt(e.target.value, 10)
+          if (hours > 0 && hours <= 168) {
+            localStorage.setItem("oak:session_timeout_hours", hours.toString())
+            this._updateTimeDisplay()
+          }
         }
       })
     }

@@ -6,7 +6,7 @@ defmodule OakCompendiumWeb.Layouts do
 
   * `:root` — the HTML skeleton (head, body, scripts). Set via
     `put_root_layout` in the router pipeline.
-  * `:app`  — the application chrome (nav, main, footer). Rendered
+  * `:app`  — the application chrome (nav, main). Rendered
     from `app.html.heex` via `embed_templates`.
   """
   use OakCompendiumWeb, :html
