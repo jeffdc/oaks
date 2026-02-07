@@ -750,9 +750,10 @@ go build -o oak .
 - Go: `snake_case.go`
 
 ### Code Style
+- **Elixir (V2)**: See `CODING_STANDARDS.md` for comprehensive Elixir/Phoenix conventions. All agents must follow these standards.
 - **Python**: PEP 8, docstrings on functions, meaningful variable names
-- **JavaScript**: 2-space indent, see `web/CLAUDE.md` for Svelte conventions
-- **Go**: `gofmt`, API client pattern for data operations
+- **JavaScript (V1)**: 2-space indent, see `web/CLAUDE.md` for Svelte conventions
+- **Go (V1)**: `gofmt`, API client pattern for data operations
 
 ### Git Workflow
 
