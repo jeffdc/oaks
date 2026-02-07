@@ -20,6 +20,9 @@ defmodule OakCompendium.Taxonomy.Taxon do
     field :content, :string
     field :content_updated_at, :string
     field :links, :string
+
+    # Populated by list_taxa_with_counts/1 via select_merge
+    field :species_count, :integer, virtual: true, default: 0
   end
 
   def changeset(taxon, attrs) do
