@@ -1,9 +1,39 @@
 defmodule OakCompendiumWeb.AboutLive do
   use OakCompendiumWeb, :live_view
 
+  alias OakCompendium.Species
+
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, page_title: "About")}
+    if connected?(socket) do
+      send(self(), :load_stats)
+    end
+
+    version = Application.spec(:oak_compendium, :vsn) |> to_string()
+
+    {:ok,
+     assign(socket,
+       page_title: "About",
+       version: version,
+       stats: %{species_count: 0, hybrid_count: 0, total: 0},
+       is_loading: true
+     )}
+  end
+
+  @impl true
+  def handle_info(:load_stats, socket) do
+    species_count = Species.count()
+    hybrid_count = Species.count_hybrids()
+
+    {:noreply,
+     assign(socket,
+       stats: %{
+         species_count: species_count,
+         hybrid_count: hybrid_count,
+         total: species_count + hybrid_count
+       },
+       is_loading: false
+     )}
   end
 
   @impl true
@@ -90,6 +120,41 @@ defmodule OakCompendiumWeb.AboutLive do
       </section>
 
       <section class="mb-8">
+        <h3 class="section-title">Database Statistics</h3>
+        <div class="grid grid-cols-3 gap-4 max-[480px]:grid-cols-1">
+          <div
+            class="flex flex-col items-center p-5 rounded-xl border"
+            style="background-color: var(--color-surface); border-color: var(--color-border); box-shadow: var(--shadow-sm);"
+          >
+            <span class="text-3xl font-bold leading-none" style="color: var(--color-forest-700);">
+              {if @is_loading, do: "\u2014", else: @stats.species_count}
+            </span>
+            <span class="text-sm mt-1.5" style="color: var(--color-text-secondary);">Species</span>
+          </div>
+          <div
+            class="flex flex-col items-center p-5 rounded-xl border"
+            style="background-color: var(--color-surface); border-color: var(--color-border); box-shadow: var(--shadow-sm);"
+          >
+            <span class="text-3xl font-bold leading-none" style="color: var(--color-forest-700);">
+              {if @is_loading, do: "\u2014", else: @stats.hybrid_count}
+            </span>
+            <span class="text-sm mt-1.5" style="color: var(--color-text-secondary);">Hybrids</span>
+          </div>
+          <div
+            class="flex flex-col items-center p-5 rounded-xl border"
+            style="background-color: var(--color-surface); border-color: var(--color-border); box-shadow: var(--shadow-sm);"
+          >
+            <span class="text-3xl font-bold leading-none" style="color: var(--color-forest-700);">
+              {if @is_loading, do: "\u2014", else: @stats.total}
+            </span>
+            <span class="text-sm mt-1.5" style="color: var(--color-text-secondary);">
+              Total Entries
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-8">
         <h3 class="section-title">Data Sources</h3>
         <p
           class="leading-relaxed mb-3"
@@ -124,7 +189,7 @@ defmodule OakCompendiumWeb.AboutLive do
             rel="noopener noreferrer"
           >IUCN Red List of Threatened Species</a>,
           retrieved via the IUCN Red List API. Citation: IUCN 2024. IUCN Red List of Threatened
-          Species. Version 2024-2.
+          Species. Version 2024-2 &lt;www.iucnredlist.org&gt;.
         </p>
         <p
           class="leading-relaxed"
@@ -197,6 +262,18 @@ defmodule OakCompendiumWeb.AboutLive do
           Read operations are open to all; write operations require authentication.
         </p>
       </section>
+
+      <footer
+        class="mt-12 pt-6 text-center"
+        style="border-top: 1px solid var(--color-border);"
+      >
+        <span
+          class="text-xs"
+          style="color: var(--color-text-tertiary); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;"
+        >
+          Version {@version}
+        </span>
+      </footer>
     </div>
     """
   end
