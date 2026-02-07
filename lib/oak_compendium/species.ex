@@ -18,6 +18,53 @@ defmodule OakCompendium.Species do
   # -- List --
 
   @doc """
+  Returns all species matching the given filters, ordered by scientific_name.
+
+  No pagination — intended for the LiveView list page.
+
+  ## Options
+    * `"search"` - case-insensitive name search
+    * `"subgenus"`, `"section"`, `"subsection"`, `"complex"` - taxonomy filters
+    * `"hybrid"` - filter by hybrid status
+  """
+  @spec list_all_species(map()) :: [Species.t()]
+  def list_all_species(params \\ %{}) do
+    params
+    |> species_filter_query()
+    |> maybe_filter_search(params["search"])
+    |> order_by([s], asc: s.scientific_name)
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns distinct non-nil subgenus values, sorted alphabetically.
+  """
+  @spec distinct_subgenera() :: [String.t()]
+  def distinct_subgenera do
+    from(s in Species,
+      select: s.subgenus,
+      distinct: true,
+      where: not is_nil(s.subgenus),
+      order_by: [asc: s.subgenus]
+    )
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns distinct non-nil section values, sorted alphabetically.
+  """
+  @spec distinct_sections() :: [String.t()]
+  def distinct_sections do
+    from(s in Species,
+      select: s.section,
+      distinct: true,
+      where: not is_nil(s.section),
+      order_by: [asc: s.section]
+    )
+    |> Repo.all()
+  end
+
+  @doc """
   Returns a paginated list of species with optional filters.
 
   ## Options
@@ -206,6 +253,14 @@ defmodule OakCompendium.Species do
 
   defp maybe_filter(query, field, value) do
     where(query, [s], field(s, ^field) == ^value)
+  end
+
+  defp maybe_filter_search(query, nil), do: query
+  defp maybe_filter_search(query, ""), do: query
+
+  defp maybe_filter_search(query, search) do
+    search_term = "%#{String.downcase(search)}%"
+    where(query, [s], fragment("lower(?) LIKE ?", s.scientific_name, ^search_term))
   end
 
   defp maybe_filter_hybrid(query, nil), do: query

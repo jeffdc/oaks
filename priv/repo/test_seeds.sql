@@ -37,6 +37,14 @@ INSERT INTO species (id, scientific_name, author, is_hybrid, conservation_status
 INSERT INTO species (id, scientific_name, author, is_hybrid, parent1, parent2, subgenus, section) VALUES
   (5, '×bebbiana', 'C.K.Schneid.', 1, 'alba', 'macrocarpa', 'Quercus', 'Quercus');
 
+-- Add JSON array relationship data for testing detail page
+UPDATE species SET
+  hybrids = '["×bebbiana"]',
+  closely_related_to = '["stellata"]',
+  synonyms = '["alba var. repanda"]',
+  subspecies_varieties = '["alba var. latiloba"]'
+WHERE id = 1;
+
 -- =============================================================================
 -- Species Sources (junction data)
 -- =============================================================================
