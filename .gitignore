@@ -76,6 +76,11 @@ quercus_export.json
 # bv (beads viewer) local config and caches
 .bv/
 
+# SQLite temp/backup files
+*.db-shm
+*.db-wal
+*.db.bak
+
 # Elixir / Phoenix
 /_build/
 /cover/
