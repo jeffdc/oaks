@@ -32,15 +32,20 @@ defmodule OakCompendiumWeb.Router do
   scope "/", OakCompendiumWeb do
     pipe_through :browser
 
-    live_session :default, on_mount: [OakCompendiumWeb.Hooks.ActiveNav] do
+    live_session :default,
+      on_mount: [OakCompendiumWeb.Hooks.ActiveNav, OakCompendiumWeb.Hooks.Auth] do
       live "/", HomeLive
       live "/list", SpeciesListLive
+      live "/species/new", SpeciesFormLive, :new
+      live "/species/:name/edit", SpeciesFormLive, :edit
       live "/species/:name", SpeciesDetailLive
       live "/species/:name/merge/:target", SpeciesMergeLive
       live "/compare/:name", SpeciesCompareLive
       live "/taxonomy", TaxonomyLive
       live "/taxonomy/*path", TaxonomyLive
       live "/articles", ArticlesLive
+      live "/articles/new", ArticleFormLive, :new
+      live "/articles/:slug/edit", ArticleFormLive, :edit
       live "/articles/:slug", ArticleLive
       live "/sources", SourcesLive
       live "/sources/:id", SourceDetailLive

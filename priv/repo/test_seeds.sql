@@ -59,7 +59,18 @@ INSERT INTO species_sources (id, species_id, source_id, local_names, range, grow
 -- =============================================================================
 
 INSERT INTO articles (id, slug, title, author, content, tags, is_published, created_at, updated_at, published_at) VALUES
-  (1, 'getting-started', 'Getting Started with Oak Identification', 'Jeff', 'Start by looking at the leaves...', '["guide","beginner"]', 1, '2025-01-01T00:00:00Z', '2025-01-15T00:00:00Z', '2025-01-01T00:00:00Z');
+  (1, 'getting-started', 'Getting Started with Oak Identification', 'Jeff', '# Getting Started
+
+Start by looking at the **leaves**. Oak leaves have distinctive lobed shapes.
+
+## Key Features
+
+- Leaf shape and lobe pattern
+- Acorn size and cap coverage
+- Bark texture and color
+
+> The best way to learn is to go outside and observe.', '["guide","beginner"]', 1, '2025-01-01T00:00:00Z', '2025-01-15T00:00:00Z', '2025-01-01T00:00:00Z'),
+  (2, 'advanced-taxonomy-draft', 'Advanced Oak Taxonomy', 'Jeff', 'This is a **draft** about oak taxonomy.', '["taxonomy","advanced"]', 0, '2025-02-01T00:00:00Z', '2025-02-10T00:00:00Z', NULL);
 
 -- =============================================================================
 -- Import Metadata

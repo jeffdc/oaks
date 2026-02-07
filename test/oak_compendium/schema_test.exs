@@ -104,14 +104,16 @@ defmodule OakCompendium.SchemaTest do
   end
 
   describe "Article schema" do
-    test "loads seeded article" do
+    test "loads seeded articles" do
       articles = Repo.all(Article)
-      assert length(articles) == 1
+      assert length(articles) == 2
 
-      article = hd(articles)
-      assert article.slug == "getting-started"
-      assert article.is_published == true
-      assert article.author == "Jeff"
+      published = Enum.find(articles, &(&1.slug == "getting-started"))
+      assert published.is_published == true
+      assert published.author == "Jeff"
+
+      draft = Enum.find(articles, &(&1.slug == "advanced-taxonomy-draft"))
+      assert draft.is_published == false
     end
   end
 

@@ -8,7 +8,7 @@ defmodule OakCompendium.Articles.Article do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @required_fields [:slug, :title, :author, :created_at, :updated_at]
+  @type t :: %__MODULE__{}
 
   schema "articles" do
     field :slug, :string
@@ -22,6 +22,10 @@ defmodule OakCompendium.Articles.Article do
     field :published_at, :string
   end
 
+  @doc """
+  Full changeset used for database persistence.
+  Requires slug and timestamps (set by context functions).
+  """
   def changeset(article, attrs) do
     article
     |> cast(attrs, [
@@ -35,7 +39,19 @@ defmodule OakCompendium.Articles.Article do
       :updated_at,
       :published_at
     ])
-    |> validate_required(@required_fields)
+    |> validate_required([:slug, :title, :author, :created_at, :updated_at])
     |> unique_constraint(:slug)
+  end
+
+  @doc """
+  Form changeset for user input validation.
+  Only validates fields the user controls (title, author, content, tags, is_published).
+  """
+  def form_changeset(article, attrs) do
+    article
+    |> cast(attrs, [:title, :author, :content, :tags, :is_published])
+    |> validate_required([:title, :author])
+    |> validate_length(:title, max: 200)
+    |> validate_length(:author, max: 200)
   end
 end
