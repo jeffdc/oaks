@@ -87,7 +87,7 @@ defmodule OakCompendium.SchemaTest do
   describe "SpeciesSource schema" do
     test "loads all seeded species_sources" do
       ss = Repo.all(SpeciesSource)
-      assert length(ss) == 3
+      assert length(ss) == 4
     end
 
     test "preloads species and source associations" do

@@ -52,7 +52,8 @@ WHERE id = 1;
 INSERT INTO species_sources (id, species_id, source_id, local_names, range, growth_habit, leaves, is_preferred) VALUES
   (1, 1, 2, '["white oak","eastern white oak"]', 'Eastern North America; 0 to 1600 m', 'Reaches 25 m high', '8-20 cm long, obovate', 1),
   (2, 1, 1, NULL, NULL, NULL, NULL, 0),
-  (3, 2, 2, '["northern red oak"]', 'Eastern North America', 'Reaches 25-35 m', '12-22 cm long', 1);
+  (3, 2, 2, '["northern red oak"]', 'Eastern North America', 'Reaches 25-35 m', '12-22 cm long', 1),
+  (4, 3, 3, '["post oak"]', 'Eastern US', NULL, '10-18 cm, cross-shaped', 1);
 
 -- =============================================================================
 -- Articles

@@ -28,7 +28,7 @@ defmodule OakCompendium.SourcesTest do
       assert inat.species_count == 1
 
       oak_comp = Enum.find(sources, &(&1.name == "Oak Compendium"))
-      assert oak_comp.species_count == 0
+      assert oak_comp.species_count == 1
     end
 
     test "returns expected fields" do
@@ -73,8 +73,10 @@ defmodule OakCompendium.SourcesTest do
       assert names == Enum.sort(names)
     end
 
-    test "returns empty list for source with no species" do
-      assert Sources.get_species_for_source(3) == []
+    test "returns species for source 3" do
+      species = Sources.get_species_for_source(3)
+      assert length(species) == 1
+      assert hd(species).scientific_name == "stellata"
     end
 
     test "returns empty list for nonexistent source" do

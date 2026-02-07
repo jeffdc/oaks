@@ -49,11 +49,11 @@ defmodule OakCompendiumWeb.SourceDetailLiveTest do
       assert html =~ ~s(href="/species/rubra")
     end
 
-    test "source with no species shows zero count", %{conn: conn} do
+    test "source 3 shows species with data", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/sources/3")
       assert html =~ "Oak Compendium"
-      # Should not show "Species with Data from This Source" section
-      refute html =~ "Species with Data from This Source"
+      assert html =~ "Species with Data from This Source"
+      assert html =~ "stellata"
     end
   end
 
