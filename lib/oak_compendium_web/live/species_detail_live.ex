@@ -9,6 +9,7 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
 
   use OakCompendiumWeb, :live_view
 
+  alias OakCompendium.Markdown
   alias OakCompendium.Species
 
   @impl true
@@ -23,6 +24,7 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
        subspecies_varieties: [],
        synonyms: [],
        external_links: [],
+       computed_external_links: [],
        species_sources: [],
        selected_source: nil,
        has_relationships: false,
@@ -135,7 +137,11 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
               :if={@species.is_hybrid && (@species.parent1 || @species.parent2)}
               species={@species}
             />
-            <.hybrids_section :if={@hybrids != []} hybrids={@hybrids} />
+            <.hybrids_section
+              :if={@hybrids != []}
+              hybrids={@hybrids}
+              species_name={@species.scientific_name}
+            />
             <.related_section :if={@closely_related != []} related={@closely_related} />
             <.subspecies_section
               :if={@subspecies_varieties != []}
@@ -149,6 +155,7 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
               :if={@species_sources != []}
               sources={@species_sources}
               selected={@selected_source}
+              species_name={@species.scientific_name}
             />
             <.source_content :if={@selected_source} source={@selected_source} />
             <div
@@ -161,6 +168,11 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
             </div>
           </div>
         </div>
+
+        <.external_links_section
+          :if={@computed_external_links != []}
+          links={@computed_external_links}
+        />
       </div>
 
       <.delete_confirm_modal
@@ -237,8 +249,8 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
         </div>
       </div>
       <.taxonomy_breadcrumb species={@species} />
-
-      <!-- Compare link (visible to all users) -->
+      
+    <!-- Compare link (visible to all users) -->
       <div class="mt-4 pt-4 border-t border-base-200">
         <.link
           navigate={~p"/compare/#{@species.scientific_name}"}
@@ -372,22 +384,36 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
   end
 
   attr :hybrids, :list, required: true
+  attr :species_name, :string, required: true
 
   defp hybrids_section(assigns) do
     ~H"""
     <section class="card p-4">
-      <h2 class="section-title section-title-sm mb-3">Known Hybrids</h2>
-      <ul class="space-y-1">
-        <li :for={hybrid <- @hybrids}>
+      <h2 class="section-title section-title-sm mb-3">
+        Known Hybrids ({length(@hybrids)})
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div :for={hybrid <- @hybrids} class="hybrid-item">
           <.link
-            navigate={~p"/species/#{hybrid}"}
-            class="flex items-center gap-2 p-2 rounded hover:bg-base-200 transition-colors"
+            navigate={~p"/species/#{hybrid.name}"}
+            class="species-link font-semibold"
+            style="text-decoration: none;"
           >
-            <.icon name="hero-link" class="size-4 text-forest-600" />
-            <span class="font-medium">Quercus <em>{hybrid}</em></span>
+            Q. {format_hybrid_display(hybrid.name)}
           </.link>
-        </li>
-      </ul>
+          <span
+            :if={other = get_other_parent(hybrid, @species_name)}
+            class="text-sm"
+            style="color: var(--color-text-secondary);"
+          >
+            (with <.link
+              navigate={~p"/species/#{other}"}
+              class="species-link"
+              style="text-decoration: none;"
+            >Q. {other}</.link>)
+          </span>
+        </div>
+      </div>
     </section>
     """
   end
@@ -447,25 +473,31 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
 
   attr :sources, :list, required: true
   attr :selected, :any, required: true
+  attr :species_name, :string, required: true
 
   defp source_tabs(assigns) do
     ~H"""
-    <div
-      class="flex flex-wrap gap-1 p-1 rounded-lg mb-4"
-      style="background-color: var(--color-forest-800);"
-    >
+    <div class="source-tabs-strip" role="tablist">
       <button
         :for={ss <- @sources}
         phx-click="select_source"
         phx-value-id={ss.source.id}
-        class={[
-          "px-3 py-1.5 rounded text-sm font-medium transition-colors",
-          source_tab_classes(ss, @selected)
-        ]}
+        class={["source-tab", selected_tab?(ss, @selected) && "active"]}
+        role="tab"
+        aria-selected={to_string(selected_tab?(ss, @selected))}
       >
-        {ss.source.name}
-        <span :if={ss.is_preferred} title="Preferred source">&#9733;</span>
+        <span class="source-tab-name">{ss.source.name}</span>
+        <span :if={ss.is_preferred} class="preferred-star" title="Preferred source">&#9733;</span>
       </button>
+      <.link
+        :if={length(@sources) > 1}
+        navigate={~p"/compare/#{@species_name}"}
+        class="compare-sources-link"
+        title="Compare all sources side-by-side"
+      >
+        <.icon name="hero-arrows-right-left" class="size-4" />
+        <span>Compare</span>
+      </.link>
     </div>
     """
   end
@@ -483,17 +515,23 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
       </h3>
 
       <div class="divide-y" style="border-color: var(--color-border-light);">
-        <.source_field label="Geographic Range" value={@source.range} />
-        <.source_field label="Growth Habit" value={@source.growth_habit} />
-        <.source_field label="Leaves" value={@source.leaves} />
-        <.source_field label="Flowers" value={@source.flowers} />
-        <.source_field label="Fruits" value={@source.fruits} />
-        <.source_field label="Bark" value={@source.bark} />
-        <.source_field label="Twigs" value={@source.twigs} />
-        <.source_field label="Buds" value={@source.buds} />
+        <.source_field label="Geographic Range" value={@source.range} icon="hero-map-pin" />
+        <.source_field label="Growth Habit" value={@source.growth_habit} icon="hero-building-office-2" />
+        <.source_field label="Leaves" value={@source.leaves} icon="leaf" />
+        <.source_field label="Flowers" value={@source.flowers} icon="flower" />
+        <.source_field label="Fruits" value={@source.fruits} icon="acorn" />
+        <.source_field label="Bark" value={@source.bark} icon="hero-sparkles" />
+        <.source_field label="Twigs" value={@source.twigs} icon="hero-sparkles" />
+        <.source_field label="Buds" value={@source.buds} icon="hero-sparkles" />
 
         <div :if={@local_names != []} class="py-3">
-          <h4 class="text-sm font-semibold mb-2" style="color: var(--color-forest-700);">
+          <h4
+            class="flex items-center gap-1.5 text-sm font-semibold mb-2"
+            style="color: var(--color-forest-700);"
+          >
+            <span style="color: var(--color-forest-500);">
+              <.icon name="hero-language" class="size-4 flex-shrink-0" />
+            </span>
             Common Names
           </h4>
           <div class="flex flex-wrap gap-2">
@@ -503,8 +541,16 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
           </div>
         </div>
 
-        <.source_field label="Hardiness & Habitat" value={@source.hardiness_habitat} />
-        <.source_field label="Additional Information" value={@source.miscellaneous} />
+        <.source_field
+          label="Hardiness & Habitat"
+          value={@source.hardiness_habitat}
+          icon="hero-globe-americas"
+        />
+        <.source_field
+          label="Additional Information"
+          value={@source.miscellaneous}
+          icon="hero-information-circle"
+        />
       </div>
 
       <div
@@ -528,15 +574,76 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
 
   attr :label, :string, required: true
   attr :value, :string, default: nil
+  attr :icon, :string, default: nil
 
   defp source_field(assigns) do
     ~H"""
     <div :if={@value && @value != ""} class="py-3">
-      <h4 class="text-sm font-semibold mb-1" style="color: var(--color-forest-700);">
+      <h4 class="flex items-center gap-1.5 text-sm font-semibold mb-1" style="color: var(--color-forest-700);">
+        <.field_icon :if={@icon} name={@icon} />
         {@label}
       </h4>
-      <p class="prose-content" style="white-space: pre-wrap;">{@value}</p>
+      <div class="prose-content">{raw(Markdown.render_html(@value))}</div>
     </div>
+    """
+  end
+
+  attr :name, :string, required: true
+
+  defp field_icon(%{name: "leaf"} = assigns) do
+    ~H"""
+    <svg class="size-4 flex-shrink-0" style="color: var(--color-forest-500);" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z" />
+    </svg>
+    """
+  end
+
+  defp field_icon(%{name: "flower"} = assigns) do
+    ~H"""
+    <svg class="size-4 flex-shrink-0" style="color: var(--color-forest-500);" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M15,10.59V9L12.5,6.5L10,9V10.59L11.29,11.88L10.59,14.59L12,14L13.41,14.59L12.71,11.88L15,10.59Z" />
+    </svg>
+    """
+  end
+
+  defp field_icon(%{name: "acorn"} = assigns) do
+    ~H"""
+    <svg class="size-4 flex-shrink-0" style="color: var(--color-forest-500);" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12,2C12.5,2 13,2.19 13.41,2.59C13.8,3 14,3.5 14,4C14,4.5 13.8,5 13.41,5.41C13,5.8 12.5,6 12,6C11.5,6 11,5.8 10.59,5.41C10.2,5 10,4.5 10,4C10,3.5 10.2,3 10.59,2.59C11,2.19 11.5,2 12,2M12,6C13.1,6 14,6.9 14,8V9.5C15.72,9.5 17.17,10.6 17.71,12.13C18.14,13.38 18.13,14.77 17.66,16C17.19,17.26 16.32,18.23 15.19,18.74C14.06,19.25 12.78,19.25 11.65,18.74C10.5,18.23 9.63,17.26 9.16,16C8.69,14.77 8.68,13.38 9.11,12.13C9.65,10.6 11.1,9.5 12.83,9.5H12V8C12,6.9 12.9,6 12,6M12.13,11.5C11.41,11.5 10.81,11.89 10.54,12.5C10.27,13.11 10.39,13.82 10.85,14.3C11.31,14.78 12,14.94 12.63,14.7C13.26,14.46 13.7,13.86 13.7,13.17C13.7,12.64 13.5,12.13 13.13,11.76C12.76,11.39 12.26,11.5 12.13,11.5Z" />
+    </svg>
+    """
+  end
+
+  defp field_icon(%{name: "hero-" <> _} = assigns) do
+    ~H"""
+    <span style="color: var(--color-forest-500);"><.icon name={@name} class="size-4 flex-shrink-0" /></span>
+    """
+  end
+
+  # -- External links --
+
+  attr :links, :list, required: true
+
+  defp external_links_section(assigns) do
+    ~H"""
+    <section class="card p-4 mt-6">
+      <h2 class="section-title section-title-sm mb-3">
+        <.icon name="hero-arrow-top-right-on-square" class="size-4 inline-block" />
+        External Links
+      </h2>
+      <div class="flex flex-wrap gap-3">
+        <a
+          :for={link <- @links}
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="external-link-btn"
+        >
+          {link.name}
+          <.icon name="hero-arrow-top-right-on-square" class="size-3.5" />
+        </a>
+      </div>
+    </section>
     """
   end
 
@@ -728,11 +835,15 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
   # -- Data loading --
 
   defp load_species(socket, species) do
-    hybrids = Species.parse_json_array(species.hybrids)
+    hybrids =
+      species.hybrids
+      |> Species.parse_json_array()
+      |> Species.get_hybrids_with_parents()
     closely_related = Species.parse_json_array(species.closely_related_to)
     subspecies_varieties = Species.parse_json_array(species.subspecies_varieties)
     synonyms = Species.parse_json_array(species.synonyms)
     external_links = Species.parse_json_array(species.external_links)
+    computed_external_links = build_external_links(species.scientific_name, external_links)
     species_sources = species.species_sources
     selected_source = List.first(species_sources)
 
@@ -748,6 +859,7 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
        subspecies_varieties: subspecies_varieties,
        synonyms: synonyms,
        external_links: external_links,
+       computed_external_links: computed_external_links,
        species_sources: species_sources,
        selected_source: selected_source,
        has_relationships: has_relationships,
@@ -776,6 +888,53 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
   defp display_name("\u00D7" <> rest), do: rest
   defp display_name(name), do: name
 
+  defp get_other_parent(%{parent1: p1, parent2: p2}, current_name) do
+    clean = fn name ->
+      (name || "")
+      |> String.replace(~r/^Quercus\s+/, "")
+      |> String.replace(~r/^×\s*/, "")
+      |> String.trim()
+    end
+
+    current = current_name |> clean.() |> String.downcase()
+    c1 = if p1, do: clean.(p1), else: nil
+    c2 = if p2, do: clean.(p2), else: nil
+
+    cond do
+      c1 && String.downcase(c1) != current -> c1
+      c2 && String.downcase(c2) != current -> c2
+      true -> nil
+    end
+  end
+
+  defp build_external_links(species_name, db_links) do
+    custom =
+      Enum.flat_map(db_links, fn
+        %{"name" => name, "url" => url} -> [%{name: name, url: url}]
+        _ -> []
+      end)
+
+    auto = [
+      %{
+        name: "iNaturalist",
+        url: "https://www.inaturalist.org/search?q=#{URI.encode("Quercus #{species_name}")}"
+      },
+      %{
+        name: "Wikipedia",
+        url:
+          "https://en.wikipedia.org/wiki/Quercus_#{String.replace(species_name, " ", "_")}"
+      }
+    ]
+
+    (custom ++ auto) |> Enum.sort_by(& &1.name)
+  end
+
+  defp format_hybrid_display(name) do
+    if String.starts_with?(name, "×"),
+      do: name,
+      else: "× #{name}"
+  end
+
   defp format_synonym(syn) when is_binary(syn), do: syn
 
   defp format_synonym(%{"name" => name, "author" => author}) when author != "" do
@@ -785,12 +944,8 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
   defp format_synonym(%{"name" => name}), do: name
   defp format_synonym(other), do: inspect(other)
 
-  defp source_tab_classes(source, selected) do
-    if selected && source.id == selected.id do
-      "bg-white text-forest-800"
-    else
-      "text-white/70 hover:text-white hover:bg-white/10"
-    end
+  defp selected_tab?(source, selected) do
+    selected && source.id == selected.id
   end
 
   defp conservation_classes("LC"), do: "bg-green-100 text-green-800 border-green-300"

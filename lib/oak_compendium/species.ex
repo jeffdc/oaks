@@ -178,6 +178,28 @@ defmodule OakCompendium.Species do
     |> Repo.aggregate(:count)
   end
 
+  @doc """
+  Given a list of hybrid scientific names, returns a list of maps with
+  `name`, `parent1`, and `parent2` for each hybrid.
+  """
+  @spec get_hybrids_with_parents([String.t()]) :: [map()]
+  def get_hybrids_with_parents([]), do: []
+
+  def get_hybrids_with_parents(hybrid_names) do
+    parent_map =
+      from(s in Species,
+        where: s.scientific_name in ^hybrid_names,
+        select: {s.scientific_name, s.parent1, s.parent2}
+      )
+      |> Repo.all()
+      |> Map.new(fn {name, p1, p2} -> {name, {p1, p2}} end)
+
+    Enum.map(hybrid_names, fn name ->
+      {p1, p2} = Map.get(parent_map, name, {nil, nil})
+      %{name: name, parent1: p1, parent2: p2}
+    end)
+  end
+
   # -- Write operations --
 
   @doc """

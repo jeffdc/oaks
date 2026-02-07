@@ -159,15 +159,7 @@ defmodule OakCompendium.Articles do
   Returns safe HTML string or empty string if content is nil.
   """
   @spec render_markdown(String.t() | nil) :: String.t()
-  def render_markdown(nil), do: ""
-  def render_markdown(""), do: ""
-
-  def render_markdown(content) when is_binary(content) do
-    case Earmark.as_html(content) do
-      {:ok, html, _warnings} -> html
-      {:error, _html, _errors} -> content
-    end
-  end
+  defdelegate render_markdown(content), to: OakCompendium.Markdown, as: :render_html
 
   # -- Serialization --
 
