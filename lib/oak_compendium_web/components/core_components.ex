@@ -444,6 +444,100 @@ defmodule OakCompendiumWeb.CoreComponents do
     """
   end
 
+  @doc """
+  Renders a modal dialog.
+
+  ## Examples
+
+      <.modal id="confirm-modal">
+        Are you sure?
+        <:actions>
+          <.button phx-click="confirm">OK</.button>
+        </:actions>
+      </.modal>
+
+  JS.exec("data-show", to: "#confirm-modal") to show it.
+  JS.exec("data-cancel", to: "#confirm-modal") to hide it.
+  """
+  attr :id, :string, required: true
+  attr :on_cancel, JS, default: %JS{}
+
+  slot :inner_block, required: true
+  slot :title
+  slot :actions
+
+  def modal(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      phx-mounted={@id == "confirm-modal" && show_modal(@id)}
+      phx-remove={hide_modal(@id)}
+      data-show={show_modal(@id)}
+      data-cancel={JS.exec(@on_cancel, "phx-remove")}
+      class="hidden relative z-50"
+    >
+      <div
+        id={"#{@id}-bg"}
+        class="fixed inset-0 bg-black/60 transition-opacity"
+        aria-hidden="true"
+      />
+      <div
+        class="fixed inset-0 overflow-y-auto"
+        aria-labelledby={"#{@id}-title"}
+        aria-describedby={"#{@id}-description"}
+        role="dialog"
+        aria-modal="true"
+        tabindex="0"
+      >
+        <div class="flex min-h-full items-center justify-center p-4">
+          <div class="w-full max-w-lg rounded-xl bg-base-100 p-8 shadow-xl ring-1 ring-base-300">
+            <.focus_wrap
+              id={"#{@id}-wrap"}
+              phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
+              phx-key="escape"
+              phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
+            >
+              <div :if={@title != []} class="mb-4">
+                <h2 id={"#{@id}-title"} class="text-lg font-semibold">
+                  {render_slot(@title)}
+                </h2>
+              </div>
+              <div id={"#{@id}-description"}>
+                {render_slot(@inner_block)}
+              </div>
+              <div :if={@actions != []} class="mt-6 flex justify-end gap-3">
+                {render_slot(@actions)}
+              </div>
+            </.focus_wrap>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a back navigation link.
+
+  ## Examples
+
+      <.back navigate={~p"/species"}>Back to species list</.back>
+  """
+  attr :navigate, :any, required: true
+  slot :inner_block, required: true
+
+  def back(assigns) do
+    ~H"""
+    <.link
+      navigate={@navigate}
+      class="inline-flex items-center gap-1 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
+    >
+      <.icon name="hero-arrow-left" class="size-4" />
+      {render_slot(@inner_block)}
+    </.link>
+    """
+  end
+
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do
@@ -465,6 +559,32 @@ defmodule OakCompendiumWeb.CoreComponents do
         {"transition-all ease-in duration-200", "opacity-100 translate-y-0 sm:scale-100",
          "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
     )
+  end
+
+  def show_modal(js \\ %JS{}, id) when is_binary(id) do
+    js
+    |> JS.show(to: "##{id}")
+    |> JS.show(
+      to: "##{id}-bg",
+      time: 300,
+      transition: {"transition-all ease-out duration-300", "opacity-0", "opacity-100"}
+    )
+    |> show("##{id}-wrap")
+    |> JS.add_class("overflow-hidden", to: "body")
+    |> JS.focus_first(to: "##{id}-wrap")
+  end
+
+  def hide_modal(js \\ %JS{}, id) when is_binary(id) do
+    js
+    |> JS.hide(
+      to: "##{id}-bg",
+      time: 200,
+      transition: {"transition-all ease-in duration-200", "opacity-100", "opacity-0"}
+    )
+    |> hide("##{id}-wrap")
+    |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})
+    |> JS.remove_class("overflow-hidden", to: "body")
+    |> JS.pop_focus()
   end
 
   @doc """

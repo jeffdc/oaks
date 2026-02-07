@@ -1,8 +1,8 @@
 defmodule OakCompendiumWeb.PageControllerTest do
   use OakCompendiumWeb.ConnCase
 
-  test "GET /", %{conn: conn} do
-    conn = get(conn, ~p"/")
-    assert html_response(conn, 200) =~ "Peace of mind from prototype to production"
+  test "GET /health returns 200", %{conn: conn} do
+    conn = get(conn, "/health")
+    assert response(conn, 200) =~ "ok"
   end
 end

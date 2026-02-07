@@ -1,0 +1,93 @@
+<header class="sticky top-0 z-40 bg-[oklch(25%_0.05_150)] shadow-md">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+    <div class="flex items-center gap-4">
+      <%!-- Logo and title --%>
+      <.link navigate={~p"/"} class="flex items-center gap-2 hover:opacity-90 transition-opacity">
+        <.icon name="hero-leaf" class="size-6 text-green-300" />
+        <span class="text-xl font-bold text-white tracking-wide">Oak Compendium</span>
+      </.link>
+
+      <%!-- Spacer --%>
+      <div class="flex-1" />
+
+      <%!-- Navigation --%>
+      <nav class="hidden sm:flex items-center gap-1" aria-label="Main navigation">
+        <.link navigate={~p"/list"} class="nav-link">Species</.link>
+        <.link navigate={~p"/taxonomy"} class="nav-link">Taxonomy</.link>
+        <.link navigate={~p"/search"} class="nav-link">Search</.link>
+        <.link navigate={~p"/sources"} class="nav-link">Sources</.link>
+        <.link navigate={~p"/articles"} class="nav-link">Articles</.link>
+        <.link navigate={~p"/about"} class="nav-link">About</.link>
+      </nav>
+
+      <%!-- Settings gear --%>
+      <.link navigate={~p"/settings"} class="nav-icon-link" title="Settings" aria-label="Settings">
+        <.icon name="hero-cog-6-tooth" class="size-5" />
+      </.link>
+
+      <%!-- Theme toggle --%>
+      <Layouts.theme_toggle />
+
+      <%!-- Mobile menu button --%>
+      <button
+        class="sm:hidden nav-icon-link"
+        aria-label="Toggle menu"
+        phx-click={
+          JS.toggle(to: "#mobile-menu")
+          |> JS.toggle(to: "#menu-open-icon")
+          |> JS.toggle(to: "#menu-close-icon")
+        }
+      >
+        <span id="menu-open-icon"><.icon name="hero-bars-3" class="size-5" /></span>
+        <span id="menu-close-icon" class="hidden">
+          <.icon name="hero-x-mark" class="size-5" />
+        </span>
+      </button>
+    </div>
+
+    <%!-- Mobile navigation --%>
+    <nav
+      id="mobile-menu"
+      class="hidden sm:hidden pt-3 pb-1 border-t border-white/10 mt-3"
+      aria-label="Mobile navigation"
+    >
+      <div class="flex flex-col gap-1">
+        <.link navigate={~p"/list"} class="nav-link">Species</.link>
+        <.link navigate={~p"/taxonomy"} class="nav-link">Taxonomy</.link>
+        <.link navigate={~p"/search"} class="nav-link">Search</.link>
+        <.link navigate={~p"/sources"} class="nav-link">Sources</.link>
+        <.link navigate={~p"/articles"} class="nav-link">Articles</.link>
+        <.link navigate={~p"/about"} class="nav-link">About</.link>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="flex-1 px-4 py-8 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-7xl">
+    {render_slot(@inner_block)}
+  </div>
+</main>
+
+<.flash_group flash={@flash} />
+
+<footer class="border-t border-base-300 bg-base-200/50 mt-auto">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-base-content/60">
+      <p>Oak Compendium &mdash; A comprehensive database of <em>Quercus</em> species</p>
+      <div class="flex items-center gap-4">
+        <.link navigate={~p"/about"} class="hover:text-base-content transition-colors">
+          About
+        </.link>
+        <a
+          href="https://github.com/jeffdc/oaks"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:text-base-content transition-colors"
+        >
+          GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
