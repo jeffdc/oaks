@@ -36,6 +36,7 @@ ENV/
 
 # Temporary and working files
 tmp/
+BUGS.md
 
 # Testing
 .pytest_cache/
