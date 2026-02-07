@@ -13,6 +13,30 @@ defmodule OakCompendiumWeb.Layouts do
 
   embed_templates "layouts/*"
 
+  @doc false
+  def nav_class(current_path, link_path) do
+    if nav_active?(current_path, link_path), do: "nav-link nav-link-active", else: "nav-link"
+  end
+
+  @doc false
+  def nav_icon_class(current_path, link_path) do
+    if nav_active?(current_path, link_path),
+      do: "nav-icon-link nav-icon-link-active",
+      else: "nav-icon-link"
+  end
+
+  defp nav_active?(nil, _link_path), do: false
+
+  defp nav_active?(current_path, "/list") do
+    current_path == "/list" or
+      String.starts_with?(current_path, "/species/") or
+      String.starts_with?(current_path, "/compare/")
+  end
+
+  defp nav_active?(current_path, link_path) do
+    current_path == link_path or String.starts_with?(current_path, link_path <> "/")
+  end
+
   @doc """
   Shows the flash group with standard titles and content.
 

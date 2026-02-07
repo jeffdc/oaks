@@ -244,6 +244,17 @@ textarea:focus-visible {
   box-shadow: 0 0 0 2px var(--color-white-30);
 }
 
+/* Active state for current page */
+.nav-link-active {
+  color: white;
+  background-color: var(--color-white-15);
+}
+
+.nav-icon-link-active {
+  color: white;
+  background-color: var(--color-white-15);
+}
+
 /* ============================================
    Prose Content (V1 rich text styling)
    ============================================ */
