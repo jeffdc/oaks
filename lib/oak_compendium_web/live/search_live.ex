@@ -3,8 +3,8 @@ defmodule OakCompendiumWeb.SearchLive do
   LiveView for unified search across species, taxa, and sources.
 
   Search query is stored in the URL as `?q=...` so results are
-  bookmarkable and shareable. Input is debounced at 300ms to
-  avoid excessive queries.
+  bookmarkable and shareable. The header search input is synced
+  via the SearchSync hook, which debounces at 300ms.
   """
 
   use OakCompendiumWeb, :live_view
@@ -44,34 +44,9 @@ defmodule OakCompendiumWeb.SearchLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-4xl mx-auto">
-      <h1 class="text-2xl font-bold mb-6">Search</h1>
-
-      <form id="search-form" phx-change="search" class="mb-8">
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <.icon name="hero-magnifying-glass" class="size-5 text-base-content/40" />
-          </div>
-          <input
-            type="search"
-            id="search-input"
-            name="q"
-            value={@query}
-            placeholder="Search by name, author, synonym, or common name..."
-            class="w-full input input-bordered pl-10"
-            phx-debounce="300"
-            autofocus
-          />
-        </div>
-      </form>
-
-      <div :if={@query == ""} class="text-center py-12 text-base-content/50">
-        <.icon name="hero-magnifying-glass" class="size-12 mx-auto mb-4" />
-        <p class="text-lg">Enter a search term to find species, taxa, or sources.</p>
-      </div>
-
+    <div id="search-sync" phx-hook="SearchSync" data-query={@query}>
       <div :if={@query != "" && @results}>
-        <.counts_bar counts={@results.counts} />
+        <.counts_bar counts={@results.counts} authenticated={assigns[:authenticated]} />
         <.no_results :if={@results.counts.total == 0} query={@query} />
         <div :if={@results.counts.total > 0}>
           <.taxa_results :if={@results.taxa != []} taxa={@results.taxa} />
@@ -86,22 +61,46 @@ defmodule OakCompendiumWeb.SearchLive do
   # -- Components --
 
   attr :counts, :map, required: true
+  attr :authenticated, :boolean, default: false
 
   defp counts_bar(assigns) do
     ~H"""
-    <div class="flex flex-wrap gap-3 mb-6 text-sm text-base-content/70">
-      <span :if={@counts.taxa > 0}>{@counts.taxa} taxa</span>
-      <span
-        :if={@counts.taxa > 0 && (@counts.sources > 0 || @counts.species > 0)}
-        class="text-base-content/30"
-      >
-        |
+    <div class="card search-counts-bar">
+      <span :if={@counts.taxa > 0} class="search-count-item">
+        {@counts.taxa} {if(@counts.taxa == 1, do: "taxon", else: "taxa")}
       </span>
-      <span :if={@counts.sources > 0}>{@counts.sources} sources</span>
-      <span :if={@counts.sources > 0 && @counts.species > 0} class="text-base-content/30">|</span>
-      <span :if={@counts.species > 0}>{@counts.species} species</span>
-      <span class="text-base-content/30">|</span>
-      <span class="font-medium">{@counts.total} total</span>
+      <span :if={@counts.taxa > 0} class="search-separator">|</span>
+      <span class="search-count-item">
+        {@counts.sources} {if(@counts.sources == 1, do: "source", else: "sources")}
+      </span>
+      <span class="search-separator">|</span>
+      <span class="search-count-item">
+        {@counts.species} species
+      </span>
+      <span class="search-separator">|</span>
+      <span class="search-count-total">
+        {@counts.total} total
+      </span>
+      <.link
+        :if={@authenticated}
+        navigate={~p"/species/new"}
+        class="search-add-species-btn"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Add Species
+      </.link>
     </div>
     """
   end
@@ -122,32 +121,28 @@ defmodule OakCompendiumWeb.SearchLive do
 
   defp taxa_results(assigns) do
     ~H"""
-    <section class="mb-8">
-      <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-        <span class="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
-          <.icon name="hero-squares-2x2" class="size-4 text-success" />
-        </span>
-        Taxa
-      </h2>
-      <ul class="space-y-1" id="taxa-results">
+    <div class="search-section">
+      <h3 class="search-section-label">Taxa</h3>
+      <ul class="card search-results-list" id="taxa-results">
         <li :for={taxon <- @taxa}>
           <.link
             navigate={taxonomy_path(taxon)}
-            class="flex items-center justify-between p-3 rounded-lg hover:bg-base-200 transition-colors group"
+            class="search-result-row"
           >
-            <div class="flex items-center gap-3">
-              <span class="font-medium group-hover:text-primary transition-colors">
-                {taxon.name}
+            <div class="search-result-main">
+              <span class="search-result-icon search-result-icon-taxon">
+                <.icon name="hero-squares-2x2" class="size-4" />
               </span>
-              <span class="badge badge-sm badge-ghost">{taxon.level}</span>
+              <span class="search-result-name search-result-name-taxon">{taxon.name}</span>
+              <span class="search-taxon-level">{taxon.level}</span>
             </div>
-            <span :if={taxon.species_count > 0} class="text-sm text-base-content/50">
+            <div :if={taxon.species_count > 0} class="search-result-meta">
               {taxon.species_count} species
-            </span>
+            </div>
           </.link>
         </li>
       </ul>
-    </section>
+    </div>
     """
   end
 
@@ -155,34 +150,28 @@ defmodule OakCompendiumWeb.SearchLive do
 
   defp source_results(assigns) do
     ~H"""
-    <section class="mb-8">
-      <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-        <span class="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center">
-          <.icon name="hero-book-open" class="size-4 text-warning" />
-        </span>
-        Sources
-      </h2>
-      <ul class="space-y-1" id="source-results">
+    <div class="search-section">
+      <h3 class="search-section-label">Sources</h3>
+      <ul class="card search-results-list" id="source-results">
         <li :for={source <- @sources}>
           <.link
             navigate={~p"/sources/#{source.id}"}
-            class="flex items-center justify-between p-3 rounded-lg hover:bg-base-200 transition-colors group"
+            class="search-result-row"
           >
-            <div>
-              <span class="font-medium group-hover:text-primary transition-colors">
-                {source.name}
+            <div class="search-result-main">
+              <span class="search-result-icon search-result-icon-source">
+                <.icon name="hero-book-open" class="size-4" />
               </span>
-              <span :if={source.author} class="text-sm text-base-content/50 ml-2">
-                {source.author}
-              </span>
+              <span class="search-result-name search-result-name-source">{source.name}</span>
+              <span :if={source.author} class="search-result-author">{source.author}</span>
             </div>
-            <span :if={source.source_type} class="badge badge-sm badge-ghost">
-              {source.source_type}
-            </span>
+            <div :if={source.year} class="search-result-meta">
+              {source.year}
+            </div>
           </.link>
         </li>
       </ul>
-    </section>
+    </div>
     """
   end
 
@@ -190,35 +179,33 @@ defmodule OakCompendiumWeb.SearchLive do
 
   defp species_results(assigns) do
     ~H"""
-    <section class="mb-8">
-      <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-        <span class="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
-          <.icon name="hero-check" class="size-4 text-success" />
-        </span>
-        Species
-      </h2>
-      <ul class="space-y-1" id="species-results">
+    <div class="search-section">
+      <h3 class="search-section-label">Species</h3>
+      <ul class="card search-results-list" id="species-results">
         <li :for={species <- @species}>
           <.link
             navigate={~p"/species/#{species.scientific_name}"}
-            class="flex items-center justify-between p-3 rounded-lg hover:bg-base-200 transition-colors group"
+            class="search-result-row"
           >
-            <div class="flex items-center gap-2">
-              <span class="font-medium group-hover:text-primary transition-colors">
+            <div class="search-result-main">
+              <span class="search-result-icon search-result-icon-species">
+                <.icon name="hero-check" class="size-4" />
+              </span>
+              <span class="search-result-name search-result-name-species">
                 Quercus <span :if={species.is_hybrid} class="mr-0.5">&times;</span>
                 <em>{display_name(species.scientific_name)}</em>
               </span>
-              <span :if={species.author} class="text-sm text-base-content/50">
+              <span :if={species.author} class="search-result-author">
                 {species.author}
               </span>
             </div>
-            <div class="flex items-center gap-2 text-sm text-base-content/50">
-              <span :if={species.section}>{species.section}</span>
+            <div :if={species.section} class="search-result-meta">
+              {species.section}
             </div>
           </.link>
         </li>
       </ul>
-    </section>
+    </div>
     """
   end
 

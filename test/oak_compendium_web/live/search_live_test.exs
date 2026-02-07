@@ -8,15 +8,14 @@ defmodule OakCompendiumWeb.SearchLiveTest do
   import Phoenix.LiveViewTest
 
   describe "GET /search" do
-    test "renders search page with input", %{conn: conn} do
+    test "renders search page", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/search")
-      assert html =~ "Search"
-      assert html =~ "search-input"
+      assert html =~ "search-sync"
     end
 
-    test "shows empty state when no query", %{conn: conn} do
+    test "shows nothing when no query", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/search")
-      assert html =~ "Enter a search term"
+      refute html =~ "total"
     end
 
     test "performs search from URL query param", %{conn: conn} do
@@ -32,14 +31,13 @@ defmodule OakCompendiumWeb.SearchLiveTest do
   end
 
   describe "search interaction" do
-    test "search input triggers results via phx-change", %{conn: conn} do
+    test "search event triggers results via push_patch", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/search")
 
       view
-      |> form("#search-form", %{q: "alba"})
-      |> render_change()
+      |> element("#search-sync")
+      |> render_hook("search", %{q: "alba"})
 
-      # After the push_patch, handle_params runs the search
       assert_patch(view, ~p"/search?q=alba")
 
       html = render(view)
@@ -50,13 +48,13 @@ defmodule OakCompendiumWeb.SearchLiveTest do
       {:ok, view, _html} = live(conn, ~p"/search?q=alba")
 
       view
-      |> form("#search-form", %{q: ""})
-      |> render_change()
+      |> element("#search-sync")
+      |> render_hook("search", %{q: ""})
 
       assert_patch(view, ~p"/search")
 
       html = render(view)
-      assert html =~ "Enter a search term"
+      refute html =~ "total"
     end
 
     test "species results link to detail page", %{conn: conn} do
