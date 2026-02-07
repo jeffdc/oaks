@@ -11,6 +11,8 @@ defmodule OakCompendium.Species.Species do
 
   @required_fields [:scientific_name, :is_hybrid]
 
+  @valid_conservation_statuses ~w(EX EW CR EN VU NT LC DD NE)
+
   schema "species" do
     field :scientific_name, :string
     field :author, :string
@@ -51,6 +53,8 @@ defmodule OakCompendium.Species.Species do
       :external_links
     ])
     |> validate_required(@required_fields)
+    |> validate_length(:scientific_name, min: 2, max: 100)
+    |> validate_inclusion(:conservation_status, @valid_conservation_statuses)
     |> unique_constraint(:scientific_name)
   end
 end

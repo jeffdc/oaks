@@ -178,6 +178,51 @@ defmodule OakCompendium.Species do
     |> Repo.aggregate(:count)
   end
 
+  # -- Write operations --
+
+  @doc """
+  Returns a changeset for tracking species changes.
+  """
+  @spec change_species(Species.t(), map()) :: Ecto.Changeset.t()
+  def change_species(%Species{} = species, attrs \\ %{}) do
+    Species.changeset(species, attrs)
+  end
+
+  @doc """
+  Creates a species.
+
+  Returns `{:ok, species}` on success, `{:error, changeset}` on failure.
+  """
+  @spec create_species(map()) :: {:ok, Species.t()} | {:error, Ecto.Changeset.t()}
+  def create_species(attrs) do
+    %Species{}
+    |> Species.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a species.
+
+  Returns `{:ok, species}` on success, `{:error, changeset}` on failure.
+  """
+  @spec update_species(Species.t(), map()) :: {:ok, Species.t()} | {:error, Ecto.Changeset.t()}
+  def update_species(%Species{} = species, attrs) do
+    species
+    |> Species.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a species.
+
+  Species_sources records are deleted via ON DELETE CASCADE in the database.
+  Returns `{:ok, species}` on success, `{:error, changeset}` on failure.
+  """
+  @spec delete_species(Species.t()) :: {:ok, Species.t()} | {:error, Ecto.Changeset.t()}
+  def delete_species(%Species{} = species) do
+    Repo.delete(species)
+  end
+
   # -- Serialization helpers --
 
   @doc """

@@ -25,7 +25,11 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
        external_links: [],
        species_sources: [],
        selected_source: nil,
-       has_relationships: false
+       has_relationships: false,
+       show_delete_confirm: false,
+       show_merge_picker: false,
+       merge_search_query: "",
+       merge_search_results: []
      )}
   end
 
@@ -52,6 +56,70 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
     {:noreply, assign(socket, selected_source: selected)}
   end
 
+  def handle_event("request_delete", _params, socket) do
+    if socket.assigns[:authenticated] do
+      {:noreply, assign(socket, show_delete_confirm: true)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("cancel_delete", _params, socket) do
+    {:noreply, assign(socket, show_delete_confirm: false)}
+  end
+
+  def handle_event("confirm_delete", _params, socket) do
+    if socket.assigns[:authenticated] do
+      species = socket.assigns.species
+
+      case Species.delete_species(species) do
+        {:ok, _} ->
+          {:noreply,
+           socket
+           |> put_flash(:info, "Species deleted.")
+           |> push_navigate(to: ~p"/list")}
+
+        {:error, _changeset} ->
+          {:noreply,
+           socket
+           |> assign(show_delete_confirm: false)
+           |> put_flash(:error, "Failed to delete species.")}
+      end
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("show_merge_picker", _params, socket) do
+    {:noreply,
+     assign(socket, show_merge_picker: true, merge_search_query: "", merge_search_results: [])}
+  end
+
+  def handle_event("close_merge_picker", _params, socket) do
+    {:noreply, assign(socket, show_merge_picker: false)}
+  end
+
+  def handle_event("merge_search", %{"query" => query}, socket) do
+    results =
+      if String.length(String.trim(query)) >= 2 do
+        Species.search_species(query, 20)
+        |> Enum.reject(&(&1.scientific_name == socket.assigns.species.scientific_name))
+      else
+        []
+      end
+
+    {:noreply, assign(socket, merge_search_query: query, merge_search_results: results)}
+  end
+
+  def handle_event("select_merge_target", %{"name" => target_name}, socket) do
+    source_name = socket.assigns.species.scientific_name
+
+    {:noreply,
+     socket
+     |> assign(show_merge_picker: false)
+     |> push_navigate(to: ~p"/species/#{source_name}/merge/#{target_name}")}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -59,7 +127,7 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
       <.not_found_view :if={@not_found} />
 
       <div :if={@species}>
-        <.species_header species={@species} />
+        <.species_header species={@species} authenticated={@authenticated} />
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div :if={@has_relationships} class="space-y-6">
@@ -94,6 +162,19 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
           </div>
         </div>
       </div>
+
+      <.delete_confirm_modal
+        :if={@show_delete_confirm}
+        species={@species}
+        source_count={length(@species_sources)}
+      />
+
+      <.merge_picker_dialog
+        :if={@show_merge_picker}
+        species={@species}
+        query={@merge_search_query}
+        results={@merge_search_results}
+      />
     </div>
     """
   end
@@ -120,6 +201,7 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
   end
 
   attr :species, :any, required: true
+  attr :authenticated, :boolean, default: false
 
   defp species_header(assigns) do
     ~H"""
@@ -155,6 +237,32 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
         </div>
       </div>
       <.taxonomy_breadcrumb species={@species} />
+
+      <div :if={@authenticated} class="flex items-center gap-2 mt-4 pt-4 border-t border-base-200">
+        <.link
+          navigate={~p"/species/#{@species.scientific_name}/edit"}
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+          style="color: var(--color-forest-700); background-color: var(--color-forest-50);"
+          id="edit-species-btn"
+        >
+          <.icon name="hero-pencil-square" class="size-4" /> Edit
+        </.link>
+        <button
+          phx-click="show_merge_picker"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+          style="color: var(--color-forest-700); background-color: var(--color-forest-50);"
+          id="merge-species-btn"
+        >
+          <.icon name="hero-arrows-right-left" class="size-4" /> Merge Into...
+        </button>
+        <button
+          phx-click="request_delete"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
+          id="delete-species-btn"
+        >
+          <.icon name="hero-trash" class="size-4" /> Delete
+        </button>
+      </div>
     </div>
     """
   end
@@ -417,6 +525,191 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
         {@label}
       </h4>
       <p class="prose-content" style="white-space: pre-wrap;">{@value}</p>
+    </div>
+    """
+  end
+
+  # -- Delete confirmation modal --
+
+  attr :species, :any, required: true
+  attr :source_count, :integer, default: 0
+
+  defp delete_confirm_modal(assigns) do
+    ~H"""
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center"
+      id="delete-confirm-modal"
+      phx-window-keydown="cancel_delete"
+      phx-key="Escape"
+    >
+      <div class="fixed inset-0 bg-black/50" phx-click="cancel_delete" />
+      <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+        <h3 class="text-lg font-bold text-red-800 mb-2">Delete Species</h3>
+        <p class="mb-2" style="color: var(--color-text-secondary);">
+          Are you sure you want to delete <strong>
+            Quercus <em>{display_name(@species.scientific_name)}</em>
+          </strong>?
+        </p>
+        <p :if={@source_count > 0} class="text-sm text-red-600 mb-4">
+          This will also remove data from {@source_count} source(s).
+        </p>
+        <p :if={@source_count == 0} class="text-sm mb-4" style="color: var(--color-text-tertiary);">
+          This action cannot be undone.
+        </p>
+        <div class="flex justify-end gap-3">
+          <button
+            phx-click="cancel_delete"
+            class="px-4 py-2 rounded-lg text-sm font-medium"
+            style="color: var(--color-text-secondary);"
+          >
+            Cancel
+          </button>
+          <button
+            phx-click="confirm_delete"
+            class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
+            id="confirm-delete-btn"
+          >
+            Delete Species
+          </button>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  # -- Merge picker dialog --
+
+  attr :species, :any, required: true
+  attr :query, :string, required: true
+  attr :results, :list, required: true
+
+  defp merge_picker_dialog(assigns) do
+    ~H"""
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style="background-color: rgba(0, 0, 0, 0.5);"
+      phx-window-keydown="close_merge_picker"
+      phx-key="Escape"
+      id="merge-picker-dialog"
+    >
+      <div class="card max-w-lg w-full max-h-[80vh] flex flex-col overflow-hidden">
+        <div
+          class="flex items-center justify-between p-4 border-b"
+          style="background-color: var(--color-forest-50); border-color: var(--color-border);"
+        >
+          <h2
+            class="text-lg font-semibold"
+            style="font-family: var(--font-serif); color: var(--color-forest-800);"
+          >
+            Select Target Species
+          </h2>
+          <button
+            phx-click="close_merge_picker"
+            class="p-1.5 rounded-lg hover:bg-white/50 transition-colors"
+            style="color: var(--color-text-secondary);"
+          >
+            <.icon name="hero-x-mark" class="size-5" />
+          </button>
+        </div>
+
+        <p
+          class="px-4 py-3 text-sm border-b"
+          style="color: var(--color-text-secondary); border-color: var(--color-border);"
+        >
+          Select the species that
+          <em style="color: var(--color-forest-700);">Quercus {@species.scientific_name}</em>
+          will become a synonym of.
+        </p>
+
+        <div class="p-4">
+          <form phx-change="merge_search">
+            <input
+              type="text"
+              name="query"
+              value={@query}
+              placeholder="Search for a species..."
+              autofocus
+              phx-debounce="300"
+              class="w-full px-3 py-2 rounded-lg text-sm"
+              style="border: 1px solid var(--color-border); background-color: var(--color-surface);"
+            />
+          </form>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-4 pb-4 min-h-[200px] max-h-[300px]">
+          <p
+            :if={String.length(String.trim(@query)) < 2}
+            class="text-center py-8 text-sm"
+            style="color: var(--color-text-secondary);"
+          >
+            Type at least 2 characters to search
+          </p>
+
+          <p
+            :if={String.length(String.trim(@query)) >= 2 && @results == []}
+            class="text-center py-8 text-sm"
+            style="color: var(--color-text-secondary);"
+          >
+            No species found matching "{@query}"
+          </p>
+
+          <ul :if={@results != []} class="space-y-2">
+            <li :for={species <- @results}>
+              <button
+                phx-click="select_merge_target"
+                phx-value-name={species.scientific_name}
+                class="w-full text-left p-3 rounded-lg transition-colors"
+                style="background-color: var(--color-background); border: 1px solid var(--color-border);"
+                onmouseover="this.style.backgroundColor='var(--color-forest-50)';this.style.borderColor='var(--color-forest-300)'"
+                onmouseout="this.style.backgroundColor='var(--color-background)';this.style.borderColor='var(--color-border)'"
+              >
+                <div class="flex items-baseline gap-2">
+                  <span
+                    class="font-semibold"
+                    style="font-style: italic; color: var(--color-forest-800);"
+                  >
+                    <span
+                      :if={species.is_hybrid}
+                      style="font-style: normal; color: var(--color-forest-600);"
+                    >
+                      &times;
+                    </span>
+                    {species.scientific_name}
+                  </span>
+                  <span
+                    :if={species.author}
+                    class="text-xs"
+                    style="color: var(--color-text-secondary);"
+                  >
+                    {species.author}
+                  </span>
+                </div>
+                <div :if={species.section} class="mt-1">
+                  <span
+                    class="text-xs px-2 py-0.5 rounded-full"
+                    style="background-color: var(--color-forest-100); color: var(--color-forest-700);"
+                  >
+                    sect. {species.section}
+                  </span>
+                </div>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div
+          class="flex justify-end p-4 border-t"
+          style="border-color: var(--color-border); background-color: var(--color-background);"
+        >
+          <button
+            phx-click="close_merge_picker"
+            class="px-4 py-2 rounded-lg text-sm font-medium"
+            style="color: var(--color-text-primary); border: 1px solid var(--color-border);"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
     """
   end

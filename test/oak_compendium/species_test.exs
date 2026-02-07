@@ -100,6 +100,80 @@ defmodule OakCompendium.SpeciesTest do
     end
   end
 
+  describe "create_species/1" do
+    test "creates species with valid attrs" do
+      attrs = %{scientific_name: "coccinea", is_hybrid: false, author: "Muenchh."}
+      assert {:ok, species} = Species.create_species(attrs)
+      assert species.scientific_name == "coccinea"
+      assert species.author == "Muenchh."
+      refute species.is_hybrid
+    end
+
+    test "fails with duplicate scientific_name" do
+      attrs = %{scientific_name: "alba", is_hybrid: false}
+      assert {:error, changeset} = Species.create_species(attrs)
+      assert %{scientific_name: ["has already been taken"]} = errors_on(changeset)
+    end
+
+    test "fails without required fields" do
+      assert {:error, changeset} = Species.create_species(%{})
+      errors = errors_on(changeset)
+      assert errors[:scientific_name]
+    end
+
+    test "validates conservation_status values" do
+      attrs = %{scientific_name: "test_sp", is_hybrid: false, conservation_status: "INVALID"}
+      assert {:error, changeset} = Species.create_species(attrs)
+      assert %{conservation_status: [_]} = errors_on(changeset)
+    end
+
+    test "accepts valid conservation_status" do
+      attrs = %{scientific_name: "test_sp", is_hybrid: false, conservation_status: "VU"}
+      assert {:ok, species} = Species.create_species(attrs)
+      assert species.conservation_status == "VU"
+    end
+  end
+
+  describe "update_species/2" do
+    test "updates species with valid attrs" do
+      species = Species.get_species_by_name("alba")
+      assert {:ok, updated} = Species.update_species(species, %{author: "Linnaeus"})
+      assert updated.author == "Linnaeus"
+      assert updated.scientific_name == "alba"
+    end
+
+    test "fails with invalid attrs" do
+      species = Species.get_species_by_name("alba")
+      assert {:error, changeset} = Species.update_species(species, %{scientific_name: ""})
+      assert %{scientific_name: [_]} = errors_on(changeset)
+    end
+  end
+
+  describe "delete_species/1" do
+    test "deletes species" do
+      species = Species.get_species_by_name("velutina")
+      assert {:ok, _} = Species.delete_species(species)
+      assert Species.get_species_by_name("velutina") == nil
+    end
+
+    test "cascades to species_sources" do
+      species = Species.get_species_by_name("alba")
+      full = Species.get_species_full("alba")
+      assert length(full.species_sources) > 0
+
+      assert {:ok, _} = Species.delete_species(species)
+      assert Species.get_species_by_name("alba") == nil
+    end
+  end
+
+  describe "change_species/2" do
+    test "returns a changeset" do
+      species = Species.get_species_by_name("alba")
+      changeset = Species.change_species(species)
+      assert %Ecto.Changeset{} = changeset
+    end
+  end
+
   describe "find_synonym/1" do
     test "finds species with matching synonym" do
       species = Species.find_synonym("alba var. repanda")

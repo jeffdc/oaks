@@ -72,12 +72,23 @@ defmodule OakCompendiumWeb.SpeciesListLive do
   def render(assigns) do
     ~H"""
     <div class="max-w-5xl mx-auto">
-      <h1
-        class="text-2xl font-bold mb-2"
-        style="font-family: var(--font-serif); color: var(--color-forest-800);"
-      >
-        Species List
-      </h1>
+      <div class="flex items-center justify-between mb-2">
+        <h1
+          class="text-2xl font-bold"
+          style="font-family: var(--font-serif); color: var(--color-forest-800);"
+        >
+          Species List
+        </h1>
+        <.link
+          :if={@authenticated}
+          navigate={~p"/species/new"}
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white"
+          style="background-color: var(--color-forest-600); text-decoration: none;"
+          id="new-species-btn"
+        >
+          <.icon name="hero-plus" class="size-4" /> New Species
+        </.link>
+      </div>
 
       <.counts_bar
         species_count={@species_count}
