@@ -25,13 +25,62 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. The project consists of five main components:
+The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids.
 
-1. **Python Scraper** - Extracts oak species data from oaksoftheworld.fr
-2. **Web Application** - Modern Svelte 5 app for browsing and editing species data
-3. **API Server** - Go REST API for remote database access (deployed to Fly.io)
-4. **CLI Tool** - Go command-line tool for managing taxonomic data (local or remote)
-5. **iOS App** - Native SwiftUI app for field identification (in development, on `ios-app` branch)
+## V1 → V2 Port (Active)
+
+**We are porting the project from Go + Svelte (V1) to Elixir + Phoenix LiveView (V2)**, modeled on the `~/dev/gallformers` project. See `docs/plans/2026-02-06-elixir-phoenix-port-design.md` for the full design.
+
+### Critical Rules
+
+- **NEVER modify V1 code** (`api/`, `web/`, `cli/`). It is frozen and will be deleted after cutover.
+- **USE V1 as reference** when building V2. The V1 code shows what features exist, how the data flows, what the API endpoints look like, and how the UI behaves. Read it freely.
+- **All new work goes in V2 directories** (`lib/`, `config/`, `assets/`, `test/`, `priv/`).
+- **The database schema stays the same.** Ecto schemas must match the existing SQLite tables exactly.
+- **Model patterns on gallformers** (`~/dev/gallformers`) for Phoenix/LiveView/Ecto conventions.
+
+### V1 Directories (frozen — read-only reference)
+
+| Directory | What | Use as reference for |
+|-----------|------|---------------------|
+| `api/` | Go REST API | API endpoints, auth patterns, DB queries |
+| `api/internal/db/schema/schema.sql` | Database schema | Ecto schema definitions |
+| `api/internal/handlers/` | Route handlers | LiveView pages and API controllers |
+| `web/` | Svelte 5 SPA | UI layout, pages, features, styling |
+| `web/src/routes/` | Page routes | LiveView route structure |
+| `web/src/lib/components/` | UI components | LiveView component design |
+| `cli/` | Go CLI tool | Import logic (for future mix tasks) |
+
+### V2 Directories (active development)
+
+| Directory | What |
+|-----------|------|
+| `lib/oak_compendium/` | Business logic contexts (species, taxonomy, sources, etc.) |
+| `lib/oak_compendium_web/` | Web layer (LiveViews, controllers, components) |
+| `config/` | Phoenix configuration |
+| `assets/` | JS, CSS, Tailwind |
+| `priv/repo/` | Migrations, structure.sql, seeds |
+| `test/` | Elixir tests |
+| `mix.exs` | Dependencies and project config |
+
+### V2 Tech Stack
+
+- **Framework**: Phoenix 1.8+ with LiveView
+- **Database**: SQLite via Ecto + ecto_sqlite3 (same database file)
+- **HTTP Server**: Bandit
+- **Styling**: Tailwind v4
+- **Quality**: Credo, Dialyxir, mix format
+- **Deployment**: Fly.io with Litestream (S3 replication)
+
+### What Stays Unchanged
+
+- **Python scraper** (`scrapers/`) — runs independently
+- **SQLite database** (`oak_compendium.db`) — same schema, same data
+- **Beads** (`.beads/`) — issue tracking continues as-is
+
+## V1 Components (Reference Only)
+
+The original project consisted of:
 
 ## Repository Structure
 
@@ -707,12 +756,10 @@ go build -o oak .
 
 ### Git Workflow
 
-**IMPORTANT: Never checkout `main` directly.** The beads daemon uses a sparse worktree on `main` for auto-sync. Attempting to checkout `main` will fail.
-
 **Push approval rules:**
 | Change Type | Approval Required | Notes |
 |-------------|-------------------|-------|
-| Beads (`.beads/`) | No | Daemon auto-syncs to main |
+| Beads (`.beads/`) | No | Daemon auto-syncs via `beads-sync` branch |
 | Specs (`/openspec/`) | No | But must be manually pushed to main |
 | Everything else | **Yes** | Always ask user before pushing to main |
 
@@ -780,7 +827,7 @@ For parallel agent work, use separate worktrees:
 - Main working dir: bugs, specs, small work
 - Feature worktrees: large features (e.g., `../oaks-feature-name`)
 
-All worktrees share beads state via the daemon's `sync.branch=main` configuration.
+All worktrees share beads state via the daemon's `beads-sync` branch.
 
 ### Database Management
 - **Authoritative source**: The production database on Fly.io (`/data/oak_compendium.db`) is the single source of truth
