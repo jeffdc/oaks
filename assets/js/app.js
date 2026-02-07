@@ -25,11 +25,51 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/oak_compendium"
 import topbar from "../vendor/topbar"
 
+const Hooks = {
+  ...colocatedHooks,
+  ApiKeySettings: {
+    mounted() {
+      const input = this.el.querySelector("#api-key-input")
+      const saveBtn = this.el.querySelector("#save-api-key")
+      const verifyBtn = this.el.querySelector("#verify-api-key")
+
+      // Load existing key into input
+      const stored = localStorage.getItem("oak:api_key")
+      if (stored) input.value = stored
+
+      saveBtn.addEventListener("click", () => {
+        const key = input.value.trim()
+        if (key) {
+          localStorage.setItem("oak:api_key", key)
+        } else {
+          localStorage.removeItem("oak:api_key")
+        }
+      })
+
+      verifyBtn.addEventListener("click", async () => {
+        const key = input.value.trim()
+        if (!key) {
+          this.pushEvent("verify_result", {status: "invalid"})
+          return
+        }
+        try {
+          const resp = await fetch("/api/v1/auth/verify", {
+            headers: {"Authorization": `Bearer ${key}`}
+          })
+          this.pushEvent("verify_result", {status: resp.ok ? "ok" : "invalid"})
+        } catch (_e) {
+          this.pushEvent("verify_result", {status: "error"})
+        }
+      })
+    }
+  }
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks},
+  hooks: Hooks,
 })
 
 // Show progress bar on live navigation and form submits

@@ -2,7 +2,7 @@
 #
 # Phoenix/LiveView app with legacy Go API, CLI, and Svelte web components
 
-.PHONY: dev dev-phx dev-api dev-web test setup format lint precommit ci build clean download-db help
+.PHONY: dev dev-phx dev-api dev-web test test-db setup format lint precommit ci build clean download-db help
 
 # =============================================================================
 # Phoenix Development (primary)
@@ -43,8 +43,17 @@ deps:
 # Testing
 # =============================================================================
 
-# Run Phoenix tests
-test:
+# Set up fresh test database from structure.sql + test_seeds.sql
+test-db:
+	@echo "Setting up test database..."
+	@rm -f priv/oak_compendium_test.sqlite*
+	@MIX_ENV=test mix ecto.create --quiet
+	@MIX_ENV=test mix ecto.load --quiet
+	@sqlite3 priv/oak_compendium_test.sqlite < priv/repo/test_seeds.sql
+	@echo "Test database ready"
+
+# Run Phoenix tests (rebuilds test DB first)
+test: test-db
 	mix test
 
 # Run legacy Go tests
@@ -136,7 +145,8 @@ help:
 	@echo "Phoenix Development:"
 	@echo "  make dev        Start Phoenix dev server (:4000)"
 	@echo "  make setup      Full setup (deps + assets + db check)"
-	@echo "  make test       Run Phoenix tests"
+	@echo "  make test       Run Phoenix tests (rebuilds test DB)"
+	@echo "  make test-db    Rebuild test database from structure.sql + seeds"
 	@echo "  make format     Format Elixir code"
 	@echo "  make lint       Run Credo linter"
 	@echo "  make precommit  Run all pre-commit checks"

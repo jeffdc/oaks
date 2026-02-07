@@ -3,15 +3,9 @@ defmodule OakCompendium.DataCase do
   This module defines the setup for tests requiring
   access to the application's data layer.
 
-  You may define functions here to be used as helpers in
-  your tests.
-
-  Finally, if the test case interacts with the database,
-  we enable the SQL sandbox, so changes done to the database
-  are reverted at the end of every test. If you are using
-  PostgreSQL, you can even run database tests asynchronously
-  by setting `use OakCompendium.DataCase, async: true`, although
-  this option is not recommended for other databases.
+  NOTE: This project uses SQLite which does NOT support `async: true`.
+  SQLite is single-writer, so concurrent tests holding write transactions
+  will cause "Database busy" errors. Always use `async: false` (the default).
   """
 
   use ExUnit.CaseTemplate
@@ -36,6 +30,10 @@ defmodule OakCompendium.DataCase do
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do
+    if tags[:async] do
+      raise "async: true is not supported with SQLite. Use async: false (the default)."
+    end
+
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(OakCompendium.Repo, shared: not tags[:async])
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
   end

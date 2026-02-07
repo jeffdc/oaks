@@ -19,6 +19,12 @@ if System.get_env("PHX_SERVER") do
   config :oak_compendium, OakCompendiumWeb.Endpoint, server: true
 end
 
+# Load API key for authentication (env var takes precedence over file)
+# Skip in test — test.exs sets a known test key
+if config_env() != :test do
+  config :oak_compendium, :api_key, OakCompendiumWeb.Plugs.Auth.load_api_key()
+end
+
 # Only override port if PORT env var is explicitly set (don't interfere with test config)
 if port = System.get_env("PORT") do
   config :oak_compendium, OakCompendiumWeb.Endpoint, http: [port: String.to_integer(port)]

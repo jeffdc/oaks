@@ -1,5 +1,5 @@
 defmodule OakCompendiumWeb.ErrorJSONTest do
-  use OakCompendiumWeb.ConnCase, async: true
+  use OakCompendiumWeb.ConnCase
 
   test "renders 404" do
     assert OakCompendiumWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}

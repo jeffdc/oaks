@@ -1,5 +1,5 @@
 defmodule OakCompendiumWeb.ErrorHTMLTest do
-  use OakCompendiumWeb.ConnCase, async: true
+  use OakCompendiumWeb.ConnCase
 
   # Bring render_to_string/4 for testing custom views
   import Phoenix.Template, only: [render_to_string: 4]
@@ -9,6 +9,7 @@ defmodule OakCompendiumWeb.ErrorHTMLTest do
   end
 
   test "renders 500.html" do
-    assert render_to_string(OakCompendiumWeb.ErrorHTML, "500", "html", []) == "Internal Server Error"
+    assert render_to_string(OakCompendiumWeb.ErrorHTML, "500", "html", []) ==
+             "Internal Server Error"
   end
 end
