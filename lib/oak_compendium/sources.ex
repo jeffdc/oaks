@@ -82,6 +82,46 @@ defmodule OakCompendium.Sources do
     Repo.aggregate(Source, :count)
   end
 
+  # -- Changesets --
+
+  @doc """
+  Returns a changeset for tracking source changes.
+  """
+  @spec change_source(Source.t(), map()) :: Ecto.Changeset.t()
+  def change_source(%Source{} = source, attrs \\ %{}) do
+    Source.changeset(source, attrs)
+  end
+
+  # -- Mutations --
+
+  @doc """
+  Creates a new source with the given attributes.
+  """
+  @spec create_source(map()) :: {:ok, Source.t()} | {:error, Ecto.Changeset.t()}
+  def create_source(attrs) do
+    %Source{}
+    |> Source.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a source with the given attributes.
+  """
+  @spec update_source(Source.t(), map()) :: {:ok, Source.t()} | {:error, Ecto.Changeset.t()}
+  def update_source(%Source{} = source, attrs) do
+    source
+    |> Source.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a source. Fails if species_sources reference it.
+  """
+  @spec delete_source(Source.t()) :: {:ok, Source.t()} | {:error, Ecto.Changeset.t()}
+  def delete_source(%Source{} = source) do
+    Repo.delete(source)
+  end
+
   # -- Serialization --
 
   @doc """

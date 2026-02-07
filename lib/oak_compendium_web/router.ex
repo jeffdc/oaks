@@ -48,6 +48,8 @@ defmodule OakCompendiumWeb.Router do
       live "/articles/:slug/edit", ArticleFormLive, :edit
       live "/articles/:slug", ArticleLive
       live "/sources", SourcesLive
+      live "/sources/new", SourceFormLive, :new
+      live "/sources/:id/edit", SourceFormLive, :edit
       live "/sources/:id", SourceDetailLive
       live "/search", SearchLive
       live "/settings", SettingsLive

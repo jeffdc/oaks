@@ -133,6 +133,7 @@ defmodule OakCompendium.Search do
         name: s.name,
         source_type: s.source_type,
         author: s.author,
+        year: s.year,
         url: s.url
       }
     )
