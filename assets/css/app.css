@@ -1,120 +1,224 @@
-/* See the Tailwind configuration guide for advanced usage
-   https://tailwindcss.com/docs/configuration */
+/* Oak Compendium - Tailwind v4 + daisyUI Configuration
+   Visual design ported from V1 (web/src/app.css) */
 
 @import "tailwindcss" source(none);
 @source "../css";
 @source "../js";
 @source "../../lib/oak_compendium_web";
 
-/* A Tailwind plugin that makes "hero-#{ICON}" classes available.
-   The heroicons installation itself is managed by your mix.exs */
 @plugin "../vendor/heroicons";
 
-/* daisyUI Tailwind Plugin. You can update this file by fetching the latest version with:
-   curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui.js
-   Make sure to look at the daisyUI changelog: https://daisyui.com/docs/changelog/ */
 @plugin "../vendor/daisyui" {
   themes: false;
 }
 
-/* daisyUI theme plugin. You can update this file by fetching the latest version with:
-  curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui-theme.js
-  We ship with two themes, a light one inspired on Phoenix colors and a dark one inspired
-  on Elixir colors. Build your own at: https://daisyui.com/theme-generator/ */
-@plugin "../vendor/daisyui-theme" {
-  name: "dark";
-  default: false;
-  prefersdark: true;
-  color-scheme: "dark";
-  --color-base-100: oklch(30.33% 0.016 252.42);
-  --color-base-200: oklch(25.26% 0.014 253.1);
-  --color-base-300: oklch(20.15% 0.012 254.09);
-  --color-base-content: oklch(97.807% 0.029 256.847);
-  --color-primary: oklch(58% 0.233 277.117);
-  --color-primary-content: oklch(96% 0.018 272.314);
-  --color-secondary: oklch(58% 0.233 277.117);
-  --color-secondary-content: oklch(96% 0.018 272.314);
-  --color-accent: oklch(60% 0.25 292.717);
-  --color-accent-content: oklch(96% 0.016 293.756);
-  --color-neutral: oklch(37% 0.044 257.287);
-  --color-neutral-content: oklch(98% 0.003 247.858);
-  --color-info: oklch(58% 0.158 241.966);
-  --color-info-content: oklch(97% 0.013 236.62);
-  --color-success: oklch(60% 0.118 184.704);
-  --color-success-content: oklch(98% 0.014 180.72);
-  --color-warning: oklch(66% 0.179 58.318);
-  --color-warning-content: oklch(98% 0.022 95.277);
-  --color-error: oklch(58% 0.253 17.585);
-  --color-error-content: oklch(96% 0.015 12.422);
-  --radius-selector: 0.25rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.5rem;
-  --size-selector: 0.21875rem;
-  --size-field: 0.21875rem;
-  --border: 1.5px;
-  --depth: 1;
-  --noise: 0;
-}
-
+/* Single light theme — V1 forest green palette (no dark mode) */
 @plugin "../vendor/daisyui-theme" {
   name: "light";
   default: true;
   prefersdark: false;
   color-scheme: "light";
-  --color-base-100: oklch(98% 0 0);
-  --color-base-200: oklch(96% 0.001 286.375);
-  --color-base-300: oklch(92% 0.004 286.32);
-  --color-base-content: oklch(21% 0.006 285.885);
-  --color-primary: oklch(70% 0.213 47.604);
-  --color-primary-content: oklch(98% 0.016 73.684);
-  --color-secondary: oklch(55% 0.027 264.364);
-  --color-secondary-content: oklch(98% 0.002 247.839);
-  --color-accent: oklch(0% 0 0);
+  /* V1 background/surface colors (warm stone tones) */
+  --color-base-100: oklch(98.7% 0.003 80);       /* ~#fafaf9 */
+  --color-base-200: oklch(96.5% 0.003 80);       /* ~#f5f5f4 */
+  --color-base-300: oklch(92.2% 0.004 80);       /* ~#e7e5e4 */
+  --color-base-content: oklch(21.5% 0.008 50);   /* ~#1c1917 */
+  /* Forest green primary */
+  --color-primary: oklch(48% 0.11 158);           /* ~#1e7e4b (forest-600) */
+  --color-primary-content: oklch(100% 0 0);       /* white */
+  /* Forest green secondary */
+  --color-secondary: oklch(43% 0.09 158);         /* ~#19653d (forest-700) */
+  --color-secondary-content: oklch(100% 0 0);
+  /* Oak brown accent */
+  --color-accent: oklch(55% 0.07 65);             /* ~#8b6f47 */
   --color-accent-content: oklch(100% 0 0);
-  --color-neutral: oklch(44% 0.017 285.786);
+  /* Neutral (stone text) */
+  --color-neutral: oklch(44% 0.012 50);           /* ~#57534e */
   --color-neutral-content: oklch(98% 0 0);
-  --color-info: oklch(62% 0.214 259.815);
-  --color-info-content: oklch(97% 0.014 254.604);
-  --color-success: oklch(70% 0.14 182.503);
-  --color-success-content: oklch(98% 0.014 180.72);
-  --color-warning: oklch(66% 0.179 58.318);
-  --color-warning-content: oklch(98% 0.022 95.277);
-  --color-error: oklch(58% 0.253 17.585);
+  /* Status colors */
+  --color-info: oklch(62% 0.19 250);
+  --color-info-content: oklch(97% 0.013 236.62);
+  --color-success: oklch(58% 0.13 158);           /* forest-500 green */
+  --color-success-content: oklch(100% 0 0);
+  --color-warning: oklch(75% 0.15 75);
+  --color-warning-content: oklch(30% 0.05 60);
+  --color-error: oklch(58% 0.22 25);
   --color-error-content: oklch(96% 0.015 12.422);
-  --radius-selector: 0.25rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.5rem;
-  --size-selector: 0.21875rem;
-  --size-field: 0.21875rem;
-  --border: 1.5px;
+  /* Border radii */
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
   --depth: 1;
   --noise: 0;
 }
 
-/* Add variants based on LiveView classes */
+/* ============================================
+   Tailwind v4 @theme — V1 color tokens
+   Creates utility classes: bg-forest-600, text-oak-brown, etc.
+   ============================================ */
+@theme {
+  --color-forest-50: #f0f9f4;
+  --color-forest-100: #dcf3e4;
+  --color-forest-200: #bae6cd;
+  --color-forest-300: #86d4aa;
+  --color-forest-400: #4fb87f;
+  --color-forest-500: #2a9d5f;
+  --color-forest-600: #1e7e4b;
+  --color-forest-700: #19653d;
+  --color-forest-800: #165132;
+  --color-forest-900: #14432a;
+
+  --color-oak-brown: #8b6f47;
+  --color-acorn: #a67c52;
+  --color-bark: #6b5747;
+
+  --font-serif: 'Georgia', 'Cambria', 'Times New Roman', serif;
+}
+
+/* ============================================
+   CSS Custom Properties — V1 semantic tokens
+   For use in CSS rules and component styles
+   ============================================ */
+:root {
+  /* Semantic colors */
+  --color-background: #fafaf9;
+  --color-surface: #ffffff;
+  --color-text-primary: #1c1917;
+  --color-text-secondary: #57534e;
+  --color-text-tertiary: #6b6560;
+  --color-border: #e7e5e4;
+  --color-border-light: #f5f5f4;
+
+  /* White transparency scale (for glassmorphism on dark backgrounds) */
+  --color-white-10: rgba(255, 255, 255, 0.1);
+  --color-white-15: rgba(255, 255, 255, 0.15);
+  --color-white-20: rgba(255, 255, 255, 0.2);
+  --color-white-30: rgba(255, 255, 255, 0.3);
+  --color-white-40: rgba(255, 255, 255, 0.4);
+  --color-white-60: rgba(255, 255, 255, 0.6);
+  --color-white-85: rgba(255, 255, 255, 0.85);
+
+  /* Conservation status colors */
+  --color-status-warning-bg: #fef3c7;
+  --color-status-warning-text: #92400e;
+  --color-status-warning-border: #fcd34d;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* ============================================
+   LiveView Variants
+   ============================================ */
 @custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
 @custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
 @custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
 
-/* Use the data attribute for dark mode  */
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
-
 /* Make LiveView wrapper divs transparent for layout */
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
-/* Navigation link styles for the header */
+/* ============================================
+   Base Styles (from V1 app.css)
+   ============================================ */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+/* Global link styles */
+a {
+  color: var(--color-forest-700, #19653d);
+  text-decoration: underline;
+  text-decoration-color: var(--color-forest-300, #86d4aa);
+  text-underline-offset: 2px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+a:hover {
+  color: var(--color-forest-600, #1e7e4b);
+  text-decoration-color: var(--color-forest-600, #1e7e4b);
+}
+
+/* Global focus styles for accessibility (WCAG 2.1 AA) */
+:focus-visible {
+  outline: 2px solid var(--color-forest-600, #1e7e4b);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-forest-600, #1e7e4b);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(30, 126, 75, 0.15);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-forest-600, #1e7e4b);
+  outline-offset: 0;
+  border-color: var(--color-forest-600, #1e7e4b);
+}
+
+/* Focus on dark backgrounds */
+.dark-bg :focus-visible,
+[style*="background: linear-gradient"] :focus-visible {
+  outline-color: white;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+   Navigation Styles (V1 header)
+   ============================================ */
 .nav-link {
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 1rem;
   font-size: 0.9375rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--color-white-85);
   border-radius: 0.375rem;
   transition: all 0.15s;
+  text-decoration: none;
 }
 
 .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--color-white-10);
   color: white;
+  text-decoration: none;
+}
+
+.nav-link:focus-visible {
+  outline: none;
+  background-color: var(--color-white-15);
+  box-shadow: 0 0 0 2px var(--color-white-30);
 }
 
 .nav-icon-link {
@@ -122,22 +226,327 @@
   align-items: center;
   justify-content: center;
   padding: 0.5rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--color-white-85);
   border-radius: 0.375rem;
   transition: all 0.15s;
+  text-decoration: none;
 }
 
 .nav-icon-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--color-white-10);
   color: white;
+  text-decoration: none;
 }
 
-/* Prose content for article-style pages */
-.prose-content h2 {
-  margin-top: 1.5rem;
+.nav-icon-link:focus-visible {
+  outline: none;
+  background-color: var(--color-white-15);
+  box-shadow: 0 0 0 2px var(--color-white-30);
+}
+
+/* ============================================
+   Prose Content (V1 rich text styling)
+   ============================================ */
+.prose-content {
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  font-size: 0.9375rem;
+}
+
+.prose-content p {
+  margin: 0 0 0.75rem 0;
+}
+
+.prose-content p:last-child {
+  margin-bottom: 0;
+}
+
+.prose-content ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.prose-content ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  list-style-type: decimal;
+}
+
+.prose-content li {
+  margin: 0.25rem 0;
 }
 
 .prose-content a {
+  color: var(--color-forest-700, #19653d);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-color: var(--color-forest-300, #86d4aa);
+  transition: all 0.15s ease;
+}
+
+.prose-content a:hover {
+  color: var(--color-forest-600, #1e7e4b);
+  text-decoration-color: var(--color-forest-600, #1e7e4b);
+}
+
+.prose-content strong {
+  font-weight: 600;
+}
+
+.prose-content em {
+  font-style: italic;
+}
+
+.prose-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background-color: #f0f9f4;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.prose-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--font-serif);
+  color: #14432a;
+  margin: 1.5rem 0 0.75rem 0;
+}
+
+.prose-content h1:first-child {
+  margin-top: 0;
+}
+
+.prose-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-family: var(--font-serif);
+  color: #165132;
+  margin: 1.5rem 0 0.75rem 0;
+}
+
+.prose-content h2:first-child {
+  margin-top: 0;
+}
+
+.prose-content h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-family: var(--font-serif);
+  color: #19653d;
+  margin: 1.25rem 0 0.5rem 0;
+}
+
+.prose-content h3:first-child {
+  margin-top: 0;
+}
+
+.prose-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 1rem 0 0.5rem 0;
+}
+
+.prose-content h4:first-child {
+  margin-top: 0;
+}
+
+.prose-content blockquote {
+  border-left: 3px solid #86d4aa;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.prose-content hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 1.5rem 0;
+}
+
+/* ============================================
+   Card Utilities (V1 card styling)
+   ============================================ */
+.card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-interactive {
+  transition: all 0.15s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.card-interactive:hover {
+  border-color: #4fb87f;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.card-interactive:focus-visible {
+  outline: none;
+  border-color: #1e7e4b;
+  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.15);
+}
+
+.card-forest {
+  background-color: #f0f9f4;
+  border-color: #bae6cd;
+}
+
+.card-forest.card-interactive:hover {
+  background-color: #dcf3e4;
+  border-color: #86d4aa;
+}
+
+/* ============================================
+   Badge/Pill Utilities (V1)
+   ============================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  font-size: 0.6875rem;
+}
+
+.badge-forest {
+  background-color: #bae6cd;
+  color: #19653d;
+}
+
+.badge-forest-light {
+  background-color: #dcf3e4;
+  color: #14432a;
+}
+
+.badge-forest-dark {
+  background-color: #1e7e4b;
+  color: white;
+}
+
+.badge-muted {
+  background-color: #f5f5f4;
+  color: var(--color-text-secondary);
+}
+
+/* ============================================
+   Section Title Utility (V1)
+   ============================================ */
+.section-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+}
+
+.section-title-sm {
+  font-size: 1rem;
+  color: #165132;
+}
+
+/* ============================================
+   Taxonomy Navigation (V1 breadcrumb)
+   ============================================ */
+.taxonomy-nav {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.taxonomy-nav .taxonomy-label {
+  font-weight: 600;
+  color: #19653d;
+  margin-right: 0.25rem;
+}
+
+.taxonomy-nav .taxonomy-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.taxonomy-nav .taxonomy-link:hover {
+  text-decoration: underline;
+  text-decoration-color: #4fb87f;
+}
+
+.taxonomy-nav .taxonomy-name {
+  font-style: italic;
+  font-weight: 500;
+  color: #19653d;
+}
+
+.taxonomy-nav .taxonomy-link:hover .taxonomy-name {
+  color: #14432a;
+}
+
+.taxonomy-nav .taxonomy-level-label {
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+}
+
+.taxonomy-nav .taxonomy-separator {
+  color: #4fb87f;
+}
+
+/* ============================================
+   Loading Spinner (V1)
+   ============================================ */
+.loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--color-border);
+  border-top-color: #1e7e4b;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   Skip Link (V1 accessibility)
+   ============================================ */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.75rem 1.5rem;
+  background-color: #19653d;
+  color: white;
+  font-weight: 600;
+  border-radius: 0 0 0.5rem 0.5rem;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid white;
+  outline-offset: 2px;
+  color: white;
 }

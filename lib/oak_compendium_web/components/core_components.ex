@@ -1,29 +1,16 @@
 defmodule OakCompendiumWeb.CoreComponents do
   @moduledoc """
-  Provides core UI components.
+  Provides core UI components for the Oak Compendium.
 
-  At first glance, this module may seem daunting, but its goal is to provide
-  core building blocks for your application, such as tables, forms, and
-  inputs. The components consist mostly of markup and are well-documented
-  with doc strings and declarative assigns. You may customize and style
-  them in any way you want, based on your application growth and needs.
+  Components are styled to match the V1 visual design: forest greens,
+  earth tones, serif headings, and nature-inspired aesthetics.
 
-  The foundation for styling is Tailwind CSS, a utility-first CSS framework,
-  augmented with daisyUI, a Tailwind CSS plugin that provides UI components
-  and themes. Here are useful references:
+  References:
 
-    * [daisyUI](https://daisyui.com/docs/intro/) - a good place to get
-      started and see the available components.
-
-    * [Tailwind CSS](https://tailwindcss.com) - the foundational framework
-      we build on. You will use it for layout, sizing, flexbox, grid, and
-      spacing.
-
-    * [Heroicons](https://heroicons.com) - see `icon/1` for usage.
-
+    * [Tailwind CSS](https://tailwindcss.com) - utility-first CSS framework
+    * [Heroicons](https://heroicons.com) - see `icon/1` for usage
     * [Phoenix.Component](https://hexdocs.pm/phoenix_live_view/Phoenix.Component.html) -
-      the component system used by Phoenix. Some components, such as `<.link>`
-      and `<.form>`, are defined there.
+      component system (`<.link>`, `<.form>`, etc.)
 
   """
   use Phoenix.Component
@@ -55,21 +42,28 @@ defmodule OakCompendiumWeb.CoreComponents do
       id={@id}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
-      class="toast toast-top toast-end z-50"
+      class="fixed top-4 right-4 z-50"
       {@rest}
     >
       <div class={[
-        "alert w-80 sm:w-96 max-w-80 sm:max-w-96 text-wrap",
-        @kind == :info && "alert-info",
-        @kind == :error && "alert-error"
+        "flex items-start gap-3 w-80 sm:w-96 p-4 rounded-lg shadow-lg border text-sm",
+        @kind == :info && "bg-forest-50 border-forest-200 text-forest-900",
+        @kind == :error && "bg-red-50 border-red-200 text-red-900"
       ]}>
-        <.icon :if={@kind == :info} name="hero-information-circle" class="size-5 shrink-0" />
-        <.icon :if={@kind == :error} name="hero-exclamation-circle" class="size-5 shrink-0" />
-        <div>
+        <.icon
+          :if={@kind == :info}
+          name="hero-information-circle"
+          class="size-5 shrink-0 text-forest-600"
+        />
+        <.icon
+          :if={@kind == :error}
+          name="hero-exclamation-circle"
+          class="size-5 shrink-0 text-red-600"
+        />
+        <div class="flex-1">
           <p :if={@title} class="font-semibold">{@title}</p>
           <p>{msg}</p>
         </div>
-        <div class="flex-1" />
         <button type="button" class="group self-start cursor-pointer" aria-label="close">
           <.icon name="hero-x-mark" class="size-5 opacity-40 group-hover:opacity-70" />
         </button>
@@ -93,11 +87,16 @@ defmodule OakCompendiumWeb.CoreComponents do
   slot :inner_block, required: true
 
   def button(%{rest: rest} = assigns) do
-    variants = %{"primary" => "btn-primary", nil => "btn-primary btn-soft"}
+    variants = %{
+      "primary" =>
+        "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md text-white bg-forest-600 hover:bg-forest-700 shadow-sm transition-colors cursor-pointer",
+      nil =>
+        "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md text-forest-700 bg-forest-50 hover:bg-forest-100 border border-forest-200 transition-colors cursor-pointer"
+    }
 
     assigns =
       assign_new(assigns, :class, fn ->
-        ["btn", Map.fetch!(variants, assigns[:variant])]
+        [Map.fetch!(variants, assigns[:variant])]
       end)
 
     if rest[:href] || rest[:navigate] || rest[:patch] do
@@ -204,8 +203,8 @@ defmodule OakCompendiumWeb.CoreComponents do
       end)
 
     ~H"""
-    <div class="fieldset mb-2">
-      <label>
+    <div class="mb-2">
+      <label class="flex items-center gap-2 cursor-pointer">
         <input
           type="hidden"
           name={@name}
@@ -213,17 +212,16 @@ defmodule OakCompendiumWeb.CoreComponents do
           disabled={@rest[:disabled]}
           form={@rest[:form]}
         />
-        <span class="label">
-          <input
-            type="checkbox"
-            id={@id}
-            name={@name}
-            value="true"
-            checked={@checked}
-            class={@class || "checkbox checkbox-sm"}
-            {@rest}
-          />{@label}
-        </span>
+        <input
+          type="checkbox"
+          id={@id}
+          name={@name}
+          value="true"
+          checked={@checked}
+          class={@class || "size-4 rounded border-stone-300 text-forest-600 focus:ring-forest-500"}
+          {@rest}
+        />
+        <span class="text-sm font-medium text-stone-700">{@label}</span>
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
@@ -232,13 +230,17 @@ defmodule OakCompendiumWeb.CoreComponents do
 
   def input(%{type: "select"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-2">
       <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="block text-sm font-medium text-stone-700 mb-1">{@label}</span>
         <select
           id={@id}
           name={@name}
-          class={[@class || "w-full select", @errors != [] && (@error_class || "select-error")]}
+          class={[
+            @class ||
+              "w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-forest-600 focus:ring-1 focus:ring-forest-600 focus:outline-none",
+            @errors != [] && (@error_class || "border-red-500")
+          ]}
           multiple={@multiple}
           {@rest}
         >
@@ -253,15 +255,16 @@ defmodule OakCompendiumWeb.CoreComponents do
 
   def input(%{type: "textarea"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-2">
       <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="block text-sm font-medium text-stone-700 mb-1">{@label}</span>
         <textarea
           id={@id}
           name={@name}
           class={[
-            @class || "w-full textarea",
-            @errors != [] && (@error_class || "textarea-error")
+            @class ||
+              "w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-forest-600 focus:ring-1 focus:ring-forest-600 focus:outline-none min-h-[5rem] resize-y",
+            @errors != [] && (@error_class || "border-red-500")
           ]}
           {@rest}
         >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
@@ -274,17 +277,18 @@ defmodule OakCompendiumWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-2">
       <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="block text-sm font-medium text-stone-700 mb-1">{@label}</span>
         <input
           type={@type}
           name={@name}
           id={@id}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
           class={[
-            @class || "w-full input",
-            @errors != [] && (@error_class || "input-error")
+            @class ||
+              "w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-forest-600 focus:ring-1 focus:ring-forest-600 focus:outline-none",
+            @errors != [] && (@error_class || "border-red-500")
           ]}
           {@rest}
         />
@@ -297,7 +301,7 @@ defmodule OakCompendiumWeb.CoreComponents do
   # Helper used by inputs to generate form errors
   defp error(assigns) do
     ~H"""
-    <p class="mt-1.5 flex gap-2 items-center text-sm text-error">
+    <p class="mt-1.5 flex gap-2 items-center text-sm text-red-600">
       <.icon name="hero-exclamation-circle" class="size-5" />
       {render_slot(@inner_block)}
     </p>
@@ -315,10 +319,13 @@ defmodule OakCompendiumWeb.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8">
+        <h1
+          class="text-lg font-semibold leading-8"
+          style="font-family: var(--font-serif); color: var(--color-text-primary);"
+        >
           {render_slot(@inner_block)}
         </h1>
-        <p :if={@subtitle != []} class="text-sm text-base-content/70">
+        <p :if={@subtitle != []} class="text-sm" style="color: var(--color-text-secondary);">
           {render_slot(@subtitle)}
         </p>
       </div>
@@ -359,25 +366,38 @@ defmodule OakCompendiumWeb.CoreComponents do
       end
 
     ~H"""
-    <table class="table table-zebra">
+    <table class="min-w-full border-collapse">
       <thead>
-        <tr>
-          <th :for={col <- @col}>{col[:label]}</th>
-          <th :if={@action != []}>
+        <tr class="border-b border-stone-200 bg-forest-50">
+          <th
+            :for={col <- @col}
+            class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-forest-800"
+          >
+            {col[:label]}
+          </th>
+          <th :if={@action != []} class="px-4 py-3">
             <span class="sr-only">Actions</span>
           </th>
         </tr>
       </thead>
-      <tbody id={@id} phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"}>
-        <tr :for={row <- @rows} id={@row_id && @row_id.(row)}>
+      <tbody
+        id={@id}
+        phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"}
+        class="divide-y divide-stone-100"
+      >
+        <tr
+          :for={row <- @rows}
+          id={@row_id && @row_id.(row)}
+          class="hover:bg-forest-50/50 transition-colors"
+        >
           <td
             :for={col <- @col}
             phx-click={@row_click && @row_click.(row)}
-            class={@row_click && "hover:cursor-pointer"}
+            class={["px-4 py-3 text-sm", @row_click && "hover:cursor-pointer"]}
           >
             {render_slot(col, @row_item.(row))}
           </td>
-          <td :if={@action != []} class="w-0 font-semibold">
+          <td :if={@action != []} class="w-0 px-4 py-3 font-semibold text-sm">
             <div class="flex gap-4">
               <%= for action <- @action do %>
                 {render_slot(action, @row_item.(row))}
@@ -406,11 +426,11 @@ defmodule OakCompendiumWeb.CoreComponents do
 
   def list(assigns) do
     ~H"""
-    <ul class="list">
-      <li :for={item <- @item} class="list-row">
-        <div class="list-col-grow">
-          <div class="font-bold">{item.title}</div>
-          <div>{render_slot(item)}</div>
+    <ul class="divide-y divide-stone-100">
+      <li :for={item <- @item} class="py-3">
+        <div>
+          <div class="font-semibold text-sm text-forest-800">{item.title}</div>
+          <div class="text-sm" style="color: var(--color-text-secondary);">{render_slot(item)}</div>
         </div>
       </li>
     </ul>
@@ -490,7 +510,7 @@ defmodule OakCompendiumWeb.CoreComponents do
         tabindex="0"
       >
         <div class="flex min-h-full items-center justify-center p-4">
-          <div class="w-full max-w-lg rounded-xl bg-base-100 p-8 shadow-xl ring-1 ring-base-300">
+          <div class="w-full max-w-lg rounded-xl bg-white p-8 shadow-xl ring-1 ring-stone-200">
             <.focus_wrap
               id={"#{@id}-wrap"}
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
@@ -530,7 +550,8 @@ defmodule OakCompendiumWeb.CoreComponents do
     ~H"""
     <.link
       navigate={@navigate}
-      class="inline-flex items-center gap-1 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
+      class="inline-flex items-center gap-1 text-sm font-semibold text-forest-700 hover:text-forest-900 transition-colors"
+      style="text-decoration: none;"
     >
       <.icon name="hero-arrow-left" class="size-4" />
       {render_slot(@inner_block)}

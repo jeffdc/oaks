@@ -1,10 +1,26 @@
-<header class="sticky top-0 z-40 bg-[oklch(25%_0.05_150)] shadow-md">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-    <div class="flex items-center gap-4">
+<%!-- Skip to main content link for keyboard/screen reader users --%>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header
+  class="sticky top-0 z-40 dark-bg"
+  style="background: linear-gradient(135deg, #165132 0%, #19653d 100%); box-shadow: var(--shadow-lg);"
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex flex-wrap items-center gap-4">
       <%!-- Logo and title --%>
-      <.link navigate={~p"/"} class="flex items-center gap-2 hover:opacity-90 transition-opacity">
-        <.icon name="hero-leaf" class="size-6 text-green-300" />
-        <span class="text-xl font-bold text-white tracking-wide">Oak Compendium</span>
+      <.link
+        navigate={~p"/"}
+        class="flex items-center gap-3 hover:opacity-90 transition-opacity"
+        style="text-decoration: none;"
+        aria-label="Oak Compendium home"
+      >
+        <.icon name="hero-leaf" class="size-7 text-green-300" />
+        <span
+          class="text-xl font-bold text-white tracking-wide"
+          style="font-family: var(--font-serif); letter-spacing: 0.01em;"
+        >
+          Oak Compendium
+        </span>
       </.link>
 
       <%!-- Spacer --%>
@@ -24,9 +40,6 @@
       <.link navigate={~p"/settings"} class="nav-icon-link" title="Settings" aria-label="Settings">
         <.icon name="hero-cog-6-tooth" class="size-5" />
       </.link>
-
-      <%!-- Theme toggle --%>
-      <Layouts.theme_toggle />
 
       <%!-- Mobile menu button --%>
       <button
@@ -63,27 +76,36 @@
   </div>
 </header>
 
-<main class="flex-1 px-4 py-8 sm:px-6 lg:px-8">
-  <div class="mx-auto max-w-7xl">
-    {render_slot(@inner_block)}
-  </div>
+<main
+  id="main-content"
+  class="flex-1 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-12 py-10 w-full"
+  tabindex="-1"
+  style="outline: none;"
+>
+  {render_slot(@inner_block)}
 </main>
 
 <.flash_group flash={@flash} />
 
-<footer class="border-t border-base-300 bg-base-200/50 mt-auto">
+<footer
+  style="border-top: 1px solid var(--color-border); background-color: var(--color-border-light);"
+  class="mt-auto"
+>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-base-content/60">
+    <div
+      class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm"
+      style="color: var(--color-text-tertiary);"
+    >
       <p>Oak Compendium &mdash; A comprehensive database of <em>Quercus</em> species</p>
       <div class="flex items-center gap-4">
-        <.link navigate={~p"/about"} class="hover:text-base-content transition-colors">
+        <.link navigate={~p"/about"} class="hover:text-forest-800 transition-colors">
           About
         </.link>
         <a
           href="https://github.com/jeffdc/oaks"
           target="_blank"
           rel="noopener noreferrer"
-          class="hover:text-base-content transition-colors"
+          class="hover:text-forest-800 transition-colors"
         >
           GitHub
         </a>

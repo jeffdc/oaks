@@ -12,15 +12,20 @@ defmodule OakCompendiumWeb.HomeLive do
     <div class="max-w-3xl mx-auto">
       <%!-- Welcome section --%>
       <section class="text-center mb-10">
-        <h1 class="text-3xl font-bold mb-3">Explore the World of Oaks</h1>
-        <p class="text-lg text-base-content/70">
+        <h2
+          class="text-3xl font-bold mb-3"
+          style="font-family: var(--font-serif); color: var(--color-forest-800, #165132);"
+        >
+          Explore the World of Oaks
+        </h2>
+        <p class="text-lg" style="color: var(--color-text-secondary); line-height: 1.6;">
           A comprehensive database of oak species and hybrids from around the globe.
         </p>
       </section>
 
       <%!-- Quick links --%>
       <section class="mb-10">
-        <h2 class="text-xl font-semibold mb-4">What would you like to do?</h2>
+        <h3 class="section-title">What would you like to do?</h3>
         <div class="grid gap-4 sm:grid-cols-2">
           <.link_card
             navigate={~p"/list"}
@@ -68,16 +73,19 @@ defmodule OakCompendiumWeb.HomeLive do
     ~H"""
     <.link
       navigate={@navigate}
-      class="flex items-center gap-4 p-5 rounded-lg border border-base-300 bg-base-100 shadow-sm hover:shadow-md hover:border-primary/30 transition-all group"
+      class="card card-interactive flex items-center gap-4 p-5"
+      style="text-decoration: none;"
     >
-      <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
+      <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-forest-50 flex items-center justify-center text-forest-600">
         <.icon name={@icon} class="size-6" />
       </div>
       <div>
-        <h3 class="font-semibold text-base-content group-hover:text-primary transition-colors">
+        <h3 class="font-semibold" style="color: var(--color-text-primary);">
           {@title}
         </h3>
-        <p class="text-sm text-base-content/60">{@description}</p>
+        <p class="text-sm" style="color: var(--color-text-secondary);">
+          {@description}
+        </p>
       </div>
     </.link>
     """
