@@ -34,8 +34,8 @@ defmodule OakCompendiumWeb.SpeciesDetailLiveTest do
 
     test "shows taxonomy breadcrumb", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/species/alba")
-      assert html =~ "subg."
-      assert html =~ "sect."
+      assert html =~ "(subgenus)"
+      assert html =~ "(section)"
     end
 
     test "shows source data from preferred source", %{conn: conn} do
