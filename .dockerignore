@@ -1,33 +1,55 @@
-# Git
+.dockerignore
+
+# Ignore git, but keep git HEAD and refs to access current commit hash if needed
 .git
-.gitignore
+!.git/HEAD
+!.git/refs
 
-# Node/Web
-web/node_modules
-web/dist
-web/.svelte-kit
+# Common development/test artifacts
+/cover/
+/doc/
+/test/
+/tmp/
+.elixir_ls
 
-# Python
-venv
+# Mix artifacts
+/_build/
+/deps/
+*.ez
+
+# Generated on crash by the VM
+erl_crash.dump
+
+# Static artifacts - fetched and built inside the Docker image
+/assets/node_modules/
+/priv/static/assets/
+/priv/static/cache_manifest.json
+
+# V1 directories (frozen, not needed in Docker build)
+/api/
+/web/
+/cli/
+/ios/
+
+# Python scraper (runs independently)
+/scrapers/
+/venv/
 __pycache__
 *.pyc
-scrapers/oaksoftheworld/tmp
 
-# Temp files
-tmp/
-*.log
+# Beads issue tracking
+.beads/
 
 # IDE
 .idea/
 .vscode/
 *.swp
 
-# iOS
-ios/
-
-# Beads
-.beads/
+# Database files (not part of the build)
+*.db
+*.db-shm
+*.db-wal
 
 # Other
-*.md
-LICENSE
+/feedback/
+/openspec/
