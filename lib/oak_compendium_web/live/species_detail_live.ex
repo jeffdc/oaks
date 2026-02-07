@@ -238,6 +238,17 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
       </div>
       <.taxonomy_breadcrumb species={@species} />
 
+      <!-- Compare link (visible to all users) -->
+      <div class="mt-4 pt-4 border-t border-base-200">
+        <.link
+          navigate={~p"/compare/#{@species.scientific_name}"}
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+          style="color: var(--color-forest-700); background-color: var(--color-forest-50);"
+        >
+          <.icon name="hero-arrows-right-left" class="size-4" /> Compare with other species
+        </.link>
+      </div>
+
       <div :if={@authenticated} class="flex items-center gap-2 mt-4 pt-4 border-t border-base-200">
         <.link
           navigate={~p"/species/#{@species.scientific_name}/edit"}
