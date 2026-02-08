@@ -59,7 +59,7 @@ defmodule OakCompendiumWeb.ArticlesLive do
           :if={@authenticated}
           navigate={~p"/articles/new"}
           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium flex-shrink-0"
-          style="background-color: var(--color-forest-600); text-decoration: none;"
+          style="background-color: var(--color-forest-600); color: white; text-decoration: none;"
         >
           <.icon name="hero-plus" class="size-4" /> New Article
         </.link>
