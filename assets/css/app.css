@@ -1783,3 +1783,286 @@ textarea:focus-visible {
   border-top-right-radius: 0;
   border-top: none;
 }
+
+/* ==========================================================================
+   Source Comparison Page
+   Matches V1 SourceComparison.svelte layout exactly.
+   ========================================================================== */
+
+.source-comparison-page {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.source-comparison-card {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-xl);
+}
+
+.source-comparison {
+  padding: 1.5rem;
+}
+
+/* Header */
+.comparison-header {
+  margin-bottom: 1.5rem;
+}
+
+.comparison-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--color-forest-700);
+  text-decoration: none;
+  margin-bottom: 0.75rem;
+  transition: color 0.15s ease;
+}
+
+.comparison-back-link:hover {
+  color: var(--color-forest-500);
+}
+
+.comparison-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-forest-900);
+  font-family: var(--font-serif);
+  margin: 0;
+}
+
+.comparison-title-prefix {
+  font-weight: 400;
+  font-style: normal;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* Source picker */
+.source-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: var(--color-forest-50);
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-forest-200);
+}
+
+.source-picker-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.source-picker-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1.5px solid var(--color-forest-300);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.source-chip:hover {
+  border-color: var(--color-forest-500);
+  color: var(--color-forest-700);
+}
+
+.source-chip.selected {
+  background-color: var(--color-forest-600);
+  border-color: var(--color-forest-600);
+  color: white;
+}
+
+.source-chip.selected:hover {
+  background-color: var(--color-forest-700);
+  border-color: var(--color-forest-700);
+}
+
+.source-chip-star {
+  font-size: 0.75rem;
+  color: var(--color-oak-brown);
+}
+
+.source-chip.selected .source-chip-star {
+  color: #fef3c7;
+}
+
+.source-picker-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}
+
+/* Comparison grid */
+.comparison-grid {
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) repeat(var(--column-count), 1fr);
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: var(--color-surface);
+}
+
+.comparison-grid-header {
+  display: contents;
+}
+
+.comparison-header-cell {
+  padding: 0.875rem 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  background-color: var(--color-forest-100);
+  border-bottom: 2px solid var(--color-forest-300);
+  color: var(--color-forest-800);
+}
+
+.comparison-field-label {
+  padding: 0.875rem 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-forest-700);
+  background-color: var(--color-forest-50);
+  border-right: 1px solid var(--color-border);
+}
+
+.comparison-source-header {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-right: 1px solid var(--color-border);
+}
+
+.comparison-source-header:last-child {
+  border-right: none;
+}
+
+.comparison-source-name {
+  white-space: nowrap;
+}
+
+.comparison-preferred-badge {
+  font-size: 0.75rem;
+  color: var(--color-oak-brown);
+}
+
+.comparison-source-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-tertiary);
+  padding: 0.125rem;
+  border-radius: 0.25rem;
+  transition: all 0.15s ease;
+}
+
+.comparison-source-link:hover {
+  color: var(--color-forest-600);
+  background-color: var(--color-forest-200);
+}
+
+/* Table rows */
+.comparison-row {
+  display: contents;
+}
+
+.comparison-row:nth-child(even) .comparison-field-label,
+.comparison-row:nth-child(even) .comparison-value-cell {
+  background-color: var(--color-background);
+}
+
+.comparison-row .comparison-field-label,
+.comparison-row .comparison-value-cell {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.comparison-value-cell {
+  padding: 0.875rem 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  border-right: 1px solid var(--color-border);
+}
+
+.comparison-value-cell:last-child {
+  border-right: none;
+}
+
+.comparison-no-data {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+.comparison-text-content {
+  line-height: 1.5;
+}
+
+/* Empty state */
+.source-comparison-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+}
+
+/* Responsive: stack on mobile */
+@media (max-width: 768px) {
+  .comparison-grid {
+    display: block;
+  }
+
+  .comparison-grid-header {
+    display: none;
+  }
+
+  .comparison-row {
+    display: block;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .comparison-row .comparison-field-label {
+    display: block;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-forest-100);
+    font-weight: 700;
+  }
+
+  .comparison-row .comparison-value-cell {
+    display: block;
+    border-right: none;
+    padding: 0.75rem 1rem;
+  }
+
+  .comparison-row .comparison-value-cell::before {
+    content: attr(data-source);
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-forest-600);
+    margin-bottom: 0.25rem;
+  }
+}

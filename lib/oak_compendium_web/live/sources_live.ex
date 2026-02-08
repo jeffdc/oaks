@@ -136,14 +136,19 @@ defmodule OakCompendiumWeb.SourcesLive do
         navigate={~p"/sources/#{@source.id}"}
         class="source-card-link"
         aria-label={@source.name}
-      ></.link>
+      >
+      </.link>
       <div class="source-content">
         <h2 class="source-card-name">{@source.name}</h2>
         <p :if={@source.description} class="source-card-desc">
           {@source.description}
         </p>
         <div class="source-card-meta">
-          <span :if={@source.source_type} class="badge badge-muted" style="text-transform: capitalize;">
+          <span
+            :if={@source.source_type}
+            class="badge badge-muted"
+            style="text-transform: capitalize;"
+          >
             {@source.source_type}
           </span>
           <span :if={@source.author} class="source-card-author">

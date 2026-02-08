@@ -222,9 +222,7 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
 
   defp species_header(assigns) do
     ~H"""
-    <header
-      style="background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-forest-100) 100%); border: 1px solid var(--color-forest-200); border-radius: 0.75rem; padding: 1rem 1.5rem; margin-bottom: 1.5rem;"
-    >
+    <header style="background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-forest-100) 100%); border: 1px solid var(--color-forest-200); border-radius: 0.75rem; padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
       <div class="species-current">
         <div class="species-current-left">
           <span class="badge badge-uppercase badge-forest">
@@ -502,7 +500,7 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
       </button>
       <.link
         :if={length(@sources) > 1}
-        navigate={~p"/compare/#{@species_name}"}
+        navigate={~p"/species/#{@species_name}/compare"}
         class="compare-sources-link"
         title="Compare all sources side-by-side"
       >
@@ -626,7 +624,12 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
 
   defp field_icon(%{name: "leaf"} = assigns) do
     ~H"""
-    <svg class="size-4 flex-shrink-0" style="color: var(--color-forest-500);" fill="currentColor" viewBox="0 0 24 24">
+    <svg
+      class="size-4 flex-shrink-0"
+      style="color: var(--color-forest-500);"
+      fill="currentColor"
+      viewBox="0 0 24 24"
+    >
       <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z" />
     </svg>
     """
@@ -634,7 +637,12 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
 
   defp field_icon(%{name: "flower"} = assigns) do
     ~H"""
-    <svg class="size-4 flex-shrink-0" style="color: var(--color-forest-500);" fill="currentColor" viewBox="0 0 24 24">
+    <svg
+      class="size-4 flex-shrink-0"
+      style="color: var(--color-forest-500);"
+      fill="currentColor"
+      viewBox="0 0 24 24"
+    >
       <path d="M12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M15,10.59V9L12.5,6.5L10,9V10.59L11.29,11.88L10.59,14.59L12,14L13.41,14.59L12.71,11.88L15,10.59Z" />
     </svg>
     """
@@ -642,7 +650,12 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
 
   defp field_icon(%{name: "acorn"} = assigns) do
     ~H"""
-    <svg class="size-4 flex-shrink-0" style="color: var(--color-forest-500);" fill="currentColor" viewBox="0 0 24 24">
+    <svg
+      class="size-4 flex-shrink-0"
+      style="color: var(--color-forest-500);"
+      fill="currentColor"
+      viewBox="0 0 24 24"
+    >
       <path d="M12,2C12.5,2 13,2.19 13.41,2.59C13.8,3 14,3.5 14,4C14,4.5 13.8,5 13.41,5.41C13,5.8 12.5,6 12,6C11.5,6 11,5.8 10.59,5.41C10.2,5 10,4.5 10,4C10,3.5 10.2,3 10.59,2.59C11,2.19 11.5,2 12,2M12,6C13.1,6 14,6.9 14,8V9.5C15.72,9.5 17.17,10.6 17.71,12.13C18.14,13.38 18.13,14.77 17.66,16C17.19,17.26 16.32,18.23 15.19,18.74C14.06,19.25 12.78,19.25 11.65,18.74C10.5,18.23 9.63,17.26 9.16,16C8.69,14.77 8.68,13.38 9.11,12.13C9.65,10.6 11.1,9.5 12.83,9.5H12V8C12,6.9 12.9,6 12,6M12.13,11.5C11.41,11.5 10.81,11.89 10.54,12.5C10.27,13.11 10.39,13.82 10.85,14.3C11.31,14.78 12,14.94 12.63,14.7C13.26,14.46 13.7,13.86 13.7,13.17C13.7,12.64 13.5,12.13 13.13,11.76C12.76,11.39 12.26,11.5 12.13,11.5Z" />
     </svg>
     """
@@ -650,7 +663,9 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
 
   defp field_icon(%{name: "hero-" <> _} = assigns) do
     ~H"""
-    <span style="color: var(--color-forest-500);"><.icon name={@name} class="size-4 flex-shrink-0" /></span>
+    <span style="color: var(--color-forest-500);">
+      <.icon name={@name} class="size-4 flex-shrink-0" />
+    </span>
     """
   end
 
@@ -662,8 +677,7 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
     ~H"""
     <section class="card card-sm detail-section full-width">
       <h2 class="section-title section-title-sm mb-3">
-        <.icon name="hero-arrow-top-right-on-square" class="size-4 inline-block" />
-        External Links
+        <.icon name="hero-arrow-top-right-on-square" class="size-4 inline-block" /> External Links
       </h2>
       <div class="flex flex-wrap gap-3">
         <a
@@ -990,14 +1004,13 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
       },
       %{
         name: "Wikipedia",
-        url:
-          "https://en.wikipedia.org/wiki/Quercus_#{String.replace(species_name, " ", "_")}",
+        url: "https://en.wikipedia.org/wiki/Quercus_#{String.replace(species_name, " ", "_")}",
         logo: "wikipedia"
       }
     ]
 
     # Sort all links alphabetically by name (case-insensitive, matching V1 localeCompare)
-    (custom ++ auto) |> Enum.sort_by(& String.downcase(&1.name))
+    (custom ++ auto) |> Enum.sort_by(&String.downcase(&1.name))
   end
 
   defp format_hybrid_display(name) do

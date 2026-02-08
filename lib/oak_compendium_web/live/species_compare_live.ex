@@ -1,552 +1,312 @@
 defmodule OakCompendiumWeb.SpeciesCompareLive do
   @moduledoc """
-  LiveView for side-by-side comparison of multiple oak species.
+  LiveView for comparing data from multiple sources for a single species.
 
-  Allows users to compare taxonomy, morphology, and descriptive data
-  across 2-4 species simultaneously. Species selection is URL-based
-  (shareable/bookmarkable).
+  Displays a side-by-side grid of source data with toggleable source selection,
+  matching the V1 SourceComparison component behavior.
   """
 
   use OakCompendiumWeb, :live_view
 
+  alias OakCompendium.Markdown
   alias OakCompendium.Species
 
-  @max_species 4
+  @max_sources 4
+
+  @fields [
+    %{key: :local_names, label: "Common Names", type: :array},
+    %{key: :range, label: "Geographic Range", type: :markdown},
+    %{key: :growth_habit, label: "Growth Habit", type: :markdown},
+    %{key: :leaves, label: "Leaves", type: :markdown},
+    %{key: :fruits, label: "Fruits (Acorns)", type: :markdown},
+    %{key: :flowers, label: "Flowers", type: :markdown},
+    %{key: :bark, label: "Bark", type: :markdown},
+    %{key: :twigs, label: "Twigs", type: :markdown},
+    %{key: :buds, label: "Buds", type: :markdown},
+    %{key: :hardiness_habitat, label: "Hardiness & Habitat", type: :markdown},
+    %{key: :miscellaneous, label: "Additional Information", type: :markdown}
+  ]
 
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
      assign(socket,
-       page_title: "Compare Species",
-       species_list: [],
-       not_found: [],
-       search_query: "",
-       search_results: [],
-       show_picker: false,
-       max_species: @max_species
+       page_title: "Compare Sources",
+       species: nil,
+       not_found: false,
+       all_sources: [],
+       selected_ids: [],
+       fields: @fields
      )}
   end
 
   @impl true
-  def handle_params(%{"name" => names_param}, _uri, socket) do
-    names =
-      names_param
-      |> String.split(",")
-      |> Enum.map(&String.trim/1)
-      |> Enum.reject(&(&1 == ""))
-      |> Enum.uniq()
+  def handle_params(%{"name" => name}, _uri, socket) do
+    case Species.get_species_full(name) do
+      nil ->
+        {:noreply,
+         assign(socket,
+           species: nil,
+           not_found: true,
+           page_title: "Species Not Found"
+         )}
 
-    if Enum.empty?(names) do
-      {:noreply, assign(socket, species_list: [], not_found: [])}
-    else
-      load_species(socket, names)
+      species ->
+        sources = species.species_sources
+        # Default: select up to 3 sources
+        default_ids = sources |> Enum.take(3) |> Enum.map(& &1.source.id)
+
+        {:noreply,
+         assign(socket,
+           species: species,
+           not_found: false,
+           all_sources: sources,
+           selected_ids: default_ids,
+           page_title: "Compare Sources — Quercus #{species.scientific_name}"
+         )}
     end
   end
-
-  # -- Events --
 
   @impl true
-  def handle_event("show_picker", _params, socket) do
-    {:noreply, assign(socket, show_picker: true, search_query: "", search_results: [])}
-  end
+  def handle_event("toggle_source", %{"id" => id_str}, socket) do
+    source_id = String.to_integer(id_str)
+    selected = socket.assigns.selected_ids
 
-  def handle_event("close_picker", _params, socket) do
-    {:noreply, assign(socket, show_picker: false)}
-  end
-
-  def handle_event("search", %{"query" => query}, socket) do
-    if String.length(String.trim(query)) >= 2 do
-      results = Species.search_species(query, 10)
-
-      # Filter out species already in the comparison
-      current_names = Enum.map(socket.assigns.species_list, & &1.scientific_name)
-      results = Enum.reject(results, &(&1.scientific_name in current_names))
-
-      {:noreply, assign(socket, search_query: query, search_results: results)}
-    else
-      {:noreply, assign(socket, search_query: query, search_results: [])}
-    end
-  end
-
-  def handle_event("add_species", %{"name" => name}, socket) do
-    current_names =
-      socket.assigns.species_list
-      |> Enum.map(& &1.scientific_name)
-
-    if length(current_names) >= @max_species do
-      {:noreply,
-       socket
-       |> put_flash(:error, "Maximum of #{@max_species} species can be compared at once.")
-       |> assign(show_picker: false)}
-    else
-      new_names = current_names ++ [name]
-      path = ~p"/compare/#{Enum.join(new_names, ",")}"
-
-      {:noreply,
-       socket
-       |> assign(show_picker: false)
-       |> push_patch(to: path)}
-    end
-  end
-
-  def handle_event("remove_species", %{"name" => name}, socket) do
-    remaining_names =
-      socket.assigns.species_list
-      |> Enum.map(& &1.scientific_name)
-      |> Enum.reject(&(&1 == name))
-
-    if Enum.empty?(remaining_names) do
-      {:noreply, push_navigate(socket, to: ~p"/list")}
-    else
-      path = ~p"/compare/#{Enum.join(remaining_names, ",")}"
-      {:noreply, push_patch(socket, to: path)}
-    end
-  end
-
-  # -- Helpers --
-
-  defp load_species(socket, names) do
-    results =
-      Enum.map(names, fn name ->
-        {name, Species.get_species_full(name)}
-      end)
-
-    species_list = for {_name, sp} <- results, sp != nil, do: sp
-    not_found = for {name, nil} <- results, do: name
-
-    {:noreply,
-     assign(socket,
-       species_list: species_list,
-       not_found: not_found,
-       page_title: build_title(species_list)
-     )}
-  end
-
-  defp build_title([]), do: "Compare Species"
-  defp build_title([sp]), do: "Compare Quercus #{sp.scientific_name}"
-
-  defp build_title(species) do
-    names = Enum.map(species, & &1.scientific_name) |> Enum.take(2)
-    "Compare #{Enum.join(names, " vs ")}"
-  end
-
-  # Get preferred source for a species, or nil if no sources
-  defp preferred_source(species) do
-    Enum.find(species.species_sources, & &1.is_preferred) ||
-      List.first(species.species_sources)
-  end
-
-  # Format species name with hybrid indicator
-  defp format_species_name(species) do
-    if species.is_hybrid do
-      "Quercus × #{species.scientific_name}"
-    else
-      "Quercus #{species.scientific_name}"
-    end
-  end
-
-  # Get field value, returning nil if not present
-  defp get_field(species, :local_names) do
-    source = preferred_source(species)
-
-    if source do
-      # Parse JSON array string to list
-      Species.parse_json_array(source.local_names)
-    else
-      nil
-    end
-  end
-
-  defp get_field(species, field)
-       when field in [
-              :range,
-              :growth_habit,
-              :leaves,
-              :fruits,
-              :flowers,
-              :bark,
-              :twigs,
-              :buds,
-              :hardiness_habitat,
-              :miscellaneous
-            ] do
-    source = preferred_source(species)
-    if source, do: Map.get(source, field), else: nil
-  end
-
-  defp get_field(species, field) do
-    Map.get(species, field)
-  end
-
-  # Check if any species has data for this field
-  defp field_has_data?(species_list, field) do
-    Enum.any?(species_list, fn sp ->
-      case get_field(sp, field) do
-        nil -> false
-        "" -> false
-        [] -> false
-        _ -> true
+    new_selected =
+      if source_id in selected do
+        # Don't deselect if only one remaining
+        if length(selected) > 1,
+          do: List.delete(selected, source_id),
+          else: selected
+      else
+        # Limit to max sources
+        if length(selected) < @max_sources,
+          do: selected ++ [source_id],
+          else: selected
       end
-    end)
+
+    {:noreply, assign(socket, selected_ids: new_selected)}
   end
 
-  # Render field value based on type
-  defp render_field_value(_assigns, value, :array) when is_list(value) do
-    case value do
-      [] -> nil
-      list -> Enum.join(list, ", ")
-    end
-  end
-
-  defp render_field_value(_assigns, value, type) when type in [:markdown, :text] do
-    if value && String.trim(value) != "" do
-      value
-    else
-      nil
-    end
-  end
-
-  defp render_field_value(_assigns, _value, _type), do: nil
+  # -- Render --
 
   @impl true
   def render(assigns) do
+    selected_sources =
+      Enum.filter(assigns.all_sources, &(&1.source.id in assigns.selected_ids))
+
+    assigns = assign(assigns, :selected_sources, selected_sources)
+
     ~H"""
-    <div class="max-w-7xl mx-auto px-4 py-6">
-      <!-- Header -->
-      <div class="mb-6">
+    <div class="source-comparison-page">
+      <div :if={@not_found} class="text-center py-16">
+        <h1 class="text-2xl font-bold" style="color: var(--color-text-primary);">
+          Species Not Found
+        </h1>
+        <p class="mt-2" style="color: var(--color-text-secondary);">
+          Could not find the requested species.
+        </p>
         <.link
           navigate={~p"/list"}
-          class="inline-flex items-center gap-2 text-sm text-forest-700 hover:text-forest-500 mb-3"
+          class="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg text-white"
+          style="background-color: var(--color-forest-600); text-decoration: none;"
         >
-          <.icon name="hero-arrow-left" class="w-4 h-4" /> Back to species list
+          <.icon name="hero-arrow-left" class="size-4" /> Back to Species List
         </.link>
-        <h1 class="text-3xl font-bold font-serif text-forest-900">
-          Compare Oak Species
-        </h1>
       </div>
-      
-    <!-- Error messages for species not found -->
-      <%= if @not_found != [] do %>
-        <div class="alert alert-warning mb-4">
-          <.icon name="hero-exclamation-triangle" class="w-5 h-5" />
-          <div>
-            <p class="font-semibold">Species not found:</p>
-            <ul class="list-disc list-inside">
-              <%= for name <- @not_found do %>
-                <li><em>Quercus {name}</em></li>
-              <% end %>
-            </ul>
+
+      <div :if={@species} class="source-comparison-card">
+        <div class="source-comparison">
+          <.comparison_header species={@species} />
+
+          <.source_picker
+            :if={@all_sources != []}
+            sources={@all_sources}
+            selected_ids={@selected_ids}
+          />
+
+          <.comparison_grid
+            :if={@selected_sources != []}
+            sources={@selected_sources}
+            fields={@fields}
+          />
+
+          <div
+            :if={@all_sources == []}
+            class="source-comparison-empty"
+          >
+            <p>No source data available for this species.</p>
           </div>
         </div>
-      <% end %>
+      </div>
+    </div>
+    """
+  end
 
-      <%= if @species_list == [] do %>
-        <!-- Empty state -->
-        <div class="text-center py-16">
-          <p class="text-base-content/60 mb-4">
-            No species selected for comparison.
-          </p>
-          <.link navigate={~p"/list"} class="btn btn-primary">
-            Browse Species
-          </.link>
-        </div>
-      <% else %>
-        <!-- Species picker button -->
-        <div class="mb-4 flex justify-between items-center">
-          <p class="text-sm text-base-content/70">
-            Comparing {length(@species_list)} {if length(@species_list) == 1,
-              do: "species",
-              else: "species"}
-          </p>
-          <%= if length(@species_list) < @max_species do %>
-            <button
-              type="button"
-              phx-click="show_picker"
-              class="btn btn-sm btn-outline"
+  # -- Components --
+
+  attr :species, :any, required: true
+
+  defp comparison_header(assigns) do
+    ~H"""
+    <header class="comparison-header">
+      <.link
+        navigate={~p"/species/#{@species.scientific_name}"}
+        class="comparison-back-link"
+      >
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to species
+      </.link>
+      <h1 class="comparison-title">
+        <span class="comparison-title-prefix">Compare sources for</span>
+        <em class="species-name">{format_species_name(@species)}</em>
+      </h1>
+    </header>
+    """
+  end
+
+  attr :sources, :list, required: true
+  attr :selected_ids, :list, required: true
+
+  defp source_picker(assigns) do
+    ~H"""
+    <div class="source-picker">
+      <span class="source-picker-label">Select sources to compare:</span>
+      <div class="source-picker-chips">
+        <button
+          :for={ss <- @sources}
+          type="button"
+          phx-click="toggle_source"
+          phx-value-id={ss.source.id}
+          class={["source-chip", ss.source.id in @selected_ids && "selected"]}
+        >
+          {ss.source.name}
+          <span :if={ss.is_preferred} class="source-chip-star" title="Preferred source">
+            &#9733;
+          </span>
+        </button>
+      </div>
+      <span :if={length(@sources) > 4} class="source-picker-hint">
+        (max 4 sources)
+      </span>
+    </div>
+    """
+  end
+
+  attr :sources, :list, required: true
+  attr :fields, :list, required: true
+
+  defp comparison_grid(assigns) do
+    column_count = length(assigns.sources)
+    assigns = assign(assigns, :column_count, column_count)
+
+    ~H"""
+    <div class="comparison-grid" style={"--column-count: #{@column_count}"}>
+      <%!-- Column headers --%>
+      <div class="comparison-grid-header">
+        <div class="comparison-field-label comparison-header-cell">Field</div>
+        <div :for={ss <- @sources} class="comparison-source-header comparison-header-cell">
+          <span class="comparison-source-name">{ss.source.name}</span>
+          <span :if={ss.is_preferred} class="comparison-preferred-badge">&#9733;</span>
+          <a
+            :if={ss.source.url}
+            href={ss.source.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="comparison-source-link"
+            title="Visit source"
+          >
+            <svg
+              class="size-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="2"
             >
-              <.icon name="hero-plus" class="w-4 h-4" /> Add species
-            </button>
-          <% end %>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
+            </svg>
+          </a>
         </div>
-        
-    <!-- Comparison table -->
-        <div class="overflow-x-auto">
-          <table class="table table-zebra w-full">
-            <thead>
-              <tr>
-                <th class="bg-forest-100 text-forest-800">Field</th>
-                <%= for species <- @species_list do %>
-                  <th class="bg-forest-100 text-forest-800">
-                    <div class="flex items-center justify-between gap-2">
-                      <div>
-                        <div class="font-semibold">
-                          {format_species_name(species)}
-                        </div>
-                        <%= if species.author do %>
-                          <div class="text-xs font-normal opacity-70">
-                            {species.author}
-                          </div>
-                        <% end %>
-                      </div>
-                      <button
-                        type="button"
-                        phx-click="remove_species"
-                        phx-value-name={species.scientific_name}
-                        class="btn btn-ghost btn-xs"
-                        title="Remove from comparison"
-                      >
-                        <.icon name="hero-x-mark" class="w-4 h-4" />
-                      </button>
-                    </div>
-                  </th>
-                <% end %>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Taxonomy fields -->
-              <%= if field_has_data?(@species_list, :subgenus) do %>
-                <tr>
-                  <td class="font-semibold">Subgenus</td>
-                  <%= for species <- @species_list do %>
-                    <td>{get_field(species, :subgenus) || "—"}</td>
-                  <% end %>
-                </tr>
-              <% end %>
+      </div>
 
-              <%= if field_has_data?(@species_list, :section) do %>
-                <tr>
-                  <td class="font-semibold">Section</td>
-                  <%= for species <- @species_list do %>
-                    <td>{get_field(species, :section) || "—"}</td>
-                  <% end %>
-                </tr>
-              <% end %>
-
-              <%= if field_has_data?(@species_list, :subsection) do %>
-                <tr>
-                  <td class="font-semibold">Subsection</td>
-                  <%= for species <- @species_list do %>
-                    <td>{get_field(species, :subsection) || "—"}</td>
-                  <% end %>
-                </tr>
-              <% end %>
-
-              <%= if field_has_data?(@species_list, :complex) do %>
-                <tr>
-                  <td class="font-semibold">Complex</td>
-                  <%= for species <- @species_list do %>
-                    <td>{get_field(species, :complex) || "—"}</td>
-                  <% end %>
-                </tr>
-              <% end %>
-
-              <%= if field_has_data?(@species_list, :conservation_status) do %>
-                <tr>
-                  <td class="font-semibold">Conservation Status</td>
-                  <%= for species <- @species_list do %>
-                    <td>{get_field(species, :conservation_status) || "—"}</td>
-                  <% end %>
-                </tr>
-              <% end %>
-              
-    <!-- Hybrid parent info -->
-              <%= if Enum.any?(@species_list, & &1.is_hybrid) do %>
-                <tr>
-                  <td class="font-semibold">Hybrid Parents</td>
-                  <%= for species <- @species_list do %>
-                    <td>
-                      <%= if species.is_hybrid and (species.parent1 or species.parent2) do %>
-                        <%= if species.parent1 do %>
-                          <.link navigate={~p"/species/#{species.parent1}"} class="link">
-                            {species.parent1}
-                          </.link>
-                        <% end %>
-                        {if species.parent1 and species.parent2, do: " × "}
-                        <%= if species.parent2 do %>
-                          <.link navigate={~p"/species/#{species.parent2}"} class="link">
-                            {species.parent2}
-                          </.link>
-                        <% end %>
-                      <% else %>
-                        —
-                      <% end %>
-                    </td>
-                  <% end %>
-                </tr>
-              <% end %>
-              
-    <!-- Descriptive fields from preferred source -->
-              <%= if field_has_data?(@species_list, :local_names) do %>
-                <tr>
-                  <td class="font-semibold">Common Names</td>
-                  <%= for species <- @species_list do %>
-                    <td>
-                      {render_field_value(assigns, get_field(species, :local_names), :array) || "—"}
-                    </td>
-                  <% end %>
-                </tr>
-              <% end %>
-
-              <%= if field_has_data?(@species_list, :range) do %>
-                <tr>
-                  <td class="font-semibold">Geographic Range</td>
-                  <%= for species <- @species_list do %>
-                    <td class="prose prose-sm max-w-none">
-                      {render_field_value(assigns, get_field(species, :range), :markdown) || "—"}
-                    </td>
-                  <% end %>
-                </tr>
-              <% end %>
-
-              <%= if field_has_data?(@species_list, :growth_habit) do %>
-                <tr>
-                  <td class="font-semibold">Growth Habit</td>
-                  <%= for species <- @species_list do %>
-                    <td class="prose prose-sm max-w-none">
-                      {render_field_value(assigns, get_field(species, :growth_habit), :markdown) ||
-                        "—"}
-                    </td>
-                  <% end %>
-                </tr>
-              <% end %>
-
-              <%= if field_has_data?(@species_list, :leaves) do %>
-                <tr>
-                  <td class="font-semibold">Leaves</td>
-                  <%= for species <- @species_list do %>
-                    <td class="prose prose-sm max-w-none">
-                      {render_field_value(assigns, get_field(species, :leaves), :markdown) || "—"}
-                    </td>
-                  <% end %>
-                </tr>
-              <% end %>
-
-              <%= if field_has_data?(@species_list, :fruits) do %>
-                <tr>
-                  <td class="font-semibold">Fruits (Acorns)</td>
-                  <%= for species <- @species_list do %>
-                    <td class="prose prose-sm max-w-none">
-                      {render_field_value(assigns, get_field(species, :fruits), :markdown) || "—"}
-                    </td>
-                  <% end %>
-                </tr>
-              <% end %>
-
-              <%= if field_has_data?(@species_list, :bark) do %>
-                <tr>
-                  <td class="font-semibold">Bark</td>
-                  <%= for species <- @species_list do %>
-                    <td class="prose prose-sm max-w-none">
-                      {render_field_value(assigns, get_field(species, :bark), :markdown) || "—"}
-                    </td>
-                  <% end %>
-                </tr>
-              <% end %>
-
-              <%= if field_has_data?(@species_list, :twigs) do %>
-                <tr>
-                  <td class="font-semibold">Twigs</td>
-                  <%= for species <- @species_list do %>
-                    <td class="prose prose-sm max-w-none">
-                      {render_field_value(assigns, get_field(species, :twigs), :markdown) || "—"}
-                    </td>
-                  <% end %>
-                </tr>
-              <% end %>
-
-              <%= if field_has_data?(@species_list, :buds) do %>
-                <tr>
-                  <td class="font-semibold">Buds</td>
-                  <%= for species <- @species_list do %>
-                    <td class="prose prose-sm max-w-none">
-                      {render_field_value(assigns, get_field(species, :buds), :markdown) || "—"}
-                    </td>
-                  <% end %>
-                </tr>
-              <% end %>
-
-              <%= if field_has_data?(@species_list, :hardiness_habitat) do %>
-                <tr>
-                  <td class="font-semibold">Hardiness & Habitat</td>
-                  <%= for species <- @species_list do %>
-                    <td class="prose prose-sm max-w-none">
-                      {render_field_value(assigns, get_field(species, :hardiness_habitat), :markdown) ||
-                        "—"}
-                    </td>
-                  <% end %>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
-      <% end %>
-      
-    <!-- Species picker modal -->
-      <%= if @show_picker do %>
-        <div class="modal modal-open">
-          <div class="modal-box">
-            <h3 class="font-bold text-lg mb-4">Add Species to Comparison</h3>
-            
-    <!-- Search input -->
-            <input
-              type="text"
-              placeholder="Search species..."
-              class="input input-bordered w-full mb-4"
-              value={@search_query}
-              phx-change="search"
-              name="query"
-              autofocus
-            />
-            
-    <!-- Search results -->
-            <div class="max-h-64 overflow-y-auto">
-              <%= if @search_query == "" or String.length(@search_query) < 2 do %>
-                <p class="text-sm text-base-content/60 text-center py-4">
-                  Type at least 2 characters to search
-                </p>
-              <% else %>
-                <%= if @search_results == [] do %>
-                  <p class="text-sm text-base-content/60 text-center py-4">
-                    No species found matching "{@search_query}"
-                  </p>
-                <% else %>
-                  <ul class="menu">
-                    <%= for species <- @search_results do %>
-                      <li>
-                        <button
-                          type="button"
-                          phx-click="add_species"
-                          phx-value-name={species.scientific_name}
-                          class="justify-start"
-                        >
-                          <span class="font-italic">
-                            <%= if species.is_hybrid do %>
-                              × {species.scientific_name}
-                            <% else %>
-                              {species.scientific_name}
-                            <% end %>
-                          </span>
-                          <%= if species.author do %>
-                            <span class="text-xs opacity-70">{species.author}</span>
-                          <% end %>
-                        </button>
-                      </li>
-                    <% end %>
-                  </ul>
-                <% end %>
-              <% end %>
-            </div>
-            
-    <!-- Modal actions -->
-            <div class="modal-action">
-              <button type="button" phx-click="close_picker" class="btn">
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+      <%!-- Field rows --%>
+      <%= for field <- @fields do %>
+        <.comparison_row :if={field_has_data?(@sources, field)} field={field} sources={@sources} />
       <% end %>
     </div>
     """
+  end
+
+  attr :field, :map, required: true
+  attr :sources, :list, required: true
+
+  defp comparison_row(assigns) do
+    ~H"""
+    <div class="comparison-row">
+      <div class="comparison-field-label">{@field.label}</div>
+      <div :for={ss <- @sources} class="comparison-value-cell" data-source={ss.source.name}>
+        <.render_cell source={ss} field={@field} />
+      </div>
+    </div>
+    """
+  end
+
+  attr :source, :any, required: true
+  attr :field, :map, required: true
+
+  defp render_cell(assigns) do
+    value = get_source_value(assigns.source, assigns.field)
+    assigns = assign(assigns, :value, value)
+
+    ~H"""
+    <%= case @value do %>
+      <% nil -> %>
+        <span class="comparison-no-data">&mdash;</span>
+      <% {:text, text} -> %>
+        <div class="comparison-text-content">{text}</div>
+      <% {:html, html} -> %>
+        <div class="prose-content prose-content-compact">{raw(html)}</div>
+    <% end %>
+    """
+  end
+
+  # -- Data helpers --
+
+  defp get_source_value(species_source, %{key: :local_names, type: :array}) do
+    names = Species.parse_json_array(species_source.local_names)
+
+    if names == [],
+      do: nil,
+      else: {:text, Enum.join(names, ", ")}
+  end
+
+  defp get_source_value(species_source, %{type: :markdown} = field) do
+    value = Map.get(species_source, field.key)
+
+    if value && String.trim(value) != "" do
+      {:html, Markdown.render_html(value)}
+    else
+      nil
+    end
+  end
+
+  defp field_has_data?(sources, field) do
+    Enum.any?(sources, fn ss ->
+      get_source_value(ss, field) != nil
+    end)
+  end
+
+  defp format_species_name(species) do
+    if species.is_hybrid do
+      "Quercus \u00D7 #{species.scientific_name}"
+    else
+      "Quercus #{species.scientific_name}"
+    end
   end
 end

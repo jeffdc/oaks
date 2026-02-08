@@ -40,7 +40,7 @@ defmodule OakCompendiumWeb.Router do
       live "/species/:name/edit", SpeciesFormLive, :edit
       live "/species/:name", SpeciesDetailLive
       live "/species/:name/merge/:target", SpeciesMergeLive
-      live "/compare/:name", SpeciesCompareLive
+      live "/species/:name/compare", SpeciesCompareLive
       live "/taxonomy", TaxonomyLive
       live "/taxonomy/*path", TaxonomyLive
       live "/articles", ArticlesLive
