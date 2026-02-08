@@ -179,7 +179,9 @@ defmodule Mix.Tasks.SmokeTest do
   defp discover_species(_), do: {:error, "response is not JSON"}
 
   defp check_home(body) when is_binary(body) do
-    if String.contains?(body, "Oak Compendium"), do: {:ok, nil}, else: {:error, "missing 'Oak Compendium'"}
+    if String.contains?(body, "Oak Compendium"),
+      do: {:ok, nil},
+      else: {:error, "missing 'Oak Compendium'"}
   end
 
   defp check_species_page(body) when is_binary(body) do
@@ -243,14 +245,25 @@ defmodule Mix.Tasks.SmokeTest do
   defp print_summary(results) do
     IO.puts("")
     total = length(results)
-    passed = Enum.count(results, fn {:pass, _} -> true; _ -> false end)
+
+    passed =
+      Enum.count(results, fn
+        {:pass, _} -> true
+        _ -> false
+      end)
+
     failed = total - passed
     IO.puts("#{total} checks, #{passed} passed, #{failed} failed")
   end
 
   @spec exit_with_code(list()) :: no_return()
   defp exit_with_code(results) do
-    has_failures = Enum.any?(results, fn {:fail, _, _} -> true; _ -> false end)
+    has_failures =
+      Enum.any?(results, fn
+        {:fail, _, _} -> true
+        _ -> false
+      end)
+
     if has_failures, do: System.halt(1), else: System.halt(0)
   end
 
