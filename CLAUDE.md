@@ -20,34 +20,12 @@ When fixing bugs, issues, or implementing changes:
 If you're unsure about scope, ASK. Examples:
 - "I found 3 places this bug could originate - should I investigate all of them?"
 - "This fix touches the database - should I also check the related API endpoints?"
-- "The V1 page has X feature - should I port that too?"
 
 ## Project Overview
 
-The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids.
+The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. Built with Elixir/Phoenix LiveView, modeled on the `~/dev/gallformers` project.
 
-## V1 to V2 Port (Active)
-
-**We are porting from Go + Svelte (V1) to Elixir + Phoenix LiveView (V2)**, modeled on the `~/dev/gallformers` project. See `docs/plans/2026-02-06-elixir-phoenix-port-design.md` for the full design.
-
-### Critical Rules
-
-- **NEVER modify V1 code** (`api/`, `web/`, `cli/`). It is frozen and will be deleted after cutover.
-- **USE V1 as reference** when building V2. Read it freely for features, data flow, API endpoints, and UI behavior.
-- **All new work goes in V2 directories** (`lib/`, `config/`, `assets/`, `test/`, `priv/`).
-- **The database schema stays the same.** Ecto schemas must match the existing SQLite tables exactly.
-- **Model patterns on gallformers** (`~/dev/gallformers`) for Phoenix/LiveView/Ecto conventions.
-
-### V1 Reference Directories (frozen, read-only)
-
-| Directory | Use as reference for |
-|-----------|---------------------|
-| `api/internal/db/schema/schema.sql` | Database schema / Ecto schema definitions |
-| `api/internal/handlers/` | Route handlers / LiveView page logic |
-| `web/src/routes/` | Page routes and UI layout |
-| `web/src/lib/components/` | UI component design and features |
-
-### V2 Directories (active development)
+## Project Structure
 
 | Directory | What |
 |-----------|------|
@@ -57,11 +35,12 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 | `assets/` | JS, CSS, Tailwind |
 | `priv/repo/` | Migrations, structure.sql, seeds |
 | `test/` | Elixir tests |
+| `cli/` | Go CLI tool (legacy, may be ported) |
 
-### V2 Tech Stack
+## Tech Stack
 
 - **Framework**: Phoenix 1.8+ with LiveView
-- **Database**: SQLite via Ecto + ecto_sqlite3 (same database file)
+- **Database**: SQLite via Ecto + ecto_sqlite3
 - **HTTP Server**: Bandit
 - **Styling**: Tailwind v4
 - **Quality**: Credo, Dialyxir, mix format
@@ -75,7 +54,7 @@ mix phx.server             # Start dev server at http://localhost:4000
 mix format                 # Format code
 mix credo --strict         # Run code quality checks
 mix precommit              # Run all checks before committing
-make ci                    # Full CI check (format, compile, credo, test, assets, dialyzer)
+mix smoke_test <url>       # Run smoke tests against a deployment
 ```
 
 **CRITICAL: Always compile with `--warnings-as-errors`**. When verifying code changes, NEVER use plain `mix compile` - always use `mix compile --warnings-as-errors` or run `mix precommit`.
@@ -111,7 +90,7 @@ mix test test/path:42          # Run specific test at line
 
 ## Database
 
-- **Schema**: Defined in `api/internal/db/schema/schema.sql` (single source of truth)
+- **Schema**: Defined in `priv/repo/structure.sql` (single source of truth)
 - **Local dev**: `oaks.db` (project root, committed for convenience)
 - **Production**: Fly.io volume at `/data/oaks.db` (authoritative)
 - **Syncing**: Use `make download-db` to pull the latest from Fly.io
@@ -147,7 +126,7 @@ where: fragment("lower(?) LIKE ?", s.name, ^search_term)
 
 See **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** for comprehensive Elixir/Phoenix conventions. All agents must follow these standards.
 
-## Authentication (V2)
+## Authentication
 
 - Auth is via API key passed as a LiveView connect param
 - Auth check in `handle_params` must guard with `connected?(socket)` before redirecting
@@ -169,10 +148,11 @@ See **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** for comprehensive Elixir/Ph
 
 ## Fly.io Deployment
 
-- **V2 App**: `oaks` (Phoenix app)
-- **V1 App**: `oak-compendium-api` (Go API, frozen — DO NOT modify)
+- **App**: `oaks` (Phoenix app)
 - **Region**: Always use `iad` (Ashburn, Virginia)
 - **Configuration**: `fly.toml` in project root
+- **Domains**: `oakcompendium.org`, `oakcompendium.com`, and `www.`/`api.` subdomains
+- **CI/CD**: Push to `main` triggers CI, successful CI triggers deploy + smoke tests
 - See gallformers CLAUDE.md for Fly.io operational rules (same patterns apply)
 
 ### The "sleep infinity" pattern for database operations
@@ -203,7 +183,3 @@ Use component prefixes when creating beads:
 - `ios-` for iOS app issues
 
 Ask before introducing new prefixes.
-
-## V1 Reference (detailed docs)
-
-For detailed V1 documentation (scraper architecture, CLI commands, Bear app integration, data flow diagrams, API authentication), see `docs/v1-reference.md`. These are rarely needed for V2 development work.
