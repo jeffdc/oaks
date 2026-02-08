@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/**'
+      - 'config/**'
+      - 'assets/**'
+      - 'priv/**'
+      - 'test/**'
+      - 'mix.exs'
+      - 'mix.lock'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lib/**'
+      - 'config/**'
+      - 'assets/**'
+      - 'priv/**'
+      - 'test/**'
+      - 'mix.exs'
+      - 'mix.lock'
+      - '.github/workflows/ci.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phoenix:
+    name: Phoenix
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.17'
+          otp-version: '27'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Setup test database
+        run: |
+          rm -f priv/oaks_test.sqlite*
+          MIX_ENV=test mix ecto.create --quiet
+          MIX_ENV=test mix ecto.load --quiet
+          sqlite3 priv/oaks_test.sqlite < priv/repo/test_seeds.sql
+
+      - name: Run precommit checks (format, compile, credo, tests)
+        run: mix precommit
+
+  assets:
+    name: Assets
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.17'
+          otp-version: '27'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Build assets
+        run: mix assets.deploy

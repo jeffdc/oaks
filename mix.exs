@@ -61,6 +61,7 @@ defmodule Oaks.MixProject do
       # API Documentation
       {:open_api_spex, "~> 3.18"},
       # Dev/Test tools
+      {:req, "~> 0.5", only: :dev, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
