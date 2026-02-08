@@ -10,8 +10,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-/lib/
-/lib64/
+# /lib/ and /lib64/ removed — Phoenix uses lib/ at project root
 parts/
 sdist/
 var/
@@ -37,6 +36,7 @@ ENV/
 
 # Temporary and working files
 tmp/
+BUGS.md
 
 # Testing
 .pytest_cache/
@@ -73,3 +73,27 @@ quercus_export.json
 .secrets
 .env
 .env.local
+
+# bv (beads viewer) local config and caches
+.bv/
+
+# SQLite temp/backup files
+*.db-shm
+*.db-wal
+*.db.bak
+
+# Elixir / Phoenix
+/_build/
+/cover/
+/deps/
+/doc/
+/.fetch
+erl_crash.dump
+*.ez
+oak_compendium-*.tar
+/priv/static/assets/
+/priv/static/cache_manifest.json
+/priv/oak_compendium_test.sqlite*
+/priv/plts/
+/assets/node_modules/
+npm-debug.log

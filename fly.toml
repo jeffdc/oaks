@@ -1,17 +1,29 @@
-app = "oak-compendium-api"
+# Oaks - Fly.io Configuration (Phoenix)
+# Deploy with: fly deploy
+
+app = "oaks"
 primary_region = "iad"
 
+# Graceful shutdown: send SIGTERM and wait for Litestream to flush WAL to S3
+kill_signal = "SIGTERM"
+kill_timeout = "30s"
+
 [build]
-  dockerfile = "api/Dockerfile"
+  dockerfile = "Dockerfile"
+
+# Note: release_command doesn't work with SQLite volumes on Fly.io because
+# the release machine gets a forked volume snapshot that doesn't persist.
+# Migrations are run in docker-entrypoint.sh instead.
 
 [env]
-  OAK_DB_PATH = "/data/oak_compendium.db"
-  OAK_ENV = "production"
+  DATABASE_PATH = "/data/oaks.db"
+  PHX_HOST = "oaks.fly.dev"
+  PORT = "4000"
 
 [http_service]
-  internal_port = 8080
+  internal_port = 4000
   force_https = true
-  auto_stop_machines = false
+  auto_stop_machines = "stop"
   auto_start_machines = true
   min_machines_running = 1
 
@@ -20,11 +32,18 @@ primary_region = "iad"
     hard_limit = 250
     soft_limit = 200
 
-[[mounts]]
-  source = "oak_data"
-  destination = "/data"
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "30s"
+    method = "GET"
+    path = "/health"
 
 [[vm]]
+  memory = "512mb"
   cpu_kind = "shared"
   cpus = 1
-  memory_mb = 256
+
+[mounts]
+  source = "oaks_data"
+  destination = "/data"

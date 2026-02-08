@@ -1,92 +1,169 @@
-# Oak Compendium - Top-level Makefile
+# Oaks - Top-level Makefile
 #
-# Coordinates development across all components:
-#   - api/  - Go REST API server
-#   - cli/  - Go command-line tool
-#   - web/  - Svelte PWA
+# Phoenix/LiveView app with legacy Go API, CLI, and Svelte web components
 
-.PHONY: dev dev-api dev-web build build-api build-cli test test-e2e test-regression clean download-db help
+.PHONY: dev dev-phx dev-api dev-web test test-db setup format lint precommit ci build clean download-db help
 
-# Start both API and web dev servers
-# API runs on :8080, web on :5173
-# Ctrl+C kills both
-dev:
-	@echo "Starting API server on http://localhost:8080"
-	@echo "Starting web dev server on http://localhost:5173"
-	@echo "Press Ctrl+C to stop both..."
-	@trap 'kill 0' INT; \
-		(cd api && $(MAKE) run) & \
-		(cd web && npm run dev:local) & \
-		wait
+# =============================================================================
+# Phoenix Development (primary)
+# =============================================================================
 
-# Start only the API server
+# Start Phoenix dev server on :4000 (auto-installs deps on first run)
+dev: setup
+	mix phx.server
+
+# Alias for clarity
+dev-phx: dev
+
+# =============================================================================
+# Legacy Components (Go API + Svelte web)
+# =============================================================================
+
+# Start Go API server on :8080
 dev-api:
 	cd api && $(MAKE) run
 
-# Start only the web dev server (connects to local API)
+# Start Svelte web dev server on :5173 (connects to local API)
 dev-web:
 	cd web && npm run dev:local
 
-# Build all components
-build: build-api build-cli
-	cd web && npm run build
+# =============================================================================
+# Setup & Dependencies
+# =============================================================================
 
-# Build API server
-build-api:
-	cd api && $(MAKE) build
+# Full setup: deps + assets + verify database exists
+setup:
+	mix setup
 
-# Build CLI tool
-build-cli:
-	cd cli && $(MAKE) build
+# Install Elixir dependencies
+deps:
+	mix deps.get
 
-# Run all unit tests
-test:
+# =============================================================================
+# Testing
+# =============================================================================
+
+# Set up fresh test database from structure.sql + test_seeds.sql
+test-db:
+	@echo "Setting up test database..."
+	@rm -f priv/oaks_test.sqlite*
+	@MIX_ENV=test mix ecto.create --quiet
+	@MIX_ENV=test mix ecto.load --quiet
+	@sqlite3 priv/oaks_test.sqlite < priv/repo/test_seeds.sql
+	@echo "Test database ready"
+
+# Run Phoenix tests (rebuilds test DB first)
+test: test-db
+	mix test
+
+# Run legacy Go tests
+test-go:
 	cd api && $(MAKE) test
 	cd cli && $(MAKE) test
+
+# Run legacy Svelte tests
+test-web:
 	cd web && npm test
 
-# Run E2E tests (requires build first)
-test-e2e:
-	cd web && npm run build && npm run test:e2e
+# Run all tests across all components
+test-all: test test-go test-web
 
-# Run full regression suite (unit tests + E2E)
-test-regression: test test-e2e
+# =============================================================================
+# Code Quality
+# =============================================================================
 
-# Clean all build artifacts
-clean:
-	cd api && $(MAKE) clean
-	cd cli && $(MAKE) clean
-	cd web && rm -rf dist .svelte-kit
+# Format Elixir code
+format:
+	mix format
+
+# Run Credo linter
+lint:
+	mix credo --strict
+
+# Pre-commit checks (format, compile, credo, tests)
+precommit:
+	mix precommit
+
+# Full CI checks (precommit + assets + dialyzer)
+ci:
+	@echo "==> Running precommit checks (format, compile, credo, tests)..."
+	mix precommit
+	@echo ""
+	@echo "==> Building assets (validates JS/CSS bundling)..."
+	mix assets.deploy
+	@echo "==> Running Dialyzer..."
+	mix dialyzer
+	@echo "==> All CI checks passed!"
+
+# =============================================================================
+# Build & Release
+# =============================================================================
+
+# Build production release
+build:
+	MIX_ENV=prod mix compile
+	MIX_ENV=prod mix assets.deploy
+	MIX_ENV=prod mix release --overwrite
+
+# Build legacy Go components
+build-go:
+	cd api && $(MAKE) build
+	cd cli && $(MAKE) build
+
+# =============================================================================
+# Database
+# =============================================================================
 
 # Download database from Fly.io (overwrites local copy)
 # The Fly.io database is the authoritative source of truth
 download-db:
 	@echo "Downloading database from Fly.io..."
-	@rm -f oak_compendium.db
-	fly ssh sftp get /data/oak_compendium.db oak_compendium.db --app oak-compendium-api
-	@echo "Database downloaded to oak_compendium.db"
+	@fly ssh sftp get /data/oaks.db oaks.db --app oaks
+	@echo "Database downloaded to oaks.db"
 
-# Show help
+# =============================================================================
+# Cleanup
+# =============================================================================
+
+# Clean Phoenix build artifacts
+clean:
+	rm -rf _build deps priv/static/assets
+
+# Clean everything including legacy components
+clean-all: clean
+	cd api && $(MAKE) clean
+	cd cli && $(MAKE) clean
+	cd web && rm -rf dist .svelte-kit node_modules
+
+# =============================================================================
+# Help
+# =============================================================================
+
 help:
-	@echo "Oak Compendium Makefile"
+	@echo "Oaks Makefile"
 	@echo ""
-	@echo "Development:"
-	@echo "  make dev        Start API (:8080) and web (:5173) together"
-	@echo "  make dev-api    Start only the API server"
-	@echo "  make dev-web    Start only the web dev server"
+	@echo "Phoenix Development:"
+	@echo "  make dev        Start Phoenix dev server (:4000)"
+	@echo "  make setup      Full setup (deps + assets + db check)"
+	@echo "  make test       Run Phoenix tests (rebuilds test DB)"
+	@echo "  make test-db    Rebuild test database from structure.sql + seeds"
+	@echo "  make format     Format Elixir code"
+	@echo "  make lint       Run Credo linter"
+	@echo "  make precommit  Run all pre-commit checks"
+	@echo "  make ci         Run full CI checks (precommit + assets + dialyzer)"
+	@echo "  make build      Build production release"
 	@echo ""
-	@echo "Building:"
-	@echo "  make build      Build all components"
-	@echo "  make build-api  Build API server only"
-	@echo "  make build-cli  Build CLI tool only"
-	@echo ""
-	@echo "Testing:"
-	@echo "  make test            Run unit tests (fast)"
-	@echo "  make test-e2e        Run E2E tests with Playwright"
-	@echo "  make test-regression Run all tests (unit + E2E)"
+	@echo "Legacy Components:"
+	@echo "  make dev-api    Start Go API server (:8080)"
+	@echo "  make dev-web    Start Svelte web dev server (:5173)"
+	@echo "  make test-go    Run Go tests (api + cli)"
+	@echo "  make test-web   Run Svelte tests"
+	@echo "  make test-all   Run all tests across all components"
+	@echo "  make build-go   Build Go binaries"
 	@echo ""
 	@echo "Database:"
-	@echo "  make download-db  Download database from Fly.io (overwrites local)"
+	@echo "  make download-db  Download database from Fly.io"
 	@echo ""
 	@echo "Other:"
-	@echo "  make clean        Clean build artifacts"
+	@echo "  make clean       Clean Phoenix build artifacts"
+	@echo "  make clean-all   Clean everything including legacy components"

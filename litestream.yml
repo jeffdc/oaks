@@ -1,0 +1,10 @@
+dbs:
+  - path: /data/oaks.db
+    replicas:
+      - type: s3
+        bucket: oaks-db-backups
+        path: litestream
+        region: us-east-1
+        sync-interval: 5s
+        access-key-id: ${LITESTREAM_ACCESS_KEY_ID}
+        secret-access-key: ${LITESTREAM_SECRET_ACCESS_KEY}

@@ -1,0 +1,2362 @@
+/* Oak Compendium - Tailwind v4 + daisyUI Configuration
+   Visual design ported from V1 (web/src/app.css) */
+
+@import "tailwindcss" source(none);
+@source "../css";
+@source "../js";
+@source "../../lib/oaks_web";
+
+@plugin "../vendor/heroicons";
+
+@plugin "../vendor/daisyui" {
+  themes: false;
+}
+
+/* Single light theme — V1 forest green palette (no dark mode) */
+@plugin "../vendor/daisyui-theme" {
+  name: "light";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  /* V1 background/surface colors (warm stone tones) */
+  --color-base-100: oklch(98.7% 0.003 80);       /* ~#fafaf9 */
+  --color-base-200: oklch(96.5% 0.003 80);       /* ~#f5f5f4 */
+  --color-base-300: oklch(92.2% 0.004 80);       /* ~#e7e5e4 */
+  --color-base-content: oklch(21.5% 0.008 50);   /* ~#1c1917 */
+  /* Forest green primary */
+  --color-primary: oklch(48% 0.11 158);           /* ~#1e7e4b (forest-600) */
+  --color-primary-content: oklch(100% 0 0);       /* white */
+  /* Forest green secondary */
+  --color-secondary: oklch(43% 0.09 158);         /* ~#19653d (forest-700) */
+  --color-secondary-content: oklch(100% 0 0);
+  /* Oak brown accent */
+  --color-accent: oklch(55% 0.07 65);             /* ~#8b6f47 */
+  --color-accent-content: oklch(100% 0 0);
+  /* Neutral (stone text) */
+  --color-neutral: oklch(44% 0.012 50);           /* ~#57534e */
+  --color-neutral-content: oklch(98% 0 0);
+  /* Status colors */
+  --color-info: oklch(62% 0.19 250);
+  --color-info-content: oklch(97% 0.013 236.62);
+  --color-success: oklch(58% 0.13 158);           /* forest-500 green */
+  --color-success-content: oklch(100% 0 0);
+  --color-warning: oklch(75% 0.15 75);
+  --color-warning-content: oklch(30% 0.05 60);
+  --color-error: oklch(58% 0.22 25);
+  --color-error-content: oklch(96% 0.015 12.422);
+  /* Border radii */
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+/* ============================================
+   Tailwind v4 @theme — V1 color tokens
+   Creates utility classes: bg-forest-600, text-oak-brown, etc.
+   ============================================ */
+@theme {
+  --color-forest-50: #f0f9f4;
+  --color-forest-100: #dcf3e4;
+  --color-forest-200: #bae6cd;
+  --color-forest-300: #86d4aa;
+  --color-forest-400: #4fb87f;
+  --color-forest-500: #2a9d5f;
+  --color-forest-600: #1e7e4b;
+  --color-forest-700: #19653d;
+  --color-forest-800: #165132;
+  --color-forest-900: #14432a;
+
+  --color-oak-brown: #8b6f47;
+  --color-acorn: #a67c52;
+  --color-bark: #6b5747;
+
+  --font-serif: 'Georgia', 'Cambria', 'Times New Roman', serif;
+}
+
+/* ============================================
+   CSS Custom Properties — V1 semantic tokens
+   For use in CSS rules and component styles
+   ============================================ */
+:root {
+  /* Semantic colors */
+  --color-background: #fafaf9;
+  --color-surface: #ffffff;
+  --color-text-primary: #1c1917;
+  --color-text-secondary: #57534e;
+  --color-text-tertiary: #6b6560;
+  --color-border: #e7e5e4;
+  --color-border-light: #f5f5f4;
+
+  /* White transparency scale (for glassmorphism on dark backgrounds) */
+  --color-white-10: rgba(255, 255, 255, 0.1);
+  --color-white-15: rgba(255, 255, 255, 0.15);
+  --color-white-20: rgba(255, 255, 255, 0.2);
+  --color-white-30: rgba(255, 255, 255, 0.3);
+  --color-white-40: rgba(255, 255, 255, 0.4);
+  --color-white-60: rgba(255, 255, 255, 0.6);
+  --color-white-85: rgba(255, 255, 255, 0.85);
+
+  /* Conservation status colors */
+  --color-status-warning-bg: #fef3c7;
+  --color-status-warning-text: #92400e;
+  --color-status-warning-border: #fcd34d;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* ============================================
+   LiveView Variants
+   ============================================ */
+@custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
+@custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
+@custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
+
+/* Make LiveView wrapper divs transparent for layout */
+[data-phx-session], [data-phx-teleported-src] { display: contents }
+
+/* ============================================
+   Base Styles (from V1 app.css)
+   ============================================ */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+/* Global link styles */
+a {
+  color: var(--color-forest-700, #19653d);
+  text-decoration: underline;
+  text-decoration-color: var(--color-forest-300, #86d4aa);
+  text-underline-offset: 2px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+a:hover {
+  color: var(--color-forest-600, #1e7e4b);
+  text-decoration-color: var(--color-forest-600, #1e7e4b);
+}
+
+/* Global focus styles for accessibility (WCAG 2.1 AA) */
+:focus-visible {
+  outline: 2px solid var(--color-forest-600, #1e7e4b);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-forest-600, #1e7e4b);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(30, 126, 75, 0.15);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-forest-600, #1e7e4b);
+  outline-offset: 0;
+  border-color: var(--color-forest-600, #1e7e4b);
+}
+
+/* Focus on dark backgrounds */
+.dark-bg :focus-visible,
+[style*="background: linear-gradient"] :focus-visible {
+  outline-color: white;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+   Navigation Styles (V1 header)
+   ============================================ */
+.nav-link {
+  padding: 0.5rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-white-85);
+  border-radius: 0.375rem;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  background-color: var(--color-white-10);
+  color: white;
+  text-decoration: none;
+}
+
+.nav-link:focus-visible {
+  outline: none;
+  background-color: var(--color-white-15);
+  box-shadow: 0 0 0 2px var(--color-white-30);
+}
+
+.nav-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  color: var(--color-white-85);
+  border-radius: 0.375rem;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.nav-icon-link:hover {
+  background-color: var(--color-white-10);
+  color: white;
+  text-decoration: none;
+}
+
+.nav-icon-link:focus-visible {
+  outline: none;
+  background-color: var(--color-white-15);
+  box-shadow: 0 0 0 2px var(--color-white-30);
+}
+
+/* Active state for current page */
+.nav-link-active {
+  color: white;
+  background-color: var(--color-white-15);
+}
+
+.nav-icon-link-active {
+  color: white;
+  background-color: var(--color-white-15);
+}
+
+/* Add Species button (V1 white pill on dark header) */
+.add-species-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-forest-800);
+  background-color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.add-species-btn:hover {
+  background-color: var(--color-forest-50);
+  color: var(--color-forest-800);
+  text-decoration: none;
+}
+
+.add-species-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-white-30);
+}
+
+/* Hide text on small screens, show only + icon */
+@media (max-width: 640px) {
+  .add-species-text {
+    display: none;
+  }
+
+  .add-species-btn {
+    padding: 0.5rem;
+  }
+}
+
+/* ============================================
+   Header Search Input (V1 glassmorphic)
+   ============================================ */
+.header-search-input {
+  background-color: var(--color-white-15);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid var(--color-white-20);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.header-search-input:focus {
+  background-color: var(--color-white-20);
+  border-color: var(--color-white-40);
+  box-shadow: var(--shadow-md), 0 0 0 3px var(--color-white-10);
+}
+
+.header-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ============================================
+   Prose Content (V1 rich text styling)
+   ============================================ */
+.prose-content {
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  font-size: 0.9375rem;
+}
+
+.prose-content p {
+  margin: 0 0 0.75rem 0;
+}
+
+.prose-content p:last-child {
+  margin-bottom: 0;
+}
+
+.prose-content ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.prose-content ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  list-style-type: decimal;
+}
+
+.prose-content li {
+  margin: 0.25rem 0;
+}
+
+.prose-content a {
+  color: var(--color-forest-700, #19653d);
+  text-decoration: underline;
+  text-decoration-color: var(--color-forest-300, #86d4aa);
+  transition: all 0.15s ease;
+}
+
+.prose-content a:hover {
+  color: var(--color-forest-600, #1e7e4b);
+  text-decoration-color: var(--color-forest-600, #1e7e4b);
+}
+
+.prose-content strong {
+  font-weight: 600;
+}
+
+.prose-content em {
+  font-style: italic;
+}
+
+.prose-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background-color: #f0f9f4;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.prose-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--font-serif);
+  color: #14432a;
+  margin: 1.5rem 0 0.75rem 0;
+}
+
+.prose-content h1:first-child {
+  margin-top: 0;
+}
+
+.prose-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-family: var(--font-serif);
+  color: #165132;
+  margin: 1.5rem 0 0.75rem 0;
+}
+
+.prose-content h2:first-child {
+  margin-top: 0;
+}
+
+.prose-content h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-family: var(--font-serif);
+  color: #19653d;
+  margin: 1.25rem 0 0.5rem 0;
+}
+
+.prose-content h3:first-child {
+  margin-top: 0;
+}
+
+.prose-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 1rem 0 0.5rem 0;
+}
+
+.prose-content h4:first-child {
+  margin-top: 0;
+}
+
+.prose-content blockquote {
+  border-left: 3px solid #86d4aa;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.prose-content hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 1.5rem 0;
+}
+
+/* ============================================
+   Card Utilities (V1 card styling)
+   ============================================ */
+.card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-interactive {
+  transition: all 0.15s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.card-interactive:hover {
+  border-color: #4fb87f;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.card-interactive:focus-visible {
+  outline: none;
+  border-color: #1e7e4b;
+  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.15);
+}
+
+.card-sm {
+  border-radius: 0.5rem;
+}
+
+.card-forest {
+  background-color: #f0f9f4;
+  border-color: #bae6cd;
+}
+
+.card-forest.card-interactive:hover {
+  background-color: #dcf3e4;
+  border-color: #86d4aa;
+}
+
+/* Taxonomy sub-taxon cards (matches V1 .sub-taxon-card) */
+.taxon-card {
+  background-color: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.taxon-card:hover {
+  background-color: var(--color-forest-100);
+  border-color: var(--color-forest-300);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.taxon-card:focus-visible {
+  outline: none;
+  border-color: var(--color-forest-600);
+  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.2);
+}
+
+/* Taxon card wrapper with hover-visible edit/delete actions */
+.taxon-card-wrapper {
+  position: relative;
+}
+
+.taxon-card-actions {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 1;
+}
+
+.taxon-card-wrapper:hover .taxon-card-actions {
+  opacity: 1;
+}
+
+.taxon-action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.375rem;
+  border: none;
+  background: var(--color-forest-100);
+  color: var(--color-forest-700);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.taxon-action-icon:hover {
+  background: var(--color-forest-200);
+}
+
+.taxon-action-delete {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.taxon-action-delete:hover {
+  background: #fee2e2;
+}
+
+/* Taxonomy species cards (matches V1 .species-card) */
+.species-card {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.species-card:hover {
+  background-color: var(--color-forest-50);
+  border-color: var(--color-forest-300);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.species-card:focus-visible {
+  outline: none;
+  border-color: var(--color-forest-600);
+  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.2);
+}
+
+/* ============================================
+   Sources List Page (matches V1 sources/+page.svelte)
+   ============================================ */
+.sources-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.source-card {
+  position: relative;
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+}
+
+.source-card:hover {
+  border-color: var(--color-forest-400);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Stretched link covers entire card */
+.source-card-link {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  text-decoration: none;
+}
+
+.source-card-body {
+  position: relative;
+  pointer-events: none;
+}
+
+.source-card-header-right {
+  pointer-events: auto;
+}
+
+.source-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.source-card-header-right {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.source-card-name {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-forest-800);
+}
+
+.source-card-desc {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-top: 0.5rem;
+}
+
+.source-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.source-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.source-card-author {
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+}
+
+.source-card-count {
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-forest-700);
+}
+
+/* Edit/delete action buttons */
+.source-card-actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.source-card.can-edit:hover .source-card-actions {
+  opacity: 1;
+}
+
+.source-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.source-action-edit {
+  color: var(--color-forest-700);
+  background-color: var(--color-forest-100);
+}
+
+.source-action-edit:hover {
+  background-color: var(--color-forest-200);
+}
+
+.source-action-delete {
+  color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.source-action-delete:hover {
+  background-color: #fee2e2;
+}
+
+.source-card-arrow {
+  color: var(--color-text-tertiary);
+  transition: color 0.15s ease;
+}
+
+.source-card:hover .source-card-arrow {
+  color: var(--color-forest-500);
+}
+
+/* Mobile: always show action buttons */
+@media (max-width: 640px) {
+  .source-card.can-edit .source-card-actions {
+    opacity: 1;
+  }
+
+  .source-action-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+/* ============================================
+   Source Detail Page (matches V1 SourceDetail.svelte)
+   ============================================ */
+.source-detail-page {
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-xl);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  overflow: hidden;
+}
+
+.source-detail {
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+/* Header: title + badge + action buttons */
+.source-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.source-header-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.source-name {
+  font-family: var(--font-serif);
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--color-forest-800);
+}
+
+.type-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.625rem;
+  background-color: var(--color-stone-100);
+  color: var(--color-text-secondary);
+  border-radius: 9999px;
+  text-transform: capitalize;
+}
+
+/* Edit/Delete action buttons */
+.source-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+
+.action-btn-edit {
+  color: var(--color-forest-700);
+  background-color: var(--color-forest-100);
+  border-color: var(--color-forest-200);
+}
+
+.action-btn-edit:hover {
+  background-color: var(--color-forest-200);
+  border-color: var(--color-forest-300);
+}
+
+.action-btn-delete {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+.action-btn-delete:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+}
+
+/* Edit/Add content button (small pill style) */
+.edit-content-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-forest-700);
+  background-color: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.edit-content-btn:hover {
+  background-color: var(--color-forest-100);
+  border-color: var(--color-forest-300);
+}
+
+.edit-content-btn:focus-visible {
+  outline: 2px solid var(--color-forest-500);
+  outline-offset: 2px;
+}
+
+/* Create Taxon button (outlined style) */
+.create-taxon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-forest-700);
+  background-color: white;
+  border: 1px solid var(--color-forest-300);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.create-taxon-btn:hover {
+  background-color: var(--color-forest-50);
+  border-color: var(--color-forest-400);
+}
+
+/* Markdown editor with Write/Preview tabs */
+.markdown-editor {
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.markdown-editor-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-forest-200);
+  background-color: var(--color-forest-50);
+}
+
+.markdown-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.markdown-tab:hover {
+  color: var(--color-text-secondary);
+}
+
+.markdown-tab-active {
+  color: var(--color-forest-700);
+  border-bottom-color: var(--color-forest-600);
+}
+
+.markdown-editor-textarea {
+  width: 100%;
+  min-height: 12rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  background-color: white;
+  border: none;
+  resize: vertical;
+}
+
+.markdown-editor-textarea::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.markdown-editor-textarea:focus {
+  outline: none;
+  background-color: white;
+}
+
+.markdown-editor-preview {
+  min-height: 12rem;
+  padding: 0.75rem 1rem;
+  background-color: white;
+}
+
+.markdown-editor-hint {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-tertiary);
+  background-color: var(--color-forest-50);
+  border-top: 1px solid var(--color-forest-200);
+}
+
+/* Tag input (for links, etc.) */
+.tag-input-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2.5rem;
+  padding: 0.375rem 0.5rem;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  cursor: text;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tag-input-container:focus-within {
+  border-color: var(--color-forest-600);
+  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.15);
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.25rem 0.125rem 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--color-forest-800);
+  background-color: var(--color-forest-100);
+  border-radius: 0.25rem;
+}
+
+.tag-chip-text {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  padding: 0;
+  color: var(--color-forest-600);
+  background: transparent;
+  border: none;
+  border-radius: 0.125rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tag-chip-remove:hover {
+  color: var(--color-forest-900);
+  background-color: var(--color-forest-200);
+}
+
+.tag-input-form {
+  flex: 1;
+  min-width: 120px;
+}
+
+.tag-input-field {
+  width: 100%;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.tag-input-field::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+/* Metadata card */
+.source-metadata-card {
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.source-metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+
+.source-metadata-url {
+  grid-column: 1 / -1;
+}
+
+.metadata-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: var(--color-text-tertiary);
+  margin-bottom: 0.25rem;
+}
+
+.metadata-value {
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+}
+
+.source-url-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--color-forest-600);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.source-url-link:hover {
+  color: var(--color-forest-700);
+  text-decoration: underline;
+}
+
+/* Description and notes (inside the metadata card) */
+.source-description {
+  margin: 1rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.source-notes {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--color-text-tertiary);
+}
+
+/* Coverage section */
+.source-coverage {
+  margin-bottom: 2.5rem;
+}
+
+.source-stat-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+  text-align: center;
+  max-width: 10rem;
+}
+
+.source-stat-value {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-forest-700);
+}
+
+.source-stat-label {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.25rem;
+}
+
+/* Species grid */
+.source-species {
+  margin-bottom: 2rem;
+}
+
+.source-species-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.25rem 1rem;
+}
+
+@media (min-width: 480px) {
+  .source-species-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .source-species-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .source-species-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.source-species-link {
+  display: block;
+  padding: 0.375rem 0.5rem;
+  text-decoration: none;
+  border-radius: 0.25rem;
+  transition: background-color 0.15s;
+}
+
+.source-species-link:hover {
+  background-color: var(--color-forest-50);
+}
+
+.source-species-name {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.9375rem;
+  color: var(--color-forest-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.species-name {
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+/* ============================================
+   Badge/Pill Utilities (V1)
+   ============================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  font-size: 0.6875rem;
+}
+
+.badge-forest {
+  background-color: #bae6cd;
+  color: #19653d;
+}
+
+.badge-forest-light {
+  background-color: #dcf3e4;
+  color: #14432a;
+}
+
+.badge-forest-dark {
+  background-color: #1e7e4b;
+  color: white;
+}
+
+.badge-muted {
+  background-color: #f5f5f4;
+  color: var(--color-text-secondary);
+}
+
+.pill-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: var(--color-forest-100);
+  color: var(--color-forest-900);
+  border: 1px solid var(--color-forest-200);
+}
+
+/* ============================================
+   Section Title Utility (V1)
+   ============================================ */
+.section-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+}
+
+.section-title-sm {
+  font-size: 1rem;
+  color: #165132;
+}
+
+/* ============================================
+   Taxonomy Navigation (V1 breadcrumb)
+   ============================================ */
+.taxonomy-nav {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.taxonomy-nav .taxonomy-label {
+  font-weight: 600;
+  color: #19653d;
+  margin-right: 0.25rem;
+}
+
+.taxonomy-nav .taxonomy-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.taxonomy-nav .taxonomy-link:hover {
+  text-decoration: underline;
+  text-decoration-color: #4fb87f;
+}
+
+.taxonomy-nav .taxonomy-name {
+  font-style: italic;
+  font-weight: 500;
+  color: #19653d;
+}
+
+.taxonomy-nav .taxonomy-link:hover .taxonomy-name {
+  color: #14432a;
+}
+
+.taxonomy-nav .taxonomy-level-label {
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+}
+
+.taxonomy-nav .taxonomy-separator {
+  color: #4fb87f;
+}
+
+/* ============================================
+   Loading Spinner (V1)
+   ============================================ */
+.loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--color-border);
+  border-top-color: #1e7e4b;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   Skip Link (V1 accessibility)
+   ============================================ */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.75rem 1.5rem;
+  background-color: #19653d;
+  color: white;
+  font-weight: 600;
+  border-radius: 0 0 0.5rem 0.5rem;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid white;
+  outline-offset: 2px;
+  color: white;
+}
+
+/* ============================================
+   Settings Page (V1 port)
+   ============================================ */
+.settings-container {
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.settings-title {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 2rem;
+}
+
+.settings-description {
+  color: var(--color-text-secondary);
+  font-size: 0.9375rem;
+  margin: 0 0 1.5rem 0;
+}
+
+.settings-form-group {
+  margin-bottom: 1rem;
+}
+
+.settings-form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.settings-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.settings-form-input {
+  width: 100%;
+  padding: 0.625rem 2.5rem 0.625rem 0.875rem;
+  font-size: 0.9375rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: white;
+  color: var(--color-text-primary);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.settings-form-input:focus {
+  outline: none;
+  border-color: var(--color-forest-500);
+  box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
+}
+
+.settings-toggle-visibility {
+  position: absolute;
+  right: 0.5rem;
+  padding: 0.375rem;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: color 0.15s;
+}
+
+.settings-toggle-visibility:hover {
+  color: var(--color-text-primary);
+}
+
+.settings-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.settings-message {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.settings-message-success {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.settings-message-error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.settings-button-group {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.settings-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.settings-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.settings-btn-primary {
+  background: var(--color-forest-600);
+  color: white;
+  border: none;
+}
+
+.settings-btn-primary:hover:not(:disabled) {
+  background: var(--color-forest-700);
+}
+
+.settings-btn-secondary {
+  background: white;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.settings-btn-secondary:hover:not(:disabled) {
+  background: var(--color-background);
+}
+
+.settings-info-box {
+  background: var(--color-background);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.settings-info-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 0.75rem 0;
+}
+
+.settings-info-list {
+  margin: 0;
+}
+
+.settings-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.375rem 0;
+  font-size: 0.875rem;
+}
+
+.settings-info-item dt {
+  color: var(--color-text-secondary);
+}
+
+.settings-info-item dd {
+  margin: 0;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.settings-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+}
+
+.settings-status-authenticated {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.settings-status-not-authenticated {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.settings-time-remaining {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8125rem;
+}
+
+.settings-btn-inline {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-forest-600);
+  background: transparent;
+  border: 1px solid var(--color-forest-300);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.settings-btn-inline:hover {
+  background: var(--color-forest-50);
+  border-color: var(--color-forest-400);
+}
+
+.settings-timeout-select {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  background: white;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.settings-timeout-select:focus {
+  outline: none;
+  border-color: var(--color-forest-500);
+  box-shadow: 0 0 0 2px rgba(34, 139, 34, 0.1);
+}
+
+.settings-security-note {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.settings-note-icon {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #d97706;
+}
+
+/* ============================================
+   Search Results (V1 port)
+   ============================================ */
+.search-counts-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-count-item {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.search-count-total {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-forest-700);
+}
+
+.search-separator {
+  color: var(--color-border);
+  font-weight: 300;
+}
+
+.search-section {
+  margin-bottom: 1.5rem;
+}
+
+.search-section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+}
+
+.search-results-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.search-results-list li {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.search-results-list li:last-child {
+  border-bottom: none;
+}
+
+.search-result-row {
+  display: block;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.search-result-row:hover {
+  background-color: var(--color-forest-50);
+  text-decoration: none;
+}
+
+.search-result-row:focus-visible {
+  outline: none;
+  background-color: var(--color-forest-50);
+  box-shadow: inset 0 0 0 2px var(--color-forest-400);
+}
+
+.search-result-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-result-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+}
+
+.search-result-icon-source {
+  background-color: #fef3c7;
+  color: var(--color-oak-brown);
+}
+
+.search-result-icon-taxon {
+  background-color: var(--color-forest-100);
+  color: var(--color-forest-700);
+}
+
+.search-result-icon-species {
+  background-color: var(--color-forest-100);
+  color: var(--color-forest-600);
+}
+
+.search-result-name {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.search-result-name-source {
+  color: var(--color-oak-brown);
+}
+
+.search-result-name-taxon {
+  color: var(--color-forest-800);
+}
+
+.search-result-name-species {
+  color: var(--color-forest-800);
+  font-family: var(--font-serif);
+}
+
+.search-result-author {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.search-result-meta {
+  font-size: 0.8125rem;
+  color: var(--color-text-tertiary);
+  margin-top: 0.25rem;
+  padding-left: 2rem;
+}
+
+.search-taxon-level {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-tertiary);
+  background-color: var(--color-forest-50);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+.search-add-species-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-left: auto;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-forest-700);
+  background-color: var(--color-forest-100);
+  border: 1px solid var(--color-forest-200);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.search-add-species-btn:hover {
+  background-color: var(--color-forest-200);
+  border-color: var(--color-forest-300);
+  text-decoration: none;
+}
+
+/* ============================================
+   Species Detail - Container (V1 SpeciesDetail.svelte:1102-1105)
+   ============================================ */
+.species-detail {
+  background-color: var(--color-surface);
+  padding: 1rem;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  background-color: var(--color-background);
+}
+
+@media (min-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+}
+
+.detail-section {
+  padding: 1rem;
+}
+
+.detail-section.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Source container (no padding, edge-to-edge) */
+.source-container {
+  /* overflow: hidden removed to allow dropdown visibility */
+}
+
+.source-container.full-width {
+  grid-column: 1 / -1;
+}
+
+/* ============================================
+   Species Detail - Header (V1 SpeciesDetail.svelte:1237-1282)
+   ============================================ */
+.species-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.species-current-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.species-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-forest-900);
+  font-family: var(--font-serif);
+  margin: 0;
+}
+
+.author-text {
+  font-size: 1rem;
+  font-weight: 400;
+  font-style: normal;
+  color: var(--color-text-secondary);
+  font-family: sans-serif;
+}
+
+.species-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.action-btn svg {
+  flex-shrink: 0;
+}
+
+.action-btn-synonym {
+  color: #9333ea;
+  background-color: #faf5ff;
+  border-color: #e9d5ff;
+}
+
+.action-btn-synonym:hover {
+  background-color: #f3e8ff;
+  border-color: #d8b4fe;
+}
+
+.action-btn-synonym:focus-visible {
+  outline: 2px solid #9333ea;
+  outline-offset: 2px;
+}
+
+/* Conservation status badge */
+.conservation-badge {
+  display: inline-flex;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+
+/* Species link (V1 SpeciesDetail.svelte:1148-1159) */
+.species-link {
+  color: var(--color-forest-700);
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.species-link:hover {
+  color: var(--color-forest-600);
+  border-bottom-color: var(--color-forest-400);
+}
+
+/* ============================================
+   Species Detail - Hybrid Items
+   ============================================ */
+.hybrid-item {
+  padding: 0.75rem;
+  padding-left: 1rem;
+  border-left: 4px solid var(--color-forest-500);
+  background: linear-gradient(90deg, var(--color-forest-50) 0%, transparent 100%);
+  border-radius: 0.375rem;
+}
+
+/* ============================================
+   Species Detail - External Links
+   ============================================ */
+.external-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-forest-700);
+  background-color: var(--color-forest-50);
+  border: 1.5px solid var(--color-forest-300);
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.external-link-btn:hover {
+  background-color: var(--color-forest-100);
+  border-color: var(--color-forest-400);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+
+/* ============================================
+   Species Detail - Source Tabs (browser-style)
+   ============================================ */
+.source-tabs-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  background-color: var(--color-forest-50);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.5rem 0.5rem 0;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+.source-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.625rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 0.375rem 0.375rem 0 0;
+  transition: all 0.15s ease;
+  position: relative;
+  margin-bottom: -1px;
+}
+.source-tab:hover:not(.active) {
+  background-color: var(--color-forest-100);
+  color: var(--color-text-primary);
+}
+.source-tab.active {
+  background-color: var(--color-surface);
+  color: var(--color-forest-800);
+  border: 1px solid var(--color-border);
+  border-bottom-color: var(--color-surface);
+}
+.preferred-star {
+  color: var(--color-oak-brown);
+  font-size: 0.75rem;
+}
+.source-tab-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-tertiary);
+  padding: 0.125rem;
+  border-radius: 0.25rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+.source-tab-link:hover {
+  color: var(--color-forest-600);
+  background-color: var(--color-forest-100);
+  text-decoration: none;
+}
+.compare-sources-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  margin-left: auto;
+  color: var(--color-forest-600);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+.compare-sources-link:hover {
+  background-color: var(--color-forest-100);
+  color: var(--color-forest-800);
+  text-decoration: none;
+}
+
+/* Add source button and wrapper */
+.add-source-wrapper {
+  position: relative;
+  margin-left: 0.5rem;
+}
+
+.add-source-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  border: 1px dashed var(--color-forest-300);
+  background: transparent;
+  color: var(--color-forest-600);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+}
+
+.add-source-btn:hover {
+  background-color: var(--color-forest-50);
+  border-color: var(--color-forest-400);
+  color: var(--color-forest-700);
+}
+
+.add-source-btn:focus-visible {
+  outline: 2px solid var(--color-forest-500);
+  outline-offset: 2px;
+}
+
+/* Source content */
+.source-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.source-content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.source-content-title {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.source-field {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.source-field:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* Source content seamless join with tabs */
+.source-tabs-strip + .card {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top: none;
+}
+
+/* ==========================================================================
+   Source Comparison Page
+   Matches V1 SourceComparison.svelte layout exactly.
+   ========================================================================== */
+
+.source-comparison-page {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.source-comparison-card {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-xl);
+}
+
+.source-comparison {
+  padding: 1.5rem;
+}
+
+/* Header */
+.comparison-header {
+  margin-bottom: 1.5rem;
+}
+
+.comparison-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--color-forest-700);
+  text-decoration: none;
+  margin-bottom: 0.75rem;
+  transition: color 0.15s ease;
+}
+
+.comparison-back-link:hover {
+  color: var(--color-forest-500);
+}
+
+.comparison-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-forest-900);
+  font-family: var(--font-serif);
+  margin: 0;
+}
+
+.comparison-title-prefix {
+  font-weight: 400;
+  font-style: normal;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* Source picker */
+.source-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: var(--color-forest-50);
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-forest-200);
+}
+
+.source-picker-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.source-picker-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1.5px solid var(--color-forest-300);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.source-chip:hover {
+  border-color: var(--color-forest-500);
+  color: var(--color-forest-700);
+}
+
+.source-chip.selected {
+  background-color: var(--color-forest-600);
+  border-color: var(--color-forest-600);
+  color: white;
+}
+
+.source-chip.selected:hover {
+  background-color: var(--color-forest-700);
+  border-color: var(--color-forest-700);
+}
+
+.source-chip-star {
+  font-size: 0.75rem;
+  color: var(--color-oak-brown);
+}
+
+.source-chip.selected .source-chip-star {
+  color: #fef3c7;
+}
+
+.source-picker-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}
+
+/* Comparison grid */
+.comparison-grid {
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) repeat(var(--column-count), 1fr);
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: var(--color-surface);
+}
+
+.comparison-grid-header {
+  display: contents;
+}
+
+.comparison-header-cell {
+  padding: 0.875rem 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  background-color: var(--color-forest-100);
+  border-bottom: 2px solid var(--color-forest-300);
+  color: var(--color-forest-800);
+}
+
+.comparison-field-label {
+  padding: 0.875rem 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-forest-700);
+  background-color: var(--color-forest-50);
+  border-right: 1px solid var(--color-border);
+}
+
+.comparison-source-header {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-right: 1px solid var(--color-border);
+}
+
+.comparison-source-header:last-child {
+  border-right: none;
+}
+
+.comparison-source-name {
+  white-space: nowrap;
+}
+
+.comparison-preferred-badge {
+  font-size: 0.75rem;
+  color: var(--color-oak-brown);
+}
+
+.comparison-source-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-tertiary);
+  padding: 0.125rem;
+  border-radius: 0.25rem;
+  transition: all 0.15s ease;
+}
+
+.comparison-source-link:hover {
+  color: var(--color-forest-600);
+  background-color: var(--color-forest-200);
+}
+
+/* Table rows */
+.comparison-row {
+  display: contents;
+}
+
+.comparison-row:nth-child(even) .comparison-field-label,
+.comparison-row:nth-child(even) .comparison-value-cell {
+  background-color: var(--color-background);
+}
+
+.comparison-row .comparison-field-label,
+.comparison-row .comparison-value-cell {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.comparison-value-cell {
+  padding: 0.875rem 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  border-right: 1px solid var(--color-border);
+}
+
+.comparison-value-cell:last-child {
+  border-right: none;
+}
+
+.comparison-no-data {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+.comparison-text-content {
+  line-height: 1.5;
+}
+
+/* Empty state */
+.source-comparison-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+}
+
+/* Responsive: stack on mobile */
+@media (max-width: 768px) {
+  .comparison-grid {
+    display: block;
+  }
+
+  .comparison-grid-header {
+    display: none;
+  }
+
+  .comparison-row {
+    display: block;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .comparison-row .comparison-field-label {
+    display: block;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-forest-100);
+    font-weight: 700;
+  }
+
+  .comparison-row .comparison-value-cell {
+    display: block;
+    border-right: none;
+    padding: 0.75rem 1rem;
+  }
+
+  .comparison-row .comparison-value-cell::before {
+    content: attr(data-source);
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-forest-600);
+    margin-bottom: 0.25rem;
+  }
+}
