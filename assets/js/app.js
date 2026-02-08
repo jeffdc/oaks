@@ -27,6 +27,20 @@ import topbar from "../vendor/topbar"
 
 const Hooks = {
   ...colocatedHooks,
+  TagInput: {
+    mounted() {
+      this.el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === ",") {
+          e.preventDefault()
+          const value = this.el.value.trim().replace(/,+$/, "")
+          if (value) {
+            this.pushEvent(this.el.dataset.addEvent, {value: value})
+            this.el.value = ""
+          }
+        }
+      })
+    }
+  },
   SearchSync: {
     mounted() {
       this._headerInput = document.getElementById("header-search")

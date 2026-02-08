@@ -27,13 +27,13 @@ defmodule OakCompendiumWeb.ArticleFormLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    if not (socket.assigns[:authenticated] || false) do
+    if socket.assigns[:authenticated] do
+      apply_action(socket, socket.assigns.live_action, params)
+    else
       {:noreply,
        socket
        |> put_flash(:error, "You must be authenticated to manage articles.")
        |> push_navigate(to: ~p"/articles")}
-    else
-      apply_action(socket, socket.assigns.live_action, params)
     end
   end
 

@@ -479,6 +479,101 @@ textarea:focus-visible {
   border-color: #86d4aa;
 }
 
+/* Taxonomy sub-taxon cards (matches V1 .sub-taxon-card) */
+.taxon-card {
+  background-color: var(--color-forest-50);
+  border: 1px solid var(--color-forest-200);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.taxon-card:hover {
+  background-color: var(--color-forest-100);
+  border-color: var(--color-forest-300);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.taxon-card:focus-visible {
+  outline: none;
+  border-color: var(--color-forest-600);
+  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.2);
+}
+
+/* Taxon card wrapper with hover-visible edit/delete actions */
+.taxon-card-wrapper {
+  position: relative;
+}
+
+.taxon-card-actions {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 1;
+}
+
+.taxon-card-wrapper:hover .taxon-card-actions {
+  opacity: 1;
+}
+
+.taxon-action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.375rem;
+  border: none;
+  background: var(--color-forest-100);
+  color: var(--color-forest-700);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.taxon-action-icon:hover {
+  background: var(--color-forest-200);
+}
+
+.taxon-action-delete {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.taxon-action-delete:hover {
+  background: #fee2e2;
+}
+
+/* Taxonomy species cards (matches V1 .species-card) */
+.species-card {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.species-card:hover {
+  background-color: var(--color-forest-50);
+  border-color: var(--color-forest-300);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.species-card:focus-visible {
+  outline: none;
+  border-color: var(--color-forest-600);
+  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.2);
+}
+
 /* ============================================
    Sources List Page (matches V1 sources/+page.svelte)
    ============================================ */
@@ -740,6 +835,185 @@ textarea:focus-visible {
 .action-btn-delete:hover {
   background-color: #fee2e2;
   border-color: #fca5a5;
+}
+
+/* Create Taxon button (outlined style) */
+.create-taxon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-forest-700);
+  background-color: white;
+  border: 1px solid var(--color-forest-300);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.create-taxon-btn:hover {
+  background-color: var(--color-forest-50);
+  border-color: var(--color-forest-400);
+}
+
+/* Markdown editor with Write/Preview tabs */
+.markdown-editor {
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.markdown-editor-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-forest-200);
+  background-color: var(--color-forest-50);
+}
+
+.markdown-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.markdown-tab:hover {
+  color: var(--color-text-secondary);
+}
+
+.markdown-tab-active {
+  color: var(--color-forest-700);
+  border-bottom-color: var(--color-forest-600);
+}
+
+.markdown-editor-textarea {
+  width: 100%;
+  min-height: 12rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  background-color: white;
+  border: none;
+  resize: vertical;
+}
+
+.markdown-editor-textarea::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.markdown-editor-textarea:focus {
+  outline: none;
+  background-color: white;
+}
+
+.markdown-editor-preview {
+  min-height: 12rem;
+  padding: 0.75rem 1rem;
+  background-color: white;
+}
+
+.markdown-editor-hint {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-tertiary);
+  background-color: var(--color-forest-50);
+  border-top: 1px solid var(--color-forest-200);
+}
+
+/* Tag input (for links, etc.) */
+.tag-input-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2.5rem;
+  padding: 0.375rem 0.5rem;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  cursor: text;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tag-input-container:focus-within {
+  border-color: var(--color-forest-600);
+  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.15);
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.25rem 0.125rem 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--color-forest-800);
+  background-color: var(--color-forest-100);
+  border-radius: 0.25rem;
+}
+
+.tag-chip-text {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  padding: 0;
+  color: var(--color-forest-600);
+  background: transparent;
+  border: none;
+  border-radius: 0.125rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tag-chip-remove:hover {
+  color: var(--color-forest-900);
+  background-color: var(--color-forest-200);
+}
+
+.tag-input-form {
+  flex: 1;
+  min-width: 120px;
+}
+
+.tag-input-field {
+  width: 100%;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.tag-input-field::placeholder {
+  color: var(--color-text-tertiary);
 }
 
 /* Metadata card */

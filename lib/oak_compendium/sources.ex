@@ -82,6 +82,37 @@ defmodule OakCompendium.Sources do
     Repo.aggregate(Source, :count)
   end
 
+  # -- SpeciesSource queries --
+
+  @doc """
+  Returns a species_source by ID, preloading source and species.
+  Raises if not found.
+  """
+  @spec get_species_source!(integer()) :: SpeciesSource.t()
+  def get_species_source!(id) do
+    SpeciesSource
+    |> Repo.get!(id)
+    |> Repo.preload([:source, :species])
+  end
+
+  @doc """
+  Returns sources that are NOT already linked to the given species.
+  """
+  @spec available_sources_for_species(integer()) :: [Source.t()]
+  def available_sources_for_species(species_id) do
+    linked_source_ids =
+      from(ss in SpeciesSource,
+        where: ss.species_id == ^species_id,
+        select: ss.source_id
+      )
+
+    from(s in Source,
+      where: s.id not in subquery(linked_source_ids),
+      order_by: [asc: s.name]
+    )
+    |> Repo.all()
+  end
+
   # -- Changesets --
 
   @doc """
@@ -90,6 +121,14 @@ defmodule OakCompendium.Sources do
   @spec change_source(Source.t(), map()) :: Ecto.Changeset.t()
   def change_source(%Source{} = source, attrs \\ %{}) do
     Source.changeset(source, attrs)
+  end
+
+  @doc """
+  Returns a changeset for tracking species_source changes.
+  """
+  @spec change_species_source(SpeciesSource.t(), map()) :: Ecto.Changeset.t()
+  def change_species_source(%SpeciesSource{} = species_source, attrs \\ %{}) do
+    SpeciesSource.changeset(species_source, attrs)
   end
 
   # -- Mutations --
@@ -120,6 +159,38 @@ defmodule OakCompendium.Sources do
   @spec delete_source(Source.t()) :: {:ok, Source.t()} | {:error, Ecto.Changeset.t()}
   def delete_source(%Source{} = source) do
     Repo.delete(source)
+  end
+
+  # -- SpeciesSource mutations --
+
+  @doc """
+  Creates a new species_source with the given attributes.
+  """
+  @spec create_species_source(map()) :: {:ok, SpeciesSource.t()} | {:error, Ecto.Changeset.t()}
+  def create_species_source(attrs) do
+    %SpeciesSource{}
+    |> SpeciesSource.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a species_source with the given attributes.
+  """
+  @spec update_species_source(SpeciesSource.t(), map()) ::
+          {:ok, SpeciesSource.t()} | {:error, Ecto.Changeset.t()}
+  def update_species_source(%SpeciesSource{} = species_source, attrs) do
+    species_source
+    |> SpeciesSource.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a species_source record.
+  """
+  @spec delete_species_source(SpeciesSource.t()) ::
+          {:ok, SpeciesSource.t()} | {:error, Ecto.Changeset.t()}
+  def delete_species_source(%SpeciesSource{} = species_source) do
+    Repo.delete(species_source)
   end
 
   # -- Serialization --

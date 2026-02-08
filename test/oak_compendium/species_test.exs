@@ -159,7 +159,7 @@ defmodule OakCompendium.SpeciesTest do
     test "cascades to species_sources" do
       species = Species.get_species_by_name("alba")
       full = Species.get_species_full("alba")
-      assert length(full.species_sources) > 0
+      assert full.species_sources != []
 
       assert {:ok, _} = Species.delete_species(species)
       assert Species.get_species_by_name("alba") == nil

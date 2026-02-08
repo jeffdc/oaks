@@ -1,7 +1,8 @@
 defmodule OakCompendiumWeb.HomeLive do
   use OakCompendiumWeb, :live_view
 
-  alias OakCompendium.{Species, Sources}
+  alias OakCompendium.Sources
+  alias OakCompendium.Species
 
   @impl true
   def mount(_params, _session, socket) do

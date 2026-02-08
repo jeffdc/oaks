@@ -1,6 +1,8 @@
 defmodule OakCompendiumWeb.Plugs.AuthTest do
   use OakCompendiumWeb.ConnCase
 
+  alias OakCompendiumWeb.Plugs.Auth
+
   @valid_key "test-api-key-secret"
   @invalid_key "wrong-key"
 
@@ -9,7 +11,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
       conn =
         build_conn()
         |> Map.put(:method, "GET")
-        |> OakCompendiumWeb.Plugs.Auth.require_auth([])
+        |> Auth.require_auth([])
 
       refute conn.halted
     end
@@ -18,7 +20,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
       conn =
         build_conn()
         |> Map.put(:method, "HEAD")
-        |> OakCompendiumWeb.Plugs.Auth.require_auth([])
+        |> Auth.require_auth([])
 
       refute conn.halted
     end
@@ -27,7 +29,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
       conn =
         build_conn()
         |> Map.put(:method, "OPTIONS")
-        |> OakCompendiumWeb.Plugs.Auth.require_auth([])
+        |> Auth.require_auth([])
 
       refute conn.halted
     end
@@ -36,7 +38,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
       conn =
         build_conn()
         |> Map.put(:method, "POST")
-        |> OakCompendiumWeb.Plugs.Auth.require_auth([])
+        |> Auth.require_auth([])
 
       assert conn.halted
       assert conn.status == 401
@@ -47,7 +49,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
       conn =
         build_conn()
         |> Map.put(:method, "PUT")
-        |> OakCompendiumWeb.Plugs.Auth.require_auth([])
+        |> Auth.require_auth([])
 
       assert conn.halted
       assert conn.status == 401
@@ -57,7 +59,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
       conn =
         build_conn()
         |> Map.put(:method, "DELETE")
-        |> OakCompendiumWeb.Plugs.Auth.require_auth([])
+        |> Auth.require_auth([])
 
       assert conn.halted
       assert conn.status == 401
@@ -67,7 +69,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
       conn =
         build_conn()
         |> Map.put(:method, "PATCH")
-        |> OakCompendiumWeb.Plugs.Auth.require_auth([])
+        |> Auth.require_auth([])
 
       assert conn.halted
       assert conn.status == 401
@@ -78,7 +80,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
         build_conn()
         |> Map.put(:method, "POST")
         |> put_req_header("authorization", "Bearer #{@valid_key}")
-        |> OakCompendiumWeb.Plugs.Auth.require_auth([])
+        |> Auth.require_auth([])
 
       refute conn.halted
       assert conn.assigns[:authenticated] == true
@@ -89,7 +91,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
         build_conn()
         |> Map.put(:method, "POST")
         |> put_req_header("authorization", "Bearer #{@invalid_key}")
-        |> OakCompendiumWeb.Plugs.Auth.require_auth([])
+        |> Auth.require_auth([])
 
       assert conn.halted
       assert conn.status == 401
@@ -102,7 +104,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
       conn =
         build_conn()
         |> Map.put(:method, "GET")
-        |> OakCompendiumWeb.Plugs.Auth.force_auth([])
+        |> Auth.force_auth([])
 
       assert conn.halted
       assert conn.status == 401
@@ -113,7 +115,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
         build_conn()
         |> Map.put(:method, "GET")
         |> put_req_header("authorization", "Bearer #{@valid_key}")
-        |> OakCompendiumWeb.Plugs.Auth.force_auth([])
+        |> Auth.force_auth([])
 
       refute conn.halted
       assert conn.assigns[:authenticated] == true
@@ -124,7 +126,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
         build_conn()
         |> Map.put(:method, "POST")
         |> put_req_header("authorization", "Bearer #{@valid_key}")
-        |> OakCompendiumWeb.Plugs.Auth.force_auth([])
+        |> Auth.force_auth([])
 
       refute conn.halted
     end
@@ -170,7 +172,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
       conn =
         build_conn()
         |> Map.put(:method, "POST")
-        |> OakCompendiumWeb.Plugs.Auth.require_auth([])
+        |> Auth.require_auth([])
 
       assert conn.halted
       assert %{"error" => "Missing authorization header"} = Jason.decode!(conn.resp_body)
@@ -181,7 +183,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
         build_conn()
         |> Map.put(:method, "POST")
         |> put_req_header("authorization", "Basic dXNlcjpwYXNz")
-        |> OakCompendiumWeb.Plugs.Auth.require_auth([])
+        |> Auth.require_auth([])
 
       assert conn.halted
       assert conn.status == 401
@@ -192,7 +194,7 @@ defmodule OakCompendiumWeb.Plugs.AuthTest do
         build_conn()
         |> Map.put(:method, "POST")
         |> put_req_header("authorization", "Bearer  #{@valid_key}  ")
-        |> OakCompendiumWeb.Plugs.Auth.require_auth([])
+        |> Auth.require_auth([])
 
       refute conn.halted
     end

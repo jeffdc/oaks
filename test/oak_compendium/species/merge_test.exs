@@ -16,7 +16,7 @@ defmodule OakCompendium.Species.MergeTest do
       assert preview.target.scientific_name == "alba"
 
       assert is_list(preview.field_comparisons)
-      assert length(preview.field_comparisons) > 0
+      assert preview.field_comparisons != []
 
       # author differs between stellata and alba
       author_cmp = Enum.find(preview.field_comparisons, &(&1.field == :author))
@@ -154,7 +154,7 @@ defmodule OakCompendium.Species.MergeTest do
       target = Species.get_species_full("alba")
       issues = Merge.detect_self_references(target, "stellata")
 
-      assert length(issues) > 0
+      assert issues != []
       assert Enum.any?(issues, &(&1.field == "closely_related_to"))
     end
 

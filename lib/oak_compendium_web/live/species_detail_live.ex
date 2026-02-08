@@ -10,6 +10,7 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
   use OakCompendiumWeb, :live_view
 
   alias OakCompendium.Markdown
+  alias OakCompendium.Sources
   alias OakCompendium.Species
 
   @impl true
@@ -28,6 +29,8 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
        species_sources: [],
        selected_source: nil,
        show_delete_confirm: false,
+       show_delete_source_confirm: false,
+       delete_source_target: nil,
        show_merge_picker: false,
        merge_search_query: "",
        merge_search_results: []
@@ -121,6 +124,45 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
      |> push_navigate(to: ~p"/species/#{source_name}/merge/#{target_name}")}
   end
 
+  def handle_event("request_delete_source", %{"id" => id_str}, socket) do
+    if socket.assigns[:authenticated] do
+      source_id = String.to_integer(id_str)
+
+      target =
+        Enum.find(socket.assigns.species_sources, fn ss -> ss.id == source_id end)
+
+      {:noreply, assign(socket, show_delete_source_confirm: true, delete_source_target: target)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("cancel_delete_source", _params, socket) do
+    {:noreply, assign(socket, show_delete_source_confirm: false, delete_source_target: nil)}
+  end
+
+  def handle_event("confirm_delete_source", _params, socket) do
+    if socket.assigns[:authenticated] do
+      target = socket.assigns.delete_source_target
+
+      case Sources.delete_species_source(target) do
+        {:ok, _} ->
+          {:noreply,
+           socket
+           |> put_flash(:info, "Source data deleted.")
+           |> push_navigate(to: ~p"/species/#{socket.assigns.species.scientific_name}")}
+
+        {:error, _changeset} ->
+          {:noreply,
+           socket
+           |> assign(show_delete_source_confirm: false, delete_source_target: nil)
+           |> put_flash(:error, "Failed to delete source data.")}
+      end
+    else
+      {:noreply, socket}
+    end
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -189,6 +231,12 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
         species={@species}
         query={@merge_search_query}
         results={@merge_search_results}
+      />
+
+      <.delete_source_confirm_modal
+        :if={@show_delete_source_confirm && @delete_source_target}
+        species={@species}
+        target={@delete_source_target}
       />
     </div>
     """
@@ -285,10 +333,10 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
       class="taxonomy-nav mt-1"
     >
       <span class="taxonomy-label">Taxonomy:</span>
-      <span class="taxonomy-link">
+      <.link navigate={~p"/taxonomy"} class="taxonomy-link">
         <span class="taxonomy-name">Quercus</span>
         <span class="taxonomy-level-label">(genus)</span>
-      </span>
+      </.link>
       <span :if={@species.subgenus}>
         <span class="taxonomy-separator">&rsaquo;</span>
         <.link navigate={~p"/taxonomy/#{@species.subgenus}"} class="taxonomy-link">
@@ -308,10 +356,15 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
       </span>
       <span :if={@species.subsection}>
         <span class="taxonomy-separator">&rsaquo;</span>
-        <span class="taxonomy-link">
+        <.link
+          navigate={
+            ~p"/taxonomy/#{@species.subgenus || "unknown"}/#{@species.section || "unknown"}/#{@species.subsection}"
+          }
+          class="taxonomy-link"
+        >
           <span class="taxonomy-name">{@species.subsection}</span>
           <span class="taxonomy-level-label">(subsection)</span>
-        </span>
+        </.link>
       </span>
       <span :if={@species.complex}>
         <span class="taxonomy-separator">&rsaquo;</span>
@@ -508,14 +561,15 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
         <span>Compare</span>
       </.link>
       <div :if={@authenticated} class="add-source-wrapper">
-        <button
-          type="button"
+        <.link
+          navigate={~p"/species/#{@species_name}/sources/new"}
           class="add-source-btn"
+          style="text-decoration: none;"
           title="Add data from another source"
         >
           <.icon name="hero-plus" class="size-3.5" />
           <span>Add Source</span>
-        </button>
+        </.link>
       </div>
     </div>
     """
@@ -536,10 +590,18 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
           Data from {@source.source.name}
         </span>
         <div :if={@authenticated} class="flex items-center gap-2">
-          <button class="action-btn action-btn-edit">
+          <.link
+            navigate={~p"/species/#{@species_name}/sources/#{@source.source.id}/edit"}
+            class="action-btn action-btn-edit"
+            style="text-decoration: none;"
+          >
             <.icon name="hero-pencil-square" class="size-3.5" /> Edit
-          </button>
-          <button class="action-btn action-btn-delete">
+          </.link>
+          <button
+            phx-click="request_delete_source"
+            phx-value-id={@source.id}
+            class="action-btn action-btn-delete"
+          >
             <.icon name="hero-trash" class="size-3.5" /> Delete
           </button>
         </div>
@@ -774,6 +836,52 @@ defmodule OakCompendiumWeb.SpeciesDetailLive do
             id="confirm-delete-btn"
           >
             Delete Species
+          </button>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  # -- Delete source confirmation modal --
+
+  attr :species, :any, required: true
+  attr :target, :any, required: true
+
+  defp delete_source_confirm_modal(assigns) do
+    ~H"""
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center"
+      id="delete-source-confirm-modal"
+      phx-window-keydown="cancel_delete_source"
+      phx-key="Escape"
+    >
+      <div class="fixed inset-0 bg-black/50" phx-click="cancel_delete_source" />
+      <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+        <h3 class="text-lg font-bold text-red-800 mb-2">Delete Source Data</h3>
+        <p class="mb-4" style="color: var(--color-text-secondary);">
+          Are you sure you want to remove <strong>{@target.source.name}</strong>
+          data from <strong class="species-name">
+            Quercus {display_name(@species.scientific_name)}
+          </strong>?
+        </p>
+        <p class="text-sm mb-4" style="color: var(--color-text-tertiary);">
+          This action cannot be undone.
+        </p>
+        <div class="flex justify-end gap-3">
+          <button
+            phx-click="cancel_delete_source"
+            class="px-4 py-2 rounded-lg text-sm font-medium"
+            style="color: var(--color-text-secondary);"
+          >
+            Cancel
+          </button>
+          <button
+            phx-click="confirm_delete_source"
+            class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
+            id="confirm-delete-source-btn"
+          >
+            Delete Source Data
           </button>
         </div>
       </div>

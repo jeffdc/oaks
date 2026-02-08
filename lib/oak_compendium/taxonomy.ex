@@ -180,6 +180,46 @@ defmodule OakCompendium.Taxonomy do
   @spec valid_levels() :: [String.t()]
   def valid_levels, do: @valid_levels
 
+  # -- Changesets --
+
+  @doc """
+  Returns a changeset for tracking taxon changes.
+  """
+  @spec change_taxon(Taxon.t(), map()) :: Ecto.Changeset.t()
+  def change_taxon(%Taxon{} = taxon, attrs \\ %{}) do
+    Taxon.changeset(taxon, attrs)
+  end
+
+  # -- Mutations --
+
+  @doc """
+  Creates a new taxon with the given attributes.
+  """
+  @spec create_taxon(map()) :: {:ok, Taxon.t()} | {:error, Ecto.Changeset.t()}
+  def create_taxon(attrs) do
+    %Taxon{}
+    |> Taxon.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a taxon with the given attributes.
+  """
+  @spec update_taxon(Taxon.t(), map()) :: {:ok, Taxon.t()} | {:error, Ecto.Changeset.t()}
+  def update_taxon(%Taxon{} = taxon, attrs) do
+    taxon
+    |> Taxon.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a taxon. May fail if species reference it.
+  """
+  @spec delete_taxon(Taxon.t()) :: {:ok, Taxon.t()} | {:error, Ecto.Changeset.t()}
+  def delete_taxon(%Taxon{} = taxon) do
+    Repo.delete(taxon)
+  end
+
   # -- Serialization --
 
   @doc """

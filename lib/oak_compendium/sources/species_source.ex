@@ -8,8 +8,8 @@ defmodule OakCompendium.Sources.SpeciesSource do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias OakCompendium.Species.Species
   alias OakCompendium.Sources.Source
+  alias OakCompendium.Species.Species
 
   @required_fields [:species_id, :source_id]
 
@@ -52,6 +52,17 @@ defmodule OakCompendium.Sources.SpeciesSource do
       :is_preferred
     ])
     |> validate_required(@required_fields)
+    |> validate_length(:range, max: 5000)
+    |> validate_length(:growth_habit, max: 5000)
+    |> validate_length(:leaves, max: 8000)
+    |> validate_length(:flowers, max: 3000)
+    |> validate_length(:fruits, max: 5000)
+    |> validate_length(:bark, max: 3000)
+    |> validate_length(:twigs, max: 3000)
+    |> validate_length(:buds, max: 3000)
+    |> validate_length(:hardiness_habitat, max: 5000)
+    |> validate_length(:miscellaneous, max: 3000)
+    |> validate_length(:url, max: 1000)
     |> foreign_key_constraint(:species_id)
     |> foreign_key_constraint(:source_id)
     |> unique_constraint([:species_id, :source_id])

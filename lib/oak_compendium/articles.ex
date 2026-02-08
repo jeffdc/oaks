@@ -117,9 +117,10 @@ defmodule OakCompendium.Articles do
     new_published = to_boolean(attrs["is_published"])
 
     published_at =
-      cond do
-        new_published && !article.is_published -> now
-        true -> article.published_at
+      if new_published && !article.is_published do
+        now
+      else
+        article.published_at
       end
 
     db_attrs =

@@ -8,6 +8,8 @@ defmodule OakCompendium.DataCase do
   will cause "Database busy" errors. Always use `async: false` (the default).
   """
 
+  alias Ecto.Adapters.SQL.Sandbox
+
   use ExUnit.CaseTemplate
 
   using do
@@ -34,8 +36,8 @@ defmodule OakCompendium.DataCase do
       raise "async: true is not supported with SQLite. Use async: false (the default)."
     end
 
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(OakCompendium.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    pid = Sandbox.start_owner!(OakCompendium.Repo, shared: not tags[:async])
+    on_exit(fn -> Sandbox.stop_owner(pid) end)
   end
 
   @doc """

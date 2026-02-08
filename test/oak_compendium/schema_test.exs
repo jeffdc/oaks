@@ -5,13 +5,13 @@ defmodule OakCompendium.SchemaTest do
   """
   use OakCompendium.DataCase
 
-  alias OakCompendium.Repo
-  alias OakCompendium.Species.Species
-  alias OakCompendium.Taxonomy.Taxon
-  alias OakCompendium.Sources.Source
-  alias OakCompendium.Sources.SpeciesSource
   alias OakCompendium.Articles.Article
   alias OakCompendium.Import.Metadata
+  alias OakCompendium.Repo
+  alias OakCompendium.Sources.Source
+  alias OakCompendium.Sources.SpeciesSource
+  alias OakCompendium.Species.Species
+  alias OakCompendium.Taxonomy.Taxon
 
   describe "Species schema" do
     test "loads all seeded species" do
