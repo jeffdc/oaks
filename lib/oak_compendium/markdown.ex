@@ -1,6 +1,6 @@
 defmodule OakCompendium.Markdown do
   @moduledoc """
-  Shared markdown rendering using Earmark.
+  Shared markdown rendering using MDEx (cmark-gfm).
   """
 
   @spec render_html(String.t() | nil) :: String.t()
@@ -8,9 +8,13 @@ defmodule OakCompendium.Markdown do
   def render_html(""), do: ""
 
   def render_html(content) when is_binary(content) do
-    case Earmark.as_html(content, %Earmark.Options{breaks: true}) do
-      {:ok, html, _warnings} -> html
-      {:error, _html, _errors} -> content
+    case MDEx.to_html(content,
+           extension: [autolink: true, table: true, strikethrough: true],
+           parse: [smart: true],
+           render: [hardbreaks: true, unsafe_: true]
+         ) do
+      {:ok, html} -> html
+      {:error, _reason} -> content
     end
   end
 end
