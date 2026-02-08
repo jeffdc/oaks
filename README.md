@@ -68,7 +68,7 @@ Data Sources                    CLI Tool                      Deployment
 iNaturalist ──────┐
   (taxonomy)      │
                   │
-Oaks of the World ├──▶ oak_compendium.db ──▶ quercus_data.json ──▶ git push
+Oaks of the World ├──▶ oaks.db ──▶ quercus_data.json ──▶ git push
   (descriptions)  │         (SQLite)            (JSON export)         │
                   │                                                   ▼
 Bear App ─────────┘                                           GitHub Actions
@@ -211,7 +211,7 @@ This project uses a dual-license structure:
 
 **Data Files**: All Rights Reserved - see [DATA_LICENSE](DATA_LICENSE)
 
-The data files (`quercus_data.json`, `cli/data/*.yaml`, `oak_compendium.db`) are
+The data files (`quercus_data.json`, `cli/data/*.yaml`, `oaks.db`) are
 proprietary and not covered by the MIT License. The data incorporates information
 from multiple sources; see the application for individual source attributions.
 

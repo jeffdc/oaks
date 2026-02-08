@@ -29,7 +29,7 @@ If a tool enforces a rule, that rule is not documented here. If you're unsure ab
 Organize modules in this order:
 
 ```elixir
-defmodule OakCompendium.Context.Entity do
+defmodule Oaks.Context.Entity do
   @moduledoc """
   Brief description of what this module does.
   """
@@ -38,8 +38,8 @@ defmodule OakCompendium.Context.Entity do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query
-  alias OakCompendium.Repo
-  alias OakCompendium.Context.{OtherEntity, AnotherEntity}
+  alias Oaks.Repo
+  alias Oaks.Context.{OtherEntity, AnotherEntity}
 
   # 2. Module attributes
   @primary_key {:id, :integer, autogenerate: false}
@@ -129,7 +129,7 @@ Use `| nil` for fields that can be null in the database or associations that may
 
 | Element | Convention | Example |
 |---------|------------|---------|
-| Modules | PascalCase | `OakCompendiumWeb.SpeciesDetailLive` |
+| Modules | PascalCase | `OaksWeb.SpeciesDetailLive` |
 | Functions | snake_case | `get_species_by_name/1` |
 | Variables | snake_case | `species_list` |
 | Atoms | snake_case | `:species_created` |
@@ -161,7 +161,7 @@ def valid?(changeset)
 Organize business logic into contexts (domain modules):
 
 ```
-lib/oak_compendium/
+lib/oaks/
 ├── species.ex         # Species context (public API)
 ├── species/
 │   └── species.ex     # Species schema
@@ -182,8 +182,8 @@ lib/oak_compendium/
 ### Keep Related Code Together
 
 - One module per file
-- Files mirror module namespace (`OakCompendium.Species.Species` → `lib/oak_compendium/species/species.ex`)
-- Tests mirror source structure (`lib/oak_compendium/species.ex` → `test/oak_compendium/species_test.exs`)
+- Files mirror module namespace (`Oaks.Species.Species` → `lib/oaks/species/species.ex`)
+- Tests mirror source structure (`lib/oaks/species.ex` → `test/oaks/species_test.exs`)
 
 ---
 
@@ -254,7 +254,7 @@ Enum.map(species, fn s -> s.species_sources end)  # No additional queries
 **Detection:** Enable query logging in dev to spot repeated queries:
 ```elixir
 # config/dev.exs
-config :oak_compendium, OakCompendium.Repo, log: :debug
+config :oaks, Oaks.Repo, log: :debug
 ```
 
 ### SQLite Compatibility
@@ -435,10 +435,10 @@ end
 ### Test File Structure
 
 ```elixir
-defmodule OakCompendium.SpeciesTest do
-  use OakCompendium.DataCase
+defmodule Oaks.SpeciesTest do
+  use Oaks.DataCase
 
-  alias OakCompendium.Species
+  alias Oaks.Species
 
   describe "list_species/0" do
     test "returns all species" do
@@ -454,8 +454,8 @@ end
 Use `Phoenix.LiveViewTest`:
 
 ```elixir
-defmodule OakCompendiumWeb.SpeciesListLiveTest do
-  use OakCompendiumWeb.ConnCase
+defmodule OaksWeb.SpeciesListLiveTest do
+  use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
 
@@ -472,19 +472,19 @@ end
 Test fixtures are defined in `test/support/fixtures/` and imported via `DataCase` or `ConnCase`:
 
 ```elixir
-defmodule OakCompendium.SpeciesFixtures do
+defmodule Oaks.SpeciesFixtures do
   def species_fixture(attrs \\ %{}) do
     {:ok, species} =
       attrs
       |> Enum.into(%{scientific_name: "alba", is_hybrid: false})
-      |> OakCompendium.Species.create_species()
+      |> Oaks.Species.create_species()
 
     species
   end
 end
 ```
 
-Import in tests: `import OakCompendium.SpeciesFixtures`
+Import in tests: `import Oaks.SpeciesFixtures`
 
 ### Assertions
 
@@ -532,7 +532,7 @@ For background work, prefer the simplest tool that fits:
 **GenServer basics:**
 
 ```elixir
-defmodule OakCompendium.Counter do
+defmodule Oaks.Counter do
   use GenServer
 
   # Client API
@@ -621,8 +621,8 @@ Phoenix uses multiple config files for different purposes:
 ```elixir
 # config/runtime.exs
 if config_env() == :prod do
-  config :oak_compendium, OakCompendium.Repo,
-    database: System.get_env("DATABASE_PATH") || "/data/oak_compendium.db"
+  config :oaks, Oaks.Repo,
+    database: System.get_env("DATABASE_PATH") || "/data/oaks.db"
 end
 ```
 
@@ -643,7 +643,7 @@ LiveView templates should begin with `<Layouts.app>`:
 </Layouts.app>
 ```
 
-The `Layouts` module is auto-aliased in `oak_compendium_web.ex` - no explicit alias needed.
+The `Layouts` module is auto-aliased in `oaks_web.ex` - no explicit alias needed.
 
 ### Flash Messages
 

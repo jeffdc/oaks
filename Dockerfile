@@ -62,7 +62,7 @@ RUN addgroup -g 1000 oak && \
     adduser -u 1000 -G oak -s /bin/sh -D oak
 
 # Copy release from builder
-COPY --from=builder --chown=oak:oak /app/_build/prod/rel/oak_compendium ./
+COPY --from=builder --chown=oak:oak /app/_build/prod/rel/oaks ./
 COPY --chown=oak:oak litestream.yml /etc/litestream.yml
 
 # Create data directory

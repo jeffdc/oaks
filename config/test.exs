@@ -1,11 +1,11 @@
 import Config
 
-config :oak_compendium, env: :test
+config :oaks, env: :test
 
 # Configure your database
 # Use a separate test database (no production data)
-config :oak_compendium, OakCompendium.Repo,
-  database: Path.expand("../priv/oak_compendium_test.sqlite", __DIR__),
+config :oaks, Oaks.Repo,
+  database: Path.expand("../priv/oaks_test.sqlite", __DIR__),
   pool_size: 5,
   pool: Ecto.Adapters.SQL.Sandbox,
   # WAL for better concurrency — allows reads during write transactions
@@ -14,7 +14,7 @@ config :oak_compendium, OakCompendium.Repo,
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
-config :oak_compendium, OakCompendiumWeb.Endpoint,
+config :oaks, OaksWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "+Qd/R+G2s0urapTtIRzFrlNgnqQPVTj60qH0NEBTRWJTKocUUEnLIJ/z+6n6zFtk",
   server: false
@@ -34,4 +34,4 @@ config :phoenix,
   sort_verified_routes_query_params: true
 
 # Test API key for auth tests
-config :oak_compendium, :api_key, "test-api-key-secret"
+config :oaks, :api_key, "test-api-key-secret"

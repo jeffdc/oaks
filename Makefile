@@ -46,10 +46,10 @@ deps:
 # Set up fresh test database from structure.sql + test_seeds.sql
 test-db:
 	@echo "Setting up test database..."
-	@rm -f priv/oak_compendium_test.sqlite*
+	@rm -f priv/oaks_test.sqlite*
 	@MIX_ENV=test mix ecto.create --quiet
 	@MIX_ENV=test mix ecto.load --quiet
-	@sqlite3 priv/oak_compendium_test.sqlite < priv/repo/test_seeds.sql
+	@sqlite3 priv/oaks_test.sqlite < priv/repo/test_seeds.sql
 	@echo "Test database ready"
 
 # Run Phoenix tests (rebuilds test DB first)
@@ -118,8 +118,8 @@ build-go:
 # The Fly.io database is the authoritative source of truth
 download-db:
 	@echo "Downloading database from Fly.io..."
-	@fly ssh sftp get /data/oak_compendium.db oak_compendium.db --app oak-compendium-api
-	@echo "Database downloaded to oak_compendium.db"
+	@fly ssh sftp get /data/oak_compendium.db oaks.db --app oak-compendium-api
+	@echo "Database downloaded to oaks.db"
 
 # =============================================================================
 # Cleanup

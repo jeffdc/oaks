@@ -11,23 +11,23 @@ import Config
 # If you use `mix release`, you need to explicitly enable the server
 # by passing the PHX_SERVER=true when you start it:
 #
-#     PHX_SERVER=true bin/oak_compendium start
+#     PHX_SERVER=true bin/oaks start
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
 if System.get_env("PHX_SERVER") do
-  config :oak_compendium, OakCompendiumWeb.Endpoint, server: true
+  config :oaks, OaksWeb.Endpoint, server: true
 end
 
 # Load API key for authentication (env var takes precedence over file)
 # Skip in test — test.exs sets a known test key
 if config_env() != :test do
-  config :oak_compendium, :api_key, OakCompendiumWeb.Plugs.Auth.load_api_key()
+  config :oaks, :api_key, OaksWeb.Plugs.Auth.load_api_key()
 end
 
 # Only override port if PORT env var is explicitly set (don't interfere with test config)
 if port = System.get_env("PORT") do
-  config :oak_compendium, OakCompendiumWeb.Endpoint, http: [port: String.to_integer(port)]
+  config :oaks, OaksWeb.Endpoint, http: [port: String.to_integer(port)]
 end
 
 if config_env() == :prod do
@@ -38,7 +38,7 @@ if config_env() == :prod do
       For example: /data/oak_compendium.db
       """
 
-  config :oak_compendium, OakCompendium.Repo,
+  config :oaks, Oaks.Repo,
     database: database_path,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     busy_timeout: 10_000
@@ -57,9 +57,9 @@ if config_env() == :prod do
 
   host = System.get_env("PHX_HOST") || "example.com"
 
-  config :oak_compendium, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+  config :oaks, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
-  config :oak_compendium, OakCompendiumWeb.Endpoint,
+  config :oaks, OaksWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     http: [
       # Enable IPv6 and bind on all interfaces.

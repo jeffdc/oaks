@@ -47,7 +47,7 @@ cd /app
 # Note: release_command doesn't work with SQLite volumes on Fly.io because
 # the release machine gets a forked snapshot that doesn't persist changes
 echo "Running database migrations..."
-su-exec oak /app/bin/oak_compendium eval 'OakCompendium.Release.migrate()'
+su-exec oak /app/bin/oaks eval 'Oaks.Release.migrate()'
 
 # Switch to oak user and start litestream with the app
 exec su-exec oak litestream replicate -exec "/app/bin/server"

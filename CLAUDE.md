@@ -51,8 +51,8 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 
 | Directory | What |
 |-----------|------|
-| `lib/oak_compendium/` | Business logic contexts (species, taxonomy, sources, etc.) |
-| `lib/oak_compendium_web/` | Web layer (LiveViews, controllers, components) |
+| `lib/oaks/` | Business logic contexts (species, taxonomy, sources, etc.) |
+| `lib/oaks_web/` | Web layer (LiveViews, controllers, components) |
 | `config/` | Phoenix configuration |
 | `assets/` | JS, CSS, Tailwind |
 | `priv/repo/` | Migrations, structure.sql, seeds |
@@ -94,10 +94,10 @@ Do not commit until precommit passes.
 
 ### Test Database
 
-Tests use a **separate test database** (`priv/oak_compendium_test.sqlite`) that is:
+Tests use a **separate test database** (`priv/oaks_test.sqlite`) that is:
 - **Schema-only**: Created from `priv/repo/structure.sql`
 - **Minimal seed data**: Loaded from `priv/repo/test_seeds.sql`
-- **Rebuilt with**: `MIX_ENV=test mix ecto.drop && MIX_ENV=test mix ecto.create && MIX_ENV=test mix ecto.load` then `sqlite3 priv/oak_compendium_test.sqlite < priv/repo/test_seeds.sql`
+- **Rebuilt with**: `MIX_ENV=test mix ecto.drop && MIX_ENV=test mix ecto.create && MIX_ENV=test mix ecto.load` then `sqlite3 priv/oaks_test.sqlite < priv/repo/test_seeds.sql`
 
 **Important**: The `mix test` alias uses `ecto.load --skip-if-loaded`, so it won't reload if the DB exists. After modifying `test_seeds.sql`, you must rebuild manually. Changing seeds can break existing tests that assert counts.
 
@@ -112,8 +112,8 @@ mix test test/path:42          # Run specific test at line
 ## Database
 
 - **Schema**: Defined in `api/internal/db/schema/schema.sql` (single source of truth)
-- **Local dev**: `oak_compendium.db` (project root, committed for convenience)
-- **Production**: Fly.io volume at `/data/oak_compendium.db` (authoritative)
+- **Local dev**: `oaks.db` (project root, committed for convenience)
+- **Production**: Fly.io volume at `/data/oaks.db` (authoritative)
 - **Syncing**: Use `make download-db` to pull the latest from Fly.io
 
 ### Data Sources

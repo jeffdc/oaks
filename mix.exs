@@ -1,9 +1,9 @@
-defmodule OakCompendium.MixProject do
+defmodule Oaks.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :oak_compendium,
+      app: :oaks,
       version: "0.1.0",
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -19,7 +19,7 @@ defmodule OakCompendium.MixProject do
 
   def application do
     [
-      mod: {OakCompendium.Application, []},
+      mod: {Oaks.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -73,10 +73,10 @@ defmodule OakCompendium.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.load --quiet --skip-if-loaded", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["compile", "tailwind oak_compendium", "esbuild oak_compendium"],
+      "assets.build": ["compile", "tailwind oaks", "esbuild oaks"],
       "assets.deploy": [
-        "tailwind oak_compendium --minify",
-        "esbuild oak_compendium --minify",
+        "tailwind oaks --minify",
+        "esbuild oaks --minify",
         "phx.digest"
       ],
       precommit: [
@@ -103,7 +103,7 @@ defmodule OakCompendium.MixProject do
 
   defp releases do
     [
-      oak_compendium: [
+      oaks: [
         include_executables_for: [:unix],
         applications: [runtime_tools: :permanent]
       ]

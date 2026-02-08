@@ -1,4 +1,4 @@
-defmodule OakCompendium.DataCase do
+defmodule Oaks.DataCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -14,17 +14,17 @@ defmodule OakCompendium.DataCase do
 
   using do
     quote do
-      alias OakCompendium.Repo
+      alias Oaks.Repo
 
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import OakCompendium.DataCase
+      import Oaks.DataCase
     end
   end
 
   setup tags do
-    OakCompendium.DataCase.setup_sandbox(tags)
+    Oaks.DataCase.setup_sandbox(tags)
     :ok
   end
 
@@ -36,7 +36,7 @@ defmodule OakCompendium.DataCase do
       raise "async: true is not supported with SQLite. Use async: false (the default)."
     end
 
-    pid = Sandbox.start_owner!(OakCompendium.Repo, shared: not tags[:async])
+    pid = Sandbox.start_owner!(Oaks.Repo, shared: not tags[:async])
     on_exit(fn -> Sandbox.stop_owner(pid) end)
   end
 

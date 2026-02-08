@@ -7,25 +7,25 @@
 # General application configuration
 import Config
 
-config :oak_compendium,
-  ecto_repos: [OakCompendium.Repo],
+config :oaks,
+  ecto_repos: [Oaks.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configure the endpoint
-config :oak_compendium, OakCompendiumWeb.Endpoint,
+config :oaks, OaksWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
-    formats: [html: OakCompendiumWeb.ErrorHTML, json: OakCompendiumWeb.ErrorJSON],
+    formats: [html: OaksWeb.ErrorHTML, json: OaksWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: OakCompendium.PubSub,
+  pubsub_server: Oaks.PubSub,
   live_view: [signing_salt: "S7Evz1w5"]
 
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",
-  oak_compendium: [
+  oaks: [
     args:
       ~w(js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
     cd: Path.expand("../assets", __DIR__),
@@ -35,7 +35,7 @@ config :esbuild,
 # Configure tailwind (the version is required)
 config :tailwind,
   version: "4.1.12",
-  oak_compendium: [
+  oaks: [
     args: ~w(
       --input=assets/css/app.css
       --output=priv/static/assets/css/app.css
