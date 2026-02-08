@@ -61,6 +61,15 @@ if config_env() == :prod do
 
   config :oaks, OaksWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
+    check_origin: [
+      "https://#{host}",
+      "https://oakcompendium.org",
+      "https://oakcompendium.com",
+      "https://www.oakcompendium.org",
+      "https://www.oakcompendium.com",
+      "https://api.oakcompendium.org",
+      "https://api.oakcompendium.com"
+    ],
     http: [
       # Enable IPv6 and bind on all interfaces.
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
