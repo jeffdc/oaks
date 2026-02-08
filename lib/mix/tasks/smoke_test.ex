@@ -171,7 +171,7 @@ defmodule Mix.Tasks.SmokeTest do
 
   defp discover_species(body) when is_map(body) do
     case body do
-      %{"data" => [%{"name" => name} | _]} when is_binary(name) -> {:ok, name}
+      %{"data" => [%{"scientific_name" => name} | _]} when is_binary(name) -> {:ok, name}
       _ -> {:error, "no species found in response"}
     end
   end
@@ -179,7 +179,7 @@ defmodule Mix.Tasks.SmokeTest do
   defp discover_species(_), do: {:error, "response is not JSON"}
 
   defp check_home(body) when is_binary(body) do
-    if String.contains?(body, "Quercus"), do: {:ok, nil}, else: {:error, "missing 'Quercus'"}
+    if String.contains?(body, "Oak Compendium"), do: {:ok, nil}, else: {:error, "missing 'Oak Compendium'"}
   end
 
   defp check_species_page(body) when is_binary(body) do
@@ -188,7 +188,7 @@ defmodule Mix.Tasks.SmokeTest do
 
   defp check_species_api(body) when is_map(body) do
     case body do
-      %{"name" => name} when is_binary(name) -> {:ok, nil}
+      %{"scientific_name" => name} when is_binary(name) -> {:ok, nil}
       _ -> {:error, "missing species name in response"}
     end
   end
