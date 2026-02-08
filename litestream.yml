@@ -1,8 +1,8 @@
 dbs:
-  - path: /data/oak_compendium.db
+  - path: /data/oaks.db
     replicas:
       - type: s3
-        bucket: oak-compendium-backups
+        bucket: oaks-db-backups
         path: litestream
         region: us-east-1
         sync-interval: 5s

@@ -1,4 +1,4 @@
-# Oak Compendium - Top-level Makefile
+# Oaks - Top-level Makefile
 #
 # Phoenix/LiveView app with legacy Go API, CLI, and Svelte web components
 
@@ -118,7 +118,7 @@ build-go:
 # The Fly.io database is the authoritative source of truth
 download-db:
 	@echo "Downloading database from Fly.io..."
-	@fly ssh sftp get /data/oak_compendium.db oaks.db --app oak-compendium-api
+	@fly ssh sftp get /data/oaks.db oaks.db --app oaks
 	@echo "Database downloaded to oaks.db"
 
 # =============================================================================
@@ -140,7 +140,7 @@ clean-all: clean
 # =============================================================================
 
 help:
-	@echo "Oak Compendium Makefile"
+	@echo "Oaks Makefile"
 	@echo ""
 	@echo "Phoenix Development:"
 	@echo "  make dev        Start Phoenix dev server (:4000)"

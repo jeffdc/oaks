@@ -1,4 +1,4 @@
-# Oak Compendium - Phoenix Dockerfile
+# Oaks - Phoenix Dockerfile
 # Multi-stage build for Phoenix release with Litestream
 
 # Stage 1: Build Elixir release
@@ -58,23 +58,23 @@ RUN tar -C /usr/local/bin -xzf /tmp/litestream.tar.gz && rm /tmp/litestream.tar.
 WORKDIR /app
 
 # Create non-root user
-RUN addgroup -g 1000 oak && \
-    adduser -u 1000 -G oak -s /bin/sh -D oak
+RUN addgroup -g 1000 oaks && \
+    adduser -u 1000 -G oaks -s /bin/sh -D oaks
 
 # Copy release from builder
-COPY --from=builder --chown=oak:oak /app/_build/prod/rel/oaks ./
-COPY --chown=oak:oak litestream.yml /etc/litestream.yml
+COPY --from=builder --chown=oaks:oaks /app/_build/prod/rel/oaks ./
+COPY --chown=oaks:oaks litestream.yml /etc/litestream.yml
 
 # Create data directory
-RUN mkdir -p /data && chown oak:oak /data
+RUN mkdir -p /data && chown oaks:oaks /data
 
-# Copy entrypoint script (runs as root to fix permissions, then drops to oak)
+# Copy entrypoint script (runs as root to fix permissions, then drops to oaks)
 COPY --chmod=755 docker-entrypoint.sh /app/docker-entrypoint.sh
 
 ENV HOME=/app
-ENV DATABASE_PATH=/data/oak_compendium.db
+ENV DATABASE_PATH=/data/oaks.db
 
 EXPOSE 4000
 
-# Run entrypoint as root - it fixes permissions then drops to oak user
+# Run entrypoint as root - it fixes permissions then drops to oaks user
 CMD ["/app/docker-entrypoint.sh"]

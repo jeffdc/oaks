@@ -1,11 +1,11 @@
 output "fly_app_name" {
   description = "Fly.io app name"
-  value       = fly_app.oak_compendium.name
+  value       = fly_app.oaks.name
 }
 
 output "fly_app_hostname" {
   description = "Fly.io app hostname"
-  value       = "${fly_app.oak_compendium.name}.fly.dev"
+  value       = "${fly_app.oaks.name}.fly.dev"
 }
 
 output "s3_bucket_name" {

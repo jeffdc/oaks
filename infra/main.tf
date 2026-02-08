@@ -1,4 +1,4 @@
-# Oak Compendium V2 Infrastructure
+# Oaks V2 Infrastructure
 #
 # This file documents all infrastructure provisioned for the Phoenix V2 app.
 # Resources were initially created manually (2026-02-07) and are captured here
@@ -10,22 +10,22 @@
 # Fly.io — App + Volume
 # -----------------------------------------------------------------------------
 
-resource "fly_app" "oak_compendium" {
+resource "fly_app" "oaks" {
   name = var.fly_app_name
   org  = "personal"
 }
 
 resource "fly_volume" "data" {
-  app    = fly_app.oak_compendium.name
-  name   = "oak_compendium_data"
+  app    = fly_app.oaks.name
+  name   = "oaks_data"
   region = var.fly_region
   size   = var.fly_volume_size_gb
 }
 
 # Fly.io secrets are set via CLI since the provider doesn't manage them:
-#   flyctl secrets set LITESTREAM_ACCESS_KEY_ID=<key> --app oak-compendium
-#   flyctl secrets set LITESTREAM_SECRET_ACCESS_KEY=<secret> --app oak-compendium
-#   flyctl secrets set SECRET_KEY_BASE=<base64> --app oak-compendium
+#   flyctl secrets set LITESTREAM_ACCESS_KEY_ID=<key> --app oaks
+#   flyctl secrets set LITESTREAM_SECRET_ACCESS_KEY=<secret> --app oaks
+#   flyctl secrets set SECRET_KEY_BASE=<base64> --app oaks
 #
 # The machine configuration (vm size, mounts, http_service) is defined in
 # fly.toml and applied at deploy time, not managed here.
@@ -38,7 +38,7 @@ resource "aws_s3_bucket" "litestream_backups" {
   bucket = var.s3_bucket_name
 
   tags = {
-    Project = "oak-compendium"
+    Project = "oaks"
     Purpose = "litestream-replication"
   }
 }
@@ -79,16 +79,16 @@ resource "aws_s3_bucket_public_access_block" "litestream_backups" {
 # -----------------------------------------------------------------------------
 
 resource "aws_iam_user" "litestream" {
-  name = "litestream-oak-compendium"
+  name = "litestream-oaks"
 
   tags = {
-    Project = "oak-compendium"
+    Project = "oaks"
     Purpose = "litestream-s3-replication"
   }
 }
 
 resource "aws_iam_policy" "litestream_backup" {
-  name        = "LitestreamOakCompendiumBackup"
+  name        = "LitestreamOaksBackup"
   description = "Allows Litestream to replicate SQLite WAL to S3"
 
   policy = jsonencode({

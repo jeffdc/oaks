@@ -7,7 +7,7 @@ variable "fly_region" {
 variable "fly_app_name" {
   description = "Fly.io app name"
   type        = string
-  default     = "oak-compendium"
+  default     = "oaks"
 }
 
 variable "fly_volume_size_gb" {
@@ -19,7 +19,7 @@ variable "fly_volume_size_gb" {
 variable "s3_bucket_name" {
   description = "S3 bucket for Litestream backups"
   type        = string
-  default     = "oak-compendium-backups"
+  default     = "oaks-db-backups"
 }
 
 variable "s3_region" {

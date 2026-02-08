@@ -35,7 +35,7 @@ if config_env() == :prod do
     System.get_env("DATABASE_PATH") ||
       raise """
       environment variable DATABASE_PATH is missing.
-      For example: /data/oak_compendium.db
+      For example: /data/oaks.db
       """
 
   config :oaks, Oaks.Repo,

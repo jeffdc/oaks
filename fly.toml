@@ -1,7 +1,7 @@
-# Oak Compendium - Fly.io Configuration (Phoenix)
+# Oaks - Fly.io Configuration (Phoenix)
 # Deploy with: fly deploy
 
-app = "oak-compendium"
+app = "oaks"
 primary_region = "iad"
 
 # Graceful shutdown: send SIGTERM and wait for Litestream to flush WAL to S3
@@ -16,8 +16,8 @@ kill_timeout = "30s"
 # Migrations are run in docker-entrypoint.sh instead.
 
 [env]
-  DATABASE_PATH = "/data/oak_compendium.db"
-  PHX_HOST = "oak-compendium.fly.dev"
+  DATABASE_PATH = "/data/oaks.db"
+  PHX_HOST = "oaks.fly.dev"
   PORT = "4000"
 
 [http_service]
@@ -45,5 +45,5 @@ kill_timeout = "30s"
   cpus = 1
 
 [mounts]
-  source = "oak_compendium_data"
+  source = "oaks_data"
   destination = "/data"

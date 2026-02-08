@@ -169,10 +169,31 @@ See **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** for comprehensive Elixir/Ph
 
 ## Fly.io Deployment
 
+- **V2 App**: `oaks` (Phoenix app)
+- **V1 App**: `oak-compendium-api` (Go API, frozen — DO NOT modify)
 - **Region**: Always use `iad` (Ashburn, Virginia)
-- **App name**: `oak-compendium-api`
 - **Configuration**: `fly.toml` in project root
 - See gallformers CLAUDE.md for Fly.io operational rules (same patterns apply)
+
+### The "sleep infinity" pattern for database operations
+
+This is the correct way to perform file operations on a Fly.io machine's volume:
+
+1. Stop machine (if running)
+2. Update machine command: `fly machine update <id> --command "sleep infinity" --app oaks`
+3. Start machine (now runs `sleep infinity` instead of app — releases DB lock)
+4. Perform file operations (backup, upload, verify)
+5. Clear command override: `fly machine update <id> --command "" --app oaks`
+6. Restart machine (reverts to Dockerfile CMD with fly.toml config)
+
+**Why this works:**
+- Machine starts successfully (`sleep infinity` never fails)
+- App is not running, so DB lock is released
+- Machine keeps all its configuration (memory, health checks, etc.)
+- Clearing command override reverts to original Dockerfile CMD
+- No machine destruction/recreation needed
+
+**Important:** When updating to `sleep infinity`, the flyctl CLI will appear to hang waiting for a health check that will never pass (the app isn't running, so nothing serves HTTP). This is expected — the machine IS running, flyctl is just waiting. Check `fly machine status <id>` to confirm state is `started`, then kill the stuck flyctl process and proceed with file operations.
 
 ## Beads Naming
 

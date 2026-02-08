@@ -39,7 +39,7 @@ jobs:
 
       - name: Health check
         run: |
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://oak-compendium.fly.dev/health)
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://oaks.fly.dev/health)
           if [ "$HTTP_STATUS" -ne 200 ]; then
             echo "Health check failed with status $HTTP_STATUS"
             exit 1
