@@ -8,7 +8,7 @@ defmodule OakCompendium.Markdown do
   def render_html(""), do: ""
 
   def render_html(content) when is_binary(content) do
-    case Earmark.as_html(content) do
+    case Earmark.as_html(content, %Earmark.Options{breaks: true}) do
       {:ok, html, _warnings} -> html
       {:error, _html, _errors} -> content
     end
