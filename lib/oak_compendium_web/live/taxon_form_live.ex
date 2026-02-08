@@ -8,7 +8,8 @@ defmodule OakCompendiumWeb.TaxonFormLive do
 
   use OakCompendiumWeb, :live_view
 
-  alias OakCompendium.Markdown
+  import OakCompendiumWeb.FormComponents
+
   alias OakCompendium.Taxonomy
   alias OakCompendium.Taxonomy.Taxon
 
@@ -289,86 +290,24 @@ defmodule OakCompendiumWeb.TaxonFormLive do
           <div class="card p-6">
             <h2 class="section-title section-title-sm mb-4">Content</h2>
             <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-semibold leading-6 text-zinc-800 mb-1">
-                  Content
-                </label>
-                <p class="text-xs mb-2" style="color: var(--color-text-tertiary);">
-                  Markdown content for this taxon (descriptions, notes, etc.)
-                </p>
-                <div class="markdown-editor">
-                  <div class="markdown-editor-tabs">
-                    <button
-                      type="button"
-                      class={"markdown-tab #{if @content_tab == "write", do: "markdown-tab-active"}"}
-                      phx-click="switch_content_tab"
-                      phx-value-tab="write"
-                    >
-                      <.icon name="hero-pencil-square" class="size-3.5" /> Write
-                    </button>
-                    <button
-                      type="button"
-                      class={"markdown-tab #{if @content_tab == "preview", do: "markdown-tab-active"}"}
-                      phx-click="switch_content_tab"
-                      phx-value-tab="preview"
-                    >
-                      <.icon name="hero-eye" class="size-3.5" /> Preview
-                    </button>
-                  </div>
-                  <div :if={@content_tab == "write"}>
-                    <textarea
-                      id={@form[:content].id}
-                      name={@form[:content].name}
-                      rows="8"
-                      class="markdown-editor-textarea"
-                      placeholder="Write about this taxon..."
-                      phx-debounce="300"
-                    >{Phoenix.HTML.Form.normalize_value("textarea", @form[:content].value)}</textarea>
-                  </div>
-                  <div
-                    :if={@content_tab == "preview"}
-                    class="markdown-editor-preview prose-content"
-                  >
-                    {raw(preview_content(@form[:content].value))}
-                  </div>
-                  <div class="markdown-editor-hint">
-                    Markdown supported: **bold**, *italic*, [links](url), - lists, ## headings
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-semibold leading-6 text-zinc-800 mb-1">
-                  Links
-                </label>
-                <p class="text-xs mb-2" style="color: var(--color-text-tertiary);">
-                  Press Enter to add URLs
-                </p>
-                <div class="tag-input-container">
-                  <div :if={@link_tags != []} class="tag-list">
-                    <span :for={{tag, idx} <- Enum.with_index(@link_tags)} class="tag-chip">
-                      <span class="tag-chip-text">{link_display(tag)}</span>
-                      <button
-                        type="button"
-                        class="tag-chip-remove"
-                        phx-click="remove_link"
-                        phx-value-index={idx}
-                        aria-label={"Remove #{tag}"}
-                      >
-                        <.icon name="hero-x-mark" class="size-3" />
-                      </button>
-                    </span>
-                  </div>
-                  <input
-                    type="text"
-                    id="link-tag-input"
-                    class="tag-input-field"
-                    placeholder="Add URL..."
-                    autocomplete="off"
-                    phx-hook="TagInput"
-                    data-add-event="add_link"
-                  />
-                </div>
-              </div>
+              <.markdown_editor
+                field={@form[:content]}
+                content_tab={@content_tab}
+                tab_event="switch_content_tab"
+                placeholder="Write about this taxon..."
+                label="Content"
+                hint="Markdown content for this taxon (descriptions, notes, etc.)"
+              />
+              <.tag_input
+                tags={@link_tags}
+                add_event="add_link"
+                remove_event="remove_link"
+                input_id="link-tag-input"
+                placeholder="Add URL..."
+                label="Links"
+                hint="Press Enter to add URLs"
+                display_fn={&link_display/1}
+              />
             </div>
           </div>
 
@@ -440,16 +379,6 @@ defmodule OakCompendiumWeb.TaxonFormLive do
   defp link_display(%{"url" => url}), do: url
   defp link_display(url) when is_binary(url), do: url
   defp link_display(_), do: ""
-
-  defp preview_content(nil),
-    do:
-      "<p style=\"color: var(--color-text-tertiary); font-style: italic;\">Nothing to preview</p>"
-
-  defp preview_content(""),
-    do:
-      "<p style=\"color: var(--color-text-tertiary); font-style: italic;\">Nothing to preview</p>"
-
-  defp preview_content(content), do: Markdown.render_html(content)
 
   defp parse_links(nil), do: []
   defp parse_links(""), do: []

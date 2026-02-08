@@ -122,7 +122,7 @@ defmodule OakCompendiumWeb.ArticlesLive do
     <.link
       navigate={~p"/articles/#{@article.slug}"}
       class="card card-interactive block p-5"
-      style="text-decoration: none;"
+      style={"text-decoration: none;#{unless @article.is_published, do: " border-left: 3px solid var(--color-warning, #f59e0b);", else: ""}"}
     >
       <div class="flex items-start justify-between gap-3">
         <h2
@@ -144,7 +144,7 @@ defmodule OakCompendiumWeb.ArticlesLive do
         style="color: var(--color-text-tertiary);"
       >
         <span>{@article.author}</span>
-        <span>&middot;</span>
+        <span>|</span>
         <span>{format_date(@article.published_at || @article.updated_at)}</span>
       </div>
       <p
@@ -180,7 +180,7 @@ defmodule OakCompendiumWeb.ArticlesLive do
 
   defp format_date(date_str) when is_binary(date_str) do
     case DateTime.from_iso8601(date_str) do
-      {:ok, dt, _} -> Calendar.strftime(dt, "%b %-d, %Y")
+      {:ok, dt, _} -> Calendar.strftime(dt, "%B %-d, %Y")
       _ -> date_str
     end
   end

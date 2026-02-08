@@ -58,6 +58,7 @@ defmodule OakCompendiumWeb.Router do
       live "/search", SearchLive
       live "/settings", SettingsLive
       live "/about", AboutLive
+      live "/help/markdown", HelpMarkdownLive
     end
   end
 

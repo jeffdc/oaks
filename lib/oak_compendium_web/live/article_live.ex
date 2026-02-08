@@ -153,7 +153,7 @@ defmodule OakCompendiumWeb.ArticleLive do
             class="flex flex-wrap items-center gap-2 text-sm"
             style="color: var(--color-text-tertiary);"
           >
-            <span>{@article.author}</span>
+            <span>By {@article.author}</span>
             <span :if={@article.published_at}>
               &middot; Published {format_date(@article.published_at)}
             </span>
@@ -278,7 +278,7 @@ defmodule OakCompendiumWeb.ArticleLive do
 
   defp format_date(date_str) when is_binary(date_str) do
     case DateTime.from_iso8601(date_str) do
-      {:ok, dt, _} -> Calendar.strftime(dt, "%b %-d, %Y")
+      {:ok, dt, _} -> Calendar.strftime(dt, "%B %-d, %Y")
       _ -> date_str
     end
   end
