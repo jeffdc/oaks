@@ -37,7 +37,36 @@ defmodule Oaks.DataCase do
     end
 
     pid = Sandbox.start_owner!(Oaks.Repo, shared: not tags[:async])
-    on_exit(fn -> Sandbox.stop_owner(pid) end)
+
+    on_exit(fn ->
+      await_task_supervisor_children()
+      Sandbox.stop_owner(pid)
+    end)
+  end
+
+  # Wait briefly for any in-flight fire-and-forget tasks (e.g., analytics
+  # inserts via OaksWeb.Plugs.Analytics / OaksWeb.Analytics.TrackPageView)
+  # to finish before the sandbox is torn down. Otherwise the tasks try to
+  # use a checked-in connection and emit DBConnection.ConnectionError
+  # warnings — and intermittently crash the suite with exit 139.
+  defp await_task_supervisor_children do
+    case Process.whereis(Oaks.TaskSupervisor) do
+      nil ->
+        :ok
+
+      _pid ->
+        Oaks.TaskSupervisor
+        |> Task.Supervisor.children()
+        |> Enum.each(fn child ->
+          ref = Process.monitor(child)
+
+          receive do
+            {:DOWN, ^ref, :process, ^child, _reason} -> :ok
+          after
+            1_000 -> :ok
+          end
+        end)
+    end
   end
 
   @doc """
