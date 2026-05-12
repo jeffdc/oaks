@@ -23,4 +23,11 @@ defmodule OaksWeb.AboutLiveTest do
     assert html =~ "Open Source"
     assert html =~ "MIT License"
   end
+
+  test "links to the analytics dashboard and privacy policy", %{conn: conn} do
+    {:ok, _view, html} = live(conn, ~p"/about")
+    assert html =~ "Privacy &amp; Analytics"
+    assert html =~ ~s(href="/analytics")
+    assert html =~ ~s(href="/privacy")
+  end
 end

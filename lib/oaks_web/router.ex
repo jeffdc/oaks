@@ -65,6 +65,7 @@ defmodule OaksWeb.Router do
       live "/about", AboutLive
       live "/help/markdown", HelpMarkdownLive
       live "/analytics", AnalyticsLive, :index
+      live "/privacy", PrivacyLive
     end
   end
 

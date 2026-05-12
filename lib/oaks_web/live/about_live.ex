@@ -263,6 +263,20 @@ defmodule OaksWeb.AboutLive do
         </p>
       </section>
 
+      <section class="mb-8">
+        <h3 class="section-title">Privacy &amp; Analytics</h3>
+        <p
+          class="leading-relaxed"
+          style="color: var(--color-text-primary); font-size: 1.0625rem; line-height: 1.7;"
+        >
+          We use a custom, self-hosted, privacy-respecting analytics system &mdash;
+          no third-party trackers, no cookies for visitors, no personal data collected.
+          View the live data on the <a href="/analytics">analytics page</a>
+          or read the full <a href="/privacy">privacy policy</a>
+          for details on what is and isn't collected.
+        </p>
+      </section>
+
       <footer
         class="mt-12 pt-6 text-center"
         style="border-top: 1px solid var(--color-border);"
