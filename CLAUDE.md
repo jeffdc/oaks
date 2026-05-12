@@ -136,7 +136,6 @@ See **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** for comprehensive Elixir/Ph
 **Push approval rules:**
 | Change Type | Approval Required | Notes |
 |-------------|-------------------|-------|
-| Beads (`.beads/`) | No | Daemon auto-syncs via `beads-sync` branch |
 | Everything else | **Yes** | Always ask user before pushing |
 
 **Commit messages:** Present tense, imperative mood.
@@ -171,12 +170,3 @@ This is the correct way to perform file operations on a Fly.io machine's volume:
 - No machine destruction/recreation needed
 
 **Important:** When updating to `sleep infinity`, the flyctl CLI will appear to hang waiting for a health check that will never pass (the app isn't running, so nothing serves HTTP). This is expected — the machine IS running, flyctl is just waiting. Check `fly machine status <id>` to confirm state is `started`, then kill the stuck flyctl process and proceed with file operations.
-
-## Beads Naming
-
-Use component prefixes when creating beads:
-- `cli-` for CLI tool issues
-- `web-` for web application issues
-- `ios-` for iOS app issues
-
-Ask before introducing new prefixes.
