@@ -1,34 +1,38 @@
 defmodule OaksWeb.Analytics.TrackPageView do
   @moduledoc """
-  `on_mount` hook that records LiveView SPA navigations through
-  `Oaks.Analytics`, paralleling `OaksWeb.Plugs.Analytics` for
-  dead-render requests.
+  `on_mount` hook that records LiveView page views.
 
-  The analytics plug records the initial HTTP GET (including the
-  dead-render that mounts a LiveView). This hook handles every
-  subsequent client-side navigation that happens over the WebSocket:
+  Pairs with `OaksWeb.Plugs.Analytics`, which handles non-LiveView
+  traffic (controller routes, 404s on unrouted paths). The hook owns
+  ALL LiveView mounts — including the initial connected mount and any
+  later `live_patch` / `live_redirect`.
 
-    * `attach_hook/4` on `:handle_params` fires once on mount and again
-      on every `live_patch`/`push_patch`/`live_redirect`. The first
-      firing is skipped because the plug already recorded it; later
-      firings insert a new row IFF the path changed. Same-path patches
-      (for example, the analytics dashboard's range buttons updating
-      `?range=30`) are NOT recorded — they're in-page state, not page
-      views.
-    * Inserts go through `Oaks.TaskSupervisor` so the LiveView process
-      never blocks on the DB write.
-    * `connected?(socket)` gates the hook: on the disconnected mount
-      (static dead-render of the LiveView) the hook is a no-op — the
-      plug handles that request.
+  Why the hook owns LV mounts (and the plug does not): a
+  `<.link navigate>` reuses the existing WebSocket and mounts the
+  destination LiveView without producing an HTTP request, so the plug
+  cannot see it. To avoid the double-tracking that an earlier
+  `skip_initial` flag was meant to prevent, the plug now SKIPS LV
+  routes entirely (it checks `conn.private[:phoenix_live_view]` in
+  `register_before_send/2`).
 
-  Visitor hash resolution priority:
+  How it works:
 
-    1. `session["visitor_hash"]` (written by the plug).
-    2. Fallback: derive from `get_connect_info(socket, :peer_data)` IP
-       and `get_connect_info(socket, :user_agent)`.
-    3. Final fallback: empty IP + empty UA so we still produce a
-        64-char hash and never crash. The resulting hash is consistent
-       within the day, just not meaningfully unique.
+    * `connected?(socket)` gates the hook: dead-render mounts do
+      nothing. The hook attaches only on the connected mount.
+    * `attach_hook/4` on `:handle_params` fires once on the connected
+      mount and again on every `live_patch` / `push_patch` /
+      `live_redirect`.
+    * On each firing, the hook compares the new path to the last
+      tracked path on the socket. If the path differs (or it is the
+      first firing on this socket, where `last_path` is nil), a row
+      is inserted via `Oaks.TaskSupervisor`. Same-path patches — for
+      example the analytics dashboard's range buttons updating
+      `?range=30` — are in-page state, not page views, so the hook
+      skips them.
+
+  Visitor hash: computed from `get_connect_info/2` (peer IP and
+  user-agent). Stable within the WS session and rotates daily because
+  the date is part of the hash input.
   """
 
   import Phoenix.LiveView
@@ -39,14 +43,13 @@ defmodule OaksWeb.Analytics.TrackPageView do
   @skip_exact ["/favicon.ico", "/health"]
 
   @doc false
-  def on_mount(:default, _params, session, socket) do
+  def on_mount(:default, _params, _session, socket) do
     if connected?(socket) do
-      visitor_hash = resolve_visitor_hash(session, socket)
+      visitor_hash = compute_visitor_hash(socket)
 
       socket =
         socket
         |> Phoenix.Component.assign(:__analytics_visitor_hash__, visitor_hash)
-        |> Phoenix.Component.assign(:__analytics_skip_initial__, true)
         |> Phoenix.Component.assign(:__analytics_last_path__, nil)
         |> attach_hook(:track_page_view, :handle_params, &track_navigation/3)
 
@@ -57,33 +60,18 @@ defmodule OaksWeb.Analytics.TrackPageView do
   end
 
   @doc false
-  # Public for unit-testing path-change logic without driving a full
-  # cross-LiveView navigation. Called from `attach_hook` internally.
+  # Public so the path-change logic can be exercised by unit tests
+  # without driving a full cross-LiveView navigation through the
+  # test harness. Called by `attach_hook/4` internally.
   def track_navigation(_params, uri, socket) do
     path = uri |> URI.parse() |> Map.get(:path) || "/"
-
-    if socket.assigns[:__analytics_skip_initial__] do
-      # Plug already tracked the initial request — record the path so
-      # subsequent same-path patches don't re-track either.
-      socket =
-        socket
-        |> Phoenix.Component.assign(:__analytics_skip_initial__, false)
-        |> Phoenix.Component.assign(:__analytics_last_path__, path)
-
-      {:cont, socket}
-    else
-      maybe_track(path, socket)
-      {:cont, Phoenix.Component.assign(socket, :__analytics_last_path__, path)}
-    end
-  end
-
-  defp maybe_track(path, socket) do
     last_path = socket.assigns[:__analytics_last_path__]
-    visitor_hash = socket.assigns[:__analytics_visitor_hash__]
 
     if path != last_path and should_track?(path) do
-      spawn_track(path, visitor_hash)
+      spawn_track(path, socket.assigns[:__analytics_visitor_hash__])
     end
+
+    {:cont, Phoenix.Component.assign(socket, :__analytics_last_path__, path)}
   end
 
   defp spawn_track(path, visitor_hash) do
@@ -98,23 +86,11 @@ defmodule OaksWeb.Analytics.TrackPageView do
     Task.Supervisor.start_child(Oaks.TaskSupervisor, fn -> Analytics.track(attrs) end)
   end
 
-  defp resolve_visitor_hash(session, socket) do
-    case Map.get(session, "visitor_hash") do
-      hash when is_binary(hash) and hash != "" ->
-        hash
-
-      _ ->
-        compute_fallback_hash(socket)
-    end
+  defp compute_visitor_hash(socket) do
+    Analytics.visitor_hash(connect_ip(socket), connect_ua(socket))
   end
 
-  defp compute_fallback_hash(socket) do
-    ip = fallback_ip(socket)
-    ua = fallback_ua(socket)
-    Analytics.visitor_hash(ip, ua)
-  end
-
-  defp fallback_ip(socket) do
+  defp connect_ip(socket) do
     case get_connect_info(socket, :peer_data) do
       %{address: address} when not is_nil(address) ->
         address |> :inet.ntoa() |> to_string()
@@ -126,7 +102,7 @@ defmodule OaksWeb.Analytics.TrackPageView do
     _ -> ""
   end
 
-  defp fallback_ua(socket) do
+  defp connect_ua(socket) do
     case get_connect_info(socket, :user_agent) do
       ua when is_binary(ua) -> ua
       _ -> ""
@@ -135,7 +111,7 @@ defmodule OaksWeb.Analytics.TrackPageView do
     _ -> ""
   end
 
-  # Mirror the plug's skip rules so plug + hook agree about what counts.
+  # Mirror the plug's path-based skip rules so plug + hook agree.
   defp should_track?(path) do
     cond do
       path in @skip_exact -> false

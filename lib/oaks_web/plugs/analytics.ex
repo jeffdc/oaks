@@ -1,22 +1,32 @@
 defmodule OaksWeb.Plugs.Analytics do
   @moduledoc """
-  Tracks page views after the response is built, without blocking the
-  request.
+  Tracks non-LiveView page views after the response is built.
 
-  Behavior:
+  Tracking is split between this plug and the
+  `OaksWeb.Analytics.TrackPageView` LiveView `on_mount` hook:
 
-    * On every request, derives a daily-rotating `visitor_hash` from the
-      client IP and User-Agent and stores it in the session so LiveView
-      navigations can reuse it (see Task 6's `on_mount` hook).
-    * In `register_before_send/2`, decides whether to record the view via
-      `should_track?/2`. Skips non-GETs, asset and API paths, the favicon
-      and health endpoints, and common bot/crawler User-Agents.
-    * Inserts are dispatched through `Oaks.TaskSupervisor` so the request
-      never blocks on the DB write and tests can synchronize on the
-      supervisor's children if they need to.
+    * This plug handles requests that are NOT served by a LiveView
+      (controller actions, asset requests that miss the router, and most
+      importantly: 404s on unrouted paths, which never enter a router
+      pipeline).
+    * The hook handles every LiveView mount and patch — including
+      cross-LiveView navigations via `live_redirect` (`<.link navigate>`)
+      that never produce a fresh HTTP request and so would otherwise be
+      invisible to this plug.
 
-  The helpers `should_track?/2`, `build_attrs/2`, and `client_ip/1` are
-  public so they can be unit-tested directly.
+  The `conn.private[:phoenix_live_view]` key is set by
+  `Phoenix.LiveView.Router` when a `live` route dispatches. We inspect
+  it inside `register_before_send/2`, by which time the router has run.
+  If it is set, the hook is responsible — the plug stays out of the way
+  to avoid double-counting.
+
+  Other skip rules: non-GET methods, paths under `/api` and `/assets`,
+  `/favicon.ico`, `/health`, and bot/crawler User-Agents.
+
+  Inserts go through `Oaks.TaskSupervisor` so the request never blocks
+  on the DB write and tests can synchronize on the supervisor's
+  children. The helpers `should_track?/2`, `build_attrs/2`, and
+  `client_ip/1` are public so they can be unit-tested directly.
   """
 
   import Plug.Conn
@@ -32,28 +42,26 @@ defmodule OaksWeb.Plugs.Analytics do
 
   @doc false
   def call(conn, _opts) do
-    # The plug runs at the Endpoint level (before the Router) so it can see
-    # 404s on unrouted paths. Ensure the session is fetched before we write
-    # to it — the :browser pipeline's fetch_session would otherwise be the
-    # first to do this.
-    conn = fetch_session(conn)
-    ip = client_ip(conn)
     ua = user_agent(conn)
-    hash = Analytics.visitor_hash(ip, ua)
-    conn = put_session(conn, :visitor_hash, hash)
 
     register_before_send(conn, fn conn ->
-      maybe_track(conn, ua, hash)
+      maybe_track(conn, ua)
       conn
     end)
   end
 
-  defp maybe_track(conn, ua, hash) do
-    if should_track?(conn, ua) do
+  defp maybe_track(conn, ua) do
+    if not live_view_route?(conn) and should_track?(conn, ua) do
+      hash = Analytics.visitor_hash(client_ip(conn), ua)
       attrs = build_attrs(conn, hash)
       Task.Supervisor.start_child(Oaks.TaskSupervisor, fn -> Analytics.track(attrs) end)
     end
   end
+
+  # True when this request was dispatched to a Phoenix LiveView. Set by
+  # Phoenix.LiveView.Router during route dispatch, so it's visible by the
+  # time register_before_send/2 fires.
+  defp live_view_route?(conn), do: Map.has_key?(conn.private, :phoenix_live_view)
 
   @doc """
   Returns `true` when the request should be recorded as a page view.

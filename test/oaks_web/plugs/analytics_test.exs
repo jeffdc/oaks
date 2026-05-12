@@ -200,18 +200,6 @@ defmodule OaksWeb.Plugs.AnalyticsTest do
   # --- call/2 ----------------------------------------------------------
 
   describe "call/2" do
-    test "puts :visitor_hash in the session" do
-      conn =
-        new_conn(:get, "/")
-        |> Plug.Conn.put_req_header("user-agent", browser_ua())
-        |> Plug.Conn.put_req_header("fly-client-ip", "203.0.113.7")
-        |> Analytics.call([])
-
-      hash = Plug.Conn.get_session(conn, :visitor_hash)
-      assert is_binary(hash)
-      assert String.length(hash) == 64
-    end
-
     test "does not halt the conn and preserves status/body when the response is sent" do
       conn =
         new_conn(:get, "/")
@@ -233,6 +221,26 @@ defmodule OaksWeb.Plugs.AnalyticsTest do
 
       assert conn.status == 201
       assert conn.resp_body == "created"
+    end
+
+    test "skips tracking for LiveView routes (conn.private[:phoenix_live_view] set)" do
+      # Simulate Phoenix.LiveView.Router having dispatched to a LV: a
+      # `:phoenix_live_view` key appears under `conn.private`. The plug's
+      # before_send callback must NOT enqueue an insert; the on_mount hook
+      # owns LV tracking.
+      conn =
+        new_conn(:get, "/some-live-route")
+        |> Plug.Conn.put_req_header("user-agent", browser_ua())
+        |> Plug.Conn.put_private(:phoenix_live_view, {SomeLive, :index, %{}, []})
+        |> Analytics.call([])
+        |> Plug.Conn.send_resp(200, "html")
+
+      # We can't directly inspect Task.Supervisor calls here, so the contract
+      # we assert is the response is preserved and no exception was raised
+      # by the before_send callback. The real assertion (zero rows inserted
+      # for LV routes via the plug) lives in the integration test.
+      refute conn.halted
+      assert conn.status == 200
     end
   end
 end

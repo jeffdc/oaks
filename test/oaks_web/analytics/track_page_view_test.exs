@@ -1,9 +1,11 @@
 defmodule OaksWeb.Analytics.TrackPageViewTest do
   @moduledoc """
-  Tests for the LiveView `on_mount` hook that records SPA navigations
-  in the `page_views` table. The first `handle_params` is skipped
-  because the analytics plug already records the initial dead render;
-  subsequent live patches/redirects are tracked by the hook.
+  Tests for the LiveView `on_mount` hook that records page views.
+
+  The hook owns ALL LiveView mounts: the plug skips LV routes by
+  checking `conn.private[:phoenix_live_view]`, so the hook tracks both
+  the initial connected mount AND every subsequent `live_patch` /
+  `live_redirect` (de-duplicated by same-path filter).
   """
 
   use OaksWeb.ConnCase
@@ -53,9 +55,7 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
   end
 
   describe "live mount + patch through the router" do
-    test "mounting a LiveView with a connected socket does NOT add a hook-row " <>
-           "for the initial render (plug already recorded it)",
-         %{conn: conn} do
+    test "connected mount of a LiveView inserts one row via the hook", %{conn: conn} do
       assert count_page_views() == 0
 
       conn = put_req_header(conn, "user-agent", browser_ua())
@@ -63,19 +63,19 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
 
       await_tasks()
 
-      # Only the plug-inserted row for the initial dead-render GET should exist.
-      # The hook intentionally skips the first handle_params.
+      # The plug skips LV routes, so the only row comes from the hook firing
+      # on the connected mount's first handle_params.
       assert count_page_views() == 1
       [pv] = Repo.all(PageView)
       assert pv.path == "/about"
     end
 
-    test "same-path patch (query-only change) does NOT add a hook row", %{conn: conn} do
+    test "same-path patch (query-only change) does NOT add another row", %{conn: conn} do
       assert count_page_views() == 0
 
       conn = put_req_header(conn, "user-agent", browser_ua())
 
-      # Initial mount of the search LiveView (one row from the plug).
+      # Initial mount of the search LiveView (one row from the hook).
       {:ok, view, _html} = live(conn, ~p"/search")
 
       # Trigger a push_patch to the same path with a different query string.
@@ -89,7 +89,7 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
 
       await_tasks()
 
-      # Only the plug-row for the initial GET /search should be present.
+      # Initial mount tracked /search once. Same-path patch did not add a row.
       assert count_page_views() == 1
       [pv] = Repo.all(PageView)
       assert pv.path == "/search"
@@ -98,15 +98,14 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
 
   describe "track_navigation/3 (direct)" do
     # Build a connected-looking socket with the hook's private assigns wired
-    # up. We can't drive a real LiveView through cross-LV navigation in a
-    # unit test, so we exercise the post-mount path-tracking logic directly.
-    defp connected_socket(opts) do
+    # up. We can't drive a real cross-LiveView navigation in a unit test,
+    # so we exercise the path-tracking logic directly.
+    defp connected_socket(opts \\ []) do
       hash = String.duplicate("a", 64)
 
       assigns = %{
         __changed__: %{},
         __analytics_visitor_hash__: hash,
-        __analytics_skip_initial__: Keyword.get(opts, :skip_initial, false),
         __analytics_last_path__: Keyword.get(opts, :last_path, nil)
       }
 
@@ -116,15 +115,16 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
       }
     end
 
-    test "first call after the initial-skip records the path but tracks nothing" do
-      socket = connected_socket(skip_initial: true)
+    test "first call (last_path nil) tracks the path" do
+      socket = connected_socket()
 
       assert {:cont, returned} =
                TrackPageView.track_navigation(%{}, "https://example.com/about", socket)
 
       await_tasks()
-      assert count_page_views() == 0
-      assert returned.assigns.__analytics_skip_initial__ == false
+      assert count_page_views() == 1
+      [pv] = Repo.all(PageView)
+      assert pv.path == "/about"
       assert returned.assigns.__analytics_last_path__ == "/about"
     end
 
