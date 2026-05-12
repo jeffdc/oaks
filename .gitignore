@@ -10,7 +10,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-# /lib/ and /lib64/ removed — Phoenix uses lib/ at project root
 parts/
 sdist/
 var/
@@ -55,16 +54,10 @@ ios/OakCompendium.xcodeproj/xcuserdata/
 ios/OakCompendium.xcodeproj/project.xcworkspace/
 *.xcuserstate
 
-# Generated files (temp exports, not the main quercus_data.json)
-quercus_export.json
-
 # Secrets and API keys
 .secrets
 .env
 .env.local
-
-# bv (beads viewer) local config and caches
-.bv/
 
 # SQLite temp/backup files
 *.db-shm
@@ -86,3 +79,5 @@ oaks-*.tar
 /priv/plts/
 /assets/node_modules/
 npm-debug.log
+
+.claude/
