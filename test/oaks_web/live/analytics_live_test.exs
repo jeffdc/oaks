@@ -107,6 +107,23 @@ defmodule OaksWeb.AnalyticsLiveTest do
       assert alpha_pos < beta_pos
       assert beta_pos < gamma_pos
     end
+
+    test "decodes percent-encoded paths for display", %{conn: conn} do
+      # Hybrid species names use "× " (U+00D7 + space) which encodes as
+      # "%C3%97%20" in URLs. The dashboard should show the decoded form.
+      today = Date.utc_today()
+
+      page_view_fixture(%{
+        path: "/species/%C3%97%20ganderi",
+        visitor_hash: hash("a"),
+        inserted_at: at(today, ~T[09:00:00])
+      })
+
+      {:ok, _view, html} = live(conn, ~p"/analytics")
+
+      assert html =~ "/species/× ganderi"
+      refute html =~ "%C3%97"
+    end
   end
 
   describe "top 404s section" do

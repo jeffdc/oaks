@@ -129,6 +129,16 @@ defmodule OaksWeb.AnalyticsLive do
     Enum.find_value(@ranges, range, fn {key, label} -> if key == range, do: label end)
   end
 
+  # Percent-encoded paths (e.g. "/species/%C3%97%20ganderi" for hybrid names
+  # like "× ganderi") are unreadable in the dashboard. Decode for display,
+  # falling back to the raw path if the encoding is malformed.
+  @doc false
+  def display_path(path) when is_binary(path) do
+    URI.decode(path)
+  rescue
+    _ -> path
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -257,7 +267,7 @@ defmodule OaksWeb.AnalyticsLive do
               :for={page <- @top_pages}
               class="border-t border-stone-100"
             >
-              <td class="px-4 py-2 font-mono text-xs break-all">{page.path}</td>
+              <td class="px-4 py-2 font-mono text-xs break-all">{display_path(page.path)}</td>
               <td class="px-4 py-2 text-right">{page.page_views}</td>
               <td class="px-4 py-2 text-right">{page.unique_visitors}</td>
             </tr>
@@ -300,7 +310,7 @@ defmodule OaksWeb.AnalyticsLive do
               :for={row <- @top_404s}
               class="border-t border-stone-100"
             >
-              <td class="px-4 py-2 font-mono text-xs break-all">{row.path}</td>
+              <td class="px-4 py-2 font-mono text-xs break-all">{display_path(row.path)}</td>
               <td class="px-4 py-2 text-right">{row.count}</td>
             </tr>
           </tbody>
