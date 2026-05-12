@@ -89,9 +89,8 @@ mix test test/path:42          # Run specific test at line
 ## Database
 
 - **Schema**: Defined in `priv/repo/structure.sql` (single source of truth)
-- **Local dev**: `oaks.db` (project root, committed for convenience)
+- **Local dev**: `oaks.db` at project root, gitignored. Pull a fresh copy from Fly.io with `make download-db`.
 - **Production**: Fly.io volume at `/data/oaks.db` (authoritative)
-- **Syncing**: Use `make download-db` to pull the latest from Fly.io
 
 ### Data Sources
 

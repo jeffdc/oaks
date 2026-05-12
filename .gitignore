@@ -64,6 +64,9 @@ ios/OakCompendium.xcodeproj/project.xcworkspace/
 *.db-wal
 *.db.bak
 
+# Local dev database (download via `make download-db`, not committed)
+/oaks.db
+
 # Elixir / Phoenix
 /_build/
 /cover/
