@@ -10,6 +10,7 @@ defmodule OaksWeb.Router do
     plug :put_root_layout, html: {OaksWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug OaksWeb.Plugs.Analytics
   end
 
   pipeline :api do
@@ -33,7 +34,11 @@ defmodule OaksWeb.Router do
     pipe_through :browser
 
     live_session :default,
-      on_mount: [OaksWeb.Hooks.ActiveNav, OaksWeb.Hooks.Auth] do
+      on_mount: [
+        OaksWeb.Hooks.ActiveNav,
+        OaksWeb.Hooks.Auth,
+        {OaksWeb.Analytics.TrackPageView, :default}
+      ] do
       live "/", HomeLive
       live "/list", SpeciesListLive
       live "/species/new", SpeciesFormLive, :new
@@ -59,6 +64,7 @@ defmodule OaksWeb.Router do
       live "/settings", SettingsLive
       live "/about", AboutLive
       live "/help/markdown", HelpMarkdownLive
+      live "/analytics", AnalyticsLive, :index
     end
   end
 

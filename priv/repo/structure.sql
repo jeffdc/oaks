@@ -96,3 +96,18 @@ CREATE TABLE IF NOT EXISTS species_sources (
 );
 CREATE INDEX IF NOT EXISTS idx_species_sources_species ON species_sources(species_id);
 CREATE INDEX IF NOT EXISTS idx_species_sources_source ON species_sources(source_id);
+
+CREATE TABLE IF NOT EXISTS page_views (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    path TEXT NOT NULL,
+    status INTEGER NOT NULL,
+    referrer_host TEXT,
+    browser TEXT,
+    device_type TEXT,
+    visitor_hash TEXT NOT NULL,
+    inserted_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS page_views_inserted_at_index ON page_views(inserted_at);
+CREATE INDEX IF NOT EXISTS page_views_path_index ON page_views(path);
+CREATE INDEX IF NOT EXISTS page_views_status_index ON page_views(status);
+CREATE INDEX IF NOT EXISTS page_views_visitor_hash_inserted_at_index ON page_views(visitor_hash, inserted_at);

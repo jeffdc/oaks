@@ -12,6 +12,8 @@ defmodule Oaks.Application do
       Oaks.Repo,
       {DNSCluster, query: Application.get_env(:oaks, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Oaks.PubSub},
+      # Task supervisor for fire-and-forget background work (analytics inserts, etc.)
+      {Task.Supervisor, name: Oaks.TaskSupervisor},
       # Start a worker by calling: Oaks.Worker.start_link(arg)
       # {Oaks.Worker, arg},
       # Start to serve requests, typically the last entry
