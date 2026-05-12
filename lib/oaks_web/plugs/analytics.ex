@@ -32,6 +32,11 @@ defmodule OaksWeb.Plugs.Analytics do
 
   @doc false
   def call(conn, _opts) do
+    # The plug runs at the Endpoint level (before the Router) so it can see
+    # 404s on unrouted paths. Ensure the session is fetched before we write
+    # to it — the :browser pipeline's fetch_session would otherwise be the
+    # first to do this.
+    conn = fetch_session(conn)
     ip = client_ip(conn)
     ua = user_agent(conn)
     hash = Analytics.visitor_hash(ip, ua)

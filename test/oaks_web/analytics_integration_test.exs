@@ -86,6 +86,24 @@ defmodule OaksWeb.AnalyticsIntegrationTest do
       assert count_page_views() == 0
     end
 
+    test "GET to an unrouted path tracks the 404", %{conn: conn} do
+      assert count_page_views() == 0
+
+      conn
+      |> put_req_header(
+        "user-agent",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15"
+      )
+      |> get("/this-route-does-not-exist")
+
+      await_tasks()
+
+      assert count_page_views() == 1
+      [pv] = Repo.all(PageView)
+      assert pv.path == "/this-route-does-not-exist"
+      assert pv.status == 404
+    end
+
     # Note: /assets/* is served by Plug.Static at the endpoint level and
     # never reaches the router, so it can't be exercised here. The plug's
     # `should_track?/2` rule is still covered by unit tests in

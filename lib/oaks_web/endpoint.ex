@@ -47,6 +47,9 @@ defmodule OaksWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+  # Analytics tracking lives at the endpoint level so it sees every request,
+  # including unrouted paths that 404 — those never enter a router pipeline.
+  plug OaksWeb.Plugs.Analytics
   plug OaksWeb.Plugs.ApiHost
   plug OaksWeb.Router
 end

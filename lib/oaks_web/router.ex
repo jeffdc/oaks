@@ -10,7 +10,6 @@ defmodule OaksWeb.Router do
     plug :put_root_layout, html: {OaksWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug OaksWeb.Plugs.Analytics
   end
 
   pipeline :api do
