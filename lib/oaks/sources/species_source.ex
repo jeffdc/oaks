@@ -13,6 +13,8 @@ defmodule Oaks.Sources.SpeciesSource do
 
   @required_fields [:species_id, :source_id]
 
+  @type t :: %__MODULE__{}
+
   schema "species_sources" do
     field :local_names, :string
     field :range, :string

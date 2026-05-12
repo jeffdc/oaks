@@ -179,6 +179,8 @@ defmodule Oaks.Search do
     end)
   end
 
+  @spec compute_path(String.t(), String.t(), map(), MapSet.t()) :: [String.t()]
+  @dialyzer {:no_opaque, compute_path: 4}
   defp compute_path(name, level, taxa_map, visited) do
     key = {name, level}
 
@@ -190,6 +192,7 @@ defmodule Oaks.Search do
     end
   end
 
+  @spec walk_parent(String.t(), String.t(), map(), MapSet.t()) :: [String.t()]
   defp walk_parent(name, level, taxa_map, visited) do
     parent_name = Map.get(taxa_map, {name, level})
     parent_level = Map.get(@level_hierarchy, level)

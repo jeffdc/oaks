@@ -12,6 +12,8 @@ defmodule Oaks.Sources.Source do
 
   @required_fields [:source_type, :name]
 
+  @type t :: %__MODULE__{}
+
   schema "sources" do
     field :source_type, :string
     field :name, :string

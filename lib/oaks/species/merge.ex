@@ -58,6 +58,7 @@ defmodule Oaks.Species.Merge do
   """
   @spec execute_merge(String.t(), String.t(), map()) ::
           {:ok, SpeciesSchema.t()} | {:error, atom(), any()}
+  @dialyzer {:no_opaque, execute_merge: 3}
   def execute_merge(source_name, target_name, merge_opts \\ %{}) do
     with source when not is_nil(source) <- Species.get_species_full(source_name),
          target when not is_nil(target) <- Species.get_species_full(target_name) do
@@ -268,6 +269,8 @@ defmodule Oaks.Species.Merge do
 
   # -- Multi steps --
 
+  @spec update_target_fields(Multi.t(), SpeciesSchema.t(), SpeciesSchema.t(), map()) :: Multi.t()
+  @dialyzer {:no_opaque, update_target_fields: 4}
   defp update_target_fields(multi, target, source, edited_fields) do
     synonyms_to_add = compute_synonyms_to_add(source, target)
 

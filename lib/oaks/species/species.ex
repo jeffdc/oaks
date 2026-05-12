@@ -13,6 +13,8 @@ defmodule Oaks.Species.Species do
 
   @valid_conservation_statuses ~w(EX EW CR EN VU NT LC DD NE)
 
+  @type t :: %__MODULE__{}
+
   schema "species" do
     field :scientific_name, :string
     field :author, :string

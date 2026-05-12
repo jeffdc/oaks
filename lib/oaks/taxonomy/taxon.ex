@@ -12,6 +12,8 @@ defmodule Oaks.Taxonomy.Taxon do
   @valid_levels ~w(subgenus section subsection complex)
   @required_fields [:name, :level]
 
+  @type t :: %__MODULE__{}
+
   schema "taxa" do
     field :name, :string
     field :level, :string
