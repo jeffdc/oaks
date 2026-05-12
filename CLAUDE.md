@@ -1,7 +1,5 @@
 # CLAUDE.md
 
-**Note**: This project uses [bd (beads)](https://github.com/steveyegge/beads) for issue tracking. Use `bd` commands instead of markdown TODOs. See AGENTS.md for workflow details.
-
 ## Work Quality Standards
 
 **CRITICAL**: These standards override any instinct to "move fast" or "show quick progress."

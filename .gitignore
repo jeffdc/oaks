@@ -43,23 +43,12 @@ BUGS.md
 .coverage
 htmlcov/
 .playwright-mcp/
-web/playwright-report/
-web/test-results/
 
 # Logs
 *.log
 
 # Go build artifacts
 cli/oak
-api/oak-api
-
-# JavaScript/Node
-web/node_modules/
-web/dist/
-web/.vite/
-
-# macOS
-.DS_Store
 
 # Xcode
 ios/OakCompendium.xcodeproj/xcuserdata/
@@ -90,10 +79,10 @@ quercus_export.json
 /.fetch
 erl_crash.dump
 *.ez
-oak_compendium-*.tar
+oaks-*.tar
 /priv/static/assets/
 /priv/static/cache_manifest.json
-/priv/oak_compendium_test.sqlite*
+/priv/oaks_test.sqlite*
 /priv/plts/
 /assets/node_modules/
 npm-debug.log

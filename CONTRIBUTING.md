@@ -1,88 +1,83 @@
-# Contributing to Quercus Database
+# Contributing to Oak Compendium
 
-Thank you for your interest in contributing! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing! This document covers how to get
+the project running locally and the conventions for submitting changes.
 
 ## How to Contribute
 
 ### Reporting Bugs
 
-If you find a bug, please open an issue with:
+Open an issue with:
 - A clear, descriptive title
-- Steps to reproduce the problem
+- Steps to reproduce
 - Expected vs. actual behavior
-- Your environment (OS, Python version)
+- Your environment (OS, Elixir/OTP version)
 - Relevant logs or error messages
 
 ### Suggesting Enhancements
 
-Enhancement suggestions are welcome! Please open an issue with:
+Open an issue with:
 - A clear description of the enhancement
-- Why this would be useful
+- Why it would be useful
 - Any implementation ideas you have
 
 ### Pull Requests
 
-1. **Fork the repository** and create your branch from `main`
-2. **Make your changes**:
-   - Follow existing code style
-   - Add comments for complex logic
-   - Update documentation if needed
-3. **Test your changes**:
-   - Ensure the scraper still works
-   - Test the query interface in multiple browsers
-4. **Commit your changes**:
-   - Use clear, descriptive commit messages
-   - Reference any related issues
-5. **Submit a pull request**
+1. **Fork the repository** and create a branch from `main`
+2. **Make your changes** following the conventions in `CODING_STANDARDS.md`
+3. **Run the quality gate** before pushing:
+   ```bash
+   mix precommit
+   ```
+4. **Submit a pull request** referencing any related issues
 
 ## Development Setup
 
+Requirements:
+- Elixir 1.17+ / OTP 27+
+- SQLite 3
+- Node.js (for asset tooling)
+
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/quercus-database.git
-cd quercus-database
+git clone https://github.com/yourusername/oaks.git
+cd oaks
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Install deps, set up DB, build assets
+mix setup
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the scraper
-python scraper.py
+# Start the dev server at http://localhost:4000
+mix phx.server
 ```
 
 ## Code Style
 
-- Follow PEP 8 guidelines
-- Use meaningful variable names
-- Add docstrings to functions
-- Keep functions focused and modular
+- Run `mix format` before committing
+- Run `mix credo --strict` and `mix dialyzer` and address findings
+- Follow Elixir/Phoenix conventions documented in `CODING_STANDARDS.md`
+- Keep functions small and focused
+- Use the database via Ecto; remember the project uses **SQLite**, not
+  PostgreSQL — see `CLAUDE.md` for the SQLite-compatible query patterns
 
 ## Testing
 
-Before submitting a PR:
-- Test the scraper with `--restart` flag
-- Verify resume functionality works
-- Check the query interface loads and searches correctly
-- Ensure no errors in browser console
+```bash
+mix test                           # Run all tests
+mix test test/path/to/test.exs     # Run a specific file
+mix test test/path/to/test.exs:42  # Run a specific test
+```
 
-## Data Quality
-
-When improving the scraper:
-- Preserve all existing data fields
-- Handle missing data gracefully (use `None` or empty lists)
-- Maintain backwards compatibility with the JSON schema
-- Document any schema changes in the PR
+The test suite uses a separate `priv/oaks_test.sqlite` database built from
+`priv/repo/structure.sql` plus `priv/repo/test_seeds.sql`. See `CLAUDE.md`
+for instructions on rebuilding the test database if you change the schema
+or seeds.
 
 ## Commit Message Guidelines
 
-- Use present tense ("Add feature" not "Added feature")
-- Use imperative mood ("Move cursor to..." not "Moves cursor to...")
-- Limit first line to 72 characters
-- Reference issues: "Fix #123: Add hybrid parent validation"
+- Use present tense, imperative mood ("Add feature", not "Added feature")
+- Limit the first line to 72 characters
+- Reference related issues in the body when relevant
 
 ## Questions?
 
-Feel free to open an issue for any questions about contributing!
+Open an issue for any questions about contributing.

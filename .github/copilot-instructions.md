@@ -1,180 +1,56 @@
-# GitHub Copilot Instructions for Quercus Database
+# GitHub Copilot Instructions for Oak Compendium
 
 ## Project Overview
 
-The Quercus Database is a comprehensive database and query tool for oak (Quercus) species and their hybrids. It combines a Python web scraper, a Svelte 5 web app, and a Go CLI tool for managing taxonomic data.
+Oak Compendium (the Quercus Database) is a comprehensive database and query
+tool for oak (*Quercus*) species and their hybrids. Live at
+[oakcompendium.org](https://oakcompendium.org/).
 
-**Key Features:**
-- Web scraper for oaksoftheworld.fr
-- Offline data caching with IndexedDB
-- Source-attributed taxonomic data model
-- Comprehensive species information (morphology, taxonomy, hybrids)
+The application is an Elixir/Phoenix LiveView app deployed to Fly.io. The
+canonical project guide is `CLAUDE.md`; the conventions reference is
+`CODING_STANDARDS.md`. Read those first.
 
 ## Tech Stack
 
-- **Python Scraper**: BeautifulSoup4, requests, lxml
-- **Web App**: Svelte 5 (runes), Vite, Tailwind 4, IndexedDB (Dexie.js)
-- **CLI**: Rust (in development), SQLite, clap, serde
-- **Testing**: Standard frameworks for each language
-- **CI/CD**: GitHub Actions (planned)
-
-## Coding Guidelines
-
-### Python (Scraper)
-- Follow PEP 8 style
-- Add docstrings to functions
-- Use meaningful variable names
-- Cache HTML to avoid re-fetching
-- Log data inconsistencies to `tmp/scraper/data_inconsistencies.log`
-
-### JavaScript/Svelte (Web App)
-- 2-space indentation
-- Use Svelte 5 runes syntax
-- Store state in Svelte stores (`dataStore.js`)
-- Follow component patterns in `web/CLAUDE.md`
-- Use Tailwind 4 utilities for styling
-
-### Rust (CLI)
-- Run `cargo fmt` before committing
-- Use strict type safety
-- Follow Repository Pattern for DB access
-- See `cli/docs/oak_cli.md` for specifications
-
-### Git Workflow
-- This project uses **bd (beads)** for issue tracking
-- Always commit `.beads/issues.jsonl` with code changes
-- Run `bd sync --from-main` at end of sessions (on ephemeral branches)
-- Commit messages: Present tense, imperative mood
-
-## Issue Tracking with bd
-
-**CRITICAL**: This project uses **bd** for ALL task tracking. Do NOT create markdown TODO lists.
-
-### Essential Commands
-
-```bash
-# Find work
-bd ready --json                    # Unblocked issues
-bd list --status open --json       # All open issues
-
-# Create and manage
-bd create "Title" -t bug|feature|task -p 0-4 --json
-bd create "Subtask" --parent <epic-id> --json
-bd update <id> --status in_progress --json
-bd close <id> --reason "Done" --json
-
-# Dependencies
-bd dep add <issue> <depends-on>    # Issue depends on depends-on
-
-# Sync (at end of session)
-bd sync --from-main
-```
-
-### Workflow
-
-1. **Check ready work**: `bd ready --json`
-2. **Claim task**: `bd update <id> --status in_progress`
-3. **Work on it**: Implement, test, document
-4. **Discover new work?** `bd create "Found bug" -p 1 --deps discovered-from:<parent-id> --json`
-5. **Complete**: `bd close <id> --reason "Done" --json`
-6. **Sync**: `bd sync --from-main`
-
-### Priorities
-
-- `0` - Critical (security, data loss, broken builds)
-- `1` - High (major features, important bugs)
-- `2` - Medium (default, nice-to-have)
-- `3` - Low (polish, optimization)
-- `4` - Backlog (future ideas)
+- **Framework**: Phoenix 1.8+ with LiveView
+- **Database**: SQLite via Ecto + ecto_sqlite3
+- **HTTP Server**: Bandit
+- **Styling**: Tailwind v4
+- **Quality**: Credo, Dialyxir, mix format
+- **Deployment**: Fly.io with Litestream (S3 replication)
 
 ## Project Structure
 
-```
-oaks/
-├── scrapers/oaksoftheworld/  # Python web scraper
-│   ├── scraper.py            # Main orchestration
-│   ├── name_parser.py        # Parse species list
-│   ├── parser.py             # Parse individual pages
-│   └── utils.py              # Caching, HTTP, progress
-├── web/                      # Svelte 5 web app
-│   ├── src/                  # Components and stores
-│   └── vite.config.js        # Build config (copies JSON)
-├── cli/                      # Rust CLI (in development)
-│   ├── src/                  # Rust source
-│   └── docs/oak_cli.md       # CLI specification
-├── quercus.db                # Canonical SQLite DB (CLI-managed)
-├── quercus_data.json         # JSON export for web app
-└── .beads/
-    ├── beads.db              # Issue tracking DB (DO NOT COMMIT)
-    └── issues.jsonl          # Git-synced issues
-```
+| Directory | What |
+|---|---|
+| `lib/oaks/` | Business logic contexts (species, taxonomy, sources, etc.) |
+| `lib/oaks_web/` | Web layer (LiveViews, controllers, components) |
+| `config/` | Phoenix configuration |
+| `assets/` | JS, CSS, Tailwind |
+| `priv/repo/` | Migrations, `structure.sql`, seeds |
+| `test/` | Elixir tests |
+| `scrapers/` | Python scripts for ingesting external data (local dev only) |
+| `cli/` | Legacy Go CLI tool, frozen |
+| `ios/` | iOS app source |
+
+## Coding Guidelines
+
+- Follow `CODING_STANDARDS.md` for Elixir/Phoenix conventions
+- Always compile with `--warnings-as-errors`
+- Run `mix precommit` before committing (format, compile, credo, tests)
+- SQLite is the database — do not use PostgreSQL-only constructs (`ilike`,
+  `array`, etc.); see CLAUDE.md for the `fragment("lower(?) LIKE ?", ...)`
+  pattern
+
+## Git Workflow
+
+- Commit messages: present tense, imperative mood
+- Never amend pushed commits; always create new commits
+- Never push to `main` without explicit approval (pre-push hook blocks it)
+- Stage specific files by name; do not use `git add -A` or `git add .`
 
 ## Key Documentation
 
-- **CLAUDE.md** - Comprehensive project guide (architecture, workflows, conventions)
-- **web/CLAUDE.md** - Detailed web app architecture
-- **cli/docs/oak_cli.md** - CLI tool specification
-- **AGENTS.md** - AI agent workflow with bd
-
-## Data Flow
-
-```
-oaksoftheworld.fr
-    ↓ (scraper)
-intermediate JSON
-    ↓ (CLI import)
-quercus.db (SQLite - canonical)
-    ↓ (CLI export)
-quercus_data.json
-    ↓ (web app load)
-IndexedDB (offline queries)
-```
-
-## Common Tasks
-
-### Running the Scraper
-```bash
-cd scrapers/oaksoftheworld
-source ../../venv/bin/activate
-python3 scraper.py                # Resume from last position
-python3 scraper.py --restart      # Start fresh
-python3 scraper.py --test         # First 50 species
-```
-
-### Web App Development
-```bash
-cd web
-npm install
-npm run dev        # http://localhost:5173
-npm run build      # Production build
-```
-
-### CLI Development
-```bash
-cd cli
-cargo build
-cargo run -- <subcommand>
-cargo test
-```
-
-## CLI Help
-
-Run `bd <command> --help` to see all available flags for any command.
-For example: `bd create --help` shows `--parent`, `--deps`, `--assignee`, etc.
-
-## Important Rules
-
-- ✅ Use bd for ALL task tracking
-- ✅ Always use `--json` flag for programmatic bd commands
-- ✅ Run `bd sync --from-main` at end of sessions
-- ✅ Commit `.beads/issues.jsonl` with code changes
-- ✅ Follow language-specific style guides
-- ✅ Run `bd <cmd> --help` to discover available flags
-- ❌ Do NOT create markdown TODO lists
-- ❌ Do NOT use external issue trackers
-- ❌ Do NOT commit `.beads/beads.db`
-- ❌ Do NOT add emojis unless user requests them
-
----
-
-**For detailed beads workflow, see [AGENTS.md](../AGENTS.md)**
+- **CLAUDE.md** — Project guide (architecture, workflows, conventions)
+- **CODING_STANDARDS.md** — Elixir/Phoenix conventions
+- **CONTRIBUTING.md** — How to set up the project and submit a PR

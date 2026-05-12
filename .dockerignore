@@ -25,9 +25,7 @@ erl_crash.dump
 /priv/static/assets/
 /priv/static/cache_manifest.json
 
-# V1 directories (frozen, not needed in Docker build)
-/api/
-/web/
+# Non-Phoenix component directories (not needed in Docker build)
 /cli/
 /ios/
 

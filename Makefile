@@ -1,8 +1,6 @@
 # Oaks - Top-level Makefile
-#
-# Phoenix/LiveView app with legacy Go API, CLI, and Svelte web components
 
-.PHONY: dev dev-phx dev-api dev-web test test-db setup format lint precommit ci build clean download-db help
+.PHONY: dev dev-phx test test-db setup format lint precommit ci build clean download-db help
 
 # =============================================================================
 # Phoenix Development (primary)
@@ -14,18 +12,6 @@ dev: setup
 
 # Alias for clarity
 dev-phx: dev
-
-# =============================================================================
-# Legacy Components (Go API + Svelte web)
-# =============================================================================
-
-# Start Go API server on :8080
-dev-api:
-	cd api && $(MAKE) run
-
-# Start Svelte web dev server on :5173 (connects to local API)
-dev-web:
-	cd web && npm run dev:local
 
 # =============================================================================
 # Setup & Dependencies
@@ -55,18 +41,6 @@ test-db:
 # Run Phoenix tests (rebuilds test DB first)
 test: test-db
 	mix test
-
-# Run legacy Go tests
-test-go:
-	cd api && $(MAKE) test
-	cd cli && $(MAKE) test
-
-# Run legacy Svelte tests
-test-web:
-	cd web && npm test
-
-# Run all tests across all components
-test-all: test test-go test-web
 
 # =============================================================================
 # Code Quality
@@ -105,11 +79,6 @@ build:
 	MIX_ENV=prod mix assets.deploy
 	MIX_ENV=prod mix release --overwrite
 
-# Build legacy Go components
-build-go:
-	cd api && $(MAKE) build
-	cd cli && $(MAKE) build
-
 # =============================================================================
 # Database
 # =============================================================================
@@ -129,12 +98,6 @@ download-db:
 clean:
 	rm -rf _build deps priv/static/assets
 
-# Clean everything including legacy components
-clean-all: clean
-	cd api && $(MAKE) clean
-	cd cli && $(MAKE) clean
-	cd web && rm -rf dist .svelte-kit node_modules
-
 # =============================================================================
 # Help
 # =============================================================================
@@ -153,17 +116,8 @@ help:
 	@echo "  make ci         Run full CI checks (precommit + assets + dialyzer)"
 	@echo "  make build      Build production release"
 	@echo ""
-	@echo "Legacy Components:"
-	@echo "  make dev-api    Start Go API server (:8080)"
-	@echo "  make dev-web    Start Svelte web dev server (:5173)"
-	@echo "  make test-go    Run Go tests (api + cli)"
-	@echo "  make test-web   Run Svelte tests"
-	@echo "  make test-all   Run all tests across all components"
-	@echo "  make build-go   Build Go binaries"
-	@echo ""
 	@echo "Database:"
 	@echo "  make download-db  Download database from Fly.io"
 	@echo ""
 	@echo "Other:"
 	@echo "  make clean       Clean Phoenix build artifacts"
-	@echo "  make clean-all   Clean everything including legacy components"

@@ -1,228 +1,81 @@
-# Quercus Database
+# Oak Compendium
 
-A comprehensive database and query tool for Quercus (oak) species and their hybrids.
+A comprehensive database and query tool for *Quercus* (oak) species and
+their hybrids.
 
 **Live site:** [oakcompendium.org](https://oakcompendium.org/)
 
 ## Features
 
-- **682 Species**: Complete iNaturalist Quercus taxonomy with species data
-- **Web Application**: Modern Svelte 5 PWA with offline support
-- **CLI Tool**: Go-based tool for managing taxonomic data
-- **Multi-Source**: Combines data from iNaturalist and Oaks of the World
-- **Offline-First**: Works without internet after initial load
+- Complete iNaturalist *Quercus* taxonomy and species list
+- Multi-source descriptive data (iNaturalist, Oaks of the World, personal
+  observations) with per-source attribution
+- Taxonomy browser by subgenus, section, subsection, and complex
+- Hybrid lookup and parent-formula display
+- JSON API with OpenAPI/Swagger docs at `/api/swagger`
+
+## Tech Stack
+
+- **Framework**: Phoenix 1.8+ with LiveView
+- **Database**: SQLite via Ecto + ecto_sqlite3
+- **HTTP Server**: Bandit
+- **Styling**: Tailwind v4
+- **Deployment**: Fly.io with Litestream (S3 replication)
 
 ## Quick Start
 
-### Full Local Development (Web + API)
+Requirements: Elixir 1.17+ / OTP 27+, SQLite 3, Node.js (for assets).
 
 ```bash
-# Install web dependencies first
-cd web && npm install && cd ..
+# Install deps, set up DB, build assets
+mix setup
 
-# Start both API server (:8080) and web dev server (:5173)
-make dev
+# Start the dev server at http://localhost:4000
+mix phx.server
 ```
 
-### Browse Species (Web App Only)
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full development setup and
+contribution guidelines, and [CLAUDE.md](CLAUDE.md) for the project guide
+(architecture, workflows, conventions).
 
-```bash
-cd web
-npm install
-npm run dev          # Uses production API
-npm run dev:local    # Uses local API at localhost:8080
-# Open http://localhost:5173
-```
+## Project Layout
 
-### Manage Data (CLI)
+| Directory | What |
+|---|---|
+| `lib/oaks/` | Business logic contexts |
+| `lib/oaks_web/` | Web layer (LiveViews, controllers, components) |
+| `config/` | Phoenix configuration |
+| `assets/` | JS, CSS, Tailwind |
+| `priv/repo/` | Migrations, `structure.sql`, seeds |
+| `test/` | Elixir tests |
+| `scrapers/` | Python scripts for ingesting external data (local dev only) |
+| `cli/` | Legacy Go CLI (frozen reference) |
+| `ios/` | iOS app source |
 
-```bash
-cd cli
-go build -o oak .
+## Data Sources
 
-# View taxonomy tree
-./oak taxa list
+| Source | ID | Purpose |
+|---|---|---|
+| iNaturalist | 1 | Authoritative taxonomy and species list |
+| Oaks of the World | 2 | Morphological descriptions, distribution, local names |
+| Oak Compendium | 3 | Personal observations (preferred for display) |
 
-# Search for species
-./oak find alba
-
-# Export to JSON for web app
-./oak export ../quercus_data.json
-```
-
-### Initialize Database from Seed Files
-
-```bash
-cd cli
-
-# Import iNaturalist taxonomy and species
-./oak taxa import --clear data/quercus-taxonomy.yaml
-./oak import-bulk data/quercus-species.yaml --source-id 1
-```
-
-## Data Pipeline
-
-```
-Data Sources                    CLI Tool                      Deployment
-─────────────                   ────────                      ──────────
-iNaturalist ──────┐
-  (taxonomy)      │
-                  │
-Oaks of the World ├──▶ oaks.db ──▶ quercus_data.json ──▶ git push
-  (descriptions)  │         (SQLite)            (JSON export)         │
-                  │                                                   ▼
-Bear App ─────────┘                                           GitHub Actions
-  (personal notes)                                                    │
-                                                                      ▼
-                                                              GitHub Pages
-```
-
-**Data Sources:**
-1. **iNaturalist** (Source 1): Authoritative taxonomy and species list
-2. **Oaks of the World** (Source 2): Morphological descriptions from scraping
-3. **Bear App** (Source 3): Personal field notes and observations
-
-**Workflow:**
-```bash
-cd cli
-oak import-bear                              # Import from Bear
-oak export ../web/public/quercus_data.json   # Export for web
-git add -A && git commit -m "Update data" && git push
-# GitHub Actions auto-deploys to GitHub Pages
-```
-
-See [CLAUDE.md](CLAUDE.md) for detailed architecture documentation.
-
-## Scraper Usage
-
-### Basic Usage
-```bash
-cd scrapers/oaksoftheworld
-
-# First run (or resume from last position)
-python3 scraper.py
-
-# Force restart from beginning
-python3 scraper.py --restart
-
-# Test mode (first 50 species)
-python3 scraper.py --test
-
-# Process specific number of species
-python3 scraper.py --limit=10
-```
-
-### Features
-- **Auto-resume**: Automatically continues from where it left off
-- **Progress tracking**: Saves state every 10 species
-- **Error handling**: Continues past failures, tracks failed URLs
-- **Rate limiting**: 0.5 second delay between requests
-
-### Output Files
-- `quercus_data.json` - Final structured data (in root directory)
-- `tmp/scraper/scraper_progress.json` - Progress state (can be deleted to restart)
-- `tmp/scraper/data_inconsistencies.log` - Taxonomic notes and name mismatches
-- `tmp/scraper/html_cache/` - Cached HTML pages
-
-## Data Structure
-
-```json
-{
-  "species": [
-    {
-      "name": "Quercus alba",
-      "is_hybrid": false,
-      "author": "L. 1753",
-      "synonyms": [...],
-      "local_names": ["white oak", "eastern white oak"],
-      "range": "Eastern North America; 0 to 1600 m",
-      "growth_habit": "reaches 25 m high...",
-      "leaves": "8-20 cm long, 5-10 cm wide...",
-      "taxonomy": {
-        "subgenus": "Quercus",
-        "section": "Quercus",
-        "complex": null
-      },
-      "hybrids": ["Quercus × bebbiana", ...],
-      "url": "http://..."
-    },
-    {
-      "name": "Quercus × bebbiana",
-      "is_hybrid": true,
-      "parent_formula": "alba x macrocarpa",
-      "parent1": "Quercus alba",
-      "parent2": "Quercus macrocarpa",
-      ...
-    }
-  ]
-}
-```
-
-## Data Fields
-
-All species include (when available):
-- **name**: Scientific name
-- **is_hybrid**: Boolean flag
-- **author**: Taxonomic authority
-- **synonyms**: List of alternative names
-- **local_names**: Common names
-- **range**: Geographic distribution
-- **growth_habit**: Size and form description
-- **leaves**: Leaf morphology
-- **flowers**: Flower description
-- **fruits**: Acorn characteristics
-- **bark_twigs_buds**: Bark and twig features
-- **hardiness_habitat**: Growing conditions
-- **taxonomy**: Subgenus, section, subsection, complex classification
-- **conservation_status**: IUCN status if applicable
-- **subspecies_varieties**: Infraspecific taxa
-- **url**: Link to source page
-
-Hybrids additionally include:
-- **parent_formula**: Original hybrid formula (e.g., "alba x macrocarpa")
-- **parent1**: First parent species
-- **parent2**: Second parent species
-
-## Requirements
-
-- Python 3.7+
-- requests
-- beautifulsoup4
-- lxml
-
-See `scrapers/oaksoftheworld/requirements.txt` for the complete list.
-
-## Contributing
-
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Submit a pull request
-
-## Data Source
-
-Data scraped from [Oaks of the World](https://oaksoftheworld.fr) with respect to their rate limits.
+Every data point is linked to its source via the `species_sources` table.
+Source 3 (personal observations) takes precedence in the UI when present.
 
 ## License
 
-This project uses a dual-license structure:
+Dual-licensed:
 
-**Source Code**: MIT License - see [LICENSE](LICENSE)
+- **Source code**: MIT License — see [LICENSE](LICENSE)
+- **Data files**: All Rights Reserved — see [DATA_LICENSE](DATA_LICENSE)
 
-**Data Files**: All Rights Reserved - see [DATA_LICENSE](DATA_LICENSE)
-
-The data files (`quercus_data.json`, `cli/data/*.yaml`, `oaks.db`) are
-proprietary and not covered by the MIT License. The data incorporates information
-from multiple sources; see the application for individual source attributions.
-
-## Future Enhancements
-
-- [ ] Geographic filtering
-- [ ] Taxonomy visualization
-- [ ] Export functionality (CSV, PDF)
-- [ ] Image gallery integration
-- [ ] Mobile-responsive design
+The data files (`oaks.db`, `data/`, scraped JSON) are proprietary and not
+covered by the MIT License. The data incorporates information from
+multiple sources; see the application for individual source attributions.
 
 ## Acknowledgments
 
-Thanks to the maintainers of [Oaks of the World](https://oaksoftheworld.fr) for compiling this comprehensive resource.
+Thanks to the maintainers of [iNaturalist](https://www.inaturalist.org/),
+[Oaks of the World](https://oaksoftheworld.fr), and the broader oak
+research community for the data this project builds on.
