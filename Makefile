@@ -6,7 +6,7 @@
 # Phoenix Development (primary)
 # =============================================================================
 
-# Start Phoenix dev server on :4000 (auto-installs deps on first run)
+# Start Phoenix dev server on :4444 (auto-installs deps on first run)
 dev: setup
 	mix phx.server
 
@@ -106,7 +106,7 @@ help:
 	@echo "Oaks Makefile"
 	@echo ""
 	@echo "Phoenix Development:"
-	@echo "  make dev        Start Phoenix dev server (:4000)"
+	@echo "  make dev        Start Phoenix dev server (:4444)"
 	@echo "  make setup      Full setup (deps + assets + db check)"
 	@echo "  make test       Run Phoenix tests (rebuilds test DB)"
 	@echo "  make test-db    Rebuild test database from structure.sql + seeds"

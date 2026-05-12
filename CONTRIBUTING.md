@@ -46,7 +46,7 @@ cd oaks
 # Install deps, set up DB, build assets
 mix setup
 
-# Start the dev server at http://localhost:4000
+# Start the dev server at http://localhost:4444
 mix phx.server
 ```
 

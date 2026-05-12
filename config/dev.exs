@@ -15,7 +15,7 @@ config :oaks, Oaks.Repo,
 # For development, we disable any cache and enable
 # debugging and code reloading.
 config :oaks, OaksWeb.Endpoint,
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+  http: [ip: {127, 0, 0, 1}, port: 4444],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,

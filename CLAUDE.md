@@ -48,7 +48,7 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 
 ```bash
 mix setup                  # Install deps, setup DB, build assets
-mix phx.server             # Start dev server at http://localhost:4000
+mix phx.server             # Start dev server at http://localhost:4444
 mix format                 # Format code
 mix credo --strict         # Run code quality checks
 mix precommit              # Run all checks before committing
