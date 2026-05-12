@@ -70,8 +70,7 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
       assert pv.path == "/about"
     end
 
-    test "live_patch/redirect to a different URL on the same LV inserts an extra row",
-         %{conn: conn} do
+    test "same-path patch (query-only change) does NOT add a hook row", %{conn: conn} do
       assert count_page_views() == 0
 
       conn = put_req_header(conn, "user-agent", browser_ua())
@@ -79,8 +78,9 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
       # Initial mount of the search LiveView (one row from the plug).
       {:ok, view, _html} = live(conn, ~p"/search")
 
-      # Trigger a push_patch via the existing search event; the hook should
-      # observe the patched URL.
+      # Trigger a push_patch to the same path with a different query string.
+      # In-page state changes (typing in search, clicking range buttons on
+      # the analytics dashboard, etc.) must NOT count as new page views.
       view
       |> element("#search-sync")
       |> render_hook("search", %{q: "alba"})
@@ -89,35 +89,71 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
 
       await_tasks()
 
-      # Plug recorded the initial GET /search; hook recorded the patch to
-      # /search?q=alba.
-      assert count_page_views() == 2
-      paths = PageView |> Repo.all() |> Enum.map(& &1.path) |> Enum.sort()
-      assert paths == ["/search", "/search"]
+      # Only the plug-row for the initial GET /search should be present.
+      assert count_page_views() == 1
+      [pv] = Repo.all(PageView)
+      assert pv.path == "/search"
+    end
+  end
+
+  describe "track_navigation/3 (direct)" do
+    # Build a connected-looking socket with the hook's private assigns wired
+    # up. We can't drive a real LiveView through cross-LV navigation in a
+    # unit test, so we exercise the post-mount path-tracking logic directly.
+    defp connected_socket(opts) do
+      hash = String.duplicate("a", 64)
+
+      assigns = %{
+        __changed__: %{},
+        __analytics_visitor_hash__: hash,
+        __analytics_skip_initial__: Keyword.get(opts, :skip_initial, false),
+        __analytics_last_path__: Keyword.get(opts, :last_path, nil)
+      }
+
+      %Phoenix.LiveView.Socket{
+        transport_pid: self(),
+        assigns: assigns
+      }
     end
 
-    test "hook reuses :visitor_hash from the session (same hash as plug-row)",
-         %{conn: conn} do
-      conn = put_req_header(conn, "user-agent", browser_ua())
+    test "first call after the initial-skip records the path but tracks nothing" do
+      socket = connected_socket(skip_initial: true)
 
-      {:ok, view, _html} = live(conn, ~p"/search")
+      assert {:cont, returned} =
+               TrackPageView.track_navigation(%{}, "https://example.com/about", socket)
 
-      view
-      |> element("#search-sync")
-      |> render_hook("search", %{q: "alba"})
-
-      assert_patch(view, ~p"/search?q=alba")
       await_tasks()
+      assert count_page_views() == 0
+      assert returned.assigns.__analytics_skip_initial__ == false
+      assert returned.assigns.__analytics_last_path__ == "/about"
+    end
 
-      hashes =
-        PageView
-        |> Repo.all()
-        |> Enum.map(& &1.visitor_hash)
-        |> Enum.uniq()
+    test "navigation to a new path tracks one row" do
+      socket = connected_socket(last_path: "/about")
 
-      # Plug + hook should share the same visitor_hash stored in session.
-      assert length(hashes) == 1
-      assert hd(hashes) |> String.length() == 64
+      assert {:cont, returned} =
+               TrackPageView.track_navigation(%{}, "https://example.com/species", socket)
+
+      await_tasks()
+      assert count_page_views() == 1
+      [pv] = Repo.all(PageView)
+      assert pv.path == "/species"
+      assert pv.status == 200
+      assert returned.assigns.__analytics_last_path__ == "/species"
+    end
+
+    test "patch to the same path (different query) does not track" do
+      socket = connected_socket(last_path: "/analytics")
+
+      assert {:cont, _returned} =
+               TrackPageView.track_navigation(
+                 %{},
+                 "https://example.com/analytics?range=30",
+                 socket
+               )
+
+      await_tasks()
+      assert count_page_views() == 0
     end
   end
 end

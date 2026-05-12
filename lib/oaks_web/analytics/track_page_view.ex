@@ -11,7 +11,10 @@ defmodule OaksWeb.Analytics.TrackPageView do
     * `attach_hook/4` on `:handle_params` fires once on mount and again
       on every `live_patch`/`push_patch`/`live_redirect`. The first
       firing is skipped because the plug already recorded it; later
-      firings insert a new row.
+      firings insert a new row IFF the path changed. Same-path patches
+      (for example, the analytics dashboard's range buttons updating
+      `?range=30`) are NOT recorded — they're in-page state, not page
+      views.
     * Inserts go through `Oaks.TaskSupervisor` so the LiveView process
       never blocks on the DB write.
     * `connected?(socket)` gates the hook: on the disconnected mount
@@ -44,6 +47,7 @@ defmodule OaksWeb.Analytics.TrackPageView do
         socket
         |> Phoenix.Component.assign(:__analytics_visitor_hash__, visitor_hash)
         |> Phoenix.Component.assign(:__analytics_skip_initial__, true)
+        |> Phoenix.Component.assign(:__analytics_last_path__, nil)
         |> attach_hook(:track_page_view, :handle_params, &track_navigation/3)
 
       {:cont, socket}
@@ -52,18 +56,34 @@ defmodule OaksWeb.Analytics.TrackPageView do
     end
   end
 
-  defp track_navigation(_params, uri, socket) do
+  @doc false
+  # Public for unit-testing path-change logic without driving a full
+  # cross-LiveView navigation. Called from `attach_hook` internally.
+  def track_navigation(_params, uri, socket) do
+    path = uri |> URI.parse() |> Map.get(:path) || "/"
+
     if socket.assigns[:__analytics_skip_initial__] do
-      {:cont, Phoenix.Component.assign(socket, :__analytics_skip_initial__, false)}
-    else
-      track_uri(uri, socket.assigns[:__analytics_visitor_hash__])
+      # Plug already tracked the initial request — record the path so
+      # subsequent same-path patches don't re-track either.
+      socket =
+        socket
+        |> Phoenix.Component.assign(:__analytics_skip_initial__, false)
+        |> Phoenix.Component.assign(:__analytics_last_path__, path)
+
       {:cont, socket}
+    else
+      maybe_track(path, socket)
+      {:cont, Phoenix.Component.assign(socket, :__analytics_last_path__, path)}
     end
   end
 
-  defp track_uri(uri, visitor_hash) do
-    path = uri |> URI.parse() |> Map.get(:path) || "/"
-    if should_track?(path), do: spawn_track(path, visitor_hash)
+  defp maybe_track(path, socket) do
+    last_path = socket.assigns[:__analytics_last_path__]
+    visitor_hash = socket.assigns[:__analytics_visitor_hash__]
+
+    if path != last_path and should_track?(path) do
+      spawn_track(path, visitor_hash)
+    end
   end
 
   defp spawn_track(path, visitor_hash) do
