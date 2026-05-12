@@ -9,10 +9,11 @@ defmodule OaksWeb.ConnCase do
 
   Finally, if the test case interacts with the database,
   we enable the SQL sandbox, so changes done to the database
-  are reverted at the end of every test. If you are using
-  PostgreSQL, you can even run database tests asynchronously
-  by setting `use OaksWeb.ConnCase, async: true`, although
-  this option is not recommended for other databases.
+  are reverted at the end of every test.
+
+  NOTE: This project uses SQLite which does NOT support `async: true`.
+  All tests run serially (enforced by `max_cases: 1` in test_helper.exs
+  and a runtime guard in `Oaks.DataCase`).
   """
 
   use ExUnit.CaseTemplate
