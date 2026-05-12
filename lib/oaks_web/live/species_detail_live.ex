@@ -368,10 +368,15 @@ defmodule OaksWeb.SpeciesDetailLive do
       </span>
       <span :if={@species.complex}>
         <span class="taxonomy-separator">&rsaquo;</span>
-        <span class="taxonomy-link">
+        <.link
+          navigate={
+            ~p"/taxonomy/#{@species.subgenus || "unknown"}/#{@species.section || "unknown"}/#{@species.subsection || "unknown"}/#{@species.complex}"
+          }
+          class="taxonomy-link"
+        >
           <span class="taxonomy-name">{@species.complex}</span>
           <span class="taxonomy-level-label">(complex)</span>
-        </span>
+        </.link>
       </span>
     </nav>
     """
