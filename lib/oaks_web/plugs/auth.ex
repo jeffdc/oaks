@@ -3,7 +3,9 @@ defmodule OaksWeb.Plugs.Auth do
   Authentication plug for API key validation.
 
   Extracts Bearer token from the Authorization header and validates it
-  against the configured API key (OAK_API_KEY env var or ~/.oak/api_key file).
+  against the configured API key. The key is loaded in `runtime.exs`:
+  prod reads `OAK_API_KEY` only; dev also accepts a `~/.oak/api_key`
+  fallback for local convenience.
 
   Two modes:
   - `RequireAuth`: only enforces auth on write methods (POST/PUT/DELETE/PATCH).

@@ -19,10 +19,36 @@ if System.get_env("PHX_SERVER") do
   config :oaks, OaksWeb.Endpoint, server: true
 end
 
-# Load API key for authentication (env var takes precedence over file)
-# Skip in test — test.exs sets a known test key
-if config_env() != :test do
-  config :oaks, :api_key, OaksWeb.Plugs.Auth.load_api_key()
+# Load API key for authentication.
+# - prod: OAK_API_KEY env var only. If missing, log a loud warning to stderr
+#   and leave the key unset — the app still boots and serves read traffic,
+#   but every write/auth request will be rejected until the secret is set.
+#   The `~/.oak/api_key` fallback is intentionally not consulted in prod:
+#   it can never exist inside the Fly container, and previously masked a
+#   missing-secret outage as a generic "invalid key" message.
+# - dev: env var, then ~/.oak/api_key fallback for local convenience.
+# - test: skipped here; test.exs sets a known test key.
+case config_env() do
+  :test ->
+    :ok
+
+  :prod ->
+    case System.get_env("OAK_API_KEY") do
+      key when is_binary(key) and key != "" ->
+        config :oaks, :api_key, key
+
+      _ ->
+        IO.puts(
+          :stderr,
+          "WARNING: OAK_API_KEY is not set. API authentication will reject every request. " <>
+            "Set it with: fly secrets set OAK_API_KEY=<key> --app oaks"
+        )
+
+        config :oaks, :api_key, nil
+    end
+
+  _ ->
+    config :oaks, :api_key, OaksWeb.Plugs.Auth.load_api_key()
 end
 
 # Only override port if PORT env var is explicitly set (don't interfere with test config)
