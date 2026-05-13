@@ -28,10 +28,10 @@ defmodule OaksWeb.HeaderTest do
       assert html =~ "Search by name"
     end
 
-    test "renders oak leaf logo", %{conn: conn} do
+    test "renders Oak Compendium logo", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/")
 
-      assert html =~ "oak-leaf-outline.svg"
+      assert html =~ "oakcompendium-logo.svg"
     end
 
     test "highlights active nav link on about page", %{conn: conn} do

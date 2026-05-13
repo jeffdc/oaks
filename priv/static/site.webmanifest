@@ -1,0 +1,19 @@
+{
+  "name": "Oak Compendium",
+  "short_name": "Oak",
+  "icons": [
+    {
+      "src": "/images/oakcompendium-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/oakcompendium-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#1f3a2d",
+  "background_color": "#f3ecd8",
+  "display": "standalone"
+}
