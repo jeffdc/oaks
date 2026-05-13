@@ -2,7 +2,8 @@ defmodule OaksWeb.AnalyticsLive do
   @moduledoc """
   Public dashboard at `/analytics` for the self-hosted page-view analytics.
 
-  Shows totals, a daily sparkline, the top pages, and the top 404s for a
+  Shows totals, a daily sparkline, the top pages, and a collapsed-by-default
+  errors section (Top 404s plus other 4xx/5xx grouped by status) for a
   configurable date range. No JavaScript chart library — the sparkline is
   a dependency-free inline SVG `<polyline>`.
 
@@ -60,6 +61,7 @@ defmodule OaksWeb.AnalyticsLive do
     |> assign(:daily, Analytics.daily_stats(from_date, to_date))
     |> assign(:top_pages, Analytics.top_pages(from_date, to_date))
     |> assign(:top_404s, Analytics.top_404s(from_date, to_date))
+    |> assign(:top_other_errors, Analytics.top_other_errors(from_date, to_date))
   end
 
   defp date_range("today") do
@@ -284,38 +286,102 @@ defmodule OaksWeb.AnalyticsLive do
         </table>
       </section>
 
-      <%!-- Top 404s table --%>
-      <section :if={@top_404s != []} class="card p-0 mb-6 overflow-hidden">
-        <div class="px-5 py-3 border-b border-stone-200 bg-stone-50">
+      <%!-- Errors (collapsed by default) --%>
+      <details :if={@top_404s != [] or @top_other_errors != []} class="card p-0 mb-6 overflow-hidden">
+        <summary class="px-5 py-3 bg-stone-50 cursor-pointer flex items-center justify-between">
           <h2 class="text-lg font-semibold" style="color: var(--color-forest-800);">
-            Top 404s
+            Errors
           </h2>
-        </div>
-        <table class="w-full text-sm">
-          <thead class="bg-stone-50">
-            <tr>
-              <th class="text-left px-4 py-2 font-medium" style="color: var(--color-text-secondary);">
-                Path
-              </th>
-              <th
-                class="text-right px-4 py-2 font-medium"
-                style="color: var(--color-text-secondary);"
-              >
-                Count
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              :for={row <- @top_404s}
-              class="border-t border-stone-100"
+          <span class="text-sm" style="color: var(--color-text-tertiary);">
+            {length(@top_404s)} 404 paths &middot; {length(@top_other_errors)} other
+          </span>
+        </summary>
+
+        <%!-- Top 404s --%>
+        <div :if={@top_404s != []} class="border-t border-stone-200">
+          <div class="px-5 py-2 bg-stone-50/50 border-b border-stone-100">
+            <h3
+              class="text-sm font-medium uppercase tracking-wide"
+              style="color: var(--color-text-secondary);"
             >
-              <td class="px-4 py-2 font-mono text-xs break-all">{display_path(row.path)}</td>
-              <td class="px-4 py-2 text-right">{row.count}</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
+              Top 404s
+            </h3>
+          </div>
+          <table class="w-full text-sm">
+            <thead class="bg-stone-50">
+              <tr>
+                <th
+                  class="text-left px-4 py-2 font-medium"
+                  style="color: var(--color-text-secondary);"
+                >
+                  Path
+                </th>
+                <th
+                  class="text-right px-4 py-2 font-medium"
+                  style="color: var(--color-text-secondary);"
+                >
+                  Count
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                :for={row <- @top_404s}
+                class="border-t border-stone-100"
+              >
+                <td class="px-4 py-2 font-mono text-xs break-all">{display_path(row.path)}</td>
+                <td class="px-4 py-2 text-right">{row.count}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <%!-- Other 4xx / 5xx --%>
+        <div :if={@top_other_errors != []} class="border-t border-stone-200">
+          <div class="px-5 py-2 bg-stone-50/50 border-b border-stone-100">
+            <h3
+              class="text-sm font-medium uppercase tracking-wide"
+              style="color: var(--color-text-secondary);"
+            >
+              Top Other Errors
+            </h3>
+          </div>
+          <table class="w-full text-sm">
+            <thead class="bg-stone-50">
+              <tr>
+                <th
+                  class="text-left px-4 py-2 font-medium"
+                  style="color: var(--color-text-secondary);"
+                >
+                  Path
+                </th>
+                <th
+                  class="text-right px-4 py-2 font-medium"
+                  style="color: var(--color-text-secondary);"
+                >
+                  Status
+                </th>
+                <th
+                  class="text-right px-4 py-2 font-medium"
+                  style="color: var(--color-text-secondary);"
+                >
+                  Count
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                :for={row <- @top_other_errors}
+                class="border-t border-stone-100"
+              >
+                <td class="px-4 py-2 font-mono text-xs break-all">{display_path(row.path)}</td>
+                <td class="px-4 py-2 text-right font-mono">{row.status}</td>
+                <td class="px-4 py-2 text-right">{row.count}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
     </div>
     """
   end

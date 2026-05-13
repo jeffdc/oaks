@@ -18,6 +18,8 @@ defmodule Oaks.Analytics do
     * `daily_stats/2` — per-day series, gap-filled with zero entries.
     * `top_pages/3` — top paths by view count with per-path unique visitors.
     * `top_404s/3` — top paths returning HTTP 404.
+    * `top_other_errors/3` — top (path, status) pairs returning non-404
+      4xx or any 5xx.
   """
 
   import Ecto.Query
@@ -79,6 +81,7 @@ defmodule Oaks.Analytics do
   def stats(%Date{} = from_date, %Date{} = to_date) do
     query =
       from(pv in PageView,
+        where: pv.status < 400,
         where: fragment("date(?)", pv.inserted_at) >= ^from_date,
         where: fragment("date(?)", pv.inserted_at) <= ^to_date,
         select: %{
@@ -105,6 +108,7 @@ defmodule Oaks.Analytics do
   def daily_stats(%Date{} = from_date, %Date{} = to_date) do
     rows =
       from(pv in PageView,
+        where: pv.status < 400,
         where: fragment("date(?)", pv.inserted_at) >= ^from_date,
         where: fragment("date(?)", pv.inserted_at) <= ^to_date,
         group_by: fragment("date(?)", pv.inserted_at),
@@ -145,6 +149,7 @@ defmodule Oaks.Analytics do
         ]
   def top_pages(%Date{} = from_date, %Date{} = to_date, limit \\ 20) do
     from(pv in PageView,
+      where: pv.status < 400,
       where: fragment("date(?)", pv.inserted_at) >= ^from_date,
       where: fragment("date(?)", pv.inserted_at) <= ^to_date,
       group_by: pv.path,
@@ -174,6 +179,34 @@ defmodule Oaks.Analytics do
       group_by: pv.path,
       select: %{
         path: pv.path,
+        count: count(pv.id)
+      },
+      order_by: [desc: count(pv.id)],
+      limit: ^limit
+    )
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the top (path, status) pairs that returned a 4xx other than 404,
+  or any 5xx, for the inclusive UTC-date range `from_date..to_date`,
+  ordered by count descending.
+
+  Grouping includes status so the same path failing with different codes
+  produces separate rows. The default `limit` is 20.
+  """
+  @spec top_other_errors(Date.t(), Date.t(), integer()) :: [
+          %{path: String.t(), status: integer(), count: integer()}
+        ]
+  def top_other_errors(%Date{} = from_date, %Date{} = to_date, limit \\ 20) do
+    from(pv in PageView,
+      where: pv.status >= 400 and pv.status != 404,
+      where: fragment("date(?)", pv.inserted_at) >= ^from_date,
+      where: fragment("date(?)", pv.inserted_at) <= ^to_date,
+      group_by: [pv.path, pv.status],
+      select: %{
+        path: pv.path,
+        status: pv.status,
         count: count(pv.id)
       },
       order_by: [desc: count(pv.id)],
