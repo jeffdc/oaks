@@ -25,6 +25,49 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/oaks"
 import topbar from "../vendor/topbar"
 
+// -- API key session (stored in localStorage, sent as a LiveSocket connect param) --
+
+const API_KEY = "oak:api_key"
+const SESSION_TS = "oak:session_timestamp"
+const TIMEOUT_HOURS = "oak:session_timeout_hours"
+const SETTINGS_NOTICE = "oak:settings_notice"
+const DEFAULT_TIMEOUT_HOURS = 24
+
+function sessionTimeoutHours() {
+  return parseInt(localStorage.getItem(TIMEOUT_HOURS) || DEFAULT_TIMEOUT_HOURS, 10)
+}
+
+function sessionRemainingMs() {
+  const timestamp = localStorage.getItem(SESSION_TS)
+  if (!timestamp) return 0
+  const elapsed = Date.now() - parseInt(timestamp, 10)
+  return Math.max(0, sessionTimeoutHours() * 60 * 60 * 1000 - elapsed)
+}
+
+function clearStoredKey() {
+  localStorage.removeItem(API_KEY)
+  localStorage.removeItem(SESSION_TS)
+}
+
+// Returns the stored API key, clearing it first if its session has expired.
+function currentApiKey() {
+  const key = localStorage.getItem(API_KEY)
+  if (!key) return ""
+  if (sessionRemainingMs() <= 0) {
+    clearStoredKey()
+    return ""
+  }
+  return key
+}
+
+// Applies a key change and reloads so every LiveView remounts with it,
+// leaving a one-shot notice for the Settings page to show afterwards.
+function reloadWithNotice(notice, change) {
+  change()
+  sessionStorage.setItem(SETTINGS_NOTICE, notice)
+  window.location.reload()
+}
+
 const Hooks = {
   ...colocatedHooks,
   TagInput: {
@@ -87,7 +130,6 @@ const Hooks = {
     }
   },
   ApiKeySettings: {
-    _defaultTimeout: 24,
     _timer: null,
 
     mounted() {
@@ -103,19 +145,8 @@ const Hooks = {
       this._clearTimer()
     },
 
-    _getTimeoutHours() {
-      return parseInt(localStorage.getItem("oak:session_timeout_hours") || this._defaultTimeout, 10)
-    },
-
-    _getTimeoutMs() {
-      return this._getTimeoutHours() * 60 * 60 * 1000
-    },
-
     _getRemainingMs() {
-      const timestamp = localStorage.getItem("oak:session_timestamp")
-      if (!timestamp) return 0
-      const elapsed = Date.now() - parseInt(timestamp, 10)
-      return Math.max(0, this._getTimeoutMs() - elapsed)
+      return sessionRemainingMs()
     },
 
     _formatTime(ms) {
@@ -144,11 +175,9 @@ const Hooks = {
       if (!el) return
       const remaining = this._getRemainingMs()
       el.textContent = this._formatTime(remaining)
-      if (remaining <= 0 && localStorage.getItem("oak:api_key")) {
-        localStorage.removeItem("oak:api_key")
-        localStorage.removeItem("oak:session_timestamp")
+      if (remaining <= 0 && localStorage.getItem(API_KEY)) {
         this._clearTimer()
-        this.pushEvent("save_result", {status: "cleared"})
+        reloadWithNotice("cleared", clearStoredKey)
       }
     },
 
@@ -156,22 +185,18 @@ const Hooks = {
       // Set timeout select to stored value
       const timeoutSelect = this.el.querySelector("#session-timeout-select")
       if (timeoutSelect) {
-        timeoutSelect.value = this._getTimeoutHours().toString()
+        timeoutSelect.value = sessionTimeoutHours().toString()
       }
 
-      // Check existing key and session validity
-      const stored = localStorage.getItem("oak:api_key")
-      if (stored) {
-        const remaining = this._getRemainingMs()
-        if (remaining > 0) {
-          const input = this.el.querySelector("#api-key-input")
-          if (input) input.value = stored
-          this.pushEvent("auth_status", {authenticated: true})
-        } else {
-          // Session expired
-          localStorage.removeItem("oak:api_key")
-          localStorage.removeItem("oak:session_timestamp")
-        }
+      const stored = currentApiKey()
+      const input = this.el.querySelector("#api-key-input")
+      if (stored && input) input.value = stored
+
+      // Show the result of a save/clear that triggered the last reload
+      const notice = sessionStorage.getItem(SETTINGS_NOTICE)
+      if (notice) {
+        sessionStorage.removeItem(SETTINGS_NOTICE)
+        this.pushEvent("save_result", {status: notice})
       }
 
       this._startTimer()
@@ -193,9 +218,11 @@ const Hooks = {
             headers: {"Authorization": `Bearer ${key}`}
           })
           if (resp.ok) {
-            localStorage.setItem("oak:api_key", key)
-            localStorage.setItem("oak:session_timestamp", Date.now().toString())
-            this.pushEvent("save_result", {status: "saved"})
+            // Reload so the LiveSocket reconnects and the server checks the new key
+            reloadWithNotice("saved", () => {
+              localStorage.setItem(API_KEY, key)
+              localStorage.setItem(SESSION_TS, Date.now().toString())
+            })
           } else {
             this.pushEvent("verify_result", {status: "invalid"})
           }
@@ -205,16 +232,14 @@ const Hooks = {
       })
 
       clearBtn.addEventListener("click", () => {
-        localStorage.removeItem("oak:api_key")
-        localStorage.removeItem("oak:session_timestamp")
         input.value = ""
-        this.pushEvent("save_result", {status: "cleared"})
+        reloadWithNotice("cleared", clearStoredKey)
       })
 
       // Reset session button (delegated since it may not exist yet)
       this.el.addEventListener("click", (e) => {
         if (e.target.id === "reset-session-btn" || e.target.closest("#reset-session-btn")) {
-          localStorage.setItem("oak:session_timestamp", Date.now().toString())
+          localStorage.setItem(SESSION_TS, Date.now().toString())
           this._updateTimeDisplay()
         }
       })
@@ -224,7 +249,7 @@ const Hooks = {
         if (e.target.id === "session-timeout-select") {
           const hours = parseInt(e.target.value, 10)
           if (hours > 0 && hours <= 168) {
-            localStorage.setItem("oak:session_timeout_hours", hours.toString())
+            localStorage.setItem(TIMEOUT_HOURS, hours.toString())
             this._updateTimeDisplay()
           }
         }
@@ -236,7 +261,8 @@ const Hooks = {
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken, api_key: localStorage.getItem("oak:api_key") || ""},
+  // A function so the key (and its expiry) is re-checked on every (re)connect
+  params: () => ({_csrf_token: csrfToken, api_key: currentApiKey()}),
   hooks: Hooks,
 })
 

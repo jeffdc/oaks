@@ -8,23 +8,22 @@ defmodule OaksWeb.SettingsLive do
        page_title: "Settings",
        verify_status: nil,
        save_status: nil,
-       show_password: false,
-       authenticated: false
+       show_password: false
      )}
   end
 
   @impl true
   def handle_event("save_result", %{"status" => status}, socket) do
+    # `authenticated` comes from the server-side auth hook; the client only
+    # reports what it did so the page can show a message.
     save_status =
       case status do
         "saved" -> :saved
         "cleared" -> :cleared
+        _ -> nil
       end
 
-    authenticated = status == "saved"
-
-    {:noreply,
-     assign(socket, save_status: save_status, verify_status: nil, authenticated: authenticated)}
+    {:noreply, assign(socket, save_status: save_status, verify_status: nil)}
   end
 
   @impl true
@@ -34,17 +33,10 @@ defmodule OaksWeb.SettingsLive do
         "ok" -> :ok
         "invalid" -> :invalid
         "error" -> :error
+        _ -> nil
       end
 
-    authenticated = if status == "ok", do: true, else: socket.assigns.authenticated
-
-    {:noreply,
-     assign(socket, verify_status: verify_status, save_status: nil, authenticated: authenticated)}
-  end
-
-  @impl true
-  def handle_event("auth_status", %{"authenticated" => authenticated}, socket) do
-    {:noreply, assign(socket, authenticated: authenticated)}
+    {:noreply, assign(socket, verify_status: verify_status, save_status: nil)}
   end
 
   @impl true
