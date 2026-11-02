@@ -115,6 +115,17 @@ defmodule OaksWeb.TaxonFormLiveTest do
       assert html =~ "Taxon updated"
     end
 
+    test "saving from the Preview tab keeps the edited content", %{conn: conn} do
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/taxonomy/1/edit")
+
+      view |> form("#taxon-form", taxon: %{content: "Edited **body**"}) |> render_change()
+      render_click(view, "switch_content_tab", %{"tab" => "preview"})
+
+      view |> form("#taxon-form") |> render_submit()
+
+      assert Oaks.Taxonomy.get_taxon_by_id(1).content == "Edited **body**"
+    end
+
     test "redirects for nonexistent taxon", %{conn: conn} do
       assert {:error, {:live_redirect, %{to: "/taxonomy"}}} =
                conn |> authenticated_conn() |> live(~p"/taxonomy/9999/edit")

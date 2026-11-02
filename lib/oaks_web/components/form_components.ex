@@ -65,7 +65,8 @@ defmodule OaksWeb.FormComponents do
             <.icon name="hero-eye" class="size-3.5" /> Preview
           </button>
         </div>
-        <div :if={@content_tab == "write"}>
+        <%!-- Keep the textarea in the DOM while previewing so the form still submits it. --%>
+        <div class={@content_tab != "write" && "hidden"}>
           <textarea
             id={@field.id}
             name={@field.name}
