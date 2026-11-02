@@ -87,8 +87,10 @@ build:
 # (overwrites the local oaks.db). Reads S3 only; never touches the Fly machine.
 # The Fly.io database is the authoritative source of truth.
 #
-# Needs S3 read access to the bucket via LITESTREAM_ACCESS_KEY_ID /
-# LITESTREAM_SECRET_ACCESS_KEY (or AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY).
+# Requires an AWS CLI session with read access to the bucket: run `aws login`
+# first (temporary credentials; no access keys). Litestream 0.3's AWS SDK can't
+# read that login type itself, so the CLI exports the session's temporary
+# credentials into Litestream's environment for this one command.
 #
 # Production replicates with Litestream 0.3.x; 0.5+ uses an incompatible
 # replica format, so a pinned 0.3 binary is fetched into bin/. 0.3.14 has no
@@ -97,9 +99,12 @@ LITESTREAM_REPLICA := s3://oaks-db-backups/litestream
 LITESTREAM_BIN := bin/litestream-0.3
 
 download-db: $(LITESTREAM_BIN)
+	@aws sts get-caller-identity >/dev/null 2>&1 || { \
+		echo "ERROR: No AWS session. Run 'aws login' first."; exit 1; }
 	@echo "Restoring latest production database from $(LITESTREAM_REPLICA)..."
 	@rm -f /tmp/oaks-restore.db /tmp/oaks-restore.db-*
-	$(LITESTREAM_BIN) restore -o /tmp/oaks-restore.db $(LITESTREAM_REPLICA)
+	@eval "$$(aws configure export-credentials --format env)" && \
+		$(LITESTREAM_BIN) restore -o /tmp/oaks-restore.db $(LITESTREAM_REPLICA)
 	@sqlite3 /tmp/oaks-restore.db "PRAGMA integrity_check;" | grep -qx ok || { \
 		echo "ERROR: Restored database failed integrity check"; exit 1; }
 	@sqlite3 /tmp/oaks-restore.db "SELECT count(*) FROM species;" | grep -qE '^[1-9]' || { \
