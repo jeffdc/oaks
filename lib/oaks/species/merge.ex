@@ -193,9 +193,10 @@ defmodule Oaks.Species.Merge do
   # doesn't already have: %{field => [entry]} for non-empty fields only.
   defp list_additions(source, target) do
     for field <- @list_fields ++ [:external_links],
-        (merged = merged_list(field, source, target)) != References.decode(Map.get(target, field)),
+        current = References.decode(Map.get(target, field)),
+        (merged = merged_list(field, source, target)) != current,
         into: %{} do
-      {field, merged -- References.decode(Map.get(target, field))}
+      {field, merged -- current}
     end
   end
 
