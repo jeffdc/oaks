@@ -88,3 +88,6 @@ oaks-*.tar
 npm-debug.log
 
 .claude/
+
+# Local tool binaries (e.g. litestream for make download-db)
+/bin/
