@@ -68,6 +68,23 @@ defmodule Oaks.Analytics do
       :error
   end
 
+  @doc """
+  Records a page view without blocking the caller, via `Oaks.TaskSupervisor`.
+
+  Set `config :oaks, :analytics_async, false` to record inline instead. Tests
+  do this so no insert outlives the test that triggered it.
+  """
+  @spec track_async(map()) :: :ok
+  def track_async(attrs) do
+    if Application.get_env(:oaks, :analytics_async, true) do
+      Task.Supervisor.start_child(Oaks.TaskSupervisor, fn -> track(attrs) end)
+    else
+      track(attrs)
+    end
+
+    :ok
+  end
+
   defp normalize_attrs(attrs) when is_map(attrs), do: attrs
   defp normalize_attrs(_), do: %{}
 

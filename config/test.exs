@@ -10,7 +10,8 @@ config :oaks, Oaks.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   # WAL for better concurrency — allows reads during write transactions
   journal_mode: :wal,
-  busy_timeout: 5000
+  busy_timeout: 5000,
+  default_transaction_mode: :immediate
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
@@ -35,3 +36,6 @@ config :phoenix,
 
 # Test API key for auth tests
 config :oaks, :api_key, "test-api-key-secret"
+
+# Record page views inline so no analytics insert outlives its test.
+config :oaks, :analytics_async, false

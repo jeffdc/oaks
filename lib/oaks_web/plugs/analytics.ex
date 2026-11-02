@@ -54,7 +54,7 @@ defmodule OaksWeb.Plugs.Analytics do
     if not live_view_route?(conn) and should_track?(conn, ua) do
       hash = Analytics.visitor_hash(client_ip(conn), ua)
       attrs = build_attrs(conn, hash)
-      Task.Supervisor.start_child(Oaks.TaskSupervisor, fn -> Analytics.track(attrs) end)
+      Analytics.track_async(attrs)
     end
   end
 

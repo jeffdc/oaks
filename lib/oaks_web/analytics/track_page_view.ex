@@ -83,7 +83,7 @@ defmodule OaksWeb.Analytics.TrackPageView do
       inserted_at: DateTime.utc_now()
     }
 
-    Task.Supervisor.start_child(Oaks.TaskSupervisor, fn -> Analytics.track(attrs) end)
+    Analytics.track_async(attrs)
   end
 
   defp compute_visitor_hash(socket) do

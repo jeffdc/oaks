@@ -10,7 +10,8 @@ config :oaks, Oaks.Repo,
   pool_size: 5,
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
-  busy_timeout: 5000
+  busy_timeout: 5000,
+  default_transaction_mode: :immediate
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
