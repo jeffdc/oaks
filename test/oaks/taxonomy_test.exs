@@ -214,4 +214,48 @@ defmodule Oaks.TaxonomyTest do
       assert taxon.content_updated_at == Date.to_iso8601(Date.utc_today())
     end
   end
+
+  describe "complexes placed directly under a section" do
+    setup do
+      {:ok, complex} =
+        Taxonomy.create_taxon(%{name: "velutina-group", level: "complex", parent: "Lobatae"})
+
+      Oaks.Species.get_species_by_name("velutina")
+      |> Ecto.Changeset.change(complex: "velutina-group")
+      |> Oaks.Repo.update!()
+
+      %{complex: complex}
+    end
+
+    test "appear as children of the section", %{complex: complex} do
+      children = Taxonomy.get_children(Taxonomy.get_taxon("section", "Lobatae"))
+      assert complex.id in Enum.map(children, & &1.id)
+    end
+
+    test "resolve as a path segment under the section" do
+      assert {:ok, [_, _, %{level: "complex", name: "velutina-group"}]} =
+               Taxonomy.resolve_path(["Lobatae", "Lobatae", "velutina-group"])
+    end
+
+    test "own their species instead of the section" do
+      complex_species = Taxonomy.get_species_in_taxon(["Lobatae", "Lobatae", "velutina-group"])
+      section_species = Taxonomy.get_species_in_taxon(["Lobatae", "Lobatae"])
+
+      assert Enum.map(complex_species, & &1.scientific_name) == ["velutina"]
+      refute "velutina" in Enum.map(section_species, & &1.scientific_name)
+      assert "rubra" in Enum.map(section_species, & &1.scientific_name)
+    end
+
+    test "search links to them through the section" do
+      %{taxa: taxa} = Oaks.Search.search("velutina-group")
+      assert [%{path: ["Lobatae", "Lobatae", "velutina-group"]}] = taxa
+    end
+  end
+
+  describe "resolve_path/1" do
+    test "rejects a segment that isn't a child of the previous one" do
+      assert Taxonomy.resolve_path(["Lobatae", "Quercus"]) == :error
+      assert Taxonomy.resolve_path(["Quercus", "Quercus", "Missing"]) == :error
+    end
+  end
 end

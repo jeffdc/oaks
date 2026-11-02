@@ -192,10 +192,18 @@ defmodule Oaks.Search do
     end
   end
 
+  # A complex sits under a subsection, or directly under a section when no
+  # subsection has its parent's name (see Oaks.Taxonomy.get_children/1).
+  defp parent_level("complex", parent_name, taxa_map) do
+    if Map.has_key?(taxa_map, {parent_name, "subsection"}), do: "subsection", else: "section"
+  end
+
+  defp parent_level(level, _parent_name, _taxa_map), do: Map.get(@level_hierarchy, level)
+
   @spec walk_parent(String.t(), String.t(), map(), MapSet.t()) :: [String.t()]
   defp walk_parent(name, level, taxa_map, visited) do
     parent_name = Map.get(taxa_map, {name, level})
-    parent_level = Map.get(@level_hierarchy, level)
+    parent_level = parent_level(level, parent_name, taxa_map)
 
     if parent_name && parent_level do
       compute_path(parent_name, parent_level, taxa_map, visited) ++ [name]

@@ -177,4 +177,23 @@ defmodule OaksWeb.TaxonomyLiveTest do
       refute Oaks.Taxonomy.get_taxon_by_id(taxon.id)
     end
   end
+
+  describe "complex directly under a section" do
+    test "is listed on the section page and browsable", %{conn: conn} do
+      {:ok, _} =
+        Oaks.Taxonomy.create_taxon(%{name: "velutina-group", level: "complex", parent: "Lobatae"})
+
+      Oaks.Species.get_species_by_name("velutina")
+      |> Ecto.Changeset.change(complex: "velutina-group")
+      |> Oaks.Repo.update!()
+
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/Lobatae/Lobatae")
+      assert html =~ "velutina-group"
+      assert html =~ "Complexes"
+
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/Lobatae/Lobatae/velutina-group")
+      refute html =~ "Taxon Not Found"
+      assert html =~ "velutina"
+    end
+  end
 end

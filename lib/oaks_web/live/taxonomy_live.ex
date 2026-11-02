@@ -14,11 +14,8 @@ defmodule OaksWeb.TaxonomyLive do
   alias Oaks.Taxonomy
   alias OaksWeb.Params
 
-  # Maps path depth to the current taxon's level name
-  @levels ["genus", "subgenus", "section", "subsection", "complex"]
-
-  # Maps path depth to the child taxa level
-  @child_levels ["subgenus", "section", "subsection", "complex"]
+  # The level a new child taxon gets when created from a taxon's page
+  @child_levels %{"subgenus" => "section", "section" => "subsection", "subsection" => "complex"}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -44,7 +41,7 @@ defmodule OaksWeb.TaxonomyLive do
         {:noreply, load_genus_level(socket)}
 
       true ->
-        {:noreply, load_taxon_level(socket, path, depth)}
+        {:noreply, load_taxon_level(socket, path)}
     end
   end
 
@@ -116,24 +113,22 @@ defmodule OaksWeb.TaxonomyLive do
     )
   end
 
-  defp load_taxon_level(socket, path, depth) do
-    current_level = Enum.at(@levels, depth)
-    child_level = Enum.at(@child_levels, depth)
-    taxon_name = List.last(path)
-
-    case Taxonomy.get_taxon(current_level, taxon_name) do
-      nil ->
+  defp load_taxon_level(socket, path) do
+    case Taxonomy.resolve_path(path) do
+      :error ->
         assign_not_found(socket, path)
 
-      current_taxon ->
-        child_taxa = fetch_child_taxa(child_level, path)
+      {:ok, taxa} ->
+        current_taxon = List.last(taxa)
+        taxon_name = current_taxon.name
+        child_taxa = Taxonomy.get_children(current_taxon)
         species = Taxonomy.get_species_in_taxon(path)
-        breadcrumbs = build_breadcrumbs(path)
+        breadcrumbs = build_breadcrumbs(path, taxa)
 
         assign(socket,
           taxonomy_path: path,
-          current_level: current_level,
-          child_level: child_level,
+          current_level: current_taxon.level,
+          child_level: Map.get(@child_levels, current_taxon.level),
           current_taxon: current_taxon,
           child_taxa: child_taxa,
           species: species,
@@ -162,27 +157,14 @@ defmodule OaksWeb.TaxonomyLive do
     )
   end
 
-  defp fetch_child_taxa(nil, _path), do: []
-
-  defp fetch_child_taxa(child_level, path) do
-    parent = if path == [], do: nil, else: List.last(path)
-    params = %{"level" => child_level}
-    params = if parent, do: Map.put(params, "parent", parent), else: params
-    Taxonomy.list_taxa_with_counts(params)
-  end
-
-  defp build_breadcrumbs(path) do
+  defp build_breadcrumbs(path, taxa) do
     root = %{name: "Quercus", level: "genus", url: ~p"/taxonomy"}
 
     segments =
-      path
-      |> Enum.with_index()
-      |> Enum.map(fn {name, idx} ->
-        %{
-          name: name,
-          level: Enum.at(@levels, idx + 1),
-          url: taxonomy_url(Enum.take(path, idx + 1))
-        }
+      taxa
+      |> Enum.with_index(1)
+      |> Enum.map(fn {taxon, depth} ->
+        %{name: taxon.name, level: taxon.level, url: taxonomy_url(Enum.take(path, depth))}
       end)
 
     [root | segments]
@@ -330,7 +312,7 @@ defmodule OaksWeb.TaxonomyLive do
 
         <%!-- Child taxa --%>
         <section :if={@child_taxa != []} class="card mb-6" style="padding: 1.5rem;">
-          <h2 class="section-title section-title-sm mb-3">{level_plural(@child_level)}</h2>
+          <h2 class="section-title section-title-sm mb-3">{children_heading(@child_taxa)}</h2>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
             <.taxon_card
               :for={taxon <- @child_taxa}
@@ -539,6 +521,13 @@ defmodule OaksWeb.TaxonomyLive do
   defp level_plural("subsection"), do: "Subsections"
   defp level_plural("complex"), do: "Complexes"
   defp level_plural(_), do: "Taxa"
+
+  defp children_heading(child_taxa) do
+    child_taxa
+    |> Enum.map(& &1.level)
+    |> Enum.uniq()
+    |> Enum.map_join(" & ", &level_plural/1)
+  end
 
   defp species_section_title(true, count), do: "Species without subgenus assignment (#{count})"
   defp species_section_title(false, _count), do: "Species"

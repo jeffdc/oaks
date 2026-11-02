@@ -14,14 +14,6 @@ defmodule Oaks.Taxonomy do
 
   @valid_levels ~w(subgenus section subsection complex)
 
-  @child_level_map %{
-    "subgenus" => "section",
-    "section" => "subsection",
-    "subsection" => "complex"
-  }
-
-  @taxonomy_fields [:subgenus, :section, :subsection, :complex]
-
   @level_fields %{
     "subgenus" => :subgenus,
     "section" => :section,
@@ -73,7 +65,15 @@ defmodule Oaks.Taxonomy do
   """
   @spec list_taxa_with_counts(map()) :: [Taxon.t()]
   def list_taxa_with_counts(params \\ %{}) do
-    from(t in Taxon,
+    Taxon
+    |> maybe_filter_level(params["level"])
+    |> maybe_filter_parent(params["parent"])
+    |> order_by([t], asc: t.name)
+    |> with_species_counts()
+  end
+
+  defp with_species_counts(query) do
+    from(t in query,
       select_merge: %{
         species_count:
           fragment(
@@ -89,9 +89,6 @@ defmodule Oaks.Taxonomy do
           )
       }
     )
-    |> maybe_filter_level(params["level"])
-    |> maybe_filter_parent(params["parent"])
-    |> order_by([t], asc: t.name)
     |> Repo.all()
   end
 
@@ -120,56 +117,110 @@ defmodule Oaks.Taxonomy do
   @doc """
   Returns child taxa of a given taxon, with species counts populated.
 
-  The child level is determined by the taxon's level:
-  subgenus → section, section → subsection, subsection → complex.
-  Complex taxa have no children (returns empty list).
+  Subgenera contain sections, sections contain subsections and complexes
+  placed directly under them, subsections contain complexes, and complexes
+  have no children.
   """
   @spec get_children(Taxon.t()) :: [Taxon.t()]
   def get_children(%Taxon{} = taxon) do
-    case Map.get(@child_level_map, taxon.level) do
-      nil -> []
-      child_level -> list_taxa_with_counts(%{"level" => child_level, "parent" => taxon.name})
+    taxon
+    |> child_taxa_query()
+    |> order_by([t], desc: t.level == "subsection", asc: t.name)
+    |> with_species_counts()
+  end
+
+  @doc """
+  Resolves a browse path of taxon names (e.g. `["Quercus", "Quercus", "robur"]`)
+  into the taxa it names, walking from subgenus down through each taxon's
+  children. Returns `:error` if any segment isn't a child of the one before.
+  """
+  @spec resolve_path([String.t()]) :: {:ok, [Taxon.t()]} | :error
+  def resolve_path([]), do: {:ok, []}
+
+  def resolve_path([subgenus | rest]) do
+    case get_taxon("subgenus", subgenus) do
+      nil -> :error
+      taxon -> resolve_children(rest, [taxon])
+    end
+  end
+
+  defp resolve_children([], resolved), do: {:ok, Enum.reverse(resolved)}
+
+  defp resolve_children([name | rest], [parent | _] = resolved) do
+    case parent |> child_taxa_query() |> where([t], t.name == ^name) |> Repo.all() do
+      [taxon | _] -> resolve_children(rest, [taxon | resolved])
+      [] -> :error
     end
   end
 
   # -- Species in taxon --
 
   @doc """
-  Returns species at exactly the given taxonomy path.
+  Returns the species that sit directly in the taxon at the given path,
+  i.e. not in one of its child taxa.
 
-  The path is a list of taxon names encoding the hierarchy,
-  e.g. `["Quercus", "Quercus"]` for section Quercus within
-  subgenus Quercus.
-
-  Uses "gap filters" to return only species at that exact level:
-  species matching the path must have the next taxonomy field
-  (below the path depth) be NULL or empty.
+  The path is a list of taxon names encoding the hierarchy, e.g.
+  `["Quercus", "Quercus"]` for section Quercus within subgenus Quercus
+  (see `resolve_path/1`). An empty path returns species with no subgenus.
+  Unknown paths return an empty list.
   """
   @spec get_species_in_taxon([String.t()]) :: [SpeciesSchema.t()]
+  def get_species_in_taxon([]) do
+    from(s in SpeciesSchema,
+      where: is_nil(s.subgenus) or s.subgenus == "",
+      order_by: [asc: s.scientific_name]
+    )
+    |> Repo.all()
+  end
+
   def get_species_in_taxon(path) when is_list(path) do
-    depth = length(path)
-
-    query = from(s in SpeciesSchema, order_by: [asc: s.scientific_name])
-
-    # Apply positive filters for each path segment
-    query =
-      path
-      |> Enum.zip(@taxonomy_fields)
-      |> Enum.reduce(query, fn {value, field}, q ->
-        where(q, [s], field(s, ^field) == ^value)
-      end)
-
-    # Apply gap filter: next taxonomy field must be NULL or empty
-    case Enum.at(@taxonomy_fields, depth) do
-      nil ->
-        Repo.all(query)
-
-      gap_field ->
-        query
-        |> where([s], is_nil(field(s, ^gap_field)) or field(s, ^gap_field) == "")
-        |> Repo.all()
+    case resolve_path(path) do
+      {:ok, taxa} -> species_directly_in(taxa)
+      :error -> []
     end
   end
+
+  defp species_directly_in(taxa) do
+    base = from(s in SpeciesSchema, order_by: [asc: s.scientific_name])
+    query = Enum.reduce(taxa, base, &filter_by_taxon/2)
+
+    taxa
+    |> List.last()
+    |> exclude_child_species(query)
+    |> Repo.all()
+  end
+
+  defp filter_by_taxon(taxon, query) do
+    field = Map.fetch!(@level_fields, taxon.level)
+    where(query, [s], field(s, ^field) == ^taxon.name)
+  end
+
+  # Species assigned to one of the taxon's child taxa belong to that child.
+  defp exclude_child_species(%Taxon{level: "subgenus"}, query) do
+    where(query, [s], is_nil(s.section) or s.section == "")
+  end
+
+  defp exclude_child_species(%Taxon{level: "section"} = taxon, query) do
+    direct_complexes =
+      taxon
+      |> child_taxa_query()
+      |> where([t], t.level == "complex")
+      |> select([t], t.name)
+      |> Repo.all()
+
+    where(
+      query,
+      [s],
+      (is_nil(s.subsection) or s.subsection == "") and
+        (is_nil(s.complex) or s.complex == "" or s.complex not in ^direct_complexes)
+    )
+  end
+
+  defp exclude_child_species(%Taxon{level: "subsection"}, query) do
+    where(query, [s], is_nil(s.complex) or s.complex == "")
+  end
+
+  defp exclude_child_species(%Taxon{}, query), do: query
 
   # -- Counts --
 
