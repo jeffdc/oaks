@@ -22,6 +22,13 @@ defmodule Oaks.Taxonomy do
 
   @taxonomy_fields [:subgenus, :section, :subsection, :complex]
 
+  @level_fields %{
+    "subgenus" => :subgenus,
+    "section" => :section,
+    "subsection" => :subsection,
+    "complex" => :complex
+  }
+
   @species_count_sql "(SELECT COUNT(*) FROM species sp WHERE " <>
                        "(? = 'subgenus' AND sp.subgenus = ?) OR " <>
                        "(? = 'section' AND sp.section = ?) OR " <>
@@ -204,21 +211,107 @@ defmodule Oaks.Taxonomy do
 
   @doc """
   Updates a taxon with the given attributes.
+
+  The level can't change after creation. Species and child taxa refer to a
+  taxon by name, so a rename also updates those references in the same
+  transaction. Changing the content stamps `content_updated_at` with today's date.
   """
   @spec update_taxon(Taxon.t(), map()) :: {:ok, Taxon.t()} | {:error, Ecto.Changeset.t()}
   def update_taxon(%Taxon{} = taxon, attrs) do
-    taxon
-    |> Taxon.changeset(attrs)
-    |> Repo.update()
+    changeset =
+      taxon
+      |> Taxon.changeset(Map.drop(attrs, ["level", :level]))
+      |> stamp_content_updated()
+
+    case Ecto.Changeset.fetch_change(changeset, :name) do
+      {:ok, new_name} -> rename_taxon(taxon, changeset, new_name)
+      :error -> Repo.update(changeset)
+    end
+  end
+
+  defp rename_taxon(taxon, changeset, new_name) do
+    field = Map.fetch!(@level_fields, taxon.level)
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:taxon, changeset)
+    |> Ecto.Multi.update_all(
+      :species,
+      from(s in SpeciesSchema, where: field(s, ^field) == ^taxon.name),
+      set: [{field, new_name}]
+    )
+    |> Ecto.Multi.update_all(:children, child_taxa_query(taxon), set: [parent: new_name])
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{taxon: updated}} -> {:ok, updated}
+      {:error, :taxon, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  defp stamp_content_updated(changeset) do
+    if Ecto.Changeset.changed?(changeset, :content) do
+      Ecto.Changeset.put_change(changeset, :content_updated_at, Date.to_iso8601(Date.utc_today()))
+    else
+      changeset
+    end
   end
 
   @doc """
-  Deletes a taxon. May fail if species reference it.
+  Returns how many species and direct child taxa refer to the taxon.
   """
-  @spec delete_taxon(Taxon.t()) :: {:ok, Taxon.t()} | {:error, Ecto.Changeset.t()}
-  def delete_taxon(%Taxon{} = taxon) do
-    Repo.delete(taxon)
+  @spec taxon_usage(Taxon.t()) :: %{species: non_neg_integer(), children: non_neg_integer()}
+  def taxon_usage(%Taxon{} = taxon) do
+    field = Map.fetch!(@level_fields, taxon.level)
+
+    %{
+      species:
+        Repo.aggregate(from(s in SpeciesSchema, where: field(s, ^field) == ^taxon.name), :count),
+      children: Repo.aggregate(child_taxa_query(taxon), :count)
+    }
   end
+
+  @doc """
+  Deletes a taxon, refusing while species or child taxa still refer to it.
+  """
+  @spec delete_taxon(Taxon.t()) ::
+          {:ok, Taxon.t()} | {:error, {:in_use, map()}} | {:error, Ecto.Changeset.t()}
+  def delete_taxon(%Taxon{} = taxon) do
+    Repo.transaction(fn ->
+      case taxon_usage(taxon) do
+        %{species: 0, children: 0} -> delete_or_rollback(taxon)
+        usage -> Repo.rollback({:in_use, usage})
+      end
+    end)
+  end
+
+  defp delete_or_rollback(taxon) do
+    case Repo.delete(taxon) do
+      {:ok, deleted} -> deleted
+      {:error, changeset} -> Repo.rollback(changeset)
+    end
+  end
+
+  # Direct children of a taxon. Children store only the parent's name, so the
+  # parent's level is implied by the child's level. A complex can sit directly
+  # under a section; when a subsection shares the section's name, complexes
+  # with that parent name belong to the subsection.
+  defp child_taxa_query(%Taxon{level: "subgenus", name: name}) do
+    from(t in Taxon, where: t.level == "section" and t.parent == ^name)
+  end
+
+  defp child_taxa_query(%Taxon{level: "section", name: name}) do
+    levels =
+      if Repo.exists?(from(t in Taxon, where: t.level == "subsection" and t.name == ^name)),
+        do: ["subsection"],
+        else: ["subsection", "complex"]
+
+    from(t in Taxon, where: t.level in ^levels and t.parent == ^name)
+  end
+
+  defp child_taxa_query(%Taxon{level: "subsection", name: name}) do
+    from(t in Taxon, where: t.level == "complex" and t.parent == ^name)
+  end
+
+  defp child_taxa_query(%Taxon{}), do: from(t in Taxon, where: false)
 
   # -- Serialization --
 

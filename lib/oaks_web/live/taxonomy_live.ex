@@ -26,7 +26,8 @@ defmodule OaksWeb.TaxonomyLive do
      assign(socket,
        page_title: "Taxonomy",
        show_delete_taxon_confirm: false,
-       delete_taxon_target: nil
+       delete_taxon_target: nil,
+       delete_taxon_usage: nil
      )}
   end
 
@@ -53,7 +54,12 @@ defmodule OaksWeb.TaxonomyLive do
     taxon = socket.assigns[:authenticated] && id && Taxonomy.get_taxon_by_id(id)
 
     if taxon do
-      {:noreply, assign(socket, show_delete_taxon_confirm: true, delete_taxon_target: taxon)}
+      {:noreply,
+       assign(socket,
+         show_delete_taxon_confirm: true,
+         delete_taxon_target: taxon,
+         delete_taxon_usage: Taxonomy.taxon_usage(taxon)
+       )}
     else
       {:noreply, socket}
     end
@@ -64,22 +70,24 @@ defmodule OaksWeb.TaxonomyLive do
   end
 
   def handle_event("confirm_delete_taxon", _params, socket) do
-    if socket.assigns[:authenticated] do
-      taxon = socket.assigns.delete_taxon_target
+    taxon = socket.assigns.delete_taxon_target
+
+    if socket.assigns[:authenticated] && taxon do
+      socket = assign(socket, show_delete_taxon_confirm: false, delete_taxon_target: nil)
 
       case Taxonomy.delete_taxon(taxon) do
         {:ok, _} ->
           {:noreply,
            socket
-           |> assign(show_delete_taxon_confirm: false, delete_taxon_target: nil)
            |> put_flash(:info, "Taxon deleted.")
            |> push_navigate(to: ~p"/taxonomy")}
 
-        {:error, _changeset} ->
+        {:error, {:in_use, usage}} ->
           {:noreply,
-           socket
-           |> assign(show_delete_taxon_confirm: false, delete_taxon_target: nil)
-           |> put_flash(:error, "Failed to delete taxon.")}
+           put_flash(socket, :error, "Can't delete: #{usage_text(usage)} still use it.")}
+
+        {:error, _changeset} ->
+          {:noreply, put_flash(socket, :error, "Failed to delete taxon.")}
       end
     else
       {:noreply, socket}
@@ -357,6 +365,7 @@ defmodule OaksWeb.TaxonomyLive do
       <.delete_taxon_modal
         :if={@show_delete_taxon_confirm && @delete_taxon_target}
         taxon={@delete_taxon_target}
+        usage={@delete_taxon_usage}
       />
     </div>
     """
@@ -467,6 +476,7 @@ defmodule OaksWeb.TaxonomyLive do
   # -- Delete taxon modal --
 
   attr :taxon, :any, required: true
+  attr :usage, :map, default: nil
 
   defp delete_taxon_modal(assigns) do
     ~H"""
@@ -482,8 +492,8 @@ defmodule OaksWeb.TaxonomyLive do
         <p class="mb-4" style="color: var(--color-text-secondary);">
           Are you sure you want to delete <strong>{@taxon.name}</strong> ({@taxon.level})?
         </p>
-        <p class="text-sm mb-4" style="color: var(--color-text-tertiary);">
-          This will fail if species or child taxa reference it.
+        <p :if={in_use?(@usage)} class="text-sm text-red-600 mb-4" id="delete-taxon-in-use">
+          {usage_text(@usage)} still use this taxon. Move or delete them first.
         </p>
         <div class="flex justify-end gap-3">
           <button
@@ -494,6 +504,7 @@ defmodule OaksWeb.TaxonomyLive do
             Cancel
           </button>
           <button
+            :if={!in_use?(@usage)}
             phx-click="confirm_delete_taxon"
             class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
             id="confirm-delete-taxon-btn"
@@ -507,6 +518,18 @@ defmodule OaksWeb.TaxonomyLive do
   end
 
   # -- Helpers --
+
+  defp in_use?(%{species: species, children: children}), do: species + children > 0
+  defp in_use?(_usage), do: false
+
+  defp usage_text(%{species: species, children: children}) do
+    [
+      species > 0 && "#{species} species",
+      children > 0 && "#{children} child #{if children == 1, do: "taxon", else: "taxa"}"
+    ]
+    |> Enum.filter(& &1)
+    |> Enum.join(" and ")
+  end
 
   defp display_name("\u00D7" <> rest), do: rest
   defp display_name(name), do: name

@@ -148,4 +148,33 @@ defmodule OaksWeb.TaxonomyLiveTest do
         |> render_click()
     end
   end
+
+  describe "delete taxon" do
+    setup %{conn: conn} do
+      %{conn: put_connect_params(conn, %{"api_key" => Application.get_env(:oaks, :api_key)})}
+    end
+
+    test "shows what still uses the taxon and offers no delete button", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/Quercus/Quercus")
+
+      html = render_click(view, "request_delete_taxon", %{"id" => "2"})
+
+      assert html =~ "3 species and 1 child taxon still use this taxon"
+      refute has_element?(view, "#confirm-delete-taxon-btn")
+      assert Oaks.Taxonomy.get_taxon_by_id(2)
+    end
+
+    test "deletes an unused taxon", %{conn: conn} do
+      {:ok, taxon} =
+        Oaks.Taxonomy.create_taxon(%{name: "Unused", level: "complex", parent: "Stellatae"})
+
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/Quercus/Quercus/Stellatae")
+      render_click(view, "request_delete_taxon", %{"id" => to_string(taxon.id)})
+
+      assert {:error, {:live_redirect, %{to: "/taxonomy"}}} =
+               view |> element("#confirm-delete-taxon-btn") |> render_click()
+
+      refute Oaks.Taxonomy.get_taxon_by_id(taxon.id)
+    end
+  end
 end

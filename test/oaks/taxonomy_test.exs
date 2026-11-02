@@ -152,4 +152,66 @@ defmodule Oaks.TaxonomyTest do
       assert names == Enum.sort(names)
     end
   end
+
+  describe "delete_taxon/1" do
+    test "refuses while species or child taxa use the taxon" do
+      section = Taxonomy.get_taxon_by_id(2)
+
+      assert {:error, {:in_use, %{species: 3, children: 1}}} = Taxonomy.delete_taxon(section)
+      assert Taxonomy.get_taxon_by_id(2)
+    end
+
+    test "deletes an unused taxon" do
+      {:ok, taxon} =
+        Taxonomy.create_taxon(%{name: "Unused", level: "complex", parent: "Stellatae"})
+
+      assert {:ok, _} = Taxonomy.delete_taxon(taxon)
+      refute Taxonomy.get_taxon_by_id(taxon.id)
+    end
+  end
+
+  describe "update_taxon/2" do
+    test "renaming a section updates its species and child subsections" do
+      {:ok, _} = Taxonomy.update_taxon(Taxonomy.get_taxon_by_id(2), %{"name" => "Albae"})
+
+      assert Oaks.Species.get_species_by_name("alba").section == "Albae"
+      assert Oaks.Species.get_species_by_name("stellata").section == "Albae"
+      assert Oaks.Species.get_species_by_name("alba").subgenus == "Quercus"
+      assert Taxonomy.get_taxon_by_id(5).parent == "Albae"
+      # The subgenus of the same name is untouched.
+      assert Taxonomy.get_taxon_by_id(1).name == "Quercus"
+      assert Taxonomy.get_taxon_by_id(2).parent == "Quercus"
+    end
+
+    test "renaming a section carries complexes placed directly under it" do
+      {:ok, complex} =
+        Taxonomy.create_taxon(%{name: "robur", level: "complex", parent: "Lobatae"})
+
+      {:ok, _} = Taxonomy.update_taxon(Taxonomy.get_taxon_by_id(4), %{"name" => "Rubrae"})
+
+      assert Taxonomy.get_taxon_by_id(complex.id).parent == "Rubrae"
+      assert Oaks.Species.get_species_by_name("rubra").section == "Rubrae"
+    end
+
+    test "rename collisions return a changeset error and change nothing" do
+      {:error, changeset} =
+        Taxonomy.update_taxon(Taxonomy.get_taxon_by_id(4), %{"name" => "Quercus"})
+
+      assert changeset.errors != []
+      assert Oaks.Species.get_species_by_name("rubra").section == "Lobatae"
+    end
+
+    test "ignores level changes" do
+      {:ok, taxon} = Taxonomy.update_taxon(Taxonomy.get_taxon_by_id(5), %{"level" => "complex"})
+      assert taxon.level == "subsection"
+    end
+
+    test "stamps content_updated_at only when content changes" do
+      {:ok, taxon} = Taxonomy.update_taxon(Taxonomy.get_taxon_by_id(5), %{"author" => "Trel."})
+      assert taxon.content_updated_at == nil
+
+      {:ok, taxon} = Taxonomy.update_taxon(taxon, %{"content" => "New text"})
+      assert taxon.content_updated_at == Date.to_iso8601(Date.utc_today())
+    end
+  end
 end
