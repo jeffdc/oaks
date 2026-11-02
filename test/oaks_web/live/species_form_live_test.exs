@@ -100,6 +100,21 @@ defmodule OaksWeb.SpeciesFormLiveTest do
       assert html =~ "Species updated"
     end
 
+    test "keeps a taxonomy value that has no taxa row when saving", %{conn: conn} do
+      Oaks.Species.get_species_by_name("alba")
+      |> Ecto.Changeset.change(subsection: "Erythromexicanae")
+      |> Oaks.Repo.update!()
+
+      {:ok, view, html} = conn |> authenticated_conn() |> live(~p"/species/alba/edit")
+      assert html =~ "Erythromexicanae (not in taxonomy)"
+
+      view |> form("#species-form", species: %{author: "L."}) |> render_submit()
+
+      species = Oaks.Species.get_species_by_name("alba")
+      assert species.author == "L."
+      assert species.subsection == "Erythromexicanae"
+    end
+
     test "redirects for nonexistent species", %{conn: conn} do
       assert {:error, {:live_redirect, %{to: "/list"}}} =
                conn |> authenticated_conn() |> live(~p"/species/zzz_nonexistent/edit")

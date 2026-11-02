@@ -201,7 +201,7 @@ defmodule OaksWeb.SpeciesFormLive do
                   field={@form[:subgenus]}
                   type="select"
                   label="Subgenus"
-                  options={@subgenera}
+                  options={taxon_options(@subgenera, @form[:subgenus].value)}
                   prompt="Select subgenus..."
                 />
               </div>
@@ -210,7 +210,7 @@ defmodule OaksWeb.SpeciesFormLive do
                   field={@form[:section]}
                   type="select"
                   label="Section"
-                  options={@sections}
+                  options={taxon_options(@sections, @form[:section].value)}
                   prompt="Select section..."
                 />
               </div>
@@ -219,7 +219,7 @@ defmodule OaksWeb.SpeciesFormLive do
                   field={@form[:subsection]}
                   type="select"
                   label="Subsection"
-                  options={@subsections}
+                  options={taxon_options(@subsections, @form[:subsection].value)}
                   prompt="Select subsection..."
                 />
               </div>
@@ -228,7 +228,7 @@ defmodule OaksWeb.SpeciesFormLive do
                   field={@form[:complex]}
                   type="select"
                   label="Complex"
-                  options={@complexes}
+                  options={taxon_options(@complexes, @form[:complex].value)}
                   prompt="Select complex..."
                 />
               </div>
@@ -335,6 +335,14 @@ defmodule OaksWeb.SpeciesFormLive do
 
   defp display_name("\u00D7" <> rest), do: rest
   defp display_name(name), do: name
+
+  # Keeps a stored value selectable when it has no taxa row; otherwise the
+  # select falls back to the prompt and saving silently clears the field.
+  defp taxon_options(names, current) when is_binary(current) and current != "" do
+    if current in names, do: names, else: [{"#{current} (not in taxonomy)", current} | names]
+  end
+
+  defp taxon_options(names, _current), do: names
 
   defp taxonomy_names(level) do
     level
