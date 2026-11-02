@@ -100,14 +100,6 @@ defmodule Oaks.Species do
   end
 
   @doc """
-  Returns a species by ID, or nil if not found.
-  """
-  @spec get_species(integer()) :: Species.t() | nil
-  def get_species(id) do
-    Repo.get(Species, id)
-  end
-
-  @doc """
   Returns a species with all source data preloaded.
 
   Sources are ordered with preferred source first.

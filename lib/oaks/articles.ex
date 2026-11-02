@@ -160,7 +160,7 @@ defmodule Oaks.Articles do
   # -- Markdown --
 
   @doc """
-  Renders markdown content to HTML using Earmark.
+  Renders markdown content to HTML via `Oaks.Markdown` (MDEx).
   Returns safe HTML string or empty string if content is nil.
   """
   @spec render_markdown(String.t() | nil) :: String.t()
