@@ -134,8 +134,11 @@ defmodule OaksWeb.TaxonFormLive do
 
   def handle_event("remove_link", %{"index" => index_str}, socket) do
     case Params.int(index_str) do
-      nil -> {:noreply, socket}
-      index -> {:noreply, assign(socket, link_tags: List.delete_at(socket.assigns.link_tags, index))}
+      nil ->
+        {:noreply, socket}
+
+      index ->
+        {:noreply, assign(socket, link_tags: List.delete_at(socket.assigns.link_tags, index))}
     end
   end
 
