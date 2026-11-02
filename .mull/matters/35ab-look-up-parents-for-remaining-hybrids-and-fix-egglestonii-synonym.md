@@ -15,3 +15,5 @@ After the 2026-11 data migrations:
 - havardii has an empty Oak Compendium row: keep (Jeff, intentional while sources mature). Oak Compendium sources are NOT auto-preferred (Jeff).
 
 2026-11-02 (7f5d3d5): 16 hybrids filled from Jeff's research (hybrid_proposals.md). Earlier fills agree with it except × cerrioides (disputed). Open decisions: × battandieri, × cerrioides, × gallaecica, × hispanica, × mannifera, × subpyrenaica; nomenclature: × columnaris→× richteri and × subglaucescens→× anselmii synonyms per POWO.
+
+Done 2026-11-02: decisions applied (battandieri coccifera × faginea broteroi, gallaecica lusitanica × robur, hispanica cerris × suber, cerrioides kept canariensis × pubescens; mannifera and subpyrenaica intentionally without parents). × columnaris merged into × richteri and × subglaucescens into × anselmii (old names kept as synonyms). Still open: × egglestonii synonym.
