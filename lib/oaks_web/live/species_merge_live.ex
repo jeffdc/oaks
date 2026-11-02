@@ -123,6 +123,14 @@ defmodule OaksWeb.SpeciesMergeLive do
   end
 
   def handle_event("execute_merge", _params, socket) do
+    if socket.assigns[:authenticated] do
+      execute_merge(socket)
+    else
+      {:noreply, socket}
+    end
+  end
+
+  defp execute_merge(socket) do
     socket = assign(socket, merging: true, merge_error: nil, completed_steps: [])
 
     include_sources =

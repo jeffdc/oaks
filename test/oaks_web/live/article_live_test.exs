@@ -51,4 +51,26 @@ defmodule OaksWeb.ArticleLiveTest do
       refute html =~ "Delete"
     end
   end
+
+  describe "delete" do
+    test "ignores delete events from unauthenticated users", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/articles/getting-started")
+
+      render_click(view, "confirm_delete")
+      render_click(view, "delete")
+
+      assert Oaks.Articles.get_article_by_slug("getting-started", false)
+      refute has_element?(view, "[phx-click='delete']")
+    end
+
+    test "deletes the article for authenticated users", %{conn: conn} do
+      conn = put_connect_params(conn, %{"api_key" => Application.get_env(:oaks, :api_key)})
+      {:ok, view, _html} = live(conn, ~p"/articles/getting-started")
+
+      render_click(view, "confirm_delete")
+      assert {:error, {:live_redirect, %{to: "/articles"}}} = render_click(view, "delete")
+
+      refute Oaks.Articles.get_article_by_slug("getting-started", true)
+    end
+  end
 end

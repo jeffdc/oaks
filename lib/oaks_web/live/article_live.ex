@@ -51,7 +51,7 @@ defmodule OaksWeb.ArticleLive do
 
   @impl true
   def handle_event("confirm_delete", _params, socket) do
-    {:noreply, assign(socket, confirm_delete: true)}
+    {:noreply, assign(socket, confirm_delete: socket.assigns[:authenticated] || false)}
   end
 
   def handle_event("cancel_delete", _params, socket) do
@@ -59,17 +59,19 @@ defmodule OaksWeb.ArticleLive do
   end
 
   def handle_event("delete", _params, socket) do
-    article = socket.assigns.article
+    if socket.assigns[:authenticated] do
+      case Articles.delete_article(socket.assigns.article) do
+        {:ok, _} ->
+          {:noreply,
+           socket
+           |> put_flash(:info, "Article deleted.")
+           |> push_navigate(to: ~p"/articles")}
 
-    case Articles.delete_article(article) do
-      {:ok, _} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Article deleted.")
-         |> push_navigate(to: ~p"/articles")}
-
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to delete article.")}
+        {:error, _} ->
+          {:noreply, put_flash(socket, :error, "Failed to delete article.")}
+      end
+    else
+      {:noreply, socket}
     end
   end
 
