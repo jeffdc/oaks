@@ -13,7 +13,9 @@ defmodule Oaks.Repo.Migrations.FixAuditedSpeciesData do
   @parent_typos [
     {"× drummondii", "parent1", "margaretta", "margaretiae"},
     {"× introgressa", "parent2", "prinoïdes", "prinoides"},
-    {"× munzii", "parent2", "cornelius", "cornelius-mulleri"}
+    {"× munzii", "parent2", "cornelius", "cornelius-mulleri"},
+    # Its synonyms give the parentage as cornelius-mulleri X engelmannii.
+    {"× acutidens", "parent1", "mulleri", "cornelius-mulleri"}
   ]
 
   # Full literature citations stored as the author; keep only the authority.
