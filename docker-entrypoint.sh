@@ -22,7 +22,9 @@ chown oaks:oaks "$BACKUP_DIR"
 # Restore from Litestream if no database exists
 if [ ! -f "$DATABASE_PATH" ]; then
   echo "No database found, attempting restore from Litestream..."
-  if litestream restore -if-replica-exists -o "$DATABASE_PATH" s3://oaks-db-backups/litestream; then
+  # -if-replica-exists exits 0 when there is no replica, so check for the file too.
+  if litestream restore -if-replica-exists -o "$DATABASE_PATH" s3://oaks-db-backups/litestream \
+    && [ -f "$DATABASE_PATH" ]; then
     chown oaks:oaks "$DATABASE_PATH"
     echo "Database restored from Litestream."
   else
