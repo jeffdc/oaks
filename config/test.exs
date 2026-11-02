@@ -42,3 +42,6 @@ config :oaks, :analytics_async, false
 
 # Tests call Oaks.Analytics.Rollup directly instead of on a timer.
 config :oaks, Oaks.Analytics.RollupScheduler, enabled: false
+
+# No pauses between rollup days/batches, and tiny prune batches so the loop runs.
+config :oaks, Oaks.Analytics.Rollup, pause_ms: 0, prune_batch: 2

@@ -13,6 +13,13 @@ defmodule Oaks.Analytics.Rollup do
 
   Everything here is idempotent and safe to run repeatedly; see
   `Oaks.Analytics.RollupScheduler` for when it runs.
+
+  Writes are spread out (one transaction per day, pruning in batches, with a
+  short pause between them) so a large backlog never holds SQLite's write
+  lock for long: Litestream needs it free to checkpoint, and a WAL that can't
+  be checkpointed grows until the volume fills (2026-11-02 incident). The
+  pause and batch size are configurable for tests:
+  `config :oaks, Oaks.Analytics.Rollup, pause_ms: 0, prune_batch: 2`.
   """
 
   import Ecto.Query
@@ -25,6 +32,8 @@ defmodule Oaks.Analytics.Rollup do
   @default_retention_days 30
   @top_404s_per_day 50
   @insert_batch 500
+  @default_prune_batch 5_000
+  @default_pause_ms 200
 
   @doc """
   Rolls up every finished day that has raw page views but no `daily_stats`
@@ -37,7 +46,9 @@ defmodule Oaks.Analytics.Rollup do
     count =
       Enum.count(pending_dates(), fn date ->
         try do
-          rollup_day(date) == :ok
+          result = rollup_day(date)
+          pause()
+          result == :ok
         rescue
           e ->
             Logger.error("Analytics rollup failed for #{date}: #{Exception.message(e)}")
@@ -163,16 +174,34 @@ defmodule Oaks.Analytics.Rollup do
   @spec prune_rolled_up_page_views(pos_integer()) :: non_neg_integer()
   def prune_rolled_up_page_views(days \\ @default_retention_days) do
     cutoff = day_start(Date.add(Date.utc_today(), -days))
+    prune_batches(cutoff, config(:prune_batch, @default_prune_batch), 0)
+  end
 
-    {count, _} =
+  # Deletes one batch at a time, pausing between batches, until a batch comes
+  # back short.
+  defp prune_batches(cutoff, batch_size, total) do
+    batch =
       from(pv in PageView,
         where: pv.inserted_at < ^cutoff,
-        where: fragment("date(?) IN (SELECT date FROM daily_stats)", pv.inserted_at)
+        where: fragment("date(?) IN (SELECT date FROM daily_stats)", pv.inserted_at),
+        select: pv.id,
+        limit: ^batch_size
       )
-      |> Repo.delete_all()
 
-    count
+    {count, _} = Repo.delete_all(from(pv in PageView, where: pv.id in subquery(batch)))
+
+    if count == batch_size do
+      pause()
+      prune_batches(cutoff, batch_size, total + count)
+    else
+      total + count
+    end
   end
+
+  defp pause, do: Process.sleep(config(:pause_ms, @default_pause_ms))
+
+  defp config(key, default),
+    do: :oaks |> Application.get_env(__MODULE__, []) |> Keyword.get(key, default)
 
   @doc """
   Runs the rollup and then the prune. Called by the scheduler.
