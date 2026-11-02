@@ -1,5 +1,5 @@
 ---
-status: raw
+status: done
 tags: [p3, cleanup]
 effort: S
 created: 2026-11-02
