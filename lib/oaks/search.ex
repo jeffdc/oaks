@@ -77,10 +77,10 @@ defmodule Oaks.Search do
         left_join: ss in SpeciesSource,
         on: ss.species_id == s.id,
         where:
-          fragment("lower(?) LIKE ?", s.scientific_name, ^term) or
-            fragment("lower(?) LIKE ?", s.author, ^term) or
-            fragment("lower(?) LIKE ?", s.synonyms, ^term) or
-            fragment("lower(?) LIKE ?", ss.local_names, ^term),
+          fragment("lower(?) LIKE ? ESCAPE '\\'", s.scientific_name, ^term) or
+            fragment("lower(?) LIKE ? ESCAPE '\\'", s.author, ^term) or
+            fragment("lower(?) LIKE ? ESCAPE '\\'", s.synonyms, ^term) or
+            fragment("lower(?) LIKE ? ESCAPE '\\'", ss.local_names, ^term),
         select: s.id
       )
 
@@ -103,7 +103,7 @@ defmodule Oaks.Search do
   defp search_taxa(term, limit) do
     taxa =
       from(t in Taxon,
-        where: fragment("lower(?) LIKE ?", t.name, ^term),
+        where: fragment("lower(?) LIKE ? ESCAPE '\\'", t.name, ^term),
         order_by: [asc: t.level, asc: t.name],
         limit: ^limit,
         select: %{
@@ -124,8 +124,8 @@ defmodule Oaks.Search do
   defp search_sources(term, limit) do
     from(s in Source,
       where:
-        fragment("lower(?) LIKE ?", s.name, ^term) or
-          fragment("lower(?) LIKE ?", s.author, ^term),
+        fragment("lower(?) LIKE ? ESCAPE '\\'", s.name, ^term) or
+          fragment("lower(?) LIKE ? ESCAPE '\\'", s.author, ^term),
       order_by: [asc: s.name],
       limit: ^limit,
       select: %{

@@ -93,5 +93,18 @@ defmodule Oaks.SearchTest do
       ids = Enum.map(species, & &1.id)
       assert ids == Enum.uniq(ids)
     end
+
+    test "matches LIKE wildcard characters literally" do
+      Oaks.Species.get_species_by_name("rubra")
+      |> Ecto.Changeset.change(author: "Test_Author 100%")
+      |> Oaks.Repo.update!()
+
+      assert names(Search.search("test_author")) == ["rubra"]
+      assert names(Search.search("100%")) == ["rubra"]
+      assert names(Search.search("test%author")) == []
+      assert names(Search.search("l_ 1753")) == []
+    end
   end
+
+  defp names(%{species: species}), do: Enum.map(species, & &1.scientific_name)
 end
