@@ -2,8 +2,9 @@
 status: raw
 tags: [tier-2]
 created: 2026-05-12
-updated: 2026-05-12
+updated: 2026-11-02
 epic: gallformers-port
+relates: [a9a3]
 ---
 
 # Replace seed-count assertions with fixtures module
@@ -21,3 +22,5 @@ Crib pattern from: /Users/jeff/dev/gallformers/test/support/fixtures/ingestion_p
 SQLite caveat: single-writer; fixtures must run within DataCase sandbox
 
 Effort: M
+
+Audit 2026-11-02: seed-count assertions at species_controller_test.exs:12-51 (==5), sources_controller_test.exs:9 (==3).
