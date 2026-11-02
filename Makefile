@@ -90,21 +90,26 @@ build:
 # Requires an AWS CLI session with read access to the bucket: run `aws login`
 # first (temporary credentials; no access keys). Litestream 0.3's AWS SDK can't
 # read that login type itself, so the CLI exports the session's temporary
-# credentials into Litestream's environment for this one command.
+# credentials into Litestream's environment for this one command. The profile
+# is passed explicitly so stale AWS_* / LITESTREAM_* key variables in the shell
+# can't take precedence over the session. Override with AWS_PROFILE=name.
 #
 # Production replicates with Litestream 0.3.x; 0.5+ uses an incompatible
 # replica format, so a pinned 0.3 binary is fetched into bin/. 0.3.14 has no
 # macOS builds, so macOS uses 0.3.13 (same replica format).
 LITESTREAM_REPLICA := s3://oaks-db-backups/litestream
 LITESTREAM_BIN := bin/litestream-0.3
+AWS_PROFILE ?= default
 
 download-db: $(LITESTREAM_BIN)
-	@aws sts get-caller-identity >/dev/null 2>&1 || { \
-		echo "ERROR: No AWS session. Run 'aws login' first."; exit 1; }
+	@aws sts get-caller-identity --profile $(AWS_PROFILE) >/dev/null || { \
+		echo "ERROR: No usable AWS session for profile '$(AWS_PROFILE)'. Run 'aws login' first."; exit 1; }
 	@echo "Restoring latest production database from $(LITESTREAM_REPLICA)..."
 	@rm -f /tmp/oaks-restore.db /tmp/oaks-restore.db-*
-	@eval "$$(aws configure export-credentials --format env)" && \
-		$(LITESTREAM_BIN) restore -o /tmp/oaks-restore.db $(LITESTREAM_REPLICA)
+	@creds="$$(aws configure export-credentials --profile $(AWS_PROFILE) --format env)" && \
+		eval "$$creds" && \
+		env -u LITESTREAM_ACCESS_KEY_ID -u LITESTREAM_SECRET_ACCESS_KEY \
+			$(LITESTREAM_BIN) restore -o /tmp/oaks-restore.db $(LITESTREAM_REPLICA)
 	@sqlite3 /tmp/oaks-restore.db "PRAGMA integrity_check;" | grep -qx ok || { \
 		echo "ERROR: Restored database failed integrity check"; exit 1; }
 	@sqlite3 /tmp/oaks-restore.db "SELECT count(*) FROM species;" | grep -qE '^[1-9]' || { \
