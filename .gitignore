@@ -46,9 +46,6 @@ htmlcov/
 # Logs
 *.log
 
-# Go build artifacts
-cli/oak
-
 # Xcode
 ios/OakCompendium.xcodeproj/xcuserdata/
 ios/OakCompendium.xcodeproj/project.xcworkspace/

@@ -49,7 +49,6 @@ contribution guidelines, and [CLAUDE.md](CLAUDE.md) for the project guide
 | `priv/repo/` | Migrations, `structure.sql`, seeds |
 | `test/` | Elixir tests |
 | `scrapers/` | Python scripts for ingesting external data (local dev only) |
-| `cli/` | Legacy Go CLI (frozen reference) |
 | `ios/` | iOS app source |
 
 ## Data Sources

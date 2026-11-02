@@ -30,7 +30,6 @@ canonical project guide is `CLAUDE.md`; the conventions reference is
 | `priv/repo/` | Migrations, `structure.sql`, seeds |
 | `test/` | Elixir tests |
 | `scrapers/` | Python scripts for ingesting external data (local dev only) |
-| `cli/` | Legacy Go CLI tool, frozen |
 | `ios/` | iOS app source |
 
 ## Coding Guidelines

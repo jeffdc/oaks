@@ -33,7 +33,6 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 | `assets/` | JS, CSS, Tailwind |
 | `priv/repo/` | Migrations, structure.sql, seeds |
 | `test/` | Elixir tests |
-| `cli/` | Go CLI tool (legacy, may be ported) |
 
 ## Tech Stack
 

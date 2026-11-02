@@ -6,7 +6,6 @@ The data files in this repository are NOT covered by the MIT License that applie
 to the source code. The following files and their contents are proprietary:
 
 - quercus_data.json
-- cli/data/*.yaml
 - oak_compendium.db (and any SQLite database exports)
 - Any JSON, YAML, or database exports derived from the above
 
