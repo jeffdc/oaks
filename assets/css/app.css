@@ -2393,3 +2393,14 @@ textarea:focus-visible {
     margin-bottom: 0.25rem;
   }
 }
+
+/* Merge picker results (species detail "Make Synonym Of...") */
+.merge-target-option {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+}
+
+.merge-target-option:hover {
+  background-color: var(--color-forest-50);
+  border-color: var(--color-forest-300);
+}

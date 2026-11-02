@@ -999,10 +999,7 @@ defmodule OaksWeb.SpeciesDetailLive do
               <button
                 phx-click="select_merge_target"
                 phx-value-name={species.scientific_name}
-                class="w-full text-left p-3 rounded-lg transition-colors"
-                style="background-color: var(--color-background); border: 1px solid var(--color-border);"
-                onmouseover="this.style.backgroundColor='var(--color-forest-50)';this.style.borderColor='var(--color-forest-300)'"
-                onmouseout="this.style.backgroundColor='var(--color-background)';this.style.borderColor='var(--color-border)'"
+                class="merge-target-option w-full text-left p-3 rounded-lg transition-colors"
               >
                 <div class="flex items-baseline gap-2">
                   <span class="species-name font-semibold" style="color: var(--color-forest-800);">
