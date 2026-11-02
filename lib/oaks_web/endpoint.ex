@@ -12,8 +12,11 @@ defmodule OaksWeb.Endpoint do
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
-    websocket: [connect_info: [session: @session_options]],
-    longpoll: [connect_info: [session: @session_options]]
+    # peer_data, user_agent, and x_headers feed the analytics visitor hash
+    # (OaksWeb.Analytics.TrackPageView); behind Fly the client IP arrives in
+    # X-Forwarded-For, which x_headers includes.
+    websocket: [connect_info: [:peer_data, :user_agent, :x_headers, session: @session_options]],
+    longpoll: [connect_info: [:peer_data, :user_agent, :x_headers, session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
   #

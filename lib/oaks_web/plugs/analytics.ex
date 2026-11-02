@@ -33,7 +33,6 @@ defmodule OaksWeb.Plugs.Analytics do
 
   alias Oaks.Analytics
 
-  @bot_regex ~r/bot|crawler|spider|scrape|preview/i
   @skip_prefixes ["/api", "/assets"]
   @skip_exact ["/favicon.ico", "/health"]
 
@@ -77,7 +76,7 @@ defmodule OaksWeb.Plugs.Analytics do
       path in @skip_exact -> false
       Enum.any?(@skip_prefixes, &String.starts_with?(path, &1 <> "/")) -> false
       Enum.any?(@skip_prefixes, &(path == &1)) -> false
-      is_binary(ua) and Regex.match?(@bot_regex, ua) -> false
+      Analytics.bot?(ua) -> false
       true -> true
     end
   end

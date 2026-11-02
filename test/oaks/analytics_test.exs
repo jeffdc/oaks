@@ -14,6 +14,13 @@ defmodule Oaks.AnalyticsTest do
   @valid_visitor_hash String.duplicate("a", 64)
 
   describe "visitor_hash/2" do
+    test "is salted, so it can't be recomputed from date, IP, and user agent" do
+      date = Date.utc_today() |> Date.to_iso8601()
+      unsalted = :crypto.hash(:sha256, date <> "10.0.0.1" <> "UA") |> Base.encode16(case: :lower)
+
+      refute Analytics.visitor_hash("10.0.0.1", "UA") == unsalted
+    end
+
     test "returns a 64-char lowercase hex string" do
       hash = Analytics.visitor_hash("10.0.0.1", "Mozilla/5.0")
       assert String.length(hash) == 64
@@ -71,6 +78,42 @@ defmodule Oaks.AnalyticsTest do
         end)
 
       assert log =~ "Analytics insert failed"
+    end
+  end
+
+  describe "bot?/1" do
+    test "flags crawlers and scripted HTTP clients" do
+      for ua <- [
+            "Googlebot/2.1",
+            "curl/8.4.0",
+            "python-requests/2.31",
+            "Go-http-client/1.1",
+            "Mozilla/5.0 HeadlessChrome/120.0",
+            "Wget/1.21"
+          ] do
+        assert Analytics.bot?(ua), ua
+      end
+    end
+
+    test "does not flag ordinary browsers or missing user agents" do
+      refute Analytics.bot?("Mozilla/5.0 (Macintosh) AppleWebKit/605.1.15 Safari/605.1.15")
+      refute Analytics.bot?(nil)
+    end
+  end
+
+  describe "stats/2 day boundaries" do
+    test "includes the very end of the last day and excludes the next midnight" do
+      today = Date.utc_today()
+      hash = String.duplicate("c", 64)
+
+      page_view_fixture(%{visitor_hash: hash, inserted_at: at(today, ~T[23:59:59.999999])})
+
+      page_view_fixture(%{
+        visitor_hash: hash,
+        inserted_at: at(Date.add(today, 1), ~T[00:00:00])
+      })
+
+      assert Analytics.stats(today, today) == %{page_views: 1, unique_visitors: 1}
     end
   end
 

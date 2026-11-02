@@ -70,6 +70,28 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
       assert pv.path == "/about"
     end
 
+    test "visitors behind the proxy get distinct hashes from X-Forwarded-For", %{conn: conn} do
+      for ip <- ["203.0.113.1", "203.0.113.2"] do
+        conn
+        |> put_req_header("user-agent", browser_ua())
+        |> put_req_header("x-forwarded-for", "#{ip}, 10.0.0.1")
+        |> live(~p"/about")
+      end
+
+      await_tasks()
+
+      hashes = PageView |> Repo.all() |> Enum.map(& &1.visitor_hash) |> Enum.uniq()
+      assert length(hashes) == 2
+    end
+
+    test "bot user agents are not tracked", %{conn: conn} do
+      conn = put_req_header(conn, "user-agent", "curl/8.4.0")
+      {:ok, _view, _html} = live(conn, ~p"/about")
+
+      await_tasks()
+      assert count_page_views() == 0
+    end
+
     test "same-path patch (query-only change) does NOT add another row", %{conn: conn} do
       assert count_page_views() == 0
 

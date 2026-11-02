@@ -41,17 +41,18 @@ defmodule OaksWeb.PrivacyLive do
           class="leading-relaxed mb-3"
           style="color: var(--color-text-primary); font-size: 1.0625rem; line-height: 1.7;"
         >
-          We compute a daily visitor identifier as <code>SHA256(today_date &Vert; ip &Vert; user_agent)</code>. The IP address and
-          user-agent are read in memory only; neither is written to disk. The resulting hash is
-          a one-way fingerprint and cannot be reversed to recover your IP.
+          We compute a daily visitor identifier as <code>SHA256(daily_salt &Vert; ip &Vert; user_agent)</code>, where
+          the salt is a random secret generated each day and held only in server memory. The IP
+          address and user-agent are read in memory only; neither is written to disk. Without
+          the salt, the stored hash can't be reversed or matched against a guessed IP.
         </p>
         <p
           class="leading-relaxed mb-3"
           style="color: var(--color-text-primary); font-size: 1.0625rem; line-height: 1.7;"
         >
-          Because the date is part of the hash input, every visitor identifier rotates at
-          midnight UTC. Yesterday's identifier cannot be reconstructed today, which makes
-          cross-day tracking technically impossible.
+          A new salt is generated at midnight UTC and the old one is discarded, so every visitor
+          identifier rotates daily. Yesterday's identifier cannot be reconstructed today, which
+          makes cross-day tracking technically impossible.
         </p>
         <p
           class="leading-relaxed"

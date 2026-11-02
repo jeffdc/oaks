@@ -29,18 +29,44 @@ defmodule Oaks.Analytics do
   alias Oaks.Analytics.PageView
   alias Oaks.Repo
 
+  # Matches crawlers and scripted HTTP clients; their requests aren't page views.
+  @bot_regex ~r/bot|crawler|spider|scrape|preview|curl|wget|python-requests|python-urllib|aiohttp|httpx|go-http-client|okhttp|java\/|libwww|headless|phantomjs|lighthouse/i
+
   @doc """
   Returns a 64-character lowercase hex SHA256 hash of
-  `today_iso_date <> ip <> user_agent`.
+  `daily_salt <> ip <> user_agent`.
 
-  The hash is stable for the same `ip` + `user_agent` within a UTC day
-  and rotates at the UTC day boundary, preventing cross-day correlation.
+  The salt is 32 random bytes generated for each UTC day and held only in
+  memory, so the hash is stable for the same `ip` + `user_agent` within a
+  day, can't be brute-forced from the stored value, and can't be linked
+  across days once the salt is discarded.
   """
   @spec visitor_hash(String.t(), String.t()) :: String.t()
   def visitor_hash(ip, user_agent) when is_binary(ip) and is_binary(user_agent) do
-    date = Date.utc_today() |> Date.to_iso8601()
-    :crypto.hash(:sha256, date <> ip <> user_agent) |> Base.encode16(case: :lower)
+    :crypto.hash(:sha256, daily_salt(Date.utc_today()) <> ip <> user_agent)
+    |> Base.encode16(case: :lower)
   end
+
+  defp daily_salt(date) do
+    key = {__MODULE__, :daily_salt}
+
+    case :persistent_term.get(key, nil) do
+      {^date, salt} ->
+        salt
+
+      _ ->
+        salt = :crypto.strong_rand_bytes(32)
+        :persistent_term.put(key, {date, salt})
+        salt
+    end
+  end
+
+  @doc """
+  True for user agents that belong to crawlers or scripted HTTP clients.
+  """
+  @spec bot?(String.t() | nil) :: boolean()
+  def bot?(user_agent) when is_binary(user_agent), do: Regex.match?(@bot_regex, user_agent)
+  def bot?(_user_agent), do: false
 
   @doc """
   Inserts a `PageView` from a plain attrs map.
@@ -85,6 +111,9 @@ defmodule Oaks.Analytics do
     :ok
   end
 
+  # Start of a UTC day, for range filters that can use the inserted_at index.
+  defp day_start(%Date{} = date), do: DateTime.new!(date, ~T[00:00:00.000000], "Etc/UTC")
+
   defp normalize_attrs(attrs) when is_map(attrs), do: attrs
   defp normalize_attrs(_), do: %{}
 
@@ -92,15 +121,15 @@ defmodule Oaks.Analytics do
   Returns total `page_views` and distinct `unique_visitors` for the
   inclusive UTC-date range `from_date..to_date`.
 
-  Uses `date(inserted_at)` for SQLite-compatible day-bucketing.
+  Filters on an `inserted_at` range so the index applies.
   """
   @spec stats(Date.t(), Date.t()) :: %{page_views: integer(), unique_visitors: integer()}
   def stats(%Date{} = from_date, %Date{} = to_date) do
     query =
       from(pv in PageView,
         where: pv.status < 400,
-        where: fragment("date(?)", pv.inserted_at) >= ^from_date,
-        where: fragment("date(?)", pv.inserted_at) <= ^to_date,
+        where: pv.inserted_at >= ^day_start(from_date),
+        where: pv.inserted_at < ^day_start(Date.add(to_date, 1)),
         select: %{
           page_views: count(pv.id),
           unique_visitors: count(pv.visitor_hash, :distinct)
@@ -126,8 +155,8 @@ defmodule Oaks.Analytics do
     rows =
       from(pv in PageView,
         where: pv.status < 400,
-        where: fragment("date(?)", pv.inserted_at) >= ^from_date,
-        where: fragment("date(?)", pv.inserted_at) <= ^to_date,
+        where: pv.inserted_at >= ^day_start(from_date),
+        where: pv.inserted_at < ^day_start(Date.add(to_date, 1)),
         group_by: fragment("date(?)", pv.inserted_at),
         select: %{
           date: fragment("date(?)", pv.inserted_at),
@@ -167,8 +196,8 @@ defmodule Oaks.Analytics do
   def top_pages(%Date{} = from_date, %Date{} = to_date, limit \\ 20) do
     from(pv in PageView,
       where: pv.status < 400,
-      where: fragment("date(?)", pv.inserted_at) >= ^from_date,
-      where: fragment("date(?)", pv.inserted_at) <= ^to_date,
+      where: pv.inserted_at >= ^day_start(from_date),
+      where: pv.inserted_at < ^day_start(Date.add(to_date, 1)),
       group_by: pv.path,
       select: %{
         path: pv.path,
@@ -191,8 +220,8 @@ defmodule Oaks.Analytics do
   def top_404s(%Date{} = from_date, %Date{} = to_date, limit \\ 20) do
     from(pv in PageView,
       where: pv.status == 404,
-      where: fragment("date(?)", pv.inserted_at) >= ^from_date,
-      where: fragment("date(?)", pv.inserted_at) <= ^to_date,
+      where: pv.inserted_at >= ^day_start(from_date),
+      where: pv.inserted_at < ^day_start(Date.add(to_date, 1)),
       group_by: pv.path,
       select: %{
         path: pv.path,
@@ -218,8 +247,8 @@ defmodule Oaks.Analytics do
   def top_other_errors(%Date{} = from_date, %Date{} = to_date, limit \\ 20) do
     from(pv in PageView,
       where: pv.status >= 400 and pv.status != 404,
-      where: fragment("date(?)", pv.inserted_at) >= ^from_date,
-      where: fragment("date(?)", pv.inserted_at) <= ^to_date,
+      where: pv.inserted_at >= ^day_start(from_date),
+      where: pv.inserted_at < ^day_start(Date.add(to_date, 1)),
       group_by: [pv.path, pv.status],
       select: %{
         path: pv.path,

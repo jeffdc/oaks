@@ -44,7 +44,7 @@ defmodule OaksWeb.Analytics.TrackPageView do
 
   @doc false
   def on_mount(:default, _params, _session, socket) do
-    if connected?(socket) do
+    if connected?(socket) and not Analytics.bot?(connect_ua(socket)) do
       visitor_hash = compute_visitor_hash(socket)
 
       socket =
@@ -90,17 +90,27 @@ defmodule OaksWeb.Analytics.TrackPageView do
     Analytics.visitor_hash(connect_ip(socket), connect_ua(socket))
   end
 
+  # Socket connect_info only exposes headers starting with "x-", so Fly's
+  # fly-client-ip isn't available here; use the first X-Forwarded-For hop
+  # (the client, as set by Fly's proxy), then the socket peer.
   defp connect_ip(socket) do
-    case get_connect_info(socket, :peer_data) do
-      %{address: address} when not is_nil(address) ->
-        address |> :inet.ntoa() |> to_string()
-
-      _ ->
-        ""
-    end
+    headers = get_connect_info(socket, :x_headers) || []
+    forwarded_ip(headers) || peer_ip(get_connect_info(socket, :peer_data))
   rescue
     _ -> ""
   end
+
+  defp forwarded_ip(headers) do
+    case List.keyfind(headers, "x-forwarded-for", 0) do
+      {_, value} when value != "" -> value |> String.split(",") |> List.first() |> String.trim()
+      _ -> nil
+    end
+  end
+
+  defp peer_ip(%{address: address}) when not is_nil(address),
+    do: address |> :inet.ntoa() |> to_string()
+
+  defp peer_ip(_peer_data), do: ""
 
   defp connect_ua(socket) do
     case get_connect_info(socket, :user_agent) do
