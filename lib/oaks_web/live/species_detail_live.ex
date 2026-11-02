@@ -210,6 +210,17 @@ defmodule OaksWeb.SpeciesDetailLive do
             >
               <.icon name="hero-document-text" class="size-12 mx-auto mb-3 opacity-40" />
               <p class="italic">No source data available for this species.</p>
+              <.link
+                :if={@authenticated}
+                navigate={~p"/species/#{@species.scientific_name}/sources/new"}
+                class="add-source-btn mt-4"
+                style="text-decoration: none;"
+                title="Add data from a source"
+                id="empty-add-source-btn"
+              >
+                <.icon name="hero-plus" class="size-3.5" />
+                <span>Add Source</span>
+              </.link>
             </div>
           </section>
 

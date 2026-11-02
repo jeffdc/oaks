@@ -154,5 +154,20 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       {:ok, _view, html} = live(conn, ~p"/species/velutina")
       assert html =~ "No source data available"
     end
+
+    test "hides Add Source link when unauthenticated", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/species/velutina")
+      refute has_element?(view, "#empty-add-source-btn")
+    end
+
+    test "shows Add Source link when authenticated", %{conn: conn} do
+      conn = put_connect_params(conn, %{"api_key" => Application.get_env(:oaks, :api_key)})
+      {:ok, view, _html} = live(conn, ~p"/species/velutina")
+
+      assert has_element?(
+               view,
+               ~s|#empty-add-source-btn[href="/species/velutina/sources/new"]|
+             )
+    end
   end
 end
