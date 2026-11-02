@@ -13,6 +13,27 @@ defmodule Oaks.Release do
     end
   end
 
+  @doc """
+  Returns how many migrations have not been run yet, across all repos.
+
+  `docker-entrypoint.sh` uses this to take a pre-migration backup only when
+  there is something to migrate.
+  """
+  @spec pending_migration_count() :: non_neg_integer()
+  def pending_migration_count do
+    load_app()
+
+    for repo <- repos(), reduce: 0 do
+      count ->
+        {:ok, pending, _} =
+          Ecto.Migrator.with_repo(repo, fn repo ->
+            repo |> Ecto.Migrator.migrations() |> Enum.count(&match?({:down, _, _}, &1))
+          end)
+
+        count + pending
+    end
+  end
+
   def rollback(repo, version) do
     load_app()
     {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version))

@@ -1,0 +1,54 @@
+# Hybrid parentage proposals
+
+Research notes for populating `species.parent1` / `species.parent2`. No database
+or source files were changed.
+
+Evidence is drawn from POWO/WCVP, Oaks of the World (OOTW), IPNI, World Flora
+Online (WFO), Flora of North America, Trees and Shrubs Online, and the
+International Oaks journal. Links are inline.
+
+## Summary table
+
+| Hybrid | Parentage | Evidence / notes |
+|---|---|---|
+| **× avellaniformis** | *Q. rotundifolia* × *Q. suber* | POWO accepts the hybrid with this formula ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:295827-1)); OOTW gives the same and notes *nothosubsp. morisii* = *Q. suber* × *Q. ilex* subsp. *ilex* ([OOTW](https://oaksoftheworld.fr/quercus_avellaniformis.htm)). |
+| **× battandieri** | *Q. coccifera* × *Q. faginea* var. *broteroi* | A. Camus 1939; OOTW lists this as the synonym ([OOTW](https://oaksoftheworld.fr/quercus_battandieri.htm)). **Nomenclatural problem:** POWO does not accept *× battandieri* as this hybrid—it sinks the name into *Q. pseudococcifera* subsp. *pseudococcifera* ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:359407-1)). The same cross is accepted by POWO as **× prasina** ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:296612-1)). |
+| **× carrissoana** | *Q. canariensis* × *Q. robur* | POWO accepted ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:359468-1)); OOTW gives the same ([OOTW](https://oaksoftheworld.fr/quercus_carrissoana.htm)). |
+| **× celtica** | *Q. lusitanica* × *Q. suber* | POWO accepted with this formula ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:70027609-1)); OOTW writes *Q. fruticosa* (*lusitanica*) × *Q. suber* ([OOTW](https://oaksoftheworld.fr/quercus_celtica.htm)). |
+| **× cerrioides** | **Competing:** *Q. pubescens* (*Q. humilis*) × *Q. faginea* **or** *Q. canariensis* × *Q. pubescens* subsp. *subpyrenaica* | OOTW lays out both schools explicitly: Spanish authors/Govaerts & Frodin use *canariensis* × *pubescens* subsp. *subpyrenaica*; A. Camus, Schwarz, and many European authors use *pubescens* × *faginea* ([OOTW](https://oaksoftheworld.fr/quercus_cerrioides.htm)). Nomenclatural discussion: [Vázquez et al. PDF](https://dialnet.unirioja.es/descarga/articulo/6745587.pdf). POWO accepts the name but the parentage remains disputed. |
+| **× columnaris** | *Q. palustris* × *Q. rubra* | POWO treats *× columnaris* Laughlin as a heterotypic synonym of **× richteri** Baen., with formula *Q. palustris* × *Q. rubra* ([POWO](https://powo.science.kew.org/taxon/216325-2)); OOTW gives the same under *richteri* ([OOTW](https://oaksoftheworld.fr/quercus_richteri.htm)). |
+| **× coscojosuberiformis** | *Q. coccifera* × *Q. suber* | POWO accepted ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:77094214-1)); OOTW gives the same ([OOTW](https://oaksoftheworld.fr/quercus_coscojosuberiformis.htm)). |
+| **× diegoi** | *Q. lusitanica* × *Q. pyrenaica* | POWO accepted ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:77144130-1)); OOTW writes *Q. fruticosa* × *Q. pyrenaica* ([OOTW](https://oaksoftheworld.fr/quercus_diegoi.htm)). |
+| **× ewanii** | *Q. durata* var. *gabrielensis* × *Q. engelmannii* | POWO accepted; replacement name for illegitimate *× grandidentata* Ewan ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:77143791-1)); OOTW gives the same under *grandidentata* ([OOTW](https://oaksoftheworld.fr/quercus_grandidentata.htm)). FNA supports the *durata* var. *gabrielensis* parent. |
+| **× gallaecica** | *Q. lusitanica* × *Q. robur*; POWO now *Q. lusitanica* × *Q. orocantabrica* | OOTW/protologue: *Q. fruticosa* × *Q. robur* ([OOTW](https://oaksoftheworld.fr/quercus_gallaecica.htm)). POWO uses the newer segregate *Q. orocantabrica* for part of the *robur* complex ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:50425882-2)). |
+| **× hispanica** | *Q. cerris* × *Q. suber* | POWO accepted ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:296259-1)); OOTW gives the same but notes 2018 genetic work suggests it may be a relict ancestral form rather than a true hybrid ([OOTW](https://oaksoftheworld.fr/quercus_hispanica.htm)). |
+| **× kerneri montserratii** | *Q. robur* × *Q. pubescens* subsp. *subpyrenaica* | Correct name: **× kerneri nothosubsp. montserratii** (Vicioso) Rivas Mart. & Sáenz. POWO gives this formula ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:967172-1)); OOTW gives the same, noting Vicioso instead considered it *Q. cerrioides* × *Q. robur* ([OOTW](https://oaksoftheworld.fr/quercus_kerneri.htm)). |
+| **× knoblochii** | *Q. jonesii* (= *Q. coccolobifolia*) × *Q. viminea* | POWO gives *Q. coccolobifolia* × *Q. viminea* ([POWO](https://powo.science.kew.org/taxon/215969-2)); POWO treats *Q. coccolobifolia* as a synonym of *Q. jonesii* ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:215966-2)). OOTW gives *Q. viminea* × *Q. jonesii* and notes Valencia-A. doubts the hybrid status ([OOTW](https://oaksoftheworld.fr/quercus_knoblochii.htm)). |
+| **× mannifera** | POWO: *Q. infectoria* subsp. *veneris* × *Q. petraea* subsp. *polycarpa*. Older: *Q. boissieri* × *Q. iberica* | POWO accepts it as a hybrid with the first formula ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:296433-1)); OOTW records the older *boissieri* × *iberica* view but notes Avishai’s work treats *Q. mannifera* as a distinct species ([OOTW](https://oaksoftheworld.fr/quercus_mannifera.htm)); Avishai 2015 in [International Oaks 26](https://www.internationaloaksociety.org/sites/default/files/files/IO/IOS%20Journal%20%2326/ios%20journal%2326.pdf). |
+| **× numantina** | *Q. faginea* × *Q. pyrenaica* | POWO accepted ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:359905-1)); OOTW gives the same ([OOTW](https://oaksoftheworld.fr/quercus_numantina.htm)). |
+| **× pachucana** | *Q. laurina* × *Q. mexicana* | POWO accepted ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:1014115-1)); OOTW gives the same ([OOTW](https://oaksoftheworld.fr/quercus_pachucana.htm)). Caveat: known mainly from the type; later survey could not relocate it ([SciELO](https://www.scielo.org.mx/scielo.php?pid=S2007-42982017000400660&script=sci_arttext)). |
+| **× prasina** | *Q. coccifera* × *Q. faginea* | POWO accepted with this formula ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:296612-1)); OOTW lists *× angustifolia* Villar as *coccifera* × *faginea* ([OOTW](https://oaksoftheworld.fr/quercus_prasina.htm)). |
+| **× schochiana** | *Q. palustris* × *Q. phellos* | POWO accepted ([POWO](https://powo.science.kew.org/taxon/296723-1)); OOTW gives *palustris* × *phellos* ([OOTW](https://oaksoftheworld.fr/quercus_schochiana.htm)); Trees and Shrubs Online agrees ([T&S](https://www.treesandshrubsonline.org/articles/quercus/quercus-x-schochiana/)). |
+| **× subconvexa** | *Q. durata* × *Q. garryana* | POWO accepted ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:360136-1)); OOTW notes it is “more exactly” *Q. durata* × *Q. garryana*, distinct from *× howellii* (*Q. dumosa* × *Q. garryana*) ([OOTW](https://oaksoftheworld.fr/quercus_howellii.htm)). |
+| **× subglaucescens** | *Q. canariensis* × *Q. pubescens* (narrowly subsp. *subpyrenaica*) | POWO treats *× subglaucescens* as a synonym of **× anselmi**, formula *Q. canariensis* × *Q. pubescens* ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:359366-1)); OOTW gives the same and notes the narrower *subpyrenaica* interpretation ([OOTW](https://oaksoftheworld.fr/quercus_anselmii.htm)). |
+| **× subpyrenaica** | *Q. faginea* × *Q. pubescens* | POWO accepts it as a hybrid with this formula ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:360147-1)). **Conflict:** WFO treats it as *Q. pubescens* subsp. *subpyrenaica*, not a hybrid ([WFO](https://worldfloraonline.org/taxon/wfo-0000292707)); OOTW likewise treats *subpyrenaica* as a subspecies of *Q. pubescens* ([OOTW](https://oaksoftheworld.fr/quercus_pubescens.htm)). |
+| **× takaoyamensis** | *Q. acuta* × *Q. sessilifolia* | POWO accepted ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:360165-1)); OOTW gives the same ([OOTW](https://oaksoftheworld.fr/quercus_takaoyamensis.htm)). |
+| **× tingitana** | *Q. faginea* × *Q. lusitanica*; older *Q. alpestris* × *Q. fruticosa* | POWO gives *Q. faginea* × *Q. lusitanica* ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:360187-1)); OOTW gives the older equivalent ([OOTW](https://oaksoftheworld.fr/quercus_tingitana.htm)). |
+| **× tlemcenensis** | *Q. faginea* × *Q. canariensis* | POWO accepted ([POWO](https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:296826-1)); OOTW gives the same and cites Vázquez & Vila-Viçosa 2021 ([OOTW](https://oaksoftheworld.fr/quercus_tlemcenensis.htm)). |
+| **× welwitschii** | *Q. estremadurensis* × *Q. pyrenaica* | POWO accepted ([POWO](https://powo.science.kew.org/taxon/360241-1)); OOTW gives the same ([OOTW](https://oaksoftheworld.fr/quercus_welwitschii.htm)). |
+
+## The five that need a decision
+
+1. **× battandieri** — If you follow A. Camus/OOTW, parents are *Q. coccifera* × *Q. faginea* var. *broteroi*. If you follow POWO, the name is not accepted for that cross; POWO puts it under *Q. pseudococcifera* and uses **× prasina** for *coccifera* × *faginea*. These may be the same biological cross under different names.
+2. **× cerrioides** — Two live formulas: *Q. pubescens* × *Q. faginea* (A. Camus, Schwarz, much European literature) vs *Q. canariensis* × *Q. pubescens* subsp. *subpyrenaica* (Govaerts & Frodin, Rivas-Martínez, Sáenz, Vázquez). OOTW documents both.
+3. **× mannifera** — POWO treats it as a hybrid (*Q. infectoria* subsp. *veneris* × *Q. petraea* subsp. *polycarpa*); older literature used *Q. boissieri* × *Q. iberica*; Avishai (2015) argues it is a distinct species. This one is not safely a hybrid.
+4. **× hispanica** — Conventional formula *Q. cerris* × *Q. suber*, but OOTW notes recent genetic work suggesting it may be a relict ancestral form rather than a hybrid.
+5. **× subpyrenaica** — POWO accepts it as *Q. faginea* × *Q. pubescens*; WFO and OOTW treat it as *Q. pubescens* subsp. *subpyrenaica*. So “hybrid” depends on the checklist.
+
+## Nomenclatural notes
+
+- **× columnaris** → synonym of **× richteri** (*Q. palustris* × *Q. rubra*) under POWO.
+- **× subglaucescens** → synonym of **× anselmi** (*Q. canariensis* × *Q. pubescens*) under POWO.
+- **× kerneri montserratii** → properly **× kerneri nothosubsp. montserratii**.
+- **× ewanii** → replacement name for illegitimate **× grandidentata** Ewan.
+- **Q. lusitanica** is the POWO-accepted name for the plant long called **Q. fruticosa** in Iberian oak literature.
