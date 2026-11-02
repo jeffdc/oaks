@@ -1,5 +1,5 @@
 ---
-status: raw
+status: done
 tags: [p3, data]
 created: 2026-11-02
 updated: 2026-11-02
@@ -17,3 +17,5 @@ After the 2026-11 data migrations:
 2026-11-02 (7f5d3d5): 16 hybrids filled from Jeff's research (hybrid_proposals.md). Earlier fills agree with it except × cerrioides (disputed). Open decisions: × battandieri, × cerrioides, × gallaecica, × hispanica, × mannifera, × subpyrenaica; nomenclature: × columnaris→× richteri and × subglaucescens→× anselmii synonyms per POWO.
 
 Done 2026-11-02: decisions applied (battandieri coccifera × faginea broteroi, gallaecica lusitanica × robur, hispanica cerris × suber, cerrioides kept canariensis × pubescens; mannifera and subpyrenaica intentionally without parents). × columnaris merged into × richteri and × subglaucescens into × anselmii (old names kept as synonyms). Still open: × egglestonii synonym.
+
+Done 2026-11-02: × mannifera and × subpyrenaica follow POWO (Jeff). × shirlingii placed under × egglestonii per protologue + Palmer + ITIS; removed from × moultonensis (WFO placement treated as the conflicting one). Every named hybrid now has parents.
