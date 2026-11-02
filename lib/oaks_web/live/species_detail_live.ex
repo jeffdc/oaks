@@ -29,6 +29,7 @@ defmodule OaksWeb.SpeciesDetailLive do
        external_links: [],
        computed_external_links: [],
        species_sources: [],
+       can_add_source: false,
        selected_source: nil,
        show_delete_confirm: false,
        show_delete_source_confirm: false,
@@ -199,6 +200,7 @@ defmodule OaksWeb.SpeciesDetailLive do
               selected={@selected_source}
               species_name={@species.scientific_name}
               authenticated={@authenticated}
+              can_add_source={@can_add_source}
             />
             <.source_content
               :if={@selected_source}
@@ -552,6 +554,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   attr :selected, :any, required: true
   attr :species_name, :string, required: true
   attr :authenticated, :boolean, default: false
+  attr :can_add_source, :boolean, default: true
 
   defp source_tabs(assigns) do
     ~H"""
@@ -584,7 +587,7 @@ defmodule OaksWeb.SpeciesDetailLive do
         <.icon name="hero-arrows-right-left" class="size-4" />
         <span>Compare</span>
       </.link>
-      <div :if={@authenticated} class="add-source-wrapper">
+      <div :if={@authenticated && @can_add_source} class="add-source-wrapper">
         <.link
           navigate={~p"/species/#{@species_name}/sources/new"}
           class="add-source-btn"
@@ -1075,6 +1078,7 @@ defmodule OaksWeb.SpeciesDetailLive do
        external_links: external_links,
        computed_external_links: computed_external_links,
        species_sources: species_sources,
+       can_add_source: Sources.available_sources_for_species(species.id) != [],
        selected_source: selected_source,
        not_found: false,
        page_title: "Quercus #{epithet(species.scientific_name)}"

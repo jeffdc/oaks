@@ -40,7 +40,11 @@ defmodule OaksWeb.FormComponents do
   def markdown_editor(assigns) do
     ~H"""
     <div>
-      <label :if={@label} class="block text-sm font-semibold leading-6 text-zinc-800 mb-1">
+      <label
+        :if={@label}
+        for={@field.id}
+        class="block text-sm font-semibold leading-6 text-zinc-800 mb-1"
+      >
         {@label}
       </label>
       <p :if={@hint} class="text-xs mb-2" style="color: var(--color-text-tertiary);">
@@ -129,7 +133,11 @@ defmodule OaksWeb.FormComponents do
 
     ~H"""
     <div>
-      <label :if={@label} class="block text-sm font-semibold leading-6 text-zinc-800 mb-1">
+      <label
+        :if={@label}
+        for={@input_id}
+        class="block text-sm font-semibold leading-6 text-zinc-800 mb-1"
+      >
         {@label}
       </label>
       <p :if={@hint} class="text-xs mb-2" style="color: var(--color-text-tertiary);">

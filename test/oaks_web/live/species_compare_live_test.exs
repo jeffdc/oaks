@@ -92,4 +92,11 @@ defmodule OaksWeb.SpeciesCompareLiveTest do
       assert html =~ "Compare sources for"
     end
   end
+
+  describe "synonyms" do
+    test "redirects a synonym to the accepted species' comparison", %{conn: conn} do
+      assert {:error, {:live_redirect, %{to: "/species/alba/compare"}}} =
+               live(conn, "/species/alba%20var.%20repanda/compare")
+    end
+  end
 end

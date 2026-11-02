@@ -16,8 +16,6 @@ defmodule OaksWeb.HomeLive do
        page_title: "Oak Compendium - A Database of the World's Oak Species",
        page_description:
          "A comprehensive guide to oak species (genus Quercus) featuring detailed information on taxonomy, morphology, distribution, and hybrid relationships.",
-       page_url: "/",
-       page_image: nil,
        stats: %{oak_count: 0, hybrid_count: 0},
        all_species: [],
        sources: [],

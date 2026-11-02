@@ -368,6 +368,39 @@ textarea:focus-visible {
   font-style: italic;
 }
 
+/* Wide markdown blocks scroll inside themselves instead of widening the page */
+.prose-content pre {
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  background-color: #f0f9f4;
+}
+
+.prose-content pre code {
+  padding: 0;
+  background-color: transparent;
+}
+
+.prose-content table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+.prose-content th,
+.prose-content td {
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.prose-content img {
+  max-width: 100%;
+  height: auto;
+}
+
 .prose-content code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   background-color: #f0f9f4;

@@ -132,7 +132,8 @@ defmodule OaksWeb.TaxonomyLive do
           current_taxon: current_taxon,
           child_taxa: child_taxa,
           species: species,
-          species_count: length(species),
+          # Everything in the taxon, matching the count on its card one level up.
+          species_count: Taxonomy.taxon_usage(current_taxon).species,
           breadcrumbs: breadcrumbs,
           is_genus_level: false,
           not_found: false,

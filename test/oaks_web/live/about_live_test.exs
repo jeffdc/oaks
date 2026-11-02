@@ -30,4 +30,14 @@ defmodule OaksWeb.AboutLiveTest do
     assert html =~ ~s(href="/analytics")
     assert html =~ ~s(href="/privacy")
   end
+
+  test "counts hybrids once in the totals", %{conn: conn} do
+    total = Oaks.Species.count()
+    hybrids = Oaks.Species.count_hybrids()
+    {:ok, view, _html} = live(conn, ~p"/about")
+    html = render(view)
+
+    assert html =~ ~r/>\s*#{total - hybrids}\s*<\/span>\s*<span[^>]*>Species</
+    assert html =~ ~r/>\s*#{total}\s*<\/span>\s*<span[^>]*>\s*Total Entries/
+  end
 end

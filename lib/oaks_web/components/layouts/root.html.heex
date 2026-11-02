@@ -6,7 +6,10 @@
     <meta name="csrf-token" content={get_csrf_token()} />
     <meta
       name="description"
-      content="A comprehensive database of oak species from around the world"
+      content={
+        assigns[:page_description] ||
+          "A comprehensive database of oak species from around the world"
+      }
     />
     <.live_title default="Oak Compendium">
       {assigns[:page_title]}

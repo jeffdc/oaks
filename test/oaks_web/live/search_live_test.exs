@@ -88,4 +88,13 @@ defmodule OaksWeb.SearchLiveTest do
       assert html =~ "alba"
     end
   end
+
+  test "resets the page title when the query is cleared", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/search?q=alba")
+    assert page_title(view) =~ "Search: alba"
+
+    render_patch(view, ~p"/search")
+    assert page_title(view) =~ "Search"
+    refute page_title(view) =~ "alba"
+  end
 end

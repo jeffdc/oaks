@@ -157,4 +157,29 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
       refute html =~ "delete-source-confirm-modal"
     end
   end
+
+  describe "duplicate source" do
+    test "shows the error on the source field", %{conn: conn} do
+      {:ok, view, _html} =
+        conn |> authenticated_conn() |> live(~p"/species/alba/sources/new")
+
+      html = render_submit(view, "save", %{"species_source" => %{"source_id" => "1"}})
+      assert html =~ "already has data for this species"
+    end
+  end
+
+  describe "add source availability" do
+    test "hides Add Source once every source is linked", %{conn: conn} do
+      alba = Oaks.Species.get_species_by_name("alba")
+      {:ok, _} = Oaks.Sources.create_species_source(%{species_id: alba.id, source_id: 3})
+
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/alba")
+      refute has_element?(view, ".add-source-btn")
+    end
+
+    test "shows Add Source while a source is still available", %{conn: conn} do
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/alba")
+      assert has_element?(view, ".add-source-btn")
+    end
+  end
 end

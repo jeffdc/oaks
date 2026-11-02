@@ -69,6 +69,9 @@ defmodule Oaks.Sources.SpeciesSource do
     |> validate_length(:url, max: 1000)
     |> foreign_key_constraint(:species_id)
     |> foreign_key_constraint(:source_id)
-    |> unique_constraint([:species_id, :source_id])
+    |> unique_constraint([:species_id, :source_id],
+      error_key: :source_id,
+      message: "already has data for this species"
+    )
   end
 end

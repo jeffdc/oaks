@@ -46,12 +46,19 @@ defmodule OaksWeb.SpeciesCompareLive do
   def handle_params(%{"name" => name}, _uri, socket) do
     case Species.get_species_full(name) do
       nil ->
-        {:noreply,
-         assign(socket,
-           species: nil,
-           not_found: true,
-           page_title: "Species Not Found"
-         )}
+        case Species.find_synonym(name) do
+          nil ->
+            {:noreply,
+             assign(socket,
+               species: nil,
+               not_found: true,
+               page_title: "Species Not Found"
+             )}
+
+          canonical ->
+            {:noreply,
+             push_navigate(socket, to: ~p"/species/#{canonical.scientific_name}/compare")}
+        end
 
       species ->
         sources = species.species_sources

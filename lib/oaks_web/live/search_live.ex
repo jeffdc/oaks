@@ -219,7 +219,7 @@ defmodule OaksWeb.SearchLive do
   # -- Helpers --
 
   defp perform_search(socket, "") do
-    assign(socket, query: "", results: nil)
+    assign(socket, query: "", results: nil, page_title: "Search")
   end
 
   defp perform_search(socket, query) do
