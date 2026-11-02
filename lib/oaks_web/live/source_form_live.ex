@@ -166,7 +166,7 @@ defmodule OaksWeb.SourceFormLive do
                   field={@form[:source_type]}
                   type="select"
                   label="Type"
-                  options={source_type_options()}
+                  options={source_type_options(@form[:source_type].value)}
                   prompt="Select type..."
                 />
               </div>
@@ -281,14 +281,20 @@ defmodule OaksWeb.SourceFormLive do
 
   defp cancel_path(:edit, source), do: ~p"/sources/#{source.id}"
 
-  defp source_type_options do
-    [
-      {"Book", "Book"},
-      {"Website", "Website"},
-      {"Journal Article", "Journal Article"},
-      {"Personal Observation", "Personal Observation"},
-      {"Database", "Database"},
-      {"Other", "Other"}
-    ]
+  @source_types [
+    "Book",
+    "Website",
+    "Journal Article",
+    "Personal Observation",
+    "Database",
+    "Other"
+  ]
+
+  # Keeps a stored value selectable when it isn't one of the standard types;
+  # otherwise the select falls back to the prompt and saving fails as blank.
+  defp source_type_options(current) when is_binary(current) and current != "" do
+    if current in @source_types, do: @source_types, else: [current | @source_types]
   end
+
+  defp source_type_options(_current), do: @source_types
 end
