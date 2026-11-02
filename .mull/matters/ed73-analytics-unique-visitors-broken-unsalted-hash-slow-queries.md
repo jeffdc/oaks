@@ -18,3 +18,5 @@ epic: audit-2026-11
 From 7b41: 404 page-view inserts are bounded per row (PageView validates path <= 2000) but not rate-limited/sampled — consider sampling 404 inserts under flood.
 
 Done 2026-11-02: connect_info peer_data/user_agent/x_headers; LV IP from X-Forwarded-For (fly-client-ip isn't in x_headers); random in-memory daily salt; Analytics.bot? shared by plug+hook with broader regex; indexed inserted_at range filters; privacy page updated. NOT done: retention pruning, 404 sampling, and checking whether prod has recorded page views since May 16 (needs prod access).
+
+2026-11-02 (623195a): page_views rolled up into daily_stats/daily_page_stats/daily_referrer_stats/daily_error_stats (404s top 50/day), raw pruned after 30 days for rolled-up days, hourly RollupScheduler GenServer. Prod copy: 173 days rolled up, 214k rows pruned in 6s, dashboard numbers identical except long-tail 404 counts. DB file won't shrink without VACUUM.

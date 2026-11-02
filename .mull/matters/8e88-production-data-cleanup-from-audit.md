@@ -1,10 +1,11 @@
 ---
-status: raw
+status: done
 tags: [p2, data]
 effort: L
 created: 2026-11-02
 updated: 2026-11-02
 epic: audit-2026-11
+relates: [35ab]
 ---
 
 # Production data cleanup from audit
@@ -23,3 +24,5 @@ From May 2026 snapshot (oaks.db). Re-measure against fresh prod copy (make downl
 - 4 subsection values missing from taxa (Erythromexicanae, Leucomexicanae, Roburoid, Salicifoliae).
 - × oviedoensis source 3 not preferred; × prasina/source 2 content-free row.
 - make download-db (Makefile:90) copies only oaks.db, not -wal -> may miss unchecked writes.
+
+Done 2026-11-02: data migrations 170000 (targeted fixes), 175000 (OOTW synonym splits, × diegoi diagnosis -> OOTW miscellaneous, 4 parent fills), 180000 (normalize lists/back-links). Verified on 2026-11-02 prod copy. Left for Jeff: see follow-up matter.

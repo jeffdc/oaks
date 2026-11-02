@@ -1,5 +1,5 @@
 ---
-status: refined
+status: done
 tags: [p1, integrity]
 effort: M
 created: 2026-11-02
@@ -23,3 +23,5 @@ lib/oaks/species/merge.ex + lib/oaks_web/live/species_merge_live.ex:
 10. compute_synonyms_to_add (merge.ex:255,267) String.downcase on every entry; crashes on {name,author} map entries that find_synonym supports.
 11. String.to_existing_atom in copy_field (species_merge_live.ex:94) -> whitelist @scalar_fields.
 Related: [[shared name-reference updater]].
+
+Done 2026-11-02 (ee4dec2): merge uses References.rewrite (excludes source+target); target parents naming either species auto-cleared (no more stuck Save); synonym's hybrids/closely_related/subspecies/external_links unioned into target; preferred flag kept when target has none; shared sources + same-parent hybrids + list additions shown as notices; same-species and :target_not_found guards; map synonym entries handled.

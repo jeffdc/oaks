@@ -1,5 +1,5 @@
 ---
-status: raw
+status: done
 tags: [p1, integrity]
 effort: M
 created: 2026-11-02
@@ -16,3 +16,5 @@ Species reference each other by scientific_name string (parent1, parent2, hybrid
 - Delete (species.ex ~:328, species_detail_live.ex:75-95): dangling references; confirm modal only mentions source count.
 - Proposal: one context function (reuse Merge.find_references/build_reference_update) used by rename, delete, and merge, run inside a transaction. On rename append old name to synonyms. On delete: show references in modal and block or clear.
 - Needs design discussion before implementation. Merge fixes depend on the corrected find_references (escaped \u00d7 issue).
+
+Done 2026-11-02 (ee4dec2): Oaks.Species.References (find/rewrite, name keys ignore case/whitespace/× spacing, decodes JSON so escaped × works). Rename updates all mentions + adds old name as synonym (Jeff: yes). Delete lists mentions in the confirm modal and removes them (Jeff: option b).
