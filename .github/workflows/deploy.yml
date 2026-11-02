@@ -19,10 +19,13 @@ jobs:
     # Only deploy if CI succeeded (or manual trigger)
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
+      # Check out the exact commit CI tested, not whatever main is now.
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup Flyctl
-        uses: superfly/flyctl-actions/setup-flyctl@master
+        uses: superfly/flyctl-actions/setup-flyctl@1.6
 
       - name: Deploy to Fly.io
         run: flyctl deploy --remote-only
@@ -34,7 +37,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy
     steps:
+      # Check out the exact commit CI tested, not whatever main is now.
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup Elixir
         uses: erlef/setup-beam@v1

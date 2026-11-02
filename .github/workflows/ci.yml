@@ -13,7 +13,11 @@ on:
       - 'mix.lock'
       - 'Dockerfile'
       - 'fly.toml'
+      - 'docker-entrypoint.sh'
+      - 'litestream.yml'
+      - 'rel/**'
       - '.github/workflows/ci.yml'
+      - '.github/workflows/deploy.yml'
   pull_request:
     branches: [main]
     paths:
@@ -26,7 +30,11 @@ on:
       - 'mix.lock'
       - 'Dockerfile'
       - 'fly.toml'
+      - 'docker-entrypoint.sh'
+      - 'litestream.yml'
+      - 'rel/**'
       - '.github/workflows/ci.yml'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 concurrency:
