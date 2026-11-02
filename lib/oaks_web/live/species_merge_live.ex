@@ -519,7 +519,7 @@ defmodule OaksWeb.SpeciesMergeLive do
       |> Enum.reject(fn {_label, val} -> is_nil(val) || val == "" end)
       |> Enum.take(3)
 
-    local_names = Species.parse_json_array(assigns.source.local_names)
+    local_names = Species.parse_name_list(assigns.source.local_names)
     assigns = assign(assigns, fields: fields, local_names: local_names)
 
     ~H"""

@@ -598,7 +598,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   attr :species_name, :string, required: true
 
   defp source_content(assigns) do
-    local_names = Species.parse_json_array(assigns.source.local_names)
+    local_names = Species.parse_name_list(assigns.source.local_names)
     assigns = assign(assigns, :local_names, local_names)
 
     ~H"""
@@ -1048,11 +1048,11 @@ defmodule OaksWeb.SpeciesDetailLive do
   defp load_species(socket, species) do
     hybrids =
       species.hybrids
-      |> Species.parse_json_array()
+      |> Species.parse_name_list()
       |> Species.get_hybrids_with_parents()
 
-    closely_related = Species.parse_json_array(species.closely_related_to)
-    subspecies_varieties = Species.parse_json_array(species.subspecies_varieties)
+    closely_related = Species.parse_name_list(species.closely_related_to)
+    subspecies_varieties = Species.parse_name_list(species.subspecies_varieties)
     synonyms = Species.parse_json_array(species.synonyms)
     external_links = Species.parse_json_array(species.external_links)
     computed_external_links = build_external_links(species.scientific_name, external_links)

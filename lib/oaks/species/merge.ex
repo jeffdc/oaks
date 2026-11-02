@@ -119,7 +119,7 @@ defmodule Oaks.Species.Merge do
       |> Repo.all()
       |> Enum.filter(fn s ->
         s.hybrids
-        |> Species.parse_json_array()
+        |> Species.parse_name_list()
         |> Enum.any?(&(String.downcase(&1) == lower_name))
       end)
       |> Enum.map(&%{species: &1, reference_type: "hybrids"})
@@ -131,7 +131,7 @@ defmodule Oaks.Species.Merge do
       |> Repo.all()
       |> Enum.filter(fn s ->
         s.closely_related_to
-        |> Species.parse_json_array()
+        |> Species.parse_name_list()
         |> Enum.any?(&(String.downcase(&1) == lower_name))
       end)
       |> Enum.map(&%{species: &1, reference_type: "closely_related_to"})
@@ -213,7 +213,7 @@ defmodule Oaks.Species.Merge do
         issues
       end
 
-    hybrids = Species.parse_json_array(target.hybrids)
+    hybrids = Species.parse_name_list(target.hybrids)
 
     issues =
       Enum.reduce(hybrids, issues, fn h, acc ->
@@ -227,7 +227,7 @@ defmodule Oaks.Species.Merge do
         end
       end)
 
-    related = Species.parse_json_array(target.closely_related_to)
+    related = Species.parse_name_list(target.closely_related_to)
 
     issues =
       Enum.reduce(related, issues, fn r, acc ->
@@ -360,7 +360,7 @@ defmodule Oaks.Species.Merge do
   defp build_reference_update(species, "hybrids", source_name, target_name) do
     updated =
       species.hybrids
-      |> Species.parse_json_array()
+      |> Species.parse_name_list()
       |> Enum.map(fn h ->
         if String.downcase(h) == String.downcase(source_name), do: target_name, else: h
       end)
@@ -374,7 +374,7 @@ defmodule Oaks.Species.Merge do
   defp build_reference_update(species, "closely_related_to", source_name, target_name) do
     updated =
       species.closely_related_to
-      |> Species.parse_json_array()
+      |> Species.parse_name_list()
       |> Enum.map(fn r ->
         if String.downcase(r) == String.downcase(source_name), do: target_name, else: r
       end)

@@ -269,8 +269,8 @@ defmodule OaksWeb.SpeciesSourceFormLive do
               <.input
                 field={@form[:local_names]}
                 type="text"
-                label="Common Names (JSON array)"
-                placeholder={~s(e.g. ["white oak","eastern white oak"])}
+                label="Common Names"
+                placeholder="e.g. white oak, eastern white oak"
                 phx-debounce="300"
               />
               <.input

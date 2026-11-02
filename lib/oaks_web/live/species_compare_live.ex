@@ -282,7 +282,7 @@ defmodule OaksWeb.SpeciesCompareLive do
   # -- Data helpers --
 
   defp get_source_value(species_source, %{key: :local_names, type: :array}) do
-    names = Species.parse_json_array(species_source.local_names)
+    names = Species.parse_name_list(species_source.local_names)
 
     if names == [],
       do: nil,

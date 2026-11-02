@@ -100,6 +100,28 @@ defmodule OaksWeb.SpeciesFormLiveTest do
       assert html =~ "Species updated"
     end
 
+    test "saves comma-separated relationship names as a list", %{conn: conn} do
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/alba/edit")
+
+      view
+      |> form("#species-form", species: %{hybrids: "×bebbiana, ×jackiana"})
+      |> render_submit()
+
+      assert Oaks.Species.get_species_by_name("alba").hybrids == ~s(["×bebbiana","×jackiana"])
+    end
+
+    test "shows an error instead of saving an invalid list", %{conn: conn} do
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/alba/edit")
+
+      html =
+        view
+        |> form("#species-form", species: %{closely_related_to: "[1, 2]"})
+        |> render_submit()
+
+      assert html =~ "must contain only names"
+      assert Oaks.Species.get_species_by_name("alba").closely_related_to == ~s(["stellata"])
+    end
+
     test "keeps a taxonomy value that has no taxa row when saving", %{conn: conn} do
       Oaks.Species.get_species_by_name("alba")
       |> Ecto.Changeset.change(subsection: "Erythromexicanae")

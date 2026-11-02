@@ -462,6 +462,13 @@ defmodule Oaks.Species do
 
   defp like_pattern(term), do: "%#{escape_like(String.downcase(term))}%"
 
+  @doc """
+  Parses a JSON list of names, keeping only string entries so malformed
+  stored data can't crash callers that treat entries as names.
+  """
+  @spec parse_name_list(String.t() | nil) :: [String.t()]
+  def parse_name_list(value), do: value |> parse_json_array() |> Enum.filter(&is_binary/1)
+
   @doc false
   def parse_json_array(nil), do: []
   def parse_json_array(""), do: []

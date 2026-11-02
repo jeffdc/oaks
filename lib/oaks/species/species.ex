@@ -7,6 +7,7 @@ defmodule Oaks.Species.Species do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Oaks.JsonList
   alias Oaks.Sources.SpeciesSource
 
   @required_fields [:scientific_name, :is_hybrid]
@@ -54,6 +55,10 @@ defmodule Oaks.Species.Species do
       :synonyms,
       :external_links
     ])
+    |> JsonList.cast(:hybrids)
+    |> JsonList.cast(:closely_related_to)
+    |> JsonList.cast(:subspecies_varieties)
+    |> JsonList.cast(:synonyms, allow_objects: true)
     |> validate_required(@required_fields)
     |> validate_length(:scientific_name, min: 2, max: 100)
     |> validate_inclusion(:conservation_status, @valid_conservation_statuses)

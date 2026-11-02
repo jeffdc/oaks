@@ -158,6 +158,22 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
     end
   end
 
+  describe "malformed stored lists" do
+    test "renders when list columns hold non-name entries", %{conn: conn} do
+      Oaks.Species.get_species_by_name("alba")
+      |> Ecto.Changeset.change(
+        hybrids: ~s([1, "×bebbiana"]),
+        closely_related_to: ~s([{"name": "x"}, "stellata"]),
+        subspecies_varieties: ~s([null])
+      )
+      |> Oaks.Repo.update!()
+
+      {:ok, _view, html} = live(conn, ~p"/species/alba")
+      assert html =~ "bebbiana"
+      assert html =~ "stellata"
+    end
+  end
+
   describe "species without sources" do
     test "shows no source data message", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/species/velutina")
