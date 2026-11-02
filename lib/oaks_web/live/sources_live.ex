@@ -136,8 +136,7 @@ defmodule OaksWeb.SourcesLive do
         navigate={~p"/sources/#{@source.id}"}
         class="source-card-link"
         aria-label={@source.name}
-      >
-      </.link>
+      ></.link>
       <div class="source-card-body">
         <div class="source-card-header">
           <h2 class="source-card-name">{@source.name}</h2>
