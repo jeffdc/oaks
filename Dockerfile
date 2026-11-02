@@ -2,7 +2,9 @@
 # Multi-stage build for Phoenix release with Litestream
 
 # Stage 1: Build Elixir release
-FROM hexpm/elixir:1.17.3-erlang-27.1.2-alpine-3.20.3 AS builder
+# Keep the builder's Alpine version identical to the runtime stage below:
+# the release links against that Alpine's OpenSSL and musl.
+FROM hexpm/elixir:1.17.3-erlang-27.3.4.19-alpine-3.24.3 AS builder
 
 # Install build dependencies
 RUN apk add --no-cache build-base git
@@ -46,14 +48,28 @@ RUN mix assets.deploy
 RUN mix release
 
 # Stage 2: Runtime
-FROM alpine:3.20 AS runtime
+FROM alpine:3.24.3 AS runtime
 
 # Runtime dependencies
 RUN apk add --no-cache libstdc++ openssl ncurses-libs sqlite su-exec
 
-# Install Litestream for continuous SQLite replication
-ADD https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.tar.gz /tmp/litestream.tar.gz
-RUN tar -C /usr/local/bin -xzf /tmp/litestream.tar.gz && rm /tmp/litestream.tar.gz
+# Install Litestream for continuous SQLite replication, verifying the
+# download against the release's published SHA-256 digests.
+# TARGETARCH is set by BuildKit from the build platform; it must not have a
+# default here or it would override that. Fall back to amd64 (Fly) if unset.
+ARG LITESTREAM_VERSION=v0.3.14
+ARG TARGETARCH
+RUN arch="${TARGETARCH:-amd64}" && \
+    case "$arch" in \
+      amd64) sha=880ccafc9514650c4a2a0cc78eb1e61aaad95dd3e86e877c8694f955c9095436 ;; \
+      arm64) sha=4d375a66653e4a9b27a5b38ce9cb73681c39893ba0485f81ab860d4cd427e642 ;; \
+      *) echo "Unsupported architecture: $arch" && exit 1 ;; \
+    esac && \
+    wget -qO /tmp/litestream.tar.gz \
+      "https://github.com/benbjohnson/litestream/releases/download/${LITESTREAM_VERSION}/litestream-${LITESTREAM_VERSION}-linux-${arch}.tar.gz" && \
+    echo "$sha  /tmp/litestream.tar.gz" | sha256sum -c - && \
+    tar -C /usr/local/bin -xzf /tmp/litestream.tar.gz && \
+    rm /tmp/litestream.tar.gz
 
 WORKDIR /app
 
