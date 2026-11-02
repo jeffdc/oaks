@@ -2,11 +2,10 @@ defmodule Oaks.Repo.Migrations.FillResearchedHybridParents do
   @moduledoc """
   Fills parents for named hybrids from Jeff's 2026-11 parentage research
   (POWO/WCVP, Oaks of the World, IPNI, WFO, FNA), plus his decisions on the
-  disputed ones. × mannifera (possibly a distinct species) and × subpyrenaica
-  (treated by WFO and Oaks of the World as Q. pubescens subsp. subpyrenaica)
-  are deliberately left without parents; × cerrioides keeps canariensis ×
-  pubescens from SplitOaksOfTheWorldSynonyms. × columnaris and × subglaucescens
-  are merged into × richteri and × anselmii by MergePowoSynonymHybrids.
+  disputed ones (× mannifera and × subpyrenaica follow POWO). × cerrioides
+  keeps canariensis × pubescens from SplitOaksOfTheWorldSynonyms.
+  × columnaris and × subglaucescens are merged into × richteri and × anselmii
+  by MergePowoSynonymHybrids.
 
   Infraspecific parents use the existing infraspecific species row when there
   is one (e.g. `durata gabrielensis`), otherwise the species. A row is only
@@ -34,10 +33,14 @@ defmodule Oaks.Repo.Migrations.FillResearchedHybridParents do
     {"× kerneri montserratii", "robur", "pubescens"},
     # POWO: coccolobifolia × viminea, coccolobifolia = jonesii
     {"× knoblochii", "jonesii", "viminea"},
+    # POWO. Older literature: boissieri × iberica; Avishai 2015: a distinct species.
+    {"× mannifera", "infectoria veneris", "petraea polycarpa"},
     {"× numantina", "faginea", "pyrenaica"},
     {"× pachucana", "laurina", "mexicana"},
     {"× schochiana", "palustris", "phellos"},
     {"× subconvexa", "durata", "garryana"},
+    # POWO. WFO and Oaks of the World treat it as Q. pubescens subsp. subpyrenaica.
+    {"× subpyrenaica", "faginea", "pubescens"},
     {"× takaoyamensis", "acuta", "sessilifolia"},
     {"× tingitana", "faginea", "lusitanica"},
     {"× welwitschii", "estremadurensis", "pyrenaica"}

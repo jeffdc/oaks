@@ -193,6 +193,16 @@ defmodule Oaks.Repo.Migrations.SplitOaksOfTheWorldSynonyms do
      [
        "douglasii x turbinella or douglasii x john-tuckeri = dumosa var. alvordiana (Eastw.) Jepson 1910"
      ], ["dumosa var. alvordiana (Eastw.) Jepson 1910"]},
+    # × shirlingii Bush ex Palmer & Steyerm. 1935 was described as imbricaria ×
+    # shumardii var. schneckii; Palmer and ITIS sink it into × egglestonii (1924).
+    {"× egglestonii",
+     [
+       "imbricaria x shumardii x shirlingii Bush ex Palmer & Steyerm. 1935 (as imbricaria X shumardii var . schneckii )"
+     ],
+     ["× shirlingii Bush ex Palmer & Steyerm. 1935 (as imbricaria × shumardii var. schneckii)"]},
+    # WFO also lists × shirlingii under × moultonensis; following Palmer/ITIS,
+    # it belongs to × egglestonii only.
+    {"× moultonensis", ["shirlingii (x)"], []},
     {"× macdonaldii",
      [
        "pacifica x lobata = dumosa var. macdonaldii (Greene & Kellogg) Jepson 1923 = dumosa subsp macdonaldii (Greene & Kellogg) A.Camus 1935"
