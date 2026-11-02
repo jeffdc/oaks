@@ -183,5 +183,61 @@ defmodule Oaks.SpeciesTest do
     test "returns nil when no synonym match" do
       assert Species.find_synonym("nonexistent synonym") == nil
     end
+
+    test "matches synonyms that carry authorship" do
+      set_synonyms("rubra", [
+        "handeliana A.Camus",
+        "argentata (Korth.) Oerst. 1867",
+        "shumardii var. acerifolia E.J.Palmer 1927"
+      ])
+
+      assert Species.find_synonym("handeliana").scientific_name == "rubra"
+      assert Species.find_synonym("argentata").scientific_name == "rubra"
+      assert Species.find_synonym("shumardii var. acerifolia").scientific_name == "rubra"
+    end
+
+    test "does not match a name followed by a rank or another epithet" do
+      set_synonyms("rubra", ["reticulata var. retifolia Liebm. 1869", "falcata pagodifolia"])
+
+      assert Species.find_synonym("reticulata") == nil
+      assert Species.find_synonym("falcata") == nil
+    end
+
+    test "ignores case, extra whitespace, Quercus prefix, and hybrid sign" do
+      set_synonyms("rubra", ["Quercus  Borealis Michx.f.", "×  fernaldii Trel."])
+
+      assert Species.find_synonym("borealis").scientific_name == "rubra"
+      assert Species.find_synonym("×fernaldii").scientific_name == "rubra"
+      assert Species.find_synonym("× fernaldii").scientific_name == "rubra"
+    end
+
+    test "matches structured name/author entries" do
+      set_synonyms("rubra", [%{"name" => "maxima", "author" => "(Marshall) Ashe"}])
+
+      assert Species.find_synonym("maxima").scientific_name == "rubra"
+    end
+
+    test "prefers an exact match over an author-suffixed one" do
+      set_synonyms("alba", ["repanda Michx."])
+      set_synonyms("rubra", ["repanda"])
+
+      assert Species.find_synonym("repanda").scientific_name == "rubra"
+    end
+
+    test "treats LIKE wildcards in the lookup literally" do
+      assert Species.find_synonym("%") == nil
+      assert Species.find_synonym("alba var. repand_") == nil
+    end
+
+    test "returns nil for a blank name" do
+      assert Species.find_synonym("  ") == nil
+    end
+  end
+
+  defp set_synonyms(name, synonyms) do
+    name
+    |> Species.get_species_by_name()
+    |> Ecto.Changeset.change(synonyms: Jason.encode!(synonyms))
+    |> Oaks.Repo.update!()
   end
 end

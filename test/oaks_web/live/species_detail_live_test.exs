@@ -147,6 +147,15 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert {:error, {:live_redirect, %{to: "/species/alba"}}} =
                live(conn, "/species/alba%20var.%20repanda")
     end
+
+    test "redirects when the stored synonym includes authorship", %{conn: conn} do
+      Oaks.Species.get_species_by_name("alba")
+      |> Ecto.Changeset.change(synonyms: ~s(["repanda Michx."]))
+      |> Oaks.Repo.update!()
+
+      assert {:error, {:live_redirect, %{to: "/species/alba"}}} =
+               live(conn, "/species/repanda")
+    end
   end
 
   describe "species without sources" do

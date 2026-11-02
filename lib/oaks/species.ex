@@ -148,17 +148,101 @@ defmodule Oaks.Species do
   end
 
   @doc """
-  Finds species that reference the given name as a synonym.
+  Finds the species that lists the given name as a synonym.
+
+  Synonym entries often carry authorship (e.g. `"handeliana A.Camus"`), so an
+  entry matches when it equals the name exactly or when the name is followed by
+  an author citation (a word starting with an uppercase letter or `(`). Entries
+  that continue with a rank or further epithet (`"reticulata var. retifolia"`)
+  do not match a lookup for `"reticulata"`. Exact matches win over
+  author-suffixed ones; ties go to the lowest species id.
   """
   @spec find_synonym(String.t()) :: Species.t() | nil
   def find_synonym(name) do
-    search = "%\"#{name}\"%"
+    target = normalize_synonym_name(name)
+
+    case String.split(target) do
+      [] ->
+        nil
+
+      words ->
+        words
+        |> List.last()
+        |> synonym_candidates()
+        |> Enum.map(&{best_synonym_match(&1, target), &1})
+        |> Enum.reject(fn {rank, _species} -> is_nil(rank) end)
+        |> Enum.min_by(fn {rank, _species} -> rank end, fn -> {nil, nil} end)
+        |> elem(1)
+    end
+  end
+
+  # Coarse SQL prefilter on one word of the name; exact matching happens in Elixir.
+  defp synonym_candidates(word) do
+    search = "%#{escape_like(word)}%"
 
     from(s in Species,
-      where: fragment("? LIKE ?", s.synonyms, ^search),
-      limit: 1
+      where: fragment("lower(?) LIKE ? ESCAPE '\\'", s.synonyms, ^search),
+      order_by: s.id
     )
-    |> Repo.one()
+    |> Repo.all()
+  end
+
+  # Returns 0 for an exact match, 1 for name + author, nil for no match.
+  defp best_synonym_match(species, target) do
+    species.synonyms
+    |> parse_json_array()
+    |> Enum.map(&synonym_match_rank(&1, target))
+    |> Enum.reject(&is_nil/1)
+    |> Enum.min(fn -> nil end)
+  end
+
+  defp synonym_match_rank(%{"name" => name}, target) when is_binary(name) do
+    if normalize_synonym_name(name) == target, do: 0
+  end
+
+  defp synonym_match_rank(entry, target) when is_binary(entry) do
+    entry = String.trim(entry)
+    normalized = normalize_synonym_name(entry)
+
+    cond do
+      normalized == target -> 0
+      String.starts_with?(normalized, target <> " ") and author_follows?(entry, target) -> 1
+      true -> nil
+    end
+  end
+
+  defp synonym_match_rank(_entry, _target), do: nil
+
+  # Checks the original-case text after the name to see if it starts like an
+  # author citation rather than a rank marker or another epithet.
+  defp author_follows?(entry, target) do
+    rest =
+      entry
+      |> String.split()
+      |> strip_name_prefix()
+      |> Enum.drop(length(String.split(target)))
+
+    case rest do
+      [word | _] -> Regex.match?(~r/^[(\p{Lu}]/u, word)
+      [] -> false
+    end
+  end
+
+  defp strip_name_prefix(["Quercus" | rest]), do: strip_name_prefix(rest)
+  defp strip_name_prefix(["×" | rest]), do: rest
+  defp strip_name_prefix(["×" <> word | rest]) when word != "", do: [word | rest]
+  defp strip_name_prefix(words), do: words
+
+  defp normalize_synonym_name(name) do
+    name
+    |> String.split()
+    |> strip_name_prefix()
+    |> Enum.join(" ")
+    |> String.downcase()
+  end
+
+  defp escape_like(str) do
+    String.replace(str, ~r/[\\%_]/, fn char -> "\\" <> char end)
   end
 
   @doc """

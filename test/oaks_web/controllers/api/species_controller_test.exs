@@ -68,6 +68,16 @@ defmodule OaksWeb.API.SpeciesControllerTest do
       assert %{"error" => _} = json_response(conn, 404)
     end
 
+    test "redirects a synonym with authorship to the accepted species", %{conn: conn} do
+      Oaks.Species.get_species_by_name("alba")
+      |> Ecto.Changeset.change(synonyms: ~s(["repanda Michx."]))
+      |> Oaks.Repo.update!()
+
+      conn = get(conn, "/api/v1/species/repanda")
+      assert %{"scientific_name" => "alba"} = json_response(conn, 301)
+      assert get_resp_header(conn, "location") == ["/api/v1/species/alba"]
+    end
+
     test "returns hybrid species", %{conn: conn} do
       conn = get(conn, "/api/v1/species/%C3%97bebbiana")
       species = json_response(conn, 200)
