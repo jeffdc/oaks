@@ -91,3 +91,7 @@ npm-debug.log
 
 # Local tool binaries (e.g. litestream for make download-db)
 /bin/
+
+# direnv / nix-direnv cache and per-user overrides
+.direnv/
+.envrc.local

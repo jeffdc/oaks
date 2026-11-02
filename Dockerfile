@@ -2,9 +2,10 @@
 # Multi-stage build for Phoenix release with Litestream
 
 # Stage 1: Build Elixir release
-# Keep the builder's Alpine version identical to the runtime stage below:
-# the release links against that Alpine's OpenSSL and musl.
-FROM hexpm/elixir:1.17.3-erlang-27.3.4.19-alpine-3.24.3 AS builder
+# Keep Elixir/OTP identical to CI and the dev toolchain (flake.nix; checked by
+# scripts/check-toolchain), and the Alpine version identical to the runtime
+# stage below: the release links against that Alpine's OpenSSL and musl.
+FROM hexpm/elixir:1.19.6-erlang-28.5.0.8-alpine-3.24.3 AS builder
 
 # Install build dependencies
 RUN apk add --no-cache build-base git
@@ -41,7 +42,16 @@ COPY config/runtime.exs config/
 # Compile first (needed for colocated hooks)
 RUN mix compile
 
-# Build assets (esbuild + tailwind are installed via mix)
+# OTP >= 28.5.0.6 httpc rejects GitHub's release redirects (headers > 10240
+# bytes), which breaks the tailwind package's own binary download. Place the
+# binary where the tailwind package looks for it (_build/tailwind-<target>); it
+# then skips its own download. Keep the version in sync with `config :tailwind`
+# in config/config.exs.
+ADD https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.12/tailwindcss-linux-x64-musl /app/_build/tailwind-linux-x64-musl
+RUN echo "a8a1926a2951a5da0684c568d612bc0a590600334d3a85d0e63ea90ac7ced2e5  /app/_build/tailwind-linux-x64-musl" | sha256sum -c - && \
+    chmod +x /app/_build/tailwind-linux-x64-musl
+
+# Build assets (esbuild is installed via mix from npm; tailwind is placed above)
 RUN mix assets.deploy
 
 # Build the release

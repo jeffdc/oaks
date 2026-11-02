@@ -42,6 +42,7 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 - **Styling**: Tailwind v4
 - **Quality**: Credo, Dialyxir, mix format
 - **Deployment**: Fly.io with Litestream (S3 replication)
+- **Toolchain**: Nix flake (`flake.nix`, pinned by `flake.lock`, loaded by direnv via `.envrc`) — Elixir/OTP, SQLite, and a pinned Tailwind. CI runs in the same shell and the Dockerfile builder image must match it (`scripts/check-toolchain`). Mirrors gallformers.
 
 ## Development Commands
 
@@ -53,6 +54,8 @@ mix credo --strict         # Run code quality checks
 mix precommit              # Run all checks before committing
 mix smoke_test <url>       # Run smoke tests against a deployment
 ```
+
+**CRITICAL: Run mix inside the Nix dev shell** (direnv, or `nix develop -c <cmd>`). A Homebrew or other system Elixir is a different version than CI and production, and its formatter can disagree with CI.
 
 **CRITICAL: Always compile with `--warnings-as-errors`**. When verifying code changes, NEVER use plain `mix compile` - always use `mix compile --warnings-as-errors` or run `mix precommit`.
 

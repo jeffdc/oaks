@@ -16,6 +16,9 @@ on:
       - 'docker-entrypoint.sh'
       - 'litestream.yml'
       - 'rel/**'
+      - 'flake.nix'
+      - 'flake.lock'
+      - 'scripts/**'
       - '.github/workflows/ci.yml'
       - '.github/workflows/deploy.yml'
   pull_request:
@@ -33,6 +36,9 @@ on:
       - 'docker-entrypoint.sh'
       - 'litestream.yml'
       - 'rel/**'
+      - 'flake.nix'
+      - 'flake.lock'
+      - 'scripts/**'
       - '.github/workflows/ci.yml'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
@@ -41,19 +47,27 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Toolchain comes from the flake's dev shell (flake.nix), the same one used locally.
+# Steps run through `nix develop`; the shell is pre-built in its own step so a broken
+# shell fails clearly and doesn't skew step timings.
+
 jobs:
   phoenix:
     name: Phoenix
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        shell: 'nix develop -c bash -e {0}'
+
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup Elixir
-        uses: erlef/setup-beam@v1
-        with:
-          elixir-version: '1.17'
-          otp-version: '27'
+      - uses: cachix/install-nix-action@v31
+
+      - name: Build dev shell
+        shell: bash
+        run: nix build --no-link .#devShells.x86_64-linux.default
 
       - name: Restore dependencies cache
         uses: actions/cache@v6
@@ -61,8 +75,11 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-${{ hashFiles('mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-
+          key: ${{ runner.os }}-mix-${{ hashFiles('flake.lock') }}-${{ hashFiles('mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-${{ hashFiles('flake.lock') }}-
+
+      - name: Check Dockerfile matches the flake toolchain
+        run: scripts/check-toolchain
 
       - name: Install dependencies
         run: mix deps.get
@@ -81,14 +98,18 @@ jobs:
     name: Assets
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        shell: 'nix develop -c bash -e {0}'
+
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup Elixir
-        uses: erlef/setup-beam@v1
-        with:
-          elixir-version: '1.17'
-          otp-version: '27'
+      - uses: cachix/install-nix-action@v31
+
+      - name: Build dev shell
+        shell: bash
+        run: nix build --no-link .#devShells.x86_64-linux.default
 
       - name: Restore dependencies cache
         uses: actions/cache@v6
@@ -96,8 +117,8 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-${{ hashFiles('mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-
+          key: ${{ runner.os }}-mix-${{ hashFiles('flake.lock') }}-${{ hashFiles('mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-${{ hashFiles('flake.lock') }}-
 
       - name: Install dependencies
         run: mix deps.get

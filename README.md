@@ -24,9 +24,22 @@ their hybrids.
 
 ## Quick Start
 
-Requirements: Elixir 1.17+ / OTP 27+, SQLite 3, Node.js (for assets).
+The toolchain (Elixir, Erlang/OTP, SQLite, Tailwind) comes from a Nix flake, pinned
+in `flake.lock` and shared with CI and the gallformers project. The Dockerfile uses the
+same versions; CI checks that with `scripts/check-toolchain`.
+
+Prerequisites:
+
+- **[Nix](https://github.com/NixOS/nix-installer)** with flakes enabled
+- **[direnv](https://direnv.net/)** hooked into your shell, plus
+  **[nix-direnv](https://github.com/nix-community/nix-direnv)** for caching
+- **AWS credentials** (`aws login`) for `make download-db`
+
+Without direnv, `nix develop` opens the same shell.
 
 ```bash
+direnv allow             # once per checkout: loads the dev shell from flake.nix
+
 # Install deps, set up DB, build assets
 mix setup
 

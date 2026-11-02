@@ -1,0 +1,79 @@
+#!/bin/sh
+# Fails if the Dockerfile drifts from the dev toolchain (flake.nix).
+#
+# Run inside the Nix dev shell: the Elixir and OTP versions it compares against
+# are the ones on PATH. CI runs it in the Phoenix job (.github/workflows/ci.yml).
+#
+# Checks:
+#   - builder image hexpm/elixir:<elixir>-erlang-<otp>-alpine-<alpine> matches
+#     `elixir --short-version` and the exact OTP version
+#   - runtime image alpine:<alpine> matches the builder's Alpine version
+#   - Tailwind download version matches `config :tailwind, version:` in config/config.exs
+# and that flake.nix's pinned tailwindVersion matches config/config.exs.
+#
+# Mirrors gallformers' scripts/check-toolchain.
+# CHECK_TOOLCHAIN_ROOT overrides the directory the files are read from (for testing).
+
+set -eu
+
+root="${CHECK_TOOLCHAIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+failures=0
+
+fail() {
+  echo "MISMATCH: $*"
+  failures=$((failures + 1))
+}
+
+check() {
+  label=$1
+  expected=$2
+  found=$3
+  if [ "$expected" = "$found" ]; then
+    echo "ok        $label: $found"
+  else
+    fail "$label: expected $expected, found ${found:-<none>}"
+  fi
+}
+
+elixir_version=$(elixir --short-version)
+otp_version=$(erl -noshell -eval '
+  {ok, V} = file:read_file(filename:join([code:root_dir(), "releases",
+                                          erlang:system_info(otp_release), "OTP_VERSION"])),
+  io:format("~s", [string:trim(V)]),
+  halt().')
+# First `version: "..."` after the `config :tailwind,` line (esbuild's comes earlier).
+tailwind_version=$(awk '
+  /^config :tailwind,/ { in_block = 1; next }
+  in_block && match($0, /version: "[0-9.]+"/) {
+    v = substr($0, RSTART + 10, RLENGTH - 11); print v; exit
+  }' "$root/config/config.exs")
+[ -n "$tailwind_version" ] || fail "could not read the tailwind version from config/config.exs"
+flake_tailwind=$(sed -n 's/^ *tailwindVersion = "\([0-9.]*\)";$/\1/p' "$root/flake.nix")
+check "flake.nix Tailwind (= config.exs)" "$tailwind_version" "$flake_tailwind"
+
+file="$root/Dockerfile"
+if [ -f "$file" ]; then
+  builder=$(sed -n 's|^FROM hexpm/elixir:\([^ ]*\) AS builder.*|\1|p' "$file")
+  [ -n "$builder" ] || fail "Dockerfile: no 'FROM hexpm/elixir:... AS builder' line"
+  # <elixir>-erlang-<otp>-alpine-<alpine>
+  d_elixir=$(echo "$builder" | sed -n 's|^\(.*\)-erlang-.*|\1|p')
+  d_otp=$(echo "$builder" | sed -n 's|.*-erlang-\(.*\)-alpine-.*|\1|p')
+  d_alpine=$(echo "$builder" | sed -n 's|.*-alpine-\(.*\)$|\1|p')
+  d_runtime_alpine=$(sed -n 's|^FROM alpine:\([^ ]*\) AS runtime.*|\1|p' "$file")
+  d_tailwind=$(sed -n 's|.*tailwindcss/releases/download/v\([^/]*\)/.*|\1|p' "$file" | head -1)
+
+  check "Dockerfile Elixir" "$elixir_version" "$d_elixir"
+  check "Dockerfile OTP" "$otp_version" "$d_otp"
+  check "Dockerfile runtime Alpine (= builder Alpine)" "$d_alpine" "$d_runtime_alpine"
+  check "Dockerfile Tailwind (= config.exs)" "$tailwind_version" "$d_tailwind"
+else
+  fail "Dockerfile not found"
+fi
+
+if [ "$failures" -gt 0 ]; then
+  echo
+  echo "$failures toolchain mismatch(es). Update the Dockerfile or flake.nix/flake.lock so they agree."
+  exit 1
+fi
+echo
+echo "Dockerfile matches the dev toolchain."
