@@ -40,4 +40,16 @@ defmodule OaksWeb.AboutLiveTest do
     assert html =~ ~r/>\s*#{total - hybrids}\s*<\/span>\s*<span[^>]*>Species</
     assert html =~ ~r/>\s*#{total}\s*<\/span>\s*<span[^>]*>\s*Total Entries/
   end
+
+  test "shows the deployed app version and API version", %{conn: conn} do
+    {:ok, view, html} = live(conn, ~p"/about")
+
+    assert html =~ "App: #{Oaks.Version.app_version()} | API: #{Oaks.Version.api_version()}"
+    assert Oaks.Version.app_version() =~ ~r/^\d{4}\.\d{1,2}\.\d{1,2}$/
+
+    assert has_element?(
+             view,
+             ~s|#release-notes-link[href="https://github.com/jeffdc/oaks/releases"]|
+           )
+  end
 end

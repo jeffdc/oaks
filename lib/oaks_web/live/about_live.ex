@@ -2,6 +2,7 @@ defmodule OaksWeb.AboutLive do
   use OaksWeb, :live_view
 
   alias Oaks.Species
+  alias Oaks.Version
 
   @impl true
   def mount(_params, _session, socket) do
@@ -9,12 +10,11 @@ defmodule OaksWeb.AboutLive do
       send(self(), :load_stats)
     end
 
-    version = Application.spec(:oaks, :vsn) |> to_string()
-
     {:ok,
      assign(socket,
        page_title: "About",
-       version: version,
+       app_version: Version.app_version(),
+       api_version: Version.api_version(),
        stats: %{species_count: 0, hybrid_count: 0, total: 0},
        is_loading: true
      )}
@@ -285,8 +285,18 @@ defmodule OaksWeb.AboutLive do
           class="text-xs"
           style="color: var(--color-text-tertiary); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;"
         >
-          Version {@version}
+          App: {@app_version} | API: {@api_version}
         </span>
+        <span class="mx-2 text-xs" style="color: var(--color-text-tertiary);">&middot;</span>
+        <a
+          href="https://github.com/jeffdc/oaks/releases"
+          target="_blank"
+          rel="noreferrer"
+          class="text-xs"
+          id="release-notes-link"
+        >
+          Release Notes
+        </a>
       </footer>
     </div>
     """

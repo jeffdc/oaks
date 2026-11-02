@@ -12,7 +12,7 @@ defmodule OaksWeb.ApiSpec do
     %OpenApi{
       info: %Info{
         title: "Oak Compendium API",
-        version: "1.0.0",
+        version: Oaks.Version.api_version(),
         description: "API for the Quercus (oak) species database"
       },
       servers: [
