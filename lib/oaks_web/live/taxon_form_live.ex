@@ -12,6 +12,7 @@ defmodule OaksWeb.TaxonFormLive do
 
   alias Oaks.Taxonomy
   alias Oaks.Taxonomy.Taxon
+  alias OaksWeb.Params
 
   @level_options [
     {"Subgenus", "subgenus"},
@@ -67,9 +68,9 @@ defmodule OaksWeb.TaxonFormLive do
   end
 
   defp apply_action(socket, :edit, %{"id" => id_str}) do
-    id = String.to_integer(id_str)
+    id = Params.int(id_str)
 
-    case Taxonomy.get_taxon_by_id(id) do
+    case id && Taxonomy.get_taxon_by_id(id) do
       nil ->
         socket
         |> put_flash(:error, "Taxon not found.")
@@ -132,9 +133,10 @@ defmodule OaksWeb.TaxonFormLive do
   end
 
   def handle_event("remove_link", %{"index" => index_str}, socket) do
-    index = String.to_integer(index_str)
-    tags = List.delete_at(socket.assigns.link_tags, index)
-    {:noreply, assign(socket, link_tags: tags)}
+    case Params.int(index_str) do
+      nil -> {:noreply, socket}
+      index -> {:noreply, assign(socket, link_tags: List.delete_at(socket.assigns.link_tags, index))}
+    end
   end
 
   def handle_event("save", %{"taxon" => taxon_params}, socket) do

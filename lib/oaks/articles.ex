@@ -222,13 +222,16 @@ defmodule Oaks.Articles do
     where(query, [a], a.is_published == true)
   end
 
-  defp maybe_filter_tag(query, nil), do: query
   defp maybe_filter_tag(query, ""), do: query
 
-  defp maybe_filter_tag(query, tag) do
-    search = "%\"#{tag}\"%"
-    where(query, [a], fragment("? LIKE ?", a.tags, ^search))
+  defp maybe_filter_tag(query, tag) when is_binary(tag) do
+    search = "%" <> escape_like(Jason.encode!(tag)) <> "%"
+    where(query, [a], fragment("? LIKE ? ESCAPE '\\'", a.tags, ^search))
   end
+
+  defp maybe_filter_tag(query, _tag), do: query
+
+  defp escape_like(str), do: String.replace(str, ~r/[\\%_]/, fn char -> "\\" <> char end)
 
   defp generate_unique_slug(title, exclude_id \\ nil) do
     base_slug = generate_slug(title)

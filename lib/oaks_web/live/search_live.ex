@@ -10,6 +10,7 @@ defmodule OaksWeb.SearchLive do
   use OaksWeb, :live_view
 
   alias Oaks.Search
+  alias OaksWeb.Params
 
   @impl true
   def mount(_params, _session, socket) do
@@ -24,7 +25,7 @@ defmodule OaksWeb.SearchLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    query = params["q"] || ""
+    query = Params.string(params["q"])
 
     socket =
       if query != socket.assigns.query do
@@ -38,7 +39,7 @@ defmodule OaksWeb.SearchLive do
 
   @impl true
   def handle_event("search", %{"q" => query}, socket) do
-    {:noreply, push_patch(socket, to: search_path(query))}
+    {:noreply, push_patch(socket, to: search_path(Params.string(query)))}
   end
 
   @impl true

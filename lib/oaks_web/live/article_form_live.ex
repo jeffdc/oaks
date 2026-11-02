@@ -12,6 +12,7 @@ defmodule OaksWeb.ArticleFormLive do
 
   alias Oaks.Articles
   alias Oaks.Articles.Article
+  alias OaksWeb.Params
 
   @impl true
   def mount(_params, _session, socket) do
@@ -102,9 +103,10 @@ defmodule OaksWeb.ArticleFormLive do
   end
 
   def handle_event("remove_tag", %{"index" => index_str}, socket) do
-    index = String.to_integer(index_str)
-    tags = List.delete_at(socket.assigns.tags, index)
-    {:noreply, assign(socket, tags: tags)}
+    case Params.int(index_str) do
+      nil -> {:noreply, socket}
+      index -> {:noreply, assign(socket, tags: List.delete_at(socket.assigns.tags, index))}
+    end
   end
 
   def handle_event("save", %{"article" => params}, socket) do

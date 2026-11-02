@@ -10,6 +10,7 @@ defmodule OaksWeb.SpeciesListLive do
   use OaksWeb, :live_view
 
   alias Oaks.Species
+  alias OaksWeb.Params
 
   @impl true
   def mount(_params, _session, socket) do
@@ -33,9 +34,9 @@ defmodule OaksWeb.SpeciesListLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    query = params["q"] || ""
-    subgenus = params["subgenus"] || ""
-    section = params["section"] || ""
+    query = Params.string(params["q"])
+    subgenus = Params.string(params["subgenus"])
+    section = Params.string(params["section"])
 
     filters =
       %{}
@@ -61,9 +62,9 @@ defmodule OaksWeb.SpeciesListLive do
 
   @impl true
   def handle_event("filter", params, socket) do
-    query = params["q"] || ""
-    subgenus = params["subgenus"] || ""
-    section = params["section"] || ""
+    query = Params.string(params["q"])
+    subgenus = Params.string(params["subgenus"])
+    section = Params.string(params["section"])
 
     {:noreply, push_patch(socket, to: list_path(query, subgenus, section))}
   end

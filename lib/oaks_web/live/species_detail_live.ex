@@ -12,6 +12,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   alias Oaks.Markdown
   alias Oaks.Sources
   alias Oaks.Species
+  alias OaksWeb.Params
 
   @impl true
   def mount(_params, _session, socket) do
@@ -50,14 +51,12 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   @impl true
   def handle_event("select_source", %{"id" => id_str}, socket) do
-    source_id = String.to_integer(id_str)
+    source_id = Params.int(id_str)
 
-    selected =
-      Enum.find(socket.assigns.species_sources, fn ss ->
-        ss.source.id == source_id
-      end)
-
-    {:noreply, assign(socket, selected_source: selected)}
+    case Enum.find(socket.assigns.species_sources, &(&1.source.id == source_id)) do
+      nil -> {:noreply, socket}
+      selected -> {:noreply, assign(socket, selected_source: selected)}
+    end
   end
 
   def handle_event("request_delete", _params, socket) do
@@ -104,6 +103,8 @@ defmodule OaksWeb.SpeciesDetailLive do
   end
 
   def handle_event("merge_search", %{"query" => query}, socket) do
+    query = Params.string(query)
+
     results =
       if String.length(String.trim(query)) >= 2 do
         Species.search_species(query, 20)
@@ -125,12 +126,13 @@ defmodule OaksWeb.SpeciesDetailLive do
   end
 
   def handle_event("request_delete_source", %{"id" => id_str}, socket) do
-    if socket.assigns[:authenticated] do
-      source_id = String.to_integer(id_str)
+    source_id = Params.int(id_str)
 
-      target =
-        Enum.find(socket.assigns.species_sources, fn ss -> ss.id == source_id end)
+    target =
+      socket.assigns[:authenticated] &&
+        Enum.find(socket.assigns.species_sources, &(&1.id == source_id))
 
+    if target do
       {:noreply, assign(socket, show_delete_source_confirm: true, delete_source_target: target)}
     else
       {:noreply, socket}

@@ -7,6 +7,7 @@ defmodule OaksWeb.API.SearchController do
   use OpenApiSpex.ControllerSpecs
 
   alias Oaks.Search
+  alias OaksWeb.Params
 
   tags(["Search"])
 
@@ -26,12 +27,8 @@ defmodule OaksWeb.API.SearchController do
     ]
   )
 
-  def search(conn, %{"q" => query} = params) do
-    limit =
-      case Integer.parse(params["limit"] || "") do
-        {n, ""} -> n
-        _ -> 50
-      end
+  def search(conn, %{"q" => query} = params) when is_binary(query) do
+    limit = Params.int(params["limit"]) || 50
 
     results = Search.search(query, limit)
     json(conn, results)

@@ -10,6 +10,7 @@ defmodule OaksWeb.ArticlesLive do
   use OaksWeb, :live_view
 
   alias Oaks.Articles
+  alias OaksWeb.Params
 
   @impl true
   def mount(_params, _session, socket) do
@@ -24,7 +25,7 @@ defmodule OaksWeb.ArticlesLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    tag = params["tag"]
+    tag = Params.string(params["tag"], nil)
     authenticated = socket.assigns[:authenticated] || false
 
     filter = if tag, do: %{"tag" => tag}, else: %{}

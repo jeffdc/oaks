@@ -11,6 +11,7 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   alias Oaks.Species
   alias Oaks.Species.Merge
+  alias OaksWeb.Params
 
   @scalar_fields ~w(author conservation_status subgenus section subsection complex parent1 parent2)
 
@@ -89,7 +90,7 @@ defmodule OaksWeb.SpeciesMergeLive do
   # -- Events --
 
   @impl true
-  def handle_event("copy_field", %{"field" => field}, socket) do
+  def handle_event("copy_field", %{"field" => field}, socket) when field in @scalar_fields do
     source = socket.assigns.preview.source
     value = Map.get(source, String.to_existing_atom(field))
 
@@ -97,17 +98,27 @@ defmodule OaksWeb.SpeciesMergeLive do
     {:noreply, assign(socket, edited_fields: edited)}
   end
 
-  def handle_event("update_field", %{"field" => field, "value" => value}, socket) do
+  def handle_event("update_field", %{"field" => field, "value" => value}, socket)
+      when field in @scalar_fields and is_binary(value) do
     value = if value == "", do: nil, else: value
     edited = Map.put(socket.assigns.edited_fields, field, value)
     {:noreply, assign(socket, edited_fields: edited)}
   end
 
+  def handle_event(event, _params, socket) when event in ["copy_field", "update_field"] do
+    {:noreply, socket}
+  end
+
   def handle_event("toggle_source", %{"source-id" => id_str}, socket) do
-    source_id = String.to_integer(id_str)
-    current = Map.get(socket.assigns.source_checkboxes, source_id, true)
-    checkboxes = Map.put(socket.assigns.source_checkboxes, source_id, !current)
-    {:noreply, assign(socket, source_checkboxes: checkboxes)}
+    case Params.int(id_str) do
+      nil ->
+        {:noreply, socket}
+
+      source_id ->
+        current = Map.get(socket.assigns.source_checkboxes, source_id, true)
+        checkboxes = Map.put(socket.assigns.source_checkboxes, source_id, !current)
+        {:noreply, assign(socket, source_checkboxes: checkboxes)}
+    end
   end
 
   def handle_event("toggle_references", _params, socket) do

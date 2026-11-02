@@ -11,6 +11,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
   alias Oaks.Sources
   alias Oaks.Sources.SpeciesSource
   alias Oaks.Species
+  alias OaksWeb.Params
 
   @impl true
   def mount(_params, _session, socket) do
@@ -70,9 +71,9 @@ defmodule OaksWeb.SpeciesSourceFormLive do
         |> push_navigate(to: ~p"/list")
 
       species ->
-        source_id = String.to_integer(source_id_str)
+        source_id = Params.int(source_id_str)
 
-        case find_species_source(species.id, source_id) do
+        case source_id && find_species_source(species.id, source_id) do
           nil ->
             socket
             |> put_flash(:error, "Source data not found.")

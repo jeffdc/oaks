@@ -10,6 +10,7 @@ defmodule OaksWeb.SpeciesCompareLive do
 
   alias Oaks.Markdown
   alias Oaks.Species
+  alias OaksWeb.Params
 
   @max_sources 4
 
@@ -69,7 +70,7 @@ defmodule OaksWeb.SpeciesCompareLive do
 
   @impl true
   def handle_event("toggle_source", %{"id" => id_str}, socket) do
-    source_id = String.to_integer(id_str)
+    source_id = Params.int(id_str)
     selected = socket.assigns.selected_ids
 
     new_selected =
@@ -87,6 +88,8 @@ defmodule OaksWeb.SpeciesCompareLive do
 
     {:noreply, assign(socket, selected_ids: new_selected)}
   end
+
+  def handle_event("toggle_source", _params, socket), do: {:noreply, socket}
 
   # -- Render --
 

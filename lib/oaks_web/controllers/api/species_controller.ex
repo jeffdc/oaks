@@ -29,8 +29,8 @@ defmodule OaksWeb.API.SpeciesController do
 
   def index(conn, params) do
     {species, count} = Species.list_species(params)
-    limit = parse_int(params["limit"]) || 50
-    offset = parse_int(params["offset"]) || 0
+    limit = Species.clamp_limit(params["limit"])
+    offset = Species.clamp_offset(params["offset"])
 
     json(conn, %{
       data: Enum.map(species, &Species.to_map/1),
@@ -112,8 +112,8 @@ defmodule OaksWeb.API.SpeciesController do
     ]
   )
 
-  def search(conn, %{"q" => query} = params) do
-    limit = parse_int(params["limit"]) || 50
+  def search(conn, %{"q" => query} = params) when is_binary(query) do
+    limit = Species.clamp_limit(params["limit"])
     species = Species.search_species(query, limit)
 
     json(conn, %{
@@ -127,15 +127,4 @@ defmodule OaksWeb.API.SpeciesController do
   def search(conn, _params) do
     conn |> put_status(:bad_request) |> json(%{error: "Missing required parameter: q"})
   end
-
-  defp parse_int(nil), do: nil
-
-  defp parse_int(val) when is_binary(val) do
-    case Integer.parse(val) do
-      {n, ""} -> n
-      _ -> nil
-    end
-  end
-
-  defp parse_int(val) when is_integer(val), do: val
 end

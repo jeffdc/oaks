@@ -12,6 +12,7 @@ defmodule OaksWeb.TaxonomyLive do
   alias Oaks.Markdown
   alias Oaks.Species
   alias Oaks.Taxonomy
+  alias OaksWeb.Params
 
   # Maps path depth to the current taxon's level name
   @levels ["genus", "subgenus", "section", "subsection", "complex"]
@@ -48,9 +49,10 @@ defmodule OaksWeb.TaxonomyLive do
 
   @impl true
   def handle_event("request_delete_taxon", %{"id" => id_str}, socket) do
-    if socket.assigns[:authenticated] do
-      id = String.to_integer(id_str)
-      taxon = Taxonomy.get_taxon_by_id(id)
+    id = Params.int(id_str)
+    taxon = socket.assigns[:authenticated] && id && Taxonomy.get_taxon_by_id(id)
+
+    if taxon do
       {:noreply, assign(socket, show_delete_taxon_confirm: true, delete_taxon_target: taxon)}
     else
       {:noreply, socket}

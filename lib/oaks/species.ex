@@ -76,7 +76,7 @@ defmodule Oaks.Species do
   @spec list_species(map()) :: {[Species.t()], integer()}
   def list_species(params \\ %{}) do
     limit = clamp_limit(params["limit"])
-    offset = parse_int(params["offset"]) || 0
+    offset = clamp_offset(params["offset"])
 
     base = species_filter_query(params)
     count = Repo.aggregate(base, :count)
@@ -136,11 +136,11 @@ defmodule Oaks.Species do
   """
   @spec search_species(String.t(), integer()) :: [Species.t()]
   def search_species(query, limit \\ @default_limit) do
-    limit = min(limit, @max_limit)
-    search_term = "%#{String.downcase(query)}%"
+    limit = clamp_limit(limit)
+    search_term = like_pattern(query)
 
     from(s in Species,
-      where: fragment("lower(?) LIKE ?", s.scientific_name, ^search_term),
+      where: fragment("lower(?) LIKE ? ESCAPE '\\'", s.scientific_name, ^search_term),
       order_by: [asc: s.scientific_name],
       limit: ^limit
     )
@@ -399,20 +399,22 @@ defmodule Oaks.Species do
     |> maybe_filter_hybrid(params["hybrid"])
   end
 
-  defp maybe_filter(query, _field, nil), do: query
   defp maybe_filter(query, _field, ""), do: query
 
-  defp maybe_filter(query, field, value) do
+  defp maybe_filter(query, field, value) when is_binary(value) do
     where(query, [s], field(s, ^field) == ^value)
   end
 
-  defp maybe_filter_search(query, nil), do: query
+  defp maybe_filter(query, _field, _value), do: query
+
   defp maybe_filter_search(query, ""), do: query
 
-  defp maybe_filter_search(query, search) do
-    search_term = "%#{String.downcase(search)}%"
-    where(query, [s], fragment("lower(?) LIKE ?", s.scientific_name, ^search_term))
+  defp maybe_filter_search(query, search) when is_binary(search) do
+    search_term = like_pattern(search)
+    where(query, [s], fragment("lower(?) LIKE ? ESCAPE '\\'", s.scientific_name, ^search_term))
   end
+
+  defp maybe_filter_search(query, _search), do: query
 
   defp maybe_filter_hybrid(query, nil), do: query
   defp maybe_filter_hybrid(query, ""), do: query
@@ -425,9 +427,13 @@ defmodule Oaks.Species do
     end
   end
 
-  defp clamp_limit(nil), do: @default_limit
+  defp maybe_filter_hybrid(query, _value), do: query
 
-  defp clamp_limit(val) do
+  @doc """
+  Parses a requested page size, defaulting to #{@default_limit} and capping at #{@max_limit}.
+  """
+  @spec clamp_limit(term()) :: pos_integer()
+  def clamp_limit(val) do
     case parse_int(val) do
       nil -> @default_limit
       n when n < 1 -> @default_limit
@@ -435,6 +441,12 @@ defmodule Oaks.Species do
       n -> n
     end
   end
+
+  @doc """
+  Parses a requested offset, defaulting to 0 and never negative.
+  """
+  @spec clamp_offset(term()) :: non_neg_integer()
+  def clamp_offset(val), do: max(parse_int(val) || 0, 0)
 
   defp parse_int(nil), do: nil
   defp parse_int(val) when is_integer(val), do: val
@@ -445,6 +457,10 @@ defmodule Oaks.Species do
       _ -> nil
     end
   end
+
+  defp parse_int(_val), do: nil
+
+  defp like_pattern(term), do: "%#{escape_like(String.downcase(term))}%"
 
   @doc false
   def parse_json_array(nil), do: []
