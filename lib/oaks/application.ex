@@ -13,12 +13,17 @@ defmodule Oaks.Application do
       {DNSCluster, query: Application.get_env(:oaks, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Oaks.PubSub},
       # Task supervisor for fire-and-forget background work (analytics inserts, etc.)
-      {Task.Supervisor, name: Oaks.TaskSupervisor},
-      # Start a worker by calling: Oaks.Worker.start_link(arg)
-      # {Oaks.Worker, arg},
-      # Start to serve requests, typically the last entry
-      OaksWeb.Endpoint
+      {Task.Supervisor, name: Oaks.TaskSupervisor}
     ]
+
+    # Daily analytics rollup + raw page view pruning (off in tests)
+    children =
+      if Application.get_env(:oaks, Oaks.Analytics.RollupScheduler, [])[:enabled] == false,
+        do: children,
+        else: children ++ [Oaks.Analytics.RollupScheduler]
+
+    # Start to serve requests, typically the last entry
+    children = children ++ [OaksWeb.Endpoint]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

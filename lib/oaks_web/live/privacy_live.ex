@@ -142,10 +142,11 @@ defmodule OaksWeb.PrivacyLive do
           class="leading-relaxed"
           style="color: var(--color-text-primary); font-size: 1.0625rem; line-height: 1.7;"
         >
-          Aggregate analytics data is retained indefinitely so we can understand long-term
-          trends. Because the only per-visit identifier is the daily-rotating hash, there is
-          no way to connect visits across days or identify individual visitors regardless of
-          retention.
+          Individual page-view records are kept for 30 days. After that they are rolled up
+          into daily totals (views and unique visitors per page, referring sites, and error
+          counts) and deleted; only those daily totals are kept long-term. Because the only
+          per-visit identifier is the daily-rotating hash, there is no way to connect visits
+          across days or identify individual visitors at any point.
         </p>
       </section>
 

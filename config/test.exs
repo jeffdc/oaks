@@ -39,3 +39,6 @@ config :oaks, :api_key, "test-api-key-secret"
 
 # Record page views inline so no analytics insert outlives its test.
 config :oaks, :analytics_async, false
+
+# Tests call Oaks.Analytics.Rollup directly instead of on a timer.
+config :oaks, Oaks.Analytics.RollupScheduler, enabled: false

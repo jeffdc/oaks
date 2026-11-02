@@ -153,10 +153,12 @@ defmodule Oaks.AnalyticsTest do
       assert Analytics.stats(yesterday, today) == %{page_views: 2, unique_visitors: 2}
 
       # Full three-day range
-      assert Analytics.stats(yesterday, tomorrow) == %{page_views: 3, unique_visitors: 2}
+      # Unique visitors are counted per day (the visitor hash's salt rotates
+      # daily), so hash_b on two days counts once on each.
+      assert Analytics.stats(yesterday, tomorrow) == %{page_views: 3, unique_visitors: 3}
     end
 
-    test "counts DISTINCT visitor_hash within range (same hash on multiple days counts once)" do
+    test "counts distinct visitor_hash per day and sums the days" do
       today = Date.utc_today()
       yesterday = Date.add(today, -1)
       hash = String.duplicate("c", 64)
@@ -165,7 +167,9 @@ defmodule Oaks.AnalyticsTest do
       page_view_fixture(%{visitor_hash: hash, inserted_at: at(today, ~T[09:00:00])})
       page_view_fixture(%{visitor_hash: hash, inserted_at: at(today, ~T[10:00:00])})
 
-      assert Analytics.stats(yesterday, today) == %{page_views: 3, unique_visitors: 1}
+      # Real hashes never repeat across days (daily salt), so a hash seen on two
+      # days is two daily visitors; within one day it counts once.
+      assert Analytics.stats(yesterday, today) == %{page_views: 3, unique_visitors: 2}
     end
   end
 
