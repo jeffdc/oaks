@@ -7,15 +7,15 @@ defmodule Oaks.Species.Merge do
   deletes the source. The entire operation runs in a transaction.
   """
 
-  import Ecto.Query
-
   alias Ecto.Multi
   alias Oaks.Repo
   alias Oaks.Sources.SpeciesSource
   alias Oaks.Species
+  alias Oaks.Species.References
   alias Oaks.Species.Species, as: SpeciesSchema
 
   @scalar_fields ~w(author conservation_status subgenus section subsection complex parent1 parent2)a
+  @list_fields [:hybrids, :closely_related_to, :subspecies_varieties]
 
   @doc """
   Returns a preview of what a merge would change.
@@ -24,7 +24,9 @@ defmodule Oaks.Species.Merge do
   - Field-by-field comparison of scalar fields
   - Source overlap (synonym-only, target-only, shared)
   - References from other species that point to the synonym
-  - Self-reference issues on the target
+  - Target parents that point at the synonym (cleared by the merge)
+  - Hybrids whose two parents are the synonym and the target
+  - Names and links the synonym's lists add to the target
   - Synonyms that would be added
 
   Returns `{:ok, preview}` or `{:error, reason}`.
@@ -32,15 +34,16 @@ defmodule Oaks.Species.Merge do
   @spec preview_merge(String.t(), String.t()) ::
           {:ok, map()} | {:error, :source_not_found | :target_not_found | :same_species}
   def preview_merge(source_name, target_name) do
-    if String.downcase(source_name) == String.downcase(target_name) do
-      {:error, :same_species}
+    with {:same, false} <- {:same, References.key(source_name) == References.key(target_name)},
+         {:source, %SpeciesSchema{} = source} <-
+           {:source, Species.get_species_full(source_name)},
+         {:target, %SpeciesSchema{} = target} <-
+           {:target, Species.get_species_full(target_name)} do
+      {:ok, build_preview(source, target)}
     else
-      with source when not is_nil(source) <- Species.get_species_full(source_name),
-           target when not is_nil(target) <- Species.get_species_full(target_name) do
-        {:ok, build_preview(source, target)}
-      else
-        nil -> {:error, :source_not_found}
-      end
+      {:same, true} -> {:error, :same_species}
+      {:source, nil} -> {:error, :source_not_found}
+      {:target, nil} -> {:error, :target_not_found}
     end
   end
 
@@ -51,8 +54,11 @@ defmodule Oaks.Species.Merge do
   - `"edited_fields"` - map of field name to value for target species updates
   - `"include_sources"` - list of source_ids to transfer from synonym to target
 
-  All operations run in a single transaction via `Ecto.Multi`.
-  On failure, all changes are rolled back.
+  The target gains the source's name and synonyms, its name lists (hybrids,
+  closely related, subspecies & varieties) and external links, and the
+  selected sources. Every other species' mention of the source is pointed at
+  the target, and the source is deleted. All operations run in a single
+  transaction via `Ecto.Multi`; on failure, all changes are rolled back.
 
   Returns `{:ok, target_species}` or `{:error, step, reason}`.
   """
@@ -60,7 +66,8 @@ defmodule Oaks.Species.Merge do
           {:ok, SpeciesSchema.t()} | {:error, atom(), any()}
   @dialyzer {:no_opaque, execute_merge: 3}
   def execute_merge(source_name, target_name, merge_opts \\ %{}) do
-    with source when not is_nil(source) <- Species.get_species_full(source_name),
+    with false <- References.key(source_name) == References.key(target_name),
+         source when not is_nil(source) <- Species.get_species_full(source_name),
          target when not is_nil(target) <- Species.get_species_full(target_name) do
       edited_fields = merge_opts["edited_fields"] || %{}
       include_source_ids = merge_opts["include_sources"] || []
@@ -68,11 +75,14 @@ defmodule Oaks.Species.Merge do
       Multi.new()
       |> update_target_fields(target, source, edited_fields)
       |> transfer_sources(source, target, include_source_ids)
-      |> update_references(source, target)
-      |> delete_source(source)
+      |> References.rewrite(source.scientific_name, target.scientific_name,
+        except: [source.id, target.id]
+      )
+      |> Multi.delete(:delete_source, source)
       |> Repo.transaction()
       |> handle_transaction_result(target_name)
     else
+      true -> {:error, :load, "A species can't be merged into itself"}
       nil -> {:error, :load, "Species not found"}
     end
   end
@@ -80,63 +90,14 @@ defmodule Oaks.Species.Merge do
   @doc """
   Finds species that reference the given name in relationship fields.
 
-  Searches parent1, parent2, hybrids, and closely_related_to.
-  Returns a list of `{species, reference_type}` tuples grouped by type.
+  Returns one `%{species: species, reference_type: field}` entry per field
+  that mentions the name (see `Oaks.Species.References.find/1`).
   """
   @spec find_references(String.t()) :: [map()]
   def find_references(name) do
-    lower_name = String.downcase(name)
-    json_pattern = "%\"#{name}\"%"
-
-    parent_refs =
-      from(s in SpeciesSchema,
-        where:
-          fragment("lower(?)", s.parent1) == ^lower_name or
-            fragment("lower(?)", s.parent2) == ^lower_name,
-        select: s
-      )
-      |> Repo.all()
-      |> Enum.flat_map(fn s ->
-        refs = []
-
-        refs =
-          if s.parent1 && String.downcase(s.parent1) == lower_name,
-            do: [%{species: s, reference_type: "parent1"} | refs],
-            else: refs
-
-        refs =
-          if s.parent2 && String.downcase(s.parent2) == lower_name,
-            do: [%{species: s, reference_type: "parent2"} | refs],
-            else: refs
-
-        refs
-      end)
-
-    hybrid_refs =
-      from(s in SpeciesSchema,
-        where: fragment("? LIKE ?", s.hybrids, ^json_pattern)
-      )
-      |> Repo.all()
-      |> Enum.filter(fn s ->
-        s.hybrids
-        |> Species.parse_name_list()
-        |> Enum.any?(&(String.downcase(&1) == lower_name))
-      end)
-      |> Enum.map(&%{species: &1, reference_type: "hybrids"})
-
-    related_refs =
-      from(s in SpeciesSchema,
-        where: fragment("? LIKE ?", s.closely_related_to, ^json_pattern)
-      )
-      |> Repo.all()
-      |> Enum.filter(fn s ->
-        s.closely_related_to
-        |> Species.parse_name_list()
-        |> Enum.any?(&(String.downcase(&1) == lower_name))
-      end)
-      |> Enum.map(&%{species: &1, reference_type: "closely_related_to"})
-
-    parent_refs ++ hybrid_refs ++ related_refs
+    for %{species: species, fields: fields} <- References.find(name),
+        field <- fields,
+        do: %{species: species, reference_type: Atom.to_string(field)}
   end
 
   # -- Preview helpers --
@@ -149,9 +110,10 @@ defmodule Oaks.Species.Merge do
     shared_ids = MapSet.intersection(source_source_ids, target_source_ids)
     target_only_ids = MapSet.difference(target_source_ids, source_source_ids)
 
-    references = find_references(source.scientific_name)
-    self_ref_issues = detect_self_references(target, source.scientific_name)
-    synonyms_to_add = compute_synonyms_to_add(source, target)
+    references =
+      source.scientific_name
+      |> find_references()
+      |> Enum.reject(&(&1.species.id == target.id))
 
     %{
       source: source,
@@ -159,12 +121,15 @@ defmodule Oaks.Species.Merge do
       field_comparisons: compare_scalar_fields(source, target),
       synonym_only_sources:
         Enum.filter(source.species_sources, &MapSet.member?(synonym_only_ids, &1.source_id)),
-      shared_sources: MapSet.to_list(shared_ids),
+      shared_sources:
+        Enum.filter(source.species_sources, &MapSet.member?(shared_ids, &1.source_id)),
       target_only_sources:
         Enum.filter(target.species_sources, &MapSet.member?(target_only_ids, &1.source_id)),
       references: references,
-      self_reference_issues: self_ref_issues,
-      synonyms_to_add: synonyms_to_add
+      self_reference_issues: detect_self_references(target, source.scientific_name),
+      same_parent_hybrids: same_parent_hybrids(references, target),
+      list_additions: list_additions(source, target),
+      synonyms_to_add: compute_synonyms_to_add(source, target)
     }
   end
 
@@ -187,84 +152,80 @@ defmodule Oaks.Species.Merge do
   defp normalize_value(val), do: val
 
   @doc """
-  Detects self-reference issues that would occur if the synonym is merged
-  into the target. Returns a list of issue maps.
+  Returns the target's parent fields that point at the synonym. After the
+  merge they would point at the target itself, so the merge clears them.
+
+  Pass the target with any edits applied to see what the merge will do.
   """
-  @spec detect_self_references(SpeciesSchema.t(), String.t()) :: [map()]
+  @spec detect_self_references(map(), String.t()) :: [map()]
   def detect_self_references(target, synonym_name) do
-    lower_synonym = synonym_name |> String.downcase() |> String.replace(~r/^×\s*/, "")
-    issues = []
+    synonym = References.key(synonym_name)
 
-    matches? = fn name ->
-      name && name |> String.downcase() |> String.replace(~r/^×\s*/, "") == lower_synonym
+    for field <- [:parent1, :parent2],
+        value = Map.get(target, field),
+        is_binary(value) and References.key(value) == synonym do
+      %{
+        field: Atom.to_string(field),
+        value: value,
+        hint: "This parent will be cleared, since it would point at the merged species itself."
+      }
     end
-
-    issues =
-      if matches?.(target.parent1) do
-        [%{field: "parent1", value: target.parent1, hint: "Clear the parent1 field"} | issues]
-      else
-        issues
-      end
-
-    issues =
-      if matches?.(target.parent2) do
-        [%{field: "parent2", value: target.parent2, hint: "Clear the parent2 field"} | issues]
-      else
-        issues
-      end
-
-    hybrids = Species.parse_name_list(target.hybrids)
-
-    issues =
-      Enum.reduce(hybrids, issues, fn h, acc ->
-        if matches?.(h) do
-          [
-            %{field: "hybrids", value: h, hint: "Remove from target's hybrids before merging"}
-            | acc
-          ]
-        else
-          acc
-        end
-      end)
-
-    related = Species.parse_name_list(target.closely_related_to)
-
-    issues =
-      Enum.reduce(related, issues, fn r, acc ->
-        if matches?.(r) do
-          [
-            %{
-              field: "closely_related_to",
-              value: r,
-              hint: "Remove from target's closely related species"
-            }
-            | acc
-          ]
-        else
-          acc
-        end
-      end)
-
-    Enum.reverse(issues)
   end
+
+  # Hybrids whose parents are the synonym and the target end up with the
+  # target as both parents.
+  defp same_parent_hybrids(references, target) do
+    target_key = References.key(target.scientific_name)
+
+    references
+    |> Enum.filter(&(&1.reference_type in ["parent1", "parent2"]))
+    |> Enum.map(& &1.species)
+    |> Enum.uniq_by(& &1.id)
+    |> Enum.filter(fn hybrid ->
+      Enum.any?(
+        [hybrid.parent1, hybrid.parent2],
+        &(is_binary(&1) and References.key(&1) == target_key)
+      )
+    end)
+  end
+
+  # Entries in the source's name lists and external links that the target
+  # doesn't already have: %{field => [entry]} for non-empty fields only.
+  defp list_additions(source, target) do
+    for field <- @list_fields ++ [:external_links],
+        (merged = merged_list(field, source, target)) != References.decode(Map.get(target, field)),
+        into: %{} do
+      {field, merged -- References.decode(Map.get(target, field))}
+    end
+  end
+
+  defp merged_list(:external_links, source, target) do
+    (References.decode(target.external_links) ++ References.decode(source.external_links))
+    |> Enum.uniq_by(&link_key/1)
+  end
+
+  defp merged_list(field, source, target) do
+    drop = MapSet.new([source.scientific_name, target.scientific_name], &References.key/1)
+
+    (References.decode(Map.get(target, field)) ++ References.decode(Map.get(source, field)))
+    |> Enum.reject(&(is_binary(&1) and MapSet.member?(drop, References.key(&1))))
+    |> Enum.uniq_by(&entry_key/1)
+  end
+
+  defp link_key(%{"url" => url}) when is_binary(url), do: String.trim_trailing(url, "/")
+  defp link_key(link), do: link
+
+  defp entry_key(entry) when is_binary(entry), do: References.key(entry)
+  defp entry_key(%{"name" => name}) when is_binary(name), do: References.key(name)
+  defp entry_key(entry), do: entry
 
   defp compute_synonyms_to_add(source, target) do
     existing =
-      target.synonyms
-      |> Species.parse_json_array()
-      |> MapSet.new(&String.downcase/1)
+      MapSet.new(References.decode(target.synonyms) ++ [target.scientific_name], &entry_key/1)
 
-    source_synonyms = Species.parse_json_array(source.synonyms)
-
-    new_synonyms =
-      if MapSet.member?(existing, String.downcase(source.scientific_name)) do
-        []
-      else
-        [source.scientific_name]
-      end
-
-    new_synonyms ++
-      Enum.reject(source_synonyms, &MapSet.member?(existing, String.downcase(&1)))
+    ([source.scientific_name] ++ References.decode(source.synonyms))
+    |> Enum.reject(&MapSet.member?(existing, entry_key(&1)))
+    |> Enum.uniq_by(&entry_key/1)
   end
 
   # -- Multi steps --
@@ -272,32 +233,40 @@ defmodule Oaks.Species.Merge do
   @spec update_target_fields(Multi.t(), SpeciesSchema.t(), SpeciesSchema.t(), map()) :: Multi.t()
   @dialyzer {:no_opaque, update_target_fields: 4}
   defp update_target_fields(multi, target, source, edited_fields) do
-    synonyms_to_add = compute_synonyms_to_add(source, target)
+    merged_away = MapSet.new([source.scientific_name, target.scientific_name], &References.key/1)
 
-    existing_synonyms = Species.parse_json_array(target.synonyms)
-    updated_synonyms = Jason.encode!(existing_synonyms ++ synonyms_to_add)
+    scalars =
+      Map.new(@scalar_fields, fn field ->
+        value = Map.get(edited_fields, Atom.to_string(field), Map.get(target, field))
 
-    attrs =
-      @scalar_fields
-      |> Enum.reduce(%{}, fn field, acc ->
-        field_str = Atom.to_string(field)
-
+        # A parent naming either species would make the target its own parent.
         value =
-          if Map.has_key?(edited_fields, field_str) do
-            edited_fields[field_str]
-          else
-            Map.get(target, field)
-          end
+          if field in [:parent1, :parent2] and is_binary(value) and
+               MapSet.member?(merged_away, References.key(value)),
+             do: nil,
+             else: value
 
-        Map.put(acc, field, value)
+        {field, value}
       end)
-      |> Map.put(:synonyms, updated_synonyms)
+
+    lists =
+      Map.new(@list_fields ++ [:external_links], fn field ->
+        {field, References.encode(merged_list(field, source, target))}
+      end)
+
+    synonyms =
+      References.encode(
+        References.decode(target.synonyms) ++ compute_synonyms_to_add(source, target)
+      )
+
+    attrs = scalars |> Map.merge(lists) |> Map.put(:synonyms, synonyms)
 
     Multi.update(multi, :update_target, SpeciesSchema.changeset(target, attrs))
   end
 
   defp transfer_sources(multi, source, target, include_source_ids) do
     target_source_ids = MapSet.new(target.species_sources, & &1.source_id)
+    target_has_preferred = Enum.any?(target.species_sources, & &1.is_preferred)
 
     sources_to_transfer =
       source.species_sources
@@ -322,76 +291,13 @@ defmodule Oaks.Species.Merge do
         hardiness_habitat: ss.hardiness_habitat,
         miscellaneous: ss.miscellaneous,
         url: ss.url,
-        is_preferred: false
+        # Keep the synonym's preferred source unless the target already has one.
+        is_preferred: ss.is_preferred and not target_has_preferred
       }
 
-      step_name = :"transfer_source_#{ss.source_id}"
+      step_name = {:transfer_source, ss.source_id}
       Multi.insert(acc, step_name, SpeciesSource.changeset(%SpeciesSource{}, attrs))
     end)
-  end
-
-  defp update_references(multi, source, target) do
-    source_name = source.scientific_name
-    target_name = target.scientific_name
-    references = find_references(source_name)
-
-    Enum.reduce(references, multi, fn ref, acc ->
-      step_name = :"update_ref_#{ref.species.id}_#{ref.reference_type}"
-
-      Multi.run(acc, step_name, fn repo, _changes ->
-        species = repo.get!(SpeciesSchema, ref.species.id)
-        attrs = build_reference_update(species, ref.reference_type, source_name, target_name)
-
-        species
-        |> SpeciesSchema.changeset(attrs)
-        |> repo.update()
-      end)
-    end)
-  end
-
-  defp build_reference_update(_species, "parent1", _source_name, target_name) do
-    %{parent1: target_name}
-  end
-
-  defp build_reference_update(_species, "parent2", _source_name, target_name) do
-    %{parent2: target_name}
-  end
-
-  defp build_reference_update(species, "hybrids", source_name, target_name) do
-    updated =
-      species.hybrids
-      |> Species.parse_name_list()
-      |> Enum.map(fn h ->
-        if String.downcase(h) == String.downcase(source_name), do: target_name, else: h
-      end)
-      |> remove_self_references(species.scientific_name)
-      |> Enum.uniq_by(&String.downcase/1)
-      |> Jason.encode!()
-
-    %{hybrids: updated}
-  end
-
-  defp build_reference_update(species, "closely_related_to", source_name, target_name) do
-    updated =
-      species.closely_related_to
-      |> Species.parse_name_list()
-      |> Enum.map(fn r ->
-        if String.downcase(r) == String.downcase(source_name), do: target_name, else: r
-      end)
-      |> remove_self_references(species.scientific_name)
-      |> Enum.uniq_by(&String.downcase/1)
-      |> Jason.encode!()
-
-    %{closely_related_to: updated}
-  end
-
-  defp remove_self_references(names, species_name) do
-    lower_self = String.downcase(species_name)
-    Enum.reject(names, &(String.downcase(&1) == lower_self))
-  end
-
-  defp delete_source(multi, source) do
-    Multi.delete(multi, :delete_source, source)
   end
 
   defp handle_transaction_result({:ok, _changes}, target_name) do

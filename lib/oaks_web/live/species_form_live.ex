@@ -167,6 +167,13 @@ defmodule OaksWeb.SpeciesFormLive do
                   placeholder="e.g. alba"
                   phx-debounce="300"
                 />
+                <p
+                  :if={@live_action == :edit}
+                  class="text-xs mt-1"
+                  style="color: var(--color-text-tertiary);"
+                >
+                  Renaming updates every species that mentions this name and keeps the old name as a synonym.
+                </p>
               </div>
               <div>
                 <.input

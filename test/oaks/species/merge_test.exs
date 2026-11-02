@@ -63,7 +63,7 @@ defmodule Oaks.Species.MergeTest do
     end
 
     test "returns error for nonexistent target species" do
-      assert {:error, :source_not_found} = Merge.preview_merge("alba", "nonexistent")
+      assert {:error, :target_not_found} = Merge.preview_merge("alba", "nonexistent")
     end
   end
 
@@ -148,20 +148,74 @@ defmodule Oaks.Species.MergeTest do
   end
 
   describe "detect_self_references/2" do
-    test "detects when target would reference itself via closely_related_to" do
-      # alba has closely_related_to = ["stellata"]
-      # If stellata is merged into alba, alba would reference itself
-      target = Species.get_species_full("alba")
-      issues = Merge.detect_self_references(target, "stellata")
+    test "flags a target parent that points at the synonym" do
+      target = %{Species.get_species_full("alba") | parent1: "stellata"}
 
-      assert issues != []
-      assert Enum.any?(issues, &(&1.field == "closely_related_to"))
+      assert [%{field: "parent1", value: "stellata"}] =
+               Merge.detect_self_references(target, "stellata")
+    end
+
+    test "list mentions of the synonym are not issues; the merge removes them" do
+      # alba has closely_related_to = ["stellata"]
+      target = Species.get_species_full("alba")
+      assert Merge.detect_self_references(target, "stellata") == []
     end
 
     test "returns empty when no self-references" do
       target = Species.get_species_full("rubra")
       issues = Merge.detect_self_references(target, "velutina")
       assert issues == []
+    end
+  end
+
+  describe "execute_merge/3 relationships" do
+    defp set!(name, changes) do
+      name
+      |> Species.get_species_by_name()
+      |> Ecto.Changeset.change(changes)
+      |> Oaks.Repo.update!()
+    end
+
+    test "points escaped-× hybrid list entries at the target" do
+      set!("velutina", hybrids: ~s(["\\u00d7bebbiana"]))
+
+      {:ok, _} = Merge.execute_merge("×bebbiana", "rubra")
+
+      assert Species.get_species_by_name("velutina").hybrids == ~s(["rubra"])
+    end
+
+    test "clears a target parent that named the synonym instead of making it its own parent" do
+      set!("rubra", parent1: "stellata")
+
+      {:ok, _} = Merge.execute_merge("stellata", "rubra", %{"edited_fields" => %{}})
+
+      assert Species.get_species_by_name("rubra").parent1 == nil
+    end
+
+    test "adds the synonym's name lists to the target and drops self mentions" do
+      set!("stellata", hybrids: ~s(["×bebbiana"]), closely_related_to: ~s(["alba", "velutina"]))
+
+      {:ok, _} = Merge.execute_merge("stellata", "alba")
+
+      alba = Species.get_species_by_name("alba")
+      assert Species.parse_name_list(alba.hybrids) == ["×bebbiana"]
+      assert Species.parse_name_list(alba.closely_related_to) == ["velutina"]
+    end
+
+    test "keeps the preferred flag on a moved source when the target has none" do
+      stellata = Species.get_species_full("stellata")
+      [ss] = stellata.species_sources
+      ss |> Ecto.Changeset.change(is_preferred: true) |> Oaks.Repo.update!()
+
+      {:ok, target} =
+        Merge.execute_merge("stellata", "velutina", %{"include_sources" => [ss.source_id]})
+
+      assert [%{is_preferred: true}] = target.species_sources
+    end
+
+    test "refuses to merge a species into itself" do
+      assert {:error, :load, _} = Merge.execute_merge("alba", "alba")
+      assert Species.get_species_by_name("alba")
     end
   end
 end

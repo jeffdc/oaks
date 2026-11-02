@@ -32,6 +32,7 @@ defmodule OaksWeb.SpeciesDetailLive do
        can_add_source: false,
        selected_source: nil,
        show_delete_confirm: false,
+       delete_references: [],
        show_delete_source_confirm: false,
        delete_source_target: nil,
        show_merge_picker: false,
@@ -63,7 +64,11 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   def handle_event("request_delete", _params, socket) do
     if socket.assigns[:authenticated] do
-      {:noreply, assign(socket, show_delete_confirm: true)}
+      {:noreply,
+       assign(socket,
+         show_delete_confirm: true,
+         delete_references: Species.references_to(socket.assigns.species)
+       )}
     else
       {:noreply, socket}
     end
@@ -240,6 +245,7 @@ defmodule OaksWeb.SpeciesDetailLive do
         :if={@show_delete_confirm}
         species={@species}
         source_count={length(@species_sources)}
+        references={@delete_references}
       />
 
       <.merge_picker_dialog
@@ -826,6 +832,7 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   attr :species, :any, required: true
   attr :source_count, :integer, default: 0
+  attr :references, :list, default: []
 
   defp delete_confirm_modal(assigns) do
     ~H"""
@@ -846,6 +853,19 @@ defmodule OaksWeb.SpeciesDetailLive do
         <p :if={@source_count > 0} class="text-sm text-red-600 mb-4">
           This will also remove data from {@source_count} source(s).
         </p>
+        <div :if={@references != []} class="text-sm mb-4" id="delete-references">
+          <p class="mb-1" style="color: var(--color-text-secondary);">
+            {length(@references)} other species mention this name. Deleting removes it from:
+          </p>
+          <ul class="max-h-40 overflow-y-auto pl-4 list-disc">
+            <li :for={ref <- @references}>
+              <span class="species-name">{epithet(ref.species.scientific_name)}</span>
+              <span style="color: var(--color-text-tertiary);">
+                ({Enum.map_join(ref.fields, ", ", &reference_field_label/1)})
+              </span>
+            </li>
+          </ul>
+        </div>
         <p :if={@source_count == 0} class="text-sm mb-4" style="color: var(--color-text-tertiary);">
           This action cannot be undone.
         </p>
@@ -869,6 +889,12 @@ defmodule OaksWeb.SpeciesDetailLive do
     </div>
     """
   end
+
+  defp reference_field_label(:parent1), do: "parent"
+  defp reference_field_label(:parent2), do: "parent"
+  defp reference_field_label(:hybrids), do: "hybrids"
+  defp reference_field_label(:closely_related_to), do: "closely related"
+  defp reference_field_label(:subspecies_varieties), do: "subspecies & varieties"
 
   # -- Delete source confirmation modal --
 

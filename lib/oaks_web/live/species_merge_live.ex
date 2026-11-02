@@ -548,7 +548,10 @@ defmodule OaksWeb.SpeciesMergeLive do
     refs = assigns.preview.references
     parent_refs = Enum.filter(refs, &(&1.reference_type in ["parent1", "parent2"]))
     hybrid_refs = Enum.filter(refs, &(&1.reference_type == "hybrids"))
-    related_refs = Enum.filter(refs, &(&1.reference_type == "closely_related_to"))
+
+    related_refs =
+      Enum.filter(refs, &(&1.reference_type in ["closely_related_to", "subspecies_varieties"]))
+
     ref_count = length(refs)
 
     assigns =
@@ -660,22 +663,51 @@ defmodule OaksWeb.SpeciesMergeLive do
 
     self_ref_issues =
       Merge.detect_self_references(
-        assigns.preview.target,
+        with_edits(assigns.preview.target, assigns.edited_fields),
         assigns.preview.source.scientific_name
       )
 
-    has_warnings = unchecked_sources != [] || self_ref_issues != []
+    shared_sources = Enum.map(assigns.preview.shared_sources, &source_name/1)
+
+    has_warnings =
+      unchecked_sources != [] || self_ref_issues != [] || shared_sources != [] ||
+        assigns.preview.same_parent_hybrids != [] || assigns.preview.list_additions != %{}
 
     assigns =
       assign(assigns,
         unchecked_sources: unchecked_sources,
         self_ref_issues: self_ref_issues,
+        shared_sources: shared_sources,
         has_warnings: has_warnings
       )
 
     ~H"""
     <div :if={@has_warnings} class="space-y-4 mb-6">
       <.data_loss_warning :if={@unchecked_sources != []} sources={@unchecked_sources} />
+      <.merge_notice
+        :if={@shared_sources != []}
+        id="shared-sources-notice"
+        title="Sources both species have"
+        items={@shared_sources}
+      >
+        The target keeps its own text for these sources; the synonym's text for them is not carried over.
+      </.merge_notice>
+      <.merge_notice
+        :if={@preview.same_parent_hybrids != []}
+        id="same-parent-hybrids-notice"
+        title="Hybrids of these two species"
+        items={Enum.map(@preview.same_parent_hybrids, & &1.scientific_name)}
+      >
+        After merging, both parents of these hybrids will be {@preview.target.scientific_name}. Review their parents afterwards.
+      </.merge_notice>
+      <.merge_notice
+        :if={@preview.list_additions != %{}}
+        id="list-additions-notice"
+        title="Added to the target from the synonym"
+        items={list_addition_items(@preview.list_additions)}
+      >
+        These entries from the synonym are added to {@preview.target.scientific_name}.
+      </.merge_notice>
       <.self_reference_warning :if={@self_ref_issues != []} issues={@self_ref_issues} />
     </div>
     """
@@ -706,6 +738,60 @@ defmodule OaksWeb.SpeciesMergeLive do
     """
   end
 
+  attr :id, :string, required: true
+  attr :title, :string, required: true
+  attr :items, :list, required: true
+  slot :inner_block, required: true
+
+  defp merge_notice(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      class="p-4 rounded-xl border-l-4"
+      style="background-color: var(--color-forest-50); border-left-color: var(--color-forest-400);"
+    >
+      <div class="font-semibold text-sm mb-1" style="color: var(--color-forest-800);">{@title}</div>
+      <p class="text-sm mb-2" style="color: var(--color-text-secondary);">
+        {render_slot(@inner_block)}
+      </p>
+      <ul class="list-disc pl-5 text-sm space-y-0.5" style="color: var(--color-text-primary);">
+        <li :for={item <- @items}>{item}</li>
+      </ul>
+    </div>
+    """
+  end
+
+  defp list_addition_items(additions) do
+    labels = %{
+      hybrids: "Hybrid",
+      closely_related_to: "Closely related",
+      subspecies_varieties: "Subspecies/variety",
+      external_links: "External link"
+    }
+
+    for {field, entries} <- additions, entry <- entries do
+      text =
+        case entry do
+          %{"name" => name} -> name
+          %{"url" => url} -> url
+          other when is_binary(other) -> other
+          other -> inspect(other)
+        end
+
+      "#{labels[field]}: #{text}"
+    end
+  end
+
+  # The target as it will be saved: edited scalar fields override stored ones.
+  defp with_edits(target, edited_fields) do
+    Enum.reduce(@scalar_fields, target, fn field, acc ->
+      case Map.fetch(edited_fields, field) do
+        {:ok, value} -> Map.put(acc, String.to_existing_atom(field), value)
+        :error -> acc
+      end
+    end)
+  end
+
   attr :issues, :list, required: true
 
   defp self_reference_warning(assigns) do
@@ -719,7 +805,7 @@ defmodule OaksWeb.SpeciesMergeLive do
         <span class="font-semibold text-sm" style="color: #92400e;">Self-Reference Warning</span>
       </div>
       <p class="text-sm mb-2" style="color: #92400e;">
-        After merge, this species would reference itself:
+        After the merge these would point at the species itself, so they will be cleared:
       </p>
       <div class="space-y-2">
         <div
@@ -750,15 +836,6 @@ defmodule OaksWeb.SpeciesMergeLive do
   attr :source_name, :string, required: true
 
   defp action_bar(assigns) do
-    self_ref_issues =
-      Merge.detect_self_references(
-        assigns.preview.target,
-        assigns.preview.source.scientific_name
-      )
-
-    has_self_refs = self_ref_issues != []
-    assigns = assign(assigns, has_self_refs: has_self_refs)
-
     ~H"""
     <div
       class="sticky bottom-0 flex justify-end gap-3 p-4 rounded-xl"
@@ -773,10 +850,10 @@ defmodule OaksWeb.SpeciesMergeLive do
       </.link>
       <button
         phx-click="show_confirm"
-        disabled={@merging || @has_self_refs}
+        disabled={@merging}
         class={[
           "px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-colors",
-          (@merging || @has_self_refs) && "opacity-50 cursor-not-allowed"
+          @merging && "opacity-50 cursor-not-allowed"
         ]}
         style="background-color: var(--color-forest-600);"
         id="merge-save-btn"

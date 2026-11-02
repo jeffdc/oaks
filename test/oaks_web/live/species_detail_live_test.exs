@@ -158,6 +158,18 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
     end
   end
 
+  describe "delete confirmation" do
+    test "lists the species that mention it", %{conn: conn} do
+      conn = put_connect_params(conn, %{"api_key" => Application.get_env(:oaks, :api_key)})
+      {:ok, view, _html} = live(conn, ~p"/species/alba")
+
+      render_click(view, "request_delete")
+
+      assert has_element?(view, "#delete-references", "bebbiana")
+      assert has_element?(view, "#delete-references", "parent")
+    end
+  end
+
   describe "malformed stored lists" do
     test "renders when list columns hold non-name entries", %{conn: conn} do
       Oaks.Species.get_species_by_name("alba")

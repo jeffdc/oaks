@@ -8,8 +8,10 @@ defmodule Oaks.Species do
 
   import Ecto.Query
 
+  alias Ecto.Multi
   alias Oaks.Repo
   alias Oaks.Sources.{Source, SpeciesSource}
+  alias Oaks.Species.References
   alias Oaks.Species.Species
 
   @default_limit 50
@@ -301,24 +303,80 @@ defmodule Oaks.Species do
   @doc """
   Updates a species.
 
+  Renaming also points every other species' mention of the old name at the
+  new one (see `Oaks.Species.References`) and keeps the old name as a
+  synonym so existing links still resolve, all in one transaction.
+
   Returns `{:ok, species}` on success, `{:error, changeset}` on failure.
   """
   @spec update_species(Species.t(), map()) :: {:ok, Species.t()} | {:error, Ecto.Changeset.t()}
   def update_species(%Species{} = species, attrs) do
-    species
-    |> Species.changeset(attrs)
-    |> Repo.update()
+    changeset = Species.changeset(species, attrs)
+
+    case Ecto.Changeset.fetch_change(changeset, :scientific_name) do
+      {:ok, new_name} when changeset.valid? ->
+        if References.key(new_name) == References.key(species.scientific_name),
+          do: Repo.update(changeset),
+          else: rename_species(species, changeset, new_name)
+
+      _ ->
+        Repo.update(changeset)
+    end
+  end
+
+  defp rename_species(species, changeset, new_name) do
+    old_name = species.scientific_name
+
+    synonyms = References.decode(Ecto.Changeset.get_field(changeset, :synonyms))
+
+    known? =
+      Enum.any?(synonyms, &(is_binary(&1) and References.key(&1) == References.key(old_name)))
+
+    changeset =
+      if known?,
+        do: changeset,
+        else:
+          Ecto.Changeset.put_change(
+            changeset,
+            :synonyms,
+            References.encode(synonyms ++ [old_name])
+          )
+
+    Multi.new()
+    |> Multi.update(:species, changeset)
+    |> References.rewrite(old_name, new_name, except: [species.id])
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{species: updated}} -> {:ok, updated}
+      {:error, :species, changeset, _} -> {:error, changeset}
+      {:error, _step, %Ecto.Changeset{} = changeset, _} -> {:error, changeset}
+    end
   end
 
   @doc """
-  Deletes a species.
+  Returns the other species that mention this species by name, with the
+  fields that mention it (see `Oaks.Species.References.find/1`).
+  """
+  @spec references_to(Species.t()) :: [References.mention()]
+  def references_to(%Species{} = species), do: References.find(species.scientific_name)
+
+  @doc """
+  Deletes a species and removes its name from every other species that
+  mentions it, in one transaction.
 
   Species_sources records are deleted via ON DELETE CASCADE in the database.
   Returns `{:ok, species}` on success, `{:error, changeset}` on failure.
   """
   @spec delete_species(Species.t()) :: {:ok, Species.t()} | {:error, Ecto.Changeset.t()}
   def delete_species(%Species{} = species) do
-    Repo.delete(species)
+    Multi.new()
+    |> References.rewrite(species.scientific_name, nil, except: [species.id])
+    |> Multi.delete(:species, species)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{species: deleted}} -> {:ok, deleted}
+      {:error, _step, %Ecto.Changeset{} = changeset, _} -> {:error, changeset}
+    end
   end
 
   # -- Serialization helpers --
