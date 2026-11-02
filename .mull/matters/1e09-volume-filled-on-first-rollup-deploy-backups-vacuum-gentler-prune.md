@@ -15,3 +15,5 @@ Follow-ups:
 2. Delete old/partial /data/backups/pre-migrate-*.db via sleep-infinity pattern (destructive on prod - needs Jeff's OK).
 3. One-off VACUUM: ~70% of the DB is free pages after the prune (~94MB -> ~30MB).
 4. Rollup: prune in batches with a pause/checkpoint between, so a large backlog can't starve Litestream checkpoints again (steady state is ~1 day/run, low risk).
+
+2026-11-02: (1) done 40447f2 — backup only when Oaks.Release.pending_migration_count() > 0, MAX_BACKUPS=3, partial copy removed + exit on failure (script exercised in an alpine container with stubs: skip/backup+trim/failure paths). (4) done 387a273 — prune in 5000-row batches, 200ms pause between batches and rollup days. (2) Jeff runs the backup cleanup on prod. (3) VACUUM deferred: 3GB volume, freed pages get reused.
