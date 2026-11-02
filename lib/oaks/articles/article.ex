@@ -40,6 +40,8 @@ defmodule Oaks.Articles.Article do
       :published_at
     ])
     |> validate_required([:slug, :title, :author, :created_at, :updated_at])
+    |> validate_length(:title, max: 200)
+    |> validate_length(:author, max: 200)
     |> unique_constraint(:slug)
   end
 

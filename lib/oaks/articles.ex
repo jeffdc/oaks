@@ -12,6 +12,9 @@ defmodule Oaks.Articles do
   alias Oaks.Articles.Article
   alias Oaks.Repo
 
+  # Slugs that collide with fixed routes (/articles/new, /api/v1/articles/tags).
+  @reserved_slugs ~w(new tags)
+
   # -- List --
 
   @doc """
@@ -97,8 +100,9 @@ defmodule Oaks.Articles do
   @doc """
   Updates an article with the given attributes.
 
-  Regenerates the slug if the title changed. Sets `published_at` when
-  transitioning from unpublished to published.
+  Regenerates the slug when the title changes, but only for articles that
+  have never been published, so shared links keep working. Sets
+  `published_at` when transitioning from unpublished to published.
   """
   @spec update_article(Article.t(), map()) :: {:ok, Article.t()} | {:error, Ecto.Changeset.t()}
   def update_article(%Article{} = article, attrs) do
@@ -108,7 +112,7 @@ defmodule Oaks.Articles do
     new_title = attrs["title"] || article.title
 
     slug =
-      if new_title != article.title do
+      if new_title != article.title and is_nil(article.published_at) do
         generate_unique_slug(new_title, article.id)
       else
         article.slug
@@ -190,6 +194,8 @@ defmodule Oaks.Articles do
   """
   def generate_slug(title) when is_binary(title) do
     title
+    |> String.normalize(:nfd)
+    |> String.replace(~r/\p{Mn}/u, "")
     |> String.downcase()
     |> String.replace(~r/[^a-z0-9\s-]/, "")
     |> String.replace(~r/[\s_]+/, "-")
@@ -234,7 +240,12 @@ defmodule Oaks.Articles do
   defp escape_like(str), do: String.replace(str, ~r/[\\%_]/, fn char -> "\\" <> char end)
 
   defp generate_unique_slug(title, exclude_id \\ nil) do
-    base_slug = generate_slug(title)
+    base_slug =
+      case generate_slug(title) do
+        "" -> "article"
+        slug -> slug
+      end
+
     find_available_slug(base_slug, exclude_id, 0)
   end
 
@@ -255,6 +266,8 @@ defmodule Oaks.Articles do
       candidate
     end
   end
+
+  defp slug_taken?(slug, _exclude_id) when slug in @reserved_slugs, do: true
 
   defp slug_taken?(slug, nil) do
     Repo.exists?(from a in Article, where: a.slug == ^slug)

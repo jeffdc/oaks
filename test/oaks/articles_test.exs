@@ -129,7 +129,14 @@ defmodule Oaks.ArticlesTest do
                })
 
       assert updated.title == "Updated Title"
-      assert updated.slug == "updated-title"
+      assert updated.slug == "getting-started"
+    end
+
+    test "regenerates the slug when a never-published draft is retitled" do
+      article = Articles.get_article_by_slug("advanced-taxonomy-draft", true)
+
+      {:ok, updated} = Articles.update_article(article, %{"title" => "Section Notes"})
+      assert updated.slug == "section-notes"
     end
 
     test "sets published_at when transitioning to published" do
@@ -201,6 +208,31 @@ defmodule Oaks.ArticlesTest do
 
     test "handles multiple spaces and hyphens" do
       assert Articles.generate_slug("  too   many   spaces  ") == "too-many-spaces"
+    end
+
+    test "transliterates accented letters" do
+      assert Articles.generate_slug("Chênes du Québec") == "chenes-du-quebec"
+    end
+  end
+
+  describe "slug edge cases on create" do
+    defp create(title) do
+      Articles.create_article(%{"title" => title, "author" => "Jeff", "content" => "x"})
+    end
+
+    test "falls back to a generic slug when the title has no Latin letters" do
+      assert {:ok, %{slug: "article"}} = create("日本のオーク")
+      assert {:ok, %{slug: "article-2"}} = create("!!!")
+    end
+
+    test "never uses slugs reserved by routes" do
+      assert {:ok, %{slug: "new-2"}} = create("New")
+      assert {:ok, %{slug: "tags-2"}} = create("Tags")
+    end
+
+    test "rejects overlong titles with a title error" do
+      assert {:error, changeset} = create(String.duplicate("a", 201))
+      assert changeset.errors[:title]
     end
   end
 
