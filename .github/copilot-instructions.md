@@ -27,7 +27,7 @@ canonical project guide is `CLAUDE.md`; the conventions reference is
 | `lib/oaks_web/` | Web layer (LiveViews, controllers, components) |
 | `config/` | Phoenix configuration |
 | `assets/` | JS, CSS, Tailwind |
-| `priv/repo/` | Migrations, `structure.sql`, seeds |
+| `priv/repo/` | Migrations, seeds |
 | `test/` | Elixir tests |
 | `scrapers/` | Python scripts for ingesting external data (local dev only) |
 | `ios/` | iOS app source |

@@ -67,10 +67,10 @@ mix test test/path/to/test.exs     # Run a specific file
 mix test test/path/to/test.exs:42  # Run a specific test
 ```
 
-The test suite uses a separate `priv/oaks_test.sqlite` database built from
-`priv/repo/structure.sql` plus `priv/repo/test_seeds.sql`. See `CLAUDE.md`
-for instructions on rebuilding the test database if you change the schema
-or seeds.
+The test suite uses a separate `priv/oaks_test.sqlite` database built by
+running the migrations in `priv/repo/migrations` and then loading
+`priv/repo/test_seeds.sql`. Run `make test-db` to rebuild it after changing
+the seeds.
 
 ## Commit Message Guidelines
 

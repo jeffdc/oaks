@@ -71,7 +71,7 @@ jobs:
         run: |
           rm -f priv/oaks_test.sqlite*
           MIX_ENV=test mix ecto.create --quiet
-          MIX_ENV=test mix ecto.load --quiet
+          MIX_ENV=test mix ecto.migrate --quiet
           sqlite3 priv/oaks_test.sqlite < priv/repo/test_seeds.sql
 
       - name: Run precommit checks (format, compile, credo, tests)

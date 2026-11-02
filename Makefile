@@ -29,12 +29,12 @@ deps:
 # Testing
 # =============================================================================
 
-# Set up fresh test database from structure.sql + test_seeds.sql
+# Set up fresh test database from migrations + test_seeds.sql
 test-db:
 	@echo "Setting up test database..."
 	@rm -f priv/oaks_test.sqlite*
 	@MIX_ENV=test mix ecto.create --quiet
-	@MIX_ENV=test mix ecto.load --quiet
+	@MIX_ENV=test mix ecto.migrate --quiet
 	@sqlite3 priv/oaks_test.sqlite < priv/repo/test_seeds.sql
 	@echo "Test database ready"
 
@@ -152,7 +152,7 @@ help:
 	@echo "  make dev        Start Phoenix dev server (:4444)"
 	@echo "  make setup      Full setup (deps + assets + db check)"
 	@echo "  make test       Run Phoenix tests (rebuilds test DB)"
-	@echo "  make test-db    Rebuild test database from structure.sql + seeds"
+	@echo "  make test-db    Rebuild test database from migrations + seeds"
 	@echo "  make format     Format Elixir code"
 	@echo "  make lint       Run Credo linter"
 	@echo "  make precommit  Run all pre-commit checks"

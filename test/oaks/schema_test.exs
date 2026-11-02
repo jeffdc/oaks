@@ -1,7 +1,7 @@
 defmodule Oaks.SchemaTest do
   @moduledoc """
   Verifies that Ecto schemas can query the database correctly.
-  Runs against the test database (structure.sql + test_seeds.sql).
+  Runs against the test database (migrations + test_seeds.sql).
   """
   use Oaks.DataCase
 

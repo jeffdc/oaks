@@ -1,5 +1,5 @@
 -- Test seed data for oak_compendium test database
--- Loaded after structure.sql to provide minimal data for tests
+-- Loaded after the migrations (make test-db) to provide minimal data for tests
 --
 -- Keep this minimal — only add data that tests actually need
 

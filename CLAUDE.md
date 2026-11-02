@@ -31,7 +31,7 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 | `lib/oaks_web/` | Web layer (LiveViews, controllers, components) |
 | `config/` | Phoenix configuration |
 | `assets/` | JS, CSS, Tailwind |
-| `priv/repo/` | Migrations, structure.sql, seeds |
+| `priv/repo/` | Migrations, seeds |
 | `test/` | Elixir tests |
 
 ## Tech Stack
@@ -71,11 +71,11 @@ Do not commit until precommit passes.
 ### Test Database
 
 Tests use a **separate test database** (`priv/oaks_test.sqlite`) that is:
-- **Schema-only**: Created from `priv/repo/structure.sql`
+- **Schema**: Built by running the migrations in `priv/repo/migrations`
 - **Minimal seed data**: Loaded from `priv/repo/test_seeds.sql`
-- **Rebuilt with**: `MIX_ENV=test mix ecto.drop && MIX_ENV=test mix ecto.create && MIX_ENV=test mix ecto.load` then `sqlite3 priv/oaks_test.sqlite < priv/repo/test_seeds.sql`
+- **Rebuilt with**: `make test-db` (drops the file, runs `ecto.create` + `ecto.migrate`, then loads the seeds with `sqlite3`)
 
-**Important**: The `mix test` alias uses `ecto.load --skip-if-loaded`, so it won't reload if the DB exists. After modifying `test_seeds.sql`, you must rebuild manually. Changing seeds can break existing tests that assert counts.
+**Important**: The `mix test` alias runs `ecto.migrate` (so new migrations apply automatically) but never reloads seeds. After modifying `test_seeds.sql`, run `make test-db`. Changing seeds can break existing tests that assert counts.
 
 ### Running Tests
 
@@ -87,7 +87,7 @@ mix test test/path:42          # Run specific test at line
 
 ## Database
 
-- **Schema**: Defined in `priv/repo/structure.sql` (single source of truth)
+- **Schema**: Defined only by Ecto migrations in `priv/repo/migrations` (single source of truth). Every schema change is a new migration; there is no `structure.sql` to keep in sync. Production applies pending migrations at startup (`Oaks.Release.migrate/0` from `docker-entrypoint.sh`).
 - **Local dev**: `oaks.db` at project root, gitignored. Pull a fresh copy from Fly.io with `make download-db`.
 - **Production**: Fly.io volume at `/data/oaks.db` (authoritative)
 
