@@ -1,8 +1,12 @@
 defmodule Oaks.Repo.Migrations.FillResearchedHybridParents do
   @moduledoc """
   Fills parents for named hybrids from Jeff's 2026-11 parentage research
-  (POWO/WCVP, Oaks of the World, IPNI, WFO, FNA). Only hybrids with an
-  uncontested formula are here; disputed ones are left for a decision.
+  (POWO/WCVP, Oaks of the World, IPNI, WFO, FNA), plus his decisions on the
+  disputed ones. × mannifera (possibly a distinct species) and × subpyrenaica
+  (treated by WFO and Oaks of the World as Q. pubescens subsp. subpyrenaica)
+  are deliberately left without parents; × cerrioides keeps canariensis ×
+  pubescens from SplitOaksOfTheWorldSynonyms. × columnaris and × subglaucescens
+  are merged into × richteri and × anselmii by MergePowoSynonymHybrids.
 
   Infraspecific parents use the existing infraspecific species row when there
   is one (e.g. `durata gabrielensis`), otherwise the species. A row is only
@@ -15,13 +19,17 @@ defmodule Oaks.Repo.Migrations.FillResearchedHybridParents do
   # {hybrid, parent1, parent2}
   @parents [
     {"× avellaniformis", "rotundifolia", "suber"},
+    # Camus / Oaks of the World; POWO calls this cross × prasina instead.
+    {"× battandieri", "coccifera", "faginea broteroi"},
     {"× carrissoana", "canariensis", "robur"},
     {"× celtica", "lusitanica", "suber"},
-    # POWO: synonym of × richteri (palustris × rubra)
-    {"× columnaris", "palustris", "rubra"},
     {"× coscojosuberiformis", "coccifera", "suber"},
     # Replacement name for the illegitimate × grandidentata Ewan
     {"× ewanii", "durata gabrielensis", "engelmannii"},
+    # Protologue / Oaks of the World (POWO: lusitanica × orocantabrica)
+    {"× gallaecica", "lusitanica", "robur"},
+    # Conventional formula; 2018 genetics suggests it may be an ancestral form.
+    {"× hispanica", "cerris", "suber"},
     # robur × pubescens subsp. subpyrenaica (no subpyrenaica row here)
     {"× kerneri montserratii", "robur", "pubescens"},
     # POWO: coccolobifolia × viminea, coccolobifolia = jonesii
@@ -30,8 +38,6 @@ defmodule Oaks.Repo.Migrations.FillResearchedHybridParents do
     {"× pachucana", "laurina", "mexicana"},
     {"× schochiana", "palustris", "phellos"},
     {"× subconvexa", "durata", "garryana"},
-    # POWO: synonym of × anselmii (canariensis × pubescens)
-    {"× subglaucescens", "canariensis", "pubescens"},
     {"× takaoyamensis", "acuta", "sessilifolia"},
     {"× tingitana", "faginea", "lusitanica"},
     {"× welwitschii", "estremadurensis", "pyrenaica"}
