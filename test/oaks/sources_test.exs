@@ -89,4 +89,21 @@ defmodule Oaks.SourcesTest do
       assert Sources.count() == 3
     end
   end
+
+  describe "delete_source/1" do
+    test "returns an error while species have data from the source" do
+      source = Sources.get_source(1)
+
+      assert {:error, changeset} = Sources.delete_source(source)
+      assert changeset.errors[:id]
+      assert Sources.get_source(1)
+    end
+
+    test "deletes a source with no species data" do
+      {:ok, source} = Sources.create_source(%{name: "Unused", source_type: "website"})
+
+      assert {:ok, _} = Sources.delete_source(source)
+      refute Sources.get_source(source.id)
+    end
+  end
 end

@@ -154,11 +154,27 @@ defmodule Oaks.Sources do
   end
 
   @doc """
-  Deletes a source. Fails if species_sources reference it.
+  Deletes a source. Returns an error changeset while species have data from it.
   """
   @spec delete_source(Source.t()) :: {:ok, Source.t()} | {:error, Ecto.Changeset.t()}
   def delete_source(%Source{} = source) do
-    Repo.delete(source)
+    Repo.transaction(fn ->
+      if Repo.exists?(from(ss in SpeciesSource, where: ss.source_id == ^source.id)) do
+        source
+        |> Ecto.Changeset.change()
+        |> Ecto.Changeset.add_error(:id, "has species data")
+        |> Repo.rollback()
+      else
+        delete_or_rollback(source)
+      end
+    end)
+  end
+
+  defp delete_or_rollback(record) do
+    case Repo.delete(record) do
+      {:ok, deleted} -> deleted
+      {:error, changeset} -> Repo.rollback(changeset)
+    end
   end
 
   # -- SpeciesSource mutations --

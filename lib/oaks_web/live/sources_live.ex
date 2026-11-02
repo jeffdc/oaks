@@ -47,9 +47,9 @@ defmodule OaksWeb.SourcesLive do
   end
 
   def handle_event("confirm_delete", _params, socket) do
-    if socket.assigns[:authenticated] do
-      source = socket.assigns.delete_source
+    source = socket.assigns.delete_source
 
+    if socket.assigns[:authenticated] && source do
       case Sources.delete_source(source) do
         {:ok, _} ->
           sources = Sources.list_sources_with_species_count()

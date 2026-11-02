@@ -52,9 +52,9 @@ defmodule OaksWeb.SourceDetailLive do
   end
 
   def handle_event("confirm_delete", _params, socket) do
-    if socket.assigns[:authenticated] do
-      source = socket.assigns.source
+    source = socket.assigns.source
 
+    if socket.assigns[:authenticated] && source do
       case Sources.delete_source(source) do
         {:ok, _} ->
           {:noreply,
