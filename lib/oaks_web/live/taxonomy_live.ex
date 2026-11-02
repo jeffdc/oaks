@@ -442,8 +442,13 @@ defmodule OaksWeb.TaxonomyLive do
     >
       <span style="font-style: italic; font-weight: 500; color: var(--color-forest-700); font-size: 0.9375rem;">
         Quercus{" "}
-        <span :if={@species.is_hybrid} style="font-style: normal;">&times;</span>
-        {display_name(@species.scientific_name)}
+        <span
+          :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)}
+          style="font-style: normal;"
+        >
+          &times;
+        </span>
+        {epithet(@species.scientific_name)}
       </span>
       <span
         :if={@species.author}
@@ -512,9 +517,6 @@ defmodule OaksWeb.TaxonomyLive do
     |> Enum.filter(& &1)
     |> Enum.join(" and ")
   end
-
-  defp display_name("\u00D7" <> rest), do: rest
-  defp display_name(name), do: name
 
   defp level_plural("subgenus"), do: "Subgenera"
   defp level_plural("section"), do: "Sections"

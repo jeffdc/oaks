@@ -234,6 +234,21 @@ defmodule Oaks.SpeciesTest do
     end
   end
 
+  describe "change_species/2 hybrid flag" do
+    test "requires the hybrid flag for names containing ×" do
+      changeset = Species.change_species(%Oaks.Species.Species{}, %{scientific_name: "× foo"})
+      assert changeset.errors[:is_hybrid]
+
+      changeset =
+        Species.change_species(%Oaks.Species.Species{}, %{
+          scientific_name: "× foo",
+          is_hybrid: true
+        })
+
+      refute changeset.errors[:is_hybrid]
+    end
+  end
+
   defp set_synonyms(name, synonyms) do
     name
     |> Species.get_species_by_name()

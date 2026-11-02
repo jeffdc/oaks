@@ -54,7 +54,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
 
         socket
         |> assign(
-          page_title: "Add Source Data — Quercus #{display_name(species.scientific_name)}",
+          page_title: "Add Source Data — Quercus #{epithet(species.scientific_name)}",
           species: species,
           species_source: species_source,
           available_sources: available,
@@ -84,7 +84,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
 
             socket
             |> assign(
-              page_title: "Edit Source Data — Quercus #{display_name(species.scientific_name)}",
+              page_title: "Edit Source Data — Quercus #{epithet(species.scientific_name)}",
               species: species,
               species_source: species_source,
               form: to_form(changeset)
@@ -323,7 +323,4 @@ defmodule OaksWeb.SpeciesSourceFormLive do
     </div>
     """
   end
-
-  defp display_name("\u00D7" <> rest), do: rest
-  defp display_name(name), do: name
 end

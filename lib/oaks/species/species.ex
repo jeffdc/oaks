@@ -62,6 +62,19 @@ defmodule Oaks.Species.Species do
     |> validate_required(@required_fields)
     |> validate_length(:scientific_name, min: 2, max: 100)
     |> validate_inclusion(:conservation_status, @valid_conservation_statuses)
+    |> validate_hybrid_flag()
     |> unique_constraint(:scientific_name)
+  end
+
+  # Pages decide whether to show the hybrid sign from the name, so a name
+  # containing × must also be flagged as a hybrid.
+  defp validate_hybrid_flag(changeset) do
+    name = get_field(changeset, :scientific_name) || ""
+
+    if String.contains?(name, "×") and get_field(changeset, :is_hybrid) != true do
+      add_error(changeset, :is_hybrid, "must be checked for names containing ×")
+    else
+      changeset
+    end
   end
 end

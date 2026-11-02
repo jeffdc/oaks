@@ -50,10 +50,10 @@ defmodule OaksWeb.HomeLive do
   end
 
   defp fetch_stats do
-    %{
-      oak_count: Species.count(),
-      hybrid_count: Species.count_hybrids()
-    }
+    hybrid_count = Species.count_hybrids()
+
+    # Species.count/0 includes hybrids; the tagline lists them separately.
+    %{oak_count: Species.count() - hybrid_count, hybrid_count: hybrid_count}
   end
 
   defp fetch_and_sort_sources do

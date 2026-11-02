@@ -13,6 +13,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   alias Oaks.Sources
   alias Oaks.Species
   alias OaksWeb.Params
+  alias OaksWeb.SpeciesName
 
   @impl true
   def mount(_params, _session, socket) do
@@ -292,8 +293,13 @@ defmodule OaksWeb.SpeciesDetailLive do
           <h1 class="species-title">
             <em>
               Quercus{" "}
-              <span :if={@species.is_hybrid} style="font-style: normal;">&times;</span>
-              {display_name(@species.scientific_name)}
+              <span
+                :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)}
+                style="font-style: normal;"
+              >
+                &times;
+              </span>
+              {epithet(@species.scientific_name)}
             </em>
             <span :if={@species.author} class="author-text">{@species.author}</span>
           </h1>
@@ -831,7 +837,7 @@ defmodule OaksWeb.SpeciesDetailLive do
         <h3 class="text-lg font-bold text-red-800 mb-2">Delete Species</h3>
         <p class="mb-2" style="color: var(--color-text-secondary);">
           Are you sure you want to delete <strong class="species-name">
-            Quercus {display_name(@species.scientific_name)}
+            Quercus {epithet(@species.scientific_name)}
           </strong>?
         </p>
         <p :if={@source_count > 0} class="text-sm text-red-600 mb-4">
@@ -880,7 +886,7 @@ defmodule OaksWeb.SpeciesDetailLive do
         <p class="mb-4" style="color: var(--color-text-secondary);">
           Are you sure you want to remove <strong>{@target.source.name}</strong>
           data from <strong class="species-name">
-            Quercus {display_name(@species.scientific_name)}
+            Quercus {epithet(@species.scientific_name)}
           </strong>?
         </p>
         <p class="text-sm mb-4" style="color: var(--color-text-tertiary);">
@@ -998,12 +1004,12 @@ defmodule OaksWeb.SpeciesDetailLive do
                 <div class="flex items-baseline gap-2">
                   <span class="species-name font-semibold" style="color: var(--color-forest-800);">
                     <span
-                      :if={species.is_hybrid}
+                      :if={hybrid_sign?(species.scientific_name, species.is_hybrid)}
                       style="font-style: normal; color: var(--color-forest-600);"
                     >
                       &times;
                     </span>
-                    {species.scientific_name}
+                    {epithet(species.scientific_name)}
                   </span>
                   <span
                     :if={species.author}
@@ -1071,7 +1077,7 @@ defmodule OaksWeb.SpeciesDetailLive do
        species_sources: species_sources,
        selected_source: selected_source,
        not_found: false,
-       page_title: "Quercus #{display_name(species.scientific_name)}"
+       page_title: "Quercus #{epithet(species.scientific_name)}"
      )}
   end
 
@@ -1091,9 +1097,6 @@ defmodule OaksWeb.SpeciesDetailLive do
   end
 
   # -- Helpers --
-
-  defp display_name("\u00D7" <> rest), do: rest
-  defp display_name(name), do: name
 
   defp get_other_parent(%{parent1: p1, parent2: p2}, current_name) do
     clean = fn name ->
@@ -1139,11 +1142,7 @@ defmodule OaksWeb.SpeciesDetailLive do
     (custom ++ auto) |> Enum.sort_by(&String.downcase(&1.name))
   end
 
-  defp format_hybrid_display(name) do
-    if String.starts_with?(name, "\u00D7"),
-      do: name,
-      else: "\u00D7 #{name}"
-  end
+  defp format_hybrid_display(name), do: SpeciesName.label(name, true)
 
   defp format_synonym(syn) when is_binary(syn), do: syn
 

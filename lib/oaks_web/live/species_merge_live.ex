@@ -12,6 +12,7 @@ defmodule OaksWeb.SpeciesMergeLive do
   alias Oaks.Species
   alias Oaks.Species.Merge
   alias OaksWeb.Params
+  alias OaksWeb.SpeciesName
 
   @scalar_fields ~w(author conservation_status subgenus section subsection complex parent1 parent2)
 
@@ -926,15 +927,8 @@ defmodule OaksWeb.SpeciesMergeLive do
     end)
   end
 
-  defp format_species_name(species) do
-    name = species.scientific_name
-
-    if species.is_hybrid && !String.starts_with?(name, "\u00D7") do
-      "\u00D7 #{name}"
-    else
-      name
-    end
-  end
+  defp format_species_name(species),
+    do: SpeciesName.label(species.scientific_name, species.is_hybrid)
 
   defp field_label("author"), do: "Author"
   defp field_label("conservation_status"), do: "Conservation Status"

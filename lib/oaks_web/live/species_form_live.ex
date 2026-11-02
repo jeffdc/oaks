@@ -72,7 +72,7 @@ defmodule OaksWeb.SpeciesFormLive do
 
         socket
         |> assign(
-          page_title: "Edit Quercus #{display_name(species.scientific_name)}",
+          page_title: "Edit Quercus #{epithet(species.scientific_name)}",
           species: species,
           form: to_form(changeset)
         )
@@ -332,9 +332,6 @@ defmodule OaksWeb.SpeciesFormLive do
   defp cancel_path(:edit, species) do
     ~p"/species/#{species.scientific_name}"
   end
-
-  defp display_name("\u00D7" <> rest), do: rest
-  defp display_name(name), do: name
 
   # Keeps a stored value selectable when it has no taxa row; otherwise the
   # select falls back to the prompt and saving silently clears the field.

@@ -235,7 +235,9 @@ defmodule OaksWeb.SourceDetailLive do
         >
           <span class="source-species-name">
             Q.{" "}
-            <span :if={sp.is_hybrid}>&times;</span>{display_name(sp.scientific_name)}
+            <span :if={hybrid_sign?(sp.scientific_name, sp.is_hybrid)}>&times;</span>{epithet(
+              sp.scientific_name
+            )}
           </span>
         </.link>
       </div>
@@ -327,7 +329,4 @@ defmodule OaksWeb.SourceDetailLive do
   end
 
   # -- Helpers --
-
-  defp display_name("\u00D7" <> rest), do: rest
-  defp display_name(name), do: name
 end

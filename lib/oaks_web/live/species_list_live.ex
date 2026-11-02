@@ -183,8 +183,8 @@ defmodule OaksWeb.SpeciesListLive do
       <div class="flex items-center gap-2">
         <span class="font-medium group-hover:text-primary transition-colors">
           Quercus{" "}
-          <span :if={@species.is_hybrid}>&times;</span>
-          <em>{display_name(@species.scientific_name)}</em>
+          <span :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)}>&times;</span>
+          <em>{epithet(@species.scientific_name)}</em>
         </span>
         <span
           :if={@species.author}
@@ -235,9 +235,6 @@ defmodule OaksWeb.SpeciesListLive do
 
   defp maybe_put(map, _key, ""), do: map
   defp maybe_put(map, key, value), do: Map.put(map, key, value)
-
-  defp display_name("\u00D7" <> rest), do: rest
-  defp display_name(name), do: name
 
   defp conservation_classes("LC"), do: "bg-green-100 text-green-800 border-green-300"
   defp conservation_classes("NT"), do: "bg-lime-100 text-lime-800 border-lime-300"

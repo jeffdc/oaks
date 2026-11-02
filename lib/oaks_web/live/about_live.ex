@@ -22,15 +22,15 @@ defmodule OaksWeb.AboutLive do
 
   @impl true
   def handle_info(:load_stats, socket) do
-    species_count = Species.count()
+    total = Species.count()
     hybrid_count = Species.count_hybrids()
 
     {:noreply,
      assign(socket,
        stats: %{
-         species_count: species_count,
+         species_count: total - hybrid_count,
          hybrid_count: hybrid_count,
-         total: species_count + hybrid_count
+         total: total
        },
        is_loading: false
      )}

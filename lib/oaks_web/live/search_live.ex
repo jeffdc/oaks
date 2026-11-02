@@ -193,8 +193,14 @@ defmodule OaksWeb.SearchLive do
                 <.icon name="hero-check" class="size-4" />
               </span>
               <span class="search-result-name search-result-name-species">
-                Quercus <span :if={species.is_hybrid} class="mr-0.5">&times;</span>
-                <em>{display_name(species.scientific_name)}</em>
+                Quercus
+                <span
+                  :if={hybrid_sign?(species.scientific_name, species.is_hybrid)}
+                  class="mr-0.5"
+                >
+                  &times;
+                </span>
+                <em>{epithet(species.scientific_name)}</em>
               </span>
               <span :if={species.author} class="search-result-author">
                 {species.author}
@@ -231,7 +237,4 @@ defmodule OaksWeb.SearchLive do
   defp taxonomy_path(%{name: name}) do
     "/taxonomy/#{name}"
   end
-
-  defp display_name("×" <> rest), do: rest
-  defp display_name(name), do: name
 end

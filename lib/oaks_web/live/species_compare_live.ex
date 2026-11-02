@@ -11,6 +11,7 @@ defmodule OaksWeb.SpeciesCompareLive do
   alias Oaks.Markdown
   alias Oaks.Species
   alias OaksWeb.Params
+  alias OaksWeb.SpeciesName
 
   @max_sources 4
 
@@ -305,11 +306,6 @@ defmodule OaksWeb.SpeciesCompareLive do
     end)
   end
 
-  defp format_species_name(species) do
-    if species.is_hybrid do
-      "Quercus \u00D7 #{species.scientific_name}"
-    else
-      "Quercus #{species.scientific_name}"
-    end
-  end
+  defp format_species_name(species),
+    do: SpeciesName.full_name(species.scientific_name, species.is_hybrid)
 end

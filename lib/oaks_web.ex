@@ -81,6 +81,8 @@ defmodule OaksWeb do
       import Phoenix.HTML
       # Core UI components
       import OaksWeb.CoreComponents
+      # Species name display (hybrid notation)
+      import OaksWeb.SpeciesName, only: [epithet: 1, hybrid_sign?: 2]
 
       # Common modules used in templates
       alias OaksWeb.Layouts
