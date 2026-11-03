@@ -19,3 +19,5 @@ relates: [651c]
 Done 2026-11-02 (a9a3 partial): 'Database busy' flake fixed — default_transaction_mode: :immediate in test/dev/prod Repo config + Analytics.track_async runs inline when :analytics_async false (test). Remaining: sandbox 'client exited' noise, test DB tracked in git, concurrent mix test runs share one file, missing form LiveView tests.
 
 2026-11-02: added ArticleFormLive + SourceFormLive tests (SettingsLive tests added in 74c39cd). Found source form couldn't save a source whose source_type isn't a listed option (test seeds use lowercase 'website'); fixed same way as febd. Still open: test DB tracked in git (needs OK to git rm --cached), per-partition test DBs, sandbox 'client exited' log noise.
+
+2026-11-02: priv/oaks_test.sqlite is no longer tracked in git — that item is done. Still open: per-partition test DBs (or document one runner at a time), sandbox 'client exited' log noise.

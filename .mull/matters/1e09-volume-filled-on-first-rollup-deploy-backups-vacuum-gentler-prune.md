@@ -1,5 +1,5 @@
 ---
-status: refined
+status: done
 tags: [p1, ops]
 created: 2026-11-02
 updated: 2026-11-02
@@ -17,3 +17,5 @@ Follow-ups:
 4. Rollup: prune in batches with a pause/checkpoint between, so a large backlog can't starve Litestream checkpoints again (steady state is ~1 day/run, low risk).
 
 2026-11-02: (1) done 40447f2 — backup only when Oaks.Release.pending_migration_count() > 0, MAX_BACKUPS=3, partial copy removed + exit on failure (script exercised in an alpine container with stubs: skip/backup+trim/failure paths). (4) done 387a273 — prune in 5000-row batches, 200ms pause between batches and rollup days. (2) Jeff runs the backup cleanup on prod. (3) VACUUM deferred: 3GB volume, freed pages get reused.
+
+2026-11-02: (2) Jeff cleaned up old pre-migrate backups on prod. (3) VACUUM deferred (3GB volume, freed pages reused). Closed.
