@@ -1,6 +1,6 @@
 # Oaks - Top-level Makefile
 
-.PHONY: dev dev-phx test test-db setup format lint precommit ci build clean download-db help
+.PHONY: dev dev-phx test test-db setup format lint precommit done-checks ci build clean download-db help
 
 # =============================================================================
 # Phoenix Development (primary)
@@ -57,6 +57,14 @@ lint:
 # Pre-commit checks (format, compile, credo, tests)
 precommit:
 	mix precommit
+
+# The hard check `mull done` runs (`mull config checks "make done-checks"`).
+# Rebuilds this checkout's test database first: a worktree has its own, and
+# `mix test` only creates and migrates it (no seeds).
+done-checks: test-db
+	scripts/check-toolchain
+	mix precommit
+	mix dialyzer
 
 # Full CI checks (precommit + assets + dialyzer)
 ci:
@@ -166,6 +174,7 @@ help:
 	@echo "  make format     Format Elixir code"
 	@echo "  make lint       Run Credo linter"
 	@echo "  make precommit  Run all pre-commit checks"
+	@echo "  make done-checks  Hard checks mull done runs (test DB + toolchain + precommit + dialyzer)"
 	@echo "  make ci         Run full CI checks (precommit + assets + dialyzer)"
 	@echo "  make build      Build production release"
 	@echo ""
