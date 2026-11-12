@@ -2,6 +2,34 @@ format: 2
 integration: main
 release: main
 remote: origin
-done_checks: []
-layers: {}
-human: Jeff
+done_checks:
+    - make done-checks
+layers:
+    data:
+        - priv/repo/**
+    docs:
+        - docs/**
+        - '*.md'
+    domain:
+        - lib/oaks/**
+    ios:
+        - ios/**
+    ops:
+        - Dockerfile
+        - docker-entrypoint.sh
+        - fly.toml
+        - litestream.yml
+        - rel/**
+        - infra/**
+        - .github/**
+        - flake.nix
+        - flake.lock
+        - scripts/**
+        - Makefile
+    scrapers:
+        - scrapers/**
+    tests:
+        - test/**
+    ui:
+        - lib/oaks_web/**
+        - assets/**
