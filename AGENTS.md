@@ -1,184 +1,62 @@
 # AI Agent Instructions
 
-## Issue Tracking with bd (beads)
+Project rules (investigation before action, SQLite, Nix toolchain, git workflow) are in [CLAUDE.md](CLAUDE.md) and [CODING_STANDARDS.md](CODING_STANDARDS.md).
 
-**IMPORTANT**: This project uses **bd (beads)** for ALL issue tracking. Do NOT use markdown TODOs, task lists, or other tracking methods.
+## This project in mull
 
-### Why bd?
+- **Plans:**
+  - `species-maps` (Species range maps): boundary data, then the species-region model and map component, then the map on species pages.
+  - `gallformers-parity` (Gallformers parity): independent ports of patterns from `~/dev/gallformers`; each item names the file to crib from.
+  - `search` (Search rethink): shaping, not agreed yet. Captures and questions only.
+  - `audit-2026-11` (Codebase audit follow-ups): open checks and decisions left from the November 2026 audit.
+- **Small, unrelated work is unplanned** (`--plan none`).
+- **Hard checks:** `make done-checks`, which `mull done` runs: it rebuilds the checkout's test database, then runs `scripts/check-toolchain`, `mix precommit` and `mix dialyzer`. Run it inside the Nix dev shell (direnv, or `nix develop -c make done-checks`).
+- **Layers** for done reports: `ui` (`lib/oaks_web`, `assets`; tours required), `domain` (`lib/oaks`), `data` (`priv/repo`), `tests`, `ops` (Docker, Fly, Litestream, `rel`, `infra`, `.github`, flake, `scripts`, Makefile), `scrapers`, `ios`, `docs` (`docs/**`, `*.md`).
+- **Old tracker:** `.mull/` is read-only history. "Matter xxxx" in code, notes or entries means `.mull/matters/xxxx-*.md`. Don't edit it or track work there.
 
-- Dependency-aware: Track blockers and relationships between issues
-- Git-friendly: Auto-syncs to JSONL for version control
-- Agent-optimized: JSON output, ready work detection, discovered-from links
-- Prevents duplicate tracking systems and confusion
+## Working with mull
 
-### Quick Start
+This project's plans, work items, backlog and open questions live in **mull**: a CLI whose data sits on the `mull` git branch. Use only the CLI. Never read or edit mull's data or the `mull` branch directly.
 
-**Check for ready work:**
-```bash
-bd ready --json
-```
+- **Output.** Every command prints JSON, and errors are `{"code", "error"}` on stderr. `mull guide json` documents the shapes and error codes.
+- **Batch.** To write more than a couple of records, use `mull batch` (JSON Lines on stdin, all or nothing) instead of a shell loop.
+- **The record.** Plans hold phases, and phases hold items. An item goes captured → committed → active → in review → done, or is dropped. Captured items (bugs and ideas) are the backlog: they aren't work until the human commits them. Done means reviewed.
 
-**Create new issues:**
-```bash
-bd create "Issue title" -t bug|feature|task -p 0-4 --json
-bd create "Issue title" -p 1 --deps discovered-from:bd-123 --json
-bd create "Subtask" --parent <epic-id> --json  # Hierarchical subtask (gets ID like epic-id.1)
-```
-
-**Claim and update:**
-```bash
-bd update bd-42 --status in_progress --json
-bd update bd-42 --priority 1 --json
-```
-
-**Complete work:**
-```bash
-bd close bd-42 --reason "Completed" --json
-```
-
-### Issue Types
-
-- `bug` - Something broken
-- `feature` - New functionality
-- `task` - Work item (tests, docs, refactoring)
-- `epic` - Large feature with subtasks
-- `chore` - Maintenance (dependencies, tooling)
-
-### Priorities
-
-- `0` - Critical (security, data loss, broken builds)
-- `1` - High (major features, important bugs)
-- `2` - Medium (default, nice-to-have)
-- `3` - Low (polish, optimization)
-- `4` - Backlog (future ideas)
-
-### Workflow for AI Agents
-
-1. **Check ready work**: `bd ready` shows unblocked issues
-2. **Claim your task**: `bd update <id> --status in_progress`
-3. **Work on it**: Implement, test, document
-4. **Discover new work?** Create linked issue:
-   - `bd create "Found bug" -p 1 --deps discovered-from:<parent-id>`
-5. **Complete**: `bd close <id> --reason "Done"`
-6. **Beads auto-syncs**: The daemon commits beads changes to the `beads-sync` branch automatically - no manual commit needed
-
-### Auto-Sync
-
-bd automatically syncs with git via a dedicated `beads-sync` branch:
-- Daemon commits beads changes to `beads-sync` (not your working branch)
-- Exports to `.beads/issues.jsonl` after changes (5s debounce)
-- Auto-pushes and pulls from remote `beads-sync`
-- Your code branches stay clean of beads commits
-- No manual sync needed!
-
-### GitHub Copilot Integration
-
-If using GitHub Copilot, also create `.github/copilot-instructions.md` for automatic instruction loading.
-Run `bd onboard` to get the content, or see step 2 of the onboard instructions.
-
-### MCP Server (Recommended)
-
-If using Claude or MCP-compatible clients, install the beads MCP server:
-
-```bash
-pip install beads-mcp
-```
-
-Add to MCP config (e.g., `~/.config/claude/config.json`):
-```json
-{
-  "beads": {
-    "command": "beads-mcp",
-    "args": []
-  }
-}
-```
-
-Then use `mcp__beads__*` functions instead of CLI commands.
-
-### Managing AI-Generated Planning Documents
-
-AI assistants often create planning and design documents during development:
-- PLAN.md, IMPLEMENTATION.md, ARCHITECTURE.md
-- DESIGN.md, CODEBASE_SUMMARY.md, INTEGRATION_PLAN.md
-- TESTING_GUIDE.md, TECHNICAL_DESIGN.md, and similar files
-
-**Best Practice: Use a dedicated directory for these ephemeral files**
-
-**Recommended approach:**
-- Create a `history/` directory in the project root
-- Store ALL AI-generated planning/design docs in `history/`
-- Keep the repository root clean and focused on permanent project files
-- Only access `history/` when explicitly asked to review past planning
-
-**Example .gitignore entry (optional):**
-```
-# AI planning documents (ephemeral)
-history/
-```
-
-### CLI Help
-
-Run `bd <command> --help` to see all available flags for any command.
-For example: `bd create --help` shows `--parent`, `--deps`, `--assignee`, etc.
-
-### Important Rules
-
-- Use bd for ALL task tracking
-- Always use `--json` flag for programmatic use
-- Link discovered work with `discovered-from` dependencies
-- Check `bd ready` before asking "what should I work on?"
-- Store AI planning docs in `history/` directory
-- Run `bd <cmd> --help` to discover available flags
-- Do NOT create markdown TODO lists
-- Do NOT use external issue trackers
-- Do NOT duplicate tracking systems
-- Do NOT clutter repo root with planning documents
-
-For more details, see README.md and QUICKSTART.md.
-
-### Always Include Issue Descriptions
-
-Issues without descriptions lack context for future work. When creating issues, always include a meaningful description with:
-
-- Why the issue exists (problem statement or need)
-- What needs to be done (scope and approach)
-- How you discovered it (if applicable during work)
-
-Good examples:
-
-```bash
-# Bug discovered during work
-bd create "Fix auth bug in login handler" \
-  --description="Login fails with 500 error when password contains special characters like quotes. Found while testing GH#123 feature. Stack trace shows unescaped SQL in auth/login.go:45." \
-  -t bug -p 1 --deps discovered-from:bd-abc --json
-
-# Feature request
-bd create "Add password reset flow" \
-  --description="Users need ability to reset forgotten passwords via email. Should follow OAuth best practices and include rate limiting to prevent abuse." \
-  -t feature -p 2 --json
-
-# Technical debt
-bd create "Refactor auth package for testability" \
-  --description="Current auth code has tight DB coupling making unit tests difficult. Need to extract interfaces and add dependency injection. Blocks writing tests for bd-xyz." \
-  -t task -p 3 --json
-```
-
-Bad examples (missing context):
-
-```bash
-bd create "Fix auth bug" -t bug -p 1 --json  # What bug? Where? Why?
-bd create "Add feature" -t feature --json     # What feature? Why needed?
-bd create "Refactor code" -t task --json      # What code? Why refactor?
-```
-
-## Session Completion
-
-**When ending a work session:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - `mix precommit`
-3. **Update issue status** - Close finished work, update in-progress items
-4. **Commit code** - Stage and commit with a descriptive message
-5. **Ask user about pushing** - NEVER push without explicit user approval (see CLAUDE.md git workflow)
-6. **Hand off** - Provide context for next session
+1. **Start of session:** run `mull context --item <id>`, or `mull context` if you have no item yet.
+   - Read the decisions it lists, and don't re-decide anything the log already settles.
+   - Read the item's `docs` and its `phase_doc` (the phase's design and when it's done). Docs hold intent only. Status comes from mull, never from a doc.
+2. **One item per session.**
+   - Claim it with `mull start <id>`. Your item is committed work (`mull ready`), or a captured item the human wants done now: starting commits it.
+   - Work on a branch named `<id>-<short-name>`.
+   - End every commit message with the trailer line `Mull: <id>`.
+3. **Capture as you go,** one line each, without waiting for the end. Anyone captures; only the human commits.
+   - `mull decided "<what you chose>" --item <id> --detail "<why, one line>"`: any choice the human didn't make for you.
+   - `mull ask "<question>" --item <id>`: anything you need from the human. Keep working on whatever isn't blocked.
+   - `mull bug "<what>" --source "item <id>"`: anything out of scope that's wrong (a bug, an inconsistency, half-finished work, an assumption you made).
+   - `mull idea "<title>" --detail "<short note>" --source "<where>"`: a possibility worth keeping that isn't work yet, whether the human raised it or you noticed it. Keep to ideas worth the human's time.
+   - Bugs and ideas go to the backlog, not to the human's inbox: that's only questions, decisions and reviews. The human goes through the backlog in triage (`mull guide triage`). Add `--plan` or `--phase` to a capture if it belongs to one, and `--category` if it helps.
+   - **Feedback the human hands over for later** (something to fix, change or revisit, but not now):
+     ```
+     mull bug "<the feedback, in the human's words>" --source "human, <date or context>"
+     ```
+     - File it when it's given. Don't hold it for the end of the session.
+     - Don't act on it in your current work unless the human says to, and never drop it.
+     - It's feedback if it judges or asks to change existing work. It's an idea if it's a possibility that isn't work yet. If you can't tell which, ask the human.
+4. **Don't change plans or phases (or their docs), and don't add items,** unless the human asks. Propose changes with `mull ask`.
+   - Only the human creates and agrees a plan (`mull plan new ... --on-request`, `mull plan agree <slug> --on-request`). A plan that's still shaping takes captures and questions, but no phases or committed work.
+   - Read a plan's or phase's doc with `mull plan doc <slug>` or `mull phase doc <id>`.
+   - Order exists only between phases (`mull need <phase> <phase>`). Items inside a phase are unordered.
+   - Never commit a captured item (`mull commit <id>`) on your own. When the human tells you to, add `--on-request`, with `--plan`, `--phase` or `--plan none` if they say where it goes. Retag a capture (`mull set <id> plan|phase <value>`) only on their word too.
+5. **Finish only with `mull done`:**
+   ```
+   mull done <id> --summary "<what changed and how it fits>" --tour "<steps, or none>" --design -
+   ```
+   - Give the design notes on stdin: how you built it and why (the approach, the shape of the code, what you rejected). They're required, and "none" isn't accepted.
+   - Give the tour inline, one step per line: what to click and what the human should see. Write "none" if no UI changed. Only one of `--summary`, `--tour` and `--design` can read stdin.
+   - `done` runs the project's hard checks itself. If they fail, fix the problem and run `done` again, or run `mull release <id>` and say why.
+   - After `done` the item is in review. It's done only once its review is accepted. Never say an item is done unless `mull done` succeeded.
+6. **Hand over:**
+   - Show the human (or the supervisor) the report from `mull report <id>`, and the tour. The review carries the decisions you recorded with `--item`, and accepting it ratifies them.
+   - Run `mull accept <id> --on-request` only when the human tells you to. If they decide one of those decisions differently, run `mull decide <decision-id> "<their decision>" --on-request` first.
+   - Settle any other inbox entry only on the human's explicit instruction, also with `--on-request`.
+7. **Run `mull sync`** after `done` and at the end of the session.

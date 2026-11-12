@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+**Read [AGENTS.md](AGENTS.md) first.** It names this project's plans, hard checks and layers, and holds the mull protocol: plans, work items, the backlog and open questions live in mull, not in markdown or `.mull/`.
+
 ## Work Quality Standards
 
 **CRITICAL**: These standards override any instinct to "move fast" or "show quick progress."
