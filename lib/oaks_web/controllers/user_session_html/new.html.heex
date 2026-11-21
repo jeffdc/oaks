@@ -29,4 +29,16 @@
       </div>
     </.form>
   </section>
+
+  <section :if={@dev_login} class="card p-6" style="margin-top: 1.5rem;" id="dev-login">
+    <p class="settings-description">
+      Local development: log in as the dev user, with no password or code.
+    </p>
+    <%!-- A plain path, not ~p: the route doesn't exist in a production build. --%>
+    <.form for={%{}} action="/dev/log-in">
+      <button type="submit" class="settings-btn settings-btn-secondary">
+        Log in as dev user
+      </button>
+    </.form>
+  </section>
 </div>

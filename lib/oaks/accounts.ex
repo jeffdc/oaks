@@ -173,12 +173,22 @@ defmodule Oaks.Accounts do
   end
 
   defp get_or_create_user(email) do
-    with nil <- get_user_by_email(email),
-         {:error, changeset} <- %User{} |> User.email_changeset(%{email: email}) |> Repo.insert() do
-      Repo.rollback(changeset)
-    else
-      {:ok, %User{} = user} -> user
-      %User{} = user -> user
+    case get_or_create_user_by_email(email) do
+      {:ok, user} -> user
+      {:error, changeset} -> Repo.rollback(changeset)
+    end
+  end
+
+  @doc """
+  The user with `email`, created if there is none. A new user has no
+  password or authenticator app, so can't log in until setup; the dev-only
+  login (`OaksWeb.DevLoginController`) logs one in directly.
+  """
+  @spec get_or_create_user_by_email(String.t()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  def get_or_create_user_by_email(email) when is_binary(email) do
+    case get_user_by_email(email) do
+      nil -> %User{} |> User.email_changeset(%{email: email}) |> Repo.insert()
+      %User{} = user -> {:ok, user}
     end
   end
 

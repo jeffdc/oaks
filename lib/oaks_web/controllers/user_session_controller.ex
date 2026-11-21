@@ -18,8 +18,11 @@ defmodule OaksWeb.UserSessionController do
 
   @pending_login_seconds 300
 
+  # Locally, the login page also offers the one-click dev login.
+  @dev_login Application.compile_env(:oaks, :dev_routes, false)
+
   def new(conn, _params) do
-    render(conn, :new, form: login_form(%{}), error: nil, page_title: "Log in")
+    render_new(conn, %{}, nil)
   end
 
   def create(conn, %{"user" => %{"email" => email, "password" => password}}) do
@@ -72,7 +75,16 @@ defmodule OaksWeb.UserSessionController do
   defp render_login_error(conn, email, error) do
     conn
     |> put_status(if error == :too_many, do: 429, else: 200)
-    |> render(:new, form: login_form(%{"email" => email}), error: error, page_title: "Log in")
+    |> render_new(%{"email" => email}, error)
+  end
+
+  defp render_new(conn, params, error) do
+    render(conn, :new,
+      form: login_form(params),
+      error: error,
+      dev_login: @dev_login,
+      page_title: "Log in"
+    )
   end
 
   defp login_form(params), do: Phoenix.Component.to_form(params, as: "user")
