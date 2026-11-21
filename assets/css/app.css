@@ -1,10 +1,25 @@
 /* Oak Compendium - Tailwind v4 + daisyUI Configuration
-   Visual design ported from V1 (web/src/app.css) */
+
+   Two systems side by side while the site is rebuilt page by page:
+   * ./system: the DESIGN.md system (tokens, fonts, element defaults,
+     components). New and rebuilt pages use only this.
+   * Everything else in this file: the V1 look (daisyUI theme, forest
+     tokens, page CSS), kept until the pages that use it are rebuilt. Its
+     :root text and background variables now point at the DESIGN.md tokens.
+
+   The V1 CSS is unlayered, so it beats the system's layered rules where
+   both style the same element; the system's classes carry an oc- prefix
+   so they never meet. */
 
 @import "tailwindcss" source(none);
 @source "../css";
 @source "../js";
 @source "../../lib/oaks_web";
+
+@import "./system/tokens.css";
+@import "./system/fonts.css";
+@import "./system/base.css";
+@import "./system/components.css";
 
 @plugin "../vendor/heroicons";
 
@@ -19,10 +34,10 @@
   prefersdark: false;
   color-scheme: "light";
   /* V1 background/surface colors (warm stone tones) */
-  --color-base-100: oklch(98.7% 0.003 80);       /* ~#fafaf9 */
-  --color-base-200: oklch(96.5% 0.003 80);       /* ~#f5f5f4 */
+  --color-base-100: #fbfbf7;                     /* DESIGN.md paper */
+  --color-base-200: #f1f0e8;                     /* DESIGN.md paper-2 */
   --color-base-300: oklch(92.2% 0.004 80);       /* ~#e7e5e4 */
-  --color-base-content: oklch(21.5% 0.008 50);   /* ~#1c1917 */
+  --color-base-content: #161616;                 /* DESIGN.md ink */
   /* Forest green primary */
   --color-primary: oklch(48% 0.11 158);           /* ~#1e7e4b (forest-600) */
   --color-primary-content: oklch(100% 0 0);       /* white */
@@ -75,7 +90,7 @@
   --color-acorn: #a67c52;
   --color-bark: #6b5747;
 
-  --font-serif: 'Georgia', 'Cambria', 'Times New Roman', serif;
+  /* --font-serif is set in system/tokens.css (Source Serif 4). */
 }
 
 /* ============================================
@@ -83,12 +98,13 @@
    For use in CSS rules and component styles
    ============================================ */
 :root {
-  /* Semantic colors */
-  --color-background: #fafaf9;
+  /* Semantic colors. Background and text are aliases of the DESIGN.md
+     tokens (item 21b7) so V1 pages sit on the same paper in the same inks. */
+  --color-background: var(--color-paper);
   --color-surface: #ffffff;
-  --color-text-primary: #1c1917;
-  --color-text-secondary: #57534e;
-  --color-text-tertiary: #6b6560;
+  --color-text-primary: var(--color-ink);
+  --color-text-secondary: var(--color-ink-2);
+  --color-text-tertiary: var(--color-ink-3);
   --color-border: #e7e5e4;
   --color-border-light: #f5f5f4;
 
@@ -123,78 +139,8 @@
 /* Make LiveView wrapper divs transparent for layout */
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
-/* ============================================
-   Base Styles (from V1 app.css)
-   ============================================ */
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-feature-settings: "kern" 1, "liga" 1;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
-}
-
-/* Global link styles */
-a {
-  color: var(--color-forest-700, #19653d);
-  text-decoration: underline;
-  text-decoration-color: var(--color-forest-300, #86d4aa);
-  text-underline-offset: 2px;
-  transition: color 0.15s ease, text-decoration-color 0.15s ease;
-}
-
-a:hover {
-  color: var(--color-forest-600, #1e7e4b);
-  text-decoration-color: var(--color-forest-600, #1e7e4b);
-}
-
-/* Global focus styles for accessibility (WCAG 2.1 AA) */
-:focus-visible {
-  outline: 2px solid var(--color-forest-600, #1e7e4b);
-  outline-offset: 2px;
-}
-
-:focus:not(:focus-visible) {
-  outline: none;
-}
-
-button:focus-visible,
-[role="button"]:focus-visible {
-  outline: 2px solid var(--color-forest-600, #1e7e4b);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(30, 126, 75, 0.15);
-}
-
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--color-forest-600, #1e7e4b);
-  outline-offset: 0;
-  border-color: var(--color-forest-600, #1e7e4b);
-}
-
-/* Focus on dark backgrounds */
-.dark-bg :focus-visible,
-[style*="background: linear-gradient"] :focus-visible {
-  outline-color: white;
-}
-
-/* Reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
+/* Base styles (body, links, focus, selection, reduced motion) live in
+   system/base.css. */
 
 /* ============================================
    Navigation Styles (V1 header)

@@ -1,0 +1,642 @@
+/* ==========================================================================
+   Oak Compendium design system: components (DESIGN.md, design/prototype/oc.css)
+
+   One block per function component in OaksWeb.CoreComponents and
+   OaksWeb.DesignComponents. Classes carry the oc- prefix so they never meet
+   the V1 class names in app.css. In @layer components, so a utility class
+   passed to a component still wins.
+
+   Square corners, flat: no border-radius and no shadows anywhere.
+   ========================================================================== */
+
+@layer components {
+  /* ---------------------------------------------------------------------
+     Taxonomy band (DesignComponents.taxonomy_band): the ochre field with
+     the breadcrumb, ranks separated by drawn chevrons.
+     --------------------------------------------------------------------- */
+  .oc-band {
+    background: var(--color-ochre);
+    color: var(--color-ink);
+  }
+  .oc-band-in {
+    max-width: var(--container-frame);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-s5);
+    padding: 0 var(--spacing-s6);
+  }
+  .oc-band ol {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    padding: 13px 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--spacing-s2);
+    font: 600 15px/1.4 var(--font-narrow);
+    letter-spacing: 0.01em;
+  }
+  .oc-band ol > li {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-s2);
+  }
+  .oc-band ol > li + li::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-top: 2px solid var(--color-ink);
+    border-right: 2px solid var(--color-ink);
+    transform: rotate(45deg);
+    margin: 0 6px 0 2px;
+  }
+  .oc-band a {
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .oc-band a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .oc-band :focus-visible { outline-color: var(--color-ink); }
+  .oc-band-rk {
+    font-weight: 500;
+    color: #2e2306;
+  }
+  .oc-band ol [aria-current] {
+    font: italic 700 16px/1.4 var(--font-serif);
+  }
+  .oc-band i { font-family: var(--font-serif); font-size: 16px; }
+
+  /* Siblings menu at the band's right end */
+  .oc-band details {
+    position: relative;
+    flex: none;
+    font: 600 14px/1.3 var(--font-narrow);
+  }
+  .oc-band summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 7px 12px;
+    border: 1.5px solid var(--color-ink);
+    display: flex;
+    gap: var(--spacing-s2);
+    align-items: center;
+    white-space: nowrap;
+  }
+  .oc-band summary::-webkit-details-marker { display: none; }
+  .oc-band summary::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    margin-top: -3px;
+  }
+  .oc-band details[open] summary {
+    background: var(--color-ink);
+    color: var(--color-ochre);
+  }
+  .oc-band details[open] summary::after {
+    transform: rotate(-135deg);
+    margin-top: 3px;
+  }
+  .oc-band-siblings {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 5;
+    margin: 0;
+    padding: var(--spacing-s2) 0;
+    list-style: none;
+    min-width: 230px;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: var(--color-paper);
+    border: 1.5px solid var(--color-ink);
+  }
+  .oc-band-siblings li { display: block; }
+  .oc-band-siblings a,
+  .oc-band-siblings [aria-current] {
+    display: block;
+    padding: 6px 16px;
+    font: italic 600 16px/1.3 var(--font-serif);
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .oc-band-siblings a:hover { background: var(--color-paper-2); }
+  .oc-band-siblings [aria-current] {
+    font-weight: 700;
+    background: var(--color-ochre);
+  }
+
+  @media (max-width: 760px) {
+    .oc-band-in {
+      gap: var(--spacing-s3);
+      padding: 0 var(--spacing-s4) 0 0;
+    }
+    .oc-band ol {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+      padding: 10px 0 10px 28px;
+      font-size: 14px;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 36px);
+      mask-image: linear-gradient(to right, transparent 0, #000 36px);
+    }
+    .oc-band ol::-webkit-scrollbar { display: none; }
+    .oc-band summary { padding: 6px 9px; font-size: 13px; }
+  }
+
+  /* ---------------------------------------------------------------------
+     Section heading (DesignComponents.section_heading): an uppercase
+     Archivo label standing on a 2px ink rule, with an optional note.
+     --------------------------------------------------------------------- */
+  .oc-section-heading {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--spacing-s3);
+    margin: 0 0 var(--spacing-s3);
+    padding: 0 0 var(--spacing-s2);
+    border-bottom: 2px solid var(--color-rule-strong);
+    font: 800 15px/1.2 var(--font-frame);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+  .oc-section-heading-note {
+    font: 500 13px/1.2 var(--font-frame);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--color-ink-3);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  /* ---------------------------------------------------------------------
+     Source mark (DesignComponents.source_mark): pencil Archivo, a 40%
+     underline that firms up on hover, never wraps.
+     --------------------------------------------------------------------- */
+  .oc-src {
+    margin-left: 4px;
+    font: 500 12.5px/1.3 var(--font-frame);
+    color: var(--color-pencil);
+    white-space: nowrap;
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-pencil) 40%, transparent);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  a.oc-src:hover {
+    text-decoration: none;
+    border-bottom-color: var(--color-pencil);
+  }
+
+  /* ---------------------------------------------------------------------
+     Standing marks (DesignComponents.standing_mark): a drawn 14px mark
+     and its label. Agree, differs and unreviewed are marks, never colours.
+     --------------------------------------------------------------------- */
+  .oc-mk {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font: 600 12.5px/1 var(--font-frame);
+    color: var(--color-ink-2);
+    white-space: nowrap;
+  }
+  .oc-mk svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    color: var(--color-ink);
+  }
+  .oc-mk-cut { stroke: var(--color-paper); }
+  .oc-marks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-s2) var(--spacing-s4);
+  }
+
+  /* ---------------------------------------------------------------------
+     Status tag (DesignComponents.status_tag): an outlined ink stamp.
+     --------------------------------------------------------------------- */
+  .oc-status {
+    display: inline-block;
+    font: 700 13px/1 var(--font-frame);
+    letter-spacing: 0.04em;
+    color: var(--color-ink);
+    border: 1.5px solid var(--color-ink);
+    padding: 4px 7px;
+    white-space: nowrap;
+  }
+
+  /* ---------------------------------------------------------------------
+     Buttons (CoreComponents.button, DesignComponents.compare_button):
+     square, 1.5px ink outline. Primary is the ochre fill and inverts to
+     ink on hover; ghost is the outline alone.
+     --------------------------------------------------------------------- */
+  .oc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font: 700 14px/1 var(--font-frame);
+    color: var(--color-ink);
+    background: transparent;
+    border: 1.5px solid var(--color-ink);
+    border-radius: 0;
+    padding: 10px 13px;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .oc-btn:hover {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    text-decoration: none;
+  }
+  .oc-btn-primary { background: var(--color-ochre); }
+  .oc-btn-primary:hover {
+    background: var(--color-ink);
+    color: var(--color-ochre);
+  }
+  .oc-btn-compact {
+    font-size: 13px;
+    padding: 7px 10px;
+  }
+  .oc-btn:disabled,
+  .oc-btn[aria-disabled="true"] {
+    background: transparent;
+    color: var(--color-ink-2);
+    border-color: color-mix(in srgb, var(--color-ink) 40%, transparent);
+    border-style: dashed;
+    cursor: not-allowed;
+  }
+  .oc-btn .oc-kbd-hint { margin-left: 2px; }
+  .phx-submit-loading .oc-btn[type="submit"],
+  .oc-btn.phx-click-loading { cursor: progress; }
+
+  /* ---------------------------------------------------------------------
+     Title row (CoreComponents.header): the page title on a 2px rule.
+     --------------------------------------------------------------------- */
+  .oc-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--spacing-s2) var(--spacing-s5);
+    padding-bottom: var(--spacing-s4);
+    margin-bottom: var(--spacing-s6);
+    border-bottom: 2px solid var(--color-rule-strong);
+  }
+  .oc-title h1 {
+    margin: 0;
+    font: 600 clamp(34px, 4vw, 50px)/1.05 var(--font-serif);
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+  .oc-title-sub {
+    margin: var(--spacing-s2) 0 0;
+    font: 600 16px/1.4 var(--font-frame);
+    color: var(--color-ink-2);
+    max-width: 70ch;
+  }
+  .oc-title-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-s2);
+  }
+
+  /* ---------------------------------------------------------------------
+     Ruled table (CoreComponents.table): rows on hairlines under a 2px
+     head rule, Archivo with lining tabular figures. The voice column
+     (Jeff's words) is serif. With stack, each row becomes a block on
+     phones with every cell labelled.
+     --------------------------------------------------------------------- */
+  .oc-table-wrap { overflow-x: auto; }
+  .oc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font: 15px/1.5 var(--font-frame);
+    color: var(--color-ink);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  .oc-table th,
+  .oc-table td {
+    text-align: left;
+    vertical-align: top;
+    padding: var(--spacing-s3) var(--spacing-s4) var(--spacing-s3) 0;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .oc-table thead th {
+    font: 800 13px/1.2 var(--font-frame);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--color-rule-strong);
+  }
+  .oc-table tbody th {
+    font: 700 15px/1.4 var(--font-frame);
+    width: 110px;
+  }
+  .oc-table td.oc-voice {
+    font: 400 16px/1.55 var(--font-serif);
+  }
+  @media (min-width: 761px) {
+    .oc-table td.oc-voice { width: 46%; }
+  }
+  .oc-table tbody tr[phx-click]:hover,
+  .oc-table td.oc-clickable:hover { background: var(--color-paper-2); cursor: pointer; }
+  .oc-table-actions { display: flex; gap: var(--spacing-s4); }
+  .oc-empty {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--color-ink-3);
+  }
+
+  @media (max-width: 760px) {
+    .oc-table-stack table,
+    .oc-table-stack tbody,
+    .oc-table-stack tr,
+    .oc-table-stack th,
+    .oc-table-stack td { display: block; width: auto; }
+    .oc-table-stack thead {
+      position: absolute;
+      left: -9999px;
+    }
+    .oc-table-stack tr {
+      padding: var(--spacing-s3) 0 var(--spacing-s4);
+      border-bottom: 2px solid var(--color-rule-strong);
+    }
+    .oc-table-stack tbody th {
+      border: 0;
+      padding: 0 0 var(--spacing-s2);
+      font-size: 16px;
+      width: auto;
+    }
+    .oc-table-stack td {
+      border: 0;
+      padding: var(--spacing-s2) 0 0;
+    }
+    .oc-table-stack td[data-label]::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 2px;
+      font: 700 12px/1.3 var(--font-frame);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-ink-3);
+    }
+  }
+
+  /* Other sources behind a disclosure (DesignComponents.other_sources):
+     the summary is a standing mark, the body each source as it wrote it. */
+  .oc-other summary {
+    cursor: pointer;
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-s2);
+  }
+  .oc-other summary::-webkit-details-marker { display: none; }
+  .oc-other summary::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid var(--color-ink);
+    border-bottom: 2px solid var(--color-ink);
+    transform: rotate(45deg);
+    margin: -3px 0 0 4px;
+  }
+  .oc-other[open] summary::after {
+    transform: rotate(-135deg);
+    margin-top: 3px;
+  }
+  .oc-other p {
+    margin: var(--spacing-s3) 0 0;
+    font: 400 15px/1.55 var(--font-serif);
+    color: var(--color-ink-2);
+  }
+  .oc-by {
+    display: block;
+    margin-top: 2px;
+    font: 600 12.5px/1.3 var(--font-frame);
+    color: var(--color-ink-3);
+  }
+
+  /* ---------------------------------------------------------------------
+     Data list (CoreComponents.list): term beside value, on hairlines.
+     --------------------------------------------------------------------- */
+  .oc-list {
+    margin: 0;
+    font: 14px/1.45 var(--font-frame);
+  }
+  .oc-list > div {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: var(--spacing-s1) var(--spacing-s5);
+    padding: var(--spacing-s3) 0;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .oc-list dt {
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+  .oc-list dd {
+    margin: 0;
+    font: 400 16px/1.5 var(--font-serif);
+    color: var(--color-ink);
+  }
+  @media (max-width: 760px) {
+    .oc-list > div { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  /* ---------------------------------------------------------------------
+     Modal (CoreComponents.modal): a square paper panel over an ink wash.
+     --------------------------------------------------------------------- */
+  .oc-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: color-mix(in srgb, var(--color-ink) 65%, transparent);
+  }
+  .oc-modal-panel {
+    width: min(640px, 94vw);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border: 2px solid var(--color-ink);
+  }
+  .oc-modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-s4);
+    padding: var(--spacing-s5) var(--spacing-s6) var(--spacing-s3);
+    border-bottom: 2px solid var(--color-rule-strong);
+  }
+  .oc-modal-head h2 {
+    margin: 0;
+    font: 600 26px/1.15 var(--font-serif);
+    text-wrap: balance;
+  }
+  .oc-modal-body {
+    padding: var(--spacing-s4) var(--spacing-s6) var(--spacing-s5);
+  }
+  .oc-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--spacing-s2);
+    padding: var(--spacing-s3) var(--spacing-s6);
+    border-top: 1px solid var(--color-rule);
+  }
+  @media (max-width: 760px) {
+    .oc-modal-head, .oc-modal-body, .oc-modal-actions {
+      padding-left: var(--spacing-s4);
+      padding-right: var(--spacing-s4);
+    }
+  }
+
+  /* ---------------------------------------------------------------------
+     Back link (CoreComponents.back): Archivo, a drawn left chevron.
+     --------------------------------------------------------------------- */
+  .oc-back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-s2);
+    font: 700 14px/1.3 var(--font-frame);
+    color: var(--color-pencil);
+    text-decoration: none;
+  }
+  .oc-back::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-left: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+  }
+  .oc-back:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+
+  /* ---------------------------------------------------------------------
+     Flash (CoreComponents.flash): a square notice fixed at the top right.
+     Info is paper with an ink outline; an error reverses to an ink plate.
+     --------------------------------------------------------------------- */
+  .oc-flash {
+    position: fixed;
+    top: var(--spacing-s4);
+    right: var(--spacing-s4);
+    z-index: 50;
+    width: min(24rem, calc(100vw - 2 * var(--spacing-s4)));
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-s3);
+    padding: var(--spacing-s3) var(--spacing-s3) var(--spacing-s3) var(--spacing-s4);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border: 1.5px solid var(--color-ink);
+    font: 500 14px/1.45 var(--font-frame);
+    cursor: pointer;
+  }
+  .oc-flash-error {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .oc-flash-error :focus-visible { outline-color: var(--color-ochre); }
+  .oc-flash-title {
+    margin: 0 0 2px;
+    font-weight: 800;
+  }
+  .oc-flash p { margin: 0; }
+  .oc-flash-body { flex: 1; }
+  .oc-flash-close {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    margin: -4px -4px 0 0;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .oc-flash-close svg { width: 12px; height: 12px; }
+
+  /* ---------------------------------------------------------------------
+     Inputs (CoreComponents.input): the one sanctioned box. White field,
+     1.5px border at 40% ink that goes full ink on focus and when invalid.
+     --------------------------------------------------------------------- */
+  .oc-field { margin-bottom: var(--spacing-s4); }
+  .oc-label {
+    display: block;
+    margin-bottom: var(--spacing-s1);
+    font: 700 14px/1.3 var(--font-frame);
+    color: var(--color-ink);
+  }
+  .oc-input {
+    display: block;
+    width: 100%;
+    font: 500 15px/1.4 var(--font-frame);
+    color: var(--color-ink);
+    background: #fff;
+    border: 1.5px solid color-mix(in srgb, var(--color-ink) 40%, transparent);
+    border-radius: 0;
+    padding: 9px 10px;
+    min-height: 42px; /* a select's line box ignores line-height; match the text field */
+  }
+  .oc-input:hover { border-color: color-mix(in srgb, var(--color-ink) 70%, transparent); }
+  .oc-input:focus { border-color: var(--color-ink); }
+  .oc-input:disabled {
+    background: var(--color-paper-2);
+    color: var(--color-ink-2);
+    border-style: dashed;
+    cursor: not-allowed;
+  }
+  textarea.oc-input {
+    min-height: 5rem;
+    resize: vertical;
+    font: 400 16px/1.6 var(--font-serif);
+  }
+  .oc-input[aria-invalid="true"] {
+    border-color: var(--color-ink);
+    border-width: 2px;
+  }
+  .oc-check {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-s2);
+    font: 600 14px/1.3 var(--font-frame);
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+  .oc-check input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--color-ink);
+  }
+  .oc-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: 6px 0 0;
+    font: 700 13px/1.4 var(--font-frame);
+    color: var(--color-ink);
+  }
+  .oc-error svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    margin-top: 2px;
+  }
+}

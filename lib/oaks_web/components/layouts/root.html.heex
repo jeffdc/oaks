@@ -17,11 +17,18 @@
     <link rel="icon" href={~p"/favicon.ico"} sizes="any" />
     <link rel="apple-touch-icon" href={~p"/images/oakcompendium-180.png"} />
     <link rel="manifest" href={~p"/site.webmanifest"} />
+    <link
+      rel="preload"
+      href={~p"/fonts/source-serif-4/source-serif-4-latin-opsz-normal.woff2"}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
     </script>
   </head>
-  <body class="min-h-screen flex flex-col" style="background-color: var(--color-background);">
+  <body class="min-h-screen flex flex-col">
     {@inner_content}
   </body>
 </html>
