@@ -1,11 +1,11 @@
-The Oak Compendium rebuild, agreed with Jeff on 2026-11-21 after a planning and design session. A readable version of this plan is at https://claude.ai/code/artifact/d1136370-ece1-4986-8b46-1c6c5b436e88; it predates dropping the audit log and undo (2026-11-21), and this doc wins where they differ.
+The Oak Compendium rebuild, agreed with Jeff on 2026-11-21 after a planning and design session. A readable version of this plan is at https://claude.ai/code/artifact/d1136370-ece1-4986-8b46-1c6c5b436e88; it predates dropping the audit log and undo and the simpler import endpoint (both 2026-11-21), and this doc wins where they differ.
 
 ## Goals
 - **Who it's for.** Oak identifiers first (mostly iNaturalist identifiers, at a desk beside an iNat tab or on a phone under a tree), botanists and researchers second. Jeff is the only editor.
 - **What it is.** The reference for telling oaks and their hybrids apart: one field identifier's tested knowledge, every claim traceable to his observations or to cited literature. North America first; the rest of the world stays a reference catalog until later. iNaturalist is the taxonomic backbone.
 - **Jeff's words.** Oak Compendium prose is 100% Jeff's. Agents never write, paraphrase, summarize or merge it. They find his material, assemble it verbatim with sources, and propose facts with the quote behind each. Nothing counts until Jeff accepts it.
 - **Facts.** Every fact is tied to its source, the way gallformers' taxogall does it. Jeff's facts lead; other sources stand behind them; conflicts are surfaced for Jeff, not hidden.
-- **No hand SQL.** Every change goes through the app or the one import path (packages Jeff previews and approves). Hand-run SQL over Fly is designed out. There is no audit log or undo (see the note under Architecture).
+- **No hand SQL.** Every change goes through the app or the one import endpoint (every import is dry-run first, and Jeff reads the dry-run report before it applies). Hand-run SQL over Fly is designed out. There is no audit log or undo (see the note under Architecture).
 - **The look.** DESIGN.md and the prototypes in design/prototype/ are the reference for every page.
 
 Done when:
@@ -14,7 +14,7 @@ Done when:
 - Facts, traits and conflicts are sourced and reviewable; Jeff's lead.
 - Jeff writes and publishes structured entries in the in-site editor; nothing agent-written can publish as his.
 - The public site runs on the new design: taxon pages, comparisons, hybrids, ID tool.
-- Every data change goes through the app or an approved import package; no SQL over fly ssh.
+- Every data change goes through the app or the import endpoint after a dry run; no SQL over fly ssh.
 
 ## Settled with Jeff (do not reopen)
 - Stay on SQLite. Copy gallformers' design and its pure modules (not its Carbonite audit log).
@@ -22,7 +22,7 @@ Done when:
 - iNaturalist is the taxonomic backbone; departures are Jeff's sourced decisions.
 - North America first for traits and the ID tool.
 - Varieties and subspecies are taxa with their own pages under their species.
-- Agents run in Claude Code outside the app and submit packages through one import endpoint; the app makes no LLM calls.
+- Agents run in Claude Code outside the app and submit bulk changes through one import endpoint, always as a dry run first; the app makes no LLM calls.
 - Facts from Jeff's writing: an agent proposes, with the verbatim quote; Jeff accepts.
 - The editor lives in the site, admin-only. Reviewing the live agent-assembled text is the same screen as writing.
 - Entries follow one structure: key sentence (the fragment on the taxon page), account, historical context, more to come.
@@ -52,10 +52,10 @@ Done when:
 - **Traits.** A global trait vocabulary (organ, kind: categorical, range or count, unit), values, and source-term mappings like gallformers' trait_term_mappings. No eastern North American or red/white oak assumptions. Jeff approves the vocabulary.
 - **Entries.** entry_structure (the shared sections and their purpose), entries, sections, immutable section versions, and provenance spans inside each version: inserted from material (with the material span), typed by Jeff, or agent wording (pre-existing). Entry text can only be written by Jeff's own session in the editor; the import path rejects it. Only sections Jeff marks written publish.
 - **No audit log, no undo (Jeff, 2026-11-21).** An earlier draft of this plan had an audit log (actor context, triggers, before and after images) and transaction undo. That over-read Jeff's point, which was only that changes must not be pushed to SQLite by hand-run SQL scripts. Both were dropped (items d635, 24eb). If you find a leftover mention of auditing, undo through an audit log, or "audited" writes anywhere in this plan, its items or the code, ignore it: don't implement it and don't raise it as a question. ("attributions" in Facts means a fact's sources, which stays; the audit-2026-11 plan is an unrelated codebase review.)
-- **Import packages.** One contract (JSON Schema in priv/import, as gallformers does) for every bulk change: agents in Claude Code, scripts and data loads all produce packages. A package is uploaded with a scoped token, validated, staged, shown to Jeff as a diff, and applied in one transaction when he approves. Re-applying the same package is a no-op. There is no package undo.
-- **Auth.** Replace the shared API key in localStorage with a real single-user login (phx.gen.auth) for Jeff, and scoped API tokens for agents (read private material, submit packages). Public reads stay public.
+- **Import.** One private endpoint for every bulk change (Jeff, 2026-11-21, decision e661): agents in Claude Code, scripts and data loads all send JSON shaped like the data model (one key per table, field names as in the Ecto schemas, local refs between records in one body) with a scoped token. Each record goes through its Ecto changeset, and the whole body applies in one transaction or not at all, with errors reported per record. A dry run validates and reports what would be created or changed without writing, and returns a token tied to the exact body; the real call is refused without a matching token, so every import is dry-run first (decision 62ae). Re-sending an applied import is a no-op. Each model adds its tables to the endpoint as it lands. There is no JSON Schema contract, Python validator, staging or diff screen, and no import undo: an earlier draft copied gallformers' package contract, which was more than needed (item e773, dropped; the work is item f8f5).
+- **Auth.** Replace the shared API key in localStorage with a real single-user login (phx.gen.auth) for Jeff, and scoped API tokens for agents (read private material, submit imports). Public reads stay public.
 - **API.** The public read-only v1 keeps working through an adapter until the site moves. A v2 serves the new model (taxa, names, published entry sections, facts with sources) to the public. A private API serves agents.
-- **Gallformers.** Copy the proven pure modules now (standing rules, partial dates, quote locating, name normalizing, ancestry) and the import-contract approach. The fragment-and-reader component is the first candidate to share as code; decide on a shared package once both apps settle.
+- **Gallformers.** Copy the proven pure modules now (standing rules, partial dates, quote locating, name normalizing, ancestry), but not its import contract (see Import). The fragment-and-reader component is the first candidate to share as code; decide on a shared package once both apps settle.
 
 ## Moving today's data
 - species rows become taxa and names: hybrid names parsed (×, formula, misspellings), two-word infraspecific names become child taxa with ranks, autonyms handled, synonyms become names, parent1/parent2 become parentage facts sourced as legacy data.
@@ -63,10 +63,10 @@ Done when:
 - The 2026-11-20 short Oak Compendium text loads into the editor as agent wording, flagged for review. Jeff's × fontana edit (Laughlin's description) is kept as his.
 - Lobe and tooth counts become measure facts sourced to Jeff's counts; the research workbook's literature values become other sources' facts.
 - compendium-notes material loads as materials: snippets.jsonl, manuscript paragraphs with authorship, review notes; Jeff's keep/drop sorting maps to set-aside; other people's comments are excluded. Jeff checks a sample before it applies.
-- Every load is a package Jeff previews and approves. Schema changes are migrations; data changes are packages.
+- Every load goes through the import endpoint: dry run first, and Jeff reads the dry-run report before it applies. Schema changes are migrations; data changes are imports.
 
 ## Why this order
-Foundations first: nothing else should write data until Jeff logs in properly and bulk changes come through packages. Sources and facts come before taxonomy because hybrid parentage, ranges and traits are sourced facts. Material can load in parallel with taxonomy. Traits and fact review need both taxa and material; so does the editor. The site shell can start right after Foundations; the public taxon pages need taxa, facts, entries and the shell. The ID tool needs traits and the shell; ranges and maps need taxa and the shell.
+Foundations first: nothing else should write data until Jeff logs in properly and bulk changes come through the import endpoint. Sources and facts come before taxonomy because hybrid parentage, ranges and traits are sourced facts. Material can load in parallel with taxonomy. Traits and fact review need both taxa and material; so does the editor. The site shell can start right after Foundations; the public taxon pages need taxa, facts, entries and the shell. The ID tool needs traits and the shell; ranges and maps need taxa and the shell.
 
 ## Existing plans
 - **gallformers-parity**: Keep, smaller. Five items move into the new plan; a518 and ba39 stay. Telemetry question df25/4807 is still open.
