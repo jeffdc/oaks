@@ -2,9 +2,9 @@
 plan: gallformers-parity
 phase: c3b2
 title: Replace seed-count assertions with fixture modules
-stage: committed
+stage: dropped
 created: "2026-11-12T00:40:46Z"
-updated: "2026-11-12T01:38:56Z"
+updated: "2026-11-21T18:14:48Z"
 ---
 
 Known friction: changing priv/repo/test_seeds.sql breaks tests that hardcode seed counts (5 species, 1 hybrid, etc.).
@@ -20,3 +20,5 @@ Done when changing the counts in test_seeds.sql no longer breaks tests that aren
 Crib the pattern from gallformers: test/support/fixtures/ingestion_pipeline_fixtures.ex.
 
 From matter 651c (and the seed-count note in matter a9a3).
+
+Dropped: Moved into the compendium plan as a new item with the same work (Jeff, 2026-11-21).

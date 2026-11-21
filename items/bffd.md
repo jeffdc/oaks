@@ -2,9 +2,9 @@
 plan: gallformers-parity
 phase: c3b2
 title: Auth plug pipeline cleanup
-stage: committed
+stage: dropped
 created: "2026-11-12T00:40:46Z"
-updated: "2026-11-12T01:38:56Z"
+updated: "2026-11-21T18:14:48Z"
 ---
 
 Auth is ad hoc in the router today (:api runs require_auth, :api_force_auth runs force_auth, both in lib/oaks_web/plugs/auth.ex). Replace it with explicit pipeline plugs. This pays back when a second auth tier appears.
@@ -21,3 +21,5 @@ Bug this fixes (audit 2026-11-02): articles_controller.ex:34, 53 and 84 call Aut
 Crib the pattern from gallformers: lib/gallformers_web/plugs/require_admin.ex.
 
 From matter 4fd7.
+
+Dropped: Superseded by the compendium Foundations item "Single-user login for Jeff" (Jeff, 2026-11-21).
