@@ -21,6 +21,8 @@ defmodule Oaks.Accounts.UserToken do
   @session_validity_in_days 14
   @setup_validity_in_minutes 15
 
+  @type t :: %__MODULE__{}
+
   schema "users_tokens" do
     field :token, :binary
     field :context, :string

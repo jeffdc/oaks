@@ -5,6 +5,7 @@
 # the result is piped straight into an Ecto.Multi function. The code is
 # correct; Ecto 3.14.3 still defines the struct this way.
 [
+  {"lib/oaks/accounts.ex", :call_without_opaque},
   {"lib/oaks/species.ex", :call_without_opaque},
   {"lib/oaks/taxonomy.ex", :call_without_opaque}
 ]
