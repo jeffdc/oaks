@@ -33,7 +33,9 @@ deps:
 # Testing
 # =============================================================================
 
-# Set up fresh test database from migrations + test_seeds.sql
+# Set up fresh test database from migrations + test_seeds.sql: the template
+# `mix test` copies for each run (isolate_test_db/1 in mix.exs), so running
+# this during a test run is safe. Don't run two of these at once.
 test-db:
 	@echo "Setting up test database..."
 	@rm -f priv/oaks_test.sqlite*
@@ -64,7 +66,7 @@ precommit:
 
 # The hard check `mull done` runs (`mull config checks "make done-checks"`).
 # Rebuilds this checkout's test database first: a worktree has its own, and
-# `mix test` only creates and migrates it (no seeds).
+# `mix test` only migrates its per-run copy of it (no seeds).
 done-checks: test-db
 	scripts/check-toolchain
 	mix precommit
