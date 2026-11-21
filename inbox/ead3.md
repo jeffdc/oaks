@@ -5,6 +5,12 @@ plan: compendium
 item: "5762"
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-a3668863f96bd227b
 created: "2026-11-21T23:02:35Z"
+settled:
+  action: accept
+  note: with review 3ff7
+  by: Jeff
+  human: true
+  at: "2026-11-21T23:08:02Z"
 ---
 
 Each commit leaves the suite green and shows which tests depended on which seeded table.
