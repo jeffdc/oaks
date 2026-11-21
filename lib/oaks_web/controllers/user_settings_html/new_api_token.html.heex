@@ -1,0 +1,24 @@
+<div class="settings-container" id="new-api-token-page">
+  <h1 class="settings-title">New agent token</h1>
+
+  <section class="card p-6">
+    <p class="settings-description">
+      Copy this token for <strong>{@token.name}</strong>
+      now; it won't be shown again. It grants {Enum.join(@token.scopes, " and ")} until {date(
+        @token.expires_at
+      )}. Agents send it as <code>Authorization: Bearer &lt;token&gt;</code>.
+    </p>
+    <p
+      id="api-token-value"
+      class="settings-info-box"
+      style="font-family: ui-monospace, monospace; overflow-wrap: anywhere;"
+    >
+      {@raw}
+    </p>
+    <div class="settings-button-group">
+      <.link href={~p"/users/settings/api-tokens"} class="settings-btn settings-btn-primary">
+        I've copied it
+      </.link>
+    </div>
+  </section>
+</div>

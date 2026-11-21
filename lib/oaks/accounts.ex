@@ -12,12 +12,15 @@ defmodule Oaks.Accounts do
   `fly ssh`). Opening the link sets the password and enrolls the
   authenticator app (`complete_setup/4`). The model allows any number of
   users; every user can edit.
+
+  Agents use the private API with tokens an editor issues and revokes
+  (`ApiToken`, item fbd0).
   """
 
   import Ecto.Query, warn: false
 
   alias Ecto.Multi
-  alias Oaks.Accounts.{RecoveryCode, SecondFactor, SecretBox, User, UserToken}
+  alias Oaks.Accounts.{ApiToken, RecoveryCode, SecondFactor, SecretBox, User, UserToken}
   alias Oaks.Repo
 
   ## Users
@@ -201,7 +204,7 @@ defmodule Oaks.Accounts do
   @doc """
   Finishes setup from a setup link: sets the password, enrolls `totp_secret`
   (the code entered must come from it), replaces the recovery codes, and ends
-  every session and setup link the user had.
+  every session, setup link and agent token the user had.
 
   Returns the plain recovery codes, to show once, and the ended session
   tokens, to disconnect their LiveViews.
@@ -227,6 +230,7 @@ defmodule Oaks.Accounts do
       |> Multi.run(:claim, fn repo, _ -> claim_setup_token(repo, user, encoded_token) end)
       |> Multi.update(:user, user_changes)
       |> expire_tokens(user)
+      |> Multi.delete_all(:api_tokens, from(t in ApiToken, where: t.user_id == ^user.id))
       |> replace_recovery_codes(user, codes)
       |> Repo.transaction()
       |> case do
@@ -319,6 +323,67 @@ defmodule Oaks.Accounts do
     codes = SecondFactor.new_recovery_codes()
     {:ok, _} = Multi.new() |> replace_recovery_codes(user, codes) |> Repo.transaction()
     codes
+  end
+
+  ## Agent tokens
+
+  @doc "A changeset for the new-token form."
+  def change_api_token(attrs \\ %{}), do: ApiToken.changeset(attrs)
+
+  @doc """
+  Issues an agent token for `user`. Returns the raw token, to show once, and
+  the stored token.
+  """
+  @spec create_api_token(User.t(), map()) ::
+          {:ok, String.t(), ApiToken.t()} | {:error, Ecto.Changeset.t()}
+  def create_api_token(%User{} = user, attrs) do
+    {raw, changeset} = ApiToken.build(user, attrs)
+
+    case Repo.insert(changeset) do
+      {:ok, token} -> {:ok, raw, token}
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
+  @doc "The user's agent tokens, expired ones included, newest first."
+  def list_api_tokens(%User{id: id}) do
+    Repo.all(
+      from(t in ApiToken, where: t.user_id == ^id, order_by: [desc: t.inserted_at, desc: t.id])
+    )
+  end
+
+  @doc "Revokes one of the user's agent tokens. `:error` if they have no token `id`."
+  @spec delete_api_token(User.t(), integer()) :: :ok | :error
+  def delete_api_token(%User{id: user_id}, id) when is_integer(id) do
+    case Repo.delete_all(from(t in ApiToken, where: t.id == ^id and t.user_id == ^user_id)) do
+      {1, _} -> :ok
+      _ -> :error
+    end
+  end
+
+  @doc """
+  The unexpired agent token matching `raw`, with its user, or `:error`.
+  Records when it was last used, at most once a minute.
+  """
+  @spec fetch_api_token(String.t()) :: {:ok, ApiToken.t()} | :error
+  def fetch_api_token(raw) when is_binary(raw) do
+    with {:ok, query} <- ApiToken.verify_query(raw),
+         %ApiToken{} = token <- Repo.one(query) do
+      {:ok, touch_api_token(token)}
+    else
+      _ -> :error
+    end
+  end
+
+  defp touch_api_token(token) do
+    now = DateTime.utc_now(:second)
+
+    if is_nil(token.last_used_at) or DateTime.diff(now, token.last_used_at) >= 60 do
+      Repo.update_all(from(t in ApiToken, where: t.id == ^token.id), set: [last_used_at: now])
+      %{token | last_used_at: now}
+    else
+      token
+    end
   end
 
   # Every session and setup token the user has goes; the session ones are

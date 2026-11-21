@@ -2,8 +2,8 @@ defmodule OaksWeb.SettingsLive do
   @moduledoc """
   Account settings page.
 
-  Logged in: shows the account email with links to the password and
-  recovery-code pages and a log-out link. Logged out: points to the login page.
+  Logged in: shows the account email with links to the password,
+  recovery-code and agent-token pages and a log-out link. Logged out: points to the login page.
   """
 
   use OaksWeb, :live_view
@@ -41,6 +41,13 @@ defmodule OaksWeb.SettingsLive do
               style="text-decoration: none;"
             >
               Recovery codes
+            </.link>
+            <.link
+              href={~p"/users/settings/api-tokens"}
+              class="settings-btn settings-btn-secondary"
+              style="text-decoration: none;"
+            >
+              Agent tokens
             </.link>
           </div>
 

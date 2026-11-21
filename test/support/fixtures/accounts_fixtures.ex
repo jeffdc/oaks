@@ -10,7 +10,7 @@ defmodule Oaks.AccountsFixtures do
   import Ecto.Query
 
   alias Oaks.Accounts
-  alias Oaks.Accounts.{SecretBox, UserToken}
+  alias Oaks.Accounts.{ApiToken, SecretBox, UserToken}
 
   def unique_user_email, do: "user#{System.unique_integer([:positive])}@example.com"
   def valid_user_password, do: "a long enough password"
@@ -73,6 +73,29 @@ defmodule Oaks.AccountsFixtures do
     Oaks.Repo.update_all(
       from(t in UserToken, where: t.token == ^UserToken.hash(token)),
       set: [inserted_at: dt, authenticated_at: dt]
+    )
+  end
+
+  @doc """
+  An agent token for `user`: `{raw, token}`. Grants every scope for 90 days
+  unless `attrs` says otherwise.
+  """
+  def api_token_fixture(user, attrs \\ %{}) do
+    attrs =
+      Enum.into(attrs, %{
+        "name" => "test agent",
+        "scopes" => ApiToken.scopes(),
+        "lifetime_in_days" => 90
+      })
+
+    {:ok, raw, token} = Accounts.create_api_token(user, attrs)
+    {raw, token}
+  end
+
+  @doc "Moves an agent token's expiry by `amount_to_add` `unit`s from now."
+  def set_api_token_expiry(%ApiToken{id: id}, amount_to_add, unit) do
+    Oaks.Repo.update_all(from(t in ApiToken, where: t.id == ^id),
+      set: [expires_at: DateTime.add(DateTime.utc_now(:second), amount_to_add, unit)]
     )
   end
 end

@@ -133,7 +133,8 @@ See **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** for comprehensive Elixir/Ph
 - There is no sign-up. `Oaks.Release.setup_link/1` creates a user (or recovers one) and prints a one-time setup link; see its doc for the `fly ssh` command. Any number of users is allowed, and every user can edit.
 - Every browser request and LiveView has `@current_scope`: an `Oaks.Accounts.Scope` when logged in, `nil` when not. It is set on the static render too, so LiveViews redirect logged-out visitors straight away (no `connected?/1` check).
 - Gate editing UI with `@current_scope`, and re-check `socket.assigns[:current_scope]` in every `handle_event` that writes.
-- GET/read pages are public. The JSON API is public and read-only; it has no authentication.
+- GET/read pages are public. The JSON API (`/api/v1`) is public and read-only; it has no authentication.
+- Agents use the private API (`/api/private/v1`, not in the OpenAPI spec) with agent tokens an editor issues and revokes at `/users/settings/api-tokens` (item fbd0). Code: `Oaks.Accounts.ApiToken` (hashed, scoped `materials:read` / `packages:submit`, expiring) and `OaksWeb.Plugs.ApiToken` (Bearer check, rate limits, `require_api_scope/2` for routes that need a scope). Completing setup from a setup link revokes a user's tokens; a password change doesn't.
 - Production needs the `LOGIN_ENCRYPTION_KEY` secret (32 bytes, base64; see `config/runtime.exs`). Changing it makes enrolled authenticator apps unusable until a setup link is used.
 - Login attempts are rate limited in memory (`OaksWeb.LoginLimiter`), fine for the one app machine.
 

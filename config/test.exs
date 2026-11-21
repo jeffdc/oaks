@@ -43,6 +43,7 @@ config :oaks, :login_encryption_key, "dGVzdC1sb2dpbi1lbmNyeXB0aW9uLWtleS0zMmJ5dG
 # Login rate limits high enough that the suite's own logins never trip them;
 # the rate-limit tests lower them.
 config :oaks, :login_rate_limits, per_ip: 1_000, per_account: 1_000
+config :oaks, :api_token_rate_limits, per_token: 1_000, failures_per_ip: 1_000
 
 # Record page views inline so no analytics insert outlives its test.
 config :oaks, :analytics_async, false

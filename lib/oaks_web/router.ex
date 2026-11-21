@@ -41,6 +41,13 @@ defmodule OaksWeb.Router do
     plug OpenApiSpex.Plug.PutApiSpec, module: OaksWeb.ApiSpec
   end
 
+  # The private API, for agents with a token (item fbd0). No CORS: callers
+  # aren't browsers.
+  pipeline :private_api do
+    plug :accepts, ["json"]
+    plug OaksWeb.Plugs.ApiToken
+  end
+
   # Health check (no pipeline — lightweight for load balancers)
   get "/health", OaksWeb.HealthController, :check
 
@@ -114,6 +121,13 @@ defmodule OaksWeb.Router do
     get "/stats", StatsController, :index
   end
 
+  # Private API (agent tokens; not in the OpenAPI spec)
+  scope "/api/private/v1", OaksWeb.PrivateAPI do
+    pipe_through :private_api
+
+    get "/token", TokenController, :show
+  end
+
   # OpenAPI docs (outside the API module scope to avoid module prefix)
   scope "/api/v1/docs" do
     pipe_through :api
@@ -140,7 +154,8 @@ defmodule OaksWeb.Router do
     get "/setup/:token", UserSetupController, :start
   end
 
-  # Security settings: logged in, and logged in recently (sudo mode).
+  # Security settings and agent tokens: logged in, and logged in recently
+  # (sudo mode).
   scope "/users/settings", OaksWeb do
     pipe_through [:browser, :require_authenticated_user, :require_sudo_mode]
 
@@ -148,5 +163,8 @@ defmodule OaksWeb.Router do
     put "/password", UserSettingsController, :update_password
     get "/recovery-codes", UserSettingsController, :recovery_codes
     post "/recovery-codes", UserSettingsController, :regenerate_recovery_codes
+    get "/api-tokens", UserSettingsController, :api_tokens
+    post "/api-tokens", UserSettingsController, :create_api_token
+    delete "/api-tokens/:id", UserSettingsController, :delete_api_token
   end
 end

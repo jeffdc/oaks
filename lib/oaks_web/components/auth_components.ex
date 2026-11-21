@@ -13,8 +13,6 @@ defmodule OaksWeb.AuthComponents do
   attr :rest, :global, include: ~w(autocomplete inputmode autofocus required spellcheck)
 
   def auth_field(assigns) do
-    assigns = assign(assigns, :errors, Enum.map(assigns.field.errors, &translate_error/1))
-
     ~H"""
     <div class="settings-form-group">
       <label for={@field.id} class="settings-form-label">{@label}</label>
@@ -26,10 +24,21 @@ defmodule OaksWeb.AuthComponents do
         class="settings-form-input"
         {@rest}
       />
-      <p :for={error <- @errors} class="settings-message settings-message-error" role="alert">
-        {error}
-      </p>
+      <.field_errors field={@field} />
     </div>
+    """
+  end
+
+  @doc "A form field's errors."
+  attr :field, Phoenix.HTML.FormField, required: true
+
+  def field_errors(assigns) do
+    assigns = assign(assigns, :errors, Enum.map(assigns.field.errors, &translate_error/1))
+
+    ~H"""
+    <p :for={error <- @errors} class="settings-message settings-message-error" role="alert">
+      {error}
+    </p>
     """
   end
 
