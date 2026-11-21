@@ -1,7 +1,10 @@
 -- Test seed data for oak_compendium test database
--- Loaded after the migrations (make test-db) to provide minimal data for tests
+-- Loaded after the migrations (make test-db) as a minimal baseline: the
+-- three data sources and the two subgenus roots.
 --
--- Keep this minimal — only add data that tests actually need
+-- Tests never read these rows. Each test builds its own data with the
+-- fixture modules in test/support/fixtures/ and asserts only on rows it
+-- created, so changing the seeds needs no test change.
 
 -- =============================================================================
 -- Sources

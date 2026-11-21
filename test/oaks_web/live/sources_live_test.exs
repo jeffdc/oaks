@@ -1,11 +1,38 @@
 defmodule OaksWeb.SourcesLiveTest do
   @moduledoc """
   Tests for the SourcesLive LiveView.
-  Uses seeded test data (see priv/repo/test_seeds.sql).
   """
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.SourcesFixtures
+  import Oaks.SpeciesFixtures
+
+  # `ootw` has data for two species; the others have none.
+  setup do
+    n = System.unique_integer([:positive])
+
+    inat =
+      source_fixture(
+        name: "iNaturalist #{n}",
+        description: "Authoritative taxonomy and species list"
+      )
+
+    ootw =
+      source_fixture(
+        name: "Oaks of the World #{n}",
+        description: "Rich descriptive data (morphology, distribution)"
+      )
+
+    compendium = source_fixture(name: "Oak Compendium #{n}", source_type: "personal_observation")
+
+    species_source_fixture(species_fixture(), ootw)
+    species_source_fixture(species_fixture(), ootw)
+
+    %{sources: [inat, ootw, compendium], ootw: ootw}
+  end
+
+  defp card(view, source), do: view |> element(".source-card", source.name) |> render()
 
   describe "GET /sources" do
     test "renders sources list page", %{conn: conn} do
@@ -13,11 +40,12 @@ defmodule OaksWeb.SourcesLiveTest do
       assert html =~ "Data Sources"
     end
 
-    test "displays all sources", %{conn: conn} do
+    test "displays all sources", %{conn: conn, sources: sources} do
       {:ok, _view, html} = live(conn, ~p"/sources")
-      assert html =~ "iNaturalist"
-      assert html =~ "Oaks of the World"
-      assert html =~ "Oak Compendium"
+
+      for source <- sources do
+        assert html =~ source.name
+      end
     end
 
     test "shows source descriptions", %{conn: conn} do
@@ -32,29 +60,31 @@ defmodule OaksWeb.SourcesLiveTest do
       assert html =~ "personal_observation"
     end
 
-    test "shows species count for sources with species", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/sources")
-      # Oaks of the World has 2 species
-      assert html =~ "2"
+    test "shows species count for sources with species", %{conn: conn, sources: sources} do
+      [inat, ootw, _] = sources
+      {:ok, view, _html} = live(conn, ~p"/sources")
+      assert card(view, ootw) =~ "2 species"
+      refute card(view, inat) =~ "source-card-count"
     end
 
-    test "source cards link to detail pages", %{conn: conn} do
+    test "source cards link to detail pages", %{conn: conn, sources: sources} do
       {:ok, _view, html} = live(conn, ~p"/sources")
-      assert html =~ ~s(href="/sources/1")
-      assert html =~ ~s(href="/sources/2")
-      assert html =~ ~s(href="/sources/3")
+
+      for source <- sources do
+        assert html =~ ~s(href="/sources/#{source.id}")
+      end
     end
 
-    test "clicking a source navigates to detail page", %{conn: conn} do
+    test "clicking a source navigates to detail page", %{conn: conn, ootw: ootw} do
       {:ok, view, _html} = live(conn, ~p"/sources")
 
       {:ok, _view, html} =
         view
-        |> element(~s(a[href="/sources/2"]))
+        |> element(~s(a[href="/sources/#{ootw.id}"]))
         |> render_click()
         |> follow_redirect(conn)
 
-      assert html =~ "Oaks of the World"
+      assert html =~ ootw.name
     end
   end
 end

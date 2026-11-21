@@ -225,64 +225,71 @@ defmodule Oaks.SpeciesTest do
   end
 
   describe "find_synonym/1" do
+    # Synonym epithets carry the suffix `n` so seeded synonyms can't match.
     setup do
+      n = System.unique_integer([:positive])
+
       %{
-        alba: species_fixture(scientific_name: unique("alba"), synonyms: ["alba var. repanda"]),
-        rubra: species_fixture(scientific_name: unique("rubra"))
+        n: n,
+        alba: species_fixture(scientific_name: "alba#{n}", synonyms: ["alba#{n} var. repanda"]),
+        rubra: species_fixture(scientific_name: "rubra#{n}")
       }
     end
 
-    test "finds species with matching synonym", %{alba: alba} do
-      assert Species.find_synonym("alba var. repanda").id == alba.id
+    test "finds species with matching synonym", %{n: n, alba: alba} do
+      assert Species.find_synonym("alba#{n} var. repanda").id == alba.id
     end
 
     test "returns nil when no synonym match" do
       assert Species.find_synonym("nonexistent synonym") == nil
     end
 
-    test "matches synonyms that carry authorship", %{rubra: rubra} do
+    test "matches synonyms that carry authorship", %{n: n, rubra: rubra} do
       set_synonyms(rubra, [
-        "handeliana A.Camus",
-        "argentata (Korth.) Oerst. 1867",
-        "shumardii var. acerifolia E.J.Palmer 1927"
+        "handeliana#{n} A.Camus",
+        "argentata#{n} (Korth.) Oerst. 1867",
+        "shumardii#{n} var. acerifolia E.J.Palmer 1927"
       ])
 
-      assert Species.find_synonym("handeliana").id == rubra.id
-      assert Species.find_synonym("argentata").id == rubra.id
-      assert Species.find_synonym("shumardii var. acerifolia").id == rubra.id
+      assert Species.find_synonym("handeliana#{n}").id == rubra.id
+      assert Species.find_synonym("argentata#{n}").id == rubra.id
+      assert Species.find_synonym("shumardii#{n} var. acerifolia").id == rubra.id
     end
 
-    test "does not match a name followed by a rank or another epithet", %{rubra: rubra} do
-      set_synonyms(rubra, ["reticulata var. retifolia Liebm. 1869", "falcata pagodifolia"])
+    test "does not match a name followed by a rank or another epithet", %{n: n, rubra: rubra} do
+      set_synonyms(rubra, [
+        "reticulata#{n} var. retifolia Liebm. 1869",
+        "falcata#{n} pagodifolia"
+      ])
 
-      assert Species.find_synonym("reticulata") == nil
-      assert Species.find_synonym("falcata") == nil
+      assert Species.find_synonym("reticulata#{n}") == nil
+      assert Species.find_synonym("falcata#{n}") == nil
     end
 
-    test "ignores case, extra whitespace, Quercus prefix, and hybrid sign", %{rubra: rubra} do
-      set_synonyms(rubra, ["Quercus  Borealis Michx.f.", "×  fernaldii Trel."])
+    test "ignores case, extra whitespace, Quercus prefix, and hybrid sign", %{n: n, rubra: rubra} do
+      set_synonyms(rubra, ["Quercus  Borealis#{n} Michx.f.", "×  fernaldii#{n} Trel."])
 
-      assert Species.find_synonym("borealis").id == rubra.id
-      assert Species.find_synonym("×fernaldii").id == rubra.id
-      assert Species.find_synonym("× fernaldii").id == rubra.id
+      assert Species.find_synonym("borealis#{n}").id == rubra.id
+      assert Species.find_synonym("×fernaldii#{n}").id == rubra.id
+      assert Species.find_synonym("× fernaldii#{n}").id == rubra.id
     end
 
-    test "matches structured name/author entries", %{rubra: rubra} do
-      set_synonyms(rubra, [%{"name" => "maxima", "author" => "(Marshall) Ashe"}])
+    test "matches structured name/author entries", %{n: n, rubra: rubra} do
+      set_synonyms(rubra, [%{"name" => "maxima#{n}", "author" => "(Marshall) Ashe"}])
 
-      assert Species.find_synonym("maxima").id == rubra.id
+      assert Species.find_synonym("maxima#{n}").id == rubra.id
     end
 
-    test "prefers an exact match over an author-suffixed one", %{alba: alba, rubra: rubra} do
-      set_synonyms(alba, ["repanda Michx."])
-      set_synonyms(rubra, ["repanda"])
+    test "prefers an exact match over an author-suffixed one", %{n: n, alba: alba, rubra: rubra} do
+      set_synonyms(alba, ["repanda#{n} Michx."])
+      set_synonyms(rubra, ["repanda#{n}"])
 
-      assert Species.find_synonym("repanda").id == rubra.id
+      assert Species.find_synonym("repanda#{n}").id == rubra.id
     end
 
-    test "treats LIKE wildcards in the lookup literally" do
+    test "treats LIKE wildcards in the lookup literally", %{n: n} do
       assert Species.find_synonym("%") == nil
-      assert Species.find_synonym("alba var. repand_") == nil
+      assert Species.find_synonym("alba#{n} var. repand_") == nil
     end
 
     test "returns nil for a blank name" do

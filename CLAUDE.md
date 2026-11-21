@@ -80,7 +80,7 @@ Tests use a **separate test database** (`priv/oaks_test.sqlite`) that is:
 - **Minimal seed data**: Loaded from `priv/repo/test_seeds.sql`
 - **Rebuilt with**: `make test-db` (drops the file, runs `ecto.create` + `ecto.migrate`, then loads the seeds with `sqlite3`)
 
-**Important**: The `mix test` alias runs `ecto.migrate` (so new migrations apply automatically) but never reloads seeds. After modifying `test_seeds.sql`, run `make test-db`. Changing seeds can break existing tests that assert counts.
+**Important**: The `mix test` alias runs `ecto.migrate` (so new migrations apply automatically) but never reloads seeds. After modifying `test_seeds.sql`, run `make test-db`. Tests never read the seeded rows: each test builds its own data with the fixture modules in `test/support/fixtures/` and asserts only on rows it created (see CODING_STANDARDS.md, Fixtures), so changing the seeds needs no test change.
 
 ### Running Tests
 
