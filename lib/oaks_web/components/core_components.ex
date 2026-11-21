@@ -288,7 +288,11 @@ defmodule OaksWeb.CoreComponents do
   defp error(assigns) do
     ~H"""
     <p class="oc-error">
-      <.icon name="hero-exclamation-circle-mini" class="size-4 shrink-0 mt-0.5" />
+      <svg viewBox="0 0 14 14" aria-hidden="true">
+        <circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.6" />
+        <path d="M7 3.6v4.2" stroke="currentColor" stroke-width="1.8" />
+        <circle cx="7" cy="10.2" r="1" fill="currentColor" />
+      </svg>
       {render_slot(@inner_block)}
     </p>
     """

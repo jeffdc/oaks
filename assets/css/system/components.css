@@ -440,6 +440,7 @@
   .oc-list > div {
     display: grid;
     grid-template-columns: 132px minmax(0, 1fr);
+    align-items: baseline;
     gap: var(--spacing-s1) var(--spacing-s5);
     padding: var(--spacing-s3) 0;
     border-bottom: 1px solid var(--color-rule);
@@ -638,5 +639,27 @@
     height: 14px;
     flex: none;
     margin-top: 2px;
+  }
+
+  /* ---------------------------------------------------------------------
+     Figures. The font shorthand above resets font-variant-numeric, so the
+     Two Figures Rule is restated last: lining tabular figures for table
+     cells, list values, inputs and counts; oldstyle proportional figures
+     for running text.
+     --------------------------------------------------------------------- */
+  .oc-table thead th,
+  .oc-table tbody th,
+  .oc-table td,
+  .oc-table td.oc-voice,
+  .oc-list dd,
+  .oc-input,
+  .oc-status,
+  .oc-band ol {
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  .oc-other p,
+  .oc-modal-head h2,
+  .oc-title h1 {
+    font-variant-numeric: oldstyle-nums proportional-nums;
   }
 }
