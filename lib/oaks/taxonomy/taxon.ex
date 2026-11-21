@@ -8,6 +8,7 @@ defmodule Oaks.Taxonomy.Taxon do
   """
   use Ecto.Schema
   import Ecto.Changeset
+  import Oaks.ChangesetHelpers
 
   @valid_levels ~w(subgenus section subsection complex)
   @required_fields [:name, :level]
@@ -30,6 +31,7 @@ defmodule Oaks.Taxonomy.Taxon do
   def changeset(taxon, attrs) do
     taxon
     |> cast(attrs, [:name, :level, :parent, :author, :content, :content_updated_at, :links])
+    |> trim_strings()
     |> validate_required(@required_fields)
     |> validate_inclusion(:level, @valid_levels)
     |> unique_constraint([:name, :level])

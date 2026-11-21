@@ -6,6 +6,7 @@ defmodule Oaks.Species.Species do
   """
   use Ecto.Schema
   import Ecto.Changeset
+  import Oaks.ChangesetHelpers
 
   alias Oaks.JsonList
   alias Oaks.Sources.SpeciesSource
@@ -55,6 +56,7 @@ defmodule Oaks.Species.Species do
       :synonyms,
       :external_links
     ])
+    |> trim_strings()
     |> JsonList.cast(:hybrids)
     |> JsonList.cast(:closely_related_to)
     |> JsonList.cast(:subspecies_varieties)
