@@ -1,0 +1,71 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "italic-serif-display",
+        "value": "*",
+        "files": [
+          "design/prototype/shumardii.html"
+        ],
+        "createdAt": "2026-11-21T02:12:07.927Z",
+        "reason": "Claude: scientific names are italic by botanical nomenclature convention (ICN); the h1 is the taxon name"
+      },
+      {
+        "rule": "italic-serif-display",
+        "value": "*",
+        "files": [
+          "design/prototype/compare.html"
+        ],
+        "createdAt": "2026-11-21T02:12:07.951Z",
+        "reason": "Claude: scientific names are italic by botanical nomenclature convention (ICN); the h1 is the taxon name"
+      },
+      {
+        "rule": "italic-serif-display",
+        "value": "*",
+        "files": [
+          "design/prototype/x-riparia.html"
+        ],
+        "createdAt": "2026-11-21T02:12:07.973Z",
+        "reason": "Claude: scientific names are italic by botanical nomenclature convention (ICN); the h1 is the taxon name"
+      },
+      {
+        "rule": "italic-serif-display",
+        "value": "*",
+        "files": [
+          "design/prototype/acutissima.html"
+        ],
+        "createdAt": "2026-11-21T02:12:07.995Z",
+        "reason": "Claude: scientific names are italic by botanical nomenclature convention (ICN); the h1 is the taxon name"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-11-21T02:22:26.640Z",
+        "reason": "Claude: spent direction-round sketch from before DESIGN.md existed; not shipping UI"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-11-21T02:22:26.665Z",
+        "reason": "Claude: spent direction-round sketch from before DESIGN.md existed; not shipping UI"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-11-21T02:22:26.691Z",
+        "reason": "Claude: spent direction-round sketch from before DESIGN.md existed; not shipping UI"
+      }
+    ]
+  }
+}

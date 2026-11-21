@@ -1,0 +1,325 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-21T02:21:15+00:00",
+  "title": "Design System: Oak Compendium",
+  "extensions": {
+    "colorMeta": {
+      "ochre": {
+        "role": "primary",
+        "displayName": "Ochre Band",
+        "canonical": "oklch(74.4% 0.147 83)",
+        "tonalRamp": [
+          "#150800",
+          "#3c1f00",
+          "#673a00",
+          "#8e5a00",
+          "#b47e00",
+          "#dba41f",
+          "#f9ce7a",
+          "#ffeaac"
+        ]
+      },
+      "pencil": {
+        "role": "secondary",
+        "displayName": "Pencil Blue",
+        "canonical": "oklch(49.8% 0.144 261)",
+        "tonalRamp": [
+          "#020a20",
+          "#092452",
+          "#174089",
+          "#3263b7",
+          "#5587df",
+          "#78adff",
+          "#abd5ff",
+          "#cff0ff"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Press Ink",
+        "canonical": "oklch(20.0% 0.000 90)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#aeaeae",
+          "#d4d4d4",
+          "#eeeeee"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Second Ink",
+        "canonical": "oklch(35.9% 0.005 107)",
+        "tonalRamp": [
+          "#0b0b0a",
+          "#262625",
+          "#454542",
+          "#666663",
+          "#898986",
+          "#aeaeaa",
+          "#d4d4d1",
+          "#eeefec"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Third Ink",
+        "canonical": "oklch(47.3% 0.008 107)",
+        "tonalRamp": [
+          "#0b0b0a",
+          "#272724",
+          "#454541",
+          "#666661",
+          "#898984",
+          "#aeaea9",
+          "#d4d4d0",
+          "#efefeb"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Bright Stock",
+        "canonical": "oklch(98.7% 0.005 106)",
+        "tonalRamp": [
+          "#0b0b0a",
+          "#272725",
+          "#454542",
+          "#666663",
+          "#898986",
+          "#aeaeaa",
+          "#d4d4d1",
+          "#efefec"
+        ]
+      },
+      "paper-2": {
+        "role": "neutral",
+        "displayName": "Second Stock",
+        "canonical": "oklch(95.4% 0.011 101)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#272723",
+          "#46453f",
+          "#67665f",
+          "#8a8982",
+          "#afaea7",
+          "#d5d4ce",
+          "#efefea"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#16161626"
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Strong Rule",
+        "canonical": "#161616"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Taxon name in the title row; genus at 400, epithet at 600, italic."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Italic taxon names heading comparison columns and the hybrid parents strip."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Italic taxon names in look-alike and hybrid lists."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running reading text with oldstyle figures; 16px under 760px."
+      },
+      "quote": {
+        "displayName": "Quote",
+        "purpose": "Jeff's verbatim statements, always in quotation marks with a source mark."
+      },
+      "frame": {
+        "displayName": "Frame",
+        "purpose": "Trait names and derived values; never Jeff's voice."
+      },
+      "section-label": {
+        "displayName": "Section Label",
+        "purpose": "Uppercase section headings standing on a 2px ink rule."
+      },
+      "breadcrumb": {
+        "displayName": "Breadcrumb",
+        "purpose": "Taxonomy band only; current taxon switches to serif italic 700."
+      },
+      "source-mark": {
+        "displayName": "Source Mark",
+        "purpose": "Pencil-blue source links after quotes and sourced values."
+      },
+      "figures": {
+        "displayName": "Figures",
+        "purpose": "Counts, measurements and table cells in lining tabular figures."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "compare-reveal",
+        "value": "420ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "One-time clip reveal (12px shift) of the second comparison column; none under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow",
+        "value": "1180px",
+        "purpose": "Right rail drops below the reading column as two lists."
+      },
+      {
+        "name": "phone",
+        "value": "760px",
+        "purpose": "Single column; tables and comparisons become labelled stacks; band scrolls."
+      }
+    ],
+    "focus": {
+      "value": "outline: 3px solid #2f5fb3; outline-offset: 2px",
+      "purpose": "Every interactive element."
+    }
+  },
+  "components": [
+    {
+      "name": "Compare Button",
+      "kind": "button",
+      "refersTo": "button-compare",
+      "description": "Ochre, square, ink-outlined call to open a side-by-side comparison with a look-alike.",
+      "html": "<a class=\"ds-cmp\" href=\"#\">Compare</a>",
+      "css": ":host{--ink:#161616;--ink-2:#3d3d3a;--ink-3:#5c5c57;--paper:#fbfbf7;--paper-2:#f1f0e8;--ochre:#d9a21b;--pencil:#2f5fb3;--rule:#16161626;--rule-strong:#161616;--frame:\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--frame-narrow:\"Archivo Narrow\",\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--read:\"Source Serif 4\",Georgia,\"Times New Roman\",serif;}.ds-cmp{display:inline-block;font:700 13px/1 var(--frame);color:var(--ink);background:var(--ochre);border:1.5px solid var(--ink);padding:7px 10px;text-decoration:none;}.ds-cmp:hover{background:var(--ink);color:var(--ochre);}.ds-cmp:focus-visible{outline:3px solid var(--pencil);outline-offset:2px;}"
+    },
+    {
+      "name": "Masthead and Search",
+      "kind": "nav",
+      "refersTo": "masthead",
+      "description": "Ink masthead with acorn mark, nav with ochre current underline, and a square search field.",
+      "html": "<header class=\"ds-mast\"><a class=\"ds-mark\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" aria-hidden=\"true\"><path d=\"M5 9.5C5 6 8 4 12 4s7 2 7 5.5H5Z\" fill=\"#d9a21b\"/><path d=\"M6.5 10.5h11c0 5-2.5 9-5.5 9.5-3-.5-5.5-4.5-5.5-9.5Z\" fill=\"#fbfbf7\"/><path d=\"M12 1.5v2.5\" stroke=\"#fbfbf7\" stroke-width=\"1.6\"/></svg>Oak Compendium</a><nav class=\"ds-nav\"><a href=\"#\" aria-current=\"page\">Species</a><a href=\"#\">Taxonomy</a><a href=\"#\">Identify</a></nav><label class=\"ds-search\"><input type=\"search\" placeholder=\"Name, common name or trait\"><kbd>/</kbd></label></header>",
+      "css": ":host{--ink:#161616;--ink-2:#3d3d3a;--ink-3:#5c5c57;--paper:#fbfbf7;--paper-2:#f1f0e8;--ochre:#d9a21b;--pencil:#2f5fb3;--rule:#16161626;--rule-strong:#161616;--frame:\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--frame-narrow:\"Archivo Narrow\",\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--read:\"Source Serif 4\",Georgia,\"Times New Roman\",serif;}.ds-mast{background:var(--ink);color:var(--paper);display:flex;align-items:center;gap:32px;padding:0 32px;min-height:60px;}.ds-mark{font:800 19px/1 var(--frame);color:var(--paper);text-decoration:none;display:flex;align-items:center;gap:8px;}.ds-nav{display:flex;gap:24px;font:600 15px/1 var(--frame);}.ds-nav a{color:var(--paper);text-decoration:none;padding:20px 0 17px;border-bottom:3px solid transparent;}.ds-nav a:hover{border-bottom-color:#fbfbf766;}.ds-nav a[aria-current]{border-bottom-color:var(--ochre);}.ds-search{margin-left:auto;display:flex;align-items:center;background:#ffffff14;border:1px solid #fbfbf759;min-width:280px;}.ds-search input{all:unset;flex:1;font:15px/1 var(--frame);color:var(--paper);padding:11px 14px;}.ds-search input::placeholder{color:#fbfbf7c4;}.ds-search kbd{font:600 12px/1 var(--frame);color:#fbfbf7c4;border:1px solid #fbfbf759;padding:3px 6px;margin-right:10px;}.ds-mast a:focus-visible,.ds-search:focus-within{outline:3px solid var(--pencil);outline-offset:2px;}"
+    },
+    {
+      "name": "Taxonomy Band",
+      "kind": "nav",
+      "refersTo": "taxonomy-band",
+      "description": "Ochre breadcrumb, every rank linked, in the same place on every taxon page.",
+      "html": "<nav class=\"ds-band\" aria-label=\"Taxonomy\"><ol><li><a href=\"#\"><i>Quercus</i></a></li><li><a href=\"#\"><span class=\"rk\">sect.</span><i>Lobatae</i></a></li><li><a href=\"#\"><span class=\"rk\">subsect.</span><i>Coccineae</i></a></li><li><span aria-current=\"page\">Q. shumardii</span></li></ol></nav>",
+      "css": ":host{--ink:#161616;--ink-2:#3d3d3a;--ink-3:#5c5c57;--paper:#fbfbf7;--paper-2:#f1f0e8;--ochre:#d9a21b;--pencil:#2f5fb3;--rule:#16161626;--rule-strong:#161616;--frame:\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--frame-narrow:\"Archivo Narrow\",\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--read:\"Source Serif 4\",Georgia,\"Times New Roman\",serif;}.ds-band{background:var(--ochre);}.ds-band ol{margin:0;list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:0 8px;padding:13px 32px;font:600 15px/1.4 var(--frame-narrow);letter-spacing:0.01em;}.ds-band li{display:flex;align-items:center;gap:8px;}.ds-band li+li::before{content:'';width:7px;height:7px;border-top:2px solid var(--ink);border-right:2px solid var(--ink);transform:rotate(45deg);margin:0 6px 0 2px;}.ds-band a{color:var(--ink);text-decoration:none;}.ds-band a:hover{text-decoration:underline;text-underline-offset:3px;}.ds-band a:focus-visible{outline:3px solid var(--pencil);outline-offset:2px;}.ds-band .rk{font-weight:500;margin-right:3px;}.ds-band [aria-current]{font:italic 700 16px/1.4 var(--read);}"
+    },
+    {
+      "name": "Source Mark",
+      "kind": "chip",
+      "refersTo": "source-mark",
+      "description": "Pencil-blue link that follows every quote of Jeff's and every sourced value.",
+      "html": "<p class=\"ds-q\"><q>buds looks glabrous and pretty small.</q><a class=\"ds-src\" href=\"#\">iNat i465271504 · 2024</a></p>",
+      "css": ":host{--ink:#161616;--ink-2:#3d3d3a;--ink-3:#5c5c57;--paper:#fbfbf7;--paper-2:#f1f0e8;--ochre:#d9a21b;--pencil:#2f5fb3;--rule:#16161626;--rule-strong:#161616;--frame:\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--frame-narrow:\"Archivo Narrow\",\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--read:\"Source Serif 4\",Georgia,\"Times New Roman\",serif;}.ds-q{font:400 18px/1.6 var(--read);color:var(--ink);margin:0;}.ds-q q{quotes:'“' '”';}.ds-src{font:500 12.5px/1.3 var(--frame);color:var(--pencil);white-space:nowrap;text-decoration:none;border-bottom:1px solid #2f5fb366;margin-left:4px;}.ds-src:hover{border-bottom-color:var(--pencil);} .ds-src:focus-visible{outline:3px solid var(--pencil);outline-offset:2px;border-radius:1px;}"
+    },
+    {
+      "name": "Standing Marks",
+      "kind": "custom",
+      "description": "Drawn marks for agree, differs and unreviewed; never colours.",
+      "html": "<div class=\"ds-legend\"><span class=\"ds-mk\"><svg viewBox=\"0 0 14 14\" width=\"14\" height=\"14\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M4 7.2 6.1 9.3 10 4.9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/></svg>Oaks of the World agrees</span><span class=\"ds-mk\"><svg viewBox=\"0 0 14 14\" width=\"14\" height=\"14\" aria-hidden=\"true\"><rect x=\"0.75\" y=\"0.75\" width=\"12.5\" height=\"12.5\" fill=\"currentColor\"/><path d=\"M3.6 5.4h6.8M3.6 8.6h6.8\" stroke=\"#fbfbf7\" stroke-width=\"1.5\"/><path d=\"M9.2 2.9 4.8 11.1\" stroke=\"#fbfbf7\" stroke-width=\"1.6\" stroke-linecap=\"square\"/></svg>Differs: Sibley gives buds as large</span><span class=\"ds-mk\"><svg viewBox=\"0 0 14 14\" width=\"14\" height=\"14\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-dasharray=\"2.2 1.8\"/></svg>2 sources, not reviewed</span></div>",
+      "css": ":host{--ink:#161616;--ink-2:#3d3d3a;--ink-3:#5c5c57;--paper:#fbfbf7;--paper-2:#f1f0e8;--ochre:#d9a21b;--pencil:#2f5fb3;--rule:#16161626;--rule-strong:#161616;--frame:\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--frame-narrow:\"Archivo Narrow\",\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--read:\"Source Serif 4\",Georgia,\"Times New Roman\",serif;}.ds-legend{display:flex;flex-wrap:wrap;gap:16px;}.ds-mk{display:inline-flex;align-items:center;gap:5px;font:600 12.5px/1 var(--frame);color:var(--ink-2);white-space:nowrap;}.ds-mk svg{flex:none;}"
+    },
+    {
+      "name": "Status Tag",
+      "kind": "chip",
+      "refersTo": "status-tag",
+      "description": "Outlined ink stamp for conservation status, followed by its source.",
+      "html": "<span class=\"ds-status\">IUCN LC</span><a class=\"ds-src\" href=\"#\">IUCN 2024-2</a>",
+      "css": ":host{--ink:#161616;--ink-2:#3d3d3a;--ink-3:#5c5c57;--paper:#fbfbf7;--paper-2:#f1f0e8;--ochre:#d9a21b;--pencil:#2f5fb3;--rule:#16161626;--rule-strong:#161616;--frame:\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--frame-narrow:\"Archivo Narrow\",\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--read:\"Source Serif 4\",Georgia,\"Times New Roman\",serif;}.ds-status{font:700 13px/1 var(--frame);letter-spacing:0.04em;border:1.5px solid var(--ink);padding:4px 7px;color:var(--ink);}.ds-src{font:500 12.5px/1.3 var(--frame);color:var(--pencil);text-decoration:none;border-bottom:1px solid #2f5fb366;margin-left:8px;}.ds-src:hover{border-bottom-color:var(--pencil);}"
+    },
+    {
+      "name": "Distinguishing Trait Row",
+      "kind": "card",
+      "refersTo": "section-heading",
+      "description": "Section heading on a 2px rule over a ruled trait row: Archivo trait name, derived value tagged in the frame face, Jeff's quote with source mark, standing mark.",
+      "html": "<section class=\"ds-dist\"><h2>What sets it apart <small>ranked by Jeff</small></h2><div class=\"ds-row\"><span class=\"t\">Terminal buds</span><div><p class=\"v\">Glabrous, small <span class=\"dv\">summary</span></p><blockquote><q>buds looks glabrous and pretty small.</q><a class=\"ds-src\" href=\"#\">iNat i465271504 · 2024</a></blockquote><span class=\"ds-mk\"><svg viewBox=\"0 0 14 14\" width=\"14\" height=\"14\" aria-hidden=\"true\"><rect x=\"0.75\" y=\"0.75\" width=\"12.5\" height=\"12.5\" fill=\"currentColor\"/><path d=\"M3.6 5.4h6.8M3.6 8.6h6.8\" stroke=\"#fbfbf7\" stroke-width=\"1.5\"/><path d=\"M9.2 2.9 4.8 11.1\" stroke=\"#fbfbf7\" stroke-width=\"1.6\" stroke-linecap=\"square\"/></svg>Differs: Sibley gives buds as large</span></div></div></section>",
+      "css": ":host{--ink:#161616;--ink-2:#3d3d3a;--ink-3:#5c5c57;--paper:#fbfbf7;--paper-2:#f1f0e8;--ochre:#d9a21b;--pencil:#2f5fb3;--rule:#16161626;--rule-strong:#161616;--frame:\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--frame-narrow:\"Archivo Narrow\",\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--read:\"Source Serif 4\",Georgia,\"Times New Roman\",serif;}.ds-dist{max-width:640px;font:17px/1.6 var(--read);color:var(--ink);}.ds-dist h2{font:800 15px/1.2 var(--frame);letter-spacing:0.06em;text-transform:uppercase;margin:0;padding-bottom:8px;border-bottom:2px solid var(--rule-strong);display:flex;justify-content:space-between;align-items:baseline;}.ds-dist h2 small{font:500 13px/1.2 var(--frame);letter-spacing:0;text-transform:none;color:var(--ink-3);}.ds-row{display:grid;grid-template-columns:132px minmax(0,1fr);gap:4px 24px;padding:16px 0;border-bottom:1px solid var(--rule);}.ds-row .t{font:700 15px/1.45 var(--frame);padding-top:3px;}.ds-row .v{font:700 15px/1.4 var(--frame);margin:0 0 4px;}.ds-row .dv{font:500 12px/1 var(--frame);color:var(--ink-3);margin-left:8px;letter-spacing:0.02em;}.ds-row blockquote{margin:0 0 8px;font:400 18px/1.6 var(--read);}.ds-src{font:500 12.5px/1.3 var(--frame);color:var(--pencil);text-decoration:none;border-bottom:1px solid #2f5fb366;margin-left:4px;}.ds-src:hover{border-bottom-color:var(--pencil);}.ds-mk{display:inline-flex;align-items:center;gap:5px;font:600 12.5px/1 var(--frame);color:var(--ink-2);}"
+    },
+    {
+      "name": "Comparison Grid",
+      "kind": "custom",
+      "description": "Signature: two taxa aligned trait by trait; differing rows underlined in ochre; second column slides in once.",
+      "html": "<div class=\"ds-vs\"><div class=\"hd\"></div><div class=\"hd\"><a href=\"#\"><i>Q. shumardii</i></a><span>Shumard oak</span></div><div class=\"hd b\"><a href=\"#\"><i>Q. coccinea</i></a><span>Scarlet oak</span></div><div class=\"t split\"><span class=\"ds-mk\"><svg viewBox=\"0 0 14 14\" width=\"14\" height=\"14\" aria-hidden=\"true\"><rect x=\"0.75\" y=\"0.75\" width=\"12.5\" height=\"12.5\" fill=\"currentColor\"/><path d=\"M3.6 5.4h6.8M3.6 8.6h6.8\" stroke=\"#fbfbf7\" stroke-width=\"1.5\"/><path d=\"M9.2 2.9 4.8 11.1\" stroke=\"#fbfbf7\" stroke-width=\"1.6\" stroke-linecap=\"square\"/></svg></span> Buds</div><div class=\"c split\"><b>Glabrous, angled</b><br><q>Glabrous angled (in cross-section) buds…</q></div><div class=\"c split b\"><b>Hairy at the tip</b><br><q>The buds are very consistent with Q coccinea, apically pubescent.</q></div><div class=\"t\"><span class=\"ds-mk\"><svg viewBox=\"0 0 14 14\" width=\"14\" height=\"14\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M4 7.2 6.1 9.3 10 4.9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/></svg></span> Lobes per side</div><div class=\"c\"><span class=\"n\">3–4</span>, rarely <span class=\"n\">2</span></div><div class=\"c b\"><span class=\"n\">3–4</span>, rarely <span class=\"n\">2</span></div></div>",
+      "css": ":host{--ink:#161616;--ink-2:#3d3d3a;--ink-3:#5c5c57;--paper:#fbfbf7;--paper-2:#f1f0e8;--ochre:#d9a21b;--pencil:#2f5fb3;--rule:#16161626;--rule-strong:#161616;--frame:\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--frame-narrow:\"Archivo Narrow\",\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--read:\"Source Serif 4\",Georgia,\"Times New Roman\",serif;}.ds-vs{display:grid;grid-template-columns:140px minmax(0,1fr) minmax(0,1fr);color:var(--ink);}.ds-vs>div{padding:16px 24px 16px 0;border-bottom:1px solid var(--rule);}.ds-vs .hd{border-bottom:2px solid var(--rule-strong);padding-bottom:12px;}.ds-vs .hd a{font:italic 600 26px/1.1 var(--read);color:var(--ink);text-decoration:none;}.ds-vs .hd a:hover{text-decoration:underline;}.ds-vs .hd span{display:block;font:600 14px/1.3 var(--frame);color:var(--ink-3);margin-top:4px;}.ds-vs .t{font:700 15px/1.45 var(--frame);}.ds-vs .c{font:400 16px/1.55 var(--read);font-variant-numeric:lining-nums tabular-nums;}.ds-vs .split{background:linear-gradient(var(--ochre),var(--ochre)) left bottom/100% 3px no-repeat;}.ds-vs .b{animation:ds-slidein 420ms cubic-bezier(0.16,1,0.3,1) both;}@keyframes ds-slidein{from{clip-path:inset(0 100% 0 0);transform:translateX(-12px);}to{clip-path:inset(0 0 0 0);transform:none;}}@media (prefers-reduced-motion:reduce){.ds-vs .b{animation:none;}}.ds-mk{display:inline-flex;vertical-align:-2px;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Twig Key, Unbound",
+    "overview": "The world takes a pocket dendrology key's printed materials and leaves its structure behind. Ink black on bright white stock, one committed ochre field, a pencil blue for the marks that lead to sources, a heavy grotesk for the frame and a sturdy text serif for reading. The pages are dense in the way a good field guide is dense: statements stand on rules, never in boxes, and the eye moves down ruled lists and aligned columns rather than across stacked cards.\n\nThe page answers \"is it this, or that?\" before anything else. Where the taxon sits is shown in the same ochre band on every taxon page; the traits that set it apart come first; look-alikes and hybrids sit one step away; a side-by-side comparison aligns two taxa trait by trait. Jeff's words are always quoted and always carry a source mark. What the system derives from his words is set in the frame face, so a reader never mistakes a summary for his voice. Other sources sit behind his, as they wrote it.\n\nThe key's printed materials are kept; its apparatus is not. There are no couplets, no key numbering, no dotted leaders, no key path and no life-size callouts.",
+    "keyCharacteristics": [
+      "Ink on bright stock, one ochre field, pencil-blue source marks.",
+      "Archivo frames and labels; Source Serif 4 carries reading text and every scientific name.",
+      "Square corners everywhere; rules, not boxes, separate statements.",
+      "Agree, differs and unreviewed are drawn marks, never colours.",
+      "Taxonomy breadcrumb in the ochre band, in the same place on every taxon page.",
+      "Counts and measurements in lining tabular figures; running text in oldstyle figures."
+    ],
+    "rules": [
+      {
+        "name": "The One Field Rule",
+        "body": "Ochre is the only saturated fill in the world. It marks where you are (band, current nav item, current comparison), what to do next (Compare) and where two taxa differ. Nothing else gets a coloured ground.",
+        "section": "colors"
+      },
+      {
+        "name": "The Marks Not Colours Rule",
+        "body": "Agree, differs and unreviewed are drawn marks in ink: a ticked open circle for agree, a filled square with two paper bars for differs, a dashed open circle for unreviewed or not recorded. Never encode standing with green, red or amber.",
+        "section": "colors"
+      },
+      {
+        "name": "The Verbatim Rule",
+        "body": "Jeff's words always appear in quotation marks (curly quotes) and are always followed by a source mark. Anything derived from his words, a summary value, a count, a label, is set in the frame face with a small Archivo tag (\"summary\", \"from counts\") and never in quotation marks.",
+        "section": "typography"
+      },
+      {
+        "name": "The Botanical Italic Rule",
+        "body": "Scientific names are italic per botanical convention, in the serif, everywhere: titles, lists, breadcrumbs, tables, prose. Rank words (subg., sect., subsect., complex), authorities and the hybrid sign stay roman.",
+        "section": "typography"
+      },
+      {
+        "name": "The Two Figures Rule",
+        "body": "Running text uses oldstyle figures; counts, measurements and table cells use lining tabular figures.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Template Rule",
+        "body": "Every taxon page uses the same template. A section appears because its data exists, never because Jeff has or hasn't covered the taxon: the source comparison appears whenever there are two or more sources (never with only one), and look-alikes, hybrids and range appear when their data exists. A taxon Jeff hasn't covered gets the same full page plus the not-covered notice, never a poorer stub layout.",
+        "section": "layout"
+      },
+      {
+        "name": "The Statements On Rules Rule",
+        "body": "Statements stand on rules, never in boxes. No cards, no shadows, no tinted panels around content. The only bordered shapes are small: the Compare button, the status tag, photo frames and the dashed map slot.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** put the taxonomy breadcrumb in the ochre band, in the same place on every taxon page, every rank linked.",
+      "**Do** lead with the distinguishing traits, and keep look-alikes (each with Compare) and hybrids (each with its other parent) one step away.",
+      "**Do** set Jeff's words in curly quotation marks followed by a pencil-blue source mark, every time.",
+      "**Do** set derived values (summaries, counts) in Archivo, tagged with how they were derived, and never in quotation marks.",
+      "**Do** show other sources behind Jeff's, as they wrote it, each with its attribution.",
+      "**Do** use the same taxon template everywhere, showing a section whenever its data exists (the source comparison only with two or more sources).",
+      "**Do** mark agree, differs and unreviewed with the drawn marks, labelled in words.",
+      "**Do** italicize scientific names in the serif; keep ranks, authorities and the hybrid sign roman.",
+      "**Do** separate statements with rules: 1px hairlines between rows, 2px ink under headings.",
+      "**Do** set counts and measurements in lining tabular figures."
+    ],
+    "donts": [
+      "**Don't** borrow the dichotomous key's structure: no couplets, key numbering, dotted leaders, key path or life-size callouts.",
+      "**Don't** encode agree, differs or unreviewed with colour.",
+      "**Don't** put statements in boxes, cards, tinted panels or shadows.",
+      "**Don't** add a second saturated colour or use ochre as text on paper.",
+      "**Don't** round corners.",
+      "**Don't** set anything that is not Jeff's verbatim wording in quotation marks or in a way that reads as his voice.",
+      "**Don't** hide conflicts between sources behind tabs; mark them in place.",
+      "**Don't** give a taxon Jeff hasn't covered a poorer stub layout; it gets the full page plus the not-covered notice."
+    ]
+  }
+}
