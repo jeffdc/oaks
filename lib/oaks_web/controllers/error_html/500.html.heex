@@ -1,0 +1,11 @@
+<.error_page
+  back={back_href(assigns)}
+  status="500"
+  title="Something went wrong"
+  description="The Oak Compendium hit an error showing this page."
+>
+  The Compendium hit an error and couldn’t show this page. It wasn’t anything you did. Try again in a moment, or start again from the home page.
+  <:actions>
+    <.button href={~p"/"} variant="primary">Home</.button>
+  </:actions>
+</.error_page>

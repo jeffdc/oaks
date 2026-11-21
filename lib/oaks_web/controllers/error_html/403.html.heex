@@ -1,0 +1,12 @@
+<.error_page
+  back={back_href(assigns)}
+  status="403"
+  title="No access"
+  description="You don't have permission to see this page on the Oak Compendium."
+>
+  You don’t have permission to see this page. If you edit the Compendium, log in and try again.
+  <:actions>
+    <.button href={~p"/users/log-in"} variant="primary">Log in</.button>
+    <.button href={~p"/"}>Home</.button>
+  </:actions>
+</.error_page>
