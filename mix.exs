@@ -58,6 +58,10 @@ defmodule Oaks.MixProject do
       {:mdex, "~> 0.2"},
       {:dns_cluster, "~> 0.3"},
       {:bandit, "~> 1.5"},
+      {:argon2_elixir, "~> 4.0"},
+      {:nimble_totp, "~> 1.0"},
+      {:eqrcode, "~> 0.2"},
+      {:hammer, "~> 7.0"},
       # API Documentation
       {:open_api_spex, "~> 3.18"},
       # Dev/Test tools

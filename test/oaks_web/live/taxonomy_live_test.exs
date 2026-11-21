@@ -6,6 +6,7 @@ defmodule OaksWeb.TaxonomyLiveTest do
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.AccountsFixtures
 
   describe "GET /taxonomy (genus level)" do
     test "renders taxonomy root page", %{conn: conn} do
@@ -151,7 +152,7 @@ defmodule OaksWeb.TaxonomyLiveTest do
 
   describe "delete taxon" do
     setup %{conn: conn} do
-      %{conn: put_connect_params(conn, %{"api_key" => Application.get_env(:oaks, :api_key)})}
+      %{conn: log_in_user(conn, user_fixture())}
     end
 
     test "shows what still uses the taxon and offers no delete button", %{conn: conn} do

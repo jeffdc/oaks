@@ -6,6 +6,7 @@ defmodule OaksWeb.ArticleLiveTest do
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.AccountsFixtures
 
   describe "GET /articles/:slug" do
     test "renders article detail page", %{conn: conn} do
@@ -64,7 +65,7 @@ defmodule OaksWeb.ArticleLiveTest do
     end
 
     test "deletes the article for authenticated users", %{conn: conn} do
-      conn = put_connect_params(conn, %{"api_key" => Application.get_env(:oaks, :api_key)})
+      conn = log_in_user(conn, user_fixture())
       {:ok, view, _html} = live(conn, ~p"/articles/getting-started")
 
       render_click(view, "confirm_delete")

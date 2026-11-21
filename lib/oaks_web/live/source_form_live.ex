@@ -22,18 +22,13 @@ defmodule OaksWeb.SourceFormLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    cond do
-      socket.assigns[:authenticated] ->
-        {:noreply, apply_action(socket, socket.assigns.live_action, params)}
-
-      connected?(socket) ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "You must be authenticated to manage sources.")
-         |> push_navigate(to: ~p"/sources")}
-
-      true ->
-        {:noreply, socket}
+    if socket.assigns[:current_scope] do
+      {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+    else
+      {:noreply,
+       socket
+       |> put_flash(:error, "You must be authenticated to manage sources.")
+       |> push_navigate(to: ~p"/sources")}
     end
   end
 
@@ -75,7 +70,7 @@ defmodule OaksWeb.SourceFormLive do
 
   @impl true
   def handle_event("validate", %{"source" => source_params}, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       changeset =
         socket.assigns.source
         |> Sources.change_source(source_params)
@@ -88,7 +83,7 @@ defmodule OaksWeb.SourceFormLive do
   end
 
   def handle_event("save", %{"source" => source_params}, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       save_source(socket, socket.assigns.live_action, source_params)
     else
       {:noreply,

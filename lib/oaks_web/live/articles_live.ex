@@ -26,11 +26,11 @@ defmodule OaksWeb.ArticlesLive do
   @impl true
   def handle_params(params, _uri, socket) do
     tag = Params.string(params["tag"], nil)
-    authenticated = socket.assigns[:authenticated] || false
+    editor? = socket.assigns[:current_scope] != nil
 
     filter = if tag, do: %{"tag" => tag}, else: %{}
-    articles = Articles.list_articles(filter, authenticated)
-    tags = Articles.list_tags(authenticated)
+    articles = Articles.list_articles(filter, editor?)
+    tags = Articles.list_tags(editor?)
 
     {:noreply,
      assign(socket,
@@ -57,7 +57,7 @@ defmodule OaksWeb.ArticlesLive do
           </p>
         </div>
         <.link
-          :if={@authenticated}
+          :if={@current_scope}
           navigate={~p"/articles/new"}
           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium flex-shrink-0"
           style="background-color: var(--color-forest-600); color: white; text-decoration: none;"

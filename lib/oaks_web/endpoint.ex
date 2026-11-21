@@ -4,11 +4,17 @@ defmodule OaksWeb.Endpoint do
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
+  # The session cookie holds the login session token, so it is encrypted as
+  # well as signed, never readable by page scripts (http_only), and in
+  # production only sent over HTTPS (secure).
   @session_options [
     store: :cookie,
     key: "_oaks_key",
     signing_salt: "VkRbKLCN",
-    same_site: "Lax"
+    encryption_salt: "q6m0Zr1Hxv",
+    same_site: "Lax",
+    http_only: true,
+    secure: Application.compile_env(:oaks, :secure_cookies, false)
   ]
 
   socket "/live", Phoenix.LiveView.Socket,

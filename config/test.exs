@@ -1,5 +1,8 @@
 import Config
 
+# Only in tests, make password hashing cheap
+config :argon2_elixir, t_cost: 1, m_cost: 8
+
 config :oaks, env: :test
 
 # Configure your database
@@ -34,8 +37,12 @@ config :phoenix_live_view,
 config :phoenix,
   sort_verified_routes_query_params: true
 
-# Test API key for auth tests
-config :oaks, :api_key, "test-api-key-secret"
+# Fixed, non-secret login encryption key (see config/runtime.exs)
+config :oaks, :login_encryption_key, "dGVzdC1sb2dpbi1lbmNyeXB0aW9uLWtleS0zMmJ5dGU="
+
+# Login rate limits high enough that the suite's own logins never trip them;
+# the rate-limit tests lower them.
+config :oaks, :login_rate_limits, per_ip: 1_000, per_account: 1_000
 
 # Record page views inline so no analytics insert outlives its test.
 config :oaks, :analytics_async, false

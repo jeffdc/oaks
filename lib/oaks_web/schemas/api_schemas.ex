@@ -270,21 +270,4 @@ defmodule OaksWeb.Schemas do
       required: [:status]
     })
   end
-
-  # -- Auth --
-
-  defmodule AuthVerifyResponse do
-    @moduledoc false
-    require OpenApiSpex
-
-    OpenApiSpex.schema(%{
-      title: "AuthVerifyResponse",
-      description: "Auth verification response",
-      type: :object,
-      properties: %{
-        authenticated: %Schema{type: :boolean}
-      },
-      required: [:authenticated]
-    })
-  end
 end

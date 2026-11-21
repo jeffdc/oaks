@@ -1,7 +1,8 @@
 defmodule OaksWeb.Router do
   use OaksWeb, :router
 
-  import OaksWeb.Plugs.Auth, only: [require_auth: 2, force_auth: 2]
+  import OaksWeb.UserAuth,
+    only: [fetch_current_scope_for_user: 2, require_authenticated_user: 2, require_sudo_mode: 2]
 
   # Scripts only from our own origin, so injected markup can't run code even if
   # it slips past markdown sanitizing. Inline styles are allowed because the
@@ -30,19 +31,14 @@ defmodule OaksWeb.Router do
     plug :put_secure_browser_headers, %{
       "content-security-policy" => Enum.join(@content_security_policy, "; ")
     }
+
+    plug :fetch_current_scope_for_user
   end
 
   pipeline :api do
     plug :accepts, ["json"]
     plug OaksWeb.Plugs.CORS
     plug OpenApiSpex.Plug.PutApiSpec, module: OaksWeb.ApiSpec
-    plug :require_auth
-  end
-
-  pipeline :api_force_auth do
-    plug :accepts, ["json"]
-    plug OaksWeb.Plugs.CORS
-    plug :force_auth
   end
 
   # Health check (no pipeline — lightweight for load balancers)
@@ -55,7 +51,7 @@ defmodule OaksWeb.Router do
     live_session :default,
       on_mount: [
         OaksWeb.Hooks.ActiveNav,
-        OaksWeb.Hooks.Auth,
+        {OaksWeb.UserAuth, :mount_current_scope},
         {OaksWeb.Analytics.TrackPageView, :default}
       ] do
       live "/", HomeLive
@@ -88,15 +84,7 @@ defmodule OaksWeb.Router do
     end
   end
 
-  # Auth verification (requires auth on all methods)
-  scope "/api/v1/auth", OaksWeb do
-    pipe_through :api_force_auth
-
-    get "/verify", AuthController, :verify
-    post "/verify", AuthController, :verify
-  end
-
-  # API routes (public reads, auth required for writes)
+  # API routes (public, read-only)
   scope "/api/v1", OaksWeb.API do
     pipe_through :api
 
@@ -132,5 +120,33 @@ defmodule OaksWeb.Router do
 
     get "/openapi.json", OpenApiSpex.Plug.RenderSpec, []
     get "/", OpenApiSpex.Plug.SwaggerUI, path: "/api/v1/docs/openapi.json"
+  end
+
+  ## Login (OaksWeb.UserAuth)
+
+  # Logging in, out, and setup from a setup link. Plain controllers, not
+  # LiveViews: each step writes the session cookie.
+  scope "/users", OaksWeb do
+    pipe_through :browser
+
+    get "/log-in", UserSessionController, :new
+    post "/log-in", UserSessionController, :create
+    get "/log-in/code", UserSessionController, :code
+    post "/log-in/code", UserSessionController, :verify_code
+    delete "/log-out", UserSessionController, :delete
+
+    get "/setup", UserSetupController, :edit
+    post "/setup", UserSetupController, :update
+    get "/setup/:token", UserSetupController, :start
+  end
+
+  # Security settings: logged in, and logged in recently (sudo mode).
+  scope "/users/settings", OaksWeb do
+    pipe_through [:browser, :require_authenticated_user, :require_sudo_mode]
+
+    get "/password", UserSettingsController, :edit_password
+    put "/password", UserSettingsController, :update_password
+    get "/recovery-codes", UserSettingsController, :recovery_codes
+    post "/recovery-codes", UserSettingsController, :regenerate_recovery_codes
   end
 end

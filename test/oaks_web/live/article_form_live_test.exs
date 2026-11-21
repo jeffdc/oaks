@@ -6,19 +6,20 @@ defmodule OaksWeb.ArticleFormLiveTest do
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.AccountsFixtures
 
   alias Oaks.Articles
 
   defp authenticated_conn(conn) do
-    put_connect_params(conn, %{"api_key" => Application.get_env(:oaks, :api_key)})
+    log_in_user(conn, user_fixture())
   end
 
   describe "unauthenticated" do
-    test "new redirects on connected mount", %{conn: conn} do
+    test "new redirects immediately", %{conn: conn} do
       assert {:error, {:live_redirect, %{to: "/articles"}}} = live(conn, ~p"/articles/new")
     end
 
-    test "edit redirects on connected mount", %{conn: conn} do
+    test "edit redirects immediately", %{conn: conn} do
       assert {:error, {:live_redirect, %{to: "/articles"}}} =
                live(conn, ~p"/articles/getting-started/edit")
     end

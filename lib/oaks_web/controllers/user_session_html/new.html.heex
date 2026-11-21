@@ -1,0 +1,32 @@
+<div class="settings-container" id="login-page">
+  <h1 class="settings-title">Log in</h1>
+
+  <section class="card p-6">
+    <.auth_message :if={@error == :invalid}>Invalid email or password.</.auth_message>
+    <.auth_message :if={@error == :too_many}>
+      Too many login attempts. Wait a while and try again.
+    </.auth_message>
+
+    <.form for={@form} id="login-form" action={~p"/users/log-in"}>
+      <.auth_field
+        field={@form[:email]}
+        type="email"
+        label="Email"
+        autocomplete="username"
+        spellcheck="false"
+        required
+        autofocus
+      />
+      <.auth_field
+        field={@form[:password]}
+        type="password"
+        label="Password"
+        autocomplete="current-password"
+        required
+      />
+      <div class="settings-button-group">
+        <button type="submit" class="settings-btn settings-btn-primary">Continue</button>
+      </div>
+    </.form>
+  </section>
+</div>

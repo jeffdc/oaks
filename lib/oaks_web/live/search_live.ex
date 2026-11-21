@@ -47,7 +47,7 @@ defmodule OaksWeb.SearchLive do
     ~H"""
     <div id="search-sync" phx-hook="SearchSync" data-query={@query}>
       <div :if={@query != "" && @results}>
-        <.counts_bar counts={@results.counts} authenticated={assigns[:authenticated]} />
+        <.counts_bar counts={@results.counts} editor={@current_scope != nil} />
         <.no_results :if={@results.counts.total == 0} query={@query} />
         <div :if={@results.counts.total > 0}>
           <.taxa_results :if={@results.taxa != []} taxa={@results.taxa} />
@@ -62,7 +62,7 @@ defmodule OaksWeb.SearchLive do
   # -- Components --
 
   attr :counts, :map, required: true
-  attr :authenticated, :boolean, default: false
+  attr :editor, :boolean, default: false
 
   defp counts_bar(assigns) do
     ~H"""
@@ -83,7 +83,7 @@ defmodule OaksWeb.SearchLive do
         {@counts.total} total
       </span>
       <.link
-        :if={@authenticated}
+        :if={@editor}
         navigate={~p"/species/new"}
         class="search-add-species-btn"
       >

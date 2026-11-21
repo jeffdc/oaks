@@ -19,36 +19,29 @@ if System.get_env("PHX_SERVER") do
   config :oaks, OaksWeb.Endpoint, server: true
 end
 
-# Load API key for authentication.
-# - prod: OAK_API_KEY env var only. If missing, log a loud warning to stderr
-#   and leave the key unset — the app still boots and serves read traffic,
-#   but every write/auth request will be rejected until the secret is set.
-#   The `~/.oak/api_key` fallback is intentionally not consulted in prod:
-#   it can never exist inside the Fly container, and previously masked a
-#   missing-secret outage as a generic "invalid key" message.
-# - dev: env var, then ~/.oak/api_key fallback for local convenience.
-# - test: skipped here; test.exs sets a known test key.
-case config_env() do
-  :test ->
-    :ok
+# Login encryption key (Oaks.Accounts.SecretBox): 32 bytes, base64. It
+# encrypts TOTP secrets at rest. Create it with `openssl rand -base64 32` and
+# set it with: fly secrets set LOGIN_ENCRYPTION_KEY=<key> --app oaks
+# - prod: LOGIN_ENCRYPTION_KEY only. If missing or malformed, log a loud
+#   warning and leave it unset: the site still serves read traffic, but
+#   setting up and logging in fail until the secret is set. Changing the key
+#   makes enrolled authenticator apps unusable; recover with a setup link.
+# - dev and test: a fixed, non-secret key in dev.exs and test.exs.
+if config_env() == :prod do
+  key = System.get_env("LOGIN_ENCRYPTION_KEY", "")
 
-  :prod ->
-    case System.get_env("OAK_API_KEY") do
-      key when is_binary(key) and key != "" ->
-        config :oaks, :api_key, key
+  case Base.decode64(String.trim(key)) do
+    {:ok, <<_::binary-32>>} ->
+      config :oaks, :login_encryption_key, key
 
-      _ ->
-        IO.puts(
-          :stderr,
-          "WARNING: OAK_API_KEY is not set. API authentication will reject every request. " <>
-            "Set it with: fly secrets set OAK_API_KEY=<key> --app oaks"
-        )
-
-        config :oaks, :api_key, nil
-    end
-
-  _ ->
-    config :oaks, :api_key, OaksWeb.Plugs.Auth.load_api_key()
+    _ ->
+      IO.puts(
+        :stderr,
+        "WARNING: LOGIN_ENCRYPTION_KEY is missing or is not 32 bytes of base64. " <>
+          "Logging in will fail. Set it with: " <>
+          "fly secrets set LOGIN_ENCRYPTION_KEY=$(openssl rand -base64 32) --app oaks"
+      )
+  end
 end
 
 # Only override port if PORT env var is explicitly set (don't interfere with test config)

@@ -1,0 +1,33 @@
+<div class="settings-container" id="login-code-page">
+  <h1 class="settings-title">Log in</h1>
+
+  <section class="card p-6">
+    <p class="settings-description">
+      Enter the 6-digit code from your authenticator app, or one of your recovery codes.
+    </p>
+
+    <.auth_message :if={@error == :invalid}>That code didn't work.</.auth_message>
+    <.auth_message :if={@error == :too_many}>
+      Too many attempts. Wait a while and try again.
+    </.auth_message>
+
+    <.form for={%{}} as={:login} id="login-code-form" action={~p"/users/log-in/code"}>
+      <div class="settings-form-group">
+        <label for="code" class="settings-form-label">Code</label>
+        <input
+          type="text"
+          id="code"
+          name="code"
+          class="settings-form-input"
+          autocomplete="one-time-code"
+          spellcheck="false"
+          required
+          autofocus
+        />
+      </div>
+      <div class="settings-button-group">
+        <button type="submit" class="settings-btn settings-btn-primary">Log in</button>
+      </div>
+    </.form>
+  </section>
+</div>

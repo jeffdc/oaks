@@ -38,7 +38,7 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   @impl true
   def handle_params(%{"name" => source_name, "target" => target_name}, _uri, socket) do
-    if socket.assigns.authenticated do
+    if socket.assigns[:current_scope] do
       socket =
         assign(socket,
           source_name: source_name,
@@ -76,15 +76,10 @@ defmodule OaksWeb.SpeciesMergeLive do
            )}
       end
     else
-      if connected?(socket) do
-        {:noreply,
-         socket
-         |> put_flash(:error, "Authentication required to access the merge tool.")
-         |> push_navigate(to: ~p"/species/#{source_name}")}
-      else
-        # Static render — don't redirect yet, wait for connected mount
-        {:noreply, socket}
-      end
+      {:noreply,
+       socket
+       |> put_flash(:error, "Authentication required to access the merge tool.")
+       |> push_navigate(to: ~p"/species/#{source_name}")}
     end
   end
 
@@ -135,7 +130,7 @@ defmodule OaksWeb.SpeciesMergeLive do
   end
 
   def handle_event("execute_merge", _params, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       execute_merge(socket)
     else
       {:noreply, socket}

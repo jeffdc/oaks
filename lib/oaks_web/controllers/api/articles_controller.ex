@@ -2,21 +2,19 @@ defmodule OaksWeb.API.ArticlesController do
   @moduledoc """
   API controller for articles endpoints.
 
-  Visibility depends on authentication: unauthenticated users only see
-  published articles.
+  The API is read-only and public: it returns published articles only.
   """
 
   use OaksWeb, :controller
   use OpenApiSpex.ControllerSpecs
 
   alias Oaks.Articles
-  alias OaksWeb.Plugs.Auth
 
   tags(["Articles"])
 
   operation(:index,
     summary: "List articles",
-    description: "Returns articles. Unauthenticated users see published articles only.",
+    description: "Returns published articles.",
     parameters: [
       tag: [in: :query, type: :string, description: "Filter by tag"]
     ],
@@ -31,15 +29,14 @@ defmodule OaksWeb.API.ArticlesController do
   )
 
   def index(conn, params) do
-    authenticated = Auth.authenticated?(conn)
-    articles = Articles.list_articles(params, authenticated)
+    articles = Articles.list_articles(params, false)
     json(conn, Enum.map(articles, &Articles.to_map/1))
   end
 
   operation(:show,
     summary: "Get an article",
     description:
-      "Returns a single article by slug. Returns 404 for unpublished articles when unauthenticated.",
+      "Returns a single published article by slug. Returns 404 for unpublished articles.",
     parameters: [
       slug: [in: :path, type: :string, description: "Article slug", required: true]
     ],
@@ -50,9 +47,7 @@ defmodule OaksWeb.API.ArticlesController do
   )
 
   def show(conn, %{"slug" => slug}) do
-    authenticated = Auth.authenticated?(conn)
-
-    case Articles.get_article_by_slug(slug, authenticated) do
+    case Articles.get_article_by_slug(slug, false) do
       nil ->
         conn |> put_status(:not_found) |> json(%{error: "Article not found"})
 
@@ -63,7 +58,7 @@ defmodule OaksWeb.API.ArticlesController do
 
   operation(:tags,
     summary: "List article tags",
-    description: "Returns all tags with article counts.",
+    description: "Returns all tags with published article counts.",
     responses: [
       ok:
         {"Tags", "application/json",
@@ -81,8 +76,7 @@ defmodule OaksWeb.API.ArticlesController do
   )
 
   def tags(conn, _params) do
-    authenticated = Auth.authenticated?(conn)
-    tags = Articles.list_tags(authenticated)
+    tags = Articles.list_tags(false)
     json(conn, tags)
   end
 end

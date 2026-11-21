@@ -7,6 +7,19 @@
 # General application configuration
 import Config
 
+config :oaks, :scopes,
+  user: [
+    default: true,
+    module: Oaks.Accounts.Scope,
+    assign_key: :current_scope,
+    access_path: [:user, :id],
+    schema_key: :user_id,
+    schema_type: :id,
+    schema_table: :users,
+    test_data_fixture: Oaks.AccountsFixtures,
+    test_setup_helper: :register_and_log_in_user
+  ]
+
 config :oaks,
   ecto_repos: [Oaks.Repo],
   generators: [timestamp_type: :utc_datetime]
@@ -55,8 +68,9 @@ config :logger, :default_formatter,
 config :phoenix, :json_library, Jason
 
 # Redact secrets from logged request and socket connect params.
-# The API key arrives as the "api_key" LiveView connect param.
-config :phoenix, :filter_parameters, ["password", "token", "api_key"]
+# "code" is a login TOTP or recovery code; "api_key" stays filtered in case an
+# old client still sends the retired API key.
+config :phoenix, :filter_parameters, ["password", "token", "api_key", "code"]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

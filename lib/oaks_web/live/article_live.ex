@@ -3,7 +3,7 @@ defmodule OaksWeb.ArticleLive do
   LiveView for displaying a single article.
 
   Renders article content from markdown to HTML. Shows edit/delete
-  buttons for authenticated users. Handles not-found articles.
+  buttons for logged-in users. Handles not-found articles.
   """
 
   use OaksWeb, :live_view
@@ -25,9 +25,9 @@ defmodule OaksWeb.ArticleLive do
 
   @impl true
   def handle_params(%{"slug" => slug}, _uri, socket) do
-    authenticated = socket.assigns[:authenticated] || false
+    editor? = socket.assigns[:current_scope] != nil
 
-    case Articles.get_article_by_slug(slug, authenticated) do
+    case Articles.get_article_by_slug(slug, editor?) do
       nil ->
         {:noreply,
          assign(socket,
@@ -51,7 +51,7 @@ defmodule OaksWeb.ArticleLive do
 
   @impl true
   def handle_event("confirm_delete", _params, socket) do
-    {:noreply, assign(socket, confirm_delete: socket.assigns[:authenticated] || false)}
+    {:noreply, assign(socket, confirm_delete: socket.assigns[:current_scope] != nil)}
   end
 
   def handle_event("cancel_delete", _params, socket) do
@@ -59,7 +59,7 @@ defmodule OaksWeb.ArticleLive do
   end
 
   def handle_event("delete", _params, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       case Articles.delete_article(socket.assigns.article) do
         {:ok, _} ->
           {:noreply,
@@ -85,7 +85,7 @@ defmodule OaksWeb.ArticleLive do
         <.article_header
           article={@article}
           tags={@tags}
-          authenticated={@authenticated}
+          editor={@current_scope != nil}
         />
         <.article_body content={@rendered_content} />
         <.article_footer article={@article} tags={@tags} />
@@ -121,7 +121,7 @@ defmodule OaksWeb.ArticleLive do
 
   attr :article, :any, required: true
   attr :tags, :list, required: true
-  attr :authenticated, :boolean, required: true
+  attr :editor, :boolean, required: true
 
   defp article_header(assigns) do
     ~H"""
@@ -161,7 +161,7 @@ defmodule OaksWeb.ArticleLive do
             </span>
           </div>
         </div>
-        <div :if={@authenticated} class="flex items-center gap-2 flex-shrink-0">
+        <div :if={@editor} class="flex items-center gap-2 flex-shrink-0">
           <.link
             navigate={~p"/articles/#{@article.slug}/edit"}
             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium"

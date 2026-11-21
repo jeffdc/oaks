@@ -6,21 +6,18 @@ defmodule OaksWeb.TaxonFormLiveTest do
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.AccountsFixtures
 
   alias Oaks.Taxonomy
 
-  defp api_key do
-    Application.get_env(:oaks, :api_key)
-  end
-
   defp authenticated_conn(conn) do
-    put_connect_params(conn, %{"api_key" => api_key()})
+    log_in_user(conn, user_fixture())
   end
 
   # -- New (unauthenticated) --
 
   describe "GET /taxonomy/new (unauthenticated)" do
-    test "redirects to taxonomy browser on connected mount", %{conn: conn} do
+    test "redirects to taxonomy browser", %{conn: conn} do
       assert {:error, {:live_redirect, %{to: "/taxonomy"}}} =
                live(conn, ~p"/taxonomy/new")
     end
@@ -87,7 +84,7 @@ defmodule OaksWeb.TaxonFormLiveTest do
   # -- Edit (unauthenticated) --
 
   describe "GET /taxonomy/:id/edit (unauthenticated)" do
-    test "redirects to taxonomy browser on connected mount", %{conn: conn} do
+    test "redirects to taxonomy browser", %{conn: conn} do
       assert {:error, {:live_redirect, %{to: "/taxonomy"}}} =
                live(conn, ~p"/taxonomy/1/edit")
     end

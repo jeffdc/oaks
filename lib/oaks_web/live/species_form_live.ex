@@ -14,7 +14,7 @@ defmodule OaksWeb.SpeciesFormLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    # Auth check deferred to handle_params (after connected mount sets authenticated)
+    # Auth check happens in handle_params
     subgenera = taxonomy_names("subgenus")
     sections = taxonomy_names("section")
     subsections = taxonomy_names("subsection")
@@ -33,18 +33,13 @@ defmodule OaksWeb.SpeciesFormLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       {:noreply, apply_action(socket, socket.assigns.live_action, params)}
     else
-      if connected?(socket) do
-        {:noreply,
-         socket
-         |> put_flash(:error, "You must be authenticated to perform this action.")
-         |> push_navigate(to: ~p"/list")}
-      else
-        # Static render — don't redirect yet, wait for connected mount
-        {:noreply, socket}
-      end
+      {:noreply,
+       socket
+       |> put_flash(:error, "You must be authenticated to perform this action.")
+       |> push_navigate(to: ~p"/list")}
     end
   end
 
@@ -81,7 +76,7 @@ defmodule OaksWeb.SpeciesFormLive do
 
   @impl true
   def handle_event("validate", %{"species" => species_params}, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       changeset =
         socket.assigns.species
         |> Species.change_species(species_params)
@@ -94,7 +89,7 @@ defmodule OaksWeb.SpeciesFormLive do
   end
 
   def handle_event("save", %{"species" => species_params}, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       save_species(socket, socket.assigns.live_action, species_params)
     else
       {:noreply,

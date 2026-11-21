@@ -129,11 +129,13 @@ See **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** for comprehensive Elixir/Ph
 
 ## Authentication
 
-- Auth is via API key passed as a LiveView connect param
-- Auth check in `handle_params` must guard with `connected?(socket)` before redirecting
-- During static render, `get_connect_params` returns nil, so `authenticated` is always false
-- Pattern: `if authenticated do ... else if connected?(socket) do redirect else {:noreply, socket} end end`
-- GET/read operations are public; write operations require auth
+- Editors log in with a password and a TOTP code (or a recovery code) at `/users/log-in`; built from `phx.gen.auth` (item 0249). Code: `Oaks.Accounts` (users, Argon2id hashes, encrypted TOTP secrets, hashed tokens and recovery codes) and `OaksWeb.UserAuth` (sessions, plugs, `on_mount`).
+- There is no sign-up. `Oaks.Release.setup_link/1` creates a user (or recovers one) and prints a one-time setup link; see its doc for the `fly ssh` command. Any number of users is allowed, and every user can edit.
+- Every browser request and LiveView has `@current_scope`: an `Oaks.Accounts.Scope` when logged in, `nil` when not. It is set on the static render too, so LiveViews redirect logged-out visitors straight away (no `connected?/1` check).
+- Gate editing UI with `@current_scope`, and re-check `socket.assigns[:current_scope]` in every `handle_event` that writes.
+- GET/read pages are public. The JSON API is public and read-only; it has no authentication.
+- Production needs the `LOGIN_ENCRYPTION_KEY` secret (32 bytes, base64; see `config/runtime.exs`). Changing it makes enrolled authenticator apps unusable until a setup link is used.
+- Login attempts are rate limited in memory (`OaksWeb.LoginLimiter`), fine for the one app machine.
 
 ## Git Workflow
 

@@ -40,7 +40,7 @@ defmodule OaksWeb.SourceDetailLive do
 
   @impl true
   def handle_event("request_delete", _params, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       {:noreply, assign(socket, show_delete_confirm: true)}
     else
       {:noreply, socket}
@@ -54,7 +54,7 @@ defmodule OaksWeb.SourceDetailLive do
   def handle_event("confirm_delete", _params, socket) do
     source = socket.assigns.source
 
-    if socket.assigns[:authenticated] && source do
+    if socket.assigns[:current_scope] && source do
       case Sources.delete_source(source) do
         {:ok, _} ->
           {:noreply,
@@ -80,7 +80,7 @@ defmodule OaksWeb.SourceDetailLive do
       <.not_found_view :if={@not_found} />
 
       <article :if={@source} class="source-detail">
-        <.source_header source={@source} authenticated={@authenticated} />
+        <.source_header source={@source} editor={@current_scope != nil} />
         <.metadata_card source={@source} />
         <.coverage_section species={@species} />
         <.species_section :if={@species != []} species={@species} />
@@ -117,7 +117,7 @@ defmodule OaksWeb.SourceDetailLive do
   end
 
   attr :source, :any, required: true
-  attr :authenticated, :boolean, default: false
+  attr :editor, :boolean, default: false
 
   defp source_header(assigns) do
     ~H"""
@@ -131,7 +131,7 @@ defmodule OaksWeb.SourceDetailLive do
         </span>
       </div>
 
-      <div :if={@authenticated} class="source-actions">
+      <div :if={@editor} class="source-actions">
         <.link
           navigate={~p"/sources/#{@source.id}/edit"}
           class="action-btn action-btn-edit"

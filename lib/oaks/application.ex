@@ -13,7 +13,9 @@ defmodule Oaks.Application do
       {DNSCluster, query: Application.get_env(:oaks, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Oaks.PubSub},
       # Task supervisor for fire-and-forget background work (analytics inserts, etc.)
-      {Task.Supervisor, name: Oaks.TaskSupervisor}
+      {Task.Supervisor, name: Oaks.TaskSupervisor},
+      # Login attempt counters
+      {Oaks.RateLimit, clean_period: :timer.minutes(10)}
     ]
 
     # Daily analytics rollup + raw page view pruning (off in tests)

@@ -26,7 +26,7 @@ defmodule OaksWeb.SourcesLive do
 
   @impl true
   def handle_event("request_delete", %{"id" => id_str}, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       {id, ""} = Integer.parse(id_str)
       source = Sources.get_source(id)
       species = Sources.get_species_for_source(id)
@@ -49,7 +49,7 @@ defmodule OaksWeb.SourcesLive do
   def handle_event("confirm_delete", _params, socket) do
     source = socket.assigns.delete_source
 
-    if socket.assigns[:authenticated] && source do
+    if socket.assigns[:current_scope] && source do
       case Sources.delete_source(source) do
         {:ok, _} ->
           sources = Sources.list_sources_with_species_count()
@@ -87,7 +87,7 @@ defmodule OaksWeb.SourcesLive do
             Data Sources
           </h1>
           <.link
-            :if={@authenticated}
+            :if={@current_scope}
             navigate={~p"/sources/new"}
             class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium"
             style="background-color: var(--color-forest-600); color: white; text-decoration: none; white-space: nowrap;"
@@ -111,7 +111,7 @@ defmodule OaksWeb.SourcesLive do
         <.source_card
           :for={source <- @sources}
           source={source}
-          authenticated={@authenticated}
+          editor={@current_scope != nil}
         />
       </div>
 
@@ -127,11 +127,11 @@ defmodule OaksWeb.SourcesLive do
   # -- Components --
 
   attr :source, :map, required: true
-  attr :authenticated, :boolean, default: false
+  attr :editor, :boolean, default: false
 
   defp source_card(assigns) do
     ~H"""
-    <div class={["source-card", @authenticated && "can-edit"]}>
+    <div class={["source-card", @editor && "can-edit"]}>
       <.link
         navigate={~p"/sources/#{@source.id}"}
         class="source-card-link"
@@ -141,7 +141,7 @@ defmodule OaksWeb.SourcesLive do
         <div class="source-card-header">
           <h2 class="source-card-name">{@source.name}</h2>
           <div class="source-card-header-right">
-            <div :if={@authenticated} class="source-card-actions">
+            <div :if={@editor} class="source-card-actions">
               <.link
                 navigate={~p"/sources/#{@source.id}/edit"}
                 class="source-action-btn source-action-edit"
@@ -158,7 +158,7 @@ defmodule OaksWeb.SourcesLive do
                 <.icon name="hero-trash" class="size-3.5" />
               </button>
             </div>
-            <span :if={!@authenticated} class="source-card-arrow">
+            <span :if={!@editor} class="source-card-arrow">
               <.icon name="hero-chevron-right" class="size-5" />
             </span>
           </div>

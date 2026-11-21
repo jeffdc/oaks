@@ -11,6 +11,9 @@ config :oaks, OaksWeb.Endpoint, cache_static_manifest: "priv/static/cache_manife
 
 # SSL is handled by Fly.io's proxy.
 # We don't use Phoenix force_ssl since it breaks internal health checks.
+# Browsers only reach the site over HTTPS (fly.toml force_https), so session
+# and remember-me cookies are marked Secure.
+config :oaks, :secure_cookies, true
 
 # Do not print debug messages in production
 config :logger, level: :info

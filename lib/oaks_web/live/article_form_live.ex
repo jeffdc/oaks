@@ -27,17 +27,13 @@ defmodule OaksWeb.ArticleFormLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       {:noreply, apply_action(socket, socket.assigns.live_action, params)}
     else
-      if connected?(socket) do
-        {:noreply,
-         socket
-         |> put_flash(:error, "You must be authenticated to manage articles.")
-         |> push_navigate(to: ~p"/articles")}
-      else
-        {:noreply, socket}
-      end
+      {:noreply,
+       socket
+       |> put_flash(:error, "You must be authenticated to manage articles.")
+       |> push_navigate(to: ~p"/articles")}
     end
   end
 
@@ -76,7 +72,7 @@ defmodule OaksWeb.ArticleFormLive do
 
   @impl true
   def handle_event("validate", %{"article" => params}, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       changeset =
         socket.assigns.article
         |> Articles.change_article(params)
@@ -110,7 +106,7 @@ defmodule OaksWeb.ArticleFormLive do
   end
 
   def handle_event("save", %{"article" => params}, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       params = Map.put(params, "tags", socket.assigns.tags)
 
       case socket.assigns.live_action do
@@ -206,7 +202,7 @@ defmodule OaksWeb.ArticleFormLive do
                 label="Published"
               />
               <p class="text-xs mt-1" style="color: var(--color-text-tertiary);">
-                Uncheck to save as draft (only visible to authenticated users)
+                Uncheck to save as draft (only visible to logged-in users)
               </p>
             </div>
           </div>

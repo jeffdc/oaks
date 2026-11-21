@@ -63,7 +63,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   end
 
   def handle_event("request_delete", _params, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       {:noreply,
        assign(socket,
          show_delete_confirm: true,
@@ -79,7 +79,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   end
 
   def handle_event("confirm_delete", _params, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       species = socket.assigns.species
 
       case Species.delete_species(species) do
@@ -136,7 +136,7 @@ defmodule OaksWeb.SpeciesDetailLive do
     source_id = Params.int(id_str)
 
     target =
-      socket.assigns[:authenticated] &&
+      socket.assigns[:current_scope] &&
         Enum.find(socket.assigns.species_sources, &(&1.id == source_id))
 
     if target do
@@ -151,7 +151,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   end
 
   def handle_event("confirm_delete_source", _params, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       target = socket.assigns.delete_source_target
 
       case Sources.delete_species_source(target) do
@@ -179,7 +179,7 @@ defmodule OaksWeb.SpeciesDetailLive do
       <.not_found_view :if={@not_found} />
 
       <div :if={@species}>
-        <.species_header species={@species} authenticated={@authenticated} />
+        <.species_header species={@species} editor={@current_scope != nil} />
 
         <div class="content-grid">
           <.parent_species_section
@@ -204,13 +204,13 @@ defmodule OaksWeb.SpeciesDetailLive do
               sources={@species_sources}
               selected={@selected_source}
               species_name={@species.scientific_name}
-              authenticated={@authenticated}
+              editor={@current_scope != nil}
               can_add_source={@can_add_source}
             />
             <.source_content
               :if={@selected_source}
               source={@selected_source}
-              authenticated={@authenticated}
+              editor={@current_scope != nil}
               species_name={@species.scientific_name}
             />
             <div
@@ -221,7 +221,7 @@ defmodule OaksWeb.SpeciesDetailLive do
               <.icon name="hero-document-text" class="size-12 mx-auto mb-3 opacity-40" />
               <p class="italic">No source data available for this species.</p>
               <.link
-                :if={@authenticated}
+                :if={@current_scope}
                 navigate={~p"/species/#{@species.scientific_name}/sources/new"}
                 class="add-source-btn mt-4"
                 style="text-decoration: none;"
@@ -288,7 +288,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   # -- Species header (green gradient card, compact V1 layout) --
 
   attr :species, :any, required: true
-  attr :authenticated, :boolean, default: false
+  attr :editor, :boolean, default: false
 
   defp species_header(assigns) do
     ~H"""
@@ -316,7 +316,7 @@ defmodule OaksWeb.SpeciesDetailLive do
           :if={@species.conservation_status}
           status={@species.conservation_status}
         />
-        <div :if={@authenticated} class="species-actions">
+        <div :if={@editor} class="species-actions">
           <.link
             navigate={~p"/species/#{@species.scientific_name}/edit"}
             class="action-btn action-btn-edit"
@@ -559,7 +559,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   attr :sources, :list, required: true
   attr :selected, :any, required: true
   attr :species_name, :string, required: true
-  attr :authenticated, :boolean, default: false
+  attr :editor, :boolean, default: false
   attr :can_add_source, :boolean, default: true
 
   defp source_tabs(assigns) do
@@ -593,7 +593,7 @@ defmodule OaksWeb.SpeciesDetailLive do
         <.icon name="hero-arrows-right-left" class="size-4" />
         <span>Compare</span>
       </.link>
-      <div :if={@authenticated && @can_add_source} class="add-source-wrapper">
+      <div :if={@editor && @can_add_source} class="add-source-wrapper">
         <.link
           navigate={~p"/species/#{@species_name}/sources/new"}
           class="add-source-btn"
@@ -609,7 +609,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   end
 
   attr :source, :any, required: true
-  attr :authenticated, :boolean, default: false
+  attr :editor, :boolean, default: false
   attr :species_name, :string, required: true
 
   defp source_content(assigns) do
@@ -622,7 +622,7 @@ defmodule OaksWeb.SpeciesDetailLive do
         <span class="source-content-title">
           Data from {@source.source.name}
         </span>
-        <div :if={@authenticated} class="flex items-center gap-2">
+        <div :if={@editor} class="flex items-center gap-2">
           <.link
             navigate={~p"/species/#{@species_name}/sources/#{@source.source.id}/edit"}
             class="action-btn action-btn-edit"

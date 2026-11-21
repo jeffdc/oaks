@@ -81,7 +81,7 @@ defmodule OaksWeb.SpeciesListLive do
           Species List
         </h1>
         <.link
-          :if={@authenticated}
+          :if={@current_scope}
           navigate={~p"/species/new"}
           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white"
           style="background-color: var(--color-forest-600); text-decoration: none;"

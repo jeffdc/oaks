@@ -47,7 +47,7 @@
       <%!-- Navigation --%>
       <nav class="flex items-center gap-1" aria-label="Main navigation">
         <.link
-          :if={assigns[:authenticated]}
+          :if={assigns[:current_scope]}
           navigate={~p"/species/new"}
           class="add-species-btn"
           title="Add new species"

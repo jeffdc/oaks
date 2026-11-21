@@ -6,6 +6,7 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.AccountsFixtures
 
   describe "GET /species/:name" do
     test "renders species detail page", %{conn: conn} do
@@ -160,7 +161,7 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
 
   describe "delete confirmation" do
     test "lists the species that mention it", %{conn: conn} do
-      conn = put_connect_params(conn, %{"api_key" => Application.get_env(:oaks, :api_key)})
+      conn = log_in_user(conn, user_fixture())
       {:ok, view, _html} = live(conn, ~p"/species/alba")
 
       render_click(view, "request_delete")
@@ -198,7 +199,7 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
     end
 
     test "shows Add Source link when authenticated", %{conn: conn} do
-      conn = put_connect_params(conn, %{"api_key" => Application.get_env(:oaks, :api_key)})
+      conn = log_in_user(conn, user_fixture())
       {:ok, view, _html} = live(conn, ~p"/species/velutina")
 
       assert has_element?(

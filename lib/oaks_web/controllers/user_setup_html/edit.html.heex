@@ -1,0 +1,56 @@
+<div class="settings-container" id="setup-page">
+  <h1 class="settings-title">Set up login</h1>
+
+  <section class="card p-6">
+    <p class="settings-description">
+      Setting up login for <strong>{@user.email}</strong>. This replaces any password,
+      authenticator app and recovery codes the account had, and logs out every other session.
+    </p>
+
+    <.form for={@form} id="setup-form" action={~p"/users/setup"}>
+      <h2 class="section-title" style="margin-bottom: 0.5rem;">1. Choose a password</h2>
+      <.auth_field
+        field={@form[:password]}
+        type="password"
+        label="New password (at least 12 characters)"
+        autocomplete="new-password"
+        required
+      />
+      <.auth_field
+        field={@form[:password_confirmation]}
+        type="password"
+        label="Confirm new password"
+        autocomplete="new-password"
+        required
+      />
+
+      <h2 class="section-title" style="margin-bottom: 0.5rem;">2. Add the authenticator app</h2>
+      <p class="settings-description">
+        Scan this code with an authenticator app (1Password, Google Authenticator, Authy and the like),
+        or type in the key below it.
+      </p>
+      <div id="setup-qr" style="background: white; display: inline-block; padding: 0.5rem;">
+        {@qr_svg}
+      </div>
+      <p
+        id="setup-secret"
+        class="settings-description"
+        style="font-family: ui-monospace, monospace;"
+      >
+        {@display_secret}
+      </p>
+      <.auth_field
+        field={@form[:code]}
+        label="6-digit code from the app"
+        autocomplete="one-time-code"
+        inputmode="numeric"
+        spellcheck="false"
+        required
+      />
+
+      <div class="settings-button-group">
+        <button type="submit" class="settings-btn settings-btn-primary">Finish setup</button>
+      </div>
+    </.form>
+  </section>
+</div>

@@ -35,17 +35,13 @@ defmodule OaksWeb.TaxonFormLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       {:noreply, apply_action(socket, socket.assigns.live_action, params)}
     else
-      if connected?(socket) do
-        {:noreply,
-         socket
-         |> put_flash(:error, "You must be authenticated to perform this action.")
-         |> push_navigate(to: ~p"/taxonomy")}
-      else
-        {:noreply, socket}
-      end
+      {:noreply,
+       socket
+       |> put_flash(:error, "You must be authenticated to perform this action.")
+       |> push_navigate(to: ~p"/taxonomy")}
     end
   end
 
@@ -92,7 +88,7 @@ defmodule OaksWeb.TaxonFormLive do
 
   @impl true
   def handle_event("validate", %{"taxon" => taxon_params}, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       # Update parent options when level changes
       new_level = taxon_params["level"] || ""
 
@@ -143,7 +139,7 @@ defmodule OaksWeb.TaxonFormLive do
   end
 
   def handle_event("save", %{"taxon" => taxon_params}, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       # Inject links JSON from tag input
       links_json =
         case socket.assigns.link_tags do

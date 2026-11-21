@@ -1,50 +1,42 @@
 defmodule OaksWeb.SettingsLiveTest do
   @moduledoc """
-  Tests for SettingsLive. Authentication status must come from the server-side
-  auth hook, never from what the browser reports.
+  Tests for SettingsLive: the account links when logged in, and the login
+  link when logged out.
   """
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
 
-  defp authenticated_conn(conn) do
-    put_connect_params(conn, %{"api_key" => Application.get_env(:oaks, :api_key)})
+  describe "logged in" do
+    setup :register_and_log_in_user
+
+    test "shows the account email and account links", %{conn: conn, user: user} do
+      {:ok, view, html} = live(conn, ~p"/settings")
+
+      assert html =~ "Logged in as"
+      assert html =~ user.email
+      assert has_element?(view, ~s(a[href="/users/settings/password"]), "Change password")
+      assert has_element?(view, ~s(a[href="/users/settings/recovery-codes"]), "Recovery codes")
+
+      assert has_element?(
+               view,
+               ~s(a[href="/users/log-out"][data-method="delete"]),
+               "Log out"
+             )
+
+      refute has_element?(view, ~s(a[href="/users/log-in"]))
+    end
   end
 
-  test "shows authenticated when the connect param key is valid", %{conn: conn} do
-    {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/settings")
+  describe "logged out" do
+    test "shows a login link and no account links", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/settings")
 
-    assert has_element?(view, ".settings-status-authenticated")
-    assert has_element?(view, "#session-time-remaining")
-  end
-
-  test "shows not authenticated without a key", %{conn: conn} do
-    {:ok, view, _html} = live(conn, ~p"/settings")
-
-    assert has_element?(view, ".settings-status-not-authenticated")
-  end
-
-  test "a wrong key is not authenticated", %{conn: conn} do
-    {:ok, view, _html} =
-      conn |> put_connect_params(%{"api_key" => "wrong"}) |> live(~p"/settings")
-
-    assert has_element?(view, ".settings-status-not-authenticated")
-  end
-
-  test "client save reports show a message without changing auth status", %{conn: conn} do
-    {:ok, view, _html} = live(conn, ~p"/settings")
-
-    html = render_hook(view, "save_result", %{"status" => "saved"})
-
-    assert html =~ "API key verified and saved."
-    assert has_element?(view, ".settings-status-not-authenticated")
-  end
-
-  test "ignores unknown client statuses", %{conn: conn} do
-    {:ok, view, _html} = live(conn, ~p"/settings")
-
-    assert render_hook(view, "save_result", %{"status" => "bogus"})
-    assert render_hook(view, "verify_result", %{"status" => "ok"})
-    assert has_element?(view, ".settings-status-not-authenticated")
+      assert has_element?(view, "#settings-logged-out")
+      assert has_element?(view, ~s(a[href="/users/log-in"]), "Log in")
+      refute has_element?(view, "#settings-logged-in")
+      refute has_element?(view, ~s(a[href="/users/log-out"]))
+      refute has_element?(view, ~s(a[href="/users/settings/password"]))
+    end
   end
 end

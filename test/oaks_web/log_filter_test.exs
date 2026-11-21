@@ -4,16 +4,37 @@ defmodule OaksWeb.LogFilterTest do
   """
   use ExUnit.Case
 
-  test "api_key connect param is redacted in logs" do
+  test "login and password-change params are redacted in logs" do
     filtered =
       Phoenix.Logger.filter_values(%{
-        "api_key" => "secret-key",
+        "user" => %{
+          "email" => "editor@example.com",
+          "password" => "secret-password",
+          "password_confirmation" => "secret-password",
+          "current_password" => "old-password"
+        },
         "_csrf_token" => "csrf",
         "q" => "alba"
       })
 
-    assert filtered["api_key"] == "[FILTERED]"
+    assert filtered["user"]["password"] == "[FILTERED]"
+    assert filtered["user"]["password_confirmation"] == "[FILTERED]"
+    assert filtered["user"]["current_password"] == "[FILTERED]"
+    assert filtered["user"]["email"] == "editor@example.com"
     assert filtered["_csrf_token"] == "[FILTERED]"
     assert filtered["q"] == "alba"
+  end
+
+  test "token and api_key params are redacted in logs" do
+    filtered =
+      Phoenix.Logger.filter_values(%{
+        "token" => "setup-link-token",
+        "user_token" => "session-token",
+        "api_key" => "secret-key"
+      })
+
+    assert filtered["token"] == "[FILTERED]"
+    assert filtered["user_token"] == "[FILTERED]"
+    assert filtered["api_key"] == "[FILTERED]"
   end
 end

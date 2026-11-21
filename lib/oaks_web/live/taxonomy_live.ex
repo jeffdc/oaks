@@ -48,7 +48,7 @@ defmodule OaksWeb.TaxonomyLive do
   @impl true
   def handle_event("request_delete_taxon", %{"id" => id_str}, socket) do
     id = Params.int(id_str)
-    taxon = socket.assigns[:authenticated] && id && Taxonomy.get_taxon_by_id(id)
+    taxon = socket.assigns[:current_scope] && id && Taxonomy.get_taxon_by_id(id)
 
     if taxon do
       {:noreply,
@@ -69,7 +69,7 @@ defmodule OaksWeb.TaxonomyLive do
   def handle_event("confirm_delete_taxon", _params, socket) do
     taxon = socket.assigns.delete_taxon_target
 
-    if socket.assigns[:authenticated] && taxon do
+    if socket.assigns[:current_scope] && taxon do
       socket = assign(socket, show_delete_taxon_confirm: false, delete_taxon_target: nil)
 
       case Taxonomy.delete_taxon(taxon) do
@@ -225,7 +225,7 @@ defmodule OaksWeb.TaxonomyLive do
             </div>
             <div class="flex items-center gap-4">
               <.link
-                :if={@authenticated}
+                :if={@current_scope}
                 navigate={create_taxon_path(@child_level, @current_taxon)}
                 class="create-taxon-btn"
                 style="text-decoration: none;"
@@ -240,7 +240,7 @@ defmodule OaksWeb.TaxonomyLive do
           </div>
           <.breadcrumbs :if={not @is_genus_level} crumbs={@breadcrumbs} />
           <div
-            :if={@authenticated && not @is_genus_level && @current_taxon}
+            :if={@current_scope && not @is_genus_level && @current_taxon}
             class="flex items-center gap-2 mt-2"
           >
             <.link
@@ -277,7 +277,7 @@ defmodule OaksWeb.TaxonomyLive do
                 Updated {@current_taxon.content_updated_at}
               </span>
               <.link
-                :if={@authenticated}
+                :if={@current_scope}
                 navigate={~p"/taxonomy/#{@current_taxon.id}/edit"}
                 class="edit-content-btn"
                 style="text-decoration: none;"
@@ -289,9 +289,9 @@ defmodule OaksWeb.TaxonomyLive do
           <div class="prose-content">{raw(Markdown.render_html(@current_taxon.content))}</div>
         </div>
 
-        <%!-- Empty content prompt for authenticated users --%>
+        <%!-- Empty content prompt for logged-in users --%>
         <div
-          :if={@authenticated && @current_taxon && !@current_taxon.content && !@is_genus_level}
+          :if={@current_scope && @current_taxon && !@current_taxon.content && !@is_genus_level}
           class="card p-4 mb-6"
         >
           <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
@@ -319,7 +319,7 @@ defmodule OaksWeb.TaxonomyLive do
               :for={taxon <- @child_taxa}
               taxon={taxon}
               path={@taxonomy_path}
-              authenticated={@authenticated}
+              editor={@current_scope != nil}
             />
           </div>
         </section>
@@ -375,7 +375,7 @@ defmodule OaksWeb.TaxonomyLive do
 
   attr :taxon, :any, required: true
   attr :path, :list, required: true
-  attr :authenticated, :boolean, default: false
+  attr :editor, :boolean, default: false
 
   defp taxon_card(assigns) do
     url = taxonomy_url(assigns.path ++ [assigns.taxon.name])
@@ -394,7 +394,7 @@ defmodule OaksWeb.TaxonomyLive do
           {@taxon.species_count} species
         </span>
       </.link>
-      <div :if={@authenticated} class="taxon-card-actions">
+      <div :if={@editor} class="taxon-card-actions">
         <.link
           navigate={~p"/taxonomy/#{@taxon.id}/edit"}
           class="taxon-action-icon"

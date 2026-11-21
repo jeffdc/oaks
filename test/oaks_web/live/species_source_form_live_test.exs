@@ -6,21 +6,18 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.AccountsFixtures
 
   alias Oaks.Sources
 
-  defp api_key do
-    Application.get_env(:oaks, :api_key)
-  end
-
   defp authenticated_conn(conn) do
-    put_connect_params(conn, %{"api_key" => api_key()})
+    log_in_user(conn, user_fixture())
   end
 
   # -- New (unauthenticated) --
 
   describe "GET /species/:name/sources/new (unauthenticated)" do
-    test "redirects to species list on connected mount", %{conn: conn} do
+    test "redirects to species list", %{conn: conn} do
       assert {:error, {:live_redirect, %{to: "/list"}}} =
                live(conn, ~p"/species/alba/sources/new")
     end
@@ -78,7 +75,7 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
   # -- Edit (unauthenticated) --
 
   describe "GET /species/:name/sources/:source_id/edit (unauthenticated)" do
-    test "redirects to species list on connected mount", %{conn: conn} do
+    test "redirects to species list", %{conn: conn} do
       assert {:error, {:live_redirect, %{to: "/list"}}} =
                live(conn, ~p"/species/alba/sources/2/edit")
     end

@@ -2,6 +2,11 @@ import Config
 
 config :oaks, env: :dev
 
+# Fixed, non-secret login encryption key (see config/runtime.exs). A copy of
+# the production database has TOTP secrets under the production key, so log in
+# locally after making a local setup link: mix run -e 'Oaks.Release.setup_link("you@example.com")'
+config :oaks, :login_encryption_key, "ZGV2LWxvZ2luLWVuY3J5cHRpb24ta2V5LTMyYnl0ZXM="
+
 # Configure your database
 # DATABASE_PATH env var overrides the default for flexibility
 # Falls back to oaks.db at the project root for normal development

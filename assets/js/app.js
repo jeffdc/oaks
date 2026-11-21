@@ -25,47 +25,9 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/oaks"
 import topbar from "../vendor/topbar"
 
-// -- API key session (stored in localStorage, sent as a LiveSocket connect param) --
-
-const API_KEY = "oak:api_key"
-const SESSION_TS = "oak:session_timestamp"
-const TIMEOUT_HOURS = "oak:session_timeout_hours"
-const SETTINGS_NOTICE = "oak:settings_notice"
-const DEFAULT_TIMEOUT_HOURS = 24
-
-function sessionTimeoutHours() {
-  return parseInt(localStorage.getItem(TIMEOUT_HOURS) || DEFAULT_TIMEOUT_HOURS, 10)
-}
-
-function sessionRemainingMs() {
-  const timestamp = localStorage.getItem(SESSION_TS)
-  if (!timestamp) return 0
-  const elapsed = Date.now() - parseInt(timestamp, 10)
-  return Math.max(0, sessionTimeoutHours() * 60 * 60 * 1000 - elapsed)
-}
-
-function clearStoredKey() {
-  localStorage.removeItem(API_KEY)
-  localStorage.removeItem(SESSION_TS)
-}
-
-// Returns the stored API key, clearing it first if its session has expired.
-function currentApiKey() {
-  const key = localStorage.getItem(API_KEY)
-  if (!key) return ""
-  if (sessionRemainingMs() <= 0) {
-    clearStoredKey()
-    return ""
-  }
-  return key
-}
-
-// Applies a key change and reloads so every LiveView remounts with it,
-// leaving a one-shot notice for the Settings page to show afterwards.
-function reloadWithNotice(notice, change) {
-  change()
-  sessionStorage.setItem(SETTINGS_NOTICE, notice)
-  window.location.reload()
+// The API key login is gone (item 0249): drop what it left in this browser.
+for (const key of ["oak:api_key", "oak:session_timestamp", "oak:session_timeout_hours", "oak:settings_notice"]) {
+  localStorage.removeItem(key)
 }
 
 const Hooks = {
@@ -128,141 +90,13 @@ const Hooks = {
         this._headerForm.removeEventListener("submit", this._submitHandler)
       }
     }
-  },
-  ApiKeySettings: {
-    _timer: null,
-
-    mounted() {
-      this._setupHandlers()
-      this._initSession()
-    },
-
-    updated() {
-      this._startTimer()
-    },
-
-    destroyed() {
-      this._clearTimer()
-    },
-
-    _getRemainingMs() {
-      return sessionRemainingMs()
-    },
-
-    _formatTime(ms) {
-      if (ms <= 0) return "Expired"
-      const hours = Math.floor(ms / (1000 * 60 * 60))
-      const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60))
-      if (hours > 0) return `${hours}h ${minutes}m`
-      return `${minutes}m`
-    },
-
-    _clearTimer() {
-      if (this._timer) {
-        clearInterval(this._timer)
-        this._timer = null
-      }
-    },
-
-    _startTimer() {
-      this._clearTimer()
-      this._updateTimeDisplay()
-      this._timer = setInterval(() => this._updateTimeDisplay(), 60000)
-    },
-
-    _updateTimeDisplay() {
-      const el = this.el.querySelector("#session-time-remaining")
-      if (!el) return
-      const remaining = this._getRemainingMs()
-      el.textContent = this._formatTime(remaining)
-      if (remaining <= 0 && localStorage.getItem(API_KEY)) {
-        this._clearTimer()
-        reloadWithNotice("cleared", clearStoredKey)
-      }
-    },
-
-    _initSession() {
-      // Set timeout select to stored value
-      const timeoutSelect = this.el.querySelector("#session-timeout-select")
-      if (timeoutSelect) {
-        timeoutSelect.value = sessionTimeoutHours().toString()
-      }
-
-      const stored = currentApiKey()
-      const input = this.el.querySelector("#api-key-input")
-      if (stored && input) input.value = stored
-
-      // Show the result of a save/clear that triggered the last reload
-      const notice = sessionStorage.getItem(SETTINGS_NOTICE)
-      if (notice) {
-        sessionStorage.removeItem(SETTINGS_NOTICE)
-        this.pushEvent("save_result", {status: notice})
-      }
-
-      this._startTimer()
-    },
-
-    _setupHandlers() {
-      const input = this.el.querySelector("#api-key-input")
-      const saveBtn = this.el.querySelector("#save-api-key")
-      const clearBtn = this.el.querySelector("#clear-api-key")
-
-      saveBtn.addEventListener("click", async () => {
-        const key = input.value.trim()
-        if (!key) {
-          this.pushEvent("verify_result", {status: "invalid"})
-          return
-        }
-        try {
-          const resp = await fetch("/api/v1/auth/verify", {
-            headers: {"Authorization": `Bearer ${key}`}
-          })
-          if (resp.ok) {
-            // Reload so the LiveSocket reconnects and the server checks the new key
-            reloadWithNotice("saved", () => {
-              localStorage.setItem(API_KEY, key)
-              localStorage.setItem(SESSION_TS, Date.now().toString())
-            })
-          } else {
-            this.pushEvent("verify_result", {status: "invalid"})
-          }
-        } catch (_e) {
-          this.pushEvent("verify_result", {status: "error"})
-        }
-      })
-
-      clearBtn.addEventListener("click", () => {
-        input.value = ""
-        reloadWithNotice("cleared", clearStoredKey)
-      })
-
-      // Reset session button (delegated since it may not exist yet)
-      this.el.addEventListener("click", (e) => {
-        if (e.target.id === "reset-session-btn" || e.target.closest("#reset-session-btn")) {
-          localStorage.setItem(SESSION_TS, Date.now().toString())
-          this._updateTimeDisplay()
-        }
-      })
-
-      // Timeout select (delegated since it may not exist yet)
-      this.el.addEventListener("change", (e) => {
-        if (e.target.id === "session-timeout-select") {
-          const hours = parseInt(e.target.value, 10)
-          if (hours > 0 && hours <= 168) {
-            localStorage.setItem(TIMEOUT_HOURS, hours.toString())
-            this._updateTimeDisplay()
-          }
-        }
-      })
-    }
   }
 }
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  // A function so the key (and its expiry) is re-checked on every (re)connect
-  params: () => ({_csrf_token: csrfToken, api_key: currentApiKey()}),
+  params: {_csrf_token: csrfToken},
   hooks: Hooks,
 })
 

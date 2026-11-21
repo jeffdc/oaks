@@ -7,9 +7,10 @@ defmodule OaksWeb.InputHardeningTest do
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.AccountsFixtures
 
   defp authenticated_conn(conn) do
-    put_connect_params(conn, %{"api_key" => Application.get_env(:oaks, :api_key)})
+    log_in_user(conn, user_fixture())
   end
 
   describe "API pagination bounds" do

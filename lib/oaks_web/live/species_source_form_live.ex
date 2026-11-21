@@ -26,17 +26,13 @@ defmodule OaksWeb.SpeciesSourceFormLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       {:noreply, apply_action(socket, socket.assigns.live_action, params)}
     else
-      if connected?(socket) do
-        {:noreply,
-         socket
-         |> put_flash(:error, "You must be authenticated to perform this action.")
-         |> push_navigate(to: ~p"/list")}
-      else
-        {:noreply, socket}
-      end
+      {:noreply,
+       socket
+       |> put_flash(:error, "You must be authenticated to perform this action.")
+       |> push_navigate(to: ~p"/list")}
     end
   end
 
@@ -106,7 +102,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
 
   @impl true
   def handle_event("validate", %{"species_source" => params}, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       changeset =
         socket.assigns.species_source
         |> Sources.change_species_source(params)
@@ -119,7 +115,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
   end
 
   def handle_event("save", %{"species_source" => params}, socket) do
-    if socket.assigns[:authenticated] do
+    if socket.assigns[:current_scope] do
       save_species_source(socket, socket.assigns.live_action, params)
     else
       {:noreply,
