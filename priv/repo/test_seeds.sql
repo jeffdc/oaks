@@ -18,15 +18,4 @@ INSERT INTO sources (id, source_type, name, description, url) VALUES
 
 INSERT INTO taxa (id, name, level, parent, author) VALUES
   (1, 'Quercus', 'subgenus', NULL, '(L.) Oerst.'),
-  (2, 'Quercus', 'section', 'Quercus', 'L.'),
-  (3, 'Lobatae', 'subgenus', NULL, '(Loudon) Menitsky'),
-  (4, 'Lobatae', 'section', 'Lobatae', 'Loudon'),
-  (5, 'Stellatae', 'subsection', 'Quercus', NULL);
-
--- =============================================================================
--- Import Metadata
--- =============================================================================
-
-INSERT INTO import_metadata (key, value) VALUES
-  ('last_import_date', '2025-01-01'),
-  ('inat_species_count', '450');
+  (2, 'Lobatae', 'subgenus', NULL, '(Loudon) Menitsky');

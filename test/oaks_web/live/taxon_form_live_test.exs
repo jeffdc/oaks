@@ -1,14 +1,18 @@
 defmodule OaksWeb.TaxonFormLiveTest do
   @moduledoc """
   Tests for the TaxonFormLive LiveView (create/edit taxa).
-  Uses seeded test data (see priv/repo/test_seeds.sql).
   """
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
   import Oaks.AccountsFixtures
+  import Oaks.TaxonomyFixtures
 
   alias Oaks.Taxonomy
+
+  setup do
+    %{taxon: taxon_fixture()}
+  end
 
   defp authenticated_conn(conn) do
     log_in_user(conn, user_fixture())
@@ -34,9 +38,11 @@ defmodule OaksWeb.TaxonFormLiveTest do
       assert html =~ "Name"
     end
 
-    test "pre-selects level and parent from query params", %{conn: conn} do
+    test "pre-selects level and parent from query params", %{conn: conn, taxon: taxon} do
       {:ok, _view, html} =
-        conn |> authenticated_conn() |> live("/taxonomy/new?level=section&parent=Quercus")
+        conn
+        |> authenticated_conn()
+        |> live(~p"/taxonomy/new?level=section&parent=#{taxon.name}")
 
       assert html =~ "Create Taxon"
       # The parent dropdown should be present since level is section
@@ -49,7 +55,7 @@ defmodule OaksWeb.TaxonFormLiveTest do
       {:ok, _view, html} =
         view
         |> form("#taxon-form",
-          taxon: %{name: "TestSubgenus", level: "subgenus"}
+          taxon: %{name: unique_taxon_name(), level: "subgenus"}
         )
         |> render_submit()
         |> follow_redirect(conn)
@@ -68,13 +74,12 @@ defmodule OaksWeb.TaxonFormLiveTest do
       assert html =~ "be blank"
     end
 
-    test "shows error for duplicate name+level", %{conn: conn} do
+    test "shows error for duplicate name+level", %{conn: conn, taxon: taxon} do
       {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/taxonomy/new")
 
-      # "Quercus" subgenus already exists in seeds
       html =
         view
-        |> form("#taxon-form", taxon: %{name: "Quercus", level: "subgenus"})
+        |> form("#taxon-form", taxon: %{name: taxon.name, level: "subgenus"})
         |> render_submit()
 
       assert html =~ "has already been taken"
@@ -84,24 +89,24 @@ defmodule OaksWeb.TaxonFormLiveTest do
   # -- Edit (unauthenticated) --
 
   describe "GET /taxonomy/:id/edit (unauthenticated)" do
-    test "redirects to taxonomy browser", %{conn: conn} do
+    test "redirects to taxonomy browser", %{conn: conn, taxon: taxon} do
       assert {:error, {:live_redirect, %{to: "/taxonomy"}}} =
-               live(conn, ~p"/taxonomy/1/edit")
+               live(conn, ~p"/taxonomy/#{taxon.id}/edit")
     end
   end
 
   # -- Edit (authenticated) --
 
   describe "GET /taxonomy/:id/edit (authenticated)" do
-    test "renders edit form with pre-populated data", %{conn: conn} do
-      {:ok, _view, html} = conn |> authenticated_conn() |> live(~p"/taxonomy/1/edit")
+    test "renders edit form with pre-populated data", %{conn: conn, taxon: taxon} do
+      {:ok, _view, html} = conn |> authenticated_conn() |> live(~p"/taxonomy/#{taxon.id}/edit")
 
       assert html =~ "Edit"
-      assert html =~ "Quercus"
+      assert html =~ taxon.name
     end
 
-    test "updates taxon on submit", %{conn: conn} do
-      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/taxonomy/1/edit")
+    test "updates taxon on submit", %{conn: conn, taxon: taxon} do
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/taxonomy/#{taxon.id}/edit")
 
       {:ok, _view, html} =
         view
@@ -112,20 +117,20 @@ defmodule OaksWeb.TaxonFormLiveTest do
       assert html =~ "Taxon updated"
     end
 
-    test "saving from the Preview tab keeps the edited content", %{conn: conn} do
-      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/taxonomy/1/edit")
+    test "saving from the Preview tab keeps the edited content", %{conn: conn, taxon: taxon} do
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/taxonomy/#{taxon.id}/edit")
 
       view |> form("#taxon-form", taxon: %{content: "Edited **body**"}) |> render_change()
       render_click(view, "switch_content_tab", %{"tab" => "preview"})
 
       view |> form("#taxon-form") |> render_submit()
 
-      assert Oaks.Taxonomy.get_taxon_by_id(1).content == "Edited **body**"
+      assert Oaks.Taxonomy.get_taxon_by_id(taxon.id).content == "Edited **body**"
     end
 
     test "redirects for nonexistent taxon", %{conn: conn} do
       assert {:error, {:live_redirect, %{to: "/taxonomy"}}} =
-               conn |> authenticated_conn() |> live(~p"/taxonomy/9999/edit")
+               conn |> authenticated_conn() |> live(~p"/taxonomy/0/edit")
     end
   end
 
@@ -145,8 +150,7 @@ defmodule OaksWeb.TaxonFormLiveTest do
     end
 
     test "delete taxon flow with confirmation", %{conn: conn} do
-      {:ok, taxon} =
-        Taxonomy.create_taxon(%{name: "DeleteMe", level: "subgenus"})
+      taxon = taxon_fixture(name: "DeleteMe#{System.unique_integer([:positive])}")
 
       {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/taxonomy")
 
@@ -154,7 +158,7 @@ defmodule OaksWeb.TaxonFormLiveTest do
       html = render_click(view, "request_delete_taxon", %{"id" => to_string(taxon.id)})
       assert html =~ "Delete Taxon"
       assert html =~ "Are you sure"
-      assert html =~ "DeleteMe"
+      assert html =~ taxon.name
 
       # Confirm
       {:ok, _view, html} =
@@ -166,10 +170,10 @@ defmodule OaksWeb.TaxonFormLiveTest do
       assert Taxonomy.get_taxon_by_id(taxon.id) == nil
     end
 
-    test "cancel delete hides modal", %{conn: conn} do
+    test "cancel delete hides modal", %{conn: conn, taxon: taxon} do
       {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/taxonomy")
 
-      html = render_click(view, "request_delete_taxon", %{"id" => "1"})
+      html = render_click(view, "request_delete_taxon", %{"id" => to_string(taxon.id)})
       assert html =~ "delete-taxon-modal"
 
       html = render_click(view, "cancel_delete_taxon")
