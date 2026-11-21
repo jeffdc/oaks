@@ -32,6 +32,13 @@ for (const key of ["oak:api_key", "oak:session_timestamp", "oak:session_timeout_
 
 const Hooks = {
   ...colocatedHooks,
+  // Taxonomy band (DesignComponents.taxonomy_band): on phones the path is
+  // one scrolling line; keep the current taxon, at its end, in view.
+  PinCurrentTaxon: {
+    mounted() { this.pin() },
+    updated() { this.pin() },
+    pin() { this.el.scrollLeft = this.el.scrollWidth }
+  },
   TagInput: {
     mounted() {
       this.el.addEventListener("keydown", (e) => {

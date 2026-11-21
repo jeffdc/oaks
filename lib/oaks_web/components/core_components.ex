@@ -2,8 +2,11 @@ defmodule OaksWeb.CoreComponents do
   @moduledoc """
   Provides core UI components for the Oak Compendium.
 
-  Components are styled to match the V1 visual design: forest greens,
-  earth tones, serif headings, and nature-inspired aesthetics.
+  Components follow DESIGN.md: ink on paper, square corners, no shadows,
+  Archivo for the frame and Source Serif 4 for reading. Their CSS is in
+  `assets/css/system/components.css` (classes prefixed `oc-`). The content
+  components of the design system (taxonomy band, marks, section heading)
+  are in `OaksWeb.DesignComponents`.
 
   References:
 
@@ -43,32 +46,18 @@ defmodule OaksWeb.CoreComponents do
       id={@id}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
-      class="fixed top-4 right-4 z-50"
+      class={["oc-flash", @kind == :error && "oc-flash-error"]}
       {@rest}
     >
-      <div class={[
-        "flex items-start gap-3 w-80 sm:w-96 p-4 rounded-lg shadow-lg border text-sm",
-        @kind == :info && "bg-forest-50 border-forest-200 text-forest-900",
-        @kind == :error && "bg-red-50 border-red-200 text-red-900"
-      ]}>
-        <.icon
-          :if={@kind == :info}
-          name="hero-information-circle"
-          class="size-5 shrink-0 text-forest-600"
-        />
-        <.icon
-          :if={@kind == :error}
-          name="hero-exclamation-circle"
-          class="size-5 shrink-0 text-red-600"
-        />
-        <div class="flex-1">
-          <p :if={@title} class="font-semibold">{@title}</p>
-          <p>{msg}</p>
-        </div>
-        <button type="button" class="group self-start cursor-pointer" aria-label="close">
-          <.icon name="hero-x-mark" class="size-5 opacity-40 group-hover:opacity-70" />
-        </button>
+      <div class="oc-flash-body">
+        <p :if={@title} class="oc-flash-title">{@title}</p>
+        <p>{msg}</p>
       </div>
+      <button type="button" class="oc-flash-close" aria-label="Close">
+        <svg viewBox="0 0 12 12" aria-hidden="true">
+          <path d="M1 1l10 10M11 1 1 11" fill="none" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </button>
     </div>
     """
   end
@@ -76,29 +65,33 @@ defmodule OaksWeb.CoreComponents do
   @doc """
   Renders a button with navigation support.
 
+  Square, with a 1.5px ink outline. `variant="primary"` is the ochre fill
+  for the one call to action in a view; it inverts to ink on hover. The
+  default, `variant="ghost"`, is the outline alone and inverts to ink on
+  paper. `size="compact"` is the smaller size used for Compare.
+
   ## Examples
 
       <.button>Send!</.button>
       <.button phx-click="go" variant="primary">Send!</.button>
       <.button navigate={~p"/"}>Home</.button>
   """
-  attr :rest, :global, include: ~w(href navigate patch method download name value disabled)
-  attr :class, :any
-  attr :variant, :string, values: ~w(primary)
+  attr :rest, :global,
+    include: ~w(href navigate patch method download name value disabled type form)
+
+  attr :class, :any, default: nil
+  attr :variant, :string, values: ~w(primary ghost), default: "ghost"
+  attr :size, :string, values: ~w(regular compact), default: "regular"
   slot :inner_block, required: true
 
   def button(%{rest: rest} = assigns) do
-    variants = %{
-      "primary" =>
-        "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md text-white bg-forest-600 hover:bg-forest-700 shadow-sm transition-colors cursor-pointer",
-      nil =>
-        "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md text-forest-700 bg-forest-50 hover:bg-forest-100 border border-forest-200 transition-colors cursor-pointer"
-    }
-
     assigns =
-      assign_new(assigns, :class, fn ->
-        [Map.fetch!(variants, assigns[:variant])]
-      end)
+      assign(assigns, :class, [
+        "oc-btn",
+        assigns.variant == "primary" && "oc-btn-primary",
+        assigns.size == "compact" && "oc-btn-compact",
+        assigns.class
+      ])
 
     if rest[:href] || rest[:navigate] || rest[:patch] do
       ~H"""
@@ -204,8 +197,8 @@ defmodule OaksWeb.CoreComponents do
       end)
 
     ~H"""
-    <div class="mb-2">
-      <label class="flex items-center gap-2 cursor-pointer">
+    <div class="oc-field">
+      <label class="oc-check">
         <input
           type="hidden"
           name={@name}
@@ -219,10 +212,11 @@ defmodule OaksWeb.CoreComponents do
           name={@name}
           value="true"
           checked={@checked}
-          class={@class || "size-4 rounded border-stone-300 text-forest-600 focus:ring-forest-500"}
+          class={@class}
+          aria-invalid={@errors != [] && "true"}
           {@rest}
         />
-        <span class="text-sm font-medium text-stone-700">{@label}</span>
+        <span>{@label}</span>
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
@@ -231,17 +225,14 @@ defmodule OaksWeb.CoreComponents do
 
   def input(%{type: "select"} = assigns) do
     ~H"""
-    <div class="mb-2">
+    <div class="oc-field">
       <label>
-        <span :if={@label} class="block text-sm font-medium text-stone-700 mb-1">{@label}</span>
+        <span :if={@label} class="oc-label">{@label}</span>
         <select
           id={@id}
           name={@name}
-          class={[
-            @class ||
-              "w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-forest-600 focus:ring-1 focus:ring-forest-600 focus:outline-none",
-            @errors != [] && (@error_class || "border-red-500")
-          ]}
+          class={[@class || "oc-input", @errors != [] && @error_class]}
+          aria-invalid={@errors != [] && "true"}
           multiple={@multiple}
           {@rest}
         >
@@ -256,17 +247,14 @@ defmodule OaksWeb.CoreComponents do
 
   def input(%{type: "textarea"} = assigns) do
     ~H"""
-    <div class="mb-2">
+    <div class="oc-field">
       <label>
-        <span :if={@label} class="block text-sm font-medium text-stone-700 mb-1">{@label}</span>
+        <span :if={@label} class="oc-label">{@label}</span>
         <textarea
           id={@id}
           name={@name}
-          class={[
-            @class ||
-              "w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-forest-600 focus:ring-1 focus:ring-forest-600 focus:outline-none min-h-[5rem] resize-y",
-            @errors != [] && (@error_class || "border-red-500")
-          ]}
+          class={[@class || "oc-input", @errors != [] && @error_class]}
+          aria-invalid={@errors != [] && "true"}
           {@rest}
         >{HtmlForm.normalize_value("textarea", @value)}</textarea>
       </label>
@@ -278,19 +266,16 @@ defmodule OaksWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
-    <div class="mb-2">
+    <div class="oc-field">
       <label>
-        <span :if={@label} class="block text-sm font-medium text-stone-700 mb-1">{@label}</span>
+        <span :if={@label} class="oc-label">{@label}</span>
         <input
           type={@type}
           name={@name}
           id={@id}
           value={HtmlForm.normalize_value(@type, @value)}
-          class={[
-            @class ||
-              "w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-forest-600 focus:ring-1 focus:ring-forest-600 focus:outline-none",
-            @errors != [] && (@error_class || "border-red-500")
-          ]}
+          class={[@class || "oc-input", @errors != [] && @error_class]}
+          aria-invalid={@errors != [] && "true"}
           {@rest}
         />
       </label>
@@ -302,41 +287,57 @@ defmodule OaksWeb.CoreComponents do
   # Helper used by inputs to generate form errors
   defp error(assigns) do
     ~H"""
-    <p class="mt-1.5 flex gap-2 items-center text-sm text-red-600">
-      <.icon name="hero-exclamation-circle" class="size-5" />
+    <p class="oc-error">
+      <.icon name="hero-exclamation-circle-mini" class="size-4 shrink-0 mt-0.5" />
       {render_slot(@inner_block)}
     </p>
     """
   end
 
   @doc """
-  Renders a header with title.
+  Renders a page's title row: the title on a 2px ink rule, an optional
+  subtitle under it and actions at the right.
+
+  The title is set in the serif, roman. Wrap a scientific name in `<i>`
+  (the Botanical Italic Rule).
+
+  ## Examples
+
+      <.header>
+        Sources
+        <:subtitle>Every work the Compendium cites.</:subtitle>
+        <:actions><.button navigate={~p"/sources/new"}>Add source</.button></:actions>
+      </.header>
   """
+  attr :class, :any, default: nil
   slot :inner_block, required: true
   slot :subtitle
   slot :actions
 
   def header(assigns) do
     ~H"""
-    <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
+    <header class={["oc-title", @class]}>
       <div>
-        <h1
-          class="text-lg font-semibold leading-8"
-          style="font-family: var(--font-serif); color: var(--color-text-primary);"
-        >
-          {render_slot(@inner_block)}
-        </h1>
-        <p :if={@subtitle != []} class="text-sm" style="color: var(--color-text-secondary);">
-          {render_slot(@subtitle)}
-        </p>
+        <h1>{render_slot(@inner_block)}</h1>
+        <p :if={@subtitle != []} class="oc-title-sub">{render_slot(@subtitle)}</p>
       </div>
-      <div class="flex-none">{render_slot(@actions)}</div>
+      <div :if={@actions != []} class="oc-title-actions">{render_slot(@actions)}</div>
     </header>
     """
   end
 
   @doc """
-  Renders a table with generic styling.
+  Renders a ruled table: rows on hairlines under a 2px head rule, Archivo
+  with lining tabular figures (the field-marks table in DESIGN.md).
+
+  Column options:
+
+    * `row_header` makes the column's cells row headers (`<th scope="row">`),
+      as for the trait column of a field-marks table.
+    * `voice` sets the column in the reading serif, for Jeff's words.
+
+  With `stack`, each row becomes one block on phones, every cell labelled
+  with its column's label; without it the table scrolls sideways.
 
   ## Examples
 
@@ -344,11 +345,19 @@ defmodule OaksWeb.CoreComponents do
         <:col :let={user} label="id">{user.id}</:col>
         <:col :let={user} label="username">{user.username}</:col>
       </.table>
+
+      <.table id="field-marks" rows={@traits} stack>
+        <:col :let={t} label="Trait" row_header>{t.name}</:col>
+        <:col :let={t} label="Jeff Clark" voice>...</:col>
+        <:col :let={t} label="Other sources">...</:col>
+      </.table>
   """
   attr :id, :string, required: true
   attr :rows, :list, required: true
   attr :row_id, :any, default: nil, doc: "the function for generating the row id"
   attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
+  attr :stack, :boolean, default: false, doc: "one labelled block per row on phones"
+  attr :class, :any, default: nil
 
   attr :row_item, :any,
     default: &Function.identity/1,
@@ -356,6 +365,8 @@ defmodule OaksWeb.CoreComponents do
 
   slot :col, required: true do
     attr :label, :string
+    attr :row_header, :boolean
+    attr :voice, :boolean
   end
 
   slot :action, doc: "the slot for showing user actions in the last table column"
@@ -367,52 +378,50 @@ defmodule OaksWeb.CoreComponents do
       end
 
     ~H"""
-    <table class="min-w-full border-collapse">
-      <thead>
-        <tr class="border-b border-stone-200 bg-forest-50">
-          <th
-            :for={col <- @col}
-            class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-forest-800"
-          >
-            {col[:label]}
-          </th>
-          <th :if={@action != []} class="px-4 py-3">
-            <span class="sr-only">Actions</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody
-        id={@id}
-        phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"}
-        class="divide-y divide-stone-100"
-      >
-        <tr
-          :for={row <- @rows}
-          id={@row_id && @row_id.(row)}
-          class="hover:bg-forest-50/50 transition-colors"
-        >
-          <td
-            :for={col <- @col}
-            phx-click={@row_click && @row_click.(row)}
-            class={["px-4 py-3 text-sm", @row_click && "hover:cursor-pointer"]}
-          >
-            {render_slot(col, @row_item.(row))}
-          </td>
-          <td :if={@action != []} class="w-0 px-4 py-3 font-semibold text-sm">
-            <div class="flex gap-4">
-              <%= for action <- @action do %>
-                {render_slot(action, @row_item.(row))}
-              <% end %>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class={["oc-table-wrap", @stack && "oc-table-stack", @class]}>
+      <table class="oc-table">
+        <thead>
+          <tr>
+            <th :for={col <- @col} scope="col">{col[:label]}</th>
+            <th :if={@action != []} scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody id={@id} phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"}>
+          <tr :for={row <- @rows} id={@row_id && @row_id.(row)}>
+            <%= for col <- @col do %>
+              <th
+                :if={col[:row_header]}
+                scope="row"
+                phx-click={@row_click && @row_click.(row)}
+                class={@row_click && "oc-clickable"}
+              >
+                {render_slot(col, @row_item.(row))}
+              </th>
+              <td
+                :if={!col[:row_header]}
+                data-label={col[:label]}
+                phx-click={@row_click && @row_click.(row)}
+                class={[col[:voice] && "oc-voice", @row_click && "oc-clickable"]}
+              >
+                {render_slot(col, @row_item.(row))}
+              </td>
+            <% end %>
+            <td :if={@action != []} class="w-0">
+              <div class="oc-table-actions">
+                <%= for action <- @action do %>
+                  {render_slot(action, @row_item.(row))}
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     """
   end
 
   @doc """
-  Renders a data list.
+  Renders a data list: each term beside its value, on hairlines.
 
   ## Examples
 
@@ -427,14 +436,12 @@ defmodule OaksWeb.CoreComponents do
 
   def list(assigns) do
     ~H"""
-    <ul class="divide-y divide-stone-100">
-      <li :for={item <- @item} class="py-3">
-        <div>
-          <div class="font-semibold text-sm text-forest-800">{item.title}</div>
-          <div class="text-sm" style="color: var(--color-text-secondary);">{render_slot(item)}</div>
-        </div>
-      </li>
-    </ul>
+    <dl class="oc-list">
+      <div :for={item <- @item}>
+        <dt>{item.title}</dt>
+        <dd>{render_slot(item)}</dd>
+      </div>
+    </dl>
     """
   end
 
@@ -466,14 +473,15 @@ defmodule OaksWeb.CoreComponents do
   end
 
   @doc """
-  Renders a modal dialog.
+  Renders a modal dialog: a square paper panel with a 2px ink border over
+  an ink wash. Esc, a click outside and the Close button all close it.
 
   ## Examples
 
       <.modal id="confirm-modal">
         Are you sure?
         <:actions>
-          <.button phx-click="confirm">OK</.button>
+          <.button phx-click="confirm" variant="primary">OK</.button>
         </:actions>
       </.modal>
 
@@ -497,40 +505,41 @@ defmodule OaksWeb.CoreComponents do
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
       class="hidden relative z-50"
     >
-      <div
-        id={"#{@id}-bg"}
-        class="fixed inset-0 bg-black/60 transition-opacity"
-        aria-hidden="true"
-      />
+      <div id={"#{@id}-bg"} class="oc-modal-backdrop" aria-hidden="true" />
       <div
         class="fixed inset-0 overflow-y-auto"
-        aria-labelledby={"#{@id}-title"}
+        aria-labelledby={@title != [] && "#{@id}-title"}
         aria-describedby={"#{@id}-description"}
         role="dialog"
         aria-modal="true"
         tabindex="0"
       >
-        <div class="flex min-h-full items-center justify-center p-4">
-          <div class="w-full max-w-lg rounded-xl bg-white p-8 shadow-xl ring-1 ring-stone-200">
-            <.focus_wrap
-              id={"#{@id}-wrap"}
-              phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
-              phx-key="escape"
-              phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-            >
-              <div :if={@title != []} class="mb-4">
-                <h2 id={"#{@id}-title"} class="text-lg font-semibold">
-                  {render_slot(@title)}
-                </h2>
-              </div>
-              <div id={"#{@id}-description"}>
-                {render_slot(@inner_block)}
-              </div>
-              <div :if={@actions != []} class="mt-6 flex justify-end gap-3">
-                {render_slot(@actions)}
-              </div>
-            </.focus_wrap>
-          </div>
+        <div class="flex min-h-full items-center justify-center p-s4">
+          <.focus_wrap
+            id={"#{@id}-wrap"}
+            class="oc-modal-panel"
+            phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
+            phx-key="escape"
+            phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
+          >
+            <div class="oc-modal-head">
+              <h2 :if={@title != []} id={"#{@id}-title"}>{render_slot(@title)}</h2>
+              <.button
+                type="button"
+                size="compact"
+                class="ml-auto"
+                phx-click={JS.exec("data-cancel", to: "##{@id}")}
+              >
+                Close <kbd>Esc</kbd>
+              </.button>
+            </div>
+            <div id={"#{@id}-description"} class="oc-modal-body">
+              {render_slot(@inner_block)}
+            </div>
+            <div :if={@actions != []} class="oc-modal-actions">
+              {render_slot(@actions)}
+            </div>
+          </.focus_wrap>
         </div>
       </div>
     </div>
@@ -538,7 +547,7 @@ defmodule OaksWeb.CoreComponents do
   end
 
   @doc """
-  Renders a back navigation link.
+  Renders a back navigation link, with a drawn chevron.
 
   ## Examples
 
@@ -549,12 +558,7 @@ defmodule OaksWeb.CoreComponents do
 
   def back(assigns) do
     ~H"""
-    <.link
-      navigate={@navigate}
-      class="inline-flex items-center gap-1 text-sm font-semibold text-forest-700 hover:text-forest-900 transition-colors"
-      style="text-decoration: none;"
-    >
-      <.icon name="hero-arrow-left" class="size-4" />
+    <.link navigate={@navigate} class="oc-back">
       {render_slot(@inner_block)}
     </.link>
     """
@@ -562,24 +566,22 @@ defmodule OaksWeb.CoreComponents do
 
   ## JS Commands
 
+  # Notices and dialogs fade in and out; the design keeps its one authored
+  # motion for the comparison, so nothing here slides or scales.
+
   def show(js \\ %JS{}, selector) do
     JS.show(js,
       to: selector,
-      time: 300,
-      transition:
-        {"transition-all ease-out duration-300",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
-         "opacity-100 translate-y-0 sm:scale-100"}
+      time: 150,
+      transition: {"transition-opacity ease-out duration-150", "opacity-0", "opacity-100"}
     )
   end
 
   def hide(js \\ %JS{}, selector) do
     JS.hide(js,
       to: selector,
-      time: 200,
-      transition:
-        {"transition-all ease-in duration-200", "opacity-100 translate-y-0 sm:scale-100",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
+      time: 100,
+      transition: {"transition-opacity ease-in duration-100", "opacity-100", "opacity-0"}
     )
   end
 
@@ -588,8 +590,8 @@ defmodule OaksWeb.CoreComponents do
     |> JS.show(to: "##{id}")
     |> JS.show(
       to: "##{id}-bg",
-      time: 300,
-      transition: {"transition-all ease-out duration-300", "opacity-0", "opacity-100"}
+      time: 150,
+      transition: {"transition-opacity ease-out duration-150", "opacity-0", "opacity-100"}
     )
     |> show("##{id}-wrap")
     |> JS.add_class("overflow-hidden", to: "body")
@@ -600,8 +602,8 @@ defmodule OaksWeb.CoreComponents do
     js
     |> JS.hide(
       to: "##{id}-bg",
-      time: 200,
-      transition: {"transition-all ease-in duration-200", "opacity-100", "opacity-0"}
+      time: 100,
+      transition: {"transition-opacity ease-in duration-100", "opacity-100", "opacity-0"}
     )
     |> hide("##{id}-wrap")
     |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})
