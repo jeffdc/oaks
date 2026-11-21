@@ -1,11 +1,11 @@
-The Oak Compendium rebuild, agreed with Jeff on 2026-11-21 after a planning and design session. A readable version of this plan (same content) is at https://claude.ai/code/artifact/d1136370-ece1-4986-8b46-1c6c5b436e88.
+The Oak Compendium rebuild, agreed with Jeff on 2026-11-21 after a planning and design session. A readable version of this plan is at https://claude.ai/code/artifact/d1136370-ece1-4986-8b46-1c6c5b436e88; it predates dropping the audit log and undo (2026-11-21), and this doc wins where they differ.
 
 ## Goals
 - **Who it's for.** Oak identifiers first (mostly iNaturalist identifiers, at a desk beside an iNat tab or on a phone under a tree), botanists and researchers second. Jeff is the only editor.
 - **What it is.** The reference for telling oaks and their hybrids apart: one field identifier's tested knowledge, every claim traceable to his observations or to cited literature. North America first; the rest of the world stays a reference catalog until later. iNaturalist is the taxonomic backbone.
 - **Jeff's words.** Oak Compendium prose is 100% Jeff's. Agents never write, paraphrase, summarize or merge it. They find his material, assemble it verbatim with sources, and propose facts with the quote behind each. Nothing counts until Jeff accepts it.
 - **Facts.** Every fact is tied to its source, the way gallformers' taxogall does it. Jeff's facts lead; other sources stand behind them; conflicts are surfaced for Jeff, not hidden.
-- **No hand SQL.** Every change goes through the app or one audited import path, with a history of who changed what and an undo. Hand-run SQL over Fly is designed out.
+- **No hand SQL.** Every change goes through the app or the one import path (packages Jeff previews and approves). Hand-run SQL over Fly is designed out. There is no audit log or undo (see the note under Architecture).
 - **The look.** DESIGN.md and the prototypes in design/prototype/ are the reference for every page.
 
 Done when:
@@ -14,14 +14,15 @@ Done when:
 - Facts, traits and conflicts are sourced and reviewable; Jeff's lead.
 - Jeff writes and publishes structured entries in the in-site editor; nothing agent-written can publish as his.
 - The public site runs on the new design: taxon pages, comparisons, hybrids, ID tool.
-- Every data change is audited and undoable; no SQL over fly ssh.
+- Every data change goes through the app or an approved import package; no SQL over fly ssh.
 
 ## Settled with Jeff (do not reopen)
-- Stay on SQLite. Copy gallformers' design and its pure modules; build a SQLite-native audit log instead of Carbonite.
+- Stay on SQLite. Copy gallformers' design and its pure modules (not its Carbonite audit log).
+- No audit log and no undo for now (Jeff, 2026-11-21). Add them later only if a need appears.
 - iNaturalist is the taxonomic backbone; departures are Jeff's sourced decisions.
 - North America first for traits and the ID tool.
 - Varieties and subspecies are taxa with their own pages under their species.
-- Agents run in Claude Code outside the app and submit packages through one audited import endpoint; the app makes no LLM calls.
+- Agents run in Claude Code outside the app and submit packages through one import endpoint; the app makes no LLM calls.
 - Facts from Jeff's writing: an agent proposes, with the verbatim quote; Jeff accepts.
 - The editor lives in the site, admin-only. Reviewing the live agent-assembled text is the same screen as writing.
 - Entries follow one structure: key sentence (the fragment on the taxon page), account, historical context, more to come.
@@ -44,14 +45,14 @@ Done when:
 - All UI work uses the impeccable skill (Jeff's standing instruction).
 
 ## Architecture
-- **Contexts.** Business logic splits into contexts that own their tables and talk through published read models, as in gallformers: Taxa, Sources (works, materials, observations), Facts, Traits, Entries, Import, Audit. Nothing reads another context's tables directly.
+- **Contexts.** Business logic splits into contexts that own their tables and talk through published read models, as in gallformers: Taxa, Sources (works, materials, observations), Facts, Traits, Entries, Import. Nothing reads another context's tables directly.
 - **Taxa.** taxa (rank: genus, subgenus, section, subsection, complex, species, subspecies, variety, form, nothospecies, formula hybrid), taxon_names (accepted, synonym, misapplied; authorship), a closure table for ancestry, and the iNat taxon id. Named hybrids and formula hybrids are taxa; their parentage is a sourced fact. An intersectional hybrid sits at the lowest rank both parents share. Port gallformers' Taxa.Ancestry, tree validator and NameNormalizer.
 - **Sources and material.** sources are works (books, articles, websites, iNaturalist, Jeff's own field notes). materials are Jeff's verbatim texts (iNat comments and ID remarks, manuscript paragraphs, review notes), each with date, URL, authorship (Jeff, cited, not Jeff), taxon links, a set-aside flag and a duplicate group. Materials are private and never in the public API. observations are iNat observations with photos, licence and roles: exemplar photo, evidence, material, trait illustration.
 - **Facts.** facts (kind, slot, standing), attributions (fact x source: stance, partial date, value as written), evidence (a material span, a document quote with page, or an observation), and typed detail tables: trait facts, measure facts (min, usual range, max, unit), range facts (place, native or introduced), parentage facts. Standing differs from gallformers' newest-wins: Jeff's Oak Compendium fact leads its slot; other sources sit behind it; values that disagree in a slot raise a conflict for Jeff (mine stands, update mine, not a conflict: variation). Measures compare by range overlap.
 - **Traits.** A global trait vocabulary (organ, kind: categorical, range or count, unit), values, and source-term mappings like gallformers' trait_term_mappings. No eastern North American or red/white oak assumptions. Jeff approves the vocabulary.
 - **Entries.** entry_structure (the shared sections and their purpose), entries, sections, immutable section versions, and provenance spans inside each version: inserted from material (with the material span), typed by Jeff, or agent wording (pre-existing). Entry text can only be written by Jeff's own session in the editor; the import path rejects it. Only sections Jeff marks written publish.
-- **Audit and undo.** Every write runs in Oaks.Audit.transaction(actor, operation, fun). It records the actor in a connection-local temp table; SQLite triggers on tracked tables write before and after images to audit_changes and RAISE(ABORT) when no actor is set, so an unaudited write fails, as Carbonite does in gallformers. Undo applies the inverse of a transaction as a new audited transaction, only if nothing has touched those rows since.
-- **Import packages.** One contract (JSON Schema in priv/import, as gallformers does) for every bulk change: agents in Claude Code, scripts and data loads all produce packages. A package is uploaded with a scoped token, validated, staged, shown to Jeff as a diff, applied in one audited transaction when he approves, and can be undone. Re-applying the same package is a no-op.
+- **No audit log, no undo (Jeff, 2026-11-21).** An earlier draft of this plan had an audit log (actor context, triggers, before and after images) and transaction undo. That over-read Jeff's point, which was only that changes must not be pushed to SQLite by hand-run SQL scripts. Both were dropped (items d635, 24eb). If you find a leftover mention of auditing, undo through an audit log, or "audited" writes anywhere in this plan, its items or the code, ignore it: don't implement it and don't raise it as a question. ("attributions" in Facts means a fact's sources, which stays; the audit-2026-11 plan is an unrelated codebase review.)
+- **Import packages.** One contract (JSON Schema in priv/import, as gallformers does) for every bulk change: agents in Claude Code, scripts and data loads all produce packages. A package is uploaded with a scoped token, validated, staged, shown to Jeff as a diff, and applied in one transaction when he approves. Re-applying the same package is a no-op. There is no package undo.
 - **Auth.** Replace the shared API key in localStorage with a real single-user login (phx.gen.auth) for Jeff, and scoped API tokens for agents (read private material, submit packages). Public reads stay public.
 - **API.** The public read-only v1 keeps working through an adapter until the site moves. A v2 serves the new model (taxa, names, published entry sections, facts with sources) to the public. A private API serves agents.
 - **Gallformers.** Copy the proven pure modules now (standing rules, partial dates, quote locating, name normalizing, ancestry) and the import-contract approach. The fragment-and-reader component is the first candidate to share as code; decide on a shared package once both apps settle.
@@ -65,7 +66,7 @@ Done when:
 - Every load is a package Jeff previews and approves. Schema changes are migrations; data changes are packages.
 
 ## Why this order
-Foundations first: nothing else should write data until writes are audited, undoable and come through packages. Sources and facts come before taxonomy because hybrid parentage, ranges and traits are sourced facts. Material can load in parallel with taxonomy. Traits and fact review need both taxa and material; so does the editor. The site shell can start right after Foundations; the public taxon pages need taxa, facts, entries and the shell. The ID tool needs traits and the shell; ranges and maps need taxa and the shell.
+Foundations first: nothing else should write data until Jeff logs in properly and bulk changes come through packages. Sources and facts come before taxonomy because hybrid parentage, ranges and traits are sourced facts. Material can load in parallel with taxonomy. Traits and fact review need both taxa and material; so does the editor. The site shell can start right after Foundations; the public taxon pages need taxa, facts, entries and the shell. The ID tool needs traits and the shell; ranges and maps need taxa and the shell.
 
 ## Existing plans
 - **gallformers-parity**: Keep, smaller. Five items move into the new plan; a518 and ba39 stay. Telemetry question df25/4807 is still open.

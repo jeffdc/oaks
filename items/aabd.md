@@ -5,7 +5,7 @@ rank: 40
 title: Conflict records and resolutions
 stage: committed
 created: "2026-11-21T18:14:00Z"
-updated: "2026-11-21T18:14:00Z"
+updated: "2026-11-21T18:33:13Z"
 ---
 
-Mine stands, update mine, not a conflict: variation, note. Recorded, attributed, undoable.
+Mine stands, update mine, not a conflict: variation, note. Recorded.
