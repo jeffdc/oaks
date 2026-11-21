@@ -136,13 +136,17 @@ defmodule OaksWeb.Router do
     get "/", OpenApiSpex.Plug.SwaggerUI, path: "/api/v1/docs/openapi.json"
   end
 
-  # One-click login for local development (OaksWeb.DevLoginController).
-  # Compiled in only when dev_routes is set (dev and test), never in a release.
+  # Development-only routes: the one-click login (OaksWeb.DevLoginController)
+  # and the component gallery. Compiled in only when dev_routes is set (dev
+  # and test), never in a release.
   if Application.compile_env(:oaks, :dev_routes) do
     scope "/dev", OaksWeb do
       pipe_through :browser
 
       post "/log-in", DevLoginController, :create
+
+      # The DESIGN.md component gallery (OaksWeb.DevComponentsLive, item 21b7).
+      live "/components", DevComponentsLive
     end
   end
 
