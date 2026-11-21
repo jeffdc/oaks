@@ -79,6 +79,7 @@ Tests use a **separate test database** (`priv/oaks_test.sqlite`) that is:
 - **Schema**: Built by running the migrations in `priv/repo/migrations`
 - **Minimal seed data**: Loaded from `priv/repo/test_seeds.sql`
 - **Rebuilt with**: `make test-db` (drops the file, runs `ecto.create` + `ecto.migrate`, then loads the seeds with `sqlite3`)
+- **Copied per run**: `priv/oaks_test.sqlite` is a template no test run opens. Each `mix test` runs on its own copy at `_build/test/test_dbs/oaks_test-<pid>.sqlite`, taken at start and deleted at exit (`isolate_test_db/1` in `mix.exs`), so concurrent runs in one checkout, `mix test --partitions`, and `make test-db` during a run don't collide. A run started before `make test-db` keeps its old copy. Don't run two `make test-db` at once in one checkout.
 
 **Important**: The `mix test` alias runs `ecto.migrate` (so new migrations apply automatically) but never reloads seeds. After modifying `test_seeds.sql`, run `make test-db`. Tests never read the seeded rows: each test builds its own data with the fixture modules in `test/support/fixtures/` and asserts only on rows it created (see CODING_STANDARDS.md, Fixtures), so changing the seeds needs no test change.
 
