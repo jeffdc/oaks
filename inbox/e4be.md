@@ -5,6 +5,11 @@ plan: compendium
 item: "0249"
 by: /Users/jeff/dev/oaks
 created: "2026-11-21T18:46:06Z"
+settled:
+  action: accept
+  by: Jeff
+  human: true
+  at: "2026-11-21T20:18:49Z"
 ---
 
 Generated code we own and read, not a library. Argon2id via argon2_elixir, min 12 chars, dummy hash for unknown emails.

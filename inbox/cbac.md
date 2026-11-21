@@ -5,6 +5,11 @@ plan: compendium
 item: "0249"
 by: /Users/jeff/dev/oaks
 created: "2026-11-21T18:46:06Z"
+settled:
+  action: accept
+  by: Jeff
+  human: true
+  at: "2026-11-21T20:18:49Z"
 ---
 
 Jeff does not want to close off a second editor; self-registration needs an email provider and an invite command is the easier path to a second user.

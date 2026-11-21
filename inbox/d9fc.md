@@ -5,4 +5,9 @@ plan: compendium
 item: "0249"
 by: /Users/jeff/dev/oaks
 created: "2026-11-21T18:46:06Z"
+settled:
+  action: accept
+  by: Jeff
+  human: true
+  at: "2026-11-21T20:18:49Z"
 ---
