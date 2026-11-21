@@ -4,8 +4,9 @@
 # gallformers' dev/githooks/pre-push.
 #
 # 1. Blocks force pushes (history rewriting) from anyone.
-# 2. Blocks pushes to main or master unless OAKS_PUSH_MAIN=1 is set for that
-#    one push. Agents never set it.
+# 2. Blocks pushes to main or master from anyone: main changes through a pull
+#    request. To push main yourself, set OAKS_PUSH_MAIN=1 for that one push.
+#    Agents never do.
 #
 # git passes "<local ref> <local sha> <remote ref> <remote sha>" lines on stdin.
 set -uo pipefail
@@ -24,7 +25,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 
   branch="${remote_ref#refs/heads/}"
   if [[ "$branch" = "main" || "$branch" = "master" ]] && [[ "${OAKS_PUSH_MAIN:-}" != "1" ]]; then
-    echo "Blocked: pushes to main and master need OAKS_PUSH_MAIN=1." >&2
+    echo "Blocked: pushes to main and master go through a pull request." >&2
     echo "To push it yourself: OAKS_PUSH_MAIN=1 git push ... (agents never do)." >&2
     exit 1
   fi
