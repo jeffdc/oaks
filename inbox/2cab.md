@@ -5,6 +5,12 @@ plan: compendium
 item: f8f5
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-ab5c413275376b6b6
 created: "2026-11-21T22:58:44Z"
+settled:
+  action: accept
+  note: with review d70c
+  by: /Users/jeff/dev/oaks
+  on_request: true
+  at: "2026-11-21T23:02:11Z"
 ---
 
 A producer that writes dry_run=false or dry_run=1 should learn the rule rather than have the request treated as something it didn't mean.
