@@ -37,6 +37,15 @@ ENV/
 tmp/
 BUGS.md
 
+# Local reference copy of mined Oak Compendium notes (not committed)
+/compendium-notes/
+
+# Impeccable design-session by-products: critiques, mock variants, review screenshots.
+# Its config, design.json and surface briefs stay tracked.
+/.impeccable/critique/
+/.impeccable/mocks/
+/.impeccable/review/
+
 # Testing
 .pytest_cache/
 .coverage
