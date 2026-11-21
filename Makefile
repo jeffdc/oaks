@@ -1,6 +1,6 @@
 # Oaks - Top-level Makefile
 
-.PHONY: dev dev-phx test test-db setup format lint precommit done-checks ci build clean download-db help
+.PHONY: dev dev-phx test test-db setup hooks format lint precommit done-checks ci build clean download-db help
 
 # =============================================================================
 # Phoenix Development (primary)
@@ -17,9 +17,13 @@ dev-phx: dev
 # Setup & Dependencies
 # =============================================================================
 
-# Full setup: deps + assets + verify database exists
-setup:
+# Full setup: deps + assets + verify database exists, and the push guard
+setup: hooks
 	mix setup
+
+# Install the git push guard (blocks force pushes and pushes to main)
+hooks:
+	scripts/githooks/install.sh
 
 # Install Elixir dependencies
 deps:
@@ -168,7 +172,8 @@ help:
 	@echo ""
 	@echo "Phoenix Development:"
 	@echo "  make dev        Start Phoenix dev server (:4444)"
-	@echo "  make setup      Full setup (deps + assets + db check)"
+	@echo "  make setup      Full setup (deps + assets + db check + git hooks)"
+	@echo "  make hooks      Install the git push guard (no force pushes, no pushes to main)"
 	@echo "  make test       Run Phoenix tests (rebuilds test DB)"
 	@echo "  make test-db    Rebuild test database from migrations + seeds"
 	@echo "  make format     Format Elixir code"

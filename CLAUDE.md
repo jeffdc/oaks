@@ -144,6 +144,8 @@ See **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** for comprehensive Elixir/Ph
 |-------------|-------------------|-------|
 | Everything else | **Yes** | Always ask user before pushing |
 
+**Push guard:** `make hooks` (also run by `make setup`) installs `scripts/githooks/pre-push`, which blocks force pushes and pushes to main or master. Jeff pushes main himself with `OAKS_PUSH_MAIN=1 git push ...`; agents never set it.
+
 **Commit messages:** Present tense, imperative mood.
 
 **CRITICAL: Never amend commits.** Always create new commits.
