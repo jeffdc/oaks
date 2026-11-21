@@ -7,6 +7,7 @@ defmodule Oaks.Accounts.User do
   """
   use Ecto.Schema
   import Ecto.Changeset
+  import Oaks.ChangesetHelpers
 
   @type t :: %__MODULE__{}
 
@@ -25,7 +26,7 @@ defmodule Oaks.Accounts.User do
   def email_changeset(user, attrs) do
     user
     |> cast(attrs, [:email])
-    |> update_change(:email, &String.trim/1)
+    |> trim_strings()
     |> validate_required([:email])
     |> validate_format(:email, ~r/^[^@,;\s]+@[^@,;\s]+$/,
       message: "must have the @ sign and no spaces"

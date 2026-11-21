@@ -7,6 +7,7 @@ defmodule Oaks.Sources.SpeciesSource do
   """
   use Ecto.Schema
   import Ecto.Changeset
+  import Oaks.ChangesetHelpers
 
   alias Oaks.JsonList
   alias Oaks.Sources.Source
@@ -54,6 +55,7 @@ defmodule Oaks.Sources.SpeciesSource do
       :url,
       :is_preferred
     ])
+    |> trim_strings()
     |> JsonList.cast(:local_names)
     |> validate_required(@required_fields)
     |> validate_length(:range, max: 5000)
@@ -66,6 +68,7 @@ defmodule Oaks.Sources.SpeciesSource do
     |> validate_length(:buds, max: 3000)
     |> validate_length(:hardiness_habitat, max: 5000)
     |> validate_length(:miscellaneous, max: 3000)
+    |> validate_url(:url)
     |> validate_length(:url, max: 1000)
     |> foreign_key_constraint(:species_id)
     |> foreign_key_constraint(:source_id)
