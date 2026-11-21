@@ -1,12 +1,12 @@
 defmodule OaksWeb.ArticleFormLiveTest do
   @moduledoc """
   Tests for ArticleFormLive (create/edit articles).
-  Uses seeded test data (see priv/repo/test_seeds.sql).
   """
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
   import Oaks.AccountsFixtures
+  import Oaks.ArticlesFixtures
 
   alias Oaks.Articles
 
@@ -20,8 +20,10 @@ defmodule OaksWeb.ArticleFormLiveTest do
     end
 
     test "edit redirects immediately", %{conn: conn} do
+      article = article_fixture()
+
       assert {:error, {:live_redirect, %{to: "/articles"}}} =
-               live(conn, ~p"/articles/getting-started/edit")
+               live(conn, ~p"/articles/#{article.slug}/edit")
     end
   end
 
@@ -57,15 +59,18 @@ defmodule OaksWeb.ArticleFormLiveTest do
 
   describe "edit (authenticated)" do
     test "updates the article and keeps its published slug", %{conn: conn} do
-      {:ok, view, _html} =
-        conn |> authenticated_conn() |> live(~p"/articles/getting-started/edit")
+      article = article_fixture()
+      path = ~p"/articles/#{article.slug}"
 
-      assert {:error, {:live_redirect, %{to: "/articles/getting-started"}}} =
+      {:ok, view, _html} =
+        conn |> authenticated_conn() |> live(~p"/articles/#{article.slug}/edit")
+
+      assert {:error, {:live_redirect, %{to: ^path}}} =
                view
                |> form("#article-form", article: %{title: "Getting Started, Revised"})
                |> render_submit()
 
-      assert Articles.get_article_by_slug("getting-started").title == "Getting Started, Revised"
+      assert Articles.get_article_by_slug(article.slug).title == "Getting Started, Revised"
     end
 
     test "redirects for an unknown slug", %{conn: conn} do

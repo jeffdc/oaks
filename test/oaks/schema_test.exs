@@ -5,6 +5,8 @@ defmodule Oaks.SchemaTest do
   """
   use Oaks.DataCase
 
+  import Oaks.ArticlesFixtures
+
   alias Oaks.Articles.Article
   alias Oaks.Import.Metadata
   alias Oaks.Repo
@@ -104,16 +106,17 @@ defmodule Oaks.SchemaTest do
   end
 
   describe "Article schema" do
-    test "loads seeded articles" do
-      articles = Repo.all(Article)
-      assert length(articles) == 2
+    test "reads back published and draft articles" do
+      published = article_fixture(tags: ["guide"])
+      draft = article_fixture(is_published: false)
 
-      published = Enum.find(articles, &(&1.slug == "getting-started"))
-      assert published.is_published == true
-      assert published.author == "Jeff"
+      loaded = Repo.get!(Article, published.id)
+      assert loaded.slug == published.slug
+      assert loaded.is_published == true
+      assert loaded.author == "Jeff"
+      assert loaded.tags == ~s(["guide"])
 
-      draft = Enum.find(articles, &(&1.slug == "advanced-taxonomy-draft"))
-      assert draft.is_published == false
+      assert Repo.get!(Article, draft.id).is_published == false
     end
   end
 
