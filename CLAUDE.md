@@ -131,6 +131,7 @@ See **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** for comprehensive Elixir/Ph
 
 - Editors log in with a password and a TOTP code (or a recovery code) at `/users/log-in`; built from `phx.gen.auth` (item 0249). Code: `Oaks.Accounts` (users, Argon2id hashes, encrypted TOTP secrets, hashed tokens and recovery codes) and `OaksWeb.UserAuth` (sessions, plugs, `on_mount`).
 - There is no sign-up. `Oaks.Release.setup_link/1` creates a user (or recovers one) and prints a one-time setup link; see its doc for the `fly ssh` command. Any number of users is allowed, and every user can edit.
+- Locally, the login page has a "Log in as dev user" button: `POST /dev/log-in` (`OaksWeb.DevLoginController`) logs in as `dev@localhost` with no password or code. Its route is compiled only when `config :oaks, dev_routes: true` (dev and test), so a production release has none.
 - Every browser request and LiveView has `@current_scope`: an `Oaks.Accounts.Scope` when logged in, `nil` when not. It is set on the static render too, so LiveViews redirect logged-out visitors straight away (no `connected?/1` check).
 - Gate editing UI with `@current_scope`, and re-check `socket.assigns[:current_scope]` in every `handle_event` that writes.
 - GET/read pages are public. The JSON API is public and read-only; it has no authentication.

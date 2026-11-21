@@ -44,6 +44,9 @@ config :oaks, :login_encryption_key, "dGVzdC1sb2dpbi1lbmNyeXB0aW9uLWtleS0zMmJ5dG
 # the rate-limit tests lower them.
 config :oaks, :login_rate_limits, per_ip: 1_000, per_account: 1_000
 
+# Compile the dev-only routes (the one-click dev login) so they can be tested.
+config :oaks, dev_routes: true
+
 # Record page views inline so no analytics insert outlives its test.
 config :oaks, :analytics_async, false
 
