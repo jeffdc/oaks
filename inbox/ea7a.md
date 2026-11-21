@@ -6,6 +6,11 @@ item: fbd0
 source: reports/fbd0-1.md
 by: /Users/jeff/dev/oaks
 created: "2026-11-21T21:18:00Z"
+settled:
+  action: accept
+  by: Jeff
+  human: true
+  at: "2026-11-21T21:50:35Z"
 decisions:
   - "0504"
   - "0531"

@@ -5,6 +5,12 @@ plan: compendium
 item: fbd0
 by: /Users/jeff/dev/oaks
 created: "2026-11-21T21:09:38Z"
+settled:
+  action: accept
+  note: with review ea7a
+  by: Jeff
+  human: true
+  at: "2026-11-21T21:50:35Z"
 ---
 
 Agents aren't browsers; limits follow the LoginLimiter pattern.
