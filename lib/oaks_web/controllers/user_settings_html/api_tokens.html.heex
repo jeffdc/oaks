@@ -1,0 +1,90 @@
+<div class="settings-container" id="api-tokens-page">
+  <h1 class="settings-title">Agent tokens</h1>
+
+  <section class="card p-6">
+    <h2 class="section-title" style="margin-bottom: 0.5rem;">New token</h2>
+    <p class="settings-description">
+      A token lets an agent use the private API with the scopes you pick. It's shown once,
+      when you make it.
+    </p>
+    <.form for={@form} id="api-token-form" action={~p"/users/settings/api-tokens"}>
+      <.auth_field
+        field={@form[:name]}
+        label="Name (which agent or job it's for)"
+        autocomplete="off"
+        required
+      />
+
+      <fieldset class="settings-form-group">
+        <legend class="settings-form-label">Scopes</legend>
+        <input type="hidden" name={@form[:scopes].name <> "[]"} value="" />
+        <label :for={scope <- @scopes} class="settings-check">
+          <input
+            type="checkbox"
+            name={@form[:scopes].name <> "[]"}
+            value={scope}
+            checked={scope in List.wrap(@form[:scopes].value)}
+          />
+          <code>{scope}</code> {scope_description(scope)}
+        </label>
+        <.field_errors field={@form[:scopes]} />
+      </fieldset>
+
+      <div class="settings-form-group">
+        <label for={@form[:lifetime_in_days].id} class="settings-form-label">Expires after</label>
+        <select
+          id={@form[:lifetime_in_days].id}
+          name={@form[:lifetime_in_days].name}
+          class="settings-form-input"
+        >
+          <option
+            :for={days <- @lifetimes}
+            value={days}
+            selected={to_string(days) == to_string(@form[:lifetime_in_days].value)}
+          >
+            {days} days
+          </option>
+        </select>
+      </div>
+
+      <div class="settings-button-group">
+        <button type="submit" class="settings-btn settings-btn-primary">Make token</button>
+        <.link href={~p"/settings"} class="settings-btn settings-btn-secondary">Cancel</.link>
+      </div>
+    </.form>
+  </section>
+
+  <section class="card p-6" style="margin-top: 1.5rem;">
+    <h2 class="section-title" style="margin-bottom: 0.5rem;">Tokens</h2>
+    <p :if={@tokens == []} class="settings-description" id="api-tokens-none">
+      No tokens yet.
+    </p>
+    <ul :if={@tokens != []} id="api-tokens" class="settings-token-list">
+      <li :for={token <- @tokens} id={"api-token-#{token.id}"} class="settings-token">
+        <div>
+          <strong>{token.name}</strong>
+          <span :for={scope <- token.scopes} class="settings-token-scope">{scope}</span>
+          <p class="settings-token-meta">
+            Made {date(token.inserted_at)} ·
+            <%= if expired?(token) do %>
+              <strong>expired {date(token.expires_at)}</strong>
+            <% else %>
+              expires {date(token.expires_at)}
+            <% end %>
+            · {if token.last_used_at,
+              do: "last used #{date(token.last_used_at)}",
+              else: "never used"}
+          </p>
+        </div>
+        <.form
+          for={%{}}
+          action={~p"/users/settings/api-tokens/#{token.id}"}
+          method="delete"
+          id={"revoke-api-token-#{token.id}"}
+        >
+          <button type="submit" class="settings-btn settings-btn-secondary">Revoke</button>
+        </.form>
+      </li>
+    </ul>
+  </section>
+</div>

@@ -5,7 +5,7 @@ defmodule Oaks.AccountsTest do
   import Oaks.AccountsFixtures
 
   alias Oaks.Accounts
-  alias Oaks.Accounts.{RecoveryCode, SecretBox, User, UserToken}
+  alias Oaks.Accounts.{ApiToken, RecoveryCode, SecretBox, User, UserToken}
 
   describe "create_setup_link/1" do
     test "creates a user with no password or second factor yet" do
@@ -288,6 +288,121 @@ defmodule Oaks.AccountsTest do
       assert Accounts.verify_second_factor(user, hd(old)) == :error
       assert Accounts.verify_second_factor(user, hd(new)) == :ok
       assert Repo.aggregate(from(c in RecoveryCode, where: c.user_id == ^user.id), :count) == 10
+    end
+  end
+
+  describe "agent tokens" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "a new token is prefixed, stored hashed, and found by its raw form", %{user: user} do
+      {:ok, raw, token} =
+        Accounts.create_api_token(user, %{
+          "name" => "  importer ",
+          "scopes" => ["", "packages:submit"],
+          "lifetime_in_days" => "30"
+        })
+
+      assert "oak_" <> _ = raw
+      assert token.name == "importer"
+      assert token.scopes == ["packages:submit"]
+      assert DateTime.diff(token.expires_at, DateTime.utc_now(), :day) in 29..30
+      assert Repo.get!(ApiToken, token.id).hashed_token == ApiToken.hash(raw)
+      refute Repo.exists?(from(t in ApiToken, where: t.hashed_token == ^raw))
+
+      assert {:ok, found} = Accounts.fetch_api_token(raw)
+      assert found.id == token.id
+      assert found.user.id == user.id
+      assert found.scopes == ["packages:submit"]
+    end
+
+    test "lasts 90 days unless another lifetime is picked", %{user: user} do
+      {:ok, _raw, token} =
+        Accounts.create_api_token(user, %{"name" => "x", "scopes" => ["materials:read"]})
+
+      assert DateTime.diff(token.expires_at, DateTime.utc_now(), :day) in 89..90
+    end
+
+    test "needs a name, a known scope and a listed lifetime", %{user: user} do
+      assert {:error, changeset} = Accounts.create_api_token(user, %{"name" => " "})
+      assert %{name: ["can't be blank"], scopes: ["pick at least one"]} = errors_on(changeset)
+
+      assert {:error, changeset} =
+               Accounts.create_api_token(user, %{
+                 "name" => "x",
+                 "scopes" => ["admin"],
+                 "lifetime_in_days" => "7"
+               })
+
+      assert %{scopes: ["has an invalid entry"], lifetime_in_days: ["is invalid"]} =
+               errors_on(changeset)
+    end
+
+    test "an unknown, malformed or expired token is refused", %{user: user} do
+      {raw, token} = api_token_fixture(user)
+
+      assert Accounts.fetch_api_token("oak_" <> String.duplicate("A", 43)) == :error
+      assert Accounts.fetch_api_token(String.replace_prefix(raw, "oak_", "")) == :error
+      assert Accounts.fetch_api_token("") == :error
+
+      set_api_token_expiry(token, -1, :second)
+      assert Accounts.fetch_api_token(raw) == :error
+      assert ApiToken.expired?(Repo.get!(ApiToken, token.id))
+    end
+
+    test "records when it was last used", %{user: user} do
+      {raw, token} = api_token_fixture(user)
+      refute token.last_used_at
+
+      {:ok, used} = Accounts.fetch_api_token(raw)
+      assert used.last_used_at
+      assert Repo.get!(ApiToken, token.id).last_used_at == used.last_used_at
+    end
+
+    test "lists the user's tokens, newest first", %{user: user} do
+      {_, first} = api_token_fixture(user, %{"name" => "first"})
+      {_, second} = api_token_fixture(user, %{"name" => "second"})
+      api_token_fixture(user_fixture())
+
+      assert Enum.map(Accounts.list_api_tokens(user), & &1.id) == [second.id, first.id]
+    end
+
+    test "revoking deletes the token; another user's token can't be revoked", %{user: user} do
+      {raw, token} = api_token_fixture(user)
+      {other_raw, other} = api_token_fixture(user_fixture())
+
+      assert Accounts.delete_api_token(user, other.id) == :error
+      assert {:ok, _} = Accounts.fetch_api_token(other_raw)
+
+      assert Accounts.delete_api_token(user, token.id) == :ok
+      assert Accounts.fetch_api_token(raw) == :error
+      assert Accounts.delete_api_token(user, token.id) == :error
+    end
+
+    test "survive a password change", %{user: user} do
+      {raw, _} = api_token_fixture(user)
+      new = "a brand new long password"
+
+      {:ok, _} =
+        Accounts.update_user_password(user, %{"password" => new, "password_confirmation" => new})
+
+      assert {:ok, _} = Accounts.fetch_api_token(raw)
+    end
+
+    test "end when setup is completed again (account recovery)", %{user: user} do
+      {raw, _} = api_token_fixture(user)
+      {:ok, _, link} = Accounts.create_setup_link(user.email)
+      secret = Accounts.SecondFactor.new_totp_secret()
+
+      {:ok, _} =
+        Accounts.complete_setup(user, link, secret, %{
+          "password" => valid_user_password(),
+          "password_confirmation" => valid_user_password(),
+          "code" => NimbleTOTP.verification_code(secret)
+        })
+
+      assert Accounts.fetch_api_token(raw) == :error
     end
   end
 end
