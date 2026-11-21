@@ -3,18 +3,21 @@
 
   <section class="card p-6">
     <p class="settings-description">
-      Copy this token for <strong>{@token.name}</strong>
-      now; it won't be shown again. It grants {Enum.join(@token.scopes, " and ")} until {date(
+      This token for <strong>{@token.name}</strong>
+      won't be shown again: click it to copy it. It grants {Enum.join(@token.scopes, " and ")} until {date(
         @token.expires_at
       )}. Agents send it as <code>Authorization: Bearer &lt;token&gt;</code>.
     </p>
-    <p
+    <button
+      type="button"
       id="api-token-value"
-      class="settings-info-box"
-      style="font-family: ui-monospace, monospace; overflow-wrap: anywhere;"
+      class="settings-copy-value"
+      data-copy={@raw}
+      title="Copy to clipboard"
     >
-      {@raw}
-    </p>
+      <span class="settings-copy-text">{@raw}</span>
+      <span class="settings-copy-status" data-copy-status aria-live="polite">Click to copy</span>
+    </button>
     <div class="settings-button-group">
       <.link href={~p"/users/settings/api-tokens"} class="settings-btn settings-btn-primary">
         I've copied it

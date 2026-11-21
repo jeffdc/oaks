@@ -1496,6 +1496,47 @@ textarea:focus-visible {
   margin-bottom: 1rem;
 }
 
+.settings-copy-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.settings-copy-value:hover,
+.settings-copy-value:focus-visible {
+  border-color: var(--color-forest-500);
+  box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
+  outline: none;
+}
+
+.settings-copy-text {
+  font-family: ui-monospace, monospace;
+  overflow-wrap: anywhere;
+}
+
+.settings-copy-status {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.settings-copy-value[data-copied] .settings-copy-status {
+  color: var(--color-forest-600);
+}
+
 .settings-check {
   display: flex;
   align-items: baseline;

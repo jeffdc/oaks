@@ -108,6 +108,28 @@ window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 
+// Click to copy: a [data-copy] element copies its value to the clipboard and
+// says so in its [data-copy-status] child (the new agent token page). A
+// document listener rather than a hook, since that page isn't a LiveView. If
+// the clipboard is unavailable, the text is selected for a manual copy.
+document.addEventListener("click", async e => {
+  const el = e.target.closest("[data-copy]")
+  if (!el) return
+  const status = el.querySelector("[data-copy-status]")
+
+  try {
+    await navigator.clipboard.writeText(el.dataset.copy)
+    el.dataset.copied = "true"
+    if (status) status.textContent = "Copied"
+  } catch (_err) {
+    const range = document.createRange()
+    range.selectNodeContents(el.querySelector(".settings-copy-text") || el)
+    window.getSelection().removeAllRanges()
+    window.getSelection().addRange(range)
+    if (status) status.textContent = "Press Ctrl+C or Cmd+C to copy"
+  }
+})
+
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session

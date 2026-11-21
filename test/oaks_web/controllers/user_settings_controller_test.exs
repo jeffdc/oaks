@@ -100,6 +100,7 @@ defmodule OaksWeb.UserSettingsControllerTest do
 
       [raw] = Regex.run(~r/oak_[A-Za-z0-9_-]{43}/, html)
       assert html =~ "won't be shown again"
+      assert html =~ ~s(data-copy="#{raw}")
       assert {:ok, token} = Accounts.fetch_api_token(raw)
       assert token.user.id == user.id
       assert token.scopes == ["packages:submit"]
