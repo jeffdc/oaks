@@ -55,9 +55,12 @@ defmodule OaksWeb.Endpoint do
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
+  # OaksWeb.BodyDigest hashes the raw body of import requests, which the
+  # import's dry-run token is bound to; other requests read as usual.
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
+    body_reader: {OaksWeb.BodyDigest, :read_body, []},
     json_decoder: Phoenix.json_library()
 
   plug Plug.MethodOverride

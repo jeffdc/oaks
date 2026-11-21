@@ -137,6 +137,7 @@ See **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** for comprehensive Elixir/Ph
 - Gate editing UI with `@current_scope`, and re-check `socket.assigns[:current_scope]` in every `handle_event` that writes.
 - GET/read pages are public. The JSON API (`/api/v1`) is public and read-only; it has no authentication.
 - Agents use the private API (`/api/private/v1`, not in the OpenAPI spec) with agent tokens an editor issues and revokes at `/users/settings/api-tokens` (item fbd0). Code: `Oaks.Accounts.ApiToken` (hashed, scoped `materials:read` / `packages:submit`, expiring) and `OaksWeb.Plugs.ApiToken` (Bearer check, rate limits, `require_api_scope/2` for routes that need a scope). Completing setup from a setup link revokes a user's tokens; a password change doesn't.
+- Bulk data changes go through the private API's import endpoint (`POST /api/private/v1/import`, `packages:submit`, item f8f5), always dry-run first; see [docs/import.md](docs/import.md).
 - Production needs the `LOGIN_ENCRYPTION_KEY` secret (32 bytes, base64; see `config/runtime.exs`). Changing it makes enrolled authenticator apps unusable until a setup link is used.
 - Login attempts are rate limited in memory (`OaksWeb.LoginLimiter`), fine for the one app machine.
 
