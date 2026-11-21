@@ -24,38 +24,6 @@ INSERT INTO taxa (id, name, level, parent, author) VALUES
   (5, 'Stellatae', 'subsection', 'Quercus', NULL);
 
 -- =============================================================================
--- Species
--- =============================================================================
-
-INSERT INTO species (id, scientific_name, author, is_hybrid, conservation_status, subgenus, section, subsection) VALUES
-  (1, 'alba', 'L. 1753', 0, 'LC', 'Quercus', 'Quercus', NULL),
-  (2, 'rubra', 'L. 1753', 0, 'LC', 'Lobatae', 'Lobatae', NULL),
-  (3, 'stellata', 'Wangenh. 1787', 0, 'LC', 'Quercus', 'Quercus', 'Stellatae'),
-  (4, 'velutina', 'Lam. 1785', 0, 'LC', 'Lobatae', 'Lobatae', NULL);
-
--- A hybrid
-INSERT INTO species (id, scientific_name, author, is_hybrid, parent1, parent2, subgenus, section) VALUES
-  (5, '×bebbiana', 'C.K.Schneid.', 1, 'alba', 'macrocarpa', 'Quercus', 'Quercus');
-
--- Add JSON array relationship data for testing detail page
-UPDATE species SET
-  hybrids = '["×bebbiana"]',
-  closely_related_to = '["stellata"]',
-  synonyms = '["alba var. repanda"]',
-  subspecies_varieties = '["alba var. latiloba"]'
-WHERE id = 1;
-
--- =============================================================================
--- Species Sources (junction data)
--- =============================================================================
-
-INSERT INTO species_sources (id, species_id, source_id, local_names, range, growth_habit, leaves, is_preferred) VALUES
-  (1, 1, 2, '["white oak","eastern white oak"]', 'Eastern North America; 0 to 1600 m', 'Reaches 25 m high', '8-20 cm long, obovate', 1),
-  (2, 1, 1, NULL, NULL, NULL, NULL, 0),
-  (3, 2, 2, '["northern red oak"]', 'Eastern North America', 'Reaches 25-35 m', '12-22 cm long', 1),
-  (4, 3, 3, '["post oak"]', 'Eastern US', NULL, '10-18 cm, cross-shaped', 1);
-
--- =============================================================================
 -- Import Metadata
 -- =============================================================================
 
