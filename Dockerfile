@@ -42,14 +42,14 @@ COPY config/runtime.exs config/
 # Compile first (needed for colocated hooks)
 RUN mix compile
 
-# OTP >= 28.5.0.6 httpc rejects GitHub's release redirects (headers > 10240
-# bytes), which breaks the tailwind package's own binary download. Place the
-# binary where the tailwind package looks for it (_build/tailwind-<target>); it
-# then skips its own download. Keep the version in sync with `config :tailwind`
-# in config/config.exs.
-ADD https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.12/tailwindcss-linux-x64-musl /app/_build/tailwind-linux-x64-musl
-RUN echo "a8a1926a2951a5da0684c568d612bc0a590600334d3a85d0e63ea90ac7ced2e5  /app/_build/tailwind-linux-x64-musl" | sha256sum -c - && \
-    chmod +x /app/_build/tailwind-linux-x64-musl
+# Place a pinned, checksummed Tailwind binary where the tailwind package looks
+# for it (_build/tailwind-<target>-<version>, tailwind >= 0.5); `mix tailwind`
+# then skips its own unverified download. Keep the version, in the URL and in
+# the path, in sync with `config :tailwind` in config/config.exs
+# (scripts/check-toolchain checks both).
+ADD https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.12/tailwindcss-linux-x64-musl /app/_build/tailwind-linux-x64-musl-4.1.12
+RUN echo "a8a1926a2951a5da0684c568d612bc0a590600334d3a85d0e63ea90ac7ced2e5  /app/_build/tailwind-linux-x64-musl-4.1.12" | sha256sum -c - && \
+    chmod +x /app/_build/tailwind-linux-x64-musl-4.1.12
 
 # Build assets (esbuild is installed via mix from npm; tailwind is placed above)
 RUN mix assets.deploy

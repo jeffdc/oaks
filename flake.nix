@@ -60,9 +60,8 @@
             ++ lib.optionals stdenv.hostPlatform.isLinux [ pkgs.inotify-tools ];
 
             env = {
-              # OTP >= 28.5.0.6 httpc rejects GitHub release redirects (headers > 10240
-              # bytes), which breaks the tailwind package's own binary download. Hand it a
-              # pinned binary instead (same fix as gallformers).
+              # Hand the tailwind package the pinned, hashed binary above, so dev and CI
+              # never run its own unverified download (same as gallformers).
               MIX_TAILWIND_PATH = "${tailwind}/bin/tailwindcss";
             };
           };
