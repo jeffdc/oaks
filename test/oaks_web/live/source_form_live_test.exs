@@ -1,14 +1,18 @@
 defmodule OaksWeb.SourceFormLiveTest do
   @moduledoc """
   Tests for SourceFormLive (create/edit sources).
-  Uses seeded test data (see priv/repo/test_seeds.sql).
   """
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
   import Oaks.AccountsFixtures
+  import Oaks.SourcesFixtures
 
   alias Oaks.Sources
+
+  setup do
+    %{source: source_fixture()}
+  end
 
   defp authenticated_conn(conn) do
     log_in_user(conn, user_fixture())
@@ -19,8 +23,9 @@ defmodule OaksWeb.SourceFormLiveTest do
       assert {:error, {:live_redirect, %{to: "/sources"}}} = live(conn, ~p"/sources/new")
     end
 
-    test "edit redirects immediately", %{conn: conn} do
-      assert {:error, {:live_redirect, %{to: "/sources"}}} = live(conn, ~p"/sources/1/edit")
+    test "edit redirects immediately", %{conn: conn, source: source} do
+      assert {:error, {:live_redirect, %{to: "/sources"}}} =
+               live(conn, ~p"/sources/#{source.id}/edit")
     end
 
     test "the static render redirects with a flash", %{conn: conn} do
@@ -56,19 +61,22 @@ defmodule OaksWeb.SourceFormLiveTest do
   end
 
   describe "edit (authenticated)" do
-    test "updates the source", %{conn: conn} do
-      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/sources/2/edit")
+    test "updates the source", %{conn: conn, source: source} do
+      {:ok, view, _html} =
+        conn |> authenticated_conn() |> live(~p"/sources/#{source.id}/edit")
 
-      assert {:error, {:live_redirect, %{to: "/sources/2"}}} =
+      path = "/sources/#{source.id}"
+
+      assert {:error, {:live_redirect, %{to: ^path}}} =
                view
                |> form("#source-form", source: %{author: "Updated Author"})
                |> render_submit()
 
-      assert Sources.get_source(2).author == "Updated Author"
+      assert Sources.get_source(source.id).author == "Updated Author"
     end
 
     test "redirects for unknown or invalid ids", %{conn: conn} do
-      for path <- [~p"/sources/9999/edit", "/sources/abc/edit"] do
+      for path <- [~p"/sources/0/edit", "/sources/abc/edit"] do
         assert {:error, {:live_redirect, %{to: "/sources"}}} =
                  conn |> authenticated_conn() |> live(path)
       end

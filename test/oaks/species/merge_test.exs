@@ -1,19 +1,74 @@
 defmodule Oaks.Species.MergeTest do
   @moduledoc """
   Tests for the Species.Merge context module.
-  Uses seeded test data (see priv/repo/test_seeds.sql).
   """
   use Oaks.DataCase
+
+  import Oaks.SourcesFixtures
+  import Oaks.SpeciesFixtures
 
   alias Oaks.Species
   alias Oaks.Species.Merge
 
-  describe "preview_merge/2" do
-    test "returns preview with field comparisons" do
-      assert {:ok, preview} = Merge.preview_merge("stellata", "alba")
+  # A small world: ×bebbiana has parents alba × macrocarpa; alba lists
+  # ×bebbiana as a hybrid and stellata as closely related. alba has two
+  # sources, rubra one, and stellata one that alba lacks (`compendium`).
+  # Names carry a unique suffix so they can't clash with seeded rows.
+  setup do
+    n = System.unique_integer([:positive])
+    names = %{alba: "alba#{n}", stellata: "stellata#{n}", bebbiana: "×bebbiana#{n}"}
 
-      assert preview.source.scientific_name == "stellata"
-      assert preview.target.scientific_name == "alba"
+    inat = source_fixture()
+    ootw = source_fixture()
+    compendium = source_fixture()
+
+    stellata =
+      species_fixture(
+        scientific_name: names.stellata,
+        author: "Wangenh. 1787",
+        subgenus: "Quercus",
+        section: "Quercus",
+        subsection: "Stellatae"
+      )
+
+    bebbiana =
+      hybrid_fixture(scientific_name: names.bebbiana, parent1: names.alba, parent2: "macrocarpa")
+
+    alba =
+      species_fixture(
+        scientific_name: names.alba,
+        author: "L. 1753",
+        subgenus: "Quercus",
+        section: "Quercus",
+        hybrids: [names.bebbiana],
+        closely_related_to: [names.stellata],
+        synonyms: ["alba var. repanda"]
+      )
+
+    rubra = species_fixture(scientific_name: "rubra#{n}", author: "L. 1753")
+    velutina = species_fixture(scientific_name: "velutina#{n}", author: "Lam. 1785")
+
+    species_source_fixture(alba, ootw, is_preferred: true)
+    species_source_fixture(alba, inat)
+    species_source_fixture(rubra, ootw, is_preferred: true)
+    species_source_fixture(stellata, compendium, is_preferred: true)
+
+    %{
+      alba: alba.scientific_name,
+      stellata: stellata.scientific_name,
+      bebbiana: bebbiana.scientific_name,
+      rubra: rubra.scientific_name,
+      velutina: velutina.scientific_name,
+      compendium: compendium
+    }
+  end
+
+  describe "preview_merge/2" do
+    test "returns preview with field comparisons", ctx do
+      assert {:ok, preview} = Merge.preview_merge(ctx.stellata, ctx.alba)
+
+      assert preview.source.scientific_name == ctx.stellata
+      assert preview.target.scientific_name == ctx.alba
 
       assert is_list(preview.field_comparisons)
       assert preview.field_comparisons != []
@@ -25,24 +80,23 @@ defmodule Oaks.Species.MergeTest do
       assert author_cmp.differs
     end
 
-    test "identifies synonym-only sources" do
-      # stellata has source 3 (Oak Compendium), alba does not
-      assert {:ok, preview} = Merge.preview_merge("stellata", "alba")
+    test "identifies synonym-only sources", ctx do
+      assert {:ok, preview} = Merge.preview_merge(ctx.stellata, ctx.alba)
 
       synonym_source_ids =
         Enum.map(preview.synonym_only_sources, & &1.source_id)
 
-      assert 3 in synonym_source_ids
+      assert ctx.compendium.id in synonym_source_ids
     end
 
-    test "computes synonyms to add" do
-      assert {:ok, preview} = Merge.preview_merge("stellata", "alba")
+    test "computes synonyms to add", ctx do
+      assert {:ok, preview} = Merge.preview_merge(ctx.stellata, ctx.alba)
 
-      assert "stellata" in preview.synonyms_to_add
+      assert ctx.stellata in preview.synonyms_to_add
     end
 
-    test "detects subsection difference" do
-      assert {:ok, preview} = Merge.preview_merge("stellata", "alba")
+    test "detects subsection difference", ctx do
+      assert {:ok, preview} = Merge.preview_merge(ctx.stellata, ctx.alba)
 
       subsection_cmp = Enum.find(preview.field_comparisons, &(&1.field == :subsection))
       assert subsection_cmp.source_value == "Stellatae"
@@ -50,120 +104,118 @@ defmodule Oaks.Species.MergeTest do
       assert subsection_cmp.differs
     end
 
-    test "returns error for same species" do
-      assert {:error, :same_species} = Merge.preview_merge("alba", "alba")
+    test "returns error for same species", ctx do
+      assert {:error, :same_species} = Merge.preview_merge(ctx.alba, ctx.alba)
     end
 
-    test "returns error for same species (case-insensitive)" do
-      assert {:error, :same_species} = Merge.preview_merge("Alba", "alba")
+    test "returns error for same species (case-insensitive)", ctx do
+      assert {:error, :same_species} = Merge.preview_merge(String.capitalize(ctx.alba), ctx.alba)
     end
 
-    test "returns error for nonexistent source species" do
-      assert {:error, :source_not_found} = Merge.preview_merge("nonexistent", "alba")
+    test "returns error for nonexistent source species", ctx do
+      assert {:error, :source_not_found} = Merge.preview_merge("nonexistent", ctx.alba)
     end
 
-    test "returns error for nonexistent target species" do
-      assert {:error, :target_not_found} = Merge.preview_merge("alba", "nonexistent")
+    test "returns error for nonexistent target species", ctx do
+      assert {:error, :target_not_found} = Merge.preview_merge(ctx.alba, "nonexistent")
     end
   end
 
   describe "execute_merge/3" do
-    test "adds synonym to target" do
-      assert {:ok, target} = Merge.execute_merge("stellata", "alba")
+    test "adds synonym to target", ctx do
+      assert {:ok, target} = Merge.execute_merge(ctx.stellata, ctx.alba)
 
       synonyms = Species.parse_json_array(target.synonyms)
-      assert "stellata" in synonyms
+      assert ctx.stellata in synonyms
       # Original synonym should still be there
       assert "alba var. repanda" in synonyms
     end
 
-    test "deletes source species after merge" do
-      assert {:ok, _target} = Merge.execute_merge("velutina", "rubra")
+    test "deletes source species after merge", ctx do
+      assert {:ok, _target} = Merge.execute_merge(ctx.velutina, ctx.rubra)
 
-      assert Species.get_species_by_name("velutina") == nil
+      assert Species.get_species_by_name(ctx.velutina) == nil
     end
 
-    test "transfers sources from synonym to target" do
-      # stellata has source 3 (Oak Compendium), alba does not
-      merge_opts = %{"include_sources" => [3]}
-      assert {:ok, target} = Merge.execute_merge("stellata", "alba", merge_opts)
+    test "transfers sources from synonym to target", ctx do
+      merge_opts = %{"include_sources" => [ctx.compendium.id]}
+      assert {:ok, target} = Merge.execute_merge(ctx.stellata, ctx.alba, merge_opts)
 
       source_ids = Enum.map(target.species_sources, & &1.source_id)
-      assert 3 in source_ids
+      assert ctx.compendium.id in source_ids
     end
 
-    test "does not transfer unchecked sources" do
-      # Don't include source 3
+    test "does not transfer unchecked sources", ctx do
       merge_opts = %{"include_sources" => []}
-      assert {:ok, target} = Merge.execute_merge("stellata", "alba", merge_opts)
+      assert {:ok, target} = Merge.execute_merge(ctx.stellata, ctx.alba, merge_opts)
 
       source_ids = Enum.map(target.species_sources, & &1.source_id)
-      refute 3 in source_ids
+      refute ctx.compendium.id in source_ids
     end
 
-    test "applies edited field values" do
+    test "applies edited field values", ctx do
       merge_opts = %{
         "edited_fields" => %{"author" => "Updated Author"},
         "include_sources" => []
       }
 
-      assert {:ok, target} = Merge.execute_merge("velutina", "rubra", merge_opts)
+      assert {:ok, target} = Merge.execute_merge(ctx.velutina, ctx.rubra, merge_opts)
       assert target.author == "Updated Author"
     end
 
-    test "updates references in other species" do
-      # ×bebbiana has parent1 = "alba"
-      # If we merge alba into rubra, ×bebbiana.parent1 should become "rubra"
+    test "updates references in other species", ctx do
+      # ×bebbiana has parent1 = alba, so merging alba into rubra repoints it
       merge_opts = %{"include_sources" => []}
-      assert {:ok, _target} = Merge.execute_merge("alba", "rubra", merge_opts)
+      assert {:ok, _target} = Merge.execute_merge(ctx.alba, ctx.rubra, merge_opts)
 
-      bebbiana = Species.get_species_by_name("×bebbiana")
-      assert bebbiana.parent1 == "rubra"
+      bebbiana = Species.get_species_by_name(ctx.bebbiana)
+      assert bebbiana.parent1 == ctx.rubra
     end
 
-    test "returns error for nonexistent species" do
-      assert {:error, :load, _} = Merge.execute_merge("nonexistent", "alba")
+    test "returns error for nonexistent species", ctx do
+      assert {:error, :load, _} = Merge.execute_merge("nonexistent", ctx.alba)
     end
   end
 
   describe "find_references/1" do
-    test "finds parent references" do
-      refs = Merge.find_references("alba")
+    test "finds parent references", ctx do
+      refs = Merge.find_references(ctx.alba)
       parent_refs = Enum.filter(refs, &(&1.reference_type == "parent1"))
       species_names = Enum.map(parent_refs, & &1.species.scientific_name)
-      assert "×bebbiana" in species_names
+      assert ctx.bebbiana in species_names
     end
 
-    test "finds closely_related_to references" do
-      refs = Merge.find_references("stellata")
+    test "finds closely_related_to references", ctx do
+      refs = Merge.find_references(ctx.stellata)
       related_refs = Enum.filter(refs, &(&1.reference_type == "closely_related_to"))
       species_names = Enum.map(related_refs, & &1.species.scientific_name)
-      assert "alba" in species_names
+      assert ctx.alba in species_names
     end
 
-    test "returns empty list for unreferenced species" do
-      refs = Merge.find_references("velutina")
+    test "returns empty list for unreferenced species", ctx do
+      refs = Merge.find_references(ctx.velutina)
       assert refs == []
     end
   end
 
   describe "detect_self_references/2" do
-    test "flags a target parent that points at the synonym" do
-      target = %{Species.get_species_full("alba") | parent1: "stellata"}
+    test "flags a target parent that points at the synonym", ctx do
+      target = %{Species.get_species_full(ctx.alba) | parent1: ctx.stellata}
+      stellata = ctx.stellata
 
-      assert [%{field: "parent1", value: "stellata"}] =
-               Merge.detect_self_references(target, "stellata")
+      assert [%{field: "parent1", value: ^stellata}] =
+               Merge.detect_self_references(target, ctx.stellata)
     end
 
-    test "list mentions of the synonym are not issues; the merge removes them" do
-      # alba has closely_related_to = ["stellata"]
-      target = Species.get_species_full("alba")
-      assert Merge.detect_self_references(target, "stellata") == []
+    test "list mentions of the synonym are not issues; the merge removes them", ctx do
+      # alba lists stellata as closely related
+      target = Species.get_species_full(ctx.alba)
+      assert Merge.detect_self_references(target, ctx.stellata) == []
     end
 
-    test "returns empty when no self-references" do
-      target = Species.get_species_full("rubra")
-      issues = Merge.detect_self_references(target, "velutina")
+    test "returns empty when no self-references", ctx do
+      target = Species.get_species_full(ctx.rubra)
+      issues = Merge.detect_self_references(target, ctx.velutina)
       assert issues == []
     end
   end
@@ -176,46 +228,51 @@ defmodule Oaks.Species.MergeTest do
       |> Oaks.Repo.update!()
     end
 
-    test "points escaped-× hybrid list entries at the target" do
-      set!("velutina", hybrids: ~s(["\\u00d7bebbiana"]))
+    test "points escaped-× hybrid list entries at the target", ctx do
+      "×" <> epithet = ctx.bebbiana
+      set!(ctx.velutina, hybrids: ~s(["\\u00d7#{epithet}"]))
 
-      {:ok, _} = Merge.execute_merge("×bebbiana", "rubra")
+      {:ok, _} = Merge.execute_merge(ctx.bebbiana, ctx.rubra)
 
-      assert Species.get_species_by_name("velutina").hybrids == ~s(["rubra"])
+      assert Species.get_species_by_name(ctx.velutina).hybrids == Jason.encode!([ctx.rubra])
     end
 
-    test "clears a target parent that named the synonym instead of making it its own parent" do
-      set!("rubra", parent1: "stellata")
+    test "clears a target parent that named the synonym instead of making it its own parent",
+         ctx do
+      set!(ctx.rubra, parent1: ctx.stellata)
 
-      {:ok, _} = Merge.execute_merge("stellata", "rubra", %{"edited_fields" => %{}})
+      {:ok, _} = Merge.execute_merge(ctx.stellata, ctx.rubra, %{"edited_fields" => %{}})
 
-      assert Species.get_species_by_name("rubra").parent1 == nil
+      assert Species.get_species_by_name(ctx.rubra).parent1 == nil
     end
 
-    test "adds the synonym's name lists to the target and drops self mentions" do
-      set!("stellata", hybrids: ~s(["×bebbiana"]), closely_related_to: ~s(["alba", "velutina"]))
+    test "adds the synonym's name lists to the target and drops self mentions", ctx do
+      set!(ctx.stellata,
+        hybrids: Jason.encode!([ctx.bebbiana]),
+        closely_related_to: Jason.encode!([ctx.alba, ctx.velutina])
+      )
 
-      {:ok, _} = Merge.execute_merge("stellata", "alba")
+      {:ok, _} = Merge.execute_merge(ctx.stellata, ctx.alba)
 
-      alba = Species.get_species_by_name("alba")
-      assert Species.parse_name_list(alba.hybrids) == ["×bebbiana"]
-      assert Species.parse_name_list(alba.closely_related_to) == ["velutina"]
+      alba = Species.get_species_by_name(ctx.alba)
+      assert Species.parse_name_list(alba.hybrids) == [ctx.bebbiana]
+      assert Species.parse_name_list(alba.closely_related_to) == [ctx.velutina]
     end
 
-    test "keeps the preferred flag on a moved source when the target has none" do
-      stellata = Species.get_species_full("stellata")
+    test "keeps the preferred flag on a moved source when the target has none", ctx do
+      stellata = Species.get_species_full(ctx.stellata)
       [ss] = stellata.species_sources
       ss |> Ecto.Changeset.change(is_preferred: true) |> Oaks.Repo.update!()
 
       {:ok, target} =
-        Merge.execute_merge("stellata", "velutina", %{"include_sources" => [ss.source_id]})
+        Merge.execute_merge(ctx.stellata, ctx.velutina, %{"include_sources" => [ss.source_id]})
 
       assert [%{is_preferred: true}] = target.species_sources
     end
 
-    test "refuses to merge a species into itself" do
-      assert {:error, :load, _} = Merge.execute_merge("alba", "alba")
-      assert Species.get_species_by_name("alba")
+    test "refuses to merge a species into itself", ctx do
+      assert {:error, :load, _} = Merge.execute_merge(ctx.alba, ctx.alba)
+      assert Species.get_species_by_name(ctx.alba)
     end
   end
 end

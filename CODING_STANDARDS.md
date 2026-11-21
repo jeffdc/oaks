@@ -438,12 +438,14 @@ end
 defmodule Oaks.SpeciesTest do
   use Oaks.DataCase
 
+  import Oaks.SpeciesFixtures
+
   alias Oaks.Species
 
-  describe "list_species/0" do
+  describe "list_all_species/1" do
     test "returns all species" do
       species = species_fixture()
-      assert Species.list_species() == [species]
+      assert species.id in Enum.map(Species.list_all_species(), & &1.id)
     end
   end
 end
@@ -458,6 +460,7 @@ defmodule OaksWeb.SpeciesListLiveTest do
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.SpeciesFixtures
 
   test "displays species list", %{conn: conn} do
     species = species_fixture()
@@ -469,22 +472,28 @@ end
 
 ### Fixtures
 
-Test fixtures are defined in `test/support/fixtures/` and imported via `DataCase` or `ConnCase`:
+Test fixtures live in `test/support/fixtures/`, one module per context: `Oaks.AccountsFixtures`, `Oaks.AnalyticsFixtures`, `Oaks.ArticlesFixtures`, `Oaks.SourcesFixtures`, `Oaks.SpeciesFixtures` and `Oaks.TaxonomyFixtures`. `DataCase` and `ConnCase` don't import them; each test file imports the ones it uses:
+
+```elixir
+import Oaks.SourcesFixtures
+import Oaks.SpeciesFixtures
+```
+
+A fixture merges the attrs it's given over defaults with a unique name (`System.unique_integer([:positive])`) and inserts through the context's create function, so it runs the same changeset production does:
 
 ```elixir
 defmodule Oaks.SpeciesFixtures do
   def species_fixture(attrs \\ %{}) do
-    {:ok, species} =
-      attrs
-      |> Enum.into(%{scientific_name: "alba", is_hybrid: false})
-      |> Oaks.Species.create_species()
-
+    defaults = %{scientific_name: "species#{System.unique_integer([:positive])}", is_hybrid: false}
+    {:ok, species} = defaults |> Map.merge(Map.new(attrs)) |> Oaks.Species.create_species()
     species
   end
 end
 ```
 
-Import in tests: `import Oaks.SpeciesFixtures`
+Call fixtures in `setup` or in the test body, never in `setup_all` or a module attribute, so the rows stay inside the test's sandbox transaction. Each test file builds the small world it needs; there is no shared scenario fixture (`taxon_tree_fixture/1` builds a subgenus, section and subsection).
+
+Tests never read the rows in `priv/repo/test_seeds.sql`. Assert only on rows the test created: check membership, compare whole-table numbers with the context's count function (`Species.count()`, `Sources.count()`) or a before/after difference, and use exact counts only within a filter value the test made unique.
 
 ### Assertions
 

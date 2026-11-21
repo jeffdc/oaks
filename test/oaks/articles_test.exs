@@ -1,54 +1,62 @@
 defmodule Oaks.ArticlesTest do
   @moduledoc """
   Tests for the Articles context.
-  Uses seeded test data (see priv/repo/test_seeds.sql).
   """
 
   use Oaks.DataCase
 
+  import Oaks.ArticlesFixtures
+
   alias Oaks.Articles
   alias Oaks.Articles.Article
 
+  defp unique_tag, do: "tag#{System.unique_integer([:positive])}"
+
   describe "list_articles/2" do
-    test "returns only published articles by default" do
-      articles = Articles.list_articles()
-      assert length(articles) == 1
-      assert hd(articles).slug == "getting-started"
+    setup do
+      tag = unique_tag()
+      published = article_fixture(tags: [tag])
+      draft = article_fixture(tags: [tag], is_published: false)
+      %{tag: tag, published: published, draft: draft}
     end
 
-    test "returns all articles when authenticated" do
-      articles = Articles.list_articles(%{}, true)
-      assert length(articles) == 2
-      slugs = Enum.map(articles, & &1.slug)
-      assert "getting-started" in slugs
-      assert "advanced-taxonomy-draft" in slugs
+    test "returns only published articles by default", %{published: published, draft: draft} do
+      slugs = Enum.map(Articles.list_articles(), & &1.slug)
+      assert published.slug in slugs
+      refute draft.slug in slugs
     end
 
-    test "filters by tag" do
-      articles = Articles.list_articles(%{"tag" => "guide"})
-      assert length(articles) == 1
-      assert hd(articles).slug == "getting-started"
+    test "returns all articles when authenticated", %{published: published, draft: draft} do
+      slugs = Enum.map(Articles.list_articles(%{}, true), & &1.slug)
+      assert published.slug in slugs
+      assert draft.slug in slugs
+    end
+
+    test "filters by tag", %{tag: tag, published: published} do
+      assert [%Article{slug: slug}] = Articles.list_articles(%{"tag" => tag})
+      assert slug == published.slug
     end
 
     test "returns empty list for non-existent tag" do
-      articles = Articles.list_articles(%{"tag" => "nonexistent"})
-      assert articles == []
+      assert Articles.list_articles(%{"tag" => unique_tag()}) == []
     end
   end
 
   describe "get_article_by_slug/2" do
-    test "returns published article" do
-      article = Articles.get_article_by_slug("getting-started")
-      assert article.title == "Getting Started with Oak Identification"
+    setup do
+      %{published: article_fixture(), draft: article_fixture(is_published: false)}
     end
 
-    test "returns nil for unpublished article when not authenticated" do
-      assert nil == Articles.get_article_by_slug("advanced-taxonomy-draft")
+    test "returns published article", %{published: published} do
+      assert Articles.get_article_by_slug(published.slug).title == published.title
     end
 
-    test "returns unpublished article when authenticated" do
-      article = Articles.get_article_by_slug("advanced-taxonomy-draft", true)
-      assert article.title == "Advanced Oak Taxonomy"
+    test "returns nil for unpublished article when not authenticated", %{draft: draft} do
+      assert nil == Articles.get_article_by_slug(draft.slug)
+    end
+
+    test "returns unpublished article when authenticated", %{draft: draft} do
+      assert Articles.get_article_by_slug(draft.slug, true).title == draft.title
     end
 
     test "returns nil for non-existent slug" do
@@ -57,28 +65,33 @@ defmodule Oaks.ArticlesTest do
   end
 
   describe "list_tags/1" do
-    test "returns tags from published articles only by default" do
-      tags = Articles.list_tags()
-      tag_names = Enum.map(tags, & &1.tag)
-      assert "guide" in tag_names
-      assert "beginner" in tag_names
-      refute "taxonomy" in tag_names
-      refute "advanced" in tag_names
+    setup do
+      published_tag = unique_tag()
+      draft_tag = unique_tag()
+      article_fixture(tags: [published_tag])
+      article_fixture(tags: [draft_tag], is_published: false)
+      %{published_tag: published_tag, draft_tag: draft_tag}
     end
 
-    test "returns tags from all articles when authenticated" do
-      tags = Articles.list_tags(true)
-      tag_names = Enum.map(tags, & &1.tag)
-      assert "guide" in tag_names
-      assert "taxonomy" in tag_names
-      assert "advanced" in tag_names
+    test "returns tags from published articles only by default", ctx do
+      tag_names = Enum.map(Articles.list_tags(), & &1.tag)
+      assert ctx.published_tag in tag_names
+      refute ctx.draft_tag in tag_names
+    end
+
+    test "returns tags from all articles when authenticated", ctx do
+      tag_names = Enum.map(Articles.list_tags(true), & &1.tag)
+      assert ctx.published_tag in tag_names
+      assert ctx.draft_tag in tag_names
     end
   end
 
   describe "create_article/1" do
     test "creates article with valid attributes" do
+      title = "Test Article #{System.unique_integer([:positive])}"
+
       attrs = %{
-        "title" => "Test Article",
+        "title" => title,
         "author" => "Tester",
         "content" => "Some **bold** content",
         "tags" => ["test", "new"],
@@ -86,8 +99,8 @@ defmodule Oaks.ArticlesTest do
       }
 
       assert {:ok, article} = Articles.create_article(attrs)
-      assert article.title == "Test Article"
-      assert article.slug == "test-article"
+      assert article.title == title
+      assert article.slug == Articles.generate_slug(title)
       assert article.author == "Tester"
       assert article.is_published == true
       assert article.published_at != nil
@@ -96,14 +109,12 @@ defmodule Oaks.ArticlesTest do
     end
 
     test "auto-generates unique slug on collision" do
-      attrs = %{
-        "title" => "Getting Started",
-        "author" => "Someone"
-      }
+      existing = article_fixture()
 
-      assert {:ok, article} = Articles.create_article(attrs)
-      # "getting-started" already exists in seeds, so should get -2 suffix
-      assert article.slug == "getting-started-2"
+      assert {:ok, article} =
+               Articles.create_article(%{"title" => existing.title, "author" => "Someone"})
+
+      assert article.slug == existing.slug <> "-2"
     end
 
     test "returns error for missing required fields" do
@@ -120,7 +131,7 @@ defmodule Oaks.ArticlesTest do
 
   describe "update_article/2" do
     test "updates article fields" do
-      article = Articles.get_article_by_slug("getting-started")
+      article = article_fixture()
 
       assert {:ok, updated} =
                Articles.update_article(article, %{
@@ -129,18 +140,19 @@ defmodule Oaks.ArticlesTest do
                })
 
       assert updated.title == "Updated Title"
-      assert updated.slug == "getting-started"
+      assert updated.slug == article.slug
     end
 
     test "regenerates the slug when a never-published draft is retitled" do
-      article = Articles.get_article_by_slug("advanced-taxonomy-draft", true)
+      article = article_fixture(is_published: false)
+      title = "Section Notes #{System.unique_integer([:positive])}"
 
-      {:ok, updated} = Articles.update_article(article, %{"title" => "Section Notes"})
-      assert updated.slug == "section-notes"
+      {:ok, updated} = Articles.update_article(article, %{"title" => title})
+      assert updated.slug == Articles.generate_slug(title)
     end
 
     test "sets published_at when transitioning to published" do
-      article = Articles.get_article_by_slug("advanced-taxonomy-draft", true)
+      article = article_fixture(is_published: false)
       assert article.published_at == nil
 
       assert {:ok, updated} =
@@ -151,8 +163,7 @@ defmodule Oaks.ArticlesTest do
     end
 
     test "preserves slug when title unchanged" do
-      article = Articles.get_article_by_slug("getting-started")
-      original_slug = article.slug
+      article = article_fixture()
 
       assert {:ok, updated} =
                Articles.update_article(article, %{
@@ -160,15 +171,15 @@ defmodule Oaks.ArticlesTest do
                  "is_published" => "true"
                })
 
-      assert updated.slug == original_slug
+      assert updated.slug == article.slug
     end
   end
 
   describe "delete_article/1" do
     test "deletes an article" do
-      article = Articles.get_article_by_slug("getting-started")
+      article = article_fixture()
       assert {:ok, _} = Articles.delete_article(article)
-      assert nil == Articles.get_article_by_slug("getting-started")
+      assert nil == Articles.get_article_by_slug(article.slug)
     end
   end
 

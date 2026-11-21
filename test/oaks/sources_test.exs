@@ -1,34 +1,56 @@
 defmodule Oaks.SourcesTest do
   @moduledoc """
   Tests for the Sources context module.
-  Uses seeded test data (see priv/repo/test_seeds.sql).
   """
   use Oaks.DataCase
 
+  import Oaks.SourcesFixtures
+  import Oaks.SpeciesFixtures
+
   alias Oaks.Sources
 
+  # Two sources: `ootw` has alba and rubra, `compendium` has stellata.
+  setup do
+    n = System.unique_integer([:positive])
+    alba = species_fixture(scientific_name: "alba#{n}")
+    rubra = species_fixture(scientific_name: "rubra#{n}")
+    stellata = species_fixture(scientific_name: "stellata#{n}")
+
+    ootw = source_fixture(name: "Oaks of the World #{n}")
+    compendium = source_fixture(name: "Oak Compendium #{n}", source_type: "personal_observation")
+
+    species_source_fixture(rubra, ootw)
+    species_source_fixture(alba, ootw)
+    species_source_fixture(stellata, compendium)
+
+    %{alba: alba, rubra: rubra, stellata: stellata, ootw: ootw, compendium: compendium}
+  end
+
   describe "list_sources/0" do
-    test "returns all sources ordered by name" do
+    test "returns all sources ordered by name", %{ootw: ootw, compendium: compendium} do
       sources = Sources.list_sources()
-      assert length(sources) == 3
+      assert length(sources) == Sources.count()
       names = Enum.map(sources, & &1.name)
       assert names == Enum.sort(names)
+      assert ootw.name in names
+      assert compendium.name in names
     end
   end
 
   describe "list_sources_with_species_count/0" do
-    test "returns all sources with species counts" do
+    test "returns all sources with species counts", %{ootw: ootw, compendium: compendium} do
       sources = Sources.list_sources_with_species_count()
-      assert length(sources) == 3
+      assert length(sources) == Sources.count()
 
-      oaks_of_world = Enum.find(sources, &(&1.name == "Oaks of the World"))
-      assert oaks_of_world.species_count == 2
+      assert Enum.find(sources, &(&1.id == ootw.id)).species_count == 2
+      assert Enum.find(sources, &(&1.id == compendium.id)).species_count == 1
+    end
 
-      inat = Enum.find(sources, &(&1.name == "iNaturalist"))
-      assert inat.species_count == 1
+    test "counts zero for a source with no species" do
+      unused = source_fixture()
 
-      oak_comp = Enum.find(sources, &(&1.name == "Oak Compendium"))
-      assert oak_comp.species_count == 1
+      sources = Sources.list_sources_with_species_count()
+      assert Enum.find(sources, &(&1.id == unused.id)).species_count == 0
     end
 
     test "returns expected fields" do
@@ -47,56 +69,55 @@ defmodule Oaks.SourcesTest do
   end
 
   describe "get_source/1" do
-    test "returns the source for a valid ID" do
-      source = Sources.get_source(2)
-      assert source.name == "Oaks of the World"
+    test "returns the source for a valid ID", %{ootw: ootw} do
+      source = Sources.get_source(ootw.id)
+      assert source.name == ootw.name
       assert source.source_type == "website"
     end
 
     test "returns nil for unknown ID" do
-      assert Sources.get_source(999) == nil
+      assert Sources.get_source(-1) == nil
     end
   end
 
   describe "get_species_for_source/1" do
-    test "returns species associated with a source" do
-      species = Sources.get_species_for_source(2)
+    test "returns species associated with a source", ctx do
+      species = Sources.get_species_for_source(ctx.ootw.id)
       assert length(species) == 2
       names = Enum.map(species, & &1.scientific_name)
-      assert "alba" in names
-      assert "rubra" in names
+      assert ctx.alba.scientific_name in names
+      assert ctx.rubra.scientific_name in names
     end
 
-    test "returns species ordered by scientific name" do
-      species = Sources.get_species_for_source(2)
+    test "returns species ordered by scientific name", %{ootw: ootw} do
+      species = Sources.get_species_for_source(ootw.id)
       names = Enum.map(species, & &1.scientific_name)
       assert names == Enum.sort(names)
     end
 
-    test "returns species for source 3" do
-      species = Sources.get_species_for_source(3)
-      assert length(species) == 1
-      assert hd(species).scientific_name == "stellata"
+    test "returns the one species of a single-species source", ctx do
+      assert [species] = Sources.get_species_for_source(ctx.compendium.id)
+      assert species.id == ctx.stellata.id
     end
 
     test "returns empty list for nonexistent source" do
-      assert Sources.get_species_for_source(999) == []
+      assert Sources.get_species_for_source(-1) == []
     end
   end
 
   describe "count/0" do
     test "returns total number of sources" do
-      assert Sources.count() == 3
+      before = Sources.count()
+      source_fixture()
+      assert Sources.count() == before + 1
     end
   end
 
   describe "delete_source/1" do
-    test "returns an error while species have data from the source" do
-      source = Sources.get_source(1)
-
-      assert {:error, changeset} = Sources.delete_source(source)
+    test "returns an error while species have data from the source", %{ootw: ootw} do
+      assert {:error, changeset} = Sources.delete_source(ootw)
       assert changeset.errors[:id]
-      assert Sources.get_source(1)
+      assert Sources.get_source(ootw.id)
     end
 
     test "deletes a source with no species data" do
