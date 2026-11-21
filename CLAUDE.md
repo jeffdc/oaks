@@ -144,7 +144,9 @@ See **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** for comprehensive Elixir/Ph
 |-------------|-------------------|-------|
 | Everything else | **Yes** | Always ask user before pushing |
 
-**Push guard:** `make hooks` (also run by `make setup`) installs `scripts/githooks/pre-push`, which blocks force pushes and pushes to main or master. Jeff pushes main himself with `OAKS_PUSH_MAIN=1 git push ...`; agents never set it.
+**Pull requests:** main changes only through pull requests, as in gallformers. Work goes on a branch, the branch is pushed (with Jeff's OK), a PR is opened, and Jeff merges it on GitHub. Don't merge into local main.
+
+**Push guard:** `make hooks` (also run by `make setup`) installs `scripts/githooks/pre-push`, which blocks force pushes and pushes to main or master from anyone. Jeff can push main for a one-off with `OAKS_PUSH_MAIN=1 git push ...`; agents never set it.
 
 **Commit messages:** Present tense, imperative mood.
 
