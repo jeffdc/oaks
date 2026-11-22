@@ -20,7 +20,7 @@ defmodule OaksWeb.ErrorHTMLTest do
     assert html =~ ~s(action="/search")
     assert html =~ ~s(method="get")
     assert html =~ ~s(name="q")
-    assert html =~ ~s(href="/list")
+    assert html =~ ~s(href="/species")
   end
 
   test "the 404 names the address that was asked for, escaped" do
