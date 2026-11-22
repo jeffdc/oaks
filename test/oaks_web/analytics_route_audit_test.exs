@@ -62,8 +62,7 @@ defmodule OaksWeb.AnalyticsRouteAuditTest do
     {"about", "/about", :live},
     {"help markdown", "/help/markdown", :live},
     {"analytics dashboard", "/analytics", :live},
-    {"privacy", "/privacy", :live},
-    {"settings", "/settings", :live}
+    {"privacy", "/privacy", :live}
   ]
 
   describe "route audit" do

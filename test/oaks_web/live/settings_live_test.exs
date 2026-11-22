@@ -1,7 +1,7 @@
 defmodule OaksWeb.SettingsLiveTest do
   @moduledoc """
-  Tests for SettingsLive: the account links when logged in, and the login
-  link when logged out.
+  Tests for SettingsLive: the account links when logged in, and the
+  redirect to the login page when logged out.
   """
   use OaksWeb.ConnCase
 
@@ -29,14 +29,11 @@ defmodule OaksWeb.SettingsLiveTest do
   end
 
   describe "logged out" do
-    test "shows a login link and no account links", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/settings")
+    test "redirects to the login page", %{conn: conn} do
+      assert {:error, {:redirect, %{to: "/users/log-in", flash: flash}}} =
+               live(conn, ~p"/settings")
 
-      assert has_element?(view, "#settings-logged-out")
-      assert has_element?(view, ~s(a[href="/users/log-in"]), "Log in")
-      refute has_element?(view, "#settings-logged-in")
-      refute has_element?(view, ~s(a[href="/users/log-out"]))
-      refute has_element?(view, ~s(a[href="/users/settings/password"]))
+      assert flash["error"] == "You must log in to access this page."
     end
   end
 end
