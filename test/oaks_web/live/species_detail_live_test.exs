@@ -131,9 +131,9 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert has_element?(view, "h1.species-title .oc-sci-display .oc-sci-g", "Quercus")
       assert has_element?(view, "h1.species-title .oc-sci-display .oc-sci-e", ctx.alba)
 
-      # Synonyms as stored, with no genus; rank words roman.
+      # Synonyms: names under the species, Q. abbreviated; rank words roman.
+      assert has_element?(view, "#species-synonyms .oc-sci-g", "Q.")
       assert has_element?(view, "#species-synonyms .oc-sci-e", ctx.alba)
-      refute has_element?(view, "#species-synonyms .oc-sci-g")
       assert has_element?(view, "#species-synonyms .oc-sci-r", "var.")
 
       # Hybrids and varieties: list entries under the species, Q. abbreviated.

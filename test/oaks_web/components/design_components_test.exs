@@ -113,7 +113,7 @@ defmodule OaksWeb.DesignComponentsTest do
 
     test "names a taxon by its level" do
       assert sci(name: "coccinea", level: "complex") =~
-               ~s(<i class="oc-sci-g">Q.</i> <i class="oc-sci-e">coccinea</i>)
+               ~s(<i class="oc-sci-g">Q.</i>\u00A0<i class="oc-sci-e">coccinea</i>)
 
       for level <- ~w(genus subgenus section subsection) do
         html = sci(name: "Lobatae", level: level)
@@ -126,7 +126,30 @@ defmodule OaksWeb.DesignComponentsTest do
     end
 
     test "abbreviates the genus" do
-      assert sci(name: "michauxii", abbreviate: true) =~ ~s(<i class="oc-sci-g">Q.</i> <i)
+      assert sci(name: "michauxii", abbreviate: true) =~ ~s(<i class="oc-sci-g">Q.</i>\u00A0<i)
+    end
+
+    test "sets a synonym's genus and stored authority" do
+      assert sci(name: "candida Steud.", abbreviate: true) =~
+               ~s(<span class="oc-sci-n"><i class="oc-sci-g">Q.</i>\u00A0<i class="oc-sci-e">candida</i></span> <span class="oc-sci-a">Steud.</span>)
+
+      # Lower-case authorities: a misapplied name and a garden name.
+      for {name, author} <- [{"hypoxantha auctores", "auctores"}, {"repanda hort.", "hort."}] do
+        html = sci(name: name, abbreviate: true)
+        assert html =~ ~s(<span class="oc-sci-a">#{author}</span>)
+        refute html =~ ~s(<i class="oc-sci-e">#{author}</i>)
+      end
+
+      # A stated Q. keeps its place; another genus is set in full, never abbreviated.
+      assert sci(name: "Q. urbanii f. parvifolia Martinez 1954", abbreviate: true) =~
+               ~s(<i class="oc-sci-g">Q.</i>\u00A0<i class="oc-sci-e">urbanii</i> <span class="oc-sci-r">f.</span>\u00A0<i class="oc-sci-e">parvifolia</i></span> <span class="oc-sci-a">Martinez 1954</span>)
+
+      html = sci(name: "Cyclobalanopsis glauca (Thunb.) Oerst.", abbreviate: true)
+
+      assert html =~
+               ~s[<span class="oc-sci-n"><i class="oc-sci-g">Cyclobalanopsis</i> <i class="oc-sci-e">glauca</i></span> <span class="oc-sci-a">(Thunb.) Oerst.</span>]
+
+      refute html =~ "Q."
     end
 
     test "keeps the hybrid sign roman and spaced, however it is stored" do

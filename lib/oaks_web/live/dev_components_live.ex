@@ -249,6 +249,12 @@ defmodule OaksWeb.DevComponentsLive do
             <:item title="Authority stored in the name">
               <.sci_name name="shumardii var. acerifolia E.J.Palmer 1927" genus={nil} />
             </:item>
+            <:item title="Synonyms, under a species">
+              <.sci_name name="candida Steud." abbreviate />,
+              <.sci_name name="texana Auctores" abbreviate />,
+              <.sci_name name="repanda hort." abbreviate />,
+              <.sci_name name="Cyclobalanopsis glauca (Thunb.) Oerst." abbreviate />
+            </:item>
             <:item title="In running text">
               Two subgenera, <.sci_name name="Quercus" genus={nil} weight="regular" /> and
               <.sci_name name="Cerris" genus={nil} weight="regular" />.
@@ -262,8 +268,9 @@ defmodule OaksWeb.DevComponentsLive do
             in a metadata line beside one, and no size elsewhere (running text, dialogs, table
             cells), where it takes the text around it. The genus is in full in titles, at
             a first mention and in lists whose entries stand alone; Q. after that, in lists under a
-            named taxon or record and in column heads; none above species, after "with" and for
-            synonyms.
+            named taxon or record (a species' synonyms too), and in column heads; none above species
+            and after "with". Only Quercus is abbreviated: a synonym in another genus keeps it
+            in full.
           </p>
           <.list>
             <:item title="display">

@@ -362,7 +362,7 @@ defmodule OaksWeb.SpeciesMergeLive do
         <p class="merge-synonyms">
           <span :for={{name, i} <- Enum.with_index(@preview.synonyms_to_add, 1)}><.sci_name
             name={name}
-            genus={nil}
+            abbreviate
           />{if i < length(@preview.synonyms_to_add), do: ", "}</span>
         </p>
       </div>
