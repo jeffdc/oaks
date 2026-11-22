@@ -5,4 +5,10 @@ plan: compendium
 item: "1900"
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-a82f13f5068f54dfe
 created: "2026-11-22T03:37:12Z"
+settled:
+  action: decide
+  note: This needs a much larger design as it should be a highly curated set and we do not have that yet. Add a new item to the backlog.
+  by: Jeff
+  human: true
+  at: "2026-11-22T16:14:17Z"
 ---
