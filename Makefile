@@ -6,9 +6,17 @@
 # Phoenix Development (primary)
 # =============================================================================
 
-# Start Phoenix dev server on :4444 (auto-installs deps on first run)
+# Start Phoenix dev server on :4444 (auto-installs deps on first run).
+# make dev BRANCH=<name> [PORT=<port>] runs it for a branch checked out in
+# another worktree instead (scripts/dev-branch), e.g.
+# make dev BRANCH=6b12-site-shell PORT=4460.
+ifeq ($(strip $(BRANCH)),)
 dev: setup
-	mix phx.server
+	PORT=$(or $(PORT),4444) mix phx.server
+else
+dev:
+	scripts/dev-branch "$(BRANCH)" "$(or $(PORT),4444)"
+endif
 
 # Alias for clarity
 dev-phx: dev
@@ -175,6 +183,7 @@ help:
 	@echo ""
 	@echo "Phoenix Development:"
 	@echo "  make dev        Start Phoenix dev server (:4444)"
+	@echo "  make dev BRANCH=<name> PORT=<port>  Same, for a branch in another worktree"
 	@echo "  make setup      Full setup (deps + assets + db check + git hooks)"
 	@echo "  make hooks      Install the git push guard (no force pushes, no pushes to main)"
 	@echo "  make test       Run Phoenix tests (rebuilds test DB)"
