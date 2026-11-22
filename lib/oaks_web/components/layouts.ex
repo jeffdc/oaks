@@ -68,7 +68,12 @@ defmodule OaksWeb.Layouts do
         </nav>
 
         <div :if={@current_scope} class="oc-mast-editor">
-          <details id="editor-menu" class="oc-mast-menu" data-menu>
+          <details
+            id="editor-menu"
+            class="oc-mast-menu"
+            data-menu
+            phx-mounted={JS.ignore_attributes(["open"])}
+          >
             <summary aria-current={editor_current(@current_path)}><span>Editor</span></summary>
             <ul class="oc-mast-menu-list">
               <li><.link navigate={~p"/species/new"}>Add species</.link></li>

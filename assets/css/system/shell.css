@@ -107,6 +107,9 @@
     display: flex;
     align-items: stretch;
     gap: var(--spacing-s4);
+    /* Editor reads as the nav's next item: 24px from About, as in the
+       editor prototypes, not the masthead's 32px group gap. */
+    margin-left: calc(var(--spacing-s5) - var(--spacing-s6));
   }
   .oc-mast-menu {
     position: relative;
@@ -255,13 +258,13 @@
   .oc-flash { top: calc(60px + var(--spacing-s4)); }
 
   /* ---------------------------------------------------------------------
-     Narrow screens (960px and under, where the one-row masthead with the
-     editor marks no longer fits): the mark (and editor marks) first, the
+     Narrow screens (1024px and under, where the one-row masthead with the
+     editor marks no longer fits reliably): the mark (and editor marks) first, the
      search full width, then the nav on its own scrolling row along the
      bottom edge. Phones (760px and under) also take the 16px gutters and
      drop the "/" hint.
      --------------------------------------------------------------------- */
-  @media (max-width: 960px) {
+  @media (max-width: 1024px) {
     .oc-mast-in {
       --oc-gutter: var(--spacing-s6);
       gap: var(--spacing-s3) var(--spacing-s5);
@@ -273,6 +276,12 @@
       align-self: center;
     }
     .oc-mast-menu summary { padding: 8px 0 5px; }
+    /* The current mark belongs on the masthead's bottom edge; up here the
+       ochre name is the editor mark. */
+    .oc-mast-menu summary[aria-current] { border-bottom-color: transparent; }
+    .oc-mast-menu summary:hover {
+      border-bottom-color: color-mix(in srgb, var(--color-paper) 40%, transparent);
+    }
     .oc-mast-menu-list { left: auto; right: 0; }
     .oc-search {
       order: 3;
