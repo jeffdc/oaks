@@ -159,6 +159,26 @@ defmodule Oaks.SearchTest do
       assert Search.synonym_matches(species, bicolor.scientific_name) == %{}
     end
 
+    test "passes over a synonym string that joins several names", %{n: n} do
+      joined =
+        species_fixture(
+          scientific_name: "×joined#{n}",
+          is_hybrid: true,
+          synonyms: ["ilex x petraea = koehnei#{n} Ambrosy", "koehnei#{n}a"]
+        )
+
+      query = "koehnei#{n}"
+      %{species: species} = Search.search(query)
+
+      assert Search.synonym_matches(species, query) == %{
+               joined.id => %{name: "koehnei#{n}a", author: nil}
+             }
+
+      %{species: species} = Search.search("petraea = koehnei#{n}")
+      assert joined.id in Enum.map(species, & &1.id)
+      assert Search.synonym_matches(species, "petraea = koehnei#{n}") == %{}
+    end
+
     test "leaves out a species found by a common name", %{n: n, alba: alba} do
       query = "white oak #{n}"
       %{species: species} = Search.search(query)

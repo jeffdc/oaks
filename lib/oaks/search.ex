@@ -75,8 +75,9 @@ defmodule Oaks.Search do
   name contains the query is left out; for any other, the first of its
   synonyms that contains the query (case-insensitive, as `search/2` matches)
   is returned as `%{name: name, author: author}`. A species found only by its
-  author or a common name is left out too. The author is nil for a synonym
-  stored as a string, which keeps its authority in the name.
+  author or a common name is left out too, as is a stored synonym string
+  that joins several names with "=". The author is nil for a synonym stored
+  as a string, which keeps its authority in the name.
 
   ## Examples
 
@@ -111,7 +112,11 @@ defmodule Oaks.Search do
   defp contains?(text, needle), do: String.contains?(String.downcase(text), needle)
 
   # A synonym is stored as a string, or as %{"name" => ..., "author" => ...}.
-  defp synonym_entry(name) when is_binary(name), do: [%{name: name, author: nil}]
+  # A string holding several names joined by "=" (a few hybrids' records)
+  # isn't one name to show, so it is passed over.
+  defp synonym_entry(name) when is_binary(name) do
+    if String.contains?(name, "="), do: [], else: [%{name: name, author: nil}]
+  end
 
   defp synonym_entry(%{"name" => name} = entry) when is_binary(name) do
     author = entry["author"]
