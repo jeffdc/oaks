@@ -1,0 +1,14 @@
+{
+  "tree": "902cb01e5a1a5ad059c89f593b62831ea7124259",
+  "commit": "53b631d120017b6ca74f1c2fc24bb58ae793e8ea",
+  "at": "2026-11-22T19:57:04Z",
+  "by": "/Users/jeff/dev/oaks/.claude/worktrees/6b12-site-shell",
+  "passed": true,
+  "results": [
+    {
+      "command": "make done-checks",
+      "exit": 0,
+      "duration_ms": 8454
+    }
+  ]
+}
