@@ -5,6 +5,12 @@ plan: compendium
 item: a44d
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-a25802b4f7439f517
 created: "2026-11-22T16:13:29Z"
+settled:
+  action: accept
+  note: with review 05fc
+  by: Jeff
+  human: true
+  at: "2026-11-22T16:19:11Z"
 ---
 
 720 is the low end of Jeff's 720-760 so prose stays readable: about 85 characters a line at 17px, the upper end of comfortable; forms take the 760
