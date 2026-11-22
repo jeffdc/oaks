@@ -1,12 +1,19 @@
 <.error_page
-  back={back_href(assigns)}
   status="403"
-  title="No access"
-  description="You don't have permission to see this page on the Oak Compendium."
+  title="Request refused"
+  description="The Oak Compendium refused this request."
 >
-  You don’t have permission to see this page. If you edit the Compendium, log in and try again.
+  The Compendium refused this request. Most often a form was left open too long and its security check expired: go back, reload the page and send the form again. If you edit the Compendium, you may need to log in again.
   <:actions>
-    <.button href={~p"/users/log-in"} variant="primary">Log in</.button>
+    <.button :if={back_href(assigns)} href={back_href(assigns)} variant="primary">
+      Go back
+    </.button>
+    <.button
+      href={~p"/users/log-in"}
+      variant={if back_href(assigns), do: "ghost", else: "primary"}
+    >
+      Log in
+    </.button>
     <.button href={~p"/"}>Home</.button>
   </:actions>
 </.error_page>

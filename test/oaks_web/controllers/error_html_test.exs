@@ -33,12 +33,23 @@ defmodule OaksWeb.ErrorHTMLTest do
     assert render("404") =~ "There’s no page at this address."
   end
 
-  test "renders 403.html: no access, with a way to log in" do
+  test "renders 403.html: request refused, with a way to log in" do
     html = render("403")
     assert html =~ "Error 403"
-    assert html =~ "<title>No access · Oak Compendium</title>"
-    assert html =~ ~s(href="/users/log-in")
+    assert html =~ "<title>Request refused · Oak Compendium</title>"
+    assert html =~ "security check expired"
+    assert html =~ ~s(<a href="/users/log-in" class="oc-btn oc-btn-primary">)
     refute html =~ ~s(action="/search")
+  end
+
+  test "on the 403, Go back is the one primary action when there is a page to go back to" do
+    html = render("403", conn: with_referer("https://oakcompendium.org/users/log-in"))
+
+    assert html =~
+             ~s(<a href="https://oakcompendium.org/users/log-in" class="oc-btn oc-btn-primary">)
+
+    assert html =~ ~s(<a href="/users/log-in" class="oc-btn">)
+    assert length(String.split(html, "Go back")) == 2
   end
 
   test "renders 500.html: something went wrong" do
@@ -98,6 +109,15 @@ defmodule OaksWeb.ErrorHTMLTest do
 
       assert body =~ "<title>Page not found · Oak Compendium</title>"
       assert body =~ "/no-such-page"
+    end
+
+    test "a form sent without its security token gets the 403 page", %{conn: conn} do
+      conn = Plug.Conn.put_private(conn, :plug_skip_csrf_protection, false)
+
+      {403, _headers, body} =
+        assert_error_sent 403, fn -> post(conn, ~p"/users/log-in", %{}) end
+
+      assert body =~ "<title>Request refused · Oak Compendium</title>"
     end
   end
 end
