@@ -108,7 +108,7 @@ defmodule OaksWeb.SpeciesCompareLive do
     assigns = assign(assigns, :selected_sources, selected_sources)
 
     ~H"""
-    <.page>
+    <.page width="frame">
       <div :if={@not_found} class="source-comparison-missing">
         <.back navigate={~p"/species"}>Back to Species List</.back>
         <.header>

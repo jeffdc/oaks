@@ -182,7 +182,7 @@ defmodule OaksWeb.SpeciesMergeLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page>
+    <.page width="frame">
       <.loading_state :if={@loading} />
       <.error_state :if={@error} error={@error} source_name={@source_name} />
 

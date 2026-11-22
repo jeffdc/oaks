@@ -226,20 +226,21 @@
   /* ---------------------------------------------------------------------
      Page (CoreComponents.page): the frame moves from <main> into the page,
      so a page can run a part full width (the bleed) above its framed
-     content. Named widths: frame (1400px), read (a 70ch measure), form
-     (640px). Every page starts at the frame's left gutter: read and form
-     are never centred, and their head (the title row) runs the full frame
-     over the measure.
+     content. Single-column pages sit in one centred 960px column (column,
+     and read and form, whose content holds a 70ch or 640px measure from
+     the column's left edge); the head (the title row) spans the column.
+     Only pages that set columns side by side take the 1400px frame.
      --------------------------------------------------------------------- */
   .oc-page:has(.oc-pg) {
     max-width: none;
     padding: 0;
   }
   .oc-pg-body {
-    max-width: var(--container-frame);
+    max-width: calc(var(--container-column) + 2 * var(--spacing-s6));
     margin: 0 auto;
     padding: var(--spacing-s6) var(--spacing-s6) var(--spacing-s8);
   }
+  .oc-pg-frame { max-width: var(--container-frame); }
   .oc-pg-read > .oc-pg-measure { max-width: var(--container-read); }
   .oc-pg-form > .oc-pg-measure { max-width: var(--container-form); }
 

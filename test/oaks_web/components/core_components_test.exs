@@ -207,18 +207,18 @@ defmodule OaksWeb.CoreComponentsTest do
   end
 
   describe "page/1" do
-    test "sets the content in the frame by default" do
+    test "sets the content in the centred column by default" do
       html = render_component(&CoreComponents.page/1, inner_block: text_slot("Species"))
 
       assert html =~ ~s(<div class="oc-pg">)
-      assert html =~ ~s(class="oc-pg-body oc-pg-frame")
+      assert html =~ ~s(class="oc-pg-body oc-pg-column")
       assert html =~ ~r{<div class="oc-pg-measure ?">\s*Species\s*</div>}
       refute html =~ "oc-pg-bleed"
       refute html =~ "oc-pg-head"
     end
 
-    for width <- ~w(read form) do
-      test "takes the #{width} measure" do
+    for width <- ~w(read form frame) do
+      test "takes the #{width} width" do
         html =
           render_component(&CoreComponents.page/1,
             width: unquote(width),
@@ -229,7 +229,7 @@ defmodule OaksWeb.CoreComponentsTest do
       end
     end
 
-    test "runs the bleed full width above the framed content" do
+    test "runs the bleed full width above the content" do
       html =
         render_component(&CoreComponents.page/1,
           bleed: text_slot("Title page"),
@@ -239,7 +239,7 @@ defmodule OaksWeb.CoreComponentsTest do
       assert html =~ ~r{<div class="oc-pg-bleed">\s*Title page\s*</div>\s*<div class="oc-pg-body}
     end
 
-    test "sets the head across the frame, above the measure" do
+    test "sets the head across the column, above the measure" do
       html =
         render_component(&CoreComponents.page/1,
           width: "form",

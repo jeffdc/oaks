@@ -61,7 +61,7 @@ defmodule OaksWeb.DevComponentsLive do
   def render(assigns) do
     ~H"""
     <main id="main-content">
-      <.page>
+      <.page width="frame">
         <:bleed>
           <.taxonomy_band>
             <:rank navigate={~p"/taxonomy"}><i>Quercus</i></:rank>
@@ -335,16 +335,17 @@ defmodule OaksWeb.DevComponentsLive do
 
         <section class="mt-s8">
           <.section_heading id="page">
-            Page<:note>frame, read and form widths; the head; the bleed</:note>
+            Page<:note>column, read, form and frame widths; the head; the bleed</:note>
           </.section_heading>
           <p class="max-w-[68ch]">
-            This gallery is a <code>page</code>: the band above runs in its bleed, the window's full
-            width, and everything else sits in the frame. Lists, tables, taxon pages and records take
-            the frame; prose takes read; forms and account pages take form. Every page starts at the
-            frame's left gutter: the read and form measures are never centred, and their title row
-            sits in the head, across the full frame, so only the content under it is narrower.
+            This gallery is a <code>page</code> at the frame: the band above runs in its bleed, the
+            window's full width, and everything else sits in the 1400px frame, which only pages that
+            set columns side by side take (the source comparison, a merge). Every single-column page
+            sits in one centred 960px column: lists, taxon pages and records take column; prose takes
+            read and forms and account pages take form, which hold the content under the head to
+            their measure from the column's left edge. The head spans the column.
           </p>
-          <div :for={width <- ~w(read form)} class="mt-s5 border border-dashed border-rule">
+          <div :for={width <- ~w(column read form)} class="mt-s5 border border-dashed border-rule">
             <.page id={"gallery-page-#{width}"} width={width}>
               <:head>
                 <.header>width="{width}"</.header>

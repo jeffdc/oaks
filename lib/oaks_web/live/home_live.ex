@@ -138,7 +138,7 @@ defmodule OaksWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page>
+    <.page width="frame">
       <:bleed>
         <.title_page search={~p"/search"}>
           Oak <em>Compendium</em>

@@ -569,30 +569,33 @@ defmodule OaksWeb.CoreComponents do
   end
 
   @doc """
-  Renders a page: its content in the page frame at one of three named
-  widths, with an optional full-bleed part that spans the window above it.
-  Every page wraps its content in one `page/1`; a page never sets its own
+  Renders a page: its content in a centred column or the full page frame,
+  with an optional full-bleed part that spans the window above it. Every
+  page wraps its content in one `page/1`; a page never sets its own
   max-width or centring.
 
-  Which width a page takes (DESIGN.md, Layout):
+  Which width a page takes (DESIGN.md, Layout; decision a0ac):
 
-    * `frame` (the default): the 1400px frame with 32px gutters (16px under
-      760px). Pages people scan across: taxon pages, lists, tables,
-      comparisons, search, a record such as a source, analytics.
-    * `read`: a 70ch reading measure. Prose: articles, about, privacy and
-      help pages.
-    * `form`: a 640px measure. Forms that create or edit something, and
-      the account pages (log in, setup, settings).
+    * `column` (the default): one centred 960px column. Every
+      single-column page: lists, taxon pages, search, a record such as a
+      source, analytics.
+    * `read`: the column, its content held to a 70ch reading measure.
+      Prose: articles, about, privacy and help pages.
+    * `form`: the column, its content held to a 640px measure. Forms that
+      create or edit something, and the account pages (log in, setup,
+      settings).
+    * `frame`: the 1400px frame, only for pages that set columns side by
+      side: the source comparison, a merge.
 
-  Every page starts at the frame's left gutter, in line with the
-  masthead's mark, at every width: `read` and `form` are narrower, never
-  centred. Their title row goes in the `:head` slot, which runs the full
-  frame as the masthead does, so every page's title rule spans the same
-  width and only the content under it takes the measure. (The home page
-  alone is centred, as a title page and contents.)
+  All four have 32px gutters (16px under 760px). The `:head` slot (a back
+  link and the title row) spans the column, so its 2px rule runs the
+  column's width; `read` and `form` hold only the content under it to
+  their measure, from the column's left edge, so every single-column page
+  shares one left edge. (The home page is set centred in the frame, as a
+  title page and contents.)
 
   The `:bleed` slot runs the full width of the window, edge to edge,
-  above the framed content: a title page, a band. Its content sets its
+  above the page's content: a title page, a band. Its content sets its
   own frame inside (as the masthead does).
 
   The layout's `<main>` is the frame for pages that don't use this
@@ -623,12 +626,17 @@ defmodule OaksWeb.CoreComponents do
         <:bleed><.taxonomy_band>...</.taxonomy_band></:bleed>
         ...
       </.page>
+
+      <.page width="frame">
+        <.header>Compare sources</.header>
+        ...
+      </.page>
   """
-  attr :width, :string, values: ~w(frame read form), default: "frame"
+  attr :width, :string, values: ~w(column read form frame), default: "column"
   attr :class, :any, default: nil, doc: "classes for the content under the head"
   attr :rest, :global
-  slot :bleed, doc: "full-width content above the frame"
-  slot :head, doc: "the title row, and a back link above it, across the full frame"
+  slot :bleed, doc: "full-width content above the page"
+  slot :head, doc: "the title row, and a back link above it, across the column"
   slot :inner_block, required: true
 
   def page(assigns) do
