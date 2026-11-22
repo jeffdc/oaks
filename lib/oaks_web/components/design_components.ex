@@ -46,8 +46,11 @@ defmodule OaksWeb.DesignComponents do
   and a species abbreviated (Q.).
 
   The path is one line at every width, so the band's height never
-  changes. On phones it scrolls, pinned to the current taxon (the
-  PinCurrentTaxon hook in assets/js/app.js) and fading at its left edge.
+  changes. A path longer than the line (on phones, mostly) scrolls,
+  pinned to the current taxon, fading at its left edge while steps are
+  scrolled off there, with a thin scrollbar for a mouse (the
+  PinCurrentTaxon hook in assets/js/app.js marks it `data-overflow` and
+  `data-scrolled`).
 
   The optional `:siblings` slot adds the menu at the band's right end; its
   `label` reads like "Coccineae · 7 species" and its content is `<li>`
