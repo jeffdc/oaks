@@ -487,99 +487,219 @@ a:where([class*="text-forest-6"], [class*="text-forest-7"], [style*="color: var(
   border-bottom: 1px solid var(--color-rule);
 }
 
-/* Taxonomy sub-taxon cards (matches V1 .sub-taxon-card) */
+/* --------------------------------------------
+   Taxonomy pages (item 58ef): the ochre band, the title row on its 2px
+   rule, then sections whose sub-taxa and species are ruled index columns,
+   not boxes. The band is the component (.oc-band); here it is pulled out
+   to the page edges from inside the frame, since the layout gives page
+   bodies no place above the frame.
+   -------------------------------------------- */
+.taxonomy-page-band {
+  margin: calc(-1 * var(--spacing-s6)) calc(-1 * var(--spacing-s6)) var(--spacing-s6);
+  /* Past the 1400px frame the ochre runs on to the window's edges as
+     painted overflow, which never scrolls. */
+  border-image: conic-gradient(var(--color-ochre) 0 0) fill 0 / / 0 100vmax;
+}
+
+@media (max-width: 760px) {
+  .taxonomy-page-band {
+    margin: calc(-1 * var(--spacing-s5)) calc(-1 * var(--spacing-s4)) var(--spacing-s5);
+  }
+}
+
+/* The current taxon is set in the serif italic; its rank word stays the
+   band's roman Archivo Narrow, as on the linked ranks. */
+.taxonomy-page-band [aria-current] .oc-band-rk {
+  font: 500 15px/1.4 var(--font-narrow);
+}
+
+.taxon-title h1 i {
+  font-style: italic;
+}
+
+.taxon-title .oc-title-sub {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.taxon-title-sep {
+  margin: 0 0.35em;
+  color: var(--color-ink-3);
+}
+
+.taxon-section + .taxon-section {
+  margin-top: var(--spacing-s7);
+}
+
+.taxon-section-note {
+  font: 500 13px/1.2 var(--font-frame);
+  color: var(--color-ink-3);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.taxon-empty {
+  margin: 0;
+  font: italic 400 17px/1.6 var(--font-serif);
+  color: var(--color-ink-3);
+}
+
+/* Sub-taxa and species: index columns read down, each name on a hairline.
+   The first row stands on the section label's 2px rule. */
+.taxon-index,
+.species-index {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  column-gap: var(--spacing-s6);
+}
+
+.taxon-index {
+  column-width: 220px;
+}
+
+.species-index {
+  column-width: 260px;
+}
+
+.taxon-index > li,
+.species-index > li {
+  break-inside: avoid;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+/* A sub-taxon: its name, then its count in lining figures at the right. */
+.taxon-card-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s3);
+}
+
 .taxon-card {
-  background-color: var(--color-forest-50);
-  border: 1px solid var(--color-forest-200);
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-s3);
+  padding: 10px 0;
+  color: var(--color-ink);
   text-decoration: none;
 }
 
-.taxon-card:hover {
-  background-color: var(--color-forest-100);
-  border-color: var(--color-forest-300);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+.taxon-card-name {
+  font: italic 600 18px/1.25 var(--font-serif);
 }
 
-.taxon-card:focus-visible {
-  outline: none;
-  border-color: var(--color-forest-600);
-  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.2);
+.taxon-card-count {
+  flex: none;
+  font: 500 13px/1.2 var(--font-frame);
+  color: var(--color-ink-3);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-/* Taxon card wrapper with hover-visible edit/delete actions */
-.taxon-card-wrapper {
-  position: relative;
+.taxon-card:hover .taxon-card-name,
+.species-card:hover .species-card-name {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
+/* Editor actions: with a pointer that hovers they lie over the count,
+   shown on hover or keyboard focus, so they take no room from the names;
+   on touch screens they are always there, after the count. */
 .taxon-card-actions {
   position: absolute;
   top: 50%;
-  right: 0.5rem;
+  right: 0;
   transform: translateY(-50%);
   display: flex;
-  gap: 0.25rem;
+  gap: var(--spacing-s1);
+  padding-left: var(--spacing-s2);
+  background: var(--color-paper);
   opacity: 0;
-  transition: opacity 0.15s ease;
-  z-index: 1;
 }
 
-.taxon-card-wrapper:hover .taxon-card-actions {
+.taxon-card-wrapper:hover .taxon-card-actions,
+.taxon-card-wrapper:focus-within .taxon-card-actions {
   opacity: 1;
+}
+
+@media (hover: none) {
+  .taxon-card-actions {
+    position: static;
+    transform: none;
+    padding-left: 0;
+    opacity: 1;
+  }
 }
 
 .taxon-action-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 0.375rem;
-  border: none;
-  background: var(--color-forest-100);
-  color: var(--color-forest-700);
-  cursor: pointer;
-  transition: all 0.15s ease;
+  width: 28px;
+  height: 28px;
   padding: 0;
-}
-
-.taxon-action-icon:hover {
-  background: var(--color-forest-200);
-}
-
-.taxon-action-delete {
-  color: #dc2626;
-  background: #fef2f2;
-}
-
-.taxon-action-delete:hover {
-  background: #fee2e2;
-}
-
-/* Taxonomy species cards (matches V1 .species-card) */
-.species-card {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
+  color: var(--color-ink);
+  background: transparent;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 0;
   cursor: pointer;
-  transition: all 0.15s ease;
   text-decoration: none;
 }
 
-.species-card:hover {
-  background-color: var(--color-forest-50);
-  border-color: var(--color-forest-300);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+.taxon-action-icon:hover {
+  color: var(--color-paper);
+  background: var(--color-ink);
 }
 
-.species-card:focus-visible {
-  outline: none;
-  border-color: var(--color-forest-600);
-  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.2);
+/* A species: Quercus in roman weight, the epithet heavier, the
+   authority after it in the third ink. */
+.species-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--spacing-s2);
+  padding: 9px 0;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.species-card-name {
+  font: italic 600 17px/1.3 var(--font-serif);
+}
+
+.species-card-genus {
+  font-weight: 400;
+}
+
+.species-card-author {
+  font: 400 14px/1.3 var(--font-serif);
+  color: var(--color-ink-3);
+}
+
+/* The delete dialog: the modal component's panel; the confirm is an ink
+   plate, since DESIGN.md has no warning colour. */
+.taxon-modal-text {
+  margin: 0;
+  font: 400 17px/1.6 var(--font-serif);
+  color: var(--color-ink-2);
+}
+
+.taxon-modal-in-use {
+  margin: var(--spacing-s3) 0 0;
+  font: 700 14px/1.45 var(--font-frame);
+  color: var(--color-ink);
+}
+
+.taxon-delete-confirm.oc-btn {
+  color: var(--color-paper);
+  background: var(--color-ink);
+}
+
+.taxon-delete-confirm.oc-btn:hover {
+  color: var(--color-ink);
+  background: var(--color-paper);
 }
 
 /* ============================================
@@ -1654,176 +1774,179 @@ a.badge:hover {
 
 
 /* ============================================
-   Search Results (V1 port)
+   Search Results (item 58ef)
+
+   The counts bar is the page's title row: figures in Archivo with lining
+   tabular numerals, separated by hairlines, on the 2px ink rule. Each
+   kind of result is a section label over a ruled list; a row is the
+   name (scientific names in the serif italic) with its authority, and
+   its meta at the right. No icons: the section says what a row is.
    ============================================ */
-.search-counts-bar {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1.5rem;
+/* A results list reads as one column: names and their meta stay within
+   reach of each other. */
+.search-page {
+  max-width: 56rem;
 }
 
-.search-count-item {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+/* The / hotkey needs a keyboard; phones hide its hint, as the masthead
+   does. */
+@media (max-width: 760px) {
+  .search-key-hint {
+    display: none;
+  }
+}
+
+.search-title {
+  margin: 0 0 var(--spacing-s4);
+  padding-bottom: var(--spacing-s4);
+  border-bottom: 2px solid var(--color-rule-strong);
+  font: 600 clamp(34px, 4vw, 50px)/1.05 var(--font-serif);
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.search-counts-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-s2) var(--spacing-s4);
+  min-height: 44px;
+  padding-bottom: var(--spacing-s3);
+  margin-bottom: var(--spacing-s6);
+  border-bottom: 2px solid var(--color-rule-strong);
+  font: 500 15px/1.3 var(--font-frame);
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--color-ink-2);
+}
+
+.search-count-item b,
+.search-count-total b {
+  font-weight: 700;
+  color: var(--color-ink);
 }
 
 .search-count-total {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-forest-700);
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.search-count-total b {
+  font-weight: 800;
 }
 
 .search-separator {
-  color: var(--color-border);
-  font-weight: 300;
+  align-self: stretch;
+  width: 1px;
+  margin: 3px 0;
+  background-color: var(--color-rule);
 }
 
-.search-section {
-  margin-bottom: 1.5rem;
+.search-add-species-btn.oc-btn {
+  margin-left: auto;
+}
+
+.search-section + .search-section {
+  margin-top: var(--spacing-s7);
 }
 
 .search-section-label {
-  font-size: 0.75rem;
-  font-weight: 600;
+  margin: 0;
+  padding: 0 0 var(--spacing-s2);
+  border-bottom: 2px solid var(--color-rule-strong);
+  font: 800 15px/1.2 var(--font-frame);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-tertiary);
-  margin-bottom: 0.5rem;
-  padding-left: 0.25rem;
+  color: var(--color-ink);
 }
 
 .search-results-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  overflow: hidden;
 }
 
 .search-results-list li {
-  border-bottom: 1px solid var(--color-border);
-}
-
-.search-results-list li:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid var(--color-rule);
 }
 
 .search-result-row {
-  display: block;
-  padding: 0.75rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px var(--spacing-s5);
+  padding: var(--spacing-s3) 0;
+  color: var(--color-ink);
   text-decoration: none;
-  transition: background-color 0.15s ease;
-}
-
-.search-result-row:hover {
-  background-color: var(--color-forest-50);
-  text-decoration: none;
-}
-
-.search-result-row:focus-visible {
-  outline: none;
-  background-color: var(--color-forest-50);
-  box-shadow: inset 0 0 0 2px var(--color-forest-400);
 }
 
 .search-result-main {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.search-result-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 0.25rem;
-  flex-shrink: 0;
-}
-
-.search-result-icon-source {
-  background-color: #fef3c7;
-  color: var(--color-oak-brown);
-}
-
-.search-result-icon-taxon {
-  background-color: var(--color-forest-100);
-  color: var(--color-forest-700);
-}
-
-.search-result-icon-species {
-  background-color: var(--color-forest-100);
-  color: var(--color-forest-600);
+  align-items: baseline;
+  gap: 2px var(--spacing-s3);
+  min-width: 0;
 }
 
 .search-result-name {
-  font-size: 1rem;
-  font-weight: 600;
+  font: 400 17px/1.3 var(--font-serif);
+  color: var(--color-ink);
 }
 
-.search-result-name-source {
-  color: var(--color-oak-brown);
+.search-result-row:hover .search-result-name {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
-.search-result-name-taxon {
-  color: var(--color-forest-800);
-}
-
+.search-result-name-taxon,
 .search-result-name-species {
-  color: var(--color-forest-800);
-  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.search-result-genus {
+  font-weight: 400;
 }
 
 .search-result-author {
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: var(--color-text-secondary);
-}
-
-.search-result-meta {
-  font-size: 0.8125rem;
-  color: var(--color-text-tertiary);
-  margin-top: 0.25rem;
-  padding-left: 2rem;
+  font: 400 14px/1.3 var(--font-serif);
+  color: var(--color-ink-3);
 }
 
 .search-taxon-level {
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--color-text-tertiary);
-  background-color: var(--color-forest-50);
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
+  font: 500 13px/1.2 var(--font-frame);
+  color: var(--color-ink-3);
 }
 
-.search-add-species-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  margin-left: auto;
-  padding: 0.5rem 0.875rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-forest-700);
-  background-color: var(--color-forest-100);
-  border: 1px solid var(--color-forest-200);
-  text-decoration: none;
-  transition: all 0.15s ease;
+.search-result-meta {
+  font: 500 13px/1.3 var(--font-frame);
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--color-ink-2);
 }
 
-.search-add-species-btn:hover {
-  background-color: var(--color-forest-200);
-  border-color: var(--color-forest-300);
-  text-decoration: none;
+.search-result-meta i {
+  font: italic 400 14px/1.3 var(--font-serif);
+  color: var(--color-ink);
+}
+
+.search-empty {
+  margin: 0;
+  max-width: 70ch;
+  font: 400 17px/1.6 var(--font-serif);
+  color: var(--color-ink-2);
+}
+
+.search-empty b {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.search-empty-hint {
+  margin: var(--spacing-s2) 0 0;
+  font: 500 14px/1.45 var(--font-frame);
+  color: var(--color-ink-3);
 }
 
 /* ============================================

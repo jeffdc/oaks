@@ -54,7 +54,7 @@ defmodule OaksWeb.TaxonomyLiveTest do
     test "renders taxonomy root page", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/taxonomy")
       assert html =~ "Quercus"
-      assert html =~ "genus"
+      assert html =~ "Genus"
     end
 
     test "shows subgenera as child taxa", %{conn: conn, l: l} do
@@ -74,9 +74,10 @@ defmodule OaksWeb.TaxonomyLiveTest do
       assert html =~ "#{Species.count()} species"
     end
 
-    test "does not show breadcrumbs at genus level", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/taxonomy")
-      refute html =~ "Taxonomy:"
+    test "the taxonomy band holds only the genus, as the current taxon", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/taxonomy")
+      assert has_element?(view, "#taxonomy-band [aria-current]", "Quercus")
+      refute has_element?(view, "#taxonomy-band a")
     end
 
     test "subgenus cards link to drill-down pages", %{conn: conn, q: q, l: l} do
@@ -90,14 +91,14 @@ defmodule OaksWeb.TaxonomyLiveTest do
     test "renders subgenus page", %{conn: conn, q: q} do
       {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}")
       assert html =~ q
-      assert html =~ "subgenus"
+      assert html =~ "Subgenus"
     end
 
-    test "shows breadcrumbs", %{conn: conn, q: q} do
-      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}")
-      assert html =~ "Taxonomy:"
-      assert html =~ "(genus)"
-      assert html =~ "(subgenus)"
+    test "shows the path in the taxonomy band", %{conn: conn, q: q} do
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{q}")
+      assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy"]), "Quercus")
+      assert has_element?(view, "#taxonomy-band [aria-current]", "subg.")
+      assert has_element?(view, "#taxonomy-band [aria-current]", q)
     end
 
     test "shows sections as child taxa", %{conn: conn, q: q} do
@@ -109,7 +110,7 @@ defmodule OaksWeb.TaxonomyLiveTest do
   describe "section level" do
     test "renders section page with species", %{conn: conn, q: q, alba: alba} do
       {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}/#{q}")
-      assert html =~ "section"
+      assert html =~ "Section"
       assert html =~ alba
     end
 
@@ -137,11 +138,11 @@ defmodule OaksWeb.TaxonomyLiveTest do
       assert html =~ st
     end
 
-    test "breadcrumbs show full ancestry", %{conn: conn, q: q} do
-      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}/#{q}")
-      assert html =~ "(genus)"
-      assert html =~ "(subgenus)"
-      assert html =~ "(section)"
+    test "the taxonomy band shows the full ancestry", %{conn: conn, q: q} do
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{q}/#{q}")
+      assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy"]), "Quercus")
+      assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy/#{q}"]), "subg.")
+      assert has_element?(view, "#taxonomy-band [aria-current]", "sect.")
     end
   end
 
@@ -149,7 +150,7 @@ defmodule OaksWeb.TaxonomyLiveTest do
     test "renders subsection page with species", %{conn: conn} = ctx do
       {:ok, _view, html} = live(conn, ~p"/taxonomy/#{ctx.q}/#{ctx.q}/#{ctx.st}")
       assert html =~ ctx.st
-      assert html =~ "subsection"
+      assert html =~ "Subsection"
       assert html =~ ctx.stellata
     end
   end
