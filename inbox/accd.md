@@ -5,6 +5,12 @@ plan: compendium
 item: a6c7
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-ad2368526cef11b42
 created: "2026-11-22T15:38:28Z"
+settled:
+  action: accept
+  note: with review 2148
+  by: Jeff
+  human: true
+  at: "2026-11-22T16:11:53Z"
 ---
 
 Conservative: the prototype shows full Quercus names in a names section, but Jeff hasn't seen a genus on these lists
