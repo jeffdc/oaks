@@ -400,12 +400,13 @@ Every page is built from the shared library: `OaksWeb.CoreComponents`, `OaksWeb.
 |------|-----|
 | A page and its width | `<.page width="frame\|read\|form">` (CoreComponents), with a `:bleed` slot for full-width parts such as a title page; read and form start at the frame's left gutter *(rolling out to every page, item d5b1)* |
 | Title row with actions and meta | `<.header>` with `:actions` and `:meta` slots *(to extend, item 626c)* |
-| Taxonomy breadcrumb | the layout's band slot, fed by `<.taxonomy_band>` *(to build, item 0a43)* |
+| Taxonomy breadcrumb | the layout's band slot, fed by `<.taxonomy_band>` *(to build, item 0a43)*; `inline` for a wrapping plate away from the taxon's own page |
 | A scientific name anywhere | `<.sci_name>` (DesignComponents): genus 400, epithets 600, the hybrid sign, rank words and author roman; `abbreviate`, `author`, `rank`, `weight="regular"` for running text *(rolling out to every page, item a6c7)* |
 | Buttons | `<.button>`: `primary` (one per page), `ghost`, `danger` *(to add, item c13c)*; size `compact` |
 | Dialogs and confirmations | `<.modal>` with title, body and actions slots *(to consolidate, item c13c)* |
 | Status stamps | `<.status_tag>`; IUCN status through its IUCN variant *(in progress, item 12b4)* |
-| Section labels | `<.section_heading>` |
+| Section labels | `<.section_heading>` (`align="center"` on a centred page) |
+| A centred title page, its chapter headings and a contents list | `<.title_page>` (in the page's `:bleed`), `<.chapter_heading>`, `<.contents>` |
 | Tables and ruled lists | `<.table>`, `<.list>` |
 | Form fields | `<.input>` |
 | Back links | `<.back>` |

@@ -838,6 +838,303 @@
   .oc-tags-input:focus-visible { outline: none; }
 
   /* ---------------------------------------------------------------------
+     Title page (DesignComponents.title_page): the masthead's ink continued
+     as a field holding the title, centred. The ink ends in a 6px ochre
+     edge through the middle of the search field, which hangs across it;
+     the counts sit on paper below.
+     --------------------------------------------------------------------- */
+  .oc-tp {
+    --oc-tp-gutter: var(--spacing-s6);
+    --oc-tp-field: 64px;
+  }
+  .oc-tp-ink {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .oc-tp-ink :focus-visible { outline-color: var(--color-paper); }
+  .oc-tp-in {
+    max-width: var(--container-frame);
+    margin: 0 auto;
+    padding: 50px var(--oc-tp-gutter) 34px;
+    border-top: 1px solid color-mix(in srgb, var(--color-paper) 18%, transparent);
+    text-align: center;
+  }
+  .oc-tp-title {
+    margin: 0;
+    font: 700 88px/0.95 var(--font-serif);
+    letter-spacing: -0.025em;
+    color: var(--color-paper);
+    text-wrap: balance;
+  }
+  .oc-tp-title em {
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    color: var(--color-ochre);
+  }
+  /* 18em holds the subtitle's first clause on one line at every size. */
+  .oc-tp-sub {
+    max-width: 18em;
+    margin: 20px auto 0;
+    font: 400 23px/1.4 var(--font-serif);
+    color: color-mix(in srgb, var(--color-paper) 88%, transparent);
+    text-wrap: pretty;
+  }
+
+  /* The edge: ink down to the field's middle, the ochre rule, then paper. */
+  .oc-tp-edge {
+    padding: 0 var(--oc-tp-gutter);
+    background: linear-gradient(
+      to bottom,
+      var(--color-ink) 0 50%,
+      var(--color-ochre) 50% calc(50% + 6px),
+      transparent calc(50% + 6px)
+    );
+  }
+  .oc-tp-edge-plain {
+    height: 6px;
+    background: var(--color-ochre);
+  }
+  .oc-tp-search {
+    position: relative;
+    max-width: 640px;
+    height: var(--oc-tp-field);
+    margin: 0 auto;
+    display: flex;
+    background: #fff;
+    border: 2px solid var(--color-ink);
+  }
+  .oc-tp-search:focus-within {
+    outline: 3px solid var(--color-pencil);
+    outline-offset: 3px;
+  }
+  .oc-tp-search input {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-ink);
+    caret-color: var(--color-ink);
+    font: 500 19px/1.2 var(--font-frame);
+    appearance: none;
+  }
+  .oc-tp-search input:focus,
+  .oc-tp-search input:focus-visible { outline: none; }
+  .oc-tp-search input::-webkit-search-cancel-button { appearance: none; }
+  .oc-tp-search button {
+    flex: none;
+    padding: 0 24px;
+    border: 0;
+    border-left: 2px solid var(--color-ink);
+    border-radius: 0;
+    background: var(--color-ochre);
+    color: var(--color-ink);
+    font: 800 16px/1 var(--font-frame);
+    cursor: pointer;
+  }
+  .oc-tp-search button:hover {
+    background: var(--color-ink);
+    color: var(--color-ochre);
+  }
+  /* The form's ring shows the field has focus; an inner ink ring says
+     the button is the focused part. */
+  .oc-tp-search button:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: -7px;
+  }
+  .oc-tp-search button:hover:focus-visible { outline-color: var(--color-ochre); }
+
+  .oc-tp-counts {
+    margin: 0;
+    padding: 18px var(--oc-tp-gutter) 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 0;
+    font: 600 16px/1.3 var(--font-narrow);
+    font-variant-numeric: lining-nums tabular-nums;
+    letter-spacing: 0.01em;
+    color: var(--color-ink-2);
+  }
+  .oc-tp-counts span { white-space: nowrap; }
+  .oc-tp-counts span + span::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    margin: 0 12px;
+    background: var(--color-ink);
+    vertical-align: 3px;
+  }
+
+  @media (max-width: 1180px) {
+    .oc-tp-title { font-size: 80px; }
+  }
+  @media (max-width: 760px) {
+    .oc-tp {
+      --oc-tp-gutter: var(--spacing-s4);
+      --oc-tp-field: 56px;
+    }
+    .oc-tp-in { padding: 34px var(--oc-tp-gutter) 26px; }
+    .oc-tp-title {
+      font-size: 58px;
+      line-height: 0.98;
+    }
+    .oc-tp-title em { display: block; }
+    .oc-tp-sub {
+      margin-top: 16px;
+      font-size: 19px;
+    }
+    .oc-tp-edge { padding: 0 calc(var(--oc-tp-gutter) + 10px); }
+    .oc-tp-search input {
+      padding: 0 12px;
+      font-size: 16px;
+    }
+    .oc-tp-search button { padding: 0 16px; }
+    .oc-tp-counts { font-size: 15px; }
+    .oc-tp-counts span + span::before { margin: 0 9px; }
+  }
+
+  /* ---------------------------------------------------------------------
+     Chapter heading (DesignComponents.chapter_heading): large serif
+     italic, centred, with the acorn beside it on request.
+     --------------------------------------------------------------------- */
+  .oc-chapter {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    font: italic 500 44px/1 var(--font-serif);
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    text-align: center;
+  }
+  .oc-chapter svg {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    margin-top: -6px;
+  }
+  .oc-chapter-cap { fill: var(--color-ochre); }
+  .oc-chapter-nut { fill: var(--color-ink); }
+  .oc-chapter-stem {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 1.6;
+  }
+
+  /* ---------------------------------------------------------------------
+     Contents (DesignComponents.contents): the site's parts in two ruled
+     columns under a 2px ink rule; the whole row is the link.
+     --------------------------------------------------------------------- */
+  .oc-contents ol {
+    max-width: 1180px;
+    margin: 36px auto 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 64px;
+    border-top: 2px solid var(--color-rule-strong);
+  }
+  .oc-contents li { border-bottom: 1px solid var(--color-rule); }
+  .oc-contents-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 4px 20px;
+    padding: 22px 0;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  a.oc-contents-row:hover { text-decoration: none; }
+  a.oc-contents-row:hover .oc-contents-title {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+  }
+  .oc-contents-title {
+    font: 600 34px/1.1 var(--font-serif);
+    letter-spacing: -0.01em;
+  }
+  .oc-contents-off .oc-contents-title { color: var(--color-ink-2); }
+  .oc-contents-count {
+    justify-self: end;
+    font: 600 24px/1 var(--font-frame);
+    font-variant-numeric: lining-nums tabular-nums;
+    white-space: nowrap;
+  }
+  .oc-contents-count small {
+    margin-left: 6px;
+    font: 500 14px/1 var(--font-frame);
+    color: var(--color-ink-3);
+  }
+  .oc-contents-count .oc-status { vertical-align: 4px; }
+  .oc-contents-about {
+    grid-column: 1 / -1;
+    max-width: 48ch;
+    font: 500 15px/1.45 var(--font-frame);
+    color: var(--color-ink-2);
+  }
+  .oc-contents-about .oc-sci { font-size: 16px; }
+
+  @media (max-width: 1180px) {
+    .oc-contents ol { column-gap: 40px; }
+  }
+  @media (max-width: 760px) {
+    .oc-chapter { font-size: 34px; }
+    .oc-chapter svg {
+      width: 32px;
+      height: 32px;
+    }
+    .oc-contents ol {
+      grid-template-columns: 1fr;
+      margin-top: 24px;
+    }
+    .oc-contents-row { padding: 16px 0; }
+    .oc-contents-title { font-size: 27px; }
+    .oc-contents-count { font-size: 19px; }
+  }
+
+  /* Centred section heading (section_heading align="center") */
+  .oc-section-heading-center {
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Inline taxonomy band (taxonomy_band inline): an ochre plate the width
+     of its path, wrapping rather than scrolling. */
+  .oc-band-inline {
+    display: inline-flex;
+    max-width: 100%;
+  }
+  .oc-band-inline .oc-band-in {
+    max-width: none;
+    margin: 0;
+    padding: 0 var(--spacing-s4);
+  }
+  .oc-band-inline ol {
+    justify-content: center;
+    row-gap: var(--spacing-s1);
+    padding: 10px 0;
+  }
+  @media (max-width: 760px) {
+    .oc-band-inline .oc-band-in { padding: 0 var(--spacing-s4); }
+    .oc-band-inline ol {
+      flex-wrap: wrap;
+      overflow-x: visible;
+      white-space: normal;
+      padding: 10px 0;
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+
+  /* ---------------------------------------------------------------------
      Figures. The font shorthand above resets font-variant-numeric, so the
      Two Figures Rule is restated last: lining tabular figures for table
      cells, list values, inputs and counts; oldstyle proportional figures

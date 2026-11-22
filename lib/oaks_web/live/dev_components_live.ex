@@ -249,6 +249,62 @@ defmodule OaksWeb.DevComponentsLive do
         </section>
 
         <section class="mt-s8">
+          <.section_heading id="title-pages">
+            Title page and contents<:note>title_page, chapter_heading, contents</:note>
+          </.section_heading>
+          <p class="max-w-[68ch]">
+            The home page's pieces. On a page the title page runs in the bleed, so its ink spans
+            the window; here it sits in the frame. Its search submits to the search page.
+          </p>
+          <div class="mt-s5">
+            <.title_page id="gallery-title-page" search={~p"/search"}>
+              Oak <em>Compendium</em>
+              <:subtitle>
+                Oaks, their varieties and their hybrids, and how to tell them apart
+              </:subtitle>
+              <:count>494 species</:count>
+              <:count>238 hybrids</:count>
+              <:count>8 sections</:count>
+              <:count>4 sources</:count>
+            </.title_page>
+          </div>
+          <.chapter_heading id="gallery-contents-heading" mark class="mt-s8">
+            Contents
+          </.chapter_heading>
+          <.contents id="gallery-contents" labelledby="gallery-contents-heading">
+            <:entry title="Species" navigate={~p"/species"} count={494}>
+              Every oak, A to Z, each on its own page.
+            </:entry>
+            <:entry title="Taxonomy" navigate={~p"/taxonomy"} count={8} count_label="sections">
+              Two subgenera, <.sci_name name="Quercus" genus={nil} weight="regular" /> and
+              <.sci_name name="Cerris" genus={nil} weight="regular" />, their sections and
+              subsections, every rank linked.
+            </:entry>
+            <:entry title="Identify" status="In preparation">
+              A trait filter that narrows the oaks by what you can see, and a helper for hybrids.
+            </:entry>
+            <:entry title="About" navigate={~p"/about"}>
+              What the Compendium is and who keeps it.
+            </:entry>
+          </.contents>
+          <.chapter_heading class="mt-s8">An oak at random</.chapter_heading>
+          <div class="mt-s5 text-center">
+            <.taxonomy_band id="gallery-band-inline" label="Where it sits" inline>
+              <:rank navigate={~p"/taxonomy"}><.sci_name name="Quercus" /></:rank>
+              <:rank navigate={~p"/taxonomy/Quercus"} rank="subg.">
+                <.sci_name name="Quercus" />
+              </:rank>
+              <:rank navigate={~p"/taxonomy/Quercus/Lobatae"} rank="sect.">
+                <.sci_name name="Lobatae" genus={nil} />
+              </:rank>
+            </.taxonomy_band>
+          </div>
+          <.section_heading id="gallery-centred" align="center" class="mt-s7">
+            Sources
+          </.section_heading>
+        </section>
+
+        <section class="mt-s8">
           <.section_heading id="page">
             Page<:note>frame, read and form widths; the bleed</:note>
           </.section_heading>

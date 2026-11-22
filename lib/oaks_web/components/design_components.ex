@@ -1,9 +1,11 @@
 defmodule OaksWeb.DesignComponents do
   @moduledoc """
-  Content components of the DESIGN.md system: the taxonomy band, section
-  headings, source marks, standing marks, the status tag (and its IUCN
-  Red List variant), the Compare button and the other-sources disclosure
-  of the field-marks table.
+  Content components of the DESIGN.md system: scientific names, the
+  taxonomy band, section headings, source marks, standing marks, the
+  status tag (and its IUCN Red List variant), the Compare button, the
+  other-sources disclosure of the field-marks table, and the centred
+  pieces of the home page (the title page, chapter headings and the
+  contents list).
 
   Imported into every LiveView and HTML module (see `OaksWeb`). The
   generic pieces (button, header, ruled table, list, modal, flash, input)
@@ -44,6 +46,12 @@ defmodule OaksWeb.DesignComponents do
   (the PinCurrentTaxon hook in assets/js/app.js) and fading at its left
   edge.
 
+  With `inline`, the band is an ochre plate the width of its path rather
+  than a full-width field, and it wraps rather than scrolls: for showing
+  where a taxon sits away from its own page (the home page's oak at
+  random). There `:current` is optional; leave it out when the taxon is
+  named beside the band.
+
   ## Examples
 
       <.taxonomy_band>
@@ -55,6 +63,7 @@ defmodule OaksWeb.DesignComponents do
   attr :id, :string, default: "taxonomy-band"
   attr :label, :string, default: "Taxonomy", doc: "the nav's accessible name"
   attr :class, :any, default: nil
+  attr :inline, :boolean, default: false, doc: "a plate the width of its path, wrapping"
 
   slot :rank, doc: "a linked rank, outermost first" do
     attr :navigate, :string
@@ -63,7 +72,7 @@ defmodule OaksWeb.DesignComponents do
     attr :rank_after, :boolean, doc: "show the rank word after the name (complex)"
   end
 
-  slot :current, required: true, doc: "the current taxon"
+  slot :current, doc: "the current taxon (required unless inline)"
 
   slot :siblings, doc: "the siblings menu" do
     attr :label, :string, required: true
@@ -71,9 +80,9 @@ defmodule OaksWeb.DesignComponents do
 
   def taxonomy_band(assigns) do
     ~H"""
-    <nav id={@id} class={["oc-band", @class]} aria-label={@label}>
+    <nav id={@id} class={["oc-band", @inline && "oc-band-inline", @class]} aria-label={@label}>
       <div class="oc-band-in">
-        <ol id={"#{@id}-path"} phx-hook="PinCurrentTaxon">
+        <ol id={"#{@id}-path"} phx-hook={if @inline, do: nil, else: "PinCurrentTaxon"}>
           <li :for={rank <- @rank}>
             <.link navigate={rank[:navigate]} href={rank[:href]}>
               <span :if={rank[:rank] && !rank[:rank_after]} class="oc-band-rk">{rank.rank}</span>
@@ -81,7 +90,7 @@ defmodule OaksWeb.DesignComponents do
               <span :if={rank[:rank] && rank[:rank_after]} class="oc-band-rk">{rank.rank}</span>
             </.link>
           </li>
-          <li><span aria-current="page">{render_slot(@current)}</span></li>
+          <li :if={@current != []}><span aria-current="page">{render_slot(@current)}</span></li>
         </ol>
         <details
           :for={siblings <- @siblings}
@@ -185,17 +194,30 @@ defmodule OaksWeb.DesignComponents do
     name = String.trim(name)
 
     {stated_genus, rest} =
-      case Regex.run(~r/^(Quercus|Q\.)(?:\s+(.*))?$/u, name) do
+      case rank == nil && Regex.run(~r/^(Quercus|Q\.)(?:\s+(.*))?$/u, name) do
         [_, "Q." | rest] -> {"Quercus", Enum.join(rest)}
         [_, g | rest] -> {g, Enum.join(rest)}
-        nil -> {nil, name}
+        _ -> {nil, name}
       end
 
-    rest = if rank, do: rest, else: OaksWeb.SpeciesName.label(rest, hybrid)
-    genus = if rank, do: nil, else: stated_genus || genus
-    genus = if genus && abbreviate, do: String.first(genus) <> ".", else: genus
+    cond do
+      # A name above species, after its rank word.
+      rank ->
+        {nil, words(name)}
 
-    {genus, String.split(rest, ~r/\s+/u, trim: true) |> split_attached_sign()}
+      # The genus on its own is a uninomial, set like any other name.
+      stated_genus && rest == "" ->
+        {nil, [stated_genus]}
+
+      true ->
+        genus = stated_genus || genus
+        genus = if genus && abbreviate, do: String.first(genus) <> ".", else: genus
+        {genus, rest |> OaksWeb.SpeciesName.label(hybrid) |> words()}
+    end
+  end
+
+  defp words(text) do
+    text |> String.split(~r/\s+/u, trim: true) |> split_attached_sign()
   end
 
   # "×bebbiana" inside a name reads as the sign and the epithet.
@@ -236,16 +258,27 @@ defmodule OaksWeb.DesignComponents do
 
       <.section_heading id="field-marks">Field marks</.section_heading>
       <.section_heading>Look-alikes<:note>3 taxa</:note></.section_heading>
+      <.section_heading align="center">Sources</.section_heading>
   """
   attr :id, :string, default: nil
   attr :level, :string, values: ~w(h2 h3), default: "h2"
+
+  attr :align, :string,
+    values: ~w(start center),
+    default: "start",
+    doc: "center on a centred page"
+
   attr :class, :any, default: nil
   slot :inner_block, required: true
   slot :note
 
   def section_heading(assigns) do
     ~H"""
-    <.dynamic_tag tag_name={@level} id={@id} class={["oc-section-heading", @class]}>
+    <.dynamic_tag
+      tag_name={@level}
+      id={@id}
+      class={["oc-section-heading", @align == "center" && "oc-section-heading-center", @class]}
+    >
       <span>{render_slot(@inner_block)}</span>
       <small :if={@note != []} class="oc-section-heading-note">{render_slot(@note)}</small>
     </.dynamic_tag>
@@ -507,6 +540,175 @@ defmodule OaksWeb.DesignComponents do
     <span class="oc-empty">
       {if @inner_block != [], do: render_slot(@inner_block), else: "No statement yet"}
     </span>
+    """
+  end
+
+  @doc """
+  Renders the title page: the masthead's ink continued as a field holding
+  the title and its subtitle, centred, at display size. The ink ends in a
+  6px ochre edge that runs through the middle of the search field, so the
+  field hangs across it, half on ink and half on paper. The `:count` items
+  sit on paper below it, separated by small ink squares.
+
+  The title is set in the serif roman, in paper; an `<em>` in it is set in
+  ochre italic. Put it in a page's `:bleed` slot so the ink spans the
+  window. Without `search` there is no field and the ink ends at its edge.
+
+  ## Examples
+
+      <.title_page search={~p"/search"}>
+        Oak <em>Compendium</em>
+        <:subtitle>Oaks, their varieties and their hybrids, and how to tell them apart</:subtitle>
+        <:count>494 species</:count>
+        <:count>238 hybrids</:count>
+      </.title_page>
+  """
+  attr :id, :string, default: "title-page"
+  attr :search, :string, default: nil, doc: "the search form's action; nil for no field"
+  attr :search_label, :string, default: "Find an oak"
+  attr :search_placeholder, :string, default: "Name, common name or synonym"
+  slot :inner_block, required: true, doc: "the title"
+  slot :subtitle
+  slot :count, doc: "a count set on paper under the search"
+
+  def title_page(assigns) do
+    ~H"""
+    <section id={@id} class="oc-tp" aria-labelledby={"#{@id}-title"}>
+      <div class="oc-tp-ink">
+        <div class="oc-tp-in">
+          <h1 id={"#{@id}-title"} class="oc-tp-title">{render_slot(@inner_block)}</h1>
+          <p :if={@subtitle != []} class="oc-tp-sub">{render_slot(@subtitle)}</p>
+        </div>
+      </div>
+      <div :if={@search} class="oc-tp-edge">
+        <form action={@search} method="get" role="search" class="oc-tp-search">
+          <label for={"#{@id}-q"} class="sr-only">{@search_label}</label>
+          <input
+            type="search"
+            id={"#{@id}-q"}
+            name="q"
+            placeholder={@search_placeholder}
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button type="submit">Find</button>
+        </form>
+      </div>
+      <div :if={!@search} class="oc-tp-edge oc-tp-edge-plain"></div>
+      <p :if={@count != []} class="oc-tp-counts">
+        <span :for={count <- @count}>{render_slot(count)}</span>
+      </p>
+    </section>
+    """
+  end
+
+  @doc """
+  Renders a chapter heading: a large serif italic heading, centred, for
+  the parts of a centred page (the home page's Contents, An oak at
+  random). With `mark` the acorn stands beside it, the masthead's mark set
+  on paper.
+
+  ## Examples
+
+      <.chapter_heading id="contents-heading" mark>Contents</.chapter_heading>
+  """
+  attr :id, :string, default: nil
+  attr :mark, :boolean, default: false, doc: "set the acorn beside the heading"
+  attr :class, :any, default: nil
+  slot :inner_block, required: true
+
+  def chapter_heading(assigns) do
+    ~H"""
+    <h2 id={@id} class={["oc-chapter", @class]}>
+      <svg :if={@mark} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path class="oc-chapter-cap" d="M5 9.5C5 6 8 4 12 4s7 2 7 5.5H5Z" />
+        <path class="oc-chapter-nut" d="M6.5 10.5h11c0 5-2.5 9-5.5 9.5-3-.5-5.5-4.5-5.5-9.5Z" />
+        <path class="oc-chapter-stem" d="M12 1.5v2.5" />
+      </svg>
+      <span>{render_slot(@inner_block)}</span>
+    </h2>
+    """
+  end
+
+  @doc """
+  Renders a contents list: the parts of the site in two ruled columns
+  (one on phones) under a 2px ink rule, each part's name in the serif with
+  its count at the right and one line about it beneath. The whole row is
+  the link. A part with no `navigate` isn't built yet: it is not a link
+  and carries its `status` (such as "In preparation") as a dashed stamp
+  where the count would be.
+
+  ## Examples
+
+      <.chapter_heading id="contents-heading" mark>Contents</.chapter_heading>
+      <.contents labelledby="contents-heading">
+        <:entry title="Species" navigate={~p"/species"} count={494}>
+          Every oak, A to Z.
+        </:entry>
+        <:entry title="Taxonomy" navigate={~p"/taxonomy"} count={8} count_label="sections">
+          Two subgenera, their sections and subsections.
+        </:entry>
+        <:entry title="Identify" status="In preparation">
+          A trait filter that narrows the oaks by what you can see.
+        </:entry>
+      </.contents>
+  """
+  attr :id, :string, default: "contents"
+  attr :labelledby, :string, default: nil, doc: "the id of the list's heading"
+
+  slot :entry, required: true, doc: "a part of the site; its content is one line about it" do
+    attr :title, :string, required: true
+    attr :navigate, :string, doc: "the part's page; leave out for a part not built yet"
+    attr :count, :any, doc: "a count shown at the right"
+    attr :count_label, :string, doc: "a word after the count, such as sections"
+    attr :status, :string, doc: "a stamp for a part not built yet"
+  end
+
+  def contents(assigns) do
+    ~H"""
+    <nav id={@id} class="oc-contents" aria-labelledby={@labelledby}>
+      <ol>
+        <li :for={entry <- @entry}>
+          <.contents_row entry={entry} />
+        </li>
+      </ol>
+    </nav>
+    """
+  end
+
+  attr :entry, :map, required: true
+
+  defp contents_row(%{entry: %{navigate: navigate}} = assigns) when is_binary(navigate) do
+    ~H"""
+    <.link navigate={@entry.navigate} class="oc-contents-row">
+      <.contents_parts entry={@entry} />
+    </.link>
+    """
+  end
+
+  defp contents_row(assigns) do
+    ~H"""
+    <div class="oc-contents-row oc-contents-off">
+      <.contents_parts entry={@entry} />
+    </div>
+    """
+  end
+
+  attr :entry, :map, required: true
+
+  defp contents_parts(assigns) do
+    ~H"""
+    <span class="oc-contents-title">{@entry.title}</span>
+    <span class="oc-contents-count">
+      <%= cond do %>
+        <% @entry[:count] != nil -> %>
+          {@entry.count}<small :if={@entry[:count_label]}>{@entry.count_label}</small>
+        <% @entry[:status] -> %>
+          <.status_tag class="border-dashed uppercase">{@entry.status}</.status_tag>
+        <% true -> %>
+      <% end %>
+    </span>
+    <span class="oc-contents-about">{render_slot(@entry)}</span>
     """
   end
 end

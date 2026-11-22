@@ -99,6 +99,14 @@ defmodule OaksWeb.DesignComponentsTest do
       assert html =~ ~s(<span class="oc-sci oc-sci-regular"><i class="oc-sci-e">Cerris</i></span>)
     end
 
+    test "sets the genus on its own as a name, and a rank's name in full" do
+      assert sci(name: "Quercus") =~
+               ~r{<span class="oc-sci ?"><i class="oc-sci-e">Quercus</i></span>}
+
+      assert sci(name: "Quercus", rank: "subg.") =~
+               ~s(<span class="oc-sci-r">subg.</span>\u00A0<i class="oc-sci-e">Quercus</i>)
+    end
+
     test "escapes the name and author" do
       html = sci(name: "<b>alba</b>", author: "L. & <i>x</i>")
 
@@ -106,6 +114,135 @@ defmodule OaksWeb.DesignComponentsTest do
       assert html =~ "&lt;b&gt;alba&lt;/b&gt;"
       assert html =~ "L. &amp; &lt;i&gt;x&lt;/i&gt;"
     end
+  end
+
+  describe "title_page/1" do
+    test "sets the title on ink with the search across its edge and the counts below" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.title_page search="/search">
+          Oak <em>Compendium</em>
+          <:subtitle>Oaks, their varieties and their hybrids</:subtitle>
+          <:count>494 species</:count>
+          <:count>238 hybrids</:count>
+        </DesignComponents.title_page>
+        """)
+
+      assert html =~
+               ~s(<section id="title-page" class="oc-tp" aria-labelledby="title-page-title">)
+
+      assert html =~ ~r{<h1 id="title-page-title" class="oc-tp-title">\s*Oak <em>Compendium</em>}
+      assert html =~ ~s(<p class="oc-tp-sub">Oaks, their varieties and their hybrids</p>)
+      assert html =~ ~s(<form action="/search" method="get" role="search" class="oc-tp-search">)
+      assert html =~ ~s(<label for="title-page-q" class="sr-only">Find an oak</label>)
+      assert html =~ ~s(name="q")
+      assert html =~ ~s(<button type="submit">Find</button>)
+      assert html =~ ~r{<span>494 species</span>\s*<span>238 hybrids</span>}
+      refute html =~ "oc-tp-edge-plain"
+    end
+
+    test "without a search the ink ends at a plain ochre edge" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.title_page>Oak <em>Compendium</em></DesignComponents.title_page>
+        """)
+
+      assert html =~ "oc-tp-edge oc-tp-edge-plain"
+      refute html =~ "<form"
+      refute html =~ "oc-tp-counts"
+    end
+  end
+
+  describe "chapter_heading/1" do
+    test "is a centred h2, with the acorn on request" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.chapter_heading id="c" mark>Contents</DesignComponents.chapter_heading>
+        """)
+
+      assert html =~ ~r{<h2 id="c" class="oc-chapter ?">}
+      assert html =~ ~s(class="oc-chapter-cap")
+      assert html =~ ~s(aria-hidden="true")
+
+      plain =
+        rendered_to_string(~H"""
+        <DesignComponents.chapter_heading>An oak at random</DesignComponents.chapter_heading>
+        """)
+
+      refute plain =~ "<svg"
+      assert plain =~ "An oak at random"
+    end
+  end
+
+  describe "contents/1" do
+    test "links each built part with its count and marks a part in preparation" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.contents labelledby="contents-heading">
+          <:entry title="Species" navigate="/species" count={494}>Every oak.</:entry>
+          <:entry title="Taxonomy" navigate="/taxonomy" count={8} count_label="sections">
+            Ranks.
+          </:entry>
+          <:entry title="Identify" status="In preparation">A trait filter.</:entry>
+          <:entry title="About" navigate="/about">Who keeps it.</:entry>
+        </DesignComponents.contents>
+        """)
+
+      assert html =~
+               ~s(<nav id="contents" class="oc-contents" aria-labelledby="contents-heading">)
+
+      assert html =~ ~s(href="/species")
+
+      assert html =~
+               ~r{<span class="oc-contents-title">Species</span>\s*<span class="oc-contents-count">\s*494}
+
+      assert html =~ ~s(8<small>sections</small>)
+      assert html =~ ~s(<div class="oc-contents-row oc-contents-off">)
+
+      assert html =~
+               ~r{<span class="oc-status border-dashed uppercase">\s*In preparation\s*</span>}
+
+      refute html =~ ~s(href="/identify")
+      assert html =~ ~s(href="/about")
+    end
+  end
+
+  describe "taxonomy_band/1 inline" do
+    test "is a wrapping plate with no current taxon and no pinning hook" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.taxonomy_band id="b" label="Where it sits" inline>
+          <:rank navigate="/taxonomy"><i>Quercus</i></:rank>
+          <:rank navigate="/taxonomy/Quercus" rank="subg."><i>Quercus</i></:rank>
+        </DesignComponents.taxonomy_band>
+        """)
+
+      assert html =~ ~s(class="oc-band oc-band-inline")
+      assert html =~ ~s(aria-label="Where it sits")
+      refute html =~ "PinCurrentTaxon"
+      refute html =~ "aria-current"
+    end
+  end
+
+  test "section_heading/1 centres on request" do
+    assigns = %{}
+
+    html =
+      rendered_to_string(~H"""
+      <DesignComponents.section_heading align="center">Sources</DesignComponents.section_heading>
+      """)
+
+    assert html =~ "oc-section-heading oc-section-heading-center"
   end
 
   test "section_heading/1 renders the label and an optional note" do
