@@ -121,14 +121,10 @@ defmodule OaksWeb.ArticleLive do
     <.back navigate={~p"/articles"}>Back to Articles</.back>
     <.header id="article-title">
       {@article.title}
+      <:meta>By {@article.author}</:meta>
+      <:meta :if={@article.published_at}>Published {format_date(@article.published_at)}</:meta>
       <:meta :if={!@article.is_published}>
         <.status_tag class="border-dashed uppercase">Draft</.status_tag>
-      </:meta>
-      <:meta>
-        By {@article.author}
-        <span :if={@article.published_at}>
-          &middot; Published {format_date(@article.published_at)}
-        </span>
       </:meta>
       <:meta :if={@tags != []}>
         <.link

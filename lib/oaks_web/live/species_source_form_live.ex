@@ -175,9 +175,9 @@ defmodule OaksWeb.SpeciesSourceFormLive do
 
         <.header>
           {if(@live_action == :new, do: "Add source data", else: "Edit source data")}
-          <:subtitle>
-            <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} />
-          </:subtitle>
+          <:meta>
+            <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} size="meta" />
+          </:meta>
         </.header>
       </:head>
 

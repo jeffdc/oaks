@@ -308,9 +308,11 @@ defmodule OaksWeb.CoreComponents do
     * The text column (title, meta, subtitle) grows and keeps at least
       20rem; nothing else sits beside the title.
     * `:meta` is one wrapping line straight under the title, in Archivo
-      600 14px ink-2 with lining figures: the kind word, counts, a byline,
-      status stamps (`<.status_tag>`, `<.iucn_status>`). Each entry is
-      one item on the line, so `:if` works per entry.
+      600 14px ink-2 with lining figures, no separators, in this order: the
+      kind word (or the record a form edits, `<.sci_name size="meta">`),
+      counts, a byline and date, stamps (`<.status_tag>`,
+      `<.iucn_status>`), links. Each entry is one item on the line, so
+      `:if` works per entry.
     * `:subtitle` is a sentence describing the page, under the meta.
     * `:actions` stand at the right on the title's first baseline. When
       the text column can't keep 20rem beside them, they drop below the
