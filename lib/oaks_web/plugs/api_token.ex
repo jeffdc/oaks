@@ -11,6 +11,10 @@ defmodule OaksWeb.Plugs.ApiToken do
     * 403 from `require_api_scope/2` for a token without the route's scope.
     * 429 when a limit is hit, with `retry-after` in seconds.
 
+  A request whose body or query string can't be parsed (bad JSON, a body too
+  large) is refused in the same shape by `OaksWeb.Plugs.Parsers`, in the
+  endpoint, before this plug runs.
+
   Limits, counted in memory by `Oaks.RateLimit`, come from
   `config :oaks, :api_token_rate_limits` so tests can change them:
 

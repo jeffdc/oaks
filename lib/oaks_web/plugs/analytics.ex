@@ -20,8 +20,10 @@ defmodule OaksWeb.Plugs.Analytics do
   If it is set, the hook is responsible — the plug stays out of the way
   to avoid double-counting.
 
-  Other skip rules: non-GET methods, paths under `/api` and `/assets`,
-  `/favicon.ico`, `/health`, and bot/crawler User-Agents.
+  Other skip rules: non-GET methods, redirect responses (the page the
+  browser is sent to counts instead, so a redirected visit counts once),
+  paths under `/api` and `/assets`, `/favicon.ico`, `/health`, and
+  bot/crawler User-Agents.
 
   Inserts go through `Oaks.TaskSupervisor` so the request never blocks
   on the DB write and tests can synchronize on the supervisor's
@@ -35,6 +37,9 @@ defmodule OaksWeb.Plugs.Analytics do
 
   @skip_prefixes ["/api", "/assets"]
   @skip_exact ["/favicon.ico", "/health"]
+  # 304 Not Modified is a 3xx but not a redirect: it's a revisit served
+  # from the browser's cache, so it still counts.
+  @redirect_statuses [301, 302, 303, 307, 308]
 
   @doc false
   def init(opts), do: opts
@@ -65,11 +70,12 @@ defmodule OaksWeb.Plugs.Analytics do
   @doc """
   Returns `true` when the request should be recorded as a page view.
 
-  Skips non-GET methods, asset/API paths, the favicon and health
-  endpoints, and bot User-Agents.
+  Skips non-GET methods, redirect responses, asset/API paths, the
+  favicon and health endpoints, and bot User-Agents.
   """
   @spec should_track?(Plug.Conn.t(), String.t()) :: boolean()
   def should_track?(%Plug.Conn{method: method}, _ua) when method != "GET", do: false
+  def should_track?(%Plug.Conn{status: status}, _ua) when status in @redirect_statuses, do: false
 
   def should_track?(%Plug.Conn{request_path: path}, ua) do
     cond do

@@ -77,6 +77,20 @@ defmodule OaksWeb.Plugs.AnalyticsTest do
       refute Analytics.should_track?(conn, googlebot_ua())
     end
 
+    test "returns false for redirect responses" do
+      for status <- [301, 302, 303, 307, 308] do
+        conn = %{new_conn(:get, "/list") | status: status}
+        refute Analytics.should_track?(conn, browser_ua()), "expected #{status} to be skipped"
+      end
+    end
+
+    test "returns true for 200 and 404 responses" do
+      for status <- [200, 404] do
+        conn = %{new_conn(:get, "/") | status: status}
+        assert Analytics.should_track?(conn, browser_ua()), "expected #{status} to be tracked"
+      end
+    end
+
     test "returns false for crawler/spider/scrape/preview UAs" do
       conn = new_conn(:get, "/")
       refute Analytics.should_track?(conn, "SomeCrawler/1.0")
