@@ -50,7 +50,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
 
         socket
         |> assign(
-          page_title: "Add Source Data — Quercus #{epithet(species.scientific_name)}",
+          page_title: "Add source data — Quercus #{epithet(species.scientific_name)}",
           species: species,
           species_source: species_source,
           available_sources: available,
@@ -80,7 +80,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
 
             socket
             |> assign(
-              page_title: "Edit Source Data — Quercus #{epithet(species.scientific_name)}",
+              page_title: "Edit source data — Quercus #{epithet(species.scientific_name)}",
               species: species,
               species_source: species_source,
               form: to_form(changeset)
@@ -162,31 +162,33 @@ defmodule OaksWeb.SpeciesSourceFormLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div :if={@form == nil} class="max-w-3xl mx-auto py-12 text-center">
-      <p style="color: var(--color-text-tertiary);">Loading...</p>
+    <div :if={@form == nil} class="max-w-3xl mx-auto py-s7">
+      <p class="oc-empty">Loading...</p>
     </div>
 
     <div :if={@form} class="max-w-3xl mx-auto">
-      <.link
-        navigate={~p"/species/#{@species.scientific_name}"}
-        class="inline-flex items-center gap-1 text-sm mb-4"
-        style="color: var(--color-forest-700);"
-      >
-        <.icon name="hero-arrow-left" class="size-4" /> Back to species
-      </.link>
+      <div class="mb-s5">
+        <.back navigate={~p"/species/#{@species.scientific_name}"}>Back to species</.back>
+      </div>
 
-      <h1
-        class="text-2xl font-bold mb-6"
-        style="font-family: var(--font-serif); color: var(--color-forest-800);"
-      >
-        {@page_title}
-      </h1>
+      <.header>
+        {if(@live_action == :new, do: "Add source data", else: "Edit source data")}
+        <:subtitle>
+          <i class="font-serif text-lg">
+            Quercus{" "}
+            <span :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)} class="not-italic">
+              &times;
+            </span>
+            {epithet(@species.scientific_name)}
+          </i>
+        </:subtitle>
+      </.header>
 
       <.form for={@form} id="species-source-form" phx-change="validate" phx-submit="save">
-        <div class="space-y-6">
+        <div class="flex flex-col gap-s7">
           <%!-- Source selection (new only) --%>
-          <div :if={@live_action == :new} class="card p-6">
-            <h2 class="section-title section-title-sm mb-4">Source</h2>
+          <section :if={@live_action == :new}>
+            <.section_heading>Source</.section_heading>
             <.input
               field={@form[:source_id]}
               type="select"
@@ -194,18 +196,18 @@ defmodule OaksWeb.SpeciesSourceFormLive do
               options={Enum.map(@available_sources, &{&1.name, &1.id})}
               prompt="Select a source..."
             />
-          </div>
+          </section>
 
-          <div :if={@live_action == :edit} class="card p-6">
-            <h2 class="section-title section-title-sm mb-4">Source</h2>
-            <p style="color: var(--color-text-secondary);">
+          <section :if={@live_action == :edit}>
+            <.section_heading>Source</.section_heading>
+            <p class="m-0 font-frame text-[15px] font-bold text-ink">
               {@species_source.source.name}
             </p>
-          </div>
+          </section>
 
           <%!-- Descriptive fields --%>
-          <div class="card p-6">
-            <h2 class="section-title section-title-sm mb-4">Morphology & Description</h2>
+          <section>
+            <.section_heading>Morphology & Description</.section_heading>
             <div class="space-y-4">
               <.input
                 field={@form[:range]}
@@ -256,11 +258,11 @@ defmodule OaksWeb.SpeciesSourceFormLive do
                 phx-debounce="300"
               />
             </div>
-          </div>
+          </section>
 
           <%!-- Additional info --%>
-          <div class="card p-6">
-            <h2 class="section-title section-title-sm mb-4">Additional Information</h2>
+          <section>
+            <.section_heading>Additional Information</.section_heading>
             <div class="space-y-4">
               <.input
                 field={@form[:local_names]}
@@ -294,25 +296,14 @@ defmodule OaksWeb.SpeciesSourceFormLive do
                 label="Preferred source for display"
               />
             </div>
-          </div>
+          </section>
 
           <%!-- Submit --%>
-          <div class="flex items-center justify-end gap-3">
-            <.link
-              navigate={~p"/species/#{@species.scientific_name}"}
-              class="px-4 py-2 rounded-lg text-sm font-medium"
-              style="color: var(--color-text-secondary);"
-            >
-              Cancel
-            </.link>
-            <button
-              type="submit"
-              phx-disable-with="Saving..."
-              class="px-6 py-2 rounded-lg text-sm font-medium text-white"
-              style="background-color: var(--color-forest-600);"
-            >
-              {if(@live_action == :new, do: "Add Source Data", else: "Save Changes")}
-            </button>
+          <div class="flex flex-wrap items-center justify-end gap-s2 pt-s4 border-t-2 border-ink">
+            <.button navigate={~p"/species/#{@species.scientific_name}"}>Cancel</.button>
+            <.button type="submit" variant="primary" phx-disable-with="Saving...">
+              {if(@live_action == :new, do: "Add source data", else: "Save changes")}
+            </.button>
           </div>
         </div>
       </.form>

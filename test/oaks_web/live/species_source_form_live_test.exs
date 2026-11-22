@@ -46,7 +46,7 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
       {:ok, view, html} =
         conn |> authenticated_conn() |> live(~p"/species/#{ctx.alba}/sources/new")
 
-      assert html =~ "Add Source Data"
+      assert html =~ "Add source data"
       assert html =~ "Data Source"
       assert has_element?(view, ~s(option[value="#{ctx.unlinked.id}"]), ctx.unlinked.name)
       refute has_element?(view, ~s(option[value="#{ctx.linked.id}"]))
@@ -108,7 +108,7 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
         |> authenticated_conn()
         |> live(~p"/species/#{ctx.alba}/sources/#{ctx.linked.id}/edit")
 
-      assert html =~ "Edit Source Data"
+      assert html =~ "Edit source data"
       assert html =~ ctx.linked.name
       assert html =~ "Geographic Range"
       assert html =~ "Eastern North America"
@@ -151,7 +151,7 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
 
       # Request delete
       html = render_click(view, "request_delete_source", %{"id" => to_string(ss.id)})
-      assert html =~ "Delete Source Data"
+      assert html =~ "Delete source data"
       assert html =~ "Are you sure"
 
       # Confirm delete

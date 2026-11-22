@@ -114,16 +114,25 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
     end
 
     test "shows relationship sections", %{conn: conn} = ctx do
-      {:ok, _view, html} = live(conn, ~p"/species/#{ctx.alba}")
+      {:ok, view, html} = live(conn, ~p"/species/#{ctx.alba}")
       "×" <> bebbiana_epithet = ctx.bebbiana
       assert html =~ "Known Hybrids"
       assert html =~ bebbiana_epithet
       assert html =~ "Closely Related"
       assert html =~ ctx.stellata
-      assert html =~ "Synonyms"
-      assert html =~ "#{ctx.alba} var. repanda"
-      assert html =~ "Subspecies"
-      assert html =~ "#{ctx.alba} var. latiloba"
+      assert has_element?(view, "#species-synonyms", "#{ctx.alba} var. repanda")
+      assert has_element?(view, "#species-subspecies", "#{ctx.alba} var. latiloba")
+    end
+
+    test "sets names italic with the hybrid sign and rank words roman", %{conn: conn} = ctx do
+      {:ok, view, _html} = live(conn, ~p"/species/#{ctx.alba}")
+      "×" <> bebbiana_epithet = ctx.bebbiana
+
+      assert has_element?(view, "h1.species-title", "Quercus #{ctx.alba}")
+      assert has_element?(view, "#species-synonyms i", ctx.alba)
+      assert has_element?(view, "#species-synonyms .sci-roman", "var.")
+      assert has_element?(view, "#species-hybrids .sci-roman", "×")
+      assert has_element?(view, "#species-hybrids i", bebbiana_epithet)
     end
 
     test "relationship links point to detail pages", %{conn: conn} = ctx do
@@ -178,8 +187,8 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
   describe "not found" do
     test "shows not found for unknown species", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/species/nonexistent")
-      assert html =~ "Species Not Found"
-      assert html =~ "Back to Species List"
+      assert html =~ "Species not found"
+      assert html =~ "Back to species list"
     end
 
     test "not found page has link back to list", %{conn: conn} do

@@ -198,7 +198,7 @@ defmodule OaksWeb.SpeciesDetailLive do
           />
           <.synonyms_section :if={@synonyms != []} synonyms={@synonyms} />
 
-          <section class="card card-sm source-container full-width">
+          <section class="card card-sm source-container full-width" aria-label="Source data">
             <.source_tabs
               :if={@species_sources != []}
               sources={@species_sources}
@@ -213,24 +213,19 @@ defmodule OaksWeb.SpeciesDetailLive do
               editor={@current_scope != nil}
               species_name={@species.scientific_name}
             />
-            <div
-              :if={@species_sources == []}
-              class="p-8 text-center"
-              style="color: var(--color-text-tertiary);"
-            >
-              <.icon name="hero-document-text" class="size-12 mx-auto mb-3 opacity-40" />
-              <p class="italic">No source data available for this species.</p>
-              <.link
+            <.section_heading :if={@species_sources == []}>Source data</.section_heading>
+            <div :if={@species_sources == []} class="species-no-sources">
+              <p class="oc-empty">No source data available for this species.</p>
+              <.button
                 :if={@current_scope}
                 navigate={~p"/species/#{@species.scientific_name}/sources/new"}
-                class="add-source-btn mt-4"
-                style="text-decoration: none;"
+                size="compact"
+                class="add-source-btn"
                 title="Add data from a source"
                 id="empty-add-source-btn"
               >
-                <.icon name="hero-plus" class="size-3.5" />
-                <span>Add Source</span>
-              </.link>
+                Add source
+              </.button>
             </div>
           </section>
 
@@ -268,83 +263,71 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp not_found_view(assigns) do
     ~H"""
-    <div class="text-center py-16">
-      <.icon name="hero-exclamation-circle" class="size-16 mx-auto mb-4 text-base-content/30" />
-      <h1 class="text-2xl font-bold mb-2">Species Not Found</h1>
-      <p class="mb-6" style="color: var(--color-text-secondary);">
-        The species you're looking for doesn't exist in our database.
-      </p>
-      <.link
-        navigate={~p"/species"}
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white"
-        style="background-color: var(--color-forest-600); text-decoration: none;"
-      >
-        <.icon name="hero-arrow-left" class="size-4" /> Back to Species List
-      </.link>
+    <div>
+      <.header>
+        Species not found
+        <:subtitle>The species you're looking for doesn't exist in our database.</:subtitle>
+      </.header>
+      <.back navigate={~p"/species"}>Back to species list</.back>
     </div>
     """
   end
 
-  # -- Species header (green gradient card, compact V1 layout) --
+  # -- Species header: the title row on a 2px rule (bridge restyle) --
 
   attr :species, :any, required: true
   attr :editor, :boolean, default: false
 
   defp species_header(assigns) do
     ~H"""
-    <header style="background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-forest-100) 100%); border: 1px solid var(--color-forest-200); border-radius: 0.75rem; padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+    <header class="species-header">
+      <.taxonomy_breadcrumb species={@species} />
       <div class="species-current">
-        <div class="species-current-left">
-          <span class="badge badge-uppercase badge-forest">
-            {if(@species.is_hybrid, do: "Hybrid", else: "Species")}
-          </span>
-          <h1 class="species-title">
-            <em>
-              Quercus{" "}
-              <span
-                :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)}
-                style="font-style: normal;"
-              >
-                &times;
-              </span>
-              {epithet(@species.scientific_name)}
-            </em>
-            <span :if={@species.author} class="author-text">{@species.author}</span>
-          </h1>
+        <h1 class="species-title">
+          <em>
+            <span class="species-genus">{"Quercus "}</span><span
+              :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)}
+              class="sci-roman"
+            >{"× "}</span>{sci_html(epithet(@species.scientific_name))}
+          </em>
+          <span :if={@species.author} class="author-text">{@species.author}</span>
+        </h1>
+        <div class="species-meta">
+          <span>{if(@species.is_hybrid, do: "Hybrid", else: "Species")}</span>
+          <.status_tag
+            :if={@species.conservation_status}
+            title={"IUCN Red List: #{conservation_label(@species.conservation_status)}"}
+          >
+            IUCN {@species.conservation_status}
+          </.status_tag>
         </div>
-        <.conservation_badge
-          :if={@species.conservation_status}
-          status={@species.conservation_status}
-        />
         <div :if={@editor} class="species-actions">
-          <.link
+          <.button
             navigate={~p"/species/#{@species.scientific_name}/edit"}
-            class="action-btn action-btn-edit"
-            style="text-decoration: none;"
+            size="compact"
             id="edit-species-btn"
           >
-            <.icon name="hero-pencil-square" class="size-4" />
-            <span>Edit</span>
-          </.link>
-          <button
+            Edit
+          </.button>
+          <.button
+            type="button"
             phx-click="show_merge_picker"
-            class="action-btn action-btn-synonym"
+            size="compact"
             id="merge-species-btn"
           >
-            <.icon name="hero-arrows-right-left" class="size-4" />
-            <span>Make Synonym Of...</span>
-          </button>
-          <button
+            Make synonym of…
+          </.button>
+          <.button
+            type="button"
             phx-click="request_delete"
-            class="action-btn action-btn-delete"
+            size="compact"
+            class="species-delete-btn"
             id="delete-species-btn"
           >
-            <.icon name="hero-trash" class="size-4" />
-            <span>Delete</span>
-          </button>
+            Delete
+          </.button>
         </div>
       </div>
-      <.taxonomy_breadcrumb species={@species} />
     </header>
     """
   end
@@ -357,7 +340,8 @@ defmodule OaksWeb.SpeciesDetailLive do
     ~H"""
     <nav
       :if={@species.subgenus || @species.section || @species.subsection || @species.complex}
-      class="taxonomy-nav mt-1"
+      class="taxonomy-nav"
+      aria-label="Taxonomy"
     >
       <span class="taxonomy-label">Taxonomy:</span>
       <.link navigate={~p"/taxonomy"} class="taxonomy-link">
@@ -409,53 +393,18 @@ defmodule OaksWeb.SpeciesDetailLive do
     """
   end
 
-  # -- Conservation status badge --
-
-  attr :status, :string, required: true
-
-  defp conservation_badge(assigns) do
-    colors = conservation_colors(assigns.status)
-    border_style = if colors[:border], do: "border: 1px solid #{colors.border};", else: ""
-    assigns = assign(assigns, colors: colors, border_style: border_style)
-
-    ~H"""
-    <span
-      class="conservation-badge badge-uppercase"
-      title={conservation_label(@status)}
-      style={"background-color: #{@colors.bg}; color: #{@colors.text}; #{@border_style}"}
-    >
-      {@status}
-    </span>
-    """
-  end
-
-  # -- Relationship sections --
+  # -- Relationship sections: names on hairlines --
 
   attr :species, :any, required: true
 
   defp parent_species_section(assigns) do
     ~H"""
-    <section class="card card-sm detail-section full-width">
-      <h2 class="section-title section-title-sm mb-3">
-        <.icon name="hero-arrow-path" class="size-4 inline-block" /> Parent Species
-      </h2>
-      <ul class="space-y-1">
-        <li :if={@species.parent1}>
-          <.link
-            navigate={~p"/species/#{@species.parent1}"}
-            class="flex items-center gap-2 p-2 rounded hover:bg-base-200 transition-colors"
-          >
-            <.icon name="hero-link" class="size-4 text-forest-600" />
-            <span class="species-name font-medium">Quercus {@species.parent1}</span>
-          </.link>
-        </li>
-        <li :if={@species.parent2}>
-          <.link
-            navigate={~p"/species/#{@species.parent2}"}
-            class="flex items-center gap-2 p-2 rounded hover:bg-base-200 transition-colors"
-          >
-            <.icon name="hero-link" class="size-4 text-forest-600" />
-            <span class="species-name font-medium">Quercus {@species.parent2}</span>
+    <section class="card card-sm detail-section full-width" id="species-parents">
+      <.section_heading>Parent Species</.section_heading>
+      <ul class="species-rows">
+        <li :for={parent <- Enum.reject([@species.parent1, @species.parent2], &is_nil/1)}>
+          <.link navigate={~p"/species/#{parent}"} class="species-row-link">
+            <.sci name={"Quercus #{parent}"} />
           </.link>
         </li>
       </ul>
@@ -468,30 +417,20 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp hybrids_section(assigns) do
     ~H"""
-    <section class="card card-sm detail-section full-width">
-      <h2 class="section-title section-title-sm mb-3">
-        <.icon name="hero-link" class="size-4 inline-block" /> Known Hybrids ({length(@hybrids)})
-      </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div :for={hybrid <- @hybrids} class="hybrid-item">
-          <.link
-            navigate={~p"/species/#{hybrid.name}"}
-            class="species-link font-semibold"
-          >
-            Q. {format_hybrid_display(hybrid.name)}
+    <section class="card card-sm detail-section full-width" id="species-hybrids">
+      <.section_heading>
+        Known Hybrids<:note>{length(@hybrids)} known</:note>
+      </.section_heading>
+      <ul class="species-rows hybrid-list">
+        <li :for={hybrid <- @hybrids} class="hybrid-item">
+          <.link navigate={~p"/species/#{hybrid.name}"} class="hybrid-name">
+            <.sci name={"Q. #{SpeciesName.label(hybrid.name, true)}"} />
           </.link>
-          <span
-            :if={other = get_other_parent(hybrid, @species_name)}
-            class="text-sm"
-            style="color: var(--color-text-secondary);"
-          >
-            (with <.link
-              navigate={~p"/species/#{other}"}
-              class="species-link"
-            >Q. {other}</.link>)
+          <span :if={other = get_other_parent(hybrid, @species_name)} class="hybrid-with">
+            with <.link navigate={~p"/species/#{other}"}><.sci name={other} /></.link>
           </span>
-        </div>
-      </div>
+        </li>
+      </ul>
     </section>
     """
   end
@@ -500,18 +439,12 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp related_section(assigns) do
     ~H"""
-    <section class="card card-sm detail-section full-width">
-      <h2 class="section-title section-title-sm mb-3">
-        <.icon name="hero-puzzle-piece" class="size-4 inline-block" /> Closely Related
-      </h2>
-      <ul class="space-y-1">
+    <section class="card card-sm detail-section full-width" id="species-related">
+      <.section_heading>Closely Related</.section_heading>
+      <ul class="species-rows">
         <li :for={name <- @related}>
-          <.link
-            navigate={~p"/species/#{name}"}
-            class="flex items-center gap-2 p-2 rounded hover:bg-base-200 transition-colors"
-          >
-            <.icon name="hero-link" class="size-4 text-forest-600" />
-            <span class="species-name font-medium">Quercus {name}</span>
+          <.link navigate={~p"/species/#{name}"} class="species-row-link">
+            <.sci name={"Quercus #{name}"} />
           </.link>
         </li>
       </ul>
@@ -523,13 +456,11 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp subspecies_section(assigns) do
     ~H"""
-    <section class="card card-sm detail-section full-width">
-      <h2 class="section-title section-title-sm mb-3">
-        <.icon name="hero-rectangle-stack" class="size-4 inline-block" /> Subspecies &amp; Varieties
-      </h2>
-      <ul class="space-y-1">
-        <li :for={item <- @items} class="p-2">
-          <span class="species-name" style="color: var(--color-text-secondary);">{item}</span>
+    <section class="card card-sm detail-section full-width" id="species-subspecies">
+      <.section_heading>Subspecies &amp; Varieties</.section_heading>
+      <ul class="species-rows">
+        <li :for={{name, author} <- Enum.map(@items, &name_and_authority/1)}>
+          <span class="species-row-name"><.sci name={name} />{author && " " <> author}</span>
         </li>
       </ul>
     </section>
@@ -540,17 +471,27 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp synonyms_section(assigns) do
     ~H"""
-    <section class="card card-sm detail-section full-width">
-      <h2 class="section-title section-title-sm mb-3">
-        <.icon name="hero-chat-bubble-bottom-center-text" class="size-4 inline-block" />
-        Synonyms ({length(@synonyms)})
-      </h2>
-      <div class="flex flex-wrap gap-2">
-        <span :for={syn <- @synonyms} class="pill-tag" style="font-style: italic;">
-          {format_synonym(syn)}
+    <section class="card card-sm detail-section full-width" id="species-synonyms">
+      <.section_heading>
+        Synonyms<:note>{length(@synonyms)}</:note>
+      </.section_heading>
+      <div class="species-synonyms flex flex-wrap gap-2">
+        <span :for={{name, author} <- Enum.map(@synonyms, &name_and_authority/1)} class="pill-tag">
+          <span class="species-synonym"><.sci name={name} /></span>{author && " " <> author}
         </span>
       </div>
     </section>
+    """
+  end
+
+  # A scientific name in the serif: names italic, the hybrid sign and rank
+  # words roman. Built as one run of HTML so no template whitespace falls
+  # between the parts.
+  attr :name, :string, required: true
+
+  defp sci(assigns) do
+    ~H"""
+    <span class="sci">{sci_html(@name)}</span>
     """
   end
 
@@ -564,45 +505,46 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp source_tabs(assigns) do
     ~H"""
-    <div class="source-tabs-strip" role="tablist">
-      <button
-        :for={ss <- @sources}
-        phx-click="select_source"
-        phx-value-id={ss.source.id}
-        class={["source-tab", selected_tab?(ss, @selected) && "active"]}
-        role="tab"
-        aria-selected={to_string(selected_tab?(ss, @selected))}
-      >
-        <span class="source-tab-name">{ss.source.name}</span>
-        <span :if={ss.is_preferred} class="preferred-star" title="Preferred source">&#9733;</span>
-        <.link
-          navigate={~p"/sources/#{ss.source.id}"}
-          class="source-tab-link"
-          title="View source details"
-          tabindex="0"
+    <div class="source-tabs-strip">
+      <div class="source-tabs-list" role="tablist" aria-label="Sources">
+        <button
+          :for={ss <- @sources}
+          phx-click="select_source"
+          phx-value-id={ss.source.id}
+          class={["source-tab", selected_tab?(ss, @selected) && "active"]}
+          role="tab"
+          aria-selected={to_string(selected_tab?(ss, @selected))}
         >
-          <.icon name="hero-information-circle" class="size-3.5" />
-        </.link>
-      </button>
-      <.link
+          <span class="source-tab-name">{ss.source.name}</span>
+          <span :if={ss.is_preferred} class="preferred-star" title="Preferred source">&#9733;</span>
+          <.link
+            navigate={~p"/sources/#{ss.source.id}"}
+            class="source-tab-link"
+            title="View source details"
+            aria-label={"About #{ss.source.name}"}
+            tabindex="0"
+          >
+            <.icon name="hero-information-circle" class="size-4" />
+          </.link>
+        </button>
+      </div>
+      <.compare_button
         :if={length(@sources) > 1}
         navigate={~p"/species/#{@species_name}/compare"}
         class="compare-sources-link"
         title="Compare all sources side-by-side"
       >
-        <.icon name="hero-arrows-right-left" class="size-4" />
-        <span>Compare</span>
-      </.link>
+        Compare sources
+      </.compare_button>
       <div :if={@editor && @can_add_source} class="add-source-wrapper">
-        <.link
+        <.button
           navigate={~p"/species/#{@species_name}/sources/new"}
+          size="compact"
           class="add-source-btn"
-          style="text-decoration: none;"
           title="Add data from another source"
         >
-          <.icon name="hero-plus" class="size-3.5" />
-          <span>Add Source</span>
-        </.link>
+          Add source
+        </.button>
       </div>
     </div>
     """
@@ -619,46 +561,38 @@ defmodule OaksWeb.SpeciesDetailLive do
     ~H"""
     <div class="source-content">
       <div class="source-content-header">
-        <span class="source-content-title">
+        <h2 class="source-content-title">
           Data from {@source.source.name}
-        </span>
-        <div :if={@editor} class="flex items-center gap-2">
-          <.link
+        </h2>
+        <div :if={@editor} class="source-content-actions">
+          <.button
             navigate={~p"/species/#{@species_name}/sources/#{@source.source.id}/edit"}
-            class="action-btn action-btn-edit"
-            style="text-decoration: none;"
+            size="compact"
           >
-            <.icon name="hero-pencil-square" class="size-3.5" /> Edit
-          </.link>
-          <button
+            Edit
+          </.button>
+          <.button
+            type="button"
             phx-click="request_delete_source"
             phx-value-id={@source.id}
-            class="action-btn action-btn-delete"
+            size="compact"
           >
-            <.icon name="hero-trash" class="size-3.5" /> Delete
-          </button>
+            Delete
+          </.button>
         </div>
       </div>
 
-      <.source_field label="Geographic Range" value={@source.range} icon="hero-map-pin" />
-      <.source_field label="Growth Habit" value={@source.growth_habit} icon="hero-building-office-2" />
-      <.source_field label="Leaves" value={@source.leaves} icon="leaf" />
-      <.source_field label="Flowers" value={@source.flowers} icon="flower" />
-      <.source_field label="Fruits" value={@source.fruits} icon="acorn" />
-      <.source_field label="Bark" value={@source.bark} icon="hero-sparkles" />
-      <.source_field label="Twigs" value={@source.twigs} icon="hero-sparkles" />
-      <.source_field label="Buds" value={@source.buds} icon="hero-sparkles" />
+      <.source_field label="Geographic Range" value={@source.range} />
+      <.source_field label="Growth Habit" value={@source.growth_habit} />
+      <.source_field label="Leaves" value={@source.leaves} />
+      <.source_field label="Flowers" value={@source.flowers} />
+      <.source_field label="Fruits" value={@source.fruits} />
+      <.source_field label="Bark" value={@source.bark} />
+      <.source_field label="Twigs" value={@source.twigs} />
+      <.source_field label="Buds" value={@source.buds} />
 
       <section :if={@local_names != []} class="source-field">
-        <h4
-          class="flex items-center gap-1.5 text-sm font-semibold mb-2"
-          style="color: var(--color-forest-700);"
-        >
-          <span style="color: var(--color-forest-500);">
-            <.icon name="hero-language" class="size-4 flex-shrink-0" />
-          </span>
-          Common Names
-        </h4>
+        <h3 class="source-field-label">Common Names</h3>
         <div class="flex flex-wrap gap-2">
           <span :for={name <- @local_names} class="pill-tag">
             {name}
@@ -666,101 +600,27 @@ defmodule OaksWeb.SpeciesDetailLive do
         </div>
       </section>
 
-      <.source_field
-        label="Hardiness & Habitat"
-        value={@source.hardiness_habitat}
-        icon="hero-globe-americas"
-      />
-      <.source_field
-        label="Additional Information"
-        value={@source.miscellaneous}
-        icon="hero-information-circle"
-      />
+      <.source_field label="Hardiness & Habitat" value={@source.hardiness_habitat} />
+      <.source_field label="Additional Information" value={@source.miscellaneous} />
 
-      <div
-        :if={@source.url}
-        class="mt-4 pt-4"
-        style="border-top: 1px solid var(--color-border-light);"
-      >
-        <a
-          href={@source.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-sm inline-flex items-center gap-1"
-          style="color: var(--color-forest-700);"
-        >
-          View original source <.icon name="hero-arrow-top-right-on-square" class="size-3.5" />
+      <p :if={@source.url} class="source-original">
+        <a href={@source.url} target="_blank" rel="noopener noreferrer" class="oc-src">
+          View original source
         </a>
-      </div>
+      </p>
     </div>
     """
   end
 
   attr :label, :string, required: true
   attr :value, :string, default: nil
-  attr :icon, :string, default: nil
 
   defp source_field(assigns) do
     ~H"""
     <section :if={@value && @value != ""} class="source-field">
-      <h4
-        class="flex items-center gap-1.5 text-sm font-semibold mb-1"
-        style="color: var(--color-forest-700);"
-      >
-        <.field_icon :if={@icon} name={@icon} />
-        {@label}
-      </h4>
+      <h3 class="source-field-label">{@label}</h3>
       <div class="prose-content">{raw(Markdown.render_html(@value))}</div>
     </section>
-    """
-  end
-
-  attr :name, :string, required: true
-
-  defp field_icon(%{name: "leaf"} = assigns) do
-    ~H"""
-    <svg
-      class="size-4 flex-shrink-0"
-      style="color: var(--color-forest-500);"
-      fill="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z" />
-    </svg>
-    """
-  end
-
-  defp field_icon(%{name: "flower"} = assigns) do
-    ~H"""
-    <svg
-      class="size-4 flex-shrink-0"
-      style="color: var(--color-forest-500);"
-      fill="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path d="M12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M15,10.59V9L12.5,6.5L10,9V10.59L11.29,11.88L10.59,14.59L12,14L13.41,14.59L12.71,11.88L15,10.59Z" />
-    </svg>
-    """
-  end
-
-  defp field_icon(%{name: "acorn"} = assigns) do
-    ~H"""
-    <svg
-      class="size-4 flex-shrink-0"
-      style="color: var(--color-forest-500);"
-      fill="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path d="M12,2C12.5,2 13,2.19 13.41,2.59C13.8,3 14,3.5 14,4C14,4.5 13.8,5 13.41,5.41C13,5.8 12.5,6 12,6C11.5,6 11,5.8 10.59,5.41C10.2,5 10,4.5 10,4C10,3.5 10.2,3 10.59,2.59C11,2.19 11.5,2 12,2M12,6C13.1,6 14,6.9 14,8V9.5C15.72,9.5 17.17,10.6 17.71,12.13C18.14,13.38 18.13,14.77 17.66,16C17.19,17.26 16.32,18.23 15.19,18.74C14.06,19.25 12.78,19.25 11.65,18.74C10.5,18.23 9.63,17.26 9.16,16C8.69,14.77 8.68,13.38 9.11,12.13C9.65,10.6 11.1,9.5 12.83,9.5H12V8C12,6.9 12.9,6 12,6M12.13,11.5C11.41,11.5 10.81,11.89 10.54,12.5C10.27,13.11 10.39,13.82 10.85,14.3C11.31,14.78 12,14.94 12.63,14.7C13.26,14.46 13.7,13.86 13.7,13.17C13.7,12.64 13.5,12.13 13.13,11.76C12.76,11.39 12.26,11.5 12.13,11.5Z" />
-    </svg>
-    """
-  end
-
-  defp field_icon(%{name: "hero-" <> _} = assigns) do
-    ~H"""
-    <span style="color: var(--color-forest-500);">
-      <.icon name={@name} class="size-4 flex-shrink-0" />
-    </span>
     """
   end
 
@@ -770,62 +630,18 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp external_links_section(assigns) do
     ~H"""
-    <section class="card card-sm detail-section full-width">
-      <h2 class="section-title section-title-sm mb-3">
-        <.icon name="hero-arrow-top-right-on-square" class="size-4 inline-block" /> External Links
-      </h2>
-      <div class="flex flex-wrap gap-3">
-        <a
-          :for={link <- @links}
-          href={link.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="external-link-btn"
-        >
-          <%= if link.name == "iNaturalist" do %>
-            <.ext_link_icon name={link.name} logo={link[:logo]} />
-          <% else %>
-            <.ext_link_icon name={link.name} logo={link[:logo]} />
-            {link.name}
-          <% end %>
-        </a>
-      </div>
+    <section class="card card-sm detail-section full-width" id="species-external-links">
+      <.section_heading>External Links</.section_heading>
+      <ul class="external-links">
+        <li :for={link <- @links}>
+          <a href={link.url} target="_blank" rel="noopener noreferrer" class="external-link">
+            <span class="external-link-name">{link.name}</span>
+            <span :if={host = link_host(link.url)} class="external-link-host">{host}</span>
+          </a>
+        </li>
+      </ul>
     </section>
     """
-  end
-
-  attr :name, :string, required: true
-  attr :logo, :string, default: nil
-
-  defp ext_link_icon(assigns) do
-    logo = assigns.logo || infer_logo(assigns.name)
-
-    # iNaturalist uses the full logo (larger), others use small icons
-    {icon_file, icon_class} =
-      if logo == "inaturalist",
-        do: {"inaturalist-logo.svg", "h-5"},
-        else: {"#{logo || "generic"}.svg", "size-4 flex-shrink-0"}
-
-    assigns = assigns |> assign(:icon_file, icon_file) |> assign(:icon_class, icon_class)
-
-    ~H"""
-    <img src={~p"/images/#{@icon_file}"} alt="" class={@icon_class} />
-    """
-  end
-
-  defp infer_logo(name) do
-    name_lower = String.downcase(name)
-
-    cond do
-      String.contains?(name_lower, "flora of north america") -> "fna"
-      String.contains?(name_lower, "fire effects") -> "feis"
-      String.contains?(name_lower, "usda") -> "usda"
-      String.contains?(name_lower, "gbif") -> "gbif"
-      String.contains?(name_lower, "powo") -> "powo"
-      String.contains?(name_lower, "wikipedia") -> "wikipedia"
-      String.contains?(name_lower, "inaturalist") -> "inaturalist"
-      true -> nil
-    end
   end
 
   # -- Delete confirmation modal --
@@ -837,53 +653,54 @@ defmodule OaksWeb.SpeciesDetailLive do
   defp delete_confirm_modal(assigns) do
     ~H"""
     <div
-      class="fixed inset-0 z-50 flex items-center justify-center"
+      class="fixed inset-0 z-50 flex items-center justify-center p-s4"
       id="delete-confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-confirm-title"
       phx-window-keydown="cancel_delete"
       phx-key="Escape"
     >
-      <div class="fixed inset-0 bg-black/50" phx-click="cancel_delete" />
-      <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
-        <h3 class="text-lg font-bold text-red-800 mb-2">Delete Species</h3>
-        <p class="mb-2" style="color: var(--color-text-secondary);">
-          Are you sure you want to delete <strong class="species-name">
-            Quercus {epithet(@species.scientific_name)}
-          </strong>?
-        </p>
-        <p :if={@source_count > 0} class="text-sm text-red-600 mb-4">
-          This will also remove data from {@source_count} source(s).
-        </p>
-        <div :if={@references != []} class="text-sm mb-4" id="delete-references">
-          <p class="mb-1" style="color: var(--color-text-secondary);">
-            {length(@references)} other species mention this name. Deleting removes it from:
-          </p>
-          <ul class="max-h-40 overflow-y-auto pl-4 list-disc">
-            <li :for={ref <- @references}>
-              <span class="species-name">{epithet(ref.species.scientific_name)}</span>
-              <span style="color: var(--color-text-tertiary);">
-                ({Enum.map_join(ref.fields, ", ", &reference_field_label/1)})
-              </span>
-            </li>
-          </ul>
+      <div class="oc-modal-backdrop" phx-click="cancel_delete" />
+      <div class="oc-modal-panel species-dialog">
+        <div class="oc-modal-head">
+          <h2 id="delete-confirm-title">Delete species</h2>
         </div>
-        <p :if={@source_count == 0} class="text-sm mb-4" style="color: var(--color-text-tertiary);">
-          This action cannot be undone.
-        </p>
-        <div class="flex justify-end gap-3">
-          <button
-            phx-click="cancel_delete"
-            class="px-4 py-2 rounded-lg text-sm font-medium"
-            style="color: var(--color-text-secondary);"
-          >
-            Cancel
-          </button>
-          <button
+        <div class="oc-modal-body">
+          <p>
+            Are you sure you want to delete
+            <.sci name={"Quercus #{epithet(@species.scientific_name)}"} />?
+          </p>
+          <p :if={@source_count > 0} class="species-dialog-warn">
+            This will also remove data from {@source_count} source(s).
+          </p>
+          <div :if={@references != []} class="species-dialog-note" id="delete-references">
+            <p>
+              {length(@references)} other species mention this name. Deleting removes it from:
+            </p>
+            <ul class="max-h-40 overflow-y-auto pl-4 list-disc">
+              <li :for={ref <- @references}>
+                <.sci name={epithet(ref.species.scientific_name)} />
+                <span class="text-ink-3">
+                  ({Enum.map_join(ref.fields, ", ", &reference_field_label/1)})
+                </span>
+              </li>
+            </ul>
+          </div>
+          <p :if={@source_count == 0} class="species-dialog-note">
+            This action cannot be undone.
+          </p>
+        </div>
+        <div class="oc-modal-actions">
+          <.button type="button" phx-click="cancel_delete">Cancel</.button>
+          <.button
+            type="button"
             phx-click="confirm_delete"
-            class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
+            class="species-btn-plate"
             id="confirm-delete-btn"
           >
-            Delete Species
-          </button>
+            Delete species
+          </.button>
         </div>
       </div>
     </div>
@@ -904,38 +721,36 @@ defmodule OaksWeb.SpeciesDetailLive do
   defp delete_source_confirm_modal(assigns) do
     ~H"""
     <div
-      class="fixed inset-0 z-50 flex items-center justify-center"
+      class="fixed inset-0 z-50 flex items-center justify-center p-s4"
       id="delete-source-confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-source-confirm-title"
       phx-window-keydown="cancel_delete_source"
       phx-key="Escape"
     >
-      <div class="fixed inset-0 bg-black/50" phx-click="cancel_delete_source" />
-      <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
-        <h3 class="text-lg font-bold text-red-800 mb-2">Delete Source Data</h3>
-        <p class="mb-4" style="color: var(--color-text-secondary);">
-          Are you sure you want to remove <strong>{@target.source.name}</strong>
-          data from <strong class="species-name">
-            Quercus {epithet(@species.scientific_name)}
-          </strong>?
-        </p>
-        <p class="text-sm mb-4" style="color: var(--color-text-tertiary);">
-          This action cannot be undone.
-        </p>
-        <div class="flex justify-end gap-3">
-          <button
-            phx-click="cancel_delete_source"
-            class="px-4 py-2 rounded-lg text-sm font-medium"
-            style="color: var(--color-text-secondary);"
-          >
-            Cancel
-          </button>
-          <button
+      <div class="oc-modal-backdrop" phx-click="cancel_delete_source" />
+      <div class="oc-modal-panel species-dialog">
+        <div class="oc-modal-head">
+          <h2 id="delete-source-confirm-title">Delete source data</h2>
+        </div>
+        <div class="oc-modal-body">
+          <p>
+            Are you sure you want to remove <strong>{@target.source.name}</strong>
+            data from <.sci name={"Quercus #{epithet(@species.scientific_name)}"} />?
+          </p>
+          <p class="species-dialog-note">This action cannot be undone.</p>
+        </div>
+        <div class="oc-modal-actions">
+          <.button type="button" phx-click="cancel_delete_source">Cancel</.button>
+          <.button
+            type="button"
             phx-click="confirm_delete_source"
-            class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
+            class="species-btn-plate"
             id="confirm-delete-source-btn"
           >
-            Delete Source Data
-          </button>
+            Delete source data
+          </.button>
         </div>
       </div>
     </div>
@@ -951,124 +766,79 @@ defmodule OaksWeb.SpeciesDetailLive do
   defp merge_picker_dialog(assigns) do
     ~H"""
     <div
-      class="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style="background-color: rgba(0, 0, 0, 0.5);"
+      class="fixed inset-0 z-50 flex items-center justify-center p-s4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="merge-picker-title"
       phx-window-keydown="close_merge_picker"
       phx-key="Escape"
       id="merge-picker-dialog"
     >
-      <div class="card max-w-lg w-full max-h-[80vh] flex flex-col overflow-hidden">
-        <div
-          class="flex items-center justify-between p-4 border-b"
-          style="background-color: var(--color-forest-50); border-color: var(--color-border);"
-        >
-          <h2
-            class="text-lg font-semibold"
-            style="font-family: var(--font-serif); color: var(--color-forest-800);"
-          >
-            Select Target Species
-          </h2>
-          <button
-            phx-click="close_merge_picker"
-            class="p-1.5 rounded-lg hover:bg-white/50 transition-colors"
-            style="color: var(--color-text-secondary);"
-          >
-            <.icon name="hero-x-mark" class="size-5" />
-          </button>
+      <div class="oc-modal-backdrop" phx-click="close_merge_picker" />
+      <div class="oc-modal-panel species-dialog max-h-[80vh] flex flex-col overflow-hidden">
+        <div class="oc-modal-head">
+          <h2 id="merge-picker-title">Select target species</h2>
+          <.button type="button" size="compact" phx-click="close_merge_picker">
+            Close <kbd>Esc</kbd>
+          </.button>
         </div>
 
-        <p
-          class="px-4 py-3 text-sm border-b"
-          style="color: var(--color-text-secondary); border-color: var(--color-border);"
-        >
-          Select the species that
-          <span class="species-name" style="color: var(--color-forest-700);">
-            Quercus {@species.scientific_name}
-          </span>
-          will become a synonym of.
-        </p>
+        <div class="oc-modal-body flex-1 min-h-0 flex flex-col">
+          <p>
+            Select the species that <.sci name={"Quercus #{@species.scientific_name}"} />
+            will become a synonym of.
+          </p>
 
-        <div class="p-4">
-          <form phx-change="merge_search">
+          <form phx-change="merge_search" phx-submit="merge_search">
             <input
               type="text"
               name="query"
               value={@query}
               placeholder="Search for a species..."
+              aria-label="Search for a species"
               autofocus
               phx-debounce="300"
-              class="w-full px-3 py-2 rounded-lg text-sm"
-              style="border: 1px solid var(--color-border); background-color: var(--color-surface);"
+              class="oc-input"
             />
           </form>
-        </div>
 
-        <div class="flex-1 overflow-y-auto px-4 pb-4 min-h-[200px] max-h-[300px]">
-          <p
-            :if={String.length(String.trim(@query)) < 2}
-            class="text-center py-8 text-sm"
-            style="color: var(--color-text-secondary);"
-          >
-            Type at least 2 characters to search
-          </p>
+          <div class="flex-1 overflow-y-auto min-h-[200px] max-h-[300px]">
+            <p :if={String.length(String.trim(@query)) < 2} class="species-dialog-note py-s5">
+              Type at least 2 characters to search
+            </p>
 
-          <p
-            :if={String.length(String.trim(@query)) >= 2 && @results == []}
-            class="text-center py-8 text-sm"
-            style="color: var(--color-text-secondary);"
-          >
-            No species found matching "{@query}"
-          </p>
+            <p
+              :if={String.length(String.trim(@query)) >= 2 && @results == []}
+              class="species-dialog-note py-s5"
+            >
+              No species found matching "{@query}"
+            </p>
 
-          <ul :if={@results != []} class="space-y-2">
-            <li :for={species <- @results}>
-              <button
-                phx-click="select_merge_target"
-                phx-value-name={species.scientific_name}
-                class="merge-target-option w-full text-left p-3 rounded-lg transition-colors"
-              >
-                <div class="flex items-baseline gap-2">
-                  <span class="species-name font-semibold" style="color: var(--color-forest-800);">
-                    <span
-                      :if={hybrid_sign?(species.scientific_name, species.is_hybrid)}
-                      style="font-style: normal; color: var(--color-forest-600);"
-                    >
-                      &times;
-                    </span>
-                    {epithet(species.scientific_name)}
+            <ul :if={@results != []} class="merge-results">
+              <li :for={species <- @results}>
+                <button
+                  type="button"
+                  phx-click="select_merge_target"
+                  phx-value-name={species.scientific_name}
+                  class="merge-target-option"
+                >
+                  <span class="merge-target-name">
+                    <.sci name={SpeciesName.label(species.scientific_name, species.is_hybrid)} />
                   </span>
-                  <span
-                    :if={species.author}
-                    class="text-xs"
-                    style="color: var(--color-text-secondary); font-style: normal;"
-                  >
+                  <span :if={species.author} class="merge-target-author">
                     {species.author}
                   </span>
-                </div>
-                <div :if={species.section} class="mt-1">
-                  <span
-                    class="text-xs px-2 py-0.5 rounded-full"
-                    style="background-color: var(--color-forest-100); color: var(--color-forest-700);"
-                  >
-                    sect. {species.section}
+                  <span :if={species.section} class="merge-target-meta">
+                    sect. <i>{species.section}</i>
                   </span>
-                </div>
-              </button>
-            </li>
-          </ul>
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        <div
-          class="flex justify-end p-4 border-t"
-          style="border-color: var(--color-border); background-color: var(--color-background);"
-        >
-          <button
-            phx-click="close_merge_picker"
-            class="px-4 py-2 rounded-lg text-sm font-medium"
-            style="color: var(--color-text-primary); border: 1px solid var(--color-border);"
-          >
-            Cancel
-          </button>
+        <div class="oc-modal-actions">
+          <.button type="button" phx-click="close_merge_picker">Cancel</.button>
         </div>
       </div>
     </div>
@@ -1169,31 +939,55 @@ defmodule OaksWeb.SpeciesDetailLive do
     (custom ++ auto) |> Enum.sort_by(&String.downcase(&1.name))
   end
 
-  defp format_hybrid_display(name), do: SpeciesName.label(name, true)
-
-  defp format_synonym(syn) when is_binary(syn), do: syn
-
-  defp format_synonym(%{"name" => name, "author" => author}) when author != "" do
-    "#{name} #{author}"
+  # A synonym or variety is {name, authority}. Stored as a string, the authority is
+  # whatever follows the first word that starts with a capital or "("
+  # (epithets and rank words are lower case): "shumardii var. acerifolia
+  # E.J.Palmer 1927" is {"shumardii var. acerifolia", "E.J.Palmer 1927"}.
+  defp name_and_authority(syn) when is_binary(syn) do
+    case Regex.run(~r/^(.*?)\s+([[:upper:](].*)$/u, String.trim(syn)) do
+      [_, name, author] -> {name, author}
+      _ -> {syn, nil}
+    end
   end
 
-  defp format_synonym(%{"name" => name}), do: name
-  defp format_synonym(other), do: inspect(other)
+  defp name_and_authority(%{"name" => name, "author" => author})
+       when is_binary(author) and author != "",
+       do: {name, author}
+
+  defp name_and_authority(%{"name" => name}), do: {name, nil}
+  defp name_and_authority(other), do: {inspect(other), nil}
+
+  # The hybrid sign and rank words stay roman; everything else in a
+  # scientific name is italic.
+  @roman_part ~r/(×|\b(?:subsp|ssp|var|subvar|f|nothosubsp|nothovar)\.)/u
+
+  defp sci_html(name) do
+    @roman_part
+    |> Regex.split(name, include_captures: true, trim: true)
+    |> Enum.map(fn part ->
+      text = part |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+
+      if Regex.match?(@roman_part, part) and String.trim(part) == part,
+        do: [~s(<span class="sci-roman">), text, "</span>"],
+        else: ["<i>", text, "</i>"]
+    end)
+    |> IO.iodata_to_binary()
+    |> raw()
+  end
+
+  defp link_host(url) do
+    case URI.parse(url) do
+      %URI{host: host} when is_binary(host) and host != "" ->
+        String.replace_prefix(host, "www.", "")
+
+      _ ->
+        nil
+    end
+  end
 
   defp selected_tab?(source, selected) do
     selected && source.id == selected.id
   end
-
-  defp conservation_colors("EX"), do: %{bg: "#000000", text: "#FFFFFF"}
-  defp conservation_colors("EW"), do: %{bg: "#542344", text: "#FFFFFF"}
-  defp conservation_colors("CR"), do: %{bg: "#D81E05", text: "#FFFFFF"}
-  defp conservation_colors("EN"), do: %{bg: "#FC7F3F", text: "#000000"}
-  defp conservation_colors("VU"), do: %{bg: "#F9E814", text: "#000000"}
-  defp conservation_colors("NT"), do: %{bg: "#CCE226", text: "#000000"}
-  defp conservation_colors("LC"), do: %{bg: "#60C659", text: "#000000"}
-  defp conservation_colors("DD"), do: %{bg: "#D1D1C6", text: "#000000"}
-  defp conservation_colors("NE"), do: %{bg: "#FFFFFF", text: "#000000", border: "#D1D1C6"}
-  defp conservation_colors(_), do: %{bg: "#D1D1C6", text: "#000000"}
 
   defp conservation_label("LC"), do: "Least Concern"
   defp conservation_label("NT"), do: "Near Threatened"

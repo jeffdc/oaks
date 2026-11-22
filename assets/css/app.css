@@ -1827,315 +1827,458 @@ a.badge:hover {
 }
 
 /* ============================================
-   Species Detail - Container (V1 SpeciesDetail.svelte:1102-1105)
+   Species Detail - Container (bridge restyle, item 1adb)
+
+   V1's species page in DESIGN.md's voice, its structure kept until the
+   taxon page is rebuilt: the page frame gives the gutters, and sections
+   stand on their 2px rules, 48px apart, with nothing boxed.
    ============================================ */
 .species-detail {
-  background-color: var(--color-surface);
-  padding: 1rem;
+  min-width: 0;
 }
 
 .content-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  background-color: var(--color-background);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-s7);
 }
 
-@media (min-width: 1024px) {
-  .content-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-  }
-}
-
-.detail-section {
-  padding: 1rem;
-}
-
-.detail-section.full-width {
-  grid-column: 1 / -1;
-}
-
-/* Source container (no padding, edge-to-edge) */
+/* .card drops its side padding at class weight; these sections drop the
+   rest, so their rows line up with the frame. */
+.detail-section,
 .source-container {
-  /* overflow: hidden removed to allow dropdown visibility */
+  padding: 0;
 }
 
+.detail-section.full-width,
 .source-container.full-width {
   grid-column: 1 / -1;
 }
 
-/* ============================================
-   Species Detail - Header (V1 SpeciesDetail.svelte:1237-1282)
-   ============================================ */
-.species-current {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+.detail-section .oc-section-heading {
+  margin-bottom: 0;
 }
 
-.species-current-left {
+/* Scientific names: the serif italic, with the hybrid sign, rank words
+   and authorities roman (the Botanical Italic Rule). */
+.sci {
+  font-family: var(--font-serif);
+}
+
+.sci i {
+  font-style: italic;
+}
+
+.sci-roman {
+  font-style: normal;
+}
+
+/* ============================================
+   Species Detail - Header: the title row on DESIGN.md's 2px rule. The
+   breadcrumb stands above it, where the ochre band will go.
+   ============================================ */
+.species-header {
+  margin-bottom: var(--spacing-s7);
+  padding-bottom: var(--spacing-s4);
+  border-bottom: 2px solid var(--color-rule-strong);
+}
+
+.species-header .taxonomy-nav {
+  margin: 0 0 var(--spacing-s4);
+}
+
+.species-current {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
   flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-s3) var(--spacing-s5);
 }
 
 .species-title {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.5rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-forest-900);
-  font-family: var(--font-serif);
+  gap: var(--spacing-s1) var(--spacing-s4);
+  min-width: 0;
   margin: 0;
+  font: 600 clamp(34px, 4vw, 50px)/1.05 var(--font-serif);
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.species-title em {
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+.species-genus {
+  font-weight: 400;
 }
 
 .author-text {
-  font-size: 1rem;
-  font-weight: 400;
-  font-style: normal;
-  color: var(--color-text-secondary);
-  font-family: sans-serif;
+  font: 400 22px/1.1 var(--font-serif);
+  letter-spacing: 0;
+  color: var(--color-ink-3);
 }
 
+/* Kind and conservation status, at the row's right end. */
+.species-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-s3);
+  margin-left: auto;
+  font: 600 14px/1.3 var(--font-frame);
+  color: var(--color-ink-2);
+}
+
+/* Editor actions wrap under the title on a phone instead of widening the
+   page (bug 10df). Delete stands apart at the end. */
 .species-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  margin-left: auto;
-  flex-shrink: 0;
+  gap: var(--spacing-s2);
+  min-width: 0;
 }
 
-.action-btn svg {
-  flex-shrink: 0;
+.species-actions .species-delete-btn {
+  margin-left: var(--spacing-s3);
 }
 
-.action-btn-synonym {
-  color: #9333ea;
-  background-color: #faf5ff;
-  border-color: #e9d5ff;
+@media (max-width: 760px) {
+  .species-meta {
+    margin-left: 0;
+  }
+
+  .species-actions {
+    flex-basis: 100%;
+  }
 }
 
-.action-btn-synonym:hover {
-  background-color: #f3e8ff;
-  border-color: #d8b4fe;
+/* The destructive confirmation in a dialog: an ink plate, apart from the
+   ochre call to action and from the ghost Cancel. */
+.species-btn-plate {
+  color: var(--color-paper);
+  background-color: var(--color-ink);
 }
 
-.action-btn-synonym:focus-visible {
-  outline: 2px solid #9333ea;
-  outline-offset: 2px;
+.species-btn-plate:hover {
+  color: var(--color-paper);
+  background-color: var(--color-ink-2);
+  border-color: var(--color-ink-2);
 }
 
-/* Conservation status badge */
-.conservation-badge {
-  display: inline-flex;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
+/* ============================================
+   Species Detail - Relationship lists: names on hairlines
+   ============================================ */
+.species-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.species-rows > li {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.species-row-link,
+.species-row-name {
+  display: block;
+  padding: var(--spacing-s3) 0;
+  font: 600 17px/1.3 var(--font-serif);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.species-row-name {
+  font-weight: 400;
+  color: var(--color-ink-2);
+}
+
+.species-row-link:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* Synonyms: the comma list of names, each with its authority roman. */
+.species-synonyms {
+  padding-top: var(--spacing-s3);
+}
+
+.species-synonym .sci i {
   font-weight: 600;
-  border: 1px solid transparent;
-  flex-shrink: 0;
-}
-
-/* Species link (V1 SpeciesDetail.svelte:1148-1159) */
-.species-link {
-  color: var(--color-forest-700);
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.15s ease;
-  border-bottom: 1px solid transparent;
-}
-
-.species-link:hover {
-  color: var(--color-forest-600);
-  border-bottom-color: var(--color-forest-400);
 }
 
 /* ============================================
-   Species Detail - Hybrid Items
+   Species Detail - Hybrid Items: name, then "with" the other parent
    ============================================ */
+.hybrid-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: var(--spacing-s7);
+}
+
+@media (min-width: 761px) {
+  .hybrid-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .hybrid-item {
-  padding: 0.75rem;
-  padding-left: 1rem;
-  border-left: 4px solid var(--color-forest-500);
-  background: linear-gradient(90deg, var(--color-forest-50) 0%, transparent 100%);
-  border-radius: 0.375rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--spacing-s3);
+  padding: var(--spacing-s3) 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.hybrid-name {
+  font: 600 17px/1.3 var(--font-serif);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.hybrid-with {
+  font: 400 14px/1.4 var(--font-frame);
+  color: var(--color-ink-2);
+}
+
+.hybrid-with a {
+  font: 400 15px/1.4 var(--font-serif);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.hybrid-name:hover,
+.hybrid-with a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 /* ============================================
-   Species Detail - External Links
+   Species Detail - External Links: a ruled list of pencil links, each
+   with its site
    ============================================ */
-.external-link-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.5rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: var(--color-forest-700);
-  background-color: var(--color-forest-50);
-  border: 1.5px solid var(--color-forest-300);
-  transition: all 0.2s ease;
-  text-decoration: none;
+.external-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  column-gap: var(--spacing-s7);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.external-link-btn:hover {
-  background-color: var(--color-forest-100);
-  border-color: var(--color-forest-400);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+
+.external-links > li {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.external-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--spacing-s3);
+  padding: var(--spacing-s3) 0;
   text-decoration: none;
 }
 
+.external-link-name {
+  font: 600 15px/1.4 var(--font-frame);
+  color: var(--color-pencil);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-pencil) 40%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.external-link:hover .external-link-name {
+  text-decoration-color: var(--color-pencil);
+}
+
+.external-link-host {
+  font: 500 13px/1.4 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
 /* ============================================
-   Species Detail - Source Tabs (browser-style)
+   Species Detail - Source Tabs: still tabs, in DESIGN.md's voice. The
+   strip stands on the 2px ink rule and the current tab carries the 3px
+   ochre underline along it, as the masthead's current nav item does.
    ============================================ */
 .source-tabs-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 0;
-  background-color: var(--color-forest-50);
-  border-bottom: 1px solid var(--color-border);
-  padding: 0.5rem 0.5rem 0;
-  border-radius: 0.75rem 0.75rem 0 0;
+  align-items: flex-end;
+  gap: 0 var(--spacing-s5);
+  border-bottom: 2px solid var(--color-rule-strong);
 }
+
+.source-tabs-list {
+  display: flex;
+  gap: 0 var(--spacing-s5);
+  min-width: 0;
+}
+
+/* On a phone the tabs keep one row on the rule and scroll sideways, as the
+   band does; Compare and Add source go on the row under it. */
+@media (max-width: 760px) {
+  .source-tabs-strip {
+    border-bottom: 0;
+  }
+
+  .source-tabs-list {
+    flex-basis: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 2px solid var(--color-rule-strong);
+  }
+
+  .source-tabs-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .source-tab {
+    flex: none;
+  }
+
+  .source-tabs-strip .compare-sources-link {
+    margin-left: 0;
+  }
+}
+
 .source-tab {
   display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.625rem 1rem;
-  border: none;
-  background: transparent;
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
-  font-weight: 500;
+  align-items: baseline;
+  gap: var(--spacing-s2);
+  padding: 12px 0 9px;
+  font: 700 15px/1.2 var(--font-frame);
+  color: var(--color-ink-2);
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
   cursor: pointer;
-  border-radius: 0.375rem 0.375rem 0 0;
-  transition: all 0.15s ease;
-  position: relative;
-  margin-bottom: -1px;
 }
+
 .source-tab:hover:not(.active) {
-  background-color: var(--color-forest-100);
-  color: var(--color-text-primary);
+  color: var(--color-ink);
+  border-bottom-color: color-mix(in srgb, var(--color-ink) 25%, transparent);
 }
+
 .source-tab.active {
-  background-color: var(--color-surface);
-  color: var(--color-forest-800);
-  border: 1px solid var(--color-border);
-  border-bottom-color: var(--color-surface);
+  color: var(--color-ink);
+  border-bottom-color: var(--color-ochre);
 }
+
 .preferred-star {
-  color: var(--color-oak-brown);
-  font-size: 0.75rem;
+  font-size: 12px;
+  color: var(--color-ink);
 }
+
 .source-tab-link {
   display: inline-flex;
-  align-items: center;
-  color: var(--color-text-tertiary);
-  padding: 0.125rem;
-  border-radius: 0.25rem;
-  transition: all 0.15s ease;
-  cursor: pointer;
+  align-self: center;
+  color: var(--color-ink-3);
   text-decoration: none;
 }
+
 .source-tab-link:hover {
-  color: var(--color-forest-600);
-  background-color: var(--color-forest-100);
+  color: var(--color-pencil);
   text-decoration: none;
 }
+
+/* Compare (the ochre call to action) and Add source sit at the strip's
+   right end, clear of the rule. */
 .compare-sources-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.875rem;
   margin-left: auto;
-  color: var(--color-forest-600);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  border-radius: 0.375rem;
-  transition: all 0.15s ease;
-  text-decoration: none;
-}
-.compare-sources-link:hover {
-  background-color: var(--color-forest-100);
-  color: var(--color-forest-800);
-  text-decoration: none;
 }
 
-/* Add source button and wrapper */
+.compare-sources-link,
 .add-source-wrapper {
-  position: relative;
-  margin-left: 0.5rem;
+  align-self: center;
+  margin-block: var(--spacing-s2);
 }
 
-.add-source-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.875rem;
-  border: 1px dashed var(--color-forest-300);
-  background: transparent;
-  color: var(--color-forest-600);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: 0.375rem;
-  transition: all 0.15s ease;
-}
-
-.add-source-btn:hover {
-  background-color: var(--color-forest-50);
-  border-color: var(--color-forest-400);
-  color: var(--color-forest-700);
-}
-
-.add-source-btn:focus-visible {
-  outline: 2px solid var(--color-forest-500);
-  outline-offset: 2px;
-}
-
-/* Source content */
+/* Source content: "Data from ..." then each field as a label beside its
+   text on a hairline; the label stacks above the text on a phone. */
 .source-content {
-  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
 .source-content-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--color-border-light);
+  gap: var(--spacing-s2) var(--spacing-s4);
+  padding: var(--spacing-s3) 0;
+  border-bottom: 1px solid var(--color-rule);
 }
 
 .source-content-title {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+  margin: 0;
+  font: 600 14px/1.3 var(--font-frame);
+  color: var(--color-ink-2);
+}
+
+.source-content-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-s2);
 }
 
 .source-field {
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--color-border-light);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-s1);
+  padding: var(--spacing-s4) 0;
+  border-bottom: 1px solid var(--color-rule);
 }
 
-.source-field:last-child {
-  padding-bottom: 0;
-  border-bottom: none;
+@media (min-width: 761px) {
+  .source-field {
+    grid-template-columns: 11rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--spacing-s5);
+  }
 }
 
-/* Source content seamless join with tabs */
-.source-tabs-strip + .card {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  border-top: none;
+.source-field-label {
+  margin: 0;
+  font: 700 15px/1.45 var(--font-frame);
+  color: var(--color-ink);
+}
+
+.source-field .prose-content > :first-child {
+  margin-top: 0;
+}
+
+.source-field .prose-content > :last-child {
+  margin-bottom: 0;
+}
+
+.source-original {
+  margin: 0;
+  padding: var(--spacing-s4) 0 0;
+}
+
+.source-original .oc-src {
+  margin-left: 0;
+}
+
+/* No sources yet: the empty statement under the section label. */
+.species-no-sources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-s3) var(--spacing-s5);
+}
+
+.species-no-sources p {
+  margin: 0;
 }
 
 /* ==========================================================================
@@ -2421,13 +2564,76 @@ a.badge:hover {
   }
 }
 
-/* Merge picker results (species detail "Make Synonym Of...") */
+/* Species detail dialogs (delete, delete source data, Make synonym of):
+   the modal component's square panel. The merge picker's results are
+   rows on hairlines that tint paper-2 on hover. */
+.species-dialog {
+  position: relative;
+  width: min(34rem, 100%);
+}
+
+.species-dialog .oc-modal-body :where(p) {
+  margin: 0;
+}
+
+.species-dialog .oc-modal-body > * + * {
+  margin-top: var(--spacing-s3);
+}
+
+.species-dialog .oc-modal-body ul {
+  margin: var(--spacing-s1) 0 0;
+}
+
+.species-dialog-note {
+  font: 600 14px/1.4 var(--font-frame);
+  color: var(--color-ink-2);
+}
+
+.species-dialog-warn {
+  font: 700 14px/1.4 var(--font-frame);
+  color: var(--color-ink);
+}
+
+.merge-results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-rule);
+}
+
 .merge-target-option {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
+  display: block;
+  width: 100%;
+  padding: var(--spacing-s3) var(--spacing-s2);
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--color-rule);
+  cursor: pointer;
 }
 
 .merge-target-option:hover {
-  background-color: var(--color-forest-50);
-  border-color: var(--color-forest-300);
+  background-color: var(--color-paper-2);
+}
+
+.merge-target-name {
+  font: 600 17px/1.3 var(--font-serif);
+  color: var(--color-ink);
+}
+
+.merge-target-author {
+  margin-left: var(--spacing-s2);
+  font: 500 13px/1.4 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
+.merge-target-meta {
+  display: block;
+  margin-top: 2px;
+  font: 500 13px/1.4 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
+.merge-target-meta i {
+  font: italic 400 14px/1.4 var(--font-serif);
 }
