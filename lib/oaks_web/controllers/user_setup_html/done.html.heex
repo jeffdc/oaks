@@ -1,11 +1,11 @@
 <div class="settings-container" id="setup-done-page">
-  <h1 class="settings-title">Setup complete</h1>
+  <.header>Setup complete</.header>
 
-  <section class="card p-6">
+  <section class="settings-section">
     <p class="settings-description">You're logged in.</p>
     <.recovery_code_list codes={@codes} />
     <div class="settings-button-group">
-      <.link href={~p"/"} class="settings-btn settings-btn-primary">I've saved them</.link>
+      <.button href={~p"/"} variant="primary">I've saved them</.button>
     </div>
   </section>
 </div>

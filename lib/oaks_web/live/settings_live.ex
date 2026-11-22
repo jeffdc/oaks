@@ -24,47 +24,24 @@ defmodule OaksWeb.SettingsLive do
   def render(assigns) do
     ~H"""
     <div class="settings-container" id="settings-page">
-      <h1 class="settings-title">Settings</h1>
+      <.header>Settings</.header>
 
-      <section class="card p-6">
-        <h2 class="section-title" style="margin-bottom: 0.5rem;">Account</h2>
+      <section class="settings-section">
+        <.section_heading>Account</.section_heading>
 
         <p class="settings-description" id="settings-logged-in">
           Logged in as <strong>{@current_scope.user.email}</strong>
         </p>
 
         <div class="settings-button-group">
-          <.link
-            href={~p"/users/settings/password"}
-            class="settings-btn settings-btn-secondary"
-            style="text-decoration: none;"
-          >
-            Change password
-          </.link>
-          <.link
-            href={~p"/users/settings/recovery-codes"}
-            class="settings-btn settings-btn-secondary"
-            style="text-decoration: none;"
-          >
-            Recovery codes
-          </.link>
-          <.link
-            href={~p"/users/settings/api-tokens"}
-            class="settings-btn settings-btn-secondary"
-            style="text-decoration: none;"
-          >
-            Agent tokens
-          </.link>
+          <.button href={~p"/users/settings/password"}>Change password</.button>
+          <.button href={~p"/users/settings/recovery-codes"}>Recovery codes</.button>
+          <.button href={~p"/users/settings/api-tokens"}>Agent tokens</.button>
         </div>
+      </section>
 
-        <.link
-          href={~p"/users/log-out"}
-          method="delete"
-          class="settings-btn settings-btn-primary"
-          style="text-decoration: none;"
-        >
-          Log out
-        </.link>
+      <section class="settings-section settings-aside">
+        <.button href={~p"/users/log-out"} method="delete">Log out</.button>
       </section>
     </div>
     """

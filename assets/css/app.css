@@ -1546,184 +1546,255 @@ a.badge:hover {
 }
 
 /* ============================================
-   Settings and login pages (V1 port)
+   Settings and login pages, and the About, Privacy, Markdown guide and
+   Analytics pages (bridge). Each page has CoreComponents' title row and
+   section headings; this section holds what is particular to them. The
+   account pages are a narrow form column: Archivo for the apparatus, the
+   system field (CoreComponents' oc-input) and buttons. The reading pages
+   hold their text to a reading measure, and every count is a ruled
+   figure in Archivo lining tabular numerals.
    ============================================ */
+
+/* Code, tokens, keys and recovery codes: the one monospace face. */
+.settings-description code,
+.settings-check code,
+.settings-token-scope,
+.settings-copy-text,
+.settings-secret,
+.settings-codes,
+.page-md-syntax {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* ---------- Account pages (login, setup, settings) ---------- */
 .settings-container {
-  max-width: 40rem;
+  max-width: 34rem;
   margin: 0 auto;
 }
 
-.settings-title {
-  font-family: var(--font-serif);
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 2rem;
+/* A section of an account page: no box, its heading carries the rule. */
+.settings-section {
+  margin: 0 0 var(--spacing-s7);
+}
+
+.settings-section:last-child {
+  margin-bottom: 0;
+}
+
+/* The dev login sits apart, under a hairline. */
+.settings-aside {
+  padding-top: var(--spacing-s4);
+  border-top: 1px solid var(--color-rule);
 }
 
 .settings-description {
-  color: var(--color-text-secondary);
-  font-size: 0.9375rem;
-  margin: 0 0 1.5rem 0;
+  max-width: 60ch;
+  margin: 0 0 var(--spacing-s4);
+  font: 500 15px/1.5 var(--font-frame);
+  color: var(--color-ink-2);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-.settings-form-group {
-  margin-bottom: 1rem;
+.settings-description strong {
+  font-weight: 700;
+  color: var(--color-ink);
 }
 
-.settings-form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  margin-bottom: 0.5rem;
+.settings-description code {
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  padding: 1px 4px;
 }
 
-
-.settings-form-input {
-  width: 100%;
-  padding: 0.625rem 0.875rem;
-  font-size: 0.9375rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  background: white;
-  color: var(--color-text-primary);
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.settings-form-input:focus {
-  outline: none;
-  border-color: var(--color-forest-500);
-  box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
-}
-
-
-
-
+/* An error is a reversed ink plate, a confirmation an ink outline:
+   weight and reversal carry the state, never a colour. */
 .settings-message {
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-.settings-message-success {
-  background: #f0fdf4;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
+  margin: 0 0 var(--spacing-s4);
+  padding: var(--spacing-s3) var(--spacing-s4);
+  border: 1.5px solid var(--color-ink);
+  font: 600 14px/1.45 var(--font-frame);
 }
 
 .settings-message-error {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
+  background: var(--color-ink);
+  color: var(--color-paper);
 }
 
+.settings-message-success {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+/* Buttons wrap rather than run past the column on phones (bug 65c2). */
 .settings-button-group {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.settings-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.settings-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.settings-btn-primary {
-  background: var(--color-forest-600);
-  color: white;
-  border: none;
-}
-
-.settings-btn-primary:hover:not(:disabled) {
-  background: var(--color-forest-700);
-}
-
-.settings-btn-secondary {
-  background: white;
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-}
-
-.settings-btn-secondary:hover:not(:disabled) {
-  background: var(--color-background);
-}
-
-.settings-info-box {
-  background: var(--color-background);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.settings-copy-value {
-  display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-  width: 100%;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  background: var(--color-background);
-  color: var(--color-text-primary);
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  gap: var(--spacing-s2);
+  margin: var(--spacing-s5) 0 var(--spacing-s4);
 }
 
-.settings-copy-value:hover,
-.settings-copy-value:focus-visible {
-  border-color: var(--color-forest-500);
-  box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
-  outline: none;
+.settings-button-group:last-child {
+  margin-bottom: 0;
 }
 
-.settings-copy-text {
-  font-family: ui-monospace, monospace;
-  overflow-wrap: anywhere;
-}
-
-.settings-copy-status {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-}
-
-.settings-copy-value[data-copied] .settings-copy-status {
-  color: var(--color-forest-600);
+.settings-fieldset {
+  margin: 0 0 var(--spacing-s4);
+  padding: 0;
+  border: 0;
 }
 
 .settings-check {
   display: flex;
   align-items: baseline;
-  gap: 0.5rem;
-  font-size: 0.9375rem;
-  color: var(--color-text-primary);
-  margin-bottom: 0.375rem;
+  flex-wrap: wrap;
+  gap: 2px var(--spacing-s2);
+  margin: 0 0 var(--spacing-s2);
+  font: 500 15px/1.4 var(--font-frame);
+  color: var(--color-ink-2);
+  cursor: pointer;
 }
 
-.settings-token-list {
+/* A square checkbox: a 1.5px ink box, inked when checked with a drawn
+   paper tick (the native box is rounded). */
+.settings-check input {
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  align-self: center;
+  background: #fff;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.settings-check input:checked {
+  background: var(--color-ink);
+}
+
+.settings-check input:checked::before {
+  content: "";
+  width: 4px;
+  height: 8px;
+  margin-top: -2px;
+  border-right: 2px solid var(--color-paper);
+  border-bottom: 2px solid var(--color-paper);
+  transform: rotate(45deg);
+}
+
+.settings-check code {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+/* The setup page's authenticator QR code keeps its white quiet zone. */
+.settings-qr {
+  display: inline-block;
+  padding: var(--spacing-s2);
+  background: #fff;
+  border: 1px solid var(--color-rule);
+  line-height: 0;
+}
+
+.settings-qr svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.settings-secret {
+  margin: var(--spacing-s2) 0 var(--spacing-s5);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+
+/* Recovery codes: codes on hairlines, two columns where they fit. */
+.settings-codes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  column-gap: var(--spacing-s5);
+  margin: 0 0 var(--spacing-s4);
+  padding: 0;
   list-style: none;
+  border-top: 2px solid var(--color-rule-strong);
+}
+
+.settings-codes li {
+  padding: var(--spacing-s2) 0;
+  border-bottom: 1px solid var(--color-rule);
+  font-size: 16px;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--color-ink);
+}
+
+/* The new agent token: the field's white box, the whole of it a button
+   that copies the token (app.js reads data-copy). */
+.settings-copy-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-s2) var(--spacing-s4);
+  width: 100%;
+  margin: 0 0 var(--spacing-s4);
+  padding: var(--spacing-s3) var(--spacing-s4);
+  background: #fff;
+  border: 1.5px solid color-mix(in srgb, var(--color-ink) 40%, transparent);
+  color: var(--color-ink);
+  text-align: left;
+  cursor: copy;
+}
+
+.settings-copy-value:hover,
+.settings-copy-value[data-copied] {
+  border-color: var(--color-ink);
+}
+
+.settings-copy-text {
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.settings-copy-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 13px/1.3 var(--font-frame);
+  color: var(--color-ink-2);
+  white-space: nowrap;
+}
+
+/* Copied: ink, with a drawn tick. */
+.settings-copy-value[data-copied] .settings-copy-status {
+  color: var(--color-ink);
+}
+
+.settings-copy-value[data-copied] .settings-copy-status::before {
+  content: "";
+  width: 5px;
+  height: 9px;
+  margin-top: -3px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+/* Agent tokens: rows on hairlines. */
+.settings-token-list {
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 
 .settings-token {
@@ -1731,47 +1802,263 @@ a.badge:hover {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0;
-  border-top: 1px solid var(--color-border);
+  gap: var(--spacing-s3);
+  padding: var(--spacing-s3) 0;
+  border-bottom: 1px solid var(--color-rule);
+  font: 500 15px/1.4 var(--font-frame);
+  color: var(--color-ink);
 }
 
-.settings-token .settings-btn {
-  padding: 0.375rem 0.875rem;
-  font-size: 0.875rem;
+.settings-token strong {
+  font-weight: 700;
 }
 
+/* A scope is an outlined stamp, like DESIGN.md's status tag. */
 .settings-token-scope {
   display: inline-block;
-  margin-left: 0.375rem;
-  padding: 0 0.375rem;
-  border-radius: 0.25rem;
-  background: var(--color-background);
-  font-family: ui-monospace, monospace;
-  font-size: 0.8125rem;
-  color: var(--color-text-secondary);
+  margin-left: var(--spacing-s2);
+  padding: 2px 6px;
+  border: 1.5px solid var(--color-ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-ink);
 }
 
 .settings-token-meta {
-  margin: 0.25rem 0 0;
-  font-size: 0.8125rem;
-  color: var(--color-text-secondary);
+  margin: var(--spacing-s1) 0 0;
+  font: 500 13px/1.4 var(--font-frame);
+  color: var(--color-ink-3);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
+.settings-token-meta strong {
+  font-weight: 700;
+  color: var(--color-ink);
+}
 
+/* ---------- Reading pages (About, Privacy, Markdown guide) ---------- */
+.page-read {
+  max-width: 44rem;
+  margin: 0 auto;
+}
 
+.page-read > section,
+.page-wide > section {
+  margin: 0 0 var(--spacing-s7);
+}
 
+/* The reading text under each heading: b4f7's prose at a measure that
+   keeps lines near 66 characters. */
+.page-read .prose-content {
+  max-width: 66ch;
+}
 
+.page-lead {
+  font-size: 18px;
+  line-height: 1.55;
+}
 
+/* Ruled figures: counts in Archivo lining tabular numerals, side by side
+   on a hairline, each labelled above. */
+.page-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-s2) var(--spacing-s7);
+  margin: 0;
+  padding: var(--spacing-s2) 0 var(--spacing-s3);
+  border-bottom: 1px solid var(--color-rule);
+}
 
+.page-figures > div {
+  min-width: 5rem;
+}
 
+.page-figures dt {
+  font: 600 13px/1.3 var(--font-frame);
+  color: var(--color-ink-2);
+}
 
+.page-figures dd {
+  margin: var(--spacing-s1) 0 0;
+  font: 700 28px/1.1 var(--font-frame);
+  color: var(--color-ink);
+  font-variant-numeric: lining-nums tabular-nums;
+}
 
+/* The page's own foot (versions, last updated), above the site footer. */
+.page-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-s1) var(--spacing-s2);
+  margin-top: var(--spacing-s8);
+  padding-top: var(--spacing-s4);
+  border-top: 1px solid var(--color-rule);
+  font: 500 13px/1.4 var(--font-frame);
+  color: var(--color-ink-3);
+  font-variant-numeric: lining-nums tabular-nums;
+}
 
+/* Markdown guide: the syntax beside what it renders, each labelled. */
+.page-md-example {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-s4) var(--spacing-s5);
+}
 
+.page-md-label {
+  margin: 0 0 var(--spacing-s3);
+  padding-bottom: var(--spacing-s1);
+  border-bottom: 1px solid var(--color-rule);
+  font: 800 12px/1.2 var(--font-frame);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+}
 
+.page-md-syntax {
+  margin: 0;
+  padding: var(--spacing-s3) var(--spacing-s4);
+  background: var(--color-paper-2);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 
+.page-md-result {
+  font-size: 16px;
+}
 
+.prose-content + .page-md-example {
+  margin-top: var(--spacing-s4);
+}
+
+@media (max-width: 640px) {
+  .page-md-example { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Analytics ---------- */
+.page-wide {
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+/* The period picker: the current period takes the ochre underline. */
+.analytics-ranges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-s1) var(--spacing-s4);
+  margin: 0 0 var(--spacing-s6);
+  font: 600 14px/1.3 var(--font-frame);
+}
+
+.analytics-date {
+  white-space: nowrap;
+}
+
+.analytics-ranges-label {
+  font-weight: 500;
+  color: var(--color-ink-3);
+}
+
+.analytics-range {
+  padding: var(--spacing-s1) 0 3px;
+  font: inherit;
+  color: var(--color-ink);
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+}
+
+.analytics-range:hover {
+  border-bottom-color: color-mix(in srgb, var(--color-ink) 40%, transparent);
+}
+
+.analytics-range[aria-pressed="true"] {
+  font-weight: 800;
+  border-bottom-color: var(--color-ochre);
+}
+
+/* Daily page views: an ink line on a hairline base, its dates below. */
+.analytics-chart svg {
+  display: block;
+  width: 100%;
+  height: 64px;
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-rule-strong);
+}
+
+.analytics-chart-dates {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-s4);
+  margin-top: var(--spacing-s1);
+  font: 500 13px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.analytics-table th.analytics-num,
+.analytics-table td.analytics-num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.analytics-table th:last-child,
+.analytics-table td:last-child {
+  padding-right: 0;
+}
+
+.analytics-path {
+  overflow-wrap: anywhere;
+}
+
+/* Errors fold away under their section label, with a drawn chevron. */
+.analytics-errors > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.analytics-errors > summary::-webkit-details-marker {
+  display: none;
+}
+
+.analytics-errors > summary > h2 {
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-s3);
+}
+
+.analytics-errors > summary > h2::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-top: -4px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.analytics-errors[open] > summary > h2::after {
+  margin-top: 4px;
+  transform: rotate(-135deg);
+}
+
+.analytics-errors h3 {
+  margin: var(--spacing-s5) 0 var(--spacing-s2);
+  font: 800 13px/1.2 var(--font-frame);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+}
 
 /* ============================================
    Search Results (item 58ef)
