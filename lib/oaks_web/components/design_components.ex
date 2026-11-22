@@ -717,6 +717,7 @@ defmodule OaksWeb.DesignComponents do
   """
   attr :id, :string, required: true
   attr :heading, :string, required: true
+  attr :rest, :global
   slot :name, required: true
   slot :author
   slot :band
@@ -725,7 +726,7 @@ defmodule OaksWeb.DesignComponents do
 
   def specimen(assigns) do
     ~H"""
-    <section id={@id} class="oc-specimen" aria-labelledby={"#{@id}-heading"}>
+    <section id={@id} class="oc-specimen" aria-labelledby={"#{@id}-heading"} {@rest}>
       <.chapter_heading id={"#{@id}-heading"}>{@heading}</.chapter_heading>
       <p class="oc-specimen-name">{render_slot(@name)}</p>
       <p :if={@author != []} class="oc-specimen-author">{render_slot(@author)}</p>

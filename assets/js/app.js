@@ -101,9 +101,22 @@ const Hooks = {
 }
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
+// Connect params carried over from the static render: an element with
+// data-connect-key and data-connect-value hands its value to the live
+// mount (get_connect_params/1), so a choice the server made on the first
+// render, such as the home page's oak at random, survives the connection.
+const connectParams = () => {
+  const params = {_csrf_token: csrfToken}
+  document.querySelectorAll("[data-connect-key]").forEach(el => {
+    params[el.dataset.connectKey] = el.dataset.connectValue
+  })
+  return params
+}
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken},
+  params: connectParams,
   hooks: Hooks,
 })
 
