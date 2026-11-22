@@ -128,6 +128,10 @@ defmodule OaksWeb.DesignComponents do
 
   @rank_words ~w(subsp. ssp. var. subvar. f. nothosubsp. nothovar. subg. sect. subsect. ser.)
 
+  # Lower-case words that start an authority rather than continue the name:
+  # a misapplied name ("texana auctores"), a garden name ("repanda hort").
+  @authority_words ~w(auct auctt auctores auctorum hort sensu)
+
   @doc """
   Renders a scientific name, the one way names are set anywhere on the
   site (DESIGN.md, the Botanical Italic Rule). Pages never set a name, or
@@ -143,10 +147,13 @@ defmodule OaksWeb.DesignComponents do
   or without its sign (`"× raineri"`, `"×bebbiana"`), a formula
   (`"agrifolia × parvula"`), an infraspecific name (`"agrifolia
   oxyadenia"`, `"alba var. latiloba"`) or a full name with its genus
-  (`"Quercus alba"`, `"Q. alba"`). A stored name that carries its
-  authority (`"candida Steud."`) is split at the first word that isn't a
-  lower-case epithet, a rank word or the sign, and the rest set as the
-  author. The genus is added unless the name carries one or `genus={nil}`.
+  (`"Quercus alba"`, `"Q. alba"`, or another genus, as a synonym may be:
+  `"Cyclobalanopsis glauca"`). A stored name that carries its authority
+  (`"candida Steud."`, `"texana auctores"`) is split at the first word that
+  isn't a lower-case epithet, a rank word or the sign (or that is
+  `auctores`, `hort` and the like), and the rest set as the author. The
+  genus is added unless the name carries one or `genus={nil}`; a genus
+  other than Quercus is always set in full, never abbreviated.
 
   For a name above species (a subgenus, section or subsection), pass
   `rank` and the bare name: `<.sci_name name="Lobatae" rank="sect." />`
@@ -184,11 +191,13 @@ defmodule OaksWeb.DesignComponents do
       above them (a species' parents, hybrids, relatives and varieties, a
       source's species, the references on the merge page); in comparison
       column heads; for the current species in the taxonomy band; and for
-      a complex, which is named for its species (Q. coccinea).
+      a complex, which is named for its species (Q. coccinea); and for a
+      species' synonyms (`Q. candida Steud.`, a synonym in another genus
+      in full: `Cyclobalanopsis glauca (Thunb.) Oerst.`), on the species
+      page and the merge page's synonyms to add.
     * `genus={nil}` (none): names above species (subgenus, section,
       subsection); a hybrid's other parent after "with"; a stored value
-      shown as entered (the merge page's field values); synonyms, which
-      are stored as epithets.
+      shown as entered (the merge page's field values).
 
   A name in a link underlines its name words, not its author, on hover.
 
@@ -248,8 +257,8 @@ defmodule OaksWeb.DesignComponents do
 
   # The name as one run of escaped HTML, so no template whitespace falls
   # between its parts: genus, rank words, signs and epithets joined by
-  # spaces (no-break after a rank word and on both sides of the hybrid
-  # sign, so a formula never splits and no line starts or ends on one),
+  # spaces (no-break after a rank word, after Q. and on both sides of the
+  # hybrid sign, so a formula never splits and no line starts or ends on one),
   # wrapped in .oc-sci-n, then the author.
   defp sci_name_parts(assigns) do
     {name, stored_author} = split_author(assigns.name)
@@ -295,7 +304,8 @@ defmodule OaksWeb.DesignComponents do
   end
 
   defp name_word?(w) do
-    w in ["×", "x"] or w in @rank_words or Regex.match?(~r/^×?\p{Ll}[\p{Ll}\d-]*$/u, w)
+    w in ["×", "x"] or w in @rank_words or
+      (w not in @authority_words and Regex.match?(~r/^×?\p{Ll}[\p{Ll}\d-]*$/u, w))
   end
 
   # {genus or nil, the words after it}.
@@ -318,15 +328,20 @@ defmodule OaksWeb.DesignComponents do
     end
   end
 
+  # {the genus the name states or nil, the rest}: Quercus or Q., or any
+  # other capitalised first word (a synonym in Cyclobalanopsis).
   defp stated_genus(name) do
-    case Regex.run(~r/^(Quercus|Q\.)(?:\s+(.*))?$/u, name) do
-      [_, _genus | rest] -> {"Quercus", Enum.join(rest)}
+    case Regex.run(~r/^(Quercus|Q\.|\p{Lu}\p{Ll}+)(?:\s+(.*))?$/u, name) do
+      [_, genus | rest] when genus in ["Quercus", "Q."] -> {"Quercus", Enum.join(rest)}
+      [_, genus | rest] -> {genus, Enum.join(rest)}
       nil -> {nil, name}
     end
   end
 
+  # Only Quercus, the site's own genus, is abbreviated: Q. reads at once,
+  # where C. for Cyclobalanopsis would not.
   defp genus_label(nil, _abbreviate), do: nil
-  defp genus_label(genus, true), do: String.first(genus) <> "."
+  defp genus_label("Quercus", true), do: "Q."
   defp genus_label(genus, _abbreviate), do: genus
 
   defp rest_words(rest, hybrid), do: rest |> OaksWeb.SpeciesName.label(hybrid) |> words()
@@ -351,6 +366,8 @@ defmodule OaksWeb.DesignComponents do
         cond do
           i == 0 -> ""
           elem(Enum.at(tokens, i - 1), 0) in [:roman, :sign] -> "\u00A0"
+          # An abbreviated genus never ends a line apart from its epithet.
+          Enum.at(tokens, i - 1) == {:genus, "Q."} -> "\u00A0"
           kind == :sign -> "\u00A0"
           true -> " "
         end

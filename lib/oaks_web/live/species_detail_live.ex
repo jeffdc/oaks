@@ -480,7 +480,7 @@ defmodule OaksWeb.SpeciesDetailLive do
             {{name, author}, i} <- @synonyms |> Enum.map(&name_and_authority/1) |> Enum.with_index(1)
           }
           class="species-synonym"
-        ><.sci_name name={name} author={author} genus={nil} />{if i < length(@synonyms),
+        ><.sci_name name={name} author={author} abbreviate />{if i < length(@synonyms),
           do: ", "}</span>
       </p>
     </section>
@@ -933,16 +933,9 @@ defmodule OaksWeb.SpeciesDetailLive do
     (custom ++ auto) |> Enum.sort_by(&String.downcase(&1.name))
   end
 
-  # A synonym or variety is {name, authority}. Stored as a string, the authority is
-  # whatever follows the first word that starts with a capital or "("
-  # (epithets and rank words are lower case): "shumardii var. acerifolia
-  # E.J.Palmer 1927" is {"shumardii var. acerifolia", "E.J.Palmer 1927"}.
-  defp name_and_authority(syn) when is_binary(syn) do
-    case Regex.run(~r/^(.*?)\s+([[:upper:](].*)$/u, String.trim(syn)) do
-      [_, name, author] -> {name, author}
-      _ -> {syn, nil}
-    end
-  end
+  # A synonym or variety is {name, authority}. Stored as a string, it keeps
+  # its authority in the name, which sci_name splits off itself.
+  defp name_and_authority(syn) when is_binary(syn), do: {syn, nil}
 
   defp name_and_authority(%{"name" => name, "author" => author})
        when is_binary(author) and author != "",
