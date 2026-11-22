@@ -26,4 +26,4 @@ sci-name	lib/oaks_web/live/species_merge_live.ex	6
 sci-name	lib/oaks_web/live/species_source_form_live.ex	1
 sci-name	lib/oaks_web/live/taxon_form_live.ex	2
 sci-name	lib/oaks_web/live/taxonomy_live.ex	13
-app-css	assets/css/app.css	3501
+app-css	assets/css/app.css	3493

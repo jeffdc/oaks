@@ -589,7 +589,7 @@ defmodule OaksWeb.CoreComponents do
   centred. Their title row goes in the `:head` slot, which runs the full
   frame as the masthead does, so every page's title rule spans the same
   width and only the content under it takes the measure. (The home page
-  alone centres its title page, in its bleed.)
+  alone is centred, as a title page and contents.)
 
   The `:bleed` slot runs the full width of the window, edge to edge,
   above the framed content: a title page, a band. Its content sets its
