@@ -25,9 +25,12 @@ defmodule OaksWeb.HomeLive do
   def mount(_params, _session, socket) do
     # Everything loads in both renders, so the static page is the whole page
     # (for readers without JavaScript too) and nothing fills in late. The
-    # first oak is picked by the minute, so both renders show the same one.
+    # static render picks the oak and hands it to the live mount as a
+    # connect param (data-connect-key on the specimen), so both show the
+    # same one.
     sources = list_sources()
     oaks = Enum.reject(Species.list_all_species(), & &1.is_hybrid)
+    picked = connected?(socket) && get_connect_params(socket)["featured"]
 
     {:ok,
      assign(socket,
@@ -38,7 +41,7 @@ defmodule OaksWeb.HomeLive do
        sources: sources,
        oaks: oaks
      )
-     |> feature(pick_of_the_minute(oaks))}
+     |> feature(first_oak(oaks, picked))}
   end
 
   @impl true
@@ -66,12 +69,14 @@ defmodule OaksWeb.HomeLive do
 
   defp primary?(source), do: source.id == @primary_source_id
 
-  defp pick_of_the_minute([]), do: nil
+  # The oak the static render picked, or a random one.
+  defp first_oak([], _picked), do: nil
 
-  defp pick_of_the_minute(oaks) do
-    minute = div(System.os_time(:second), 60)
-    Enum.at(oaks, :erlang.phash2(minute, length(oaks)))
+  defp first_oak(oaks, picked) when is_binary(picked) do
+    Enum.find(oaks, &(&1.scientific_name == picked)) || Enum.random(oaks)
   end
+
+  defp first_oak(oaks, _picked), do: Enum.random(oaks)
 
   # Show another: a different non-hybrid oak when there is one.
   defp feature_random(socket) do
@@ -174,7 +179,13 @@ defmodule OaksWeb.HomeLive do
         </:entry>
       </.contents>
 
-      <.specimen :if={@featured} id="oak-at-random" heading="An oak at random">
+      <.specimen
+        :if={@featured}
+        id="oak-at-random"
+        heading="An oak at random"
+        data-connect-key="featured"
+        data-connect-value={@featured.scientific_name}
+      >
         <:name><.sci_name name={@featured.scientific_name} /></:name>
         <:author :if={@featured.author}>{@featured.author}</:author>
         <:band :if={ranks(@featured) != []}>

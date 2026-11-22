@@ -109,6 +109,24 @@ defmodule OaksWeb.HomeLiveTest do
     refute shown.() == before
   end
 
+  test "the live mount keeps the oak the static render picked", %{conn: conn} do
+    species_fixture()
+    picked = species_fixture()
+    species_fixture()
+
+    {:ok, view, _html} =
+      conn
+      |> put_connect_params(%{"featured" => picked.scientific_name})
+      |> live(~p"/")
+
+    assert has_element?(view, ~s(#oak-at-random a[href="/species/#{picked.scientific_name}"]))
+
+    assert has_element?(
+             view,
+             ~s(#oak-at-random[data-connect-key="featured"][data-connect-value="#{picked.scientific_name}"])
+           )
+  end
+
   test "lists the sources with the primary one first and not iNaturalist", %{conn: conn} do
     source = source_fixture(name: "Aaa first by name")
 
