@@ -109,6 +109,41 @@
   --color-acorn: var(--color-ink-2);
   --color-bark: var(--color-ink-3);
 
+  /* Tailwind's warm and cool greys, which V1 templates use for borders,
+     icon tints and quiet grounds, take the same roles: 50 paper, 100
+     paper-2, 200 rule, 300 ink at 40%, 400-500 ink-3, 600-700 ink-2,
+     800-900 ink. No system file uses them. */
+  --color-stone-50: var(--color-paper);
+  --color-stone-100: var(--color-paper-2);
+  --color-stone-200: var(--color-rule);
+  --color-stone-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  --color-stone-400: var(--color-ink-3);
+  --color-stone-500: var(--color-ink-3);
+  --color-stone-600: var(--color-ink-2);
+  --color-stone-700: var(--color-ink-2);
+  --color-stone-800: var(--color-ink);
+  --color-stone-900: var(--color-ink);
+  --color-gray-50: var(--color-paper);
+  --color-gray-100: var(--color-paper-2);
+  --color-gray-200: var(--color-rule);
+  --color-gray-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  --color-gray-400: var(--color-ink-3);
+  --color-gray-500: var(--color-ink-3);
+  --color-gray-600: var(--color-ink-2);
+  --color-gray-700: var(--color-ink-2);
+  --color-gray-800: var(--color-ink);
+  --color-gray-900: var(--color-ink);
+  --color-zinc-50: var(--color-paper);
+  --color-zinc-100: var(--color-paper-2);
+  --color-zinc-200: var(--color-rule);
+  --color-zinc-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  --color-zinc-400: var(--color-ink-3);
+  --color-zinc-500: var(--color-ink-3);
+  --color-zinc-600: var(--color-ink-2);
+  --color-zinc-700: var(--color-ink-2);
+  --color-zinc-800: var(--color-ink);
+  --color-zinc-900: var(--color-ink);
+
   /* Square and flat (DESIGN.md: corners 0, no shadows). Tailwind's radius
      and shadow scales go to nothing, so the V1 templates' rounded-lg,
      rounded-xl, shadow-sm ... draw square and flat until their pages are
@@ -181,6 +216,31 @@
 
 /* Base styles (body, links, focus, selection, reduced motion) live in
    system/base.css. */
+
+/* V1 text links coloured forest-600 or -700 (back links, names) would be
+   ink under the token map above, which keeps those shades ink for the
+   filled buttons that share them. Links are pencil (DESIGN.md), so a link
+   with one of those text colours and no fill goes back to pencil. The
+   !important is for the inline style="color: ..." forms. */
+a:where([class*="text-forest-6"], [class*="text-forest-7"], [style*="color: var(--color-forest-6"], [style*="color: var(--color-forest-7"]):not([style*="background"], [class*="bg-"]) {
+  color: var(--color-pencil) !important;
+}
+
+/* daisyUI's fields (the species list's search and filters) are the
+   system's input field: white, a 1.5px border at 40% ink, ink on focus. */
+.input,
+.select,
+.textarea {
+  background-color: #fff;
+  border: 1.5px solid color-mix(in srgb, var(--color-ink) 40%, transparent);
+  font-family: var(--font-frame);
+}
+
+.input:focus-within,
+.select:focus,
+.textarea:focus {
+  border-color: var(--color-ink);
+}
 
 /* ============================================
    Prose Content (rendered markdown: articles, taxon write-ups, source
@@ -383,8 +443,10 @@
 }
 
 /* :where keeps this at class weight, so page sections can still set their
-   own padding; it beats the layered p-6 utilities. */
-.card:where(:not(.fixed > .card, .card-interactive)) {
+   own padding; it beats the layered p-6 utilities. Rows (card-interactive
+   and plain cards listed with them) keep their padding for the hover
+   ground. */
+.card:where(:not(.fixed > .card, .card-interactive, .card-interactive ~ .card, .card:has(~ .card-interactive))) {
   padding-left: 0;
   padding-right: 0;
 }
@@ -416,6 +478,13 @@
 
 .card-forest.card-interactive:hover {
   background-color: var(--color-paper-2);
+}
+
+/* A plain card in a list of rows (home's disabled Identification) stands
+   on the same hairline, so the list ends on a rule. */
+.card-interactive ~ .card:where(:not(.card-interactive)),
+.card:where(:not(.card-interactive)):has(~ .card-interactive) {
+  border-bottom: 1px solid var(--color-rule);
 }
 
 /* Taxonomy sub-taxon cards (matches V1 .sub-taxon-card) */
@@ -1134,7 +1203,7 @@
   align-items: center;
   gap: var(--spacing-s1);
   height: auto;
-  padding: 3px 6px;
+  padding: 4px 7px;
   font-family: var(--font-frame);
   font-size: 13px;
   font-weight: 700;
@@ -1244,6 +1313,30 @@ a.badge:hover {
 .section-title-sm {
   font-size: 15px;
   color: var(--color-ink);
+}
+
+/* A title sharing a row with its actions (home's Featured Species, the
+   taxon pages' About this ...): the row stands on the rule, so it runs
+   the full width under the label and the controls. */
+.justify-between:has(> .section-title),
+[style*="space-between"]:has(> .section-title) {
+  align-items: flex-end;
+  padding-bottom: var(--spacing-s2);
+  border-bottom: 2px solid var(--color-rule-strong);
+}
+
+.justify-between > .section-title,
+[style*="space-between"] > .section-title {
+  margin: 0;
+  padding: 0;
+  border-bottom: 0;
+}
+
+/* DESIGN.md's section label carries no icon; V1's heroicon glyphs in
+   titles are hidden, as the breadcrumb's glyph separators are. */
+.section-title > [class*="hero-"],
+.section-title > svg {
+  display: none;
 }
 
 /* ============================================
