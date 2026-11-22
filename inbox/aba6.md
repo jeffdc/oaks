@@ -6,6 +6,11 @@ item: e237
 source: reports/e237-1.md
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-aa59fd67ee390c2c2
 created: "2026-11-22T00:09:30Z"
+settled:
+  action: accept
+  by: Jeff
+  human: true
+  at: "2026-11-22T00:24:28Z"
 decisions:
   - 449b
   - 6ad1
