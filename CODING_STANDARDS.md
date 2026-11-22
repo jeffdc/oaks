@@ -392,6 +392,34 @@ let liveSocket = new LiveSocket("/live", Socket, {
 
 ---
 
+## Components
+
+Every page is built from the shared library: `OaksWeb.CoreComponents`, `OaksWeb.DesignComponents` and the layout. Each component is shown in the dev-only gallery at `/dev/components`. A page never builds its own version of something the library covers: no local helpers, no page CSS that restyles it, no copies. (Jeff, 2026-11-21, decision 8f6b: five page agents working in parallel each built their own widths, name helpers, buttons and dialogs, and the site came out inconsistent.)
+
+| Need | Use |
+|------|-----|
+| A page and its width | `<.page width="frame\|read\|form">` *(to build, item d5b1)* |
+| Title row with actions and meta | `<.header>` with `:actions` and `:meta` slots *(to extend, item 626c)* |
+| Taxonomy breadcrumb | the layout's band slot, fed by `<.taxonomy_band>` *(to build, item 0a43)* |
+| A scientific name anywhere | `<.sci_name>` *(to build, item a6c7)* |
+| Buttons | `<.button>`: `primary` (one per page), `ghost`, `danger` *(to add, item c13c)*; size `compact` |
+| Dialogs and confirmations | `<.modal>` with title, body and actions slots *(to consolidate, item c13c)* |
+| Status stamps | `<.status_tag>`; IUCN status through its IUCN variant *(in progress, item 12b4)* |
+| Section labels | `<.section_heading>` |
+| Tables and ruled lists | `<.table>`, `<.list>` |
+| Form fields | `<.input>` |
+| Back links | `<.back>` |
+| Not found | `<.not_found>`, from a real 404 *(to build, item 8f1d)* |
+| Sources and standing marks | `<.source_mark>`, `<.standing_mark>` |
+
+**When the library doesn't have what you need:** stop. Don't build it into the page. Either add it to the library as its own change, shown in `/dev/components` and reviewed by Jeff before any page uses it, or file `mull ask` and work on something else. A component that almost fits is extended in the library, never overridden on the page.
+
+**Enforced:** `scripts/check-ui` runs in `make done-checks` and fails on page-width wrappers, inline styles, daisyUI cards and badges, hand-rolled scientific names, and any growth in `app.css`. Exceptions go in its allowlist, with Jeff's approval. *(The check is item b5b2.)*
+
+Keep this table current: a change that adds or replaces a component updates its row in the same commit.
+
+---
+
 ## Error Handling
 
 ### Pattern Match Results

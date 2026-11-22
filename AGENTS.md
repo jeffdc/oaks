@@ -2,6 +2,8 @@
 
 Project rules (investigation before action, SQLite, Nix toolchain, git workflow) are in [CLAUDE.md](CLAUDE.md) and [CODING_STANDARDS.md](CODING_STANDARDS.md).
 
+**UI work uses the shared component library, always.** Before touching any page, read the Components section of [CODING_STANDARDS.md](CODING_STANDARDS.md): it says which component to use for each need. Never build a page-local version of a name, width, title row, button, dialog, stamp or anything else the library covers. If the component you need is missing or doesn't fit, stop: add it to the library as its own change for Jeff's review in `/dev/components`, or file `mull ask`. An agent that briefs other agents on UI work names the components they must use.
+
 ## This project in mull
 
 - **Plans:**
