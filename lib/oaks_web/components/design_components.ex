@@ -948,8 +948,8 @@ defmodule OaksWeb.DesignComponents do
   end
 
   @doc """
-  Renders an error notice: the title row with the status stamped at its
-  right ("Error 404"), a sentence of what happened, an optional search
+  Renders an error notice: the title row with the status stamped on the
+  title's line ("Error 404"), a sentence of what happened, an optional search
   form, then the ways on as buttons, Go back last. Ochre goes on the one
   next step, so give one action (or the search's button)
   `variant="primary"`.
@@ -977,9 +977,9 @@ defmodule OaksWeb.DesignComponents do
     <section id={@id} class="oc-error-notice">
       <.header>
         {@title}
-        <:actions>
+        <:meta>
           <.status_tag title={"HTTP status #{@status}"}>Error {@status}</.status_tag>
-        </:actions>
+        </:meta>
       </.header>
 
       <p class="max-w-[68ch] text-pretty">{render_slot(@inner_block)}</p>

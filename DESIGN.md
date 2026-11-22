@@ -248,11 +248,11 @@ Plain, printed, square.
 - **Focus:** 3px pencil-blue outline, 2px offset, on every interactive element.
 
 ### Title Row
-Every page's title is one component, `header`, on one rule (item 626c): the title in the display serif (clamp(34px, 4vw, 50px), 600, balanced) standing on a 2px ink rule, 16px of space above the rule and 32px below it.
-- **Text column:** grows to fill the row and keeps at least 20rem. In order: the title; the meta line; the subtitle.
-- **Meta line:** straight under the title, 12px below it, Archivo 600 14px ink-2 with lining tabular figures, items 16px apart with no separators, wrapping as one line. It holds what kind of thing the page is and its short facts, in this order: the kind word (Species, Hybrid, Subgenus) or the record a form edits (its name at 14px), counts (497 species), a byline and date, stamps (the status tag, the IUCN status, a dashed Draft), then links such as an article's tags. A stamp never floats beside the title.
-- **Subtitle:** a sentence describing the page, Archivo 600 16px ink-2 at most 70ch, under the meta line.
-- **Actions:** at the right end of the row, on the title's first baseline, 8px apart: compact buttons for a record's own actions (Edit, Make synonym of…, Delete), a regular button for a list's create action. When the text column can't keep 20rem beside them, they drop below the subtitle, at the left edge, 16px above the rule. No dividers between them.
+Every page's title is one component, `header`, on one rule (item 7838): the title in the display serif (clamp(34px, 4vw, 50px), 600, balanced) standing on a 2px ink rule, 16px of space above the rule and 32px below it. The row uses the page's width; editing never shapes it.
+- **Title line:** the title, then the meta on the same line, 24px after the title (and a species' authority), on its baseline. The meta wraps under the title, 12px below it, only when the line has no room for it (long titles, phones).
+- **Meta:** Archivo 600 14px ink-2 with lining tabular figures, items 16px apart with no separators. It holds what kind of thing the page is and its short facts, in this order: the kind word (Species, Hybrid, Subgenus) or the record a form edits (its name at 14px), counts (497 species), a byline and date, stamps (the status tag, the IUCN status, a dashed Draft), then links such as an article's tags.
+- **Subtitle:** a sentence describing the page, Archivo 600 16px ink-2 at most 70ch, under the title line.
+- **Edit menu:** an editor's actions for the page (Edit, Make synonym of…, Delete, Create taxon, New species…) sit in one small disclosure, `edit_menu`: a compact "Edit" button with a drawn chevron at the right end of the row, on the title's first baseline, reversed to paper on ink while open. Its list opens under it on its right edge, on paper in a 1.5px ink border, Archivo 600 14px items on paper-2 when hovered; Esc, a click outside or choosing an item closes it, and a destructive item opens its confirmation dialog. It never wraps: the title and meta take the rest of the row. Logged out there is no menu and no space kept for one.
 - **Back link:** above the row, 16px over the title, in the page's head with it.
 
 ### Status Tag

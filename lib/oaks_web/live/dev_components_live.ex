@@ -83,10 +83,6 @@ defmodule OaksWeb.DevComponentsLive do
               The DESIGN.md system as Phoenix components, with real content from the taxon page
               prototype. Development only.
             </:subtitle>
-            <:actions>
-              <.button phx-click={show_modal("gallery-modal")}>Open a dialog</.button>
-              <.compare_button navigate={~p"/species/shumardii/compare"} />
-            </:actions>
           </.header>
         </:head>
 
@@ -123,6 +119,7 @@ defmodule OaksWeb.DevComponentsLive do
               <.button>Set aside</.button>
               <.button disabled>Mark written</.button>
               <.compare_button navigate={~p"/species/coccinea"} />
+              <.button phx-click={show_modal("gallery-modal")}>Open a dialog</.button>
             </div>
             <.section_heading id="list" level="h3" class="mt-s7">List</.section_heading>
             <.list>
@@ -367,14 +364,16 @@ defmodule OaksWeb.DevComponentsLive do
 
         <section class="mt-s8">
           <.section_heading id="title-row">
-            Title row<:note>title, meta, subtitle and actions on the 2px rule</:note>
+            Title row<:note>title and meta on one line, the edit menu at the right</:note>
           </.section_heading>
           <p class="max-w-[68ch]">
-            Every page's title is one <code>header</code>. The text column grows and keeps 20rem:
-            the title, then the meta line (a kind word, counts, a byline, stamps), then a subtitle.
-            The actions stand at the right on the title's first baseline; when the column can't
-            keep 20rem beside them, they drop below it, at the left edge, above the rule. The last
-            two rows here are the same rows at a phone's width.
+            Every page's title is one <code>header</code>. The meta (a kind word, counts, a byline,
+            stamps) follows the title on its line and wraps under it only when the line has no
+            room; a subtitle goes under the line. An editor's actions are one small
+            <code>edit_menu</code>
+            at the right on the title's first baseline, which never wraps; logged out there is none
+            and the title takes the whole row. The first row is an editor's, the second a visitor's;
+            the last two are the same rows at a phone's width.
           </p>
           <div class="mt-s5 grid gap-s7">
             <.header id="gallery-title-record">
@@ -382,28 +381,38 @@ defmodule OaksWeb.DevComponentsLive do
               <:meta>Species</:meta>
               <:meta><.iucn_status code="LC" /></:meta>
               <:actions>
-                <.button size="compact">Edit</.button>
-                <.button size="compact">Make synonym of…</.button>
-                <.button size="compact">Delete</.button>
+                <.edit_menu id="gallery-edit-menu">
+                  <:item click="noop">Edit species</:item>
+                  <:item click="noop">Make synonym of…</:item>
+                  <:item click="noop">Delete species</:item>
+                </.edit_menu>
               </:actions>
             </.header>
+            <.header id="gallery-title-visitor">
+              <.sci_name name="Quercus shumardii" author="Buckley" size="display" />
+              <:meta>Species</:meta>
+              <:meta><.iucn_status code="LC" /></:meta>
+            </.header>
             <.header id="gallery-title-list">
-              Data Sources
-              <:subtitle>
-                The Oak Compendium draws from multiple sources to provide comprehensive
-                information about oak species.
-              </:subtitle>
-              <:actions><.button>Create Source</.button></:actions>
+              Species List
+              <:meta>640 species</:meta>
+              <:meta>94 hybrids</:meta>
+              <:meta><strong>734 total</strong></:meta>
+              <:actions>
+                <.edit_menu id="gallery-edit-menu-list">
+                  <:item click="noop">New species</:item>
+                </.edit_menu>
+              </:actions>
             </.header>
             <.header id="gallery-title-work">
               <.work_title title="Notes on North American Trees. I. Quercus" />
               <:meta>
                 <.status_tag>Article</.status_tag>
               </:meta>
-              <:actions>
-                <.button size="compact">Edit</.button>
-                <.button size="compact">Delete</.button>
-              </:actions>
+              <:subtitle>
+                The Oak Compendium draws from multiple sources to provide comprehensive
+                information about oak species.
+              </:subtitle>
             </.header>
             <div class="grid gap-s7 sm:grid-cols-2">
               <div class="max-w-[390px] border border-dashed border-rule p-s4">
@@ -412,19 +421,19 @@ defmodule OaksWeb.DevComponentsLive do
                   <:meta>Species</:meta>
                   <:meta><.iucn_status code="LC" /></:meta>
                   <:actions>
-                    <.button size="compact">Edit</.button>
-                    <.button size="compact">Make synonym of…</.button>
-                    <.button size="compact">Delete</.button>
+                    <.edit_menu id="gallery-edit-menu-narrow">
+                      <:item click="noop">Edit species</:item>
+                      <:item click="noop">Make synonym of…</:item>
+                      <:item click="noop">Delete species</:item>
+                    </.edit_menu>
                   </:actions>
                 </.header>
               </div>
               <div class="max-w-[390px] border border-dashed border-rule p-s4">
-                <.header id="gallery-title-narrow-list">
-                  Articles
-                  <:subtitle>
-                    Guides, reviews, and notes about oak identification and taxonomy.
-                  </:subtitle>
-                  <:actions><.button>New Article</.button></:actions>
+                <.header id="gallery-title-narrow-visitor">
+                  <.sci_name name="Quercus shumardii" author="Buckley" size="display" />
+                  <:meta>Species</:meta>
+                  <:meta><.iucn_status code="LC" /></:meta>
                 </.header>
               </div>
             </div>

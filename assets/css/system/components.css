@@ -367,28 +367,34 @@
   .oc-btn.phx-click-loading { cursor: progress; }
 
   /* ---------------------------------------------------------------------
-     Title row (CoreComponents.header): the one title row (item 626c). The
-     text column grows and keeps 20rem: the title, then the meta line
-     (kind word, counts, byline, stamps), then the subtitle. The actions
-     stand at the right on the title's first baseline; when the column
-     can't keep 20rem beside them they wrap below it, at the left edge,
-     above the 2px rule.
+     Title row (CoreComponents.header): the one title row (item 7838). The
+     title line holds the title and, after it on its baseline, the meta
+     (kind word, counts, byline, stamps), which wraps under the title only
+     when the line has no room; the subtitle goes under the line. The
+     editor's menu, when there is one, stands at the right on the title's
+     first baseline and never wraps; logged out there is none, and the
+     text takes the whole row.
      --------------------------------------------------------------------- */
   .oc-title {
     display: flex;
-    flex-wrap: wrap;
     align-items: baseline;
-    justify-content: space-between;
-    gap: var(--spacing-s4) var(--spacing-s5);
+    gap: var(--spacing-s5);
     padding-bottom: var(--spacing-s4);
     margin-bottom: var(--spacing-s6);
     border-bottom: 2px solid var(--color-rule-strong);
   }
   .oc-title-text {
-    flex: 1 1 20rem;
+    flex: 1 1 0;
     min-width: 0;
   }
+  .oc-title-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--spacing-s3) var(--spacing-s5);
+  }
   .oc-title h1 {
+    min-width: 0;
     margin: 0;
     font: 600 clamp(34px, 4vw, 50px)/1.05 var(--font-serif);
     letter-spacing: -0.01em;
@@ -402,7 +408,6 @@
     flex-wrap: wrap;
     align-items: baseline;
     gap: var(--spacing-s1) var(--spacing-s4);
-    margin-top: var(--spacing-s3);
     font: 600 14px/1.4 var(--font-frame);
     color: var(--color-ink-2);
   }
@@ -416,12 +421,67 @@
     color: var(--color-ink-2);
     max-width: 70ch;
   }
-  .oc-title-meta + .oc-title-sub { margin-top: var(--spacing-s3); }
-  .oc-title-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--spacing-s2);
+  .oc-title-line:has(.oc-title-meta) + .oc-title-sub { margin-top: var(--spacing-s3); }
+  .oc-title-actions { flex: none; }
+
+  /* Edit menu (CoreComponents.edit_menu): an editor's actions for the
+     page in one small disclosure, the compact button with a drawn
+     chevron, reversed while open; its list opens on the trigger's right
+     edge, on paper inside a 1.5px ink border, as the masthead's menu. */
+  .oc-edit-menu { position: relative; }
+  .oc-edit-menu > summary {
+    list-style: none;
+    user-select: none;
+  }
+  .oc-edit-menu > summary::-webkit-details-marker { display: none; }
+  .oc-edit-menu > summary::after {
+    content: "";
+    width: 5px;
+    height: 5px;
+    margin: -3px 1px 0 2px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+  }
+  .oc-edit-menu[open] > summary {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .oc-edit-menu[open] > summary::after {
+    transform: rotate(-135deg);
+    margin-top: 3px;
+  }
+  .oc-edit-menu-list {
+    position: absolute;
+    top: calc(100% + var(--spacing-s1));
+    right: 0;
+    z-index: 40;
+    min-width: 12rem;
+    margin: 0;
+    padding: var(--spacing-s2) 0;
+    list-style: none;
+    background: var(--color-paper);
+    border: 1.5px solid var(--color-ink);
+  }
+  .oc-edit-menu-list a,
+  .oc-edit-menu-list button {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-s2) var(--spacing-s4);
+    font: 600 14px/1.3 var(--font-frame);
+    color: var(--color-ink);
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .oc-edit-menu-list a:hover,
+  .oc-edit-menu-list button:hover { background: var(--color-paper-2); }
+  .oc-edit-menu-list :focus-visible {
+    outline-color: var(--color-pencil);
+    outline-offset: -3px;
   }
   /* A back link above the row, in the page's head. */
   .oc-pg-head > .oc-back + .oc-title { margin-top: var(--spacing-s4); }

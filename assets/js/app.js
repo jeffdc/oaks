@@ -184,12 +184,14 @@ document.addEventListener("keydown", e => {
   search.select()
 })
 
-// Menus built on <details data-menu> (the masthead's Editor menu) close on
-// Escape and on a click outside them. Document listeners rather than
-// phx-click-away, so the menu also closes on the controller pages.
+// Menus built on <details data-menu> (the masthead's Editor menu, a
+// page's Edit menu) close on Escape, on a click outside them and when one
+// of their items is chosen. Document listeners rather than phx-click-away,
+// so the menu also closes on the controller pages.
 document.addEventListener("click", e => {
   for (const menu of document.querySelectorAll("details[data-menu][open]")) {
-    if (!menu.contains(e.target)) menu.open = false
+    const chose = menu.contains(e.target) && e.target.closest("li a, li button")
+    if (!menu.contains(e.target) || chose) menu.open = false
   }
 })
 document.addEventListener("keydown", e => {

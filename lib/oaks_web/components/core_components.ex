@@ -299,26 +299,24 @@ defmodule OaksWeb.CoreComponents do
   end
 
   @doc """
-  Renders a page's title row, the one title row every page uses (item
-  626c): the title on a 2px ink rule, with its meta and subtitle under it
-  and its actions at the right.
+  Renders a page's title row, the one title row every page uses: the
+  title on a 2px ink rule, its meta on the title's line, a subtitle under
+  them, and the page's edit menu at the right.
 
-  The row's one rule (DESIGN.md, Components, Title Row):
+  The row's one rule (DESIGN.md, Components, Title Row; item 7838):
 
-    * The text column (title, meta, subtitle) grows and keeps at least
-      20rem; nothing else sits beside the title.
-    * `:meta` is one wrapping line straight under the title, in Archivo
-      600 14px ink-2 with lining figures, no separators, in this order: the
-      kind word (or the record a form edits, `<.sci_name size="meta">`),
-      counts, a byline and date, stamps (`<.status_tag>`,
-      `<.iucn_status>`), links. Each entry is one item on the line, so
-      `:if` works per entry.
-    * `:subtitle` is a sentence describing the page, under the meta.
-    * `:actions` stand at the right on the title's first baseline. When
-      the text column can't keep 20rem beside them, they drop below the
-      subtitle, at the left edge, above the rule. Use compact buttons for a
-      record's actions (Edit, Delete) and a regular one for a list's create
-      action.
+    * `:meta` sits on the title's line, after the title (and a species'
+      authority), on its baseline, in Archivo 600 14px ink-2 with lining
+      figures, no separators, in this order: the kind word (or the record
+      a form edits, `<.sci_name size="meta">`), counts, a byline and date,
+      stamps (`<.status_tag>`, `<.iucn_status>`), links. It wraps under
+      the title only when the line has no room for it. Each entry is one
+      item, so `:if` works per entry.
+    * `:subtitle` is a sentence describing the page, under the title line.
+    * `:actions` holds the page's `<.edit_menu>`, editor-only, at the
+      right on the title's first baseline. It never wraps: the title and
+      meta take the rest of the row, and with no actions (logged out) the
+      whole row.
 
   The title is set in the serif, roman; a scientific name in it is
   `<.sci_name size="display">`. A back link goes before the row in the
@@ -329,14 +327,17 @@ defmodule OaksWeb.CoreComponents do
       <.header>
         Sources
         <:subtitle>Every work the Compendium cites.</:subtitle>
-        <:actions><.button navigate={~p"/sources/new"}>Add source</.button></:actions>
       </.header>
 
       <.header>
         <.sci_name name="Quercus shumardii" author="Buckley" size="display" />
         <:meta>Species</:meta>
         <:meta><.iucn_status code="LC" /></:meta>
-        <:actions><.button size="compact" navigate={~p"/species/shumardii/edit"}>Edit</.button></:actions>
+        <:actions :if={@editor}>
+          <.edit_menu id="species-edit-menu">
+            <:item navigate={~p"/species/shumardii/edit"}>Edit species</:item>
+          </.edit_menu>
+        </:actions>
       </.header>
   """
   attr :class, :any, default: nil
@@ -344,18 +345,20 @@ defmodule OaksWeb.CoreComponents do
   slot :inner_block, required: true
 
   slot :meta,
-    doc: "one item on the meta line under the title: a kind word, count, byline or stamp"
+    doc: "one item on the title's line, after the title: a kind word, count, byline or stamp"
 
-  slot :subtitle, doc: "a sentence describing the page, under the meta line"
-  slot :actions, doc: "buttons at the right on the title's first baseline"
+  slot :subtitle, doc: "a sentence describing the page, under the title line"
+  slot :actions, doc: "the page's `<.edit_menu>`, at the right on the title's first baseline"
 
   def header(assigns) do
     ~H"""
     <header class={["oc-title", @class]} {@rest}>
       <div class="oc-title-text">
-        <h1>{render_slot(@inner_block)}</h1>
-        <div :if={@meta != []} class="oc-title-meta">
-          <span :for={meta <- @meta}>{render_slot(meta)}</span>
+        <div class="oc-title-line">
+          <h1>{render_slot(@inner_block)}</h1>
+          <div :if={@meta != []} class="oc-title-meta">
+            <span :for={meta <- @meta}>{render_slot(meta)}</span>
+          </div>
         </div>
         <p :if={@subtitle != []} class="oc-title-sub">{render_slot(@subtitle)}</p>
       </div>
@@ -363,6 +366,76 @@ defmodule OaksWeb.CoreComponents do
     </header>
     """
   end
+
+  @doc """
+  Renders an editor's actions for a page as one small disclosure, "Edit",
+  in the title row's `:actions` (item 7838). Only an editor sees it, so the
+  page gates it (`<:actions :if={@editor}>`), and a logged-out title row
+  keeps no space for it.
+
+  Built on `<details data-menu>`, as the masthead's Editor menu: the
+  summary is a compact button that Enter or Space opens, and app.js closes
+  it on Escape (focus back on the summary), on a click outside and when an
+  item is chosen. The list opens under the trigger, on its right edge.
+
+  Each `:item` is a link (`navigate`, or `href` with `method`) or, with
+  `click`, a button sending that event (`values` become `phx-value-*`). A
+  destructive item opens the page's own confirmation dialog.
+
+  ## Examples
+
+      <.edit_menu id="species-edit-menu">
+        <:item navigate={~p"/species/shumardii/edit"} id="edit-species-btn">Edit species</:item>
+        <:item click="show_merge_picker">Make synonym of…</:item>
+        <:item click="request_delete_taxon" values={%{id: 12}}>Delete taxon</:item>
+      </.edit_menu>
+  """
+  attr :id, :string, required: true
+  attr :label, :string, default: "Edit", doc: "the trigger's label"
+
+  slot :item, required: true, doc: "one action: a link or an event" do
+    attr :id, :string
+    attr :navigate, :string, doc: "a LiveView path to go to"
+    attr :href, :string, doc: "a plain link, with `method` for a delete link"
+    attr :method, :string
+    attr :click, :any, doc: "the event (or `JS` command) the item's button sends"
+    attr :values, :map, doc: "phx-value-* params sent with `click`"
+  end
+
+  def edit_menu(assigns) do
+    ~H"""
+    <details id={@id} class="oc-edit-menu" data-menu phx-mounted={JS.ignore_attributes(["open"])}>
+      <summary class="oc-btn oc-btn-compact">{@label}</summary>
+      <ul class="oc-edit-menu-list">
+        <li :for={item <- @item}>
+          <.link :if={item[:navigate]} id={item[:id]} navigate={item[:navigate]}>
+            {render_slot(item)}
+          </.link>
+          <.link
+            :if={!item[:navigate] && item[:href]}
+            id={item[:id]}
+            href={item[:href]}
+            method={item[:method] || "get"}
+          >
+            {render_slot(item)}
+          </.link>
+          <button
+            :if={!item[:navigate] && !item[:href]}
+            type="button"
+            id={item[:id]}
+            phx-click={item[:click]}
+            {phx_values(item[:values])}
+          >
+            {render_slot(item)}
+          </button>
+        </li>
+      </ul>
+    </details>
+    """
+  end
+
+  defp phx_values(nil), do: []
+  defp phx_values(values), do: Enum.map(values, fn {k, v} -> {"phx-value-#{k}", v} end)
 
   @doc """
   Renders a ruled table: rows on hairlines under a 2px head rule, Archivo

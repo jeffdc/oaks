@@ -38,7 +38,7 @@ defmodule OaksWeb.CoreComponentsTest do
   end
 
   describe "header/1" do
-    test "puts the title, subtitle and actions on the title row" do
+    test "puts the title line and subtitle in the text column and the actions beside it" do
       assigns = %{}
 
       html =
@@ -51,13 +51,15 @@ defmodule OaksWeb.CoreComponentsTest do
         """)
 
       assert html =~ ~r{<header class="oc-title\s*">}
-      assert html =~ ~r{<div class="oc-title-text">\s*<h1>\s*Sources\s*</h1>}
-      assert html =~ ~s(<p class="oc-title-sub">Every work the Compendium cites.</p>)
+
+      assert html =~
+               ~r{<div class="oc-title-text">\s*<div class="oc-title-line">\s*<h1>\s*Sources\s*</h1>\s*</div>\s*<p class="oc-title-sub">Every work the Compendium cites.</p>\s*</div>}
+
       assert html =~ ~s(<div class="oc-title-actions"><button>Add</button></div>)
       refute html =~ "oc-title-meta"
     end
 
-    test "sets each meta entry as one item on the line under the title, before the subtitle" do
+    test "sets each meta entry as one item on the title's line, after the title" do
       assigns = %{draft: false}
 
       html =
@@ -74,10 +76,48 @@ defmodule OaksWeb.CoreComponentsTest do
       assert html =~ ~r{<header class="oc-title\s*" id="t">}
 
       assert html =~
-               ~r{</h1>\s*<div class="oc-title-meta">\s*<span>Species</span>\s*<span><strong>LC</strong></span>\s*</div>\s*<p class="oc-title-sub">}
+               ~r{<div class="oc-title-line">\s*<h1>\s*Shumard oak\s*</h1>\s*<div class="oc-title-meta">\s*<span>Species</span><span><strong>LC</strong></span>\s*</div>\s*</div>\s*<p class="oc-title-sub">}
 
       refute html =~ "Draft"
       refute html =~ "oc-title-actions"
+    end
+  end
+
+  describe "edit_menu/1" do
+    test "is a compact Edit disclosure holding links and event buttons" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <CoreComponents.edit_menu id="m">
+          <:item navigate="/species/alba/edit" id="edit-btn">Edit species</:item>
+          <:item href="/old" method="delete">Remove</:item>
+          <:item click="request_delete" values={%{id: 7}} id="delete-btn">Delete species</:item>
+        </CoreComponents.edit_menu>
+        """)
+
+      assert html =~ ~r{<details id="m" class="oc-edit-menu" data-menu[^>]*phx-mounted=}
+      assert html =~ ~s(<summary class="oc-btn oc-btn-compact">Edit</summary>)
+      assert html =~ ~s(<ul class="oc-edit-menu-list">)
+      assert html =~ ~r{<a [^>]*href="/species/alba/edit"}
+      assert html =~ ~r{<a [^>]*id="edit-btn"}
+      assert html =~ ~r{<a [^>]*data-method="delete"}
+
+      assert html =~
+               ~r{<button type="button" id="delete-btn" phx-click="request_delete" phx-value-id="7">\s*Delete species\s*</button>}
+    end
+
+    test "takes another label" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <CoreComponents.edit_menu id="m" label="Add">
+          <:item navigate="/species/new">New species</:item>
+        </CoreComponents.edit_menu>
+        """)
+
+      assert html =~ ~s(<summary class="oc-btn oc-btn-compact">Add</summary>)
     end
   end
 
