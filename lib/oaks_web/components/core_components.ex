@@ -568,6 +568,65 @@ defmodule OaksWeb.CoreComponents do
     """
   end
 
+  @doc """
+  Renders a page: its content in the page frame at one of three named
+  widths, with an optional full-bleed part that spans the window above it.
+  Every page wraps its content in one `page/1`; a page never sets its own
+  max-width or centring.
+
+  Widths (DESIGN.md, Layout):
+
+    * `frame` (the default): the 1400px frame with 32px gutters (16px under
+      760px). Taxon pages, lists, tables, comparisons.
+    * `read`: a 70ch reading measure, for articles, about and help pages.
+    * `form`: a 640px measure, for forms and settings.
+
+  `read` and `form` start at the frame's left gutter, so every page's
+  content lines up with the masthead's mark at every width; they are
+  narrower, never centred.
+
+  The `:bleed` slot runs the full width of the window, edge to edge,
+  above the framed content: a title page, a band. Its content sets its
+  own frame inside (as the masthead does).
+
+  The layout's `<main>` is the frame for pages that don't use this
+  component yet; around a `page/1` it steps aside (`.oc-page:has(.oc-pg)`
+  in shell.css).
+
+  ## Examples
+
+      <.page>
+        <.header>Species</.header>
+        ...
+      </.page>
+
+      <.page width="read">
+        <.header>About</.header>
+        ...
+      </.page>
+
+      <.page>
+        <:bleed><.taxonomy_band>...</.taxonomy_band></:bleed>
+        ...
+      </.page>
+  """
+  attr :width, :string, values: ~w(frame read form), default: "frame"
+  attr :class, :any, default: nil, doc: "classes for the framed content"
+  attr :rest, :global
+  slot :bleed, doc: "full-width content above the frame"
+  slot :inner_block, required: true
+
+  def page(assigns) do
+    ~H"""
+    <div class="oc-pg" {@rest}>
+      <div :for={bleed <- @bleed} class="oc-pg-bleed">{render_slot(bleed)}</div>
+      <div class={["oc-pg-body", "oc-pg-#{@width}"]}>
+        <div class={["oc-pg-measure", @class]}>{render_slot(@inner_block)}</div>
+      </div>
+    </div>
+    """
+  end
+
   ## JS Commands
 
   # Notices and dialogs fade in and out; the design keeps its one authored

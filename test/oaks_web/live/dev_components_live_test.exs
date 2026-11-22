@@ -9,7 +9,7 @@ defmodule OaksWeb.DevComponentsLiveTest do
     assert html =~ "oc-band"
     refute html =~ "header-search"
 
-    for id <- ~w(marks buttons list field-marks fields notices) do
+    for id <- ~w(marks buttons list field-marks fields notices page) do
       assert has_element?(view, "##{id}")
     end
 

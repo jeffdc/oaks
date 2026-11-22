@@ -60,150 +60,177 @@ defmodule OaksWeb.DevComponentsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.taxonomy_band>
-      <:rank navigate={~p"/taxonomy"}><i>Quercus</i></:rank>
-      <:rank navigate={~p"/taxonomy/Quercus"} rank="subg."><i>Quercus</i></:rank>
-      <:rank navigate={~p"/taxonomy/Quercus/Lobatae"} rank="sect."><i>Lobatae</i></:rank>
-      <:rank navigate={~p"/taxonomy/Quercus/Lobatae/Coccineae"} rank="subsect.">
-        <i>Coccineae</i>
-      </:rank>
-      <:rank navigate={~p"/species/shumardii"} rank="complex" rank_after><i>shumardii</i></:rank>
-      <:current><i>Q. shumardii</i></:current>
-      <:siblings label="Coccineae · 7 species">
-        <li><.link navigate={~p"/species/acerifolia"}>Q. acerifolia</.link></li>
-        <li><.link navigate={~p"/species/buckleyi"}>Q. buckleyi</.link></li>
-        <li><.link navigate={~p"/species/coccinea"}>Q. coccinea</.link></li>
-        <li><.link navigate={~p"/species/ellipsoidalis"}>Q. ellipsoidalis</.link></li>
-        <li><.link navigate={~p"/species/rubra"}>Q. rubra</.link></li>
-        <li><span aria-current="page">Q. shumardii</span></li>
-        <li><.link navigate={~p"/species/velutina"}>Q. velutina</.link></li>
-      </:siblings>
-    </.taxonomy_band>
+    <main id="main-content">
+      <.page>
+        <:bleed>
+          <.taxonomy_band>
+            <:rank navigate={~p"/taxonomy"}><i>Quercus</i></:rank>
+            <:rank navigate={~p"/taxonomy/Quercus"} rank="subg."><i>Quercus</i></:rank>
+            <:rank navigate={~p"/taxonomy/Quercus/Lobatae"} rank="sect."><i>Lobatae</i></:rank>
+            <:rank navigate={~p"/taxonomy/Quercus/Lobatae/Coccineae"} rank="subsect.">
+              <i>Coccineae</i>
+            </:rank>
+            <:rank navigate={~p"/species/shumardii"} rank="complex" rank_after>
+              <i>shumardii</i>
+            </:rank>
+            <:current><i>Q. shumardii</i></:current>
+            <:siblings label="Coccineae · 7 species">
+              <li><.link navigate={~p"/species/acerifolia"}>Q. acerifolia</.link></li>
+              <li><.link navigate={~p"/species/buckleyi"}>Q. buckleyi</.link></li>
+              <li><.link navigate={~p"/species/coccinea"}>Q. coccinea</.link></li>
+              <li><.link navigate={~p"/species/ellipsoidalis"}>Q. ellipsoidalis</.link></li>
+              <li><.link navigate={~p"/species/rubra"}>Q. rubra</.link></li>
+              <li><span aria-current="page">Q. shumardii</span></li>
+              <li><.link navigate={~p"/species/velutina"}>Q. velutina</.link></li>
+            </:siblings>
+          </.taxonomy_band>
+        </:bleed>
+        <.back navigate={~p"/"}>Oak Compendium home</.back>
 
-    <main id="main-content" class="mx-auto max-w-frame px-s6 pt-s6 pb-s8 max-md:px-s4">
-      <.back navigate={~p"/"}>Oak Compendium home</.back>
+        <.header class="mt-s4">
+          Components
+          <:subtitle>
+            The DESIGN.md system as Phoenix components, with real content from the taxon page
+            prototype. Development only.
+          </:subtitle>
+          <:actions>
+            <.button phx-click={show_modal("gallery-modal")}>Open a dialog</.button>
+            <.compare_button navigate={~p"/species/shumardii/compare"} />
+          </:actions>
+        </.header>
 
-      <.header class="mt-s4">
-        Components
-        <:subtitle>
-          The DESIGN.md system as Phoenix components, with real content from the taxon page
-          prototype. Development only.
-        </:subtitle>
-        <:actions>
-          <.button phx-click={show_modal("gallery-modal")}>Open a dialog</.button>
-          <.compare_button navigate={~p"/species/shumardii/compare"} />
-        </:actions>
-      </.header>
+        <div class="grid gap-s7 lg:grid-cols-2">
+          <section>
+            <.section_heading id="marks">
+              Marks
+              <:note>source, standing, status</:note>
+            </.section_heading>
+            <p class="max-w-[68ch] text-lg/relaxed">
+              <q>buds looks glabrous and pretty small. acorn also looks like Q shumardii</q>
+              <.source_mark href="https://www.inaturalist.org/observations/190127456">
+                iNat i465271504 · 2024
+              </.source_mark>
+            </p>
+            <.standing_marks class="mt-s4">
+              <.standing_mark standing="agree">Oaks of the World agrees</.standing_mark>
+              <.standing_mark standing="differs">Differs: Sibley gives buds as large</.standing_mark>
+              <.standing_mark standing="open">2 sources, not reviewed</.standing_mark>
+            </.standing_marks>
+            <p class="mt-s5 flex flex-wrap items-baseline gap-s2">
+              <.iucn_status code="LC" />
+              <.source_mark href="#field-marks">IUCN 2024-2</.source_mark>
+            </p>
+            <p class="mt-s3 flex flex-wrap items-center gap-s2">
+              <.iucn_status :for={code <- ~w(EX EW CR EN VU NT LC DD NE)} code={code} prefix={false} />
+            </p>
+          </section>
 
-      <div class="grid gap-s7 lg:grid-cols-2">
-        <section>
-          <.section_heading id="marks">
-            Marks
-            <:note>source, standing, status</:note>
+          <section>
+            <.section_heading id="buttons">Buttons</.section_heading>
+            <div class="flex flex-wrap items-center gap-s3">
+              <.button variant="primary">Insert</.button>
+              <.button>Set aside</.button>
+              <.button disabled>Mark written</.button>
+              <.compare_button navigate={~p"/species/coccinea"} />
+            </div>
+            <.section_heading id="list" level="h3" class="mt-s7">List</.section_heading>
+            <.list>
+              <:item title="Authority">Buckley</:item>
+              <:item title="Common name">Shumard oak</:item>
+              <:item title="Lobes per side">
+                <span class="lining-nums tabular-nums">3–4</span>, rarely 2
+              </:item>
+            </.list>
+          </section>
+        </div>
+
+        <section class="mt-s8">
+          <.section_heading id="field-marks">
+            Field marks
+            <:note>Jeff first, other sources behind</:note>
           </.section_heading>
-          <p class="max-w-[68ch] text-lg/relaxed">
-            <q>buds looks glabrous and pretty small. acorn also looks like Q shumardii</q>
-            <.source_mark href="https://www.inaturalist.org/observations/190127456">
-              iNat i465271504 · 2024
-            </.source_mark>
-          </p>
-          <.standing_marks class="mt-s4">
-            <.standing_mark standing="agree">Oaks of the World agrees</.standing_mark>
-            <.standing_mark standing="differs">Differs: Sibley gives buds as large</.standing_mark>
-            <.standing_mark standing="open">2 sources, not reviewed</.standing_mark>
-          </.standing_marks>
-          <p class="mt-s5 flex flex-wrap items-baseline gap-s2">
-            <.iucn_status code="LC" />
-            <.source_mark href="#field-marks">IUCN 2024-2</.source_mark>
-          </p>
-          <p class="mt-s3 flex flex-wrap items-center gap-s2">
-            <.iucn_status :for={code <- ~w(EX EW CR EN VU NT LC DD NE)} code={code} prefix={false} />
-          </p>
+          <.table id="field-marks-table" rows={@traits} row_id={&"trait-#{&1.trait}"} stack>
+            <:col :let={t} label="Trait" row_header>{t.trait}</:col>
+            <:col :let={t} label="Jeff Clark" voice>
+              <%= if t.jeff do %>
+                <% {quote, mark, href} = t.jeff %>
+                <q>{quote}</q>
+                <.source_mark href={href}>{mark}</.source_mark>
+              <% else %>
+                <.no_statement />
+              <% end %>
+            </:col>
+            <:col :let={t} label="Other sources">
+              <.other_sources standing={t.standing} summary={t.summary}>
+                <:source :for={{text, by} <- t.others} by={by}>{text}</:source>
+              </.other_sources>
+            </:col>
+          </.table>
         </section>
 
-        <section>
-          <.section_heading id="buttons">Buttons</.section_heading>
-          <div class="flex flex-wrap items-center gap-s3">
-            <.button variant="primary">Insert</.button>
-            <.button>Set aside</.button>
-            <.button disabled>Mark written</.button>
-            <.compare_button navigate={~p"/species/coccinea"} />
-          </div>
-          <.section_heading id="list" level="h3" class="mt-s7">List</.section_heading>
-          <.list>
-            <:item title="Authority">Buckley</:item>
-            <:item title="Common name">Shumard oak</:item>
-            <:item title="Lobes per side">
-              <span class="lining-nums tabular-nums">3–4</span>, rarely 2
-            </:item>
-          </.list>
-        </section>
-      </div>
+        <div class="mt-s8 grid gap-s7 lg:grid-cols-2">
+          <section>
+            <.section_heading id="fields">Form fields</.section_heading>
+            <form id="gallery-form" phx-submit="noop" phx-change="noop">
+              <.input name="name" label="Name" value="Quercus shumardii" />
+              <.input
+                name="authority"
+                label="Authority"
+                value=""
+                placeholder="e.g. Buckley"
+                errors={["can't be blank"]}
+              />
+              <.input
+                name="rank"
+                type="select"
+                label="Rank"
+                options={["Species", "Variety", "Hybrid"]}
+                value="Species"
+              />
+              <.input
+                name="notes"
+                type="textarea"
+                label="Notes"
+                value="Fall color is usually yellowish."
+              />
+              <.input name="published" type="checkbox" label="Published" value="true" />
+              <.button type="submit" variant="primary">Save</.button>
+            </form>
+          </section>
 
-      <section class="mt-s8">
-        <.section_heading id="field-marks">
-          Field marks
-          <:note>Jeff first, other sources behind</:note>
-        </.section_heading>
-        <.table id="field-marks-table" rows={@traits} row_id={&"trait-#{&1.trait}"} stack>
-          <:col :let={t} label="Trait" row_header>{t.trait}</:col>
-          <:col :let={t} label="Jeff Clark" voice>
-            <%= if t.jeff do %>
-              <% {quote, mark, href} = t.jeff %>
-              <q>{quote}</q>
-              <.source_mark href={href}>{mark}</.source_mark>
-            <% else %>
-              <.no_statement />
-            <% end %>
-          </:col>
-          <:col :let={t} label="Other sources">
-            <.other_sources standing={t.standing} summary={t.summary}>
-              <:source :for={{text, by} <- t.others} by={by}>{text}</:source>
-            </.other_sources>
-          </:col>
-        </.table>
-      </section>
+          <section>
+            <.section_heading id="notices">Notices</.section_heading>
+            <div class="grid gap-s3 [&_.oc-flash]:static [&_.oc-flash]:w-full">
+              <.flash id="gallery-flash-info" kind={:info}>Source saved.</.flash>
+              <.flash id="gallery-flash-error" kind={:error} title="Something went wrong!">
+                Attempting to reconnect
+              </.flash>
+            </div>
+          </section>
+        </div>
 
-      <div class="mt-s8 grid gap-s7 lg:grid-cols-2">
-        <section>
-          <.section_heading id="fields">Form fields</.section_heading>
-          <form id="gallery-form" phx-submit="noop" phx-change="noop">
-            <.input name="name" label="Name" value="Quercus shumardii" />
-            <.input
-              name="authority"
-              label="Authority"
-              value=""
-              placeholder="e.g. Buckley"
-              errors={["can't be blank"]}
-            />
-            <.input
-              name="rank"
-              type="select"
-              label="Rank"
-              options={["Species", "Variety", "Hybrid"]}
-              value="Species"
-            />
-            <.input
-              name="notes"
-              type="textarea"
-              label="Notes"
-              value="Fall color is usually yellowish."
-            />
-            <.input name="published" type="checkbox" label="Published" value="true" />
-            <.button type="submit" variant="primary">Save</.button>
-          </form>
-        </section>
-
-        <section>
-          <.section_heading id="notices">Notices</.section_heading>
-          <div class="grid gap-s3 [&_.oc-flash]:static [&_.oc-flash]:w-full">
-            <.flash id="gallery-flash-info" kind={:info}>Source saved.</.flash>
-            <.flash id="gallery-flash-error" kind={:error} title="Something went wrong!">
-              Attempting to reconnect
-            </.flash>
+        <section class="mt-s8">
+          <.section_heading id="page">
+            Page<:note>frame, read and form widths; the bleed</:note>
+          </.section_heading>
+          <p class="max-w-[68ch]">
+            This gallery is a <code>page</code>: the band above runs in its bleed, the window's full
+            width, and everything else sits in the frame. The read and form measures start at the
+            frame's left gutter.
+          </p>
+          <div :for={width <- ~w(read form)} class="mt-s5 border border-dashed border-rule">
+            <.page id={"gallery-page-#{width}"} width={width}>
+              <p class="font-frame text-[13px] font-semibold text-ink-3">width="{width}"</p>
+              <p>
+                The page answers "is it this, or that?" before anything else. Where the taxon sits
+                is shown in the same ochre band on every taxon page; the traits that set it apart
+                come first; look-alikes and hybrids sit one step away; a side-by-side comparison
+                aligns two taxa trait by trait.
+              </p>
+            </.page>
           </div>
         </section>
-      </div>
+      </.page>
     </main>
 
     <.modal id="gallery-modal">

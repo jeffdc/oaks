@@ -39,4 +39,6 @@
 
   /* Layout */
   --container-frame: 1400px;     /* max-w-frame: the page frame */
+  --container-read: 70ch;        /* the reading measure (page width="read") */
+  --container-form: 40rem;       /* the form measure, 640px (page width="form") */
 }

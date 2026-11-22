@@ -224,6 +224,24 @@
   .oc-page:focus { outline: none; }
 
   /* ---------------------------------------------------------------------
+     Page (CoreComponents.page): the frame moves from <main> into the page,
+     so a page can run a part full width (the bleed) above its framed
+     content. Named widths: frame (1400px), read (a 70ch measure), form
+     (640px); read and form start at the frame's left gutter.
+     --------------------------------------------------------------------- */
+  .oc-page:has(.oc-pg) {
+    max-width: none;
+    padding: 0;
+  }
+  .oc-pg-body {
+    max-width: var(--container-frame);
+    margin: 0 auto;
+    padding: var(--spacing-s6) var(--spacing-s6) var(--spacing-s8);
+  }
+  .oc-pg-read > .oc-pg-measure { max-width: var(--container-read); }
+  .oc-pg-form > .oc-pg-measure { max-width: var(--container-form); }
+
+  /* ---------------------------------------------------------------------
      Site footer: the licensing line on a hairline, then the pages with no
      main nav item.
      --------------------------------------------------------------------- */
@@ -313,6 +331,7 @@
     .oc-search kbd { display: none; }
 
     .oc-page { padding: var(--spacing-s5) var(--spacing-s4) var(--spacing-s7); }
+    .oc-pg-body { padding: var(--spacing-s5) var(--spacing-s4) var(--spacing-s7); }
     .oc-footer-in { padding: var(--spacing-s5) var(--spacing-s4); }
   }
 }

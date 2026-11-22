@@ -205,4 +205,37 @@ defmodule OaksWeb.CoreComponentsTest do
       assert html =~ "checked"
     end
   end
+
+  describe "page/1" do
+    test "sets the content in the frame by default" do
+      html = render_component(&CoreComponents.page/1, inner_block: text_slot("Species"))
+
+      assert html =~ ~s(<div class="oc-pg">)
+      assert html =~ ~s(class="oc-pg-body oc-pg-frame")
+      assert html =~ ~r{<div class="oc-pg-measure ?">\s*Species\s*</div>}
+      refute html =~ "oc-pg-bleed"
+    end
+
+    for width <- ~w(read form) do
+      test "takes the #{width} measure" do
+        html =
+          render_component(&CoreComponents.page/1,
+            width: unquote(width),
+            inner_block: text_slot("About")
+          )
+
+        assert html =~ ~s(class="oc-pg-body oc-pg-#{unquote(width)}")
+      end
+    end
+
+    test "runs the bleed full width above the framed content" do
+      html =
+        render_component(&CoreComponents.page/1,
+          bleed: text_slot("Title page"),
+          inner_block: text_slot("Contents")
+        )
+
+      assert html =~ ~r{<div class="oc-pg-bleed">\s*Title page\s*</div>\s*<div class="oc-pg-body}
+    end
+  end
 end
