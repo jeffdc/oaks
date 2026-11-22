@@ -15,6 +15,8 @@ defmodule OaksWeb.SpeciesMergeLive do
   alias OaksWeb.SpeciesName
 
   @scalar_fields ~w(author conservation_status subgenus section subsection complex parent1 parent2)
+  # Fields whose values are scientific names, set italic when shown as text.
+  @name_fields ~w(subgenus section subsection complex parent1 parent2)
 
   @impl true
   def mount(_params, _session, socket) do
@@ -235,7 +237,7 @@ defmodule OaksWeb.SpeciesMergeLive do
     ~H"""
     <div class="card p-16 text-center">
       <div class="loading-spinner mx-auto mb-4"></div>
-      <p style="color: var(--color-text-secondary);">Loading species data...</p>
+      <p class="merge-muted">Loading species data...</p>
     </div>
     """
   end
@@ -245,17 +247,12 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   defp error_state(assigns) do
     ~H"""
-    <div class="card p-12 text-center">
-      <.icon name="hero-exclamation-circle" class="size-16 mx-auto mb-4 text-red-400" />
-      <h1 class="text-xl font-bold mb-2">Unable to Load Merge</h1>
-      <p class="mb-6" style="color: var(--color-text-secondary);">{@error}</p>
-      <.link
-        navigate={~p"/species"}
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white"
-        style="background-color: var(--color-forest-600); text-decoration: none;"
-      >
-        <.icon name="hero-arrow-left" class="size-4" /> Back to Species List
-      </.link>
+    <div class="merge-error-state">
+      <.back navigate={~p"/species"}>Back to Species List</.back>
+      <.header>
+        Unable to Load Merge
+        <:subtitle>{@error}</:subtitle>
+      </.header>
     </div>
     """
   end
@@ -266,27 +263,13 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   defp merge_header(assigns) do
     ~H"""
-    <div
-      class="card p-6 mb-6"
-      style="background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-surface) 100%);"
-    >
-      <h1
-        class="text-2xl font-bold flex items-center flex-wrap gap-2"
-        style="font-family: var(--font-serif); color: var(--color-forest-900);"
-      >
-        Merge:
-        <span style="color: var(--color-text-secondary);">
-          <em>{format_species_name(@preview.source)}</em>
-        </span>
-        <span style="color: var(--color-text-tertiary);">&rarr;</span>
-        <span style="color: var(--color-forest-700);">
-          <em>{format_species_name(@preview.target)}</em>
-        </span>
-      </h1>
-      <p class="mt-2" style="color: var(--color-text-secondary);">
-        The synonym will be deleted and its data merged into the target species.
-      </p>
-    </div>
+    <.header class="merge-title">
+      Merge:
+      <span class="merge-title-source"><.sci_name name={format_species_name(@preview.source)} /></span>
+      <span class="merge-title-arrow">&rarr;</span>
+      <.sci_name name={format_species_name(@preview.target)} />
+      <:subtitle>The synonym will be deleted and its data merged into the target species.</:subtitle>
+    </.header>
     """
   end
 
@@ -298,39 +281,20 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   defp column_headers(assigns) do
     ~H"""
-    <div class="hidden md:grid grid-cols-[1fr_2.5rem_1fr] gap-3 mb-4 px-3">
-      <div>
-        <span
-          class="text-xs font-semibold uppercase tracking-wide"
-          style="color: var(--color-text-tertiary);"
-        >
-          Synonym (Read-only)
-        </span>
-        <div class="mt-1">
-          <.link
-            navigate={~p"/species/#{@source_name}"}
-            style="color: var(--color-forest-600); font-family: var(--font-serif); font-style: italic; text-decoration: none;"
-          >
-            {format_species_name(@preview.source)}
-          </.link>
-        </div>
+    <div class="merge-cols">
+      <div></div>
+      <div class="merge-col">
+        <.link navigate={~p"/species/#{@source_name}"} class="merge-col-name">
+          <.sci_name name={format_species_name(@preview.source)} />
+        </.link>
+        <span class="merge-col-role">Synonym, read-only</span>
       </div>
       <div></div>
-      <div>
-        <span
-          class="text-xs font-semibold uppercase tracking-wide"
-          style="color: var(--color-forest-600);"
-        >
-          Target (Editable)
-        </span>
-        <div class="mt-1">
-          <.link
-            navigate={~p"/species/#{@target_name}"}
-            style="color: var(--color-forest-600); font-family: var(--font-serif); font-style: italic; text-decoration: none;"
-          >
-            {format_species_name(@preview.target)}
-          </.link>
-        </div>
+      <div class="merge-col">
+        <.link navigate={~p"/species/#{@target_name}"} class="merge-col-name">
+          <.sci_name name={format_species_name(@preview.target)} />
+        </.link>
+        <span class="merge-col-role">Target, editable</span>
       </div>
     </div>
     """
@@ -343,8 +307,8 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   defp field_comparison_section(assigns) do
     ~H"""
-    <div class="card p-6 mb-6 space-y-3">
-      <h2 class="section-title mb-4">Species Fields</h2>
+    <div class="card mb-6">
+      <h2 class="section-title">Species Fields</h2>
 
       <.merge_field_row
         :for={field <- ~w(author conservation_status)}
@@ -354,12 +318,7 @@ defmodule OaksWeb.SpeciesMergeLive do
         target_value={Map.get(@edited_fields, field)}
       />
 
-      <h3
-        class="text-sm font-semibold mt-4 pt-2 border-t border-base-200"
-        style="color: var(--color-text-secondary);"
-      >
-        Taxonomy
-      </h3>
+      <h3 class="merge-subhead">Taxonomy</h3>
 
       <.merge_field_row
         :for={field <- ~w(subgenus section subsection complex)}
@@ -370,12 +329,7 @@ defmodule OaksWeb.SpeciesMergeLive do
       />
 
       <div :if={@preview.source.is_hybrid || @preview.target.is_hybrid}>
-        <h3
-          class="text-sm font-semibold mt-4 pt-2 border-t border-base-200"
-          style="color: var(--color-text-secondary);"
-        >
-          Hybrid Parents
-        </h3>
+        <h3 class="merge-subhead">Hybrid Parents</h3>
 
         <.merge_field_row
           :for={field <- ~w(parent1 parent2)}
@@ -386,18 +340,11 @@ defmodule OaksWeb.SpeciesMergeLive do
         />
       </div>
 
-      <div :if={@preview.synonyms_to_add != []} class="mt-4 pt-4 border-t border-base-200">
-        <h3 class="text-sm font-semibold mb-2" style="color: var(--color-text-secondary);">
-          Synonyms to Add
-        </h3>
-        <div class="flex flex-wrap gap-2">
-          <span
-            :for={syn <- @preview.synonyms_to_add}
-            class="badge badge-forest-light"
-          >
-            + {syn}
-          </span>
-        </div>
+      <div :if={@preview.synonyms_to_add != []}>
+        <h3 class="merge-subhead">Synonyms to Add</h3>
+        <p class="merge-synonyms">
+          <.sci_name_list names={@preview.synonyms_to_add} />
+        </p>
       </div>
     </div>
     """
@@ -411,49 +358,57 @@ defmodule OaksWeb.SpeciesMergeLive do
   defp merge_field_row(assigns) do
     differs = normalize_val(assigns.source_value) != normalize_val(assigns.target_value)
     has_source_value = assigns.source_value && String.trim(to_string(assigns.source_value)) != ""
-    assigns = assign(assigns, differs: differs, has_source_value: has_source_value)
+
+    assigns =
+      assign(assigns,
+        differs: differs,
+        has_source_value: has_source_value,
+        name_fields: @name_fields
+      )
 
     ~H"""
-    <div class={[
-      "rounded-lg p-3",
-      @differs && "border-l-3 border-l-[var(--color-forest-500)]",
-      @differs && "bg-[color-mix(in_srgb,var(--color-forest-50)_50%,transparent)]"
-    ]}>
-      <div class="text-sm font-semibold mb-2" style="color: var(--color-text-primary);">
-        {@label}
+    <div class={["merge-row", @differs && "merge-row-differs"]}>
+      <div class="merge-row-label">
+        <span>{@label}</span>
+        <.standing_mark :if={@differs} standing="differs">differs</.standing_mark>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-[1fr_2.5rem_1fr] gap-3 items-start">
-        <%!-- Synonym value (read-only) --%>
-        <div
-          class="px-3 py-2 rounded-lg text-sm min-h-[2.5rem] break-words"
-          style="background-color: var(--color-background); border: 1px solid var(--color-border); color: var(--color-text-secondary); opacity: 0.7;"
+
+      <%!-- Synonym value (read-only) --%>
+      <div class="merge-row-source" data-label="Synonym">
+        <%= cond do %>
+          <% !@has_source_value -> %>
+            &mdash;
+          <% @field in @name_fields -> %>
+            <span class="sci-name"><i>{@source_value}</i></span>
+          <% true -> %>
+            {@source_value}
+        <% end %>
+      </div>
+
+      <%!-- Copy button --%>
+      <div class="merge-row-copy">
+        <button
+          :if={@has_source_value}
+          type="button"
+          phx-click="copy_field"
+          phx-value-field={@field}
+          class="merge-copy-btn"
+          title="Copy to target"
+          aria-label={"Copy the synonym's #{String.downcase(@label)} to the target"}
         >
-          {@source_value || raw("&mdash;")}
-        </div>
+          <.icon name="hero-arrow-right" class="size-4" />
+        </button>
+      </div>
 
-        <%!-- Copy button --%>
-        <div class="flex items-center justify-center pt-1">
-          <button
-            :if={@has_source_value}
-            phx-click="copy_field"
-            phx-value-field={@field}
-            class="flex items-center justify-center w-8 h-8 rounded-md transition-colors"
-            style="background-color: var(--color-forest-100); color: var(--color-forest-700); border: 1px solid var(--color-forest-300);"
-            title="Copy to target"
-          >
-            <.icon name="hero-arrow-right" class="size-4" />
-          </button>
-          <div :if={!@has_source_value} class="w-8 h-8"></div>
-        </div>
-
-        <%!-- Target value (editable) --%>
+      <%!-- Target value (editable) --%>
+      <div class="merge-row-target" data-label="Target">
         <input
           type="text"
           value={@target_value || ""}
           phx-blur="update_field"
           phx-value-field={@field}
-          class="px-3 py-2 rounded-lg text-sm w-full"
-          style="background-color: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-primary);"
+          class="oc-input"
+          aria-label={"Target #{String.downcase(@label)}"}
         />
       </div>
     </div>
@@ -471,28 +426,23 @@ defmodule OaksWeb.SpeciesMergeLive do
     assigns = assign(assigns, synonym_only: synonym_only)
 
     ~H"""
-    <div :if={@synonym_only != []} class="card p-6 mb-6">
-      <h2 class="section-title mb-4">Source Data Transfer</h2>
-      <p class="text-sm mb-4" style="color: var(--color-text-secondary);">
+    <div :if={@synonym_only != []} class="card mb-6">
+      <h2 class="section-title">Source Data Transfer</h2>
+      <p class="merge-lede">
         These sources exist only on the synonym. Check the ones you want to transfer to the target.
       </p>
 
-      <div class="space-y-3">
-        <div
-          :for={ss <- @synonym_only}
-          class="p-4 rounded-lg"
-          style="background-color: var(--color-background); border: 1px solid var(--color-border);"
-        >
-          <label class="flex items-start gap-3 cursor-pointer">
+      <div>
+        <div :for={ss <- @synonym_only} class="merge-source">
+          <label class="merge-source-label">
             <input
               type="checkbox"
               checked={Map.get(@source_checkboxes, ss.source_id, true)}
               phx-click="toggle_source"
               phx-value-source-id={ss.source_id}
-              class="mt-1 accent-[var(--color-forest-600)]"
             />
             <div class="flex-1 min-w-0">
-              <div class="font-medium text-sm">{source_name(ss)}</div>
+              <div class="merge-source-name">{source_name(ss)}</div>
               <.source_preview_fields source={ss} />
             </div>
           </label>
@@ -519,12 +469,12 @@ defmodule OaksWeb.SpeciesMergeLive do
     assigns = assign(assigns, fields: fields, local_names: local_names)
 
     ~H"""
-    <div class="mt-2 space-y-1 text-xs" style="color: var(--color-text-tertiary);">
+    <div class="merge-source-preview">
       <div :if={@local_names != []}>
         Common names: {Enum.join(@local_names, ", ")}
       </div>
       <div :for={{label, val} <- @fields}>
-        <span class="font-medium">{label}:</span> {String.slice(val, 0..80)}{if(
+        <span class="merge-source-preview-label">{label}:</span> {String.slice(val, 0..80)}{if(
           String.length(val) > 80,
           do: "...",
           else: ""
@@ -558,38 +508,27 @@ defmodule OaksWeb.SpeciesMergeLive do
       )
 
     ~H"""
-    <div class="card mb-6" style="border: 1px solid var(--color-border);">
-      <button
-        phx-click="toggle_references"
-        class="flex items-center gap-2 w-full p-4 text-left hover:bg-base-100 transition-colors rounded-xl"
-        aria-expanded={to_string(@expanded)}
-      >
-        <span style="color: var(--color-text-tertiary);">
-          <.icon
-            name="hero-chevron-right"
-            class={["size-4 transition-transform", @expanded && "rotate-90"]}
-          />
-        </span>
-        <h2 class="text-base font-semibold" style="color: var(--color-text-secondary);">
-          References to Update
-          <span class="font-normal" style="color: var(--color-text-tertiary);">
-            ({@ref_count} species)
-          </span>
-        </h2>
-      </button>
-
-      <div :if={@expanded} class="px-4 pb-4 border-t" style="border-color: var(--color-border);">
-        <p
-          :if={@ref_count == 0}
-          class="text-sm italic mt-3"
-          style="color: var(--color-text-tertiary);"
+    <section class="merge-refs">
+      <h2 class="merge-refs-title">
+        <button
+          type="button"
+          phx-click="toggle_references"
+          class="merge-refs-toggle"
+          aria-expanded={to_string(@expanded)}
         >
-          No other species reference "{@preview.source.scientific_name}"
+          References to Update <span class="merge-refs-count">({@ref_count} species)</span>
+        </button>
+      </h2>
+
+      <div :if={@expanded} class="merge-refs-body">
+        <p :if={@ref_count == 0} class="merge-empty">
+          No other species reference <.sci_name name={format_species_name(@preview.source)} />
         </p>
 
         <div :if={@ref_count > 0}>
-          <p class="text-sm mt-3 mb-3" style="color: var(--color-text-secondary);">
-            These species will be updated to reference "{@preview.target.scientific_name}" instead.
+          <p class="merge-lede">
+            These species will be updated to reference
+            <.sci_name name={format_species_name(@preview.target)} /> instead.
           </p>
 
           <.reference_group
@@ -609,7 +548,7 @@ defmodule OaksWeb.SpeciesMergeLive do
           />
         </div>
       </div>
-    </div>
+    </section>
     """
   end
 
@@ -618,25 +557,13 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   defp reference_group(assigns) do
     ~H"""
-    <div class="mb-3">
-      <h3
-        class="text-xs font-semibold uppercase tracking-wide mb-2"
-        style="color: var(--color-text-secondary);"
-      >
-        {@title} ({length(@refs)})
-      </h3>
-      <ul class="space-y-1">
-        <li :for={ref <- @refs} class="flex items-baseline gap-2 text-sm">
-          <span style="color: var(--color-text-tertiary);">&bull;</span>
-          <span style="font-family: var(--font-serif); font-style: italic;">
-            {ref.species.scientific_name}
-          </span>
-          <span
-            :if={ref.reference_type in ["parent1", "parent2"]}
-            class="text-xs"
-            style="color: var(--color-text-tertiary);"
-          >
-            ({ref.reference_type})
+    <div class="merge-ref-group">
+      <h3 class="merge-subhead">{@title} ({length(@refs)})</h3>
+      <ul class="merge-ref-list">
+        <li :for={ref <- @refs}>
+          <.sci_name name={ref.species.scientific_name} />
+          <span :if={ref.reference_type in ["parent1", "parent2"]} class="merge-ref-type">
+            {ref.reference_type}
           </span>
         </li>
       </ul>
@@ -683,7 +610,7 @@ defmodule OaksWeb.SpeciesMergeLive do
         :if={@shared_sources != []}
         id="shared-sources-notice"
         title="Sources both species have"
-        items={@shared_sources}
+        items={Enum.map(@shared_sources, &{nil, &1, false})}
       >
         The target keeps its own text for these sources; the synonym's text for them is not carried over.
       </.merge_notice>
@@ -691,9 +618,10 @@ defmodule OaksWeb.SpeciesMergeLive do
         :if={@preview.same_parent_hybrids != []}
         id="same-parent-hybrids-notice"
         title="Hybrids of these two species"
-        items={Enum.map(@preview.same_parent_hybrids, & &1.scientific_name)}
+        items={Enum.map(@preview.same_parent_hybrids, &{nil, &1.scientific_name, true})}
       >
-        After merging, both parents of these hybrids will be {@preview.target.scientific_name}. Review their parents afterwards.
+        After merging, both parents of these hybrids will be
+        <.sci_name name={format_species_name(@preview.target)} />. Review their parents afterwards.
       </.merge_notice>
       <.merge_notice
         :if={@preview.list_additions != %{}}
@@ -701,7 +629,8 @@ defmodule OaksWeb.SpeciesMergeLive do
         title="Added to the target from the synonym"
         items={list_addition_items(@preview.list_additions)}
       >
-        These entries from the synonym are added to {@preview.target.scientific_name}.
+        These entries from the synonym are added to
+        <.sci_name name={format_species_name(@preview.target)} />.
       </.merge_notice>
       <.self_reference_warning :if={@self_ref_issues != []} issues={@self_ref_issues} />
     </div>
@@ -712,21 +641,17 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   defp data_loss_warning(assigns) do
     ~H"""
-    <div
-      class="p-4 rounded-xl border-l-4"
-      style="background-color: #fef3c7; border-left-color: #f59e0b;"
-    >
-      <div class="flex items-center gap-2 mb-2">
-        <span style="color: #f59e0b;"><.icon name="hero-exclamation-triangle" class="size-5" /></span>
-        <span class="font-semibold text-sm" style="color: #92400e;">Data Loss Warning</span>
-      </div>
-      <p class="text-sm mb-2" style="color: #92400e;">
+    <div class="merge-notice merge-notice-warn">
+      <p class="merge-notice-title">
+        <.icon name="hero-exclamation-triangle" class="size-5" /> Data Loss Warning
+      </p>
+      <p class="merge-notice-text">
         The following source data will NOT be transferred and will be permanently lost:
       </p>
-      <ul class="list-disc pl-5 text-sm space-y-1" style="color: #92400e;">
-        <li :for={name <- @sources} class="font-medium">{name}</li>
+      <ul class="merge-notice-list">
+        <li :for={name <- @sources}>{name}</li>
       </ul>
-      <p class="text-xs mt-2 opacity-80" style="color: #92400e;">
+      <p class="merge-notice-foot">
         To include this data, check the source checkboxes above.
       </p>
     </div>
@@ -740,17 +665,15 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   defp merge_notice(assigns) do
     ~H"""
-    <div
-      id={@id}
-      class="p-4 rounded-xl border-l-4"
-      style="background-color: var(--color-forest-50); border-left-color: var(--color-forest-400);"
-    >
-      <div class="font-semibold text-sm mb-1" style="color: var(--color-forest-800);">{@title}</div>
-      <p class="text-sm mb-2" style="color: var(--color-text-secondary);">
-        {render_slot(@inner_block)}
-      </p>
-      <ul class="list-disc pl-5 text-sm space-y-0.5" style="color: var(--color-text-primary);">
-        <li :for={item <- @items}>{item}</li>
+    <div id={@id} class="merge-notice">
+      <p class="merge-notice-title">{@title}</p>
+      <p class="merge-notice-text">{render_slot(@inner_block)}</p>
+      <ul class="merge-notice-list">
+        <li :for={{label, text, name?} <- @items}>
+          <span :if={label}>{label}:</span>
+          <.sci_name :if={name?} name={text} />
+          <span :if={!name?}>{text}</span>
+        </li>
       </ul>
     </div>
     """
@@ -773,7 +696,7 @@ defmodule OaksWeb.SpeciesMergeLive do
           other -> inspect(other)
         end
 
-      "#{labels[field]}: #{text}"
+      {labels[field], text, field != :external_links}
     end
   end
 
@@ -791,32 +714,19 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   defp self_reference_warning(assigns) do
     ~H"""
-    <div
-      class="p-4 rounded-xl border-l-4"
-      style="background-color: #fef3c7; border-left-color: #f59e0b;"
-    >
-      <div class="flex items-center gap-2 mb-2">
-        <span style="color: #f59e0b;"><.icon name="hero-exclamation-triangle" class="size-5" /></span>
-        <span class="font-semibold text-sm" style="color: #92400e;">Self-Reference Warning</span>
-      </div>
-      <p class="text-sm mb-2" style="color: #92400e;">
+    <div class="merge-notice merge-notice-warn">
+      <p class="merge-notice-title">
+        <.icon name="hero-exclamation-triangle" class="size-5" /> Self-Reference Warning
+      </p>
+      <p class="merge-notice-text">
         After the merge these would point at the species itself, so they will be cleared:
       </p>
-      <div class="space-y-2">
-        <div
-          :for={issue <- @issues}
-          class="p-3 rounded-lg text-sm"
-          style="background-color: rgba(255,255,255,0.5);"
-        >
-          <div style="color: #92400e;">
-            "<strong>{issue.field}</strong>" contains "<em style="font-family: var(--font-serif);">{issue.value}</em>"
+      <div class="merge-issues">
+        <div :for={issue <- @issues} class="merge-issue">
+          <div>
+            "<strong>{issue.field}</strong>" contains "<em>{issue.value}</em>"
           </div>
-          <div
-            class="text-xs mt-1 pl-2 border-l-2"
-            style="color: #92400e; opacity: 0.85; border-left-color: #f59e0b;"
-          >
-            {issue.hint}
-          </div>
+          <div class="merge-issue-hint">{issue.hint}</div>
         </div>
       </div>
     </div>
@@ -832,29 +742,16 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   defp action_bar(assigns) do
     ~H"""
-    <div
-      class="sticky bottom-0 flex justify-end gap-3 p-4 rounded-xl"
-      style="background-color: var(--color-surface); box-shadow: var(--shadow-lg);"
-    >
-      <.link
-        navigate={~p"/species/#{@source_name}"}
-        class="px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
-        style="color: var(--color-text-primary); background-color: var(--color-background); border: 1px solid var(--color-border); text-decoration: none;"
-      >
-        Cancel
-      </.link>
-      <button
+    <div class="merge-actions">
+      <.button navigate={~p"/species/#{@source_name}"}>Cancel</.button>
+      <.button
+        variant="primary"
         phx-click="show_confirm"
         disabled={@merging}
-        class={[
-          "px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-colors",
-          @merging && "opacity-50 cursor-not-allowed"
-        ]}
-        style="background-color: var(--color-forest-600);"
         id="merge-save-btn"
       >
         Save Merge
-      </button>
+      </.button>
     </div>
     """
   end
@@ -885,105 +782,83 @@ defmodule OaksWeb.SpeciesMergeLive do
 
     ~H"""
     <div
-      class="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style="background-color: rgba(0, 0, 0, 0.5);"
+      class="merge-dialog fixed inset-0 z-50 flex items-center justify-center p-4"
       phx-window-keydown="cancel_confirm"
       phx-key="Escape"
     >
       <div
         class="card p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="merge-dialog-title"
         phx-click-away="cancel_confirm"
       >
         <%= cond do %>
           <% @merge_error -> %>
-            <h2 class="text-lg font-bold text-red-700 mb-4">Merge Failed</h2>
-            <div class="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-800 mb-4">
-              {@merge_error}
-            </div>
-            <p class="text-sm mb-4" style="color: var(--color-text-secondary);">
+            <h2 id="merge-dialog-title" class="merge-dialog-title">Merge Failed</h2>
+            <p class="merge-dialog-error">{@merge_error}</p>
+            <p class="merge-dialog-text">
               The synonym was NOT deleted. You can fix the issue and try again.
             </p>
-            <div class="flex justify-end">
-              <button
-                phx-click="cancel_confirm"
-                class="px-4 py-2 rounded-lg text-sm font-medium"
-                style="color: var(--color-text-secondary);"
-              >
-                Close
-              </button>
+            <div class="merge-dialog-actions">
+              <.button phx-click="cancel_confirm">Close</.button>
             </div>
           <% @merging -> %>
-            <h2 class="text-lg font-bold mb-4">Merging Species...</h2>
+            <h2 id="merge-dialog-title" class="merge-dialog-title">Merging Species...</h2>
             <div class="flex justify-center mb-4">
               <div class="loading-spinner"></div>
             </div>
           <% true -> %>
-            <h2 class="text-lg font-bold mb-4">Confirm Merge</h2>
-            <p class="text-sm mb-4" style="color: var(--color-text-secondary);">
-              You are about to merge "<em>{format_species_name(@preview.source)}</em>"
-              into "<em>{format_species_name(@preview.target)}</em>". This will:
+            <h2 id="merge-dialog-title" class="merge-dialog-title">Confirm Merge</h2>
+            <p class="merge-dialog-text">
+              You are about to merge <.sci_name name={format_species_name(@preview.source)} /> into
+              <.sci_name name={format_species_name(@preview.target)} />. This will:
             </p>
 
-            <ul class="space-y-2 mb-4">
-              <li :if={@synonyms_count > 0} class="flex items-start gap-2 text-sm">
-                <span style="color: var(--color-forest-600);">
-                  <.icon name="hero-check" class="size-5 flex-shrink-0" />
-                </span>
-                <span>Add {@synonyms_count} synonym(s) to {@preview.target.scientific_name}</span>
-              </li>
-              <li class="flex items-start gap-2 text-sm">
-                <span style="color: var(--color-forest-600);">
-                  <.icon name="hero-check" class="size-5 flex-shrink-0" />
-                </span>
-                <span>Update {@preview.target.scientific_name} with merged field values</span>
-              </li>
-              <li :if={@sources_to_transfer > 0} class="flex items-start gap-2 text-sm">
-                <span style="color: var(--color-forest-600);">
-                  <.icon name="hero-check" class="size-5 flex-shrink-0" />
-                </span>
-                <span>Transfer {@sources_to_transfer} source record(s)</span>
-              </li>
-              <li :if={@ref_count > 0} class="flex items-start gap-2 text-sm">
-                <span style="color: var(--color-forest-600);">
-                  <.icon name="hero-check" class="size-5 flex-shrink-0" />
-                </span>
+            <ul class="merge-dialog-steps">
+              <li :if={@synonyms_count > 0}>
+                <.icon name="hero-check" class="size-5 flex-shrink-0" />
                 <span>
-                  Update {@ref_count} other species that reference {@preview.source.scientific_name}
+                  Add {count_noun(@synonyms_count, "synonym", "synonyms")} to
+                  <.sci_name name={format_species_name(@preview.target)} />
                 </span>
               </li>
-              <li class="flex items-start gap-2 text-sm text-red-600">
+              <li>
+                <.icon name="hero-check" class="size-5 flex-shrink-0" />
+                <span>
+                  Update <.sci_name name={format_species_name(@preview.target)} />
+                  with merged field values
+                </span>
+              </li>
+              <li :if={@sources_to_transfer > 0}>
+                <.icon name="hero-check" class="size-5 flex-shrink-0" />
+                <span>
+                  Transfer {count_noun(@sources_to_transfer, "source record", "source records")}
+                </span>
+              </li>
+              <li :if={@ref_count > 0}>
+                <.icon name="hero-check" class="size-5 flex-shrink-0" />
+                <span>
+                  Update {@ref_count} other species that reference
+                  <.sci_name name={format_species_name(@preview.source)} />
+                </span>
+              </li>
+              <li class="merge-dialog-delete">
                 <.icon name="hero-x-mark" class="size-5 flex-shrink-0" />
-                <span>Delete "{format_species_name(@preview.source)}" permanently</span>
+                <span>Delete <.sci_name name={format_species_name(@preview.source)} /> permanently</span>
               </li>
             </ul>
 
-            <div
-              class="flex items-center gap-2 p-3 rounded-lg mb-4"
-              style="background-color: rgba(234, 179, 8, 0.1);"
-            >
-              <span style="color: #ca8a04;">
-                <.icon name="hero-exclamation-triangle" class="size-5 flex-shrink-0" />
-              </span>
-              <span class="text-sm font-medium" style="color: #a16207;">
-                This action cannot be undone.
-              </span>
-            </div>
+            <p class="merge-dialog-warn">
+              <.icon name="hero-exclamation-triangle" class="size-5 flex-shrink-0" />
+              This action cannot be undone.
+            </p>
 
-            <div class="flex justify-end gap-3">
-              <button
-                phx-click="cancel_confirm"
-                class="px-4 py-2 rounded-lg text-sm font-medium"
-                style="color: var(--color-text-secondary);"
-              >
-                Cancel
-              </button>
-              <button
-                phx-click="execute_merge"
-                class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
-                id="confirm-merge-btn"
-              >
+            <div class="merge-dialog-actions">
+              <.button phx-click="cancel_confirm">Cancel</.button>
+              <.button variant="primary" phx-click="execute_merge" id="confirm-merge-btn">
                 Confirm Merge
-              </button>
+              </.button>
             </div>
         <% end %>
       </div>
@@ -992,6 +867,73 @@ defmodule OaksWeb.SpeciesMergeLive do
   end
 
   # -- Helpers --
+
+  attr :name, :string, required: true
+
+  # A scientific name as text: the name words italic, the hybrid sign, rank
+  # words and the authority roman (the Botanical Italic Rule).
+  defp sci_name(assigns) do
+    assigns = assign(assigns, :html, name_html(assigns.name))
+
+    ~H"""
+    <span class="sci-name">{@html}</span>
+    """
+  end
+
+  attr :names, :list, required: true
+
+  # A comma list of scientific names, built as one run of text so no
+  # template whitespace opens a space before a comma.
+  defp sci_name_list(assigns) do
+    html =
+      assigns.names
+      |> Enum.map(fn name -> ["<span class=\"sci-name\">", name_iodata(name), "</span>"] end)
+      |> Enum.intersperse(", ")
+
+    assigns = assign(assigns, :html, Phoenix.HTML.raw(html))
+
+    ~H"""
+    {@html}
+    """
+  end
+
+  defp name_html(name), do: name |> name_iodata() |> Phoenix.HTML.raw()
+
+  defp name_iodata(name) do
+    name
+    |> name_parts()
+    |> Enum.map(fn
+      {:name, text} -> ["<i>", escape(text), "</i>"]
+      {:roman, text} -> escape(text)
+    end)
+  end
+
+  defp escape(text), do: text |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+
+  @rank_words ~w(× x var. subsp. ssp. f. nothosubsp. nothovar.)
+
+  # Splits a name into italic name words and roman words (hybrid sign, rank
+  # words, authority). The authority starts at the first word that isn't a
+  # lowercase epithet or a rank word, and runs to the end.
+  defp name_parts(name) do
+    name
+    |> String.replace(~r/^×(?=\S)/u, "× ")
+    |> String.split(" ", trim: true)
+    |> Enum.reduce({[], false}, fn word, {acc, in_authority} ->
+      cond do
+        in_authority -> {[{:roman, word} | acc], true}
+        word in @rank_words -> {[{:roman, word} | acc], false}
+        Regex.match?(~r/^\p{Ll}[\p{Ll}\d-]*$/u, word) -> {[{:name, word} | acc], false}
+        true -> {[{:roman, word} | acc], true}
+      end
+    end)
+    |> elem(0)
+    |> Enum.reverse()
+    |> Enum.intersperse({:roman, " "})
+  end
+
+  defp count_noun(1, singular, _plural), do: "1 #{singular}"
+  defp count_noun(n, _singular, plural), do: "#{n} #{plural}"
 
   defp initialize_edited_fields(target) do
     Map.new(@scalar_fields, fn field ->

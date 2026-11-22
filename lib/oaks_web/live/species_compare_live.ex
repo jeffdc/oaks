@@ -11,7 +11,6 @@ defmodule OaksWeb.SpeciesCompareLive do
   alias Oaks.Markdown
   alias Oaks.Species
   alias OaksWeb.Params
-  alias OaksWeb.SpeciesName
 
   @max_sources 4
 
@@ -110,20 +109,12 @@ defmodule OaksWeb.SpeciesCompareLive do
 
     ~H"""
     <div class="source-comparison-page">
-      <div :if={@not_found} class="text-center py-16">
-        <h1 class="text-2xl font-bold" style="color: var(--color-text-primary);">
+      <div :if={@not_found} class="source-comparison-missing">
+        <.back navigate={~p"/species"}>Back to Species List</.back>
+        <.header>
           Species Not Found
-        </h1>
-        <p class="mt-2" style="color: var(--color-text-secondary);">
-          Could not find the requested species.
-        </p>
-        <.link
-          navigate={~p"/species"}
-          class="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg text-white"
-          style="background-color: var(--color-forest-600); text-decoration: none;"
-        >
-          <.icon name="hero-arrow-left" class="size-4" /> Back to Species List
-        </.link>
+          <:subtitle>Could not find the requested species.</:subtitle>
+        </.header>
       </div>
 
       <div :if={@species} class="source-comparison-card">
@@ -142,12 +133,9 @@ defmodule OaksWeb.SpeciesCompareLive do
             fields={@fields}
           />
 
-          <div
-            :if={@all_sources == []}
-            class="source-comparison-empty"
-          >
-            <p>No source data available for this species.</p>
-          </div>
+          <p :if={@all_sources == []} class="source-comparison-empty">
+            No source data available for this species.
+          </p>
         </div>
       </div>
     </div>
@@ -161,18 +149,10 @@ defmodule OaksWeb.SpeciesCompareLive do
   defp comparison_header(assigns) do
     ~H"""
     <header class="comparison-header">
-      <.link
-        navigate={~p"/species/#{@species.scientific_name}"}
-        class="comparison-back-link"
-      >
-        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Back to species
-      </.link>
+      <.back navigate={~p"/species/#{@species.scientific_name}"}>Back to species</.back>
       <h1 class="comparison-title">
         <span class="comparison-title-prefix">Compare sources for</span>
-        <em class="species-name">{format_species_name(@species)}</em>
+        <.species_binomial species={@species} />
       </h1>
     </header>
     """
@@ -192,15 +172,14 @@ defmodule OaksWeb.SpeciesCompareLive do
           phx-click="toggle_source"
           phx-value-id={ss.source.id}
           class={["source-chip", ss.source.id in @selected_ids && "selected"]}
+          aria-pressed={to_string(ss.source.id in @selected_ids)}
         >
           {ss.source.name}
-          <span :if={ss.is_preferred} class="source-chip-star" title="Preferred source">
-            &#9733;
-          </span>
+          <span :if={ss.is_preferred} class="source-chip-note">preferred</span>
         </button>
       </div>
       <span :if={length(@sources) > 4} class="source-picker-hint">
-        (max 4 sources)
+        Up to 4 at once
       </span>
     </div>
     """
@@ -219,30 +198,18 @@ defmodule OaksWeb.SpeciesCompareLive do
       <div class="comparison-grid-header">
         <div class="comparison-field-label comparison-header-cell">Field</div>
         <div :for={ss <- @sources} class="comparison-source-header comparison-header-cell">
-          <span class="comparison-source-name">{ss.source.name}</span>
-          <span :if={ss.is_preferred} class="comparison-preferred-badge">&#9733;</span>
           <a
             :if={ss.source.url}
             href={ss.source.url}
             target="_blank"
             rel="noopener noreferrer"
-            class="comparison-source-link"
+            class="comparison-source-name"
             title="Visit source"
           >
-            <svg
-              class="size-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-              />
-            </svg>
+            {ss.source.name}
           </a>
+          <span :if={!ss.source.url} class="comparison-source-name">{ss.source.name}</span>
+          <span :if={ss.is_preferred} class="comparison-preferred-badge">Preferred source</span>
         </div>
       </div>
 
@@ -278,12 +245,31 @@ defmodule OaksWeb.SpeciesCompareLive do
     ~H"""
     <%= case @value do %>
       <% nil -> %>
-        <span class="comparison-no-data">&mdash;</span>
+        <.no_statement />
       <% {:text, text} -> %>
         <div class="comparison-text-content">{text}</div>
       <% {:html, html} -> %>
         <div class="prose-content prose-content-compact">{raw(html)}</div>
     <% end %>
+    """
+  end
+
+  attr :species, :any, required: true
+
+  # The whole binomial is italic; a named hybrid's sign stays roman.
+  defp species_binomial(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :sign,
+        hybrid_sign?(assigns.species.scientific_name, assigns.species.is_hybrid)
+      )
+
+    ~H"""
+    <span class="species-name">
+      <i :if={!@sign}>Quercus {epithet(@species.scientific_name)}</i>
+      <span :if={@sign}><i>Quercus</i> &times; <i>{epithet(@species.scientific_name)}</i></span>
+    </span>
     """
   end
 
@@ -312,7 +298,4 @@ defmodule OaksWeb.SpeciesCompareLive do
       get_source_value(ss, field) != nil
     end)
   end
-
-  defp format_species_name(species),
-    do: SpeciesName.full_name(species.scientific_name, species.is_hybrid)
 end

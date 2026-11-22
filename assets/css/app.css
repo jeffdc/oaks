@@ -2309,247 +2309,205 @@ a.badge:hover {
 }
 
 /* ==========================================================================
-   Source Comparison Page
-   Matches V1 SourceComparison.svelte layout exactly.
+   Source Comparison Page, Species List, Merge and Species Form
+   (item c49c, the bridge restyle onto DESIGN.md)
+
+   The comparison is DESIGN.md's comparison voice: a 140px trait column
+   and one column per source, rows on hairlines under a 2px head rule,
+   one labelled block per trait on phones. The species list is ruled rows
+   of italic names; the merge page lines the synonym and the target up in
+   the same trait-column grid, with the differs mark and the 3px ochre
+   underline on rows that differ.
    ========================================================================== */
 
-.source-comparison-page {
-  max-width: 80rem;
-  margin: 0 auto;
-  padding: 1.5rem 1rem;
-}
+/* --- Comparison ----------------------------------------------------------- */
 
-.source-comparison-card {
-  border-radius: 0.75rem;
-  overflow: hidden;
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-xl);
-}
-
-.source-comparison {
-  padding: 1.5rem;
-}
-
-/* Header */
 .comparison-header {
-  margin-bottom: 1.5rem;
+  padding-bottom: var(--spacing-s4);
+  margin-bottom: var(--spacing-s5);
+  border-bottom: 2px solid var(--color-rule-strong);
 }
 
-.comparison-back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.875rem;
-  color: var(--color-forest-700);
-  text-decoration: none;
-  margin-bottom: 0.75rem;
-  transition: color 0.15s ease;
-}
-
-.comparison-back-link:hover {
-  color: var(--color-forest-500);
+.comparison-header .oc-back {
+  margin-bottom: var(--spacing-s4);
 }
 
 .comparison-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-forest-900);
-  font-family: var(--font-serif);
   margin: 0;
+  font: 600 clamp(34px, 4vw, 50px)/1.05 var(--font-serif);
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  text-wrap: balance;
 }
 
-.comparison-title-prefix {
-  font-weight: 400;
-  font-style: normal;
-  color: var(--color-text-secondary);
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  display: block;
-  margin-bottom: 0.25rem;
-}
-
-/* Source picker */
+/* Source picker: DESIGN.md's option buttons. Pressed is ink with a small
+   ochre tick, as in the ID tool's trait controls. */
 .source-picker {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: var(--color-forest-50);
-  border-radius: 0.5rem;
-  border: 1px solid var(--color-forest-200);
+  gap: var(--spacing-s2) var(--spacing-s3);
+  padding-bottom: var(--spacing-s4);
+  margin-bottom: var(--spacing-s5);
+  border-bottom: 1px solid var(--color-rule);
 }
 
 .source-picker-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+  font: 700 14px/1.4 var(--font-frame);
+  color: var(--color-ink);
 }
 
 .source-picker-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--spacing-s2);
 }
 
 .source-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.5rem 0.875rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border: 1.5px solid var(--color-forest-300);
-  background-color: var(--color-surface);
-  color: var(--color-text-secondary);
+  gap: 6px;
+  font: 600 14px/1 var(--font-frame);
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border: 1.5px solid color-mix(in srgb, var(--color-ink) 40%, transparent);
+  padding: 9px 11px;
   cursor: pointer;
-  transition: all 0.15s ease;
 }
 
 .source-chip:hover {
-  border-color: var(--color-forest-500);
-  color: var(--color-forest-700);
+  border-color: var(--color-ink);
 }
 
 .source-chip.selected {
-  background-color: var(--color-forest-600);
-  border-color: var(--color-forest-600);
-  color: white;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-color: var(--color-ink);
 }
 
-.source-chip.selected:hover {
-  background-color: var(--color-forest-700);
-  border-color: var(--color-forest-700);
+.source-chip.selected::before {
+  content: "";
+  width: 8px;
+  height: 5px;
+  border-left: 2px solid var(--color-ochre);
+  border-bottom: 2px solid var(--color-ochre);
+  transform: rotate(-45deg);
+  margin: -3px 1px 0 0;
 }
 
-.source-chip-star {
-  font-size: 0.75rem;
-  color: var(--color-oak-brown);
+.source-chip-note {
+  font-weight: 500;
+  font-size: 12.5px;
+  color: var(--color-ink-3);
 }
 
-.source-chip.selected .source-chip-star {
-  color: #fef3c7;
+.source-chip.selected .source-chip-note {
+  color: color-mix(in srgb, var(--color-paper) 78%, transparent);
 }
 
 .source-picker-hint {
-  font-size: 0.75rem;
-  color: var(--color-text-tertiary);
+  font: 500 13px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
 }
 
-/* Comparison grid */
+/* The aligned grid */
 .comparison-grid {
   display: grid;
-  grid-template-columns: minmax(140px, 180px) repeat(var(--column-count), 1fr);
-  gap: 0;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  background-color: var(--color-surface);
+  grid-template-columns: 140px repeat(var(--column-count), minmax(0, 1fr));
 }
 
-.comparison-grid-header {
-  display: contents;
-}
-
-.comparison-header-cell {
-  padding: 0.875rem 1rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  background-color: var(--color-forest-100);
-  border-bottom: 2px solid var(--color-forest-300);
-  color: var(--color-forest-800);
-}
-
-.comparison-field-label {
-  padding: 0.875rem 1rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: var(--color-forest-700);
-  background-color: var(--color-forest-50);
-  border-right: 1px solid var(--color-border);
-}
-
-.comparison-source-header {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  border-right: 1px solid var(--color-border);
-}
-
-.comparison-source-header:last-child {
-  border-right: none;
-}
-
-.comparison-source-name {
-  white-space: nowrap;
-}
-
-.comparison-preferred-badge {
-  font-size: 0.75rem;
-  color: var(--color-oak-brown);
-}
-
-.comparison-source-link {
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-text-tertiary);
-  padding: 0.125rem;
-  border-radius: 0.25rem;
-  transition: all 0.15s ease;
-}
-
-.comparison-source-link:hover {
-  color: var(--color-forest-600);
-  background-color: var(--color-forest-200);
-}
-
-/* Table rows */
+.comparison-grid-header,
 .comparison-row {
   display: contents;
 }
 
-.comparison-row:nth-child(even) .comparison-field-label,
-.comparison-row:nth-child(even) .comparison-value-cell {
-  background-color: var(--color-background);
+.comparison-grid-header .comparison-header-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 0 var(--spacing-s5) var(--spacing-s3) 0;
+  border-bottom: 2px solid var(--color-rule-strong);
+}
+
+.comparison-grid-header .comparison-field-label {
+  font: 800 13px/1.2 var(--font-frame);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.comparison-source-name {
+  font: 700 17px/1.25 var(--font-frame);
+  color: var(--color-ink);
+}
+
+a.comparison-source-name {
+  color: var(--color-pencil);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-pencil) 40%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a.comparison-source-name:hover {
+  text-decoration-color: var(--color-pencil);
+}
+
+.comparison-preferred-badge {
+  font: 600 13px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
 }
 
 .comparison-row .comparison-field-label,
-.comparison-row .comparison-value-cell {
-  border-bottom: 1px solid var(--color-border);
+.comparison-value-cell {
+  padding: var(--spacing-s4) var(--spacing-s5) var(--spacing-s4) 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.comparison-row .comparison-field-label {
+  font: 700 15px/1.45 var(--font-frame);
+  color: var(--color-ink);
 }
 
 .comparison-value-cell {
-  padding: 0.875rem 1rem;
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  color: var(--color-text-primary);
-  border-right: 1px solid var(--color-border);
+  font: 400 16px/1.55 var(--font-serif);
+  color: var(--color-ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
-.comparison-value-cell:last-child {
-  border-right: none;
+.comparison-value-cell:last-child,
+.comparison-header-cell:last-child {
+  padding-right: 0;
 }
 
-.comparison-no-data {
-  color: var(--color-text-tertiary);
-  font-style: italic;
+.comparison-value-cell .prose-content {
+  font-size: 16px;
+  max-width: none;
 }
 
-.comparison-text-content {
-  line-height: 1.5;
+.comparison-value-cell .prose-content > :first-child {
+  margin-top: 0;
 }
 
-/* Empty state */
+.comparison-value-cell .prose-content > :last-child {
+  margin-bottom: 0;
+}
+
 .source-comparison-empty {
-  text-align: center;
-  padding: 3rem;
-  color: var(--color-text-secondary);
+  margin: 0;
+  padding: var(--spacing-s5) 0;
+  font: italic 400 17px/1.5 var(--font-serif);
+  color: var(--color-ink-3);
 }
 
-/* Responsive: stack on mobile */
-@media (max-width: 768px) {
+.source-comparison-missing .oc-back {
+  margin-bottom: var(--spacing-s4);
+}
+
+/* Phones: one labelled block per trait */
+@media (max-width: 760px) {
   .comparison-grid {
     display: block;
   }
@@ -2560,35 +2518,654 @@ a.badge:hover {
 
   .comparison-row {
     display: block;
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
-    overflow: hidden;
+    padding-top: var(--spacing-s3);
+    border-top: 2px solid var(--color-rule-strong);
+  }
+
+  .comparison-row + .comparison-row {
+    margin-top: var(--spacing-s5);
   }
 
   .comparison-row .comparison-field-label {
-    display: block;
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--color-border);
-    background-color: var(--color-forest-100);
-    font-weight: 700;
+    padding: 0 0 var(--spacing-s1);
+    border-bottom: 0;
   }
 
   .comparison-row .comparison-value-cell {
     display: block;
-    border-right: none;
-    padding: 0.75rem 1rem;
+    padding: var(--spacing-s3) 0;
+  }
+
+  .comparison-row .comparison-value-cell:last-child {
+    border-bottom: 0;
   }
 
   .comparison-row .comparison-value-cell::before {
     content: attr(data-source);
     display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-forest-600);
-    margin-bottom: 0.25rem;
+    margin-bottom: var(--spacing-s1);
+    font: 600 13px/1.3 var(--font-frame);
+    color: var(--color-ink-3);
   }
+}
+
+/* --- Species list --------------------------------------------------------- */
+
+.species-counts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-s1) var(--spacing-s4);
+  font: 500 15px/1.4 var(--font-frame);
+  color: var(--color-ink-2);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.species-counts > :last-child {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.species-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-s3);
+  margin-bottom: var(--spacing-s5);
+}
+
+@media (min-width: 640px) {
+  .species-filters {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.species-filters .input,
+.species-filters .select {
+  width: 100%;
+  max-width: none;
+}
+
+/* The magnifier sits above the field (bug a590: daisyUI's input painted
+   over it). */
+.species-search {
+  position: relative;
+}
+
+.species-search-icon {
+  position: absolute;
+  z-index: 1;
+  left: 12px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  color: var(--color-ink-3);
+  pointer-events: none;
+}
+
+.species-search .input {
+  padding-left: 38px;
+}
+
+.species-rows {
+  border-top: 1px solid var(--color-rule);
+}
+
+.species-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-s4);
+  padding: var(--spacing-s3) 0;
+  border-bottom: 1px solid var(--color-rule);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+/* The hover tint reaches a little past the frame so the text doesn't sit
+   on its edge; the hairlines stay on the frame. */
+.species-row:hover {
+  background: var(--color-paper-2);
+  box-shadow:
+    calc(var(--spacing-s2) * -1) 0 0 var(--color-paper-2),
+    var(--spacing-s2) 0 0 var(--color-paper-2);
+  text-decoration: none;
+}
+
+.species-row-name {
+  min-width: 0;
+  font: 400 18px/1.3 var(--font-serif);
+  color: var(--color-ink);
+}
+
+.species-row-name i {
+  font-weight: 600;
+}
+
+.species-row:hover .species-row-name i {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.species-row-author {
+  margin-left: 6px;
+  font-size: 15px;
+  color: var(--color-ink-3);
+}
+
+.species-row-meta {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--spacing-s3);
+  font: 500 13px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
+/* Rank names are italic in the serif; the rank word stays roman. */
+.species-row-rank i {
+  font: italic 400 14px/1.3 var(--font-serif);
+}
+
+.species-empty {
+  padding: var(--spacing-s7) 0;
+  font: 500 14px/1.5 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
+.species-empty p {
+  margin: 0;
+}
+
+.species-empty .species-empty-title {
+  margin-bottom: var(--spacing-s1);
+  font: italic 400 20px/1.4 var(--font-serif);
+  color: var(--color-ink-2);
+}
+
+/* --- Merge ---------------------------------------------------------------- */
+
+/* Scientific names set inside frame text: the name words in the serif
+   italic, the sign, rank words and authority in the surrounding face. */
+.sci-name i {
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+.merge-title .merge-title-source {
+  color: var(--color-ink-2);
+}
+
+.merge-title-arrow {
+  color: var(--color-ink-3);
+  font-weight: 400;
+}
+
+.merge-muted {
+  color: var(--color-ink-2);
+}
+
+.merge-error-state .oc-back {
+  margin-bottom: var(--spacing-s4);
+}
+
+/* Synonym | copy | target, under a 140px trait column. Column heads show
+   only where the grid does; on phones each value carries its label. */
+.merge-cols,
+.merge-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-s2) var(--spacing-s3);
+}
+
+.merge-cols {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .merge-cols,
+  .merge-row {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr) 36px minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .merge-cols {
+    margin-bottom: var(--spacing-s5);
+    align-items: end;
+  }
+}
+
+.merge-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.merge-col-name {
+  font: 600 24px/1.15 var(--font-serif);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.merge-col-role {
+  font: 600 14px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
+.merge-col-name:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.merge-row {
+  padding: var(--spacing-s3) 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+/* Rows that differ: the differs mark by the trait name and the 3px ochre
+   underline along the row's bottom edge. */
+.merge-row-differs {
+  background: linear-gradient(var(--color-ochre), var(--color-ochre)) left bottom / 100% 3px
+    no-repeat;
+}
+
+.merge-row-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font: 700 15px/1.45 var(--font-frame);
+  color: var(--color-ink);
+}
+
+.merge-row-source {
+  min-width: 0;
+  padding: 10px 0;
+  font: 500 15px/1.4 var(--font-frame);
+  color: var(--color-ink-2);
+  overflow-wrap: anywhere;
+}
+
+.merge-row-copy {
+  display: flex;
+  justify-content: center;
+  min-height: 1px;
+}
+
+.merge-copy-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--color-ink);
+  background: transparent;
+  border: 1.5px solid var(--color-ink);
+  cursor: pointer;
+}
+
+.merge-copy-btn:hover {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+@media (max-width: 767px) {
+  .merge-row-label {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-s3);
+  }
+
+  .merge-row-source::before,
+  .merge-row-target::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    font: 800 12px/1.2 var(--font-frame);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink-3);
+  }
+
+  .merge-row-source {
+    padding: 0;
+  }
+
+  .merge-row-copy {
+    justify-content: flex-start;
+  }
+
+  .merge-copy-btn .hero-arrow-right {
+    transform: rotate(90deg);
+  }
+}
+
+.merge-subhead {
+  margin: var(--spacing-s6) 0 var(--spacing-s2);
+  font: 800 13px/1.2 var(--font-frame);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.merge-synonyms {
+  margin: 0;
+  font: 400 16px/1.5 var(--font-serif);
+  color: var(--color-ink);
+}
+
+.merge-lede {
+  margin: 0 0 var(--spacing-s3);
+  font: 500 15px/1.5 var(--font-frame);
+  color: var(--color-ink-2);
+}
+
+.merge-empty {
+  margin: var(--spacing-s3) 0 0;
+  font: italic 400 16px/1.5 var(--font-serif);
+  color: var(--color-ink-3);
+}
+
+/* Sources only the synonym has: a checklist on hairlines */
+.merge-source {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.merge-source-label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s3);
+  padding: var(--spacing-s3) 0;
+  cursor: pointer;
+}
+
+.merge-source-label input {
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  accent-color: var(--color-ink);
+}
+
+.merge-source-name {
+  font: 700 15px/1.4 var(--font-frame);
+  color: var(--color-ink);
+}
+
+.merge-source-preview {
+  margin-top: 4px;
+  display: grid;
+  gap: 2px;
+  font: 400 14px/1.45 var(--font-serif);
+  color: var(--color-ink-2);
+}
+
+/* The source's own words are serif, as it wrote them; the labels are frame. */
+.merge-source-preview-label {
+  font: 600 13px/1.45 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
+/* References to update: a section label that opens and closes, with a
+   drawn chevron */
+.merge-refs {
+  margin-bottom: var(--spacing-s6);
+}
+
+.merge-refs-title {
+  margin: 0;
+  border-bottom: 2px solid var(--color-rule-strong);
+}
+
+.merge-refs-toggle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-s3);
+  width: 100%;
+  padding: 0 0 var(--spacing-s2);
+  font: 800 15px/1.2 var(--font-frame);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--color-ink);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.merge-refs-toggle::after {
+  content: "";
+  align-self: center;
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.merge-refs-toggle[aria-expanded="true"]::after {
+  transform: translateY(2px) rotate(-135deg);
+}
+
+.merge-refs-count {
+  font: 500 13px/1.2 var(--font-frame);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-ink-3);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.merge-refs-body {
+  padding-top: var(--spacing-s3);
+}
+
+.merge-ref-group .merge-subhead {
+  margin-top: var(--spacing-s4);
+}
+
+.merge-ref-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.merge-ref-list li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-s2);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-rule);
+  font: 400 16px/1.4 var(--font-serif);
+  color: var(--color-ink);
+}
+
+.merge-ref-type {
+  font: 500 13px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
+/* Notices: statements on rules. A warning stands between two 2px ink
+   rules (the not-covered notice) with a drawn warning glyph; the others
+   sit on a hairline. */
+.merge-notice {
+  padding: var(--spacing-s4) 0;
+  border-top: 1px solid var(--color-rule);
+  font: 500 15px/1.5 var(--font-frame);
+  color: var(--color-ink-2);
+}
+
+.merge-notice-warn {
+  border-top: 2px solid var(--color-rule-strong);
+  border-bottom: 2px solid var(--color-rule-strong);
+}
+
+.merge-notice-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s2);
+  margin: 0 0 4px;
+  font: 800 15px/1.3 var(--font-frame);
+  color: var(--color-ink);
+}
+
+.merge-notice-text {
+  margin: 0 0 var(--spacing-s2);
+  max-width: 70ch;
+}
+
+.merge-notice-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: square;
+  font: 400 16px/1.5 var(--font-serif);
+  color: var(--color-ink);
+}
+
+.merge-notice-list li::marker {
+  color: var(--color-ink-3);
+}
+
+.merge-notice-foot {
+  margin: var(--spacing-s2) 0 0;
+  font-size: 13px;
+  color: var(--color-ink-3);
+}
+
+.merge-issue {
+  padding: var(--spacing-s2) 0;
+  border-bottom: 1px solid var(--color-rule);
+  color: var(--color-ink);
+}
+
+.merge-issue em {
+  font-family: var(--font-serif);
+}
+
+.merge-issue-hint {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--color-ink-3);
+}
+
+/* The action bar stays in reach at the bottom of the screen: flat, on a
+   2px ink rule. */
+.merge-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-s3);
+  margin-top: var(--spacing-s6);
+  padding: var(--spacing-s3) 0;
+  background: var(--color-paper);
+  border-top: 2px solid var(--color-rule-strong);
+}
+
+/* Confirm dialog: the ink wash, and the one bordered panel */
+.merge-dialog {
+  background: color-mix(in srgb, var(--color-ink) 65%, transparent);
+}
+
+.merge-dialog-title {
+  margin: 0 0 var(--spacing-s4);
+  font: 600 26px/1.1 var(--font-serif);
+  color: var(--color-ink);
+}
+
+.merge-dialog-text {
+  margin: 0 0 var(--spacing-s4);
+  font: 500 15px/1.5 var(--font-frame);
+  color: var(--color-ink-2);
+}
+
+.merge-dialog-text .sci-name {
+  color: var(--color-ink);
+}
+
+.merge-dialog-error {
+  margin: 0 0 var(--spacing-s4);
+  padding: var(--spacing-s3) var(--spacing-s4);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font: 600 14px/1.45 var(--font-frame);
+  overflow-wrap: anywhere;
+}
+
+.merge-dialog-steps {
+  margin: 0 0 var(--spacing-s4);
+  padding: 0;
+  list-style: none;
+}
+
+.merge-dialog-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s2);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-rule);
+  font: 500 14px/1.45 var(--font-frame);
+  color: var(--color-ink);
+}
+
+.merge-dialog-steps .merge-dialog-delete {
+  font-weight: 800;
+}
+
+.merge-dialog-warn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s2);
+  margin: 0 0 var(--spacing-s5);
+  font: 800 14px/1.4 var(--font-frame);
+  color: var(--color-ink);
+}
+
+.merge-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--spacing-s3);
+}
+
+/* --- Species form --------------------------------------------------------- */
+
+.species-form-title {
+  margin-top: var(--spacing-s4);
+}
+
+.species-form-sections {
+  display: grid;
+  gap: var(--spacing-s7);
+}
+
+/* The grids and stacks set the space between fields; the field's own
+   bottom margin would double it. */
+.species-form-sections .oc-field {
+  margin-bottom: 0;
+}
+
+.species-form-stack {
+  display: grid;
+  gap: var(--spacing-s4);
+}
+
+.species-form-note {
+  margin: 6px 0 0;
+}
+
+.species-form-lede {
+  margin: 0 0 var(--spacing-s4);
+}
+
+.species-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--spacing-s3);
+  padding-top: var(--spacing-s4);
+  border-top: 2px solid var(--color-rule-strong);
 }
 
 /* Species detail dialogs (delete, delete source data, Make synonym of):
