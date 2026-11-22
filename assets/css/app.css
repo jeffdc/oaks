@@ -242,6 +242,17 @@ a:where([class*="text-forest-6"], [class*="text-forest-7"], [style*="color: var(
   border-color: var(--color-ink);
 }
 
+/* daisyUI's select draws a filled caret; it takes the system select's
+   drawn chevron instead (assets/css/system/components.css). */
+select.select {
+  appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23161616' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px 6px;
+}
+
 /* ============================================
    Prose Content (rendered markdown: articles, taxon write-ups, source
    text, previews). DESIGN.md reading text: Source Serif 4 at 17px with
@@ -299,6 +310,14 @@ a:where([class*="text-forest-6"], [class*="text-forest-7"], [style*="color: var(
 
 .prose-content strong {
   font-weight: 600;
+}
+
+/* Highlighted text is an ochre fill, the one committed field colour, not
+   the browser's yellow. */
+.prose-content mark {
+  background: var(--color-ochre);
+  color: var(--color-ink);
+  padding: 0 2px;
 }
 
 .prose-content em {
