@@ -1,19 +1,21 @@
 <.error_page
-  status="403"
   title="Request refused"
   description="The Oak Compendium refused this request."
+  path={requested_path(assigns)}
 >
-  The Compendium refused this request. Most often a form was left open too long and its security check expired: go back, reload the page and send the form again. If you edit the Compendium, you may need to log in again.
-  <:actions>
-    <.button :if={back_href(assigns)} href={back_href(assigns)} variant="primary">
-      Go back
-    </.button>
-    <.button
-      href={~p"/users/log-in"}
-      variant={if back_href(assigns), do: "ghost", else: "primary"}
-    >
-      Log in
-    </.button>
-    <.button href={~p"/"}>Home</.button>
-  </:actions>
+  <.error_notice status="403" title="Request refused">
+    The Compendium refused this request. Most often a form was left open too long and its security check expired: go back, reload the page and send the form again. If you edit the Compendium, you may need to log in again.
+    <:actions>
+      <.button :if={back_href(assigns)} href={back_href(assigns)} variant="primary">
+        Go back
+      </.button>
+      <.button
+        href={~p"/users/log-in"}
+        variant={if back_href(assigns), do: "ghost", else: "primary"}
+      >
+        Log in
+      </.button>
+      <.button href={~p"/"}>Home</.button>
+    </:actions>
+  </.error_notice>
 </.error_page>

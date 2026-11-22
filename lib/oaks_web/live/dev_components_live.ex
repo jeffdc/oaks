@@ -477,6 +477,42 @@ defmodule OaksWeb.DevComponentsLive do
             </.page>
           </div>
         </section>
+
+        <section class="mt-s8">
+          <.section_heading id="not-found">
+            Not found and errors<:note>the 404, 403 and 500 pages, at the reading measure</:note>
+          </.section_heading>
+          <p class="max-w-[68ch]">
+            Shown only with a real error status, in the site's masthead and footer. A LiveView that
+            finds nothing at its address raises <code>OaksWeb.NotFoundError</code>
+            with a kind (page, species, taxon, source or article), which picks the title, the line
+            and the index offered; an address with no route is a page. Below: a species asked for
+            under a mistyped name, with a page to go back to. The 403 and 500 are the same notice
+            with their own words.
+          </p>
+          <div class="mt-s5 border border-dashed border-rule">
+            <.page id="gallery-page-not-found" width="read">
+              <.not_found
+                id="gallery-not-found"
+                kind={:species}
+                path="/species/shumardi-typo"
+                query="shumardi-typo"
+                back={~p"/dev/components"}
+              />
+            </.page>
+          </div>
+          <div class="mt-s5 border border-dashed border-rule">
+            <.page id="gallery-page-error" width="read">
+              <.error_notice id="gallery-error-notice" status="500" title="Something went wrong">
+                The Compendium hit an error and couldn’t show this page. It wasn’t anything you did.
+                Try again in a moment, or start again from the home page.
+                <:actions>
+                  <.button href={~p"/"} variant="primary">Home</.button>
+                </:actions>
+              </.error_notice>
+            </.page>
+          </div>
+        </section>
       </.page>
     </main>
 

@@ -38,9 +38,12 @@ defmodule OaksWeb.Layouts do
 
   Both attrs are read tolerantly: a page without a logged-in user or a
   known path still gets the full masthead, with no item marked current.
+  `shortcut={false}` leaves out the search's "/" key hint, for a page that
+  loads no script (the error pages), where the key does nothing.
   """
   attr :current_scope, :any, default: nil, doc: "the `Oaks.Accounts.Scope`, or nil"
   attr :current_path, :string, default: nil, doc: "the request path, for the current item"
+  attr :shortcut, :boolean, default: true, doc: "show the \"/\" key hint (app.js binds it)"
 
   def site_header(assigns) do
     assigns = assign(assigns, :nav, @nav)
@@ -95,9 +98,9 @@ defmodule OaksWeb.Layouts do
             placeholder="Name, common name or synonym"
             autocomplete="off"
             spellcheck="false"
-            aria-keyshortcuts="/"
+            aria-keyshortcuts={@shortcut && "/"}
           />
-          <kbd aria-hidden="true">/</kbd>
+          <kbd :if={@shortcut} aria-hidden="true">/</kbd>
         </form>
       </div>
     </header>

@@ -542,4 +542,97 @@ defmodule OaksWeb.DesignComponentsTest do
     assert html =~ ~s(<span class="oc-empty">)
     assert html =~ "No statement yet"
   end
+
+  describe "error_notice/1" do
+    test "sets the title on the rule with the status stamped, the passage and the ways on" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.error_notice id="e" status="500" title="Something went wrong" back="/x">
+          It broke.
+          <:actions><a href="/">Home</a></:actions>
+        </DesignComponents.error_notice>
+        """)
+
+      assert html =~ ~s(<section id="e" class="oc-error-notice">)
+      assert html =~ ~r{<h1>\s*Something went wrong\s*</h1>}
+      assert html =~ ~r{<span class="oc-status ?" title="HTTP status 500">Error 500</span>}
+      assert html =~ "It broke."
+      assert html =~ ~r{<a href="/">Home</a>\s*<a href="/x" class="oc-btn">\s*Go back\s*</a>}
+    end
+
+    test "has no Go back without a page to go back to" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.error_notice status="403" title="Request refused">
+          No.
+          <:actions><a href="/">Home</a></:actions>
+        </DesignComponents.error_notice>
+        """)
+
+      refute html =~ "Go back"
+    end
+  end
+
+  describe "not_found/1" do
+    test "names the address asked for, with a search and the species list" do
+      html = render_component(&DesignComponents.not_found/1, path: "/no-such-page")
+
+      assert html =~ ~s(id="not-found")
+      assert html =~ ~r{<h1>\s*Page not found\s*</h1>}
+      assert html =~ "Error 404"
+      assert html =~ "There’s no page at"
+      assert html =~ "/no-such-page</span>."
+      assert html =~ ~s(<form action="/search" method="get" role="search")
+
+      assert html =~
+               ~s(<label for="not-found-search" class="oc-label">Search the Compendium</label>)
+
+      assert html =~ ~s(<button class="oc-btn oc-btn-primary" type="submit">)
+      assert html =~ ~r{<a href="/species" class="oc-btn">\s*Species list\s*</a>}
+      assert html =~ ~r{<a href="/" class="oc-btn">\s*Home\s*</a>}
+      refute html =~ "Go back"
+    end
+
+    test "each kind has its own title and index" do
+      for {kind, title, index, label} <- [
+            {:species, "Species not found", "/species", "Species list"},
+            {:taxon, "Taxon not found", "/taxonomy", "Taxonomy"},
+            {:source, "Source not found", "/sources", "Sources"},
+            {:article, "Article not found", "/articles", "Articles"}
+          ] do
+        html = render_component(&DesignComponents.not_found/1, kind: kind, path: "/x")
+
+        assert html =~ ~r{<h1>\s*#{title}\s*</h1>}, title
+        assert html =~ ~r{<a href="#{index}" class="oc-btn">\s*#{label}\s*</a>}, title
+        assert DesignComponents.not_found_title(kind) == title
+      end
+    end
+
+    test "fills in the search, escapes the address and offers Go back" do
+      html =
+        render_component(&DesignComponents.not_found/1,
+          id: "nf",
+          kind: :species,
+          path: "/species/<albaa>",
+          query: "albaa",
+          back: "https://oakcompendium.org/species"
+        )
+
+      assert html =~ ~s(id="nf-search")
+      assert html =~ ~s(value="albaa")
+      assert html =~ "/species/&lt;albaa&gt;"
+      refute html =~ "<albaa>"
+      assert html =~ ~s(href="https://oakcompendium.org/species")
+      assert html =~ "Go back"
+    end
+
+    test "without an address it reads this address" do
+      html = render_component(&DesignComponents.not_found/1, kind: :article)
+      assert html =~ "There’s no article at this address."
+    end
+  end
 end

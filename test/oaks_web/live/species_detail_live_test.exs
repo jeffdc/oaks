@@ -194,15 +194,19 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
   end
 
   describe "not found" do
-    test "shows not found for unknown species", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/nonexistent")
-      assert html =~ "Species not found"
-      assert html =~ "Back to species list"
+    test "an unknown species is a 404 with the not-found page", %{conn: conn} do
+      {404, _headers, html} =
+        assert_error_sent 404, fn -> get(conn, ~p"/species/nonexistent") end
+
+      assert html =~ "<title>Species not found · Oak Compendium</title>"
+      assert html =~ ~r{<h1>\s*Species not found\s*</h1>}
+      assert html =~ "/species/nonexistent"
+      assert html =~ ~s(value="nonexistent")
+      assert html =~ ~r{<a href="/species" class="oc-btn">\s*Species list\s*</a>}
     end
 
-    test "not found page has link back to list", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/nonexistent")
-      assert html =~ ~s(href="/species")
+    test "the LiveView raises the not-found error", %{conn: conn} do
+      assert_raise OaksWeb.NotFoundError, fn -> live(conn, ~p"/species/nonexistent") end
     end
   end
 

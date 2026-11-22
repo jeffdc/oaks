@@ -3,7 +3,8 @@ defmodule OaksWeb.ArticleLive do
   LiveView for displaying a single article.
 
   Renders article content from markdown to HTML. Shows edit/delete
-  buttons for logged-in users. Handles not-found articles.
+  buttons for logged-in users. A slug with no article (or, logged out, no
+  published one) raises `OaksWeb.NotFoundError`, a real 404.
   """
 
   use OaksWeb, :live_view
@@ -16,7 +17,6 @@ defmodule OaksWeb.ArticleLive do
      assign(socket,
        page_title: "Article",
        article: nil,
-       not_found: false,
        rendered_content: "",
        tags: [],
        confirm_delete: false
@@ -29,18 +29,12 @@ defmodule OaksWeb.ArticleLive do
 
     case Articles.get_article_by_slug(slug, editor?) do
       nil ->
-        {:noreply,
-         assign(socket,
-           article: nil,
-           not_found: true,
-           page_title: "Article Not Found"
-         )}
+        raise OaksWeb.NotFoundError, kind: :article
 
       article ->
         {:noreply,
          assign(socket,
            article: article,
-           not_found: false,
            rendered_content: Articles.render_markdown(article.content),
            tags: Articles.parse_tags(article.tags),
            page_title: article.title,
@@ -79,7 +73,6 @@ defmodule OaksWeb.ArticleLive do
   def render(assigns) do
     ~H"""
     <.page width="read">
-      <:head :if={@not_found}><.not_found_view /></:head>
       <:head :if={@article}>
         <.article_header
           article={@article}
@@ -95,18 +88,6 @@ defmodule OaksWeb.ArticleLive do
         <.delete_modal :if={@confirm_delete} article={@article} />
       </div>
     </.page>
-    """
-  end
-
-  # -- Not Found --
-
-  defp not_found_view(assigns) do
-    ~H"""
-    <.header>
-      Article Not Found
-      <:subtitle>The article you're looking for doesn't exist or hasn't been published.</:subtitle>
-    </.header>
-    <.back navigate={~p"/articles"}>Back to Articles</.back>
     """
   end
 

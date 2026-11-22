@@ -4,6 +4,7 @@ defmodule OaksWeb.SourceDetailLive do
 
   Shows source metadata (type, author, year, URL, ISBN) with description
   and notes, a coverage count, and a list of species associated with the source.
+  An id that names no source raises `OaksWeb.NotFoundError`, a real 404.
   """
 
   use OaksWeb, :live_view
@@ -17,7 +18,6 @@ defmodule OaksWeb.SourceDetailLive do
        page_title: "Source",
        source: nil,
        species: [],
-       not_found: false,
        show_delete_confirm: false
      )}
   end
@@ -29,12 +29,7 @@ defmodule OaksWeb.SourceDetailLive do
         load_source(socket, id)
 
       _ ->
-        {:noreply,
-         assign(socket,
-           source: nil,
-           not_found: true,
-           page_title: "Source Not Found"
-         )}
+        raise OaksWeb.NotFoundError, kind: :source
     end
   end
 
@@ -77,8 +72,6 @@ defmodule OaksWeb.SourceDetailLive do
   def render(assigns) do
     ~H"""
     <.page>
-      <.not_found_view :if={@not_found} />
-
       <:head :if={@source}>
         <.back navigate={~p"/sources"}>Back to Sources</.back>
         <.source_header source={@source} editor={@current_scope != nil} />
@@ -100,18 +93,6 @@ defmodule OaksWeb.SourceDetailLive do
   end
 
   # -- Page sections --
-
-  defp not_found_view(assigns) do
-    ~H"""
-    <div>
-      <.header>
-        Source Not Found
-        <:subtitle>The source you're looking for doesn't exist in our database.</:subtitle>
-      </.header>
-      <.back navigate={~p"/sources"}>Back to Sources</.back>
-    </div>
-    """
-  end
 
   attr :source, :any, required: true
   attr :editor, :boolean, default: false
@@ -227,13 +208,7 @@ defmodule OaksWeb.SourceDetailLive do
   defp load_source(socket, id) do
     case Sources.get_source(id) do
       nil ->
-        {:noreply,
-         assign(socket,
-           source: nil,
-           species: [],
-           not_found: true,
-           page_title: "Source Not Found"
-         )}
+        raise OaksWeb.NotFoundError, kind: :source
 
       source ->
         species = Sources.get_species_for_source(id)
@@ -242,7 +217,6 @@ defmodule OaksWeb.SourceDetailLive do
          assign(socket,
            source: source,
            species: species,
-           not_found: false,
            page_title: source.name
          )}
     end

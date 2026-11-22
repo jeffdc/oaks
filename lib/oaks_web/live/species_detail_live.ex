@@ -4,7 +4,8 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   Shows species taxonomy, relationships (hybrids, related species, synonyms),
   and per-source descriptive data with tab-based source selection.
-  Handles synonym redirects and 404 for unknown species.
+  A synonym's address redirects to its species; an unknown name raises
+  `OaksWeb.NotFoundError`, a real 404 (the not-found page).
   """
 
   use OaksWeb, :live_view
@@ -21,7 +22,6 @@ defmodule OaksWeb.SpeciesDetailLive do
      assign(socket,
        page_title: "Species",
        species: nil,
-       not_found: false,
        hybrids: [],
        closely_related: [],
        subspecies_varieties: [],
@@ -176,8 +176,6 @@ defmodule OaksWeb.SpeciesDetailLive do
   def render(assigns) do
     ~H"""
     <.page class="species-detail">
-      <.not_found_view :if={@not_found} />
-
       <div :if={@species}>
         <.species_header species={@species} editor={@current_scope != nil} />
 
@@ -256,20 +254,6 @@ defmodule OaksWeb.SpeciesDetailLive do
         target={@delete_source_target}
       />
     </.page>
-    """
-  end
-
-  # -- Page sections --
-
-  defp not_found_view(assigns) do
-    ~H"""
-    <div>
-      <.header>
-        Species not found
-        <:subtitle>The species you're looking for doesn't exist in our database.</:subtitle>
-      </.header>
-      <.back navigate={~p"/species"}>Back to species list</.back>
-    </div>
     """
   end
 
@@ -862,7 +846,6 @@ defmodule OaksWeb.SpeciesDetailLive do
        species_sources: species_sources,
        can_add_source: Sources.available_sources_for_species(species.id) != [],
        selected_source: selected_source,
-       not_found: false,
        page_title: SpeciesName.full_name(species.scientific_name, species.is_hybrid)
      )}
   end
@@ -870,12 +853,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   defp handle_not_found(socket, name) do
     case Species.find_synonym(name) do
       nil ->
-        {:noreply,
-         assign(socket,
-           species: nil,
-           not_found: true,
-           page_title: "Species Not Found"
-         )}
+        raise OaksWeb.NotFoundError, kind: :species, query: name
 
       canonical ->
         {:noreply, push_navigate(socket, to: ~p"/species/#{canonical.scientific_name}")}

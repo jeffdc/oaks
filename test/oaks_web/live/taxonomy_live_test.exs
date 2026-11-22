@@ -164,20 +164,19 @@ defmodule OaksWeb.TaxonomyLiveTest do
   end
 
   describe "invalid paths" do
-    test "shows not found for nonexistent taxon", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Nonexistent")
-      assert html =~ "Taxon Not Found"
+    test "a nonexistent taxon is a 404 with the not-found page", %{conn: conn} do
+      {404, _headers, html} = assert_error_sent 404, fn -> get(conn, "/taxonomy/Nonexistent") end
+
+      assert html =~ "<title>Taxon not found · Oak Compendium</title>"
+      assert html =~ ~r{<h1>\s*Taxon not found\s*</h1>}
+      assert html =~ "/taxonomy/Nonexistent"
+      assert html =~ ~r{<a href="/taxonomy" class="oc-btn">\s*Taxonomy\s*</a>}
+      assert_raise OaksWeb.NotFoundError, fn -> live(conn, "/taxonomy/Nonexistent") end
     end
 
-    test "shows not found for path too deep", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/a/b/c/d/e")
-      assert html =~ "Taxon Not Found"
-    end
-
-    test "not found page links back to taxonomy root", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Nonexistent")
-      assert html =~ ~s(href="/taxonomy")
-      assert html =~ "Return to taxonomy browser"
+    test "a path too deep is a 404", %{conn: conn} do
+      {404, _headers, html} = assert_error_sent 404, fn -> get(conn, "/taxonomy/a/b/c/d/e") end
+      assert html =~ ~r{<h1>\s*Taxon not found\s*</h1>}
     end
   end
 
@@ -235,8 +234,8 @@ defmodule OaksWeb.TaxonomyLiveTest do
       assert html =~ group
       assert html =~ "Complexes"
 
+      # The complex is found: a path naming no taxon would raise (a 404).
       {:ok, _view, html} = live(conn, ~p"/taxonomy/#{ctx.l}/#{ctx.l}/#{group}")
-      refute html =~ "Taxon Not Found"
       assert html =~ ctx.velutina
     end
 
