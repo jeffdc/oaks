@@ -150,32 +150,23 @@ defmodule OaksWeb.ArticleFormLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div :if={@form == nil} class="max-w-5xl mx-auto py-12 text-center">
-      <p style="color: var(--color-text-tertiary);">Loading...</p>
+    <div :if={@form == nil} class="max-w-4xl mx-auto py-12 text-center">
+      <p class="font-frame text-ink-3">Loading...</p>
     </div>
 
-    <div :if={@form} class="max-w-5xl mx-auto">
-      <.link
-        navigate={cancel_path(@live_action, @article)}
-        class="inline-flex items-center gap-1 text-sm mb-4"
-        style="color: var(--color-forest-700);"
-      >
-        <.icon name="hero-arrow-left" class="size-4" /> Back to articles
-      </.link>
+    <div :if={@form} class="max-w-4xl mx-auto">
+      <.back navigate={cancel_path(@live_action, @article)}>Back to articles</.back>
 
-      <h1
-        class="text-2xl font-bold mb-6"
-        style="font-family: var(--font-serif); color: var(--color-forest-800);"
-      >
+      <h1 class="mt-s4 mb-s6 font-serif text-[clamp(28px,3vw,36px)]/[1.1] font-semibold text-balance">
         {@page_title}
       </h1>
 
       <.form for={@form} id="article-form" phx-change="validate" phx-submit="save">
-        <div class="space-y-6">
+        <div class="space-y-s7">
           <%!-- Core fields --%>
-          <div class="card p-6">
+          <div class="card">
             <h2 class="section-title section-title-sm mb-4">Article Details</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-s4">
               <div>
                 <.input
                   field={@form[:title]}
@@ -201,14 +192,14 @@ defmodule OaksWeb.ArticleFormLive do
                 type="checkbox"
                 label="Published"
               />
-              <p class="text-xs mt-1" style="color: var(--color-text-tertiary);">
+              <p class="-mt-s3 pl-6 font-frame text-[13px] font-medium text-ink-3">
                 Uncheck to save as draft (only visible to logged-in users)
               </p>
             </div>
           </div>
 
           <%!-- Content --%>
-          <div class="card p-6">
+          <div class="card">
             <h2 class="section-title section-title-sm mb-4">Content</h2>
             <div class="space-y-4">
               <.markdown_editor
@@ -233,22 +224,11 @@ defmodule OaksWeb.ArticleFormLive do
           </div>
 
           <%!-- Submit --%>
-          <div class="flex items-center justify-end gap-3">
-            <.link
-              navigate={cancel_path(@live_action, @article)}
-              class="px-4 py-2 rounded-lg text-sm font-medium"
-              style="color: var(--color-text-secondary);"
-            >
-              Cancel
-            </.link>
-            <button
-              type="submit"
-              phx-disable-with="Saving..."
-              class="px-6 py-2 rounded-lg text-sm font-medium text-white"
-              style="background-color: var(--color-forest-600);"
-            >
+          <div class="flex flex-wrap items-center justify-end gap-s2 pt-s4 border-t border-rule">
+            <.button navigate={cancel_path(@live_action, @article)}>Cancel</.button>
+            <.button type="submit" variant="primary" phx-disable-with="Saving...">
               {if(@live_action == :new, do: "Create Article", else: "Save Changes")}
-            </button>
+            </.button>
           </div>
         </div>
       </.form>
