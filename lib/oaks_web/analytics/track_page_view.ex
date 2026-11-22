@@ -24,11 +24,17 @@ defmodule OaksWeb.Analytics.TrackPageView do
       `live_redirect`.
     * On each firing, the hook compares the new path to the last
       tracked path on the socket. If the path differs (or it is the
-      first firing on this socket, where `last_path` is nil), a row
-      is inserted via `Oaks.TaskSupervisor`. Same-path patches — for
-      example the analytics dashboard's range buttons updating
-      `?range=30` — are in-page state, not page views, so the hook
-      skips them.
+      first firing on this socket, where `last_path` is nil), the path
+      is marked pending. Same-path patches — for example the analytics
+      dashboard's range buttons updating `?range=30` — are in-page
+      state, not page views, so the hook skips them.
+    * A second hook on `:after_render` inserts the pending row via
+      `Oaks.TaskSupervisor`. The `:handle_params` hook runs before the
+      LiveView's own `handle_params/3`, which may redirect (a synonym
+      URL `push_navigate`s to the canonical species page). A redirect
+      skips the render, so the redirecting URL is never recorded and
+      the visit counts once, on the page it leads to — the same rule
+      `OaksWeb.Plugs.Analytics` applies to redirect responses.
 
   Visitor hash: computed from `get_connect_info/2` (peer IP and
   user-agent). Stable within the WS session and rotates daily because
@@ -51,7 +57,9 @@ defmodule OaksWeb.Analytics.TrackPageView do
         socket
         |> Phoenix.Component.assign(:__analytics_visitor_hash__, visitor_hash)
         |> Phoenix.Component.assign(:__analytics_last_path__, nil)
+        |> Phoenix.Component.assign(:__analytics_pending_path__, nil)
         |> attach_hook(:track_page_view, :handle_params, &track_navigation/3)
+        |> attach_hook(:track_page_view_rendered, :after_render, &track_pending/1)
 
       {:cont, socket}
     else
@@ -67,11 +75,28 @@ defmodule OaksWeb.Analytics.TrackPageView do
     path = uri |> URI.parse() |> Map.get(:path) || "/"
     last_path = socket.assigns[:__analytics_last_path__]
 
-    if path != last_path and should_track?(path) do
-      spawn_track(path, socket.assigns[:__analytics_visitor_hash__])
-    end
+    socket =
+      if path != last_path and should_track?(path) do
+        Phoenix.Component.assign(socket, :__analytics_pending_path__, path)
+      else
+        socket
+      end
 
     {:cont, Phoenix.Component.assign(socket, :__analytics_last_path__, path)}
+  end
+
+  @doc false
+  # The `:after_render` hook: records the path `track_navigation/3`
+  # marked pending. Public for the same reason as `track_navigation/3`.
+  def track_pending(socket) do
+    case socket.assigns[:__analytics_pending_path__] do
+      nil ->
+        socket
+
+      path ->
+        spawn_track(path, socket.assigns[:__analytics_visitor_hash__])
+        Phoenix.Component.assign(socket, :__analytics_pending_path__, nil)
+    end
   end
 
   defp spawn_track(path, visitor_hash) do
