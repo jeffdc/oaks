@@ -4,7 +4,8 @@ defmodule OaksWeb.TaxonomyLive do
 
   Supports hierarchical drill-down through the Quercus taxonomy
   (genus > subgenus > section > subsection > complex) with
-  breadcrumbs, species counts, and species lists at each level.
+  breadcrumbs, species counts, and species lists at each level. A path
+  that names no taxon raises `OaksWeb.NotFoundError`, a real 404.
   """
 
   use OaksWeb, :live_view
@@ -36,7 +37,7 @@ defmodule OaksWeb.TaxonomyLive do
 
     cond do
       depth > 4 ->
-        {:noreply, assign_not_found(socket, path)}
+        raise OaksWeb.NotFoundError, kind: :taxon, query: List.last(path)
 
       depth == 0 ->
         {:noreply, load_genus_level(socket)}
@@ -109,7 +110,6 @@ defmodule OaksWeb.TaxonomyLive do
       species_count: total,
       breadcrumbs: [],
       is_genus_level: true,
-      not_found: false,
       page_title: "Taxonomy"
     )
   end
@@ -117,7 +117,7 @@ defmodule OaksWeb.TaxonomyLive do
   defp load_taxon_level(socket, path) do
     case Taxonomy.resolve_path(path) do
       :error ->
-        assign_not_found(socket, path)
+        raise OaksWeb.NotFoundError, kind: :taxon, query: List.last(path)
 
       {:ok, taxa} ->
         current_taxon = List.last(taxa)
@@ -137,26 +137,9 @@ defmodule OaksWeb.TaxonomyLive do
           species_count: Taxonomy.taxon_usage(current_taxon).species,
           breadcrumbs: breadcrumbs,
           is_genus_level: false,
-          not_found: false,
           page_title: "#{taxon_name} — Taxonomy"
         )
     end
-  end
-
-  defp assign_not_found(socket, path) do
-    assign(socket,
-      taxonomy_path: path,
-      current_level: nil,
-      child_level: nil,
-      current_taxon: nil,
-      child_taxa: [],
-      species: [],
-      species_count: 0,
-      breadcrumbs: [],
-      is_genus_level: false,
-      not_found: true,
-      page_title: "Not Found — Taxonomy"
-    )
   end
 
   defp build_breadcrumbs(path, taxa) do
@@ -183,15 +166,7 @@ defmodule OaksWeb.TaxonomyLive do
   def render(assigns) do
     ~H"""
     <.page>
-      <div :if={@not_found}>
-        <.header>
-          Taxon Not Found
-          <:subtitle>The requested taxonomy path could not be found.</:subtitle>
-        </.header>
-        <.back navigate={~p"/taxonomy"}>Return to taxonomy browser</.back>
-      </div>
-
-      <div :if={not @not_found}>
+      <div>
         <.taxonomy_band class="taxonomy-page-band" label="Taxonomy breadcrumb">
           <:rank
             :for={crumb <- Enum.drop(@breadcrumbs, -1)}

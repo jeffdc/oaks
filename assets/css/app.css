@@ -2599,10 +2599,6 @@ a.comparison-source-name:hover {
   color: var(--color-ink-3);
 }
 
-.source-comparison-missing .oc-back {
-  margin-bottom: var(--spacing-s4);
-}
-
 /* Phones: one labelled block per trait */
 @media (max-width: 760px) {
   .comparison-grid {

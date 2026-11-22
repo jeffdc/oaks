@@ -92,11 +92,23 @@ defmodule OaksWeb.SpeciesMergeLiveTest do
       assert html =~ "cannot be merged with itself"
     end
 
-    test "shows error for nonexistent species", %{conn: conn, alba: alba} do
-      {:ok, _view, html} =
-        conn |> authenticated_conn() |> live(~p"/species/nonexistent/merge/#{alba}")
+    test "a nonexistent species is a 404 with the not-found page", %{conn: conn, alba: alba} do
+      conn = authenticated_conn(conn)
 
-      assert html =~ "could not be found"
+      {404, _headers, html} =
+        assert_error_sent 404, fn -> get(conn, ~p"/species/nonexistent/merge/#{alba}") end
+
+      assert html =~ ~r{<h1>\s*Species not found\s*</h1>}
+      assert html =~ ~s(value="nonexistent")
+
+      {404, _headers, html} =
+        assert_error_sent 404, fn -> get(conn, ~p"/species/#{alba}/merge/nonexistent") end
+
+      assert html =~ ~s(value="nonexistent")
+
+      assert_raise OaksWeb.NotFoundError, fn ->
+        live(conn, ~p"/species/nonexistent/merge/#{alba}")
+      end
     end
   end
 

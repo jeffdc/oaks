@@ -597,8 +597,8 @@ defmodule OaksWeb.CoreComponents do
   above the page's content: a title page, a band. Its content sets its
   own frame inside (as the masthead does).
 
-  The layout's `<main>` is the frame for pages that don't use this
-  component (the error pages); around a `page/1` it steps aside
+  The layout's `<main>` is the frame for any page that doesn't use this
+  component; around a `page/1` it steps aside
   (`.oc-page:has(.oc-pg)` in shell.css).
 
   ## Examples

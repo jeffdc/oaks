@@ -90,20 +90,19 @@ defmodule OaksWeb.SourceDetailLiveTest do
   end
 
   describe "not found" do
-    test "shows not found for unknown source ID", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/sources/0")
-      assert html =~ "Source Not Found"
-      assert html =~ "Back to Sources"
+    test "an unknown source ID is a 404 with the not-found page", %{conn: conn} do
+      {404, _headers, html} = assert_error_sent 404, fn -> get(conn, ~p"/sources/0") end
+
+      assert html =~ "<title>Source not found · Oak Compendium</title>"
+      assert html =~ ~r{<h1>\s*Source not found\s*</h1>}
+      assert html =~ "/sources/0"
+      assert html =~ ~r{<a href="/sources" class="oc-btn">\s*Sources\s*</a>}
+      assert_raise OaksWeb.NotFoundError, fn -> live(conn, ~p"/sources/0") end
     end
 
-    test "shows not found for invalid ID", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/sources/abc")
-      assert html =~ "Source Not Found"
-    end
-
-    test "not found page has link back to sources list", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/sources/0")
-      assert html =~ ~s(href="/sources")
+    test "an ID that isn't a number is a 404", %{conn: conn} do
+      {404, _headers, html} = assert_error_sent 404, fn -> get(conn, ~p"/sources/abc") end
+      assert html =~ ~r{<h1>\s*Source not found\s*</h1>}
     end
   end
 

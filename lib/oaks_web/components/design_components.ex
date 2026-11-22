@@ -5,7 +5,8 @@ defmodule OaksWeb.DesignComponents do
   status tag (and its IUCN Red List variant), the Compare button, the
   other-sources disclosure of the field-marks table, and the centred
   pieces of the home page (the title page, chapter headings, the contents
-  list, the specimen and the colophon).
+  list, the specimen and the colophon), and the error notice and the
+  not-found page that `OaksWeb.ErrorHTML` shows.
 
   Imported into every LiveView and HTML module (see `OaksWeb`). The
   generic pieces (button, header, ruled table, list, modal, flash, input)
@@ -23,8 +24,9 @@ defmodule OaksWeb.DesignComponents do
       colour code, and always shows its code with the colour.
   """
   use Phoenix.Component
+  use OaksWeb, :verified_routes
 
-  import OaksWeb.CoreComponents, only: [button: 1]
+  import OaksWeb.CoreComponents, only: [button: 1, header: 1]
 
   alias Phoenix.LiveView.JS
 
@@ -929,6 +931,166 @@ defmodule OaksWeb.DesignComponents do
 
     ~H"""
     {@html}
+    """
+  end
+
+  @doc """
+  Renders an error notice: the title row with the status stamped at its
+  right ("Error 404"), a sentence of what happened, an optional search
+  form, then the ways on as buttons, Go back last. Ochre goes on the one
+  next step, so give one action (or the search's button)
+  `variant="primary"`.
+
+  The 403 and 500 pages use it directly; the 404 is `not_found/1`. Set it
+  inside a `page/1`: the error pages take the reading measure.
+
+  ## Examples
+
+      <.error_notice status="500" title="Something went wrong">
+        The Compendium hit an error and couldn’t show this page.
+        <:actions><.button href={~p"/"} variant="primary">Home</.button></:actions>
+      </.error_notice>
+  """
+  attr :id, :string, default: nil
+  attr :status, :string, required: true, doc: "the HTTP status, such as 404"
+  attr :title, :string, required: true, doc: "the page's h1"
+  attr :back, :string, default: nil, doc: "where Go back goes; nil for no Go back"
+  slot :inner_block, required: true, doc: "what happened, one short passage"
+  slot :search, doc: "a search form under the passage"
+  slot :actions, required: true, doc: "the ways on; Go back follows them"
+
+  def error_notice(assigns) do
+    ~H"""
+    <section id={@id} class="oc-error-notice">
+      <.header>
+        {@title}
+        <:actions>
+          <.status_tag title={"HTTP status #{@status}"}>Error {@status}</.status_tag>
+        </:actions>
+      </.header>
+
+      <p class="max-w-[68ch] text-pretty">{render_slot(@inner_block)}</p>
+
+      {render_slot(@search)}
+
+      <div class="mt-s6 flex flex-wrap gap-s3">
+        {render_slot(@actions)}
+        <.button :if={@back} href={@back}>Go back</.button>
+      </div>
+    </section>
+    """
+  end
+
+  # What each kind of not-found page says (the index it offers is
+  # not_found_index/1).
+  @not_found %{
+    page: %{
+      title: "Page not found",
+      noun: "page",
+      hint: "The address may be mistyped, or the page may have moved.",
+      next: "Search for the oak you were after, or browse the species list."
+    },
+    species: %{
+      title: "Species not found",
+      noun: "species",
+      hint: "The name may be misspelled, or the oak may not be in the Compendium yet.",
+      next: "Search for it by its scientific or common name, or browse the species list."
+    },
+    taxon: %{
+      title: "Taxon not found",
+      noun: "taxon",
+      hint: "A name in the address may be misspelled, or the group may have moved.",
+      next: "Browse the taxonomy from the genus down, or search for the group by name."
+    },
+    source: %{
+      title: "Source not found",
+      noun: "source",
+      hint: "The address may be mistyped, or the source may have been removed.",
+      next: "Browse the sources, or search for the work by name."
+    },
+    article: %{
+      title: "Article not found",
+      noun: "article",
+      hint: "The address may be mistyped, or the article may not be published yet.",
+      next: "Browse the articles, or search the Compendium."
+    }
+  }
+
+  @doc """
+  The title of a not-found page of the given kind ("Species not found"):
+  its h1, and its head title.
+  """
+  @spec not_found_title(atom()) :: String.t()
+  def not_found_title(kind), do: Map.fetch!(@not_found, kind).title
+
+  defp not_found_index(kind) when kind in [:page, :species], do: {"Species list", ~p"/species"}
+  defp not_found_index(:taxon), do: {"Taxonomy", ~p"/taxonomy"}
+  defp not_found_index(:source), do: {"Sources", ~p"/sources"}
+  defp not_found_index(:article), do: {"Articles", ~p"/articles"}
+
+  @doc """
+  Renders a not-found page's content: an `error_notice/1` stamped 404,
+  naming what was asked for (the address, so a typo shows), a short line
+  on why, a search of the Compendium (the one ochre action) and the
+  relevant index, then Home and Go back.
+
+  It is only shown with a real 404. A LiveView that finds nothing at its
+  address raises `OaksWeb.NotFoundError` with a `kind`, and
+  `OaksWeb.ErrorHTML` renders this from it; an address with no route is
+  `:page`. `kind` picks the wording and the index: `:page` and `:species`
+  offer the species list, `:taxon` the taxonomy, `:source` the sources and
+  `:article` the articles.
+
+  ## Examples
+
+      <.not_found kind={:species} path="/species/shumardi" query="shumardi" />
+      <.not_found path="/no-such-page" back="https://oakcompendium.org/" />
+  """
+  attr :id, :string, default: "not-found", doc: "the notice's id, and its search field's prefix"
+  attr :kind, :atom, values: [:page, :species, :taxon, :source, :article], default: :page
+  attr :path, :string, default: nil, doc: "the address asked for; nil for \"this address\""
+  attr :query, :string, default: nil, doc: "a search to fill in, such as the name asked for"
+  attr :back, :string, default: nil, doc: "where Go back goes; nil for no Go back"
+
+  def not_found(assigns) do
+    {index_label, index_path} = not_found_index(assigns.kind)
+
+    assigns =
+      assign(assigns,
+        copy: Map.fetch!(@not_found, assigns.kind),
+        index_label: index_label,
+        index_path: index_path
+      )
+
+    ~H"""
+    <.error_notice id={@id} status="404" title={@copy.title} back={@back}>
+      <%= if @path do %>
+        There’s no {@copy.noun} at <span class="font-frame font-semibold wrap-anywhere lining-nums tabular-nums">{@path}</span>.
+      <% else %>
+        There’s no {@copy.noun} at this address.
+      <% end %>
+      {@copy.hint} {@copy.next}
+      <:search>
+        <form action={~p"/search"} method="get" role="search" class="mt-s6">
+          <label for={"#{@id}-search"} class="oc-label">Search the Compendium</label>
+          <div class="flex gap-s2">
+            <input
+              id={"#{@id}-search"}
+              type="search"
+              name="q"
+              value={@query}
+              class="oc-input min-w-0 flex-1"
+              placeholder="Scientific or common name"
+            />
+            <.button type="submit" variant="primary">Search</.button>
+          </div>
+        </form>
+      </:search>
+      <:actions>
+        <.button href={@index_path}>{@index_label}</.button>
+        <.button href={~p"/"}>Home</.button>
+      </:actions>
+    </.error_notice>
     """
   end
 end

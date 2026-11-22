@@ -17,10 +17,29 @@ defmodule OaksWeb.ErrorHTMLTest do
     assert html =~ "Error 404"
     assert html =~ "<title>Page not found · Oak Compendium</title>"
     assert html =~ ~r{<h1>\s*Page not found\s*</h1>}
-    assert html =~ ~s(action="/search")
-    assert html =~ ~s(method="get")
-    assert html =~ ~s(name="q")
-    assert html =~ ~s(href="/species")
+    assert html =~ ~s(<input id="not-found-search" type="search" name="q")
+    assert html =~ ~r{<a href="/species" class="oc-btn">\s*Species list\s*</a>}
+  end
+
+  test "the 404 for a LiveView's not-found error takes its kind and fills in its search" do
+    html =
+      render("404",
+        conn: %{Phoenix.ConnTest.build_conn() | request_path: "/species/albaa"},
+        reason: %OaksWeb.NotFoundError{kind: :species, query: "albaa"}
+      )
+
+    assert html =~ "<title>Species not found · Oak Compendium</title>"
+    assert html =~ ~r{<h1>\s*Species not found\s*</h1>}
+    assert html =~ "There’s no species at"
+    assert html =~ ~s(value="albaa")
+
+    html = render("404", reason: %OaksWeb.NotFoundError{kind: :taxon})
+    assert html =~ ~r{<a href="/taxonomy" class="oc-btn">\s*Taxonomy\s*</a>}
+  end
+
+  test "any other reason for a 404 is a page not found" do
+    html = render("404", reason: %Phoenix.Router.NoRouteError{conn: nil, router: nil})
+    assert html =~ ~r{<h1>\s*Page not found\s*</h1>}
   end
 
   test "the 404 names the address that was asked for, escaped" do
@@ -39,7 +58,7 @@ defmodule OaksWeb.ErrorHTMLTest do
     assert html =~ "<title>Request refused · Oak Compendium</title>"
     assert html =~ "security check expired"
     assert html =~ ~s(<a href="/users/log-in" class="oc-btn oc-btn-primary">)
-    refute html =~ ~s(action="/search")
+    refute html =~ "not-found-search"
   end
 
   test "on the 403, Go back is the one primary action when there is a page to go back to" do
@@ -56,21 +75,37 @@ defmodule OaksWeb.ErrorHTMLTest do
     html = render("500")
     assert html =~ "Error 500"
     assert html =~ "<title>Something went wrong · Oak Compendium</title>"
-    refute html =~ ~s(action="/search")
+    refute html =~ "not-found-search"
   end
 
-  test "each is a standalone page of the design system: stylesheet, masthead, footer, no script" do
+  test "each is a page in the site shell: stylesheet, the site's masthead and footer, no script" do
     for status <- @statuses do
       html = render(status)
       assert html =~ "<!DOCTYPE html>", status
       assert html =~ ~s(href="/assets/css/app.css"), status
-      assert html =~ ~s(aria-label="Oak Compendium home"), status
+      assert html =~ ~s(<a href="#main" class="oc-skip">Skip to content</a>), status
+      assert html =~ ~s(<header class="oc-mast" id="site-header">), status
+      assert html =~ ~s(<input type="search" id="header-search"), status
+      assert html =~ ~s(<main id="main" class="oc-page" tabindex="-1">), status
+      assert html =~ ~s(<div class="oc-pg-body oc-pg-read">), status
+      assert html =~ ~s(<footer class="oc-footer" id="site-footer">), status
       assert html =~ "All facts are free to use", status
       assert html =~ ~s(<meta name="description"), status
       refute html =~ "<script", status
+      # No script binds the masthead's "/" key here, so no key hint either.
+      refute html =~ "<kbd", status
+      refute html =~ "aria-keyshortcuts", status
       refute html =~ "<style", status
       refute html =~ ~s( style="), status
     end
+  end
+
+  test "the masthead is logged out and marks the part of the site asked for" do
+    html = render("404", conn: %{Phoenix.ConnTest.build_conn() | request_path: "/species/albaa"})
+
+    refute html =~ "oc-mast-editor"
+    assert html =~ ~r{<a href="/species"[^>]*aria-current="true"}
+    assert html =~ ~s(href="/users/log-in">Log in</a>)
   end
 
   test "Go back links to the page the visitor came from" do
@@ -109,6 +144,20 @@ defmodule OaksWeb.ErrorHTMLTest do
 
       assert body =~ "<title>Page not found · Oak Compendium</title>"
       assert body =~ "/no-such-page"
+    end
+
+    test "a LiveView that finds nothing gets the 404 page, its masthead logged out", %{
+      conn: conn
+    } do
+      conn = log_in_user(conn, Oaks.AccountsFixtures.user_fixture())
+
+      {404, _headers, body} =
+        assert_error_sent 404, fn -> get(conn, ~p"/species/no-such-oak") end
+
+      assert body =~ "<title>Species not found · Oak Compendium</title>"
+      assert body =~ ~s(<header class="oc-mast" id="site-header">)
+      refute body =~ "oc-mast-editor"
+      refute body =~ "<script"
     end
 
     test "a form sent without its security token gets the 403 page", %{conn: conn} do

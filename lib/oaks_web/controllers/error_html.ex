@@ -2,30 +2,40 @@ defmodule OaksWeb.ErrorHTML do
   @moduledoc """
   This module is invoked by your endpoint in case of errors on HTML requests.
 
-  See config/config.exs. The 403, 404 and 500 pages are DESIGN.md pages
-  (`error_page/1`). They stand alone, with their own masthead and footer
-  rather than the app layout: on an unmatched route no pipeline has run, so
-  there is no session, flash or current scope, and on a 500 the layout's
-  data may be what failed. They run no script.
+  See config/config.exs. The 403, 404 and 500 pages are DESIGN.md pages in
+  the site shell (`error_page/1`): the layout's masthead and footer
+  (`Layouts.site_header/1`, `Layouts.site_footer/1`) around a `page/1` at
+  the reading measure, holding an `error_notice/1` or, for the 404,
+  `not_found/1`.
+
+  The 404 is every not-found page: an address with no route, and a
+  LiveView that finds nothing at its address and raises
+  `OaksWeb.NotFoundError`, whose `kind` the page reads (`not_found_kind/1`).
+
+  `error_page/1` is its own document rather than the root and app layouts,
+  and reads nothing a pipeline sets: on an unmatched route no pipeline has
+  run, so there is no session, flash or current scope, and on a 500 the
+  layout's data may be what failed. The masthead is shown logged out, so
+  nothing on the page needs a session or a script. The pages run no
+  script.
 
   Any other status falls back to its plain status message.
   """
   use OaksWeb, :html
 
+  alias OaksWeb.NotFoundError
+
   embed_templates "error_html/*"
 
   @doc """
-  A standalone error page: the head, the stylesheet, a masthead with the
-  acorn mark linking home, the title row with the status, what happened,
-  the ways on and the site footer.
+  An error page: the head and the stylesheet, the skip link, the site's
+  masthead, the content in a `page/1` at the reading measure, and the site
+  footer.
   """
-  attr :status, :string, required: true
-  attr :title, :string, required: true, doc: "the page's h1 and its head title"
+  attr :title, :string, required: true, doc: "the head title, before \" · Oak Compendium\""
   attr :description, :string, required: true, doc: "the head description"
-  attr :back, :string, default: nil, doc: "where Go back goes (`back_href/1`); nil for none"
-  slot :inner_block, required: true, doc: "what happened"
-  slot :search, doc: "a search form under the message"
-  slot :actions, required: true, doc: "the ways on; Go back follows them"
+  attr :path, :string, default: nil, doc: "the address asked for, for the masthead's nav"
+  slot :inner_block, required: true, doc: "the error notice"
 
   def error_page(assigns) do
     ~H"""
@@ -54,80 +64,39 @@ defmodule OaksWeb.ErrorHTML do
         />
         <link rel="stylesheet" href={~p"/assets/css/app.css"} />
       </head>
-      <body class="flex min-h-screen flex-col">
-        <header class="dark-bg bg-ink text-paper">
-          <div class="mx-auto flex min-h-[60px] max-w-frame items-center px-s6 max-[760px]:px-s4">
-            <a
-              href={~p"/"}
-              aria-label="Oak Compendium home"
-              class="flex items-center gap-s2 font-frame text-[19px] font-extrabold leading-none tracking-[0.01em] text-paper no-underline"
-            >
-              <svg viewBox="0 0 24 24" class="size-[22px]" aria-hidden="true">
-                <path d="M5 9.5C5 6 8 4 12 4s7 2 7 5.5H5Z" class="fill-ochre" />
-                <path
-                  d="M6.5 10.5h11c0 5-2.5 9-5.5 9.5-3-.5-5.5-4.5-5.5-9.5Z"
-                  class="fill-paper"
-                />
-                <path d="M12 1.5v2.5" class="stroke-paper" stroke-width="1.6" />
-              </svg>
-              Oak Compendium
-            </a>
-          </div>
-        </header>
+      <body class="min-h-screen flex flex-col">
+        <a href="#main" class="oc-skip">Skip to content</a>
 
-        <main class="mx-auto w-full max-w-frame flex-1 px-s6 pt-s8 pb-s8 max-[760px]:px-s4 max-[760px]:pt-s6">
-          <div class="max-w-[46rem]">
-            <.header>
-              {@title}
-              <:actions>
-                <.status_tag title={"HTTP status #{@status}"}>Error {@status}</.status_tag>
-              </:actions>
-            </.header>
+        <Layouts.site_header current_path={@path} shortcut={false} />
 
-            <p class="max-w-[68ch] text-pretty">{render_slot(@inner_block)}</p>
-
-            {render_slot(@search)}
-
-            <div class="mt-s6 flex flex-wrap gap-s3">
-              {render_slot(@actions)}
-              <.button :if={@back} href={@back}>Go back</.button>
-            </div>
-          </div>
+        <main id="main" class="oc-page" tabindex="-1">
+          <.page width="read">
+            {render_slot(@inner_block)}
+          </.page>
         </main>
 
-        <footer class="border-t border-rule">
-          <div class="mx-auto flex max-w-frame flex-wrap gap-x-s5 gap-y-s1 px-s6 py-s5 font-frame text-[13px] leading-normal font-medium text-ink-3 max-[760px]:px-s4">
-            <span>Oak Compendium’s prose is © all rights reserved</span>
-            <span>All facts are free to use</span>
-            <span>Other sources are under their own terms</span>
-          </div>
-        </footer>
+        <Layouts.site_footer />
       </body>
     </html>
     """
   end
 
   @doc """
-  The search form on the 404: a plain GET to /search, so it works with no
-  script.
+  What kind of thing the 404 is about: the `kind` of the
+  `OaksWeb.NotFoundError` a LiveView raised, or `:page` for an address
+  with no route.
   """
-  def search_form(assigns) do
-    ~H"""
-    <form action={~p"/search"} method="get" role="search" class="mt-s6">
-      <label for="error-search" class="oc-label">Search the Compendium</label>
-      <div class="flex gap-s2">
-        <input
-          id="error-search"
-          type="search"
-          name="q"
-          class="oc-input min-w-0 flex-1"
-          placeholder="Scientific or common name"
-        />
-        <.button type="submit" variant="primary">Search</.button>
-      </div>
-    </form>
-    """
-  end
+  @spec not_found_kind(map()) :: NotFoundError.kind()
+  def not_found_kind(%{reason: %NotFoundError{kind: kind}}), do: kind
+  def not_found_kind(_assigns), do: :page
+
+  @doc """
+  The search the 404 fills in: the `query` of the `OaksWeb.NotFoundError`
+  raised (the species name asked for, say), or nil.
+  """
+  @spec not_found_query(map()) :: String.t() | nil
+  def not_found_query(%{reason: %NotFoundError{query: query}}), do: query
+  def not_found_query(_assigns), do: nil
 
   @doc """
   The address that was asked for, for the 404's message; nil when the page

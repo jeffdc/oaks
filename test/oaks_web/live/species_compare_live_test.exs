@@ -33,10 +33,15 @@ defmodule OaksWeb.SpeciesCompareLiveTest do
       assert html =~ "Quercus #{alba}"
     end
 
-    test "shows not found for unknown species", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/nonexistent/compare")
+    test "an unknown species is a 404 with the not-found page", %{conn: conn} do
+      {404, _headers, html} =
+        assert_error_sent 404, fn -> get(conn, ~p"/species/nonexistent/compare") end
 
-      assert html =~ "Species Not Found"
+      assert html =~ ~r{<h1>\s*Species not found\s*</h1>}
+      assert html =~ "/species/nonexistent/compare"
+      assert html =~ ~s(value="nonexistent")
+      assert html =~ ~r{<a href="/species" class="oc-btn">\s*Species list\s*</a>}
+      assert_raise OaksWeb.NotFoundError, fn -> live(conn, ~p"/species/nonexistent/compare") end
     end
 
     test "sets page title with species name", %{conn: conn, alba: alba} do

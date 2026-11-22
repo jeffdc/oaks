@@ -3,7 +3,9 @@ defmodule OaksWeb.SpeciesCompareLive do
   LiveView for comparing data from multiple sources for a single species.
 
   Displays a side-by-side grid of source data with toggleable source selection,
-  matching the V1 SourceComparison component behavior.
+  matching the V1 SourceComparison component behavior. A synonym's address
+  redirects to its species' comparison; an unknown name raises
+  `OaksWeb.NotFoundError`, a real 404.
   """
 
   use OaksWeb, :live_view
@@ -35,7 +37,6 @@ defmodule OaksWeb.SpeciesCompareLive do
      assign(socket,
        page_title: "Compare Sources",
        species: nil,
-       not_found: false,
        all_sources: [],
        selected_ids: [],
        fields: @fields
@@ -48,12 +49,7 @@ defmodule OaksWeb.SpeciesCompareLive do
       nil ->
         case Species.find_synonym(name) do
           nil ->
-            {:noreply,
-             assign(socket,
-               species: nil,
-               not_found: true,
-               page_title: "Species Not Found"
-             )}
+            raise OaksWeb.NotFoundError, kind: :species, query: name
 
           canonical ->
             {:noreply,
@@ -68,7 +64,6 @@ defmodule OaksWeb.SpeciesCompareLive do
         {:noreply,
          assign(socket,
            species: species,
-           not_found: false,
            all_sources: sources,
            selected_ids: default_ids,
            page_title:
@@ -111,14 +106,6 @@ defmodule OaksWeb.SpeciesCompareLive do
 
     ~H"""
     <.page width="frame">
-      <div :if={@not_found} class="source-comparison-missing">
-        <.back navigate={~p"/species"}>Back to Species List</.back>
-        <.header>
-          Species Not Found
-          <:subtitle>Could not find the requested species.</:subtitle>
-        </.header>
-      </div>
-
       <div :if={@species} class="source-comparison-card">
         <div class="source-comparison">
           <.comparison_header species={@species} />

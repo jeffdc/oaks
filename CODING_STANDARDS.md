@@ -411,7 +411,7 @@ Every page is built from the shared library: `OaksWeb.CoreComponents`, `OaksWeb.
 | Tables and ruled lists | `<.table>`, `<.list>` |
 | Form fields | `<.input>` |
 | Back links | `<.back>` |
-| Not found | `<.not_found>`, from a real 404 *(to build, item 8f1d)* |
+| Not found and error pages | A LiveView that finds nothing at its address raises `OaksWeb.NotFoundError` (`kind: :species \| :taxon \| :source \| :article`, optional `query` for the search), never renders a not-found state of its own: Phoenix then sends the real 404, `OaksWeb.ErrorHTML`'s page, which is `<.not_found>` (DesignComponents) in the site's masthead and footer. Redirects (a synonym's address) stay redirects. The 403 and 500 are `<.error_notice>` |
 | Sources and standing marks | `<.source_mark>`, `<.standing_mark>` |
 
 **When the library doesn't have what you need:** stop. Don't build it into the page. Either add it to the library as its own change, shown in `/dev/components` and reviewed by Jeff before any page uses it, or file `mull ask` and work on something else. A component that almost fits is extended in the library, never overridden on the page.

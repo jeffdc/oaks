@@ -1,19 +1,12 @@
 <.error_page
-  back={back_href(assigns)}
-  status="404"
-  title="Page not found"
+  title={not_found_title(not_found_kind(assigns))}
   description="There is no page at this address on the Oak Compendium."
+  path={requested_path(assigns)}
 >
-  <span :if={requested_path(assigns)}>
-    There’s no page at <span class="font-frame font-semibold wrap-anywhere lining-nums tabular-nums">{requested_path(assigns)}</span>.
-  </span>
-  <span :if={!requested_path(assigns)}>There’s no page at this address.</span>
-  The address may be mistyped, or the page may have moved. Search for the oak you were after, or browse the species list.
-  <:search>
-    <.search_form />
-  </:search>
-  <:actions>
-    <.button href={~p"/species"}>Species list</.button>
-    <.button href={~p"/"}>Home</.button>
-  </:actions>
+  <.not_found
+    kind={not_found_kind(assigns)}
+    path={requested_path(assigns)}
+    query={not_found_query(assigns)}
+    back={back_href(assigns)}
+  />
 </.error_page>

@@ -4,7 +4,9 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   Displays side-by-side comparison of source (synonym) and target species,
   allows editing target fields, transferring source data, and executing
-  the merge in a transaction. Requires authentication.
+  the merge in a transaction. Requires authentication. Either name
+  naming no species raises `OaksWeb.NotFoundError`, a real 404; merging a
+  species with itself shows its own error state.
   """
 
   use OaksWeb, :live_view
@@ -69,12 +71,11 @@ defmodule OaksWeb.SpeciesMergeLive do
           {:noreply,
            assign(socket, loading: false, error: "A species cannot be merged with itself.")}
 
-        {:error, _reason} ->
-          {:noreply,
-           assign(socket,
-             loading: false,
-             error: "One or both species could not be found."
-           )}
+        {:error, :source_not_found} ->
+          raise OaksWeb.NotFoundError, kind: :species, query: source_name
+
+        {:error, :target_not_found} ->
+          raise OaksWeb.NotFoundError, kind: :species, query: target_name
       end
     else
       {:noreply,

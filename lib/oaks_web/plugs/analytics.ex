@@ -18,7 +18,10 @@ defmodule OaksWeb.Plugs.Analytics do
   `Phoenix.LiveView.Router` when a `live` route dispatches. We inspect
   it inside `register_before_send/2`, by which time the router has run.
   If it is set, the hook is responsible — the plug stays out of the way
-  to avoid double-counting.
+  to avoid double-counting — unless the LiveView failed: a LiveView that
+  raises (an `OaksWeb.NotFoundError` for an unknown species, say) sends
+  the error page with its status (404) and never connects, so the hook
+  never runs, and the plug records that visit with its status.
 
   Other skip rules: non-GET methods, redirect responses (the page the
   browser is sent to counts instead, so a redirected visit counts once),
@@ -55,17 +58,22 @@ defmodule OaksWeb.Plugs.Analytics do
   end
 
   defp maybe_track(conn, ua) do
-    if not live_view_route?(conn) and should_track?(conn, ua) do
+    if not live_view_page?(conn) and should_track?(conn, ua) do
       hash = Analytics.visitor_hash(client_ip(conn), ua)
       attrs = build_attrs(conn, hash)
       Analytics.track_async(attrs)
     end
   end
 
-  # True when this request was dispatched to a Phoenix LiveView. Set by
-  # Phoenix.LiveView.Router during route dispatch, so it's visible by the
-  # time register_before_send/2 fires.
-  defp live_view_route?(conn), do: Map.has_key?(conn.private, :phoenix_live_view)
+  # True when a Phoenix LiveView served this request and rendered (or
+  # redirected), so the hook records the visit once it connects.
+  # `phoenix_live_view` is set by Phoenix.LiveView.Router during route
+  # dispatch, so it's visible by the time register_before_send/2 fires. An
+  # error status means the LiveView raised and Phoenix sent the error page
+  # instead: nothing connects, so the visit is the plug's.
+  defp live_view_page?(conn) do
+    Map.has_key?(conn.private, :phoenix_live_view) and (conn.status || 200) < 400
+  end
 
   @doc """
   Returns `true` when the request should be recorded as a page view.
