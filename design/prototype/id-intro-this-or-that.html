@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oak Compendium · ID tool intro (held from the home page round): This, or That</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Archivo+Narrow:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600;1,8..60,700&display=swap" rel="stylesheet">
+<style>
+/* Shared: DESIGN.md tokens, element defaults, the site shell (copied from
+   assets/css/system/shell.css) and the shared small components. */
+:root {
+  --ink: #161616; --ink-2: #3d3d3a; --ink-3: #5c5c57;
+  --paper: #fbfbf7; --paper-2: #f1f0e8;
+  --ochre: #d9a21b; --pencil: #2f5fb3;
+  --rule: #16161626; --rule-strong: #161616;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --frame: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --narrow: "Archivo Narrow", "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+  --gut: 32px;
+  color-scheme: light;
+}
+@media (max-width: 760px) { :root { --gut: 16px; } }
+* { box-sizing: border-box; }
+html { background: var(--paper); color: var(--ink); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+  background: var(--paper); color: var(--ink);
+  font: 17px/1.6 var(--serif);
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  font-optical-sizing: auto; text-rendering: optimizeLegibility;
+}
+@media (max-width: 760px) { body { font-size: 16px; } }
+h1, h2, h3, p, ol, ul, figure, blockquote { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+q { quotes: "\201C" "\201D" "\2018" "\2019"; }
+::selection { background: var(--ochre); color: var(--ink); }
+a { color: var(--pencil); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--pencil); outline-offset: 2px; border-radius: 1px; }
+input { caret-color: var(--ink); }
+::placeholder { color: var(--ink-3); opacity: 1; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.n { font-variant-numeric: lining-nums tabular-nums; }
+.rk { font-style: normal; font-weight: 400; }
+
+/* Skip link */
+.oc-skip { position: absolute; left: -999px; top: 8px; z-index: 60; padding: 8px 16px; background: var(--ink); color: var(--paper); font: 700 15px/1.2 var(--frame); text-decoration: none; }
+.oc-skip:focus { left: 16px; }
+
+/* Masthead */
+.oc-mast { background: var(--ink); color: var(--paper); }
+.oc-mast :focus-visible { outline-color: var(--paper); }
+.oc-mast-in { max-width: 1400px; margin: 0 auto; min-height: 60px; padding: 0 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 0 32px; }
+.oc-mark { display: flex; align-items: center; gap: 8px; font: 800 19px/1 var(--frame); letter-spacing: 0.01em; color: var(--paper); text-decoration: none; white-space: nowrap; }
+.oc-mark svg { width: 22px; height: 22px; flex: none; }
+.oc-mark-cap { fill: var(--ochre); } .oc-mark-nut { fill: var(--paper); } .oc-mark-stem { fill: none; stroke: var(--paper); stroke-width: 1.6; }
+.oc-nav { align-self: stretch; display: flex; gap: 24px; font: 600 15px/1 var(--frame); }
+.oc-nav a { display: flex; align-items: center; padding-top: 3px; border-bottom: 3px solid transparent; color: var(--paper); text-decoration: none; white-space: nowrap; }
+.oc-nav a:hover { border-bottom-color: color-mix(in srgb, var(--paper) 40%, transparent); }
+.oc-search { margin-left: auto; flex: 0 1 320px; min-width: 200px; display: flex; align-items: center; background: color-mix(in srgb, var(--paper) 8%, transparent); border: 1px solid color-mix(in srgb, var(--paper) 35%, transparent); }
+.oc-search input { flex: 1; min-width: 0; margin: 0; padding: 11px 14px; border: 0; border-radius: 0; background: transparent; color: var(--paper); caret-color: var(--paper); font: 400 15px/1.2 var(--frame); appearance: none; }
+.oc-search input:focus { outline: none; }
+.oc-search input::placeholder { color: color-mix(in srgb, var(--paper) 77%, transparent); }
+.oc-search kbd { margin-right: 10px; padding: 3px 6px; border: 1px solid color-mix(in srgb, var(--paper) 35%, transparent); color: color-mix(in srgb, var(--paper) 77%, transparent); font: 600 12px/1 var(--frame); }
+@media (max-width: 1024px) {
+  .oc-mast-in { gap: 12px 24px; padding: 12px 32px 0; }
+  .oc-search { order: 3; flex: 1 1 100%; min-width: 0; margin-left: 0; }
+  .oc-nav { order: 4; width: calc(100% + 64px); margin: 0 -32px; padding: 0 32px; gap: 16px; overflow-x: auto; }
+  .oc-nav a { padding: 10px 0 7px; }
+}
+@media (max-width: 760px) {
+  .oc-mast-in { padding: 12px 16px 0; }
+  .oc-nav { width: calc(100% + 32px); margin: 0 -16px; padding: 0 16px; }
+  .oc-search kbd { display: none; }
+}
+
+/* Footer */
+.oc-footer { border-top: 1px solid var(--rule); }
+.oc-footer-in { max-width: 1400px; margin: 0 auto; padding: 24px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; font: 500 13px/1.5 var(--frame); color: var(--ink-3); }
+.oc-footer-terms { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 24px; }
+.oc-footer-nav { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+@media (max-width: 760px) { .oc-footer-in { padding: 24px 16px; } }
+
+main { flex: 1 0 auto; }
+main:focus { outline: none; }
+.frame { max-width: 1400px; margin: 0 auto; padding-inline: var(--gut); }
+
+/* Shared small components */
+.src { margin-left: 4px; font: 500 12.5px/1.3 var(--frame); color: var(--pencil); white-space: nowrap; text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--pencil) 40%, transparent); font-variant-numeric: lining-nums tabular-nums; }
+a.src:hover { border-bottom-color: var(--pencil); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 700 14px/1 var(--frame); color: var(--ink); background: transparent; border: 1.5px solid var(--ink); border-radius: 0; padding: 10px 13px; text-decoration: none; white-space: nowrap; cursor: pointer; }
+.btn:hover { background: var(--ink); color: var(--paper); }
+.btn-primary { background: var(--ochre); }
+.btn-primary:hover { background: var(--ink); color: var(--ochre); }
+.btn svg { width: 14px; height: 14px; flex: none; }
+.slabel { font: 800 15px/1.2 var(--frame); letter-spacing: 0.06em; text-transform: uppercase; padding-bottom: 8px; border-bottom: 2px solid var(--rule-strong); display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.slabel small { font: 500 13px/1.2 var(--frame); letter-spacing: 0; text-transform: none; color: var(--ink-3); }
+.soon { display: inline-block; font: 700 12px/1 var(--frame); letter-spacing: 0.04em; text-transform: uppercase; border: 1.5px dashed color-mix(in srgb, var(--ink) 55%, transparent); color: var(--ink-2); padding: 4px 6px; vertical-align: 2px; white-space: nowrap; }
+.mk { display: inline-flex; align-items: center; gap: 5px; font: 600 12.5px/1 var(--frame); color: var(--ink-2); white-space: nowrap; }
+.mk svg { width: 14px; height: 14px; flex: none; color: var(--ink); }
+.chev { display: inline-block; width: 7px; height: 7px; border-right: 2px solid currentColor; border-top: 2px solid currentColor; transform: rotate(45deg); margin-left: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+</style>
+<style>
+/* ---- B: the question as the title, a real look-alike pair as the opening ---- */
+.open { text-align: center; padding-top: 64px; }
+.open h1 { font: 600 96px/0.98 var(--serif); letter-spacing: -0.025em; text-wrap: balance; }
+.open h1 i { font-weight: 500; letter-spacing: -0.03em; }
+.open h1 .q { font-weight: 400; color: var(--ink-3); }
+.open .dek { margin: 26px auto 0; max-width: 52ch; font: 400 21px/1.5 var(--serif); color: var(--ink-2); text-wrap: balance; }
+.open .dek b { font-weight: 600; color: var(--ink); }
+.open form { margin: 30px auto 0; max-width: 600px; display: flex; border: 2px solid var(--ink); background: var(--paper); }
+.open form:focus-within { outline: 3px solid var(--pencil); outline-offset: 2px; }
+.open input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 15px 16px; font: 500 18px/1.2 var(--frame); color: var(--ink); border-radius: 0; appearance: none; }
+.open input:focus { outline: none; }
+.open form button { border: 0; border-radius: 0; background: var(--ink); color: var(--paper); font: 700 15px/1 var(--frame); padding: 0 20px; cursor: pointer; }
+.open form button:hover { background: var(--ochre); color: var(--ink); }
+
+/* The pair */
+.pair { margin-top: 72px; }
+.pair-grid { display: grid; grid-template-columns: minmax(0, 1fr) 168px minmax(0, 1fr); }
+.side { padding: 0 0 24px; }
+.side.l { text-align: right; }
+.side .nm { font: italic 600 64px/1 var(--serif); letter-spacing: -0.015em; }
+.side .nm .g { font-weight: 400; }
+.side .nm a { color: var(--ink); text-decoration: none; }
+.side .nm a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.side .meta { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.side.l .meta { justify-content: flex-end; }
+.side .auth { font: 400 22px/1.2 var(--serif); color: var(--ink-3); }
+.side .cn { font: 700 21px/1.2 var(--frame); }
+.side .pl { margin-top: 6px; font: 600 15px/1.3 var(--narrow); color: var(--ink-2); }
+.side .pl i { font: italic 600 16px/1 var(--serif); color: var(--ink); }
+.axis { position: relative; display: grid; place-items: start center; }
+.axis::before { content: ""; position: absolute; top: 62px; bottom: 0; left: 50%; width: 2px; margin-left: -1px; background: var(--ink); }
+.axis span { position: relative; background: var(--paper); padding: 0 0 10px; font: italic 400 44px/1 var(--serif); color: var(--ink); margin-top: 4px; }
+
+.rows { border-top: 2px solid var(--ink); }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) 168px minmax(0, 1fr); border-bottom: 1px solid var(--rule); }
+.row.diff { box-shadow: inset 0 -3px 0 var(--ochre); }
+.row > div { padding: 20px 0 22px; }
+.row .l { text-align: right; }
+.row .t { text-align: center; padding-inline: 12px; font: 700 15px/1.35 var(--frame); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.row .t .mk { font-size: 12px; }
+.row blockquote { font: 400 20px/1.45 var(--serif); text-wrap: pretty; }
+.row blockquote .src { font-size: 12.5px; }
+.row .none { font: italic 400 18px/1.45 var(--serif); color: var(--ink-3); }
+.row .who { display: none; }
+
+.tip { margin-top: -1px; border-top: 2px solid var(--ink); padding: 36px 0 40px; box-shadow: inset 0 -5px 0 var(--ochre); border-bottom: 2px solid var(--ink); text-align: center; }
+.tip .lab { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--ochre); font: 800 17px/1 var(--frame); letter-spacing: 0.08em; text-transform: uppercase; padding: 9px 12px 9px 10px; }
+.tip .lab svg { width: 18px; height: 18px; }
+.tip blockquote { margin: 22px auto 0; max-width: 40ch; font: 400 32px/1.35 var(--serif); text-wrap: balance; }
+.tip blockquote .src { font-size: 13px; }
+.acts { margin-top: 28px; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.acts .btn-primary i { font-family: var(--serif); font-size: 15px; font-weight: 700; }
+
+/* The band, in the place it holds on every taxon page, carrying the ways in */
+.band { background: var(--ochre); }
+.band nav { max-width: 1400px; margin: 0 auto; padding: 0 var(--gut); display: flex; justify-content: center; }
+.band a, .band .off { display: flex; align-items: baseline; gap: 8px; padding: 13px 22px 12px; color: var(--ink); text-decoration: none; white-space: nowrap; border-left: 1px solid #16161640; }
+.band a:first-child { border-left: 0; }
+.band a:hover { background: var(--ink); color: var(--ochre); }
+.band b { font: 700 17px/1.2 var(--narrow); letter-spacing: 0.01em; }
+.band .n { font: 500 15px/1.2 var(--narrow); font-variant-numeric: lining-nums tabular-nums; }
+.band .off b { color: var(--ink-2); }
+.band .off .soon { border-color: #16161690; color: var(--ink); font-size: 11px; padding: 3px 5px; }
+
+/* Below the band: three columns standing on rules */
+.more3 { margin-top: 72px; padding-top: 0; padding-bottom: 72px; display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 48px; }
+.rnd .slabel .btn { padding: 6px 9px; font-size: 13px; }
+.rnd .nm { margin-top: 20px; font: italic 600 44px/1.05 var(--serif); }
+.rnd .nm .g { font-weight: 400; }
+.rnd .meta { margin-top: 8px; display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.rnd .auth { font: 400 20px/1.2 var(--serif); color: var(--ink-3); }
+.rnd .cn { font: 700 19px/1.2 var(--frame); }
+.rnd .pl { margin-top: 10px; font: 600 15px/1.3 var(--narrow); color: var(--ink-2); }
+.rnd .pl i { font: italic 600 16px/1 var(--serif); color: var(--ink); }
+.rnd .lk { margin-top: 16px; font: 500 14px/1.6 var(--frame); color: var(--ink-2); }
+.rnd .lk a { font: italic 600 17px/1 var(--serif); color: var(--ink); text-decoration: none; }
+.rnd .lk a:hover { text-decoration: underline; }
+.list li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--rule); }
+.list a { font: 400 18px/1.3 var(--serif); color: var(--ink); text-decoration: none; }
+.list a:hover { text-decoration: underline; }
+.list a i { font-weight: 600; }
+.list .rk { font: 500 14px/1 var(--frame); color: var(--ink-3); margin-right: 4px; }
+.list .c { font: 600 15px/1 var(--frame); font-variant-numeric: lining-nums tabular-nums; color: var(--ink-2); white-space: nowrap; }
+.list .sub { padding-top: 16px; font: 700 14px/1.2 var(--frame); border-bottom: 1px solid var(--ink); }
+.list .sub i { font: italic 600 17px/1 var(--serif); }
+.stamp { font: 700 11px/1 var(--frame); letter-spacing: 0.05em; text-transform: uppercase; background: var(--ink); color: var(--paper); padding: 4px 6px; margin-left: 8px; vertical-align: 2px; }
+
+/* The second column slides in once, as the comparison does */
+@keyframes slidein { from { clip-path: inset(0 100% 0 0); transform: translateX(12px); } to { clip-path: inset(0 0 0 0); transform: none; } }
+.r-in { animation: slidein 420ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both; }
+
+@media (max-width: 1180px) {
+  .open h1 { font-size: 80px; }
+  .side .nm { font-size: 52px; }
+  .pair-grid, .row { grid-template-columns: minmax(0, 1fr) 132px minmax(0, 1fr); }
+  .band nav { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+  .band a, .band .off { padding-inline: 16px; }
+  .band a:first-child { padding-left: 0; }
+  .more3 { grid-template-columns: 1fr 1fr; }
+  .rnd { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  .open { padding-top: 40px; }
+  .open h1 { font-size: 54px; line-height: 1.02; }
+  .open .dek { font-size: 18px; margin-top: 18px; }
+  .open form button { padding: 0 14px; }
+  .open input { font-size: 16px; padding: 14px; }
+  .pair { margin-top: 48px; }
+  .pair-grid { grid-template-columns: 1fr; text-align: center; }
+  .side, .side.l { text-align: center; padding-bottom: 0; }
+  .side .meta, .side.l .meta { justify-content: center; }
+  .side .nm { font-size: 40px; }
+  .axis { padding: 14px 0; }
+  .axis::before { top: 50%; bottom: auto; margin-top: -1px; left: 0; right: 0; width: auto; height: 2px; margin: -1px 0 0; }
+  .axis span { padding: 0 14px; margin: 0; font-size: 32px; }
+  .rows { margin-top: 28px; }
+  .row { grid-template-columns: 1fr; }
+  .row > div { padding: 0; }
+  .row .t { order: -1; flex-direction: row; justify-content: space-between; padding: 16px 0 6px; }
+  .row .l, .row .r { text-align: left; padding-bottom: 14px; }
+  .row .l { padding-bottom: 10px; }
+  .row .who { display: block; font: italic 600 15px/1.3 var(--serif); margin-bottom: 2px; color: var(--ink-2); }
+  .row blockquote { font-size: 18px; }
+  .tip { padding: 28px 0 32px; }
+  .tip blockquote { font-size: 23px; }
+  .band a, .band .off { padding: 11px 12px 10px; }
+  .band b { font-size: 16px; }
+  .more3 { grid-template-columns: 1fr; padding-top: 48px; }
+  .rnd .nm { font-size: 38px; }
+}
+</style>
+</head>
+<body>
+<a href="#main" class="oc-skip">Skip to content</a>
+<header class="oc-mast" id="site-header">
+  <div class="oc-mast-in">
+    <a href="/" class="oc-mark" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="oc-mark-cap" d="M5 9.5C5 6 8 4 12 4s7 2 7 5.5H5Z"/><path class="oc-mark-nut" d="M6.5 10.5h11c0 5-2.5 9-5.5 9.5-3-.5-5.5-4.5-5.5-9.5Z"/><path class="oc-mark-stem" d="M12 1.5v2.5"/></svg>Oak Compendium</a>
+    <nav class="oc-nav" aria-label="Main"><a href="/species"><span>Species</span></a><a href="/taxonomy"><span>Taxonomy</span></a><a href="/sources"><span>Sources</span></a><a href="/about"><span>About</span></a></nav>
+    <form action="/search" method="get" role="search" class="oc-search"><label for="header-search" class="sr-only">Search</label><input type="search" id="header-search" name="q" placeholder="Name, common name or synonym" autocomplete="off"><kbd aria-hidden="true">/</kbd></form>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <div class="band">
+    <nav aria-label="Browse">
+      <a href="/species"><b>Species</b><span class="n">494</span></a>
+      <a href="/species?hybrids=1"><b>Hybrids</b><span class="n">238</span></a>
+      <a href="/taxonomy"><b>Taxonomy</b><span class="n">8 sections</span></a>
+      <a href="/sources"><b>Sources</b><span class="n">4</span></a>
+      <span class="off"><b>Identify</b><span class="soon">In preparation</span></span>
+    </nav>
+  </div>
+
+  <div class="frame">
+    <header class="open">
+      <h1 id="t">Is it <i>this</i>, or <i>that</i><span class="q">?</span></h1>
+      <p class="dek">The Oak Compendium sets <b>494 oaks and 238 hybrids</b> side by side, in the words of one field identifier: Jeff Clark, from about 29,000 oak identifications on iNaturalist.</p>
+      <form action="/search" role="search"><label for="q" class="sr-only">Find an oak</label><input id="q" name="q" type="search" placeholder="Name, common name or synonym" autocomplete="off"><button type="submit">Find an oak</button></form>
+    </header>
+
+    <section class="pair" aria-labelledby="p-h">
+      <h2 id="p-h" class="sr-only">A look-alike pair: Quercus shumardii or Quercus coccinea</h2>
+      <div class="pair-grid">
+        <div class="side l">
+          <p class="nm"><a href="/species/shumardii"><span class="g">Quercus</span> shumardii</a></p>
+          <p class="meta"><span class="auth">Buckley</span><span class="cn">Shumard oak</span></p>
+          <p class="pl">sect. <i>Lobatae</i> · subsect. <i>Coccineae</i></p>
+        </div>
+        <div class="axis" aria-hidden="true"><span>or</span></div>
+        <div class="side r r-in">
+          <p class="nm"><a href="/species/coccinea"><span class="g">Quercus</span> coccinea</a></p>
+          <p class="meta"><span class="auth">Münchh.</span><span class="cn">Scarlet oak</span></p>
+          <p class="pl">sect. <i>Lobatae</i> · subsect. <i>Coccineae</i></p>
+        </div>
+      </div>
+
+      <div class="rows">
+        <div class="row diff">
+          <div class="l"><span class="who">Q. shumardii</span><blockquote><q>buds looks glabrous and pretty small.</q> <a class="src" href="https://www.inaturalist.org/observations/190127456">iNat i465271504</a></blockquote></div>
+          <div class="t">Terminal buds <span class="mk"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.2l1.75 3.6 3.95.55-2.87 2.77.7 3.93L7 10.2l-3.53 1.85.7-3.93L1.3 5.35l3.95-.55Z" fill="#d9a21b" stroke="#161616" stroke-width="1.2" stroke-linejoin="round"/></svg>key difference</span></div>
+          <div class="r r-in"><span class="who">Q. coccinea</span><blockquote><q>The buds are very consistent with Q coccinea, apically pubescent.</q> <a class="src" href="https://www.inaturalist.org/observations/100361510">iNat c10360967</a></blockquote></div>
+        </div>
+        <div class="row">
+          <div class="l"><span class="who">Q. shumardii</span><blockquote><q>…very tight sinuses (vs the wider ones of Q coccinea).</q> <a class="src" href="https://www.inaturalist.org/observations/403156034">iNat c23423264</a></blockquote></div>
+          <div class="t">Leaf sinuses</div>
+          <div class="r r-in"><span class="who">Q. coccinea</span><p class="none">No statement yet</p></div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <span class="lab"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="7.5" cy="7.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M11.6 11.6 16 16" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"/></svg>ID tip</span>
+        <blockquote><q>Leaf morphology can not be used to ID Q coccinea to species. The definitive factor here is the bud shape and vestiture.</q> <a class="src" href="https://www.inaturalist.org/observations/142462619">iNat c11211160 · 2023</a></blockquote>
+      </div>
+      <div class="acts">
+        <a class="btn btn-primary" href="/species/shumardii?vs=coccinea">Compare all field marks</a>
+        <button class="btn" type="button">Another pair</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="frame more3">
+    <section class="rnd" aria-labelledby="r-h">
+      <h2 class="slabel" id="r-h">An oak at random <button class="btn" type="button">Show another</button></h2>
+      <p class="nm"><span class="g">Quercus</span> michauxii</p>
+      <p class="meta"><span class="auth">Nutt.</span><span class="cn">Swamp chestnut oak</span></p>
+      <p class="pl">sect. <i>Quercus</i> · subsect. <i>Albae</i></p>
+      <p class="lk">Hybrids <a href="#">Q. × beadlei</a> with <i>alba</i>, <a href="#">Q. × byarsii</a> with <i>macrocarpa</i>, <a href="#">Q. × tottenii</a> with <i>lyrata</i></p>
+    </section>
+    <section aria-labelledby="g-h">
+      <h2 class="slabel" id="g-h">The genus <small>494 species</small></h2>
+      <ul class="list">
+        <li class="sub"><span>subgenus <i>Quercus</i></span><span class="c">332</span></li>
+        <li><a href="#"><span class="rk">sect.</span><i>Quercus</i></a><span class="c">169</span></li>
+        <li><a href="#"><span class="rk">sect.</span><i>Lobatae</i></a><span class="c">149</span></li>
+        <li><a href="#"><span class="rk">sect.</span><i>Virentes</i></a><span class="c">7</span></li><li><a href="#"><span class="rk">sect.</span><i>Protobalanus</i></a><span class="c">5</span></li><li><a href="#"><span class="rk">sect.</span><i>Ponticae</i></a><span class="c">2</span></li>
+        <li class="sub"><span>subgenus <i>Cerris</i></span><span class="c">162</span></li>
+        <li><a href="#"><span class="rk">sect.</span><i>Cyclobalanopsis</i></a><span class="c">95</span></li>
+        <li><a href="#"><span class="rk">sect.</span><i>Ilex</i></a><span class="c">46</span></li><li><a href="#"><span class="rk">sect.</span><i>Cerris</i></a><span class="c">21</span></li>
+      </ul>
+    </section>
+    <section aria-labelledby="s-h">
+      <h2 class="slabel" id="s-h">Sources</h2>
+      <ul class="list">
+        <li><a href="/sources/3"><b style="font-weight:600">Oak Compendium</b></a><span class="c">Jeff Clark<span class="stamp">Primary</span></span></li>
+        <li><a href="/sources/2">Oaks of the World</a><span class="c">514 taxa</span></li>
+        <li><a href="/sources/4">The Sibley Guide to Trees</a><span class="c">46 taxa</span></li>
+        <li><a href="/sources/5">Botanical Gazette, <span style="font-style:normal">Notes on North American Trees. I.</span> <i>Quercus</i></a><span class="c">1 taxon</span></li>
+      </ul>
+    </section>
+  </div>
+</main>
+<footer class="oc-footer" id="site-footer">
+  <div class="oc-footer-in">
+    <p class="oc-footer-terms"><span>Jeff Clark’s text © all rights reserved</span><span>Facts free to use</span><span>Other sources under their own terms</span></p>
+    <nav class="oc-footer-nav" aria-label="More"><a href="/articles">Articles</a><a href="/privacy">Privacy</a><a href="/api/v1/docs">API</a><a href="/users/log-in">Log in</a></nav>
+  </div>
+</footer>
+
+</body>
+</html>
