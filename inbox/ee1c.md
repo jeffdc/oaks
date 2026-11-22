@@ -5,6 +5,12 @@ plan: compendium
 item: b5b2
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-aaf64bcc24264fc50
 created: "2026-11-22T02:31:21Z"
+settled:
+  action: accept
+  note: with review ca5f
+  by: Jeff
+  human: true
+  at: "2026-11-22T16:11:40Z"
 ---
 
 It's a LiveView page like any other; the band examples follow the band component's current 'callers wrap names in <i>' contract and drop out when sci_name lands
