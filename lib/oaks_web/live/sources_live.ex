@@ -77,7 +77,7 @@ defmodule OaksWeb.SourcesLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-4xl mx-auto">
+    <.page>
       <.header class="mb-s2 [&>div:first-child]:flex-[1_1_20rem]">
         Data Sources
         <:subtitle>
@@ -104,7 +104,7 @@ defmodule OaksWeb.SourcesLive do
         source={@delete_source}
         species_count={assigns[:delete_species_count] || 0}
       />
-    </div>
+    </.page>
     """
   end
 

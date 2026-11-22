@@ -78,21 +78,23 @@ defmodule OaksWeb.ArticleLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-4xl mx-auto">
-      <.not_found_view :if={@not_found} />
-
-      <div :if={@article}>
+    <.page width="read">
+      <:head :if={@not_found}><.not_found_view /></:head>
+      <:head :if={@article}>
         <.article_header
           article={@article}
           tags={@tags}
           editor={@current_scope != nil}
         />
+      </:head>
+
+      <div :if={@article}>
         <.article_body content={@rendered_content} />
         <.article_footer article={@article} tags={@tags} />
 
         <.delete_modal :if={@confirm_delete} article={@article} />
       </div>
-    </div>
+    </.page>
     """
   end
 

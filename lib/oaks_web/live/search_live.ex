@@ -45,7 +45,7 @@ defmodule OaksWeb.SearchLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div id="search-sync" class="search-page" phx-hook="SearchSync" data-query={@query}>
+    <.page id="search-sync" phx-hook="SearchSync" data-query={@query}>
       <div :if={@query == ""} class="search-start">
         <h1 class="search-title">Search</h1>
         <p class="search-empty">
@@ -63,7 +63,7 @@ defmodule OaksWeb.SearchLive do
           <.species_results :if={@results.species != []} species={@results.species} />
         </div>
       </div>
-    </div>
+    </.page>
     """
   end
 

@@ -39,8 +39,10 @@ defmodule OaksWeb.AboutLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="page-read">
-      <.header>About the Oak Compendium</.header>
+    <.page width="read" class="space-y-s7">
+      <:head>
+        <.header>About the Oak Compendium</.header>
+      </:head>
 
       <section class="prose-content page-lead">
         <p>
@@ -229,7 +231,7 @@ defmodule OaksWeb.AboutLive do
           id="release-notes-link"
         >Release Notes</a>
       </footer>
-    </div>
+    </.page>
     """
   end
 end

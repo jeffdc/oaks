@@ -43,7 +43,7 @@ defmodule OaksWeb.ArticlesLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-4xl mx-auto">
+    <.page>
       <.header class="mb-s4 [&>div:first-child]:flex-[1_1_20rem]">
         Articles
         <:subtitle>Guides, reviews, and notes about oak identification and taxonomy.</:subtitle>
@@ -64,7 +64,7 @@ defmodule OaksWeb.ArticlesLive do
       <div :if={@articles != []}>
         <.article_card :for={article <- @articles} article={article} />
       </div>
-    </div>
+    </.page>
     """
   end
 

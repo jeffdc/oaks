@@ -181,7 +181,7 @@ defmodule OaksWeb.TaxonomyLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="taxonomy-page">
+    <.page>
       <div :if={@not_found}>
         <.header>
           Taxon Not Found
@@ -314,7 +314,7 @@ defmodule OaksWeb.TaxonomyLive do
         taxon={@delete_taxon_target}
         usage={@delete_taxon_usage}
       />
-    </div>
+    </.page>
     """
   end
 

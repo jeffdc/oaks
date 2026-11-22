@@ -204,113 +204,117 @@ defmodule OaksWeb.TaxonFormLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div :if={@form == nil} class="py-s7">
-      <p class="text-ink-3">Loading...</p>
-    </div>
-
-    <div :if={@form} class="max-w-3xl">
-      <div class="mb-s4">
-        <.back navigate={~p"/taxonomy"}>Back to taxonomy</.back>
+    <.page width="form">
+      <div :if={@form == nil} class="py-s7">
+        <p class="text-ink-3">Loading...</p>
       </div>
 
-      <.header>
-        <%= if @live_action == :new do %>
-          Create Taxon
-        <% else %>
-          Edit {level_label(@taxon.level)}: <i>{display_name(@taxon)}</i>
-        <% end %>
-      </.header>
-
-      <.form for={@form} id="taxon-form" phx-change="validate" phx-submit="save">
-        <div class="space-y-s7">
-          <%!-- Core fields --%>
-          <section>
-            <h2 class="section-title section-title-sm mb-s4">Core Information</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-s5">
-              <div>
-                <%= if @live_action == :new do %>
-                  <.input
-                    field={@form[:level]}
-                    type="select"
-                    label="Level"
-                    options={level_options()}
-                    prompt="Select level..."
-                  />
-                <% else %>
-                  <div class="oc-field">
-                    <span class="oc-label">Level</span>
-                    <p class="py-[9px] font-frame text-[15px] font-semibold text-ink">
-                      {level_label(@taxon.level)}
-                    </p>
-                    <p class="oc-hint">Level cannot be changed after creation</p>
-                  </div>
-                <% end %>
-              </div>
-              <div>
-                <.input
-                  field={@form[:name]}
-                  type="text"
-                  label="Name"
-                  placeholder="e.g. Quercus"
-                  phx-debounce="300"
-                />
-              </div>
-              <div :if={show_parent?(@form)}>
-                <.input
-                  field={@form[:parent]}
-                  type="select"
-                  label="Parent"
-                  options={@parent_options}
-                  prompt="Select parent..."
-                />
-              </div>
-              <div>
-                <.input
-                  field={@form[:author]}
-                  type="text"
-                  label="Author"
-                  placeholder="e.g. (L.) Oerst."
-                  phx-debounce="300"
-                />
-              </div>
-            </div>
-          </section>
-
-          <%!-- Content --%>
-          <section>
-            <h2 class="section-title section-title-sm mb-s4">Content</h2>
-            <div class="space-y-s4">
-              <.markdown_editor
-                field={@form[:content]}
-                content_tab={@content_tab}
-                tab_event="switch_content_tab"
-                placeholder="Write about this taxon..."
-                label="Content"
-                hint="Markdown content for this taxon (descriptions, notes, etc.)"
-              />
-              <.tag_input
-                tags={@link_tags}
-                add_event="add_link"
-                remove_event="remove_link"
-                input_id="link-tag-input"
-                placeholder="Add URL..."
-                label="Links"
-                hint="Press Enter to add URLs"
-                display_fn={&link_display/1}
-              />
-            </div>
-          </section>
-
-          <%!-- Submit --%>
-          <div class="flex items-center justify-end gap-s2 pt-s4 border-t border-rule">
-            <.button navigate={~p"/taxonomy"}>Cancel</.button>
-            <.button type="submit" variant="primary" phx-disable-with="Saving...">
-              {if(@live_action == :new, do: "Create Taxon", else: "Save Changes")}
-            </.button>
-          </div>
+      <:head :if={@form}>
+        <div class="mb-s4">
+          <.back navigate={~p"/taxonomy"}>Back to taxonomy</.back>
         </div>
-      </.form>
-    </div>
+
+        <.header>
+          <%= if @live_action == :new do %>
+            Create Taxon
+          <% else %>
+            Edit {level_label(@taxon.level)}: <i>{display_name(@taxon)}</i>
+          <% end %>
+        </.header>
+      </:head>
+
+      <div :if={@form}>
+        <.form for={@form} id="taxon-form" phx-change="validate" phx-submit="save">
+          <div class="space-y-s7">
+            <%!-- Core fields --%>
+            <section>
+              <h2 class="section-title section-title-sm mb-s4">Core Information</h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-s5">
+                <div>
+                  <%= if @live_action == :new do %>
+                    <.input
+                      field={@form[:level]}
+                      type="select"
+                      label="Level"
+                      options={level_options()}
+                      prompt="Select level..."
+                    />
+                  <% else %>
+                    <div class="oc-field">
+                      <span class="oc-label">Level</span>
+                      <p class="py-[9px] font-frame text-[15px] font-semibold text-ink">
+                        {level_label(@taxon.level)}
+                      </p>
+                      <p class="oc-hint">Level cannot be changed after creation</p>
+                    </div>
+                  <% end %>
+                </div>
+                <div>
+                  <.input
+                    field={@form[:name]}
+                    type="text"
+                    label="Name"
+                    placeholder="e.g. Quercus"
+                    phx-debounce="300"
+                  />
+                </div>
+                <div :if={show_parent?(@form)}>
+                  <.input
+                    field={@form[:parent]}
+                    type="select"
+                    label="Parent"
+                    options={@parent_options}
+                    prompt="Select parent..."
+                  />
+                </div>
+                <div>
+                  <.input
+                    field={@form[:author]}
+                    type="text"
+                    label="Author"
+                    placeholder="e.g. (L.) Oerst."
+                    phx-debounce="300"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <%!-- Content --%>
+            <section>
+              <h2 class="section-title section-title-sm mb-s4">Content</h2>
+              <div class="space-y-s4">
+                <.markdown_editor
+                  field={@form[:content]}
+                  content_tab={@content_tab}
+                  tab_event="switch_content_tab"
+                  placeholder="Write about this taxon..."
+                  label="Content"
+                  hint="Markdown content for this taxon (descriptions, notes, etc.)"
+                />
+                <.tag_input
+                  tags={@link_tags}
+                  add_event="add_link"
+                  remove_event="remove_link"
+                  input_id="link-tag-input"
+                  placeholder="Add URL..."
+                  label="Links"
+                  hint="Press Enter to add URLs"
+                  display_fn={&link_display/1}
+                />
+              </div>
+            </section>
+
+            <%!-- Submit --%>
+            <div class="flex items-center justify-end gap-s2 pt-s4 border-t border-rule">
+              <.button navigate={~p"/taxonomy"}>Cancel</.button>
+              <.button type="submit" variant="primary" phx-disable-with="Saving...">
+                {if(@live_action == :new, do: "Create Taxon", else: "Save Changes")}
+              </.button>
+            </div>
+          </div>
+        </.form>
+      </div>
+    </.page>
     """
   end
 

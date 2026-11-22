@@ -926,11 +926,6 @@ select.select {
    italic. Pages that need something different override them in their own
    section.
    ============================================ */
-.source-detail {
-  max-width: 56rem;
-  margin: 0 auto;
-}
-
 /* Title row: name, type tag and the editor's buttons on a 2px rule. The
    buttons hold the top right however the name wraps; on phones they drop
    below it. */
@@ -1438,11 +1433,6 @@ a.badge:hover {
 }
 
 /* ---------- Account pages (login, setup, settings) ---------- */
-.settings-container {
-  max-width: 34rem;
-  margin: 0 auto;
-}
-
 /* A section of an account page: no box, its heading carries the rule. */
 .settings-section {
   margin: 0 0 var(--spacing-s7);
@@ -1708,22 +1698,6 @@ a.badge:hover {
 }
 
 /* ---------- Reading pages (About, Privacy, Markdown guide) ---------- */
-.page-read {
-  max-width: 44rem;
-  margin: 0 auto;
-}
-
-.page-read > section,
-.page-wide > section {
-  margin: 0 0 var(--spacing-s7);
-}
-
-/* The reading text under each heading: b4f7's prose at a measure that
-   keeps lines near 66 characters. */
-.page-read .prose-content {
-  max-width: 66ch;
-}
-
 .page-lead {
   font-size: 18px;
   line-height: 1.55;
@@ -1811,11 +1785,6 @@ a.badge:hover {
 }
 
 /* ---------- Analytics ---------- */
-.page-wide {
-  max-width: 56rem;
-  margin: 0 auto;
-}
-
 /* The period picker: the current period takes the ochre underline. */
 .analytics-ranges {
   display: flex;

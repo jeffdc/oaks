@@ -170,16 +170,18 @@ defmodule OaksWeb.AnalyticsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="page-wide" data-active-range={@range}>
-      <.header>
-        Site Analytics
-        <:subtitle>
-          Privacy-respecting page view stats for the Oak Compendium.
-          Showing <strong>{range_label(@range)}</strong>
-          (<span class="analytics-date">{@from}</span>
-          &ndash; <span class="analytics-date">{@to}</span>).
-        </:subtitle>
-      </.header>
+    <.page class="space-y-s7" data-active-range={@range}>
+      <:head>
+        <.header>
+          Site Analytics
+          <:subtitle>
+            Privacy-respecting page view stats for the Oak Compendium.
+            Showing <strong>{range_label(@range)}</strong>
+            (<span class="analytics-date">{@from}</span>
+            &ndash; <span class="analytics-date">{@to}</span>).
+          </:subtitle>
+        </.header>
+      </:head>
 
       <%!-- Range buttons --%>
       <div class="analytics-ranges" role="group" aria-label="Date range">
@@ -320,7 +322,7 @@ defmodule OaksWeb.AnalyticsLive do
           </div>
         </div>
       </details>
-    </div>
+    </.page>
     """
   end
 end

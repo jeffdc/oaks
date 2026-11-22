@@ -15,8 +15,10 @@ defmodule OaksWeb.PrivacyLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="page-read">
-      <.header>Privacy Policy</.header>
+    <.page width="read" class="space-y-s7">
+      <:head>
+        <.header>Privacy Policy</.header>
+      </:head>
 
       <section>
         <.section_heading>Privacy-Protecting Analytics</.section_heading>
@@ -202,7 +204,7 @@ defmodule OaksWeb.PrivacyLive do
       </section>
 
       <footer class="page-foot">Last updated: 2026-05-12</footer>
-    </div>
+    </.page>
     """
   end
 end

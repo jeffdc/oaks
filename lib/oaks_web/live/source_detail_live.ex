@@ -76,10 +76,10 @@ defmodule OaksWeb.SourceDetailLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="source-detail-page">
+    <.page>
       <.not_found_view :if={@not_found} />
 
-      <article :if={@source} class="source-detail">
+      <article :if={@source}>
         <.back navigate={~p"/sources"}>Back to Sources</.back>
         <.source_header source={@source} editor={@current_scope != nil} />
         <.metadata_card source={@source} />
@@ -92,7 +92,7 @@ defmodule OaksWeb.SourceDetailLive do
         source={@source}
         species_count={length(@species)}
       />
-    </div>
+    </.page>
     """
   end
 
@@ -100,7 +100,7 @@ defmodule OaksWeb.SourceDetailLive do
 
   defp not_found_view(assigns) do
     ~H"""
-    <div class="source-detail">
+    <div>
       <.header>
         Source Not Found
         <:subtitle>The source you're looking for doesn't exist in our database.</:subtitle>

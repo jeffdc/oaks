@@ -72,7 +72,7 @@ defmodule OaksWeb.SpeciesListLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-5xl mx-auto">
+    <.page>
       <.header>
         Species List
         <:subtitle>
@@ -124,7 +124,7 @@ defmodule OaksWeb.SpeciesListLive do
       >
         <.species_row :for={{dom_id, species} <- @streams.species} id={dom_id} species={species} />
       </div>
-    </div>
+    </.page>
     """
   end
 

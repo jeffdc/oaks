@@ -128,188 +128,192 @@ defmodule OaksWeb.SpeciesFormLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div :if={@form == nil} class="max-w-3xl mx-auto py-12 text-center">
-      <p class="oc-empty">Loading...</p>
-    </div>
+    <.page width="form">
+      <div :if={@form == nil} class="py-s7">
+        <p class="oc-empty">Loading...</p>
+      </div>
 
-    <div :if={@form} class="max-w-3xl mx-auto">
-      <.back navigate={cancel_path(@live_action, @species)}>Back</.back>
+      <:head :if={@form}>
+        <.back navigate={cancel_path(@live_action, @species)}>Back</.back>
 
-      <.header class="species-form-title">
-        <span :if={@live_action == :new}>New Species</span>
-        <span :if={
-          @live_action == :edit && !hybrid_sign?(@species.scientific_name, @species.is_hybrid)
-        }>
-          Edit <i>Quercus {epithet(@species.scientific_name)}</i>
-        </span>
-        <span :if={
-          @live_action == :edit && hybrid_sign?(@species.scientific_name, @species.is_hybrid)
-        }>
-          Edit <i>Quercus</i> &times; <i>{epithet(@species.scientific_name)}</i>
-        </span>
-      </.header>
+        <.header class="species-form-title">
+          <span :if={@live_action == :new}>New Species</span>
+          <span :if={
+            @live_action == :edit && !hybrid_sign?(@species.scientific_name, @species.is_hybrid)
+          }>
+            Edit <i>Quercus {epithet(@species.scientific_name)}</i>
+          </span>
+          <span :if={
+            @live_action == :edit && hybrid_sign?(@species.scientific_name, @species.is_hybrid)
+          }>
+            Edit <i>Quercus</i> &times; <i>{epithet(@species.scientific_name)}</i>
+          </span>
+        </.header>
+      </:head>
 
-      <.form for={@form} id="species-form" phx-change="validate" phx-submit="save">
-        <div class="species-form-sections">
-          <%!-- Core fields --%>
-          <div class="card">
-            <h2 class="section-title section-title-sm mb-4">Basic Information</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="sm:col-span-2">
-                <.input
-                  field={@form[:scientific_name]}
-                  type="text"
-                  label="Scientific Name"
-                  placeholder="e.g. alba"
-                  phx-debounce="300"
-                />
-                <p :if={@live_action == :edit} class="oc-hint species-form-note">
-                  Renaming updates every species that mentions this name and keeps the old name as a synonym.
-                </p>
-              </div>
-              <div>
-                <.input
-                  field={@form[:author]}
-                  type="text"
-                  label="Author"
-                  placeholder="e.g. L. 1753"
-                  phx-debounce="300"
-                />
-              </div>
-              <div>
-                <.input
-                  field={@form[:conservation_status]}
-                  type="select"
-                  label="Conservation Status"
-                  options={conservation_options()}
-                  prompt="Select status..."
-                />
-              </div>
-              <div>
-                <.input field={@form[:is_hybrid]} type="checkbox" label="Is Hybrid" />
+      <div :if={@form}>
+        <.form for={@form} id="species-form" phx-change="validate" phx-submit="save">
+          <div class="species-form-sections">
+            <%!-- Core fields --%>
+            <div class="card">
+              <h2 class="section-title section-title-sm mb-4">Basic Information</h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                  <.input
+                    field={@form[:scientific_name]}
+                    type="text"
+                    label="Scientific Name"
+                    placeholder="e.g. alba"
+                    phx-debounce="300"
+                  />
+                  <p :if={@live_action == :edit} class="oc-hint species-form-note">
+                    Renaming updates every species that mentions this name and keeps the old name as a synonym.
+                  </p>
+                </div>
+                <div>
+                  <.input
+                    field={@form[:author]}
+                    type="text"
+                    label="Author"
+                    placeholder="e.g. L. 1753"
+                    phx-debounce="300"
+                  />
+                </div>
+                <div>
+                  <.input
+                    field={@form[:conservation_status]}
+                    type="select"
+                    label="Conservation Status"
+                    options={conservation_options()}
+                    prompt="Select status..."
+                  />
+                </div>
+                <div>
+                  <.input field={@form[:is_hybrid]} type="checkbox" label="Is Hybrid" />
+                </div>
               </div>
             </div>
-          </div>
 
-          <%!-- Taxonomy fields --%>
-          <div class="card">
-            <h2 class="section-title section-title-sm mb-4">Taxonomy</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <.input
-                  field={@form[:subgenus]}
-                  type="select"
-                  label="Subgenus"
-                  options={taxon_options(@subgenera, @form[:subgenus].value)}
-                  prompt="Select subgenus..."
-                />
-              </div>
-              <div>
-                <.input
-                  field={@form[:section]}
-                  type="select"
-                  label="Section"
-                  options={taxon_options(@sections, @form[:section].value)}
-                  prompt="Select section..."
-                />
-              </div>
-              <div>
-                <.input
-                  field={@form[:subsection]}
-                  type="select"
-                  label="Subsection"
-                  options={taxon_options(@subsections, @form[:subsection].value)}
-                  prompt="Select subsection..."
-                />
-              </div>
-              <div>
-                <.input
-                  field={@form[:complex]}
-                  type="select"
-                  label="Complex"
-                  options={taxon_options(@complexes, @form[:complex].value)}
-                  prompt="Select complex..."
-                />
+            <%!-- Taxonomy fields --%>
+            <div class="card">
+              <h2 class="section-title section-title-sm mb-4">Taxonomy</h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <.input
+                    field={@form[:subgenus]}
+                    type="select"
+                    label="Subgenus"
+                    options={taxon_options(@subgenera, @form[:subgenus].value)}
+                    prompt="Select subgenus..."
+                  />
+                </div>
+                <div>
+                  <.input
+                    field={@form[:section]}
+                    type="select"
+                    label="Section"
+                    options={taxon_options(@sections, @form[:section].value)}
+                    prompt="Select section..."
+                  />
+                </div>
+                <div>
+                  <.input
+                    field={@form[:subsection]}
+                    type="select"
+                    label="Subsection"
+                    options={taxon_options(@subsections, @form[:subsection].value)}
+                    prompt="Select subsection..."
+                  />
+                </div>
+                <div>
+                  <.input
+                    field={@form[:complex]}
+                    type="select"
+                    label="Complex"
+                    options={taxon_options(@complexes, @form[:complex].value)}
+                    prompt="Select complex..."
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <%!-- Hybrid parentage (shown when is_hybrid is checked) --%>
-          <div class="card">
-            <h2 class="section-title section-title-sm mb-4">Hybrid Parentage</h2>
-            <p class="oc-hint species-form-lede">
-              Only relevant for hybrid species.
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
+            <%!-- Hybrid parentage (shown when is_hybrid is checked) --%>
+            <div class="card">
+              <h2 class="section-title section-title-sm mb-4">Hybrid Parentage</h2>
+              <p class="oc-hint species-form-lede">
+                Only relevant for hybrid species.
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <.input
+                    field={@form[:parent1]}
+                    type="text"
+                    label="Parent 1"
+                    placeholder="e.g. alba"
+                    phx-debounce="300"
+                  />
+                </div>
+                <div>
+                  <.input
+                    field={@form[:parent2]}
+                    type="text"
+                    label="Parent 2"
+                    placeholder="e.g. macrocarpa"
+                    phx-debounce="300"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <%!-- Relationships (JSON arrays stored as comma-separated text) --%>
+            <div class="card">
+              <h2 class="section-title section-title-sm mb-4">Relationships</h2>
+              <p class="oc-hint species-form-lede">
+                Enter names separated by commas. JSON arrays are also accepted.
+              </p>
+              <div class="species-form-stack">
                 <.input
-                  field={@form[:parent1]}
+                  field={@form[:hybrids]}
                   type="text"
-                  label="Parent 1"
-                  placeholder="e.g. alba"
+                  label="Known Hybrids"
+                  placeholder={~s(e.g. ["×bebbiana","×jackiana"])}
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:closely_related_to]}
+                  type="text"
+                  label="Closely Related To"
+                  placeholder={~s(e.g. ["stellata","macrocarpa"])}
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:subspecies_varieties]}
+                  type="text"
+                  label="Subspecies & Varieties"
+                  placeholder={~s(e.g. ["alba var. latiloba"])}
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:synonyms]}
+                  type="text"
+                  label="Synonyms"
+                  placeholder={~s(e.g. ["alba var. repanda"])}
                   phx-debounce="300"
                 />
               </div>
-              <div>
-                <.input
-                  field={@form[:parent2]}
-                  type="text"
-                  label="Parent 2"
-                  placeholder="e.g. macrocarpa"
-                  phx-debounce="300"
-                />
-              </div>
+            </div>
+
+            <%!-- Submit --%>
+            <div class="species-form-actions">
+              <.button navigate={cancel_path(@live_action, @species)}>Cancel</.button>
+              <.button type="submit" variant="primary" phx-disable-with="Saving...">
+                {if(@live_action == :new, do: "Create Species", else: "Save Changes")}
+              </.button>
             </div>
           </div>
-
-          <%!-- Relationships (JSON arrays stored as comma-separated text) --%>
-          <div class="card">
-            <h2 class="section-title section-title-sm mb-4">Relationships</h2>
-            <p class="oc-hint species-form-lede">
-              Enter names separated by commas. JSON arrays are also accepted.
-            </p>
-            <div class="species-form-stack">
-              <.input
-                field={@form[:hybrids]}
-                type="text"
-                label="Known Hybrids"
-                placeholder={~s(e.g. ["×bebbiana","×jackiana"])}
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:closely_related_to]}
-                type="text"
-                label="Closely Related To"
-                placeholder={~s(e.g. ["stellata","macrocarpa"])}
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:subspecies_varieties]}
-                type="text"
-                label="Subspecies & Varieties"
-                placeholder={~s(e.g. ["alba var. latiloba"])}
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:synonyms]}
-                type="text"
-                label="Synonyms"
-                placeholder={~s(e.g. ["alba var. repanda"])}
-                phx-debounce="300"
-              />
-            </div>
-          </div>
-
-          <%!-- Submit --%>
-          <div class="species-form-actions">
-            <.button navigate={cancel_path(@live_action, @species)}>Cancel</.button>
-            <.button type="submit" variant="primary" phx-disable-with="Saving...">
-              {if(@live_action == :new, do: "Create Species", else: "Save Changes")}
-            </.button>
-          </div>
-        </div>
-      </.form>
-    </div>
+        </.form>
+      </div>
+    </.page>
     """
   end
 

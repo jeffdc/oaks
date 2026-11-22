@@ -1,5 +1,7 @@
-<div class="settings-container" id="login-page">
-  <.header>Log in</.header>
+<.page width="form" id="login-page">
+  <:head>
+    <.header>Log in</.header>
+  </:head>
 
   <section class="settings-section">
     <.auth_message :if={@error == :invalid}>Invalid email or password.</.auth_message>
@@ -39,4 +41,4 @@
       <.button type="submit">Log in as dev user</.button>
     </.form>
   </section>
-</div>
+</.page>

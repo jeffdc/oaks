@@ -122,135 +122,139 @@ defmodule OaksWeb.SourceFormLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div :if={@form == nil} class="max-w-4xl mx-auto py-12 text-center">
-      <p class="font-frame text-ink-3">Loading...</p>
-    </div>
+    <.page width="form">
+      <div :if={@form == nil} class="py-s7">
+        <p class="font-frame text-ink-3">Loading...</p>
+      </div>
 
-    <div :if={@form} class="max-w-4xl mx-auto">
-      <.back navigate={cancel_path(@live_action, @source)}>Back</.back>
+      <:head :if={@form}>
+        <.back navigate={cancel_path(@live_action, @source)}>Back</.back>
 
-      <h1 class="mt-s4 mb-s6 font-serif text-[clamp(28px,3vw,36px)]/[1.1] font-semibold text-balance">
-        {@page_title}
-      </h1>
+        <h1 class="mt-s4 mb-s6 font-serif text-[clamp(28px,3vw,36px)]/[1.1] font-semibold text-balance">
+          {@page_title}
+        </h1>
+      </:head>
 
-      <.form for={@form} id="source-form" phx-change="validate" phx-submit="save">
-        <div class="space-y-s7">
-          <div class="card">
-            <h2 class="section-title section-title-sm mb-4">Source Information</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-s4">
-              <div class="sm:col-span-2">
+      <div :if={@form}>
+        <.form for={@form} id="source-form" phx-change="validate" phx-submit="save">
+          <div class="space-y-s7">
+            <div class="card">
+              <h2 class="section-title section-title-sm mb-4">Source Information</h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-s4">
+                <div class="sm:col-span-2">
+                  <.input
+                    field={@form[:name]}
+                    type="text"
+                    label="Name"
+                    placeholder="e.g. The Sibley Guide to Trees"
+                    phx-debounce="300"
+                  />
+                </div>
+                <div>
+                  <.input
+                    field={@form[:source_type]}
+                    type="select"
+                    label="Type"
+                    options={source_type_options(@form[:source_type].value)}
+                    prompt="Select type..."
+                  />
+                </div>
+                <div>
+                  <.input
+                    field={@form[:author]}
+                    type="text"
+                    label="Author"
+                    placeholder="e.g. David Allen Sibley"
+                    phx-debounce="300"
+                  />
+                </div>
+                <div>
+                  <.input
+                    field={@form[:year]}
+                    type="number"
+                    label="Year"
+                    placeholder="e.g. 2009"
+                    phx-debounce="300"
+                  />
+                </div>
+                <div>
+                  <.input
+                    field={@form[:isbn]}
+                    type="text"
+                    label="ISBN"
+                    placeholder="e.g. 978-0-375-415197"
+                    phx-debounce="300"
+                  />
+                </div>
+                <div>
+                  <.input
+                    field={@form[:doi]}
+                    type="text"
+                    label="DOI"
+                    phx-debounce="300"
+                  />
+                </div>
+                <div>
+                  <.input
+                    field={@form[:license]}
+                    type="text"
+                    label="License"
+                    placeholder="e.g. CC BY 4.0"
+                    phx-debounce="300"
+                  />
+                </div>
+                <div class="sm:col-span-2">
+                  <.input
+                    field={@form[:url]}
+                    type="text"
+                    label="Website URL"
+                    placeholder="e.g. https://example.com"
+                    phx-debounce="300"
+                  />
+                </div>
+                <div class="sm:col-span-2">
+                  <.input
+                    field={@form[:license_url]}
+                    type="text"
+                    label="License URL"
+                    phx-debounce="300"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2 class="section-title section-title-sm mb-4">Description & Notes</h2>
+              <div class="space-y-4">
                 <.input
-                  field={@form[:name]}
-                  type="text"
-                  label="Name"
-                  placeholder="e.g. The Sibley Guide to Trees"
+                  field={@form[:description]}
+                  type="textarea"
+                  label="Description"
+                  placeholder="A brief description of this source..."
+                  rows="6"
                   phx-debounce="300"
                 />
-              </div>
-              <div>
                 <.input
-                  field={@form[:source_type]}
-                  type="select"
-                  label="Type"
-                  options={source_type_options(@form[:source_type].value)}
-                  prompt="Select type..."
-                />
-              </div>
-              <div>
-                <.input
-                  field={@form[:author]}
-                  type="text"
-                  label="Author"
-                  placeholder="e.g. David Allen Sibley"
-                  phx-debounce="300"
-                />
-              </div>
-              <div>
-                <.input
-                  field={@form[:year]}
-                  type="number"
-                  label="Year"
-                  placeholder="e.g. 2009"
-                  phx-debounce="300"
-                />
-              </div>
-              <div>
-                <.input
-                  field={@form[:isbn]}
-                  type="text"
-                  label="ISBN"
-                  placeholder="e.g. 978-0-375-415197"
-                  phx-debounce="300"
-                />
-              </div>
-              <div>
-                <.input
-                  field={@form[:doi]}
-                  type="text"
-                  label="DOI"
-                  phx-debounce="300"
-                />
-              </div>
-              <div>
-                <.input
-                  field={@form[:license]}
-                  type="text"
-                  label="License"
-                  placeholder="e.g. CC BY 4.0"
-                  phx-debounce="300"
-                />
-              </div>
-              <div class="sm:col-span-2">
-                <.input
-                  field={@form[:url]}
-                  type="text"
-                  label="Website URL"
-                  placeholder="e.g. https://example.com"
-                  phx-debounce="300"
-                />
-              </div>
-              <div class="sm:col-span-2">
-                <.input
-                  field={@form[:license_url]}
-                  type="text"
-                  label="License URL"
+                  field={@form[:notes]}
+                  type="textarea"
+                  label="Notes"
+                  placeholder="Internal notes about how this source is used..."
+                  rows="3"
                   phx-debounce="300"
                 />
               </div>
             </div>
-          </div>
 
-          <div class="card">
-            <h2 class="section-title section-title-sm mb-4">Description & Notes</h2>
-            <div class="space-y-4">
-              <.input
-                field={@form[:description]}
-                type="textarea"
-                label="Description"
-                placeholder="A brief description of this source..."
-                rows="6"
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:notes]}
-                type="textarea"
-                label="Notes"
-                placeholder="Internal notes about how this source is used..."
-                rows="3"
-                phx-debounce="300"
-              />
+            <div class="flex flex-wrap items-center justify-end gap-s2 pt-s4 border-t border-rule">
+              <.button navigate={cancel_path(@live_action, @source)}>Cancel</.button>
+              <.button type="submit" variant="primary" phx-disable-with="Saving...">
+                {if @live_action == :new, do: "Create Source", else: "Save Changes"}
+              </.button>
             </div>
           </div>
-
-          <div class="flex flex-wrap items-center justify-end gap-s2 pt-s4 border-t border-rule">
-            <.button navigate={cancel_path(@live_action, @source)}>Cancel</.button>
-            <.button type="submit" variant="primary" phx-disable-with="Saving...">
-              {if @live_action == :new, do: "Create Source", else: "Save Changes"}
-            </.button>
-          </div>
-        </div>
-      </.form>
-    </div>
+        </.form>
+      </div>
+    </.page>
     """
   end
 

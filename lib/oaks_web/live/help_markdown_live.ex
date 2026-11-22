@@ -55,8 +55,10 @@ defmodule OaksWeb.HelpMarkdownLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="page-read">
-      <.header>Markdown Formatting Guide</.header>
+    <.page width="read" class="space-y-s7">
+      <:head>
+        <.header>Markdown Formatting Guide</.header>
+      </:head>
 
       <section class="prose-content">
         <p>
@@ -69,7 +71,7 @@ defmodule OaksWeb.HelpMarkdownLive do
       <.md_section :for={section <- @sections} {section} />
 
       <.back navigate={~p"/"}>Back to home</.back>
-    </div>
+    </.page>
     """
   end
 

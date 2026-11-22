@@ -182,7 +182,7 @@ defmodule OaksWeb.SpeciesMergeLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-6xl mx-auto">
+    <.page>
       <.loading_state :if={@loading} />
       <.error_state :if={@error} error={@error} source_name={@source_name} />
 
@@ -227,7 +227,7 @@ defmodule OaksWeb.SpeciesMergeLive do
         merge_error={@merge_error}
         completed_steps={@completed_steps}
       />
-    </div>
+    </.page>
     """
   end
 

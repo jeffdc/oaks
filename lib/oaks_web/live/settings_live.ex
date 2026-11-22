@@ -23,8 +23,10 @@ defmodule OaksWeb.SettingsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="settings-container" id="settings-page">
-      <.header>Settings</.header>
+    <.page width="form" id="settings-page">
+      <:head>
+        <.header>Settings</.header>
+      </:head>
 
       <section class="settings-section">
         <.section_heading>Account</.section_heading>
@@ -43,7 +45,7 @@ defmodule OaksWeb.SettingsLive do
       <section class="settings-section settings-aside">
         <.button href={~p"/users/log-out"} method="delete">Log out</.button>
       </section>
-    </div>
+    </.page>
     """
   end
 end

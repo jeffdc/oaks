@@ -217,7 +217,11 @@ Wide sections below (field marks, range, notes and names, sources) run the full 
 
 Spacing is an 8-step scale from 4px to 64px (s1 to s8); 16px and 24px carry most internal rhythm, 48px separates sections within a column.
 
+Every page takes one of three named widths (`<.page>`), chosen by what the page is: the **frame** (1400px) for pages people scan across, so taxon pages, lists, tables, comparisons, search, a record such as a source, and analytics; the **reading measure** (70ch, about 612px at 17px) for prose, so articles, about, privacy and help; the **form measure** (640px) for forms that create or edit, and the account pages (log in, setup, settings). The home page's title page alone is centred, in the full-width bleed above its frame.
+
 ### Named Rules
+**The One Edge Rule.** Every page's content starts at the frame's left gutter, in line with the masthead's acorn mark, at every width, so nothing jumps sideways between pages. The reading and form measures are narrower, never centred: their title row runs the full frame, its 2px rule ending under the masthead's search field as on every other page, and only the content under it holds the measure.
+
 **The One Template Rule.** Every taxon page uses the same template. A section appears because its data exists, never because Jeff has or hasn't covered the taxon: the source comparison appears whenever there are two or more sources (never with only one), and look-alikes, hybrids and range appear when their data exists. A taxon Jeff hasn't covered gets the same full page plus the not-covered notice, never a poorer stub layout.
 
 ## Elevation & Depth

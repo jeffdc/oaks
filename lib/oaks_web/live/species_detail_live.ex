@@ -175,7 +175,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="species-detail">
+    <.page class="species-detail">
       <.not_found_view :if={@not_found} />
 
       <div :if={@species}>
@@ -255,7 +255,7 @@ defmodule OaksWeb.SpeciesDetailLive do
         species={@species}
         target={@delete_source_target}
       />
-    </div>
+    </.page>
     """
   end
 
