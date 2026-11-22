@@ -335,16 +335,20 @@ defmodule OaksWeb.DevComponentsLive do
 
         <section class="mt-s8">
           <.section_heading id="page">
-            Page<:note>frame, read and form widths; the bleed</:note>
+            Page<:note>frame, read and form widths; the head; the bleed</:note>
           </.section_heading>
           <p class="max-w-[68ch]">
             This gallery is a <code>page</code>: the band above runs in its bleed, the window's full
-            width, and everything else sits in the frame. The read and form measures start at the
-            frame's left gutter.
+            width, and everything else sits in the frame. Lists, tables, taxon pages and records take
+            the frame; prose takes read; forms and account pages take form. Every page starts at the
+            frame's left gutter: the read and form measures are never centred, and their title row
+            sits in the head, across the full frame, so only the content under it is narrower.
           </p>
           <div :for={width <- ~w(read form)} class="mt-s5 border border-dashed border-rule">
             <.page id={"gallery-page-#{width}"} width={width}>
-              <p class="font-frame text-[13px] font-semibold text-ink-3">width="{width}"</p>
+              <:head>
+                <.header>width="{width}"</.header>
+              </:head>
               <p>
                 The page answers "is it this, or that?" before anything else. Where the taxon sits
                 is shown in the same ochre band on every taxon page; the traits that set it apart

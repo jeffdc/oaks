@@ -398,7 +398,7 @@ Every page is built from the shared library: `OaksWeb.CoreComponents`, `OaksWeb.
 
 | Need | Use |
 |------|-----|
-| A page and its width | `<.page width="frame\|read\|form">` (CoreComponents), with a `:bleed` slot for full-width parts such as a title page; read and form start at the frame's left gutter *(rolling out to every page, item d5b1)* |
+| A page and its width | `<.page width="frame\|read\|form">` (CoreComponents), on every page. One rule picks the width: `frame` (the default) for pages people scan across (lists, tables, taxon pages, comparisons, search, a record such as a source, analytics); `read` for prose (articles, about, privacy, help); `form` for forms that create or edit, and the account pages (log in, setup, settings). Every page starts at the frame's left gutter: read and form are never centred, and their title row (with any back link above it) goes in the `:head` slot, which runs the full frame. A `:bleed` slot runs full-width parts such as a title page. Never a max-w-*/mx-auto wrapper or page CSS that sets a page's width |
 | Title row with actions and meta | `<.header>` with `:actions` and `:meta` slots *(to extend, item 626c)* |
 | Taxonomy breadcrumb | the layout's band slot, fed by `<.taxonomy_band>` *(to build, item 0a43)*; `inline` for a wrapping plate away from the taxon's own page |
 | A scientific name anywhere | `<.sci_name>` (DesignComponents): genus 400, epithets 600, the hybrid sign, rank words and author roman; `abbreviate`, `author`, `rank`, `weight="regular"` for running text *(rolling out to every page, item a6c7)* |

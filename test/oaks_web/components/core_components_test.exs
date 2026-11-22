@@ -214,6 +214,7 @@ defmodule OaksWeb.CoreComponentsTest do
       assert html =~ ~s(class="oc-pg-body oc-pg-frame")
       assert html =~ ~r{<div class="oc-pg-measure ?">\s*Species\s*</div>}
       refute html =~ "oc-pg-bleed"
+      refute html =~ "oc-pg-head"
     end
 
     for width <- ~w(read form) do
@@ -236,6 +237,18 @@ defmodule OaksWeb.CoreComponentsTest do
         )
 
       assert html =~ ~r{<div class="oc-pg-bleed">\s*Title page\s*</div>\s*<div class="oc-pg-body}
+    end
+
+    test "sets the head across the frame, above the measure" do
+      html =
+        render_component(&CoreComponents.page/1,
+          width: "form",
+          head: text_slot("Log in"),
+          inner_block: text_slot("Email")
+        )
+
+      assert html =~
+               ~r{<div class="oc-pg-body oc-pg-form">\s*<div class="oc-pg-head">\s*Log in\s*</div>\s*<div class="oc-pg-measure ?">\s*Email\s*</div>}
     end
   end
 end

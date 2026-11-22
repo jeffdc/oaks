@@ -227,7 +227,9 @@
      Page (CoreComponents.page): the frame moves from <main> into the page,
      so a page can run a part full width (the bleed) above its framed
      content. Named widths: frame (1400px), read (a 70ch measure), form
-     (640px); read and form start at the frame's left gutter.
+     (640px). Every page starts at the frame's left gutter: read and form
+     are never centred, and their head (the title row) runs the full frame
+     over the measure.
      --------------------------------------------------------------------- */
   .oc-page:has(.oc-pg) {
     max-width: none;
