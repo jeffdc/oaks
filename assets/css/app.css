@@ -1946,6 +1946,15 @@ a.badge:hover {
   margin-left: var(--spacing-s3);
 }
 
+/* On one row the editor's buttons stand apart from the status stamp
+   behind a hairline, so the stamp doesn't read as a fourth button. */
+@media (min-width: 761px) {
+  .species-actions {
+    padding-left: var(--spacing-s5);
+    border-left: 1px solid var(--color-rule);
+  }
+}
+
 @media (max-width: 760px) {
   .species-meta {
     margin-left: 0;
@@ -2002,7 +2011,16 @@ a.badge:hover {
   text-underline-offset: 3px;
 }
 
-/* Synonyms: the comma list of names, each with its authority roman. */
+/* Synonyms and common names: a comma list in the serif, each synonym
+   with its authority roman. The commas are in the text, so a wrapped line
+   never starts with one. */
+.species-synonyms,
+.source-names {
+  margin: 0;
+  font: 400 16px/1.6 var(--font-serif);
+  color: var(--color-ink);
+}
+
 .species-synonyms {
   padding-top: var(--spacing-s3);
 }
@@ -2133,7 +2151,15 @@ a.badge:hover {
     flex-basis: 100%;
     overflow-x: auto;
     scrollbar-width: none;
+    padding-right: var(--spacing-s6);
     border-bottom: 2px solid var(--color-rule-strong);
+    /* The tabs fade out at the right edge; the rule under them doesn't. */
+    mask-image:
+      linear-gradient(to right, var(--color-ink) calc(100% - var(--spacing-s6)), transparent),
+      linear-gradient(var(--color-ink), var(--color-ink));
+    mask-size: 100% calc(100% - 2px), 100% 2px;
+    mask-position: top, bottom;
+    mask-repeat: no-repeat;
   }
 
   .source-tabs-list::-webkit-scrollbar {
@@ -2172,9 +2198,10 @@ a.badge:hover {
   border-bottom-color: var(--color-ochre);
 }
 
-.preferred-star {
-  font-size: 12px;
-  color: var(--color-ink);
+/* The preferred source is said in words, in the standing marks' voice. */
+.source-tab-note {
+  font: 500 12.5px/1 var(--font-frame);
+  color: var(--color-ink-3);
 }
 
 .source-tab-link {
@@ -2578,6 +2605,13 @@ a.badge:hover {
 
 .species-dialog .oc-modal-body > * + * {
   margin-top: var(--spacing-s3);
+}
+
+/* A long body scrolls inside the panel, so every consequence of a delete
+   stays readable and the actions stay in view. */
+.species-dialog .oc-modal-body {
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .species-dialog .oc-modal-body ul {

@@ -298,7 +298,9 @@ defmodule OaksWeb.SpeciesDetailLive do
             :if={@species.conservation_status}
             title={"IUCN Red List: #{conservation_label(@species.conservation_status)}"}
           >
-            IUCN {@species.conservation_status}
+            IUCN {@species.conservation_status}<span class="sr-only">: {conservation_label(
+              @species.conservation_status
+            )}</span>
           </.status_tag>
         </div>
         <div :if={@editor} class="species-actions">
@@ -473,13 +475,16 @@ defmodule OaksWeb.SpeciesDetailLive do
     ~H"""
     <section class="card card-sm detail-section full-width" id="species-synonyms">
       <.section_heading>
-        Synonyms<:note>{length(@synonyms)}</:note>
+        Synonyms<:note>{count_label(length(@synonyms), "name")}</:note>
       </.section_heading>
-      <div class="species-synonyms flex flex-wrap gap-2">
-        <span :for={{name, author} <- Enum.map(@synonyms, &name_and_authority/1)} class="pill-tag">
-          <span class="species-synonym"><.sci name={name} /></span>{author && " " <> author}
-        </span>
-      </div>
+      <p class="species-synonyms">
+        <span
+          :for={
+            {{name, author}, i} <- @synonyms |> Enum.map(&name_and_authority/1) |> Enum.with_index(1)
+          }
+          class="species-synonym"
+        ><.sci name={name} />{author && " " <> author}{if i < length(@synonyms), do: ", "}</span>
+      </p>
     </section>
     """
   end
@@ -516,7 +521,7 @@ defmodule OaksWeb.SpeciesDetailLive do
           aria-selected={to_string(selected_tab?(ss, @selected))}
         >
           <span class="source-tab-name">{ss.source.name}</span>
-          <span :if={ss.is_preferred} class="preferred-star" title="Preferred source">&#9733;</span>
+          <span :if={ss.is_preferred} class="source-tab-note">preferred</span>
           <.link
             navigate={~p"/sources/#{ss.source.id}"}
             class="source-tab-link"
@@ -593,11 +598,7 @@ defmodule OaksWeb.SpeciesDetailLive do
 
       <section :if={@local_names != []} class="source-field">
         <h3 class="source-field-label">Common Names</h3>
-        <div class="flex flex-wrap gap-2">
-          <span :for={name <- @local_names} class="pill-tag">
-            {name}
-          </span>
-        </div>
+        <p class="source-names">{Enum.join(@local_names, ", ")}</p>
       </section>
 
       <.source_field label="Hardiness & Habitat" value={@source.hardiness_habitat} />
@@ -662,7 +663,7 @@ defmodule OaksWeb.SpeciesDetailLive do
       phx-key="Escape"
     >
       <div class="oc-modal-backdrop" phx-click="cancel_delete" />
-      <div class="oc-modal-panel species-dialog">
+      <div class="oc-modal-panel species-dialog max-h-[80vh] flex flex-col">
         <div class="oc-modal-head">
           <h2 id="delete-confirm-title">Delete species</h2>
         </div>
@@ -678,7 +679,7 @@ defmodule OaksWeb.SpeciesDetailLive do
             <p>
               {length(@references)} other species mention this name. Deleting removes it from:
             </p>
-            <ul class="max-h-40 overflow-y-auto pl-4 list-disc">
+            <ul class="pl-4 list-disc">
               <li :for={ref <- @references}>
                 <.sci name={epithet(ref.species.scientific_name)} />
                 <span class="text-ink-3">
@@ -984,6 +985,9 @@ defmodule OaksWeb.SpeciesDetailLive do
         nil
     end
   end
+
+  defp count_label(1, noun), do: "1 #{noun}"
+  defp count_label(n, noun), do: "#{n} #{noun}s"
 
   defp selected_tab?(source, selected) do
     selected && source.id == selected.id

@@ -107,10 +107,9 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert html =~ inat.name
     end
 
-    test "preferred source has star indicator", %{conn: conn, alba: alba} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
-      # ★ character for preferred source
-      assert html =~ "★"
+    test "marks the preferred source's tab", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
+      assert has_element?(view, ".source-tab .source-tab-note", "preferred")
     end
 
     test "shows relationship sections", %{conn: conn} = ctx do
