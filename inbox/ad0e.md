@@ -5,6 +5,12 @@ plan: compendium
 item: 8f1d
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-a6a43acb6b04db4d1
 created: "2026-11-22T16:49:31Z"
+settled:
+  action: accept
+  note: with review 6549
+  by: Jeff
+  human: true
+  at: "2026-11-22T17:31:05Z"
 ---
 
 The finish review found the hint promised a key that app.js binds, and the error pages load no script
