@@ -119,19 +119,29 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert html =~ bebbiana_epithet
       assert html =~ "Closely Related"
       assert html =~ ctx.stellata
-      assert has_element?(view, "#species-synonyms", "#{ctx.alba} var. repanda")
-      assert has_element?(view, "#species-subspecies", "#{ctx.alba} var. latiloba")
+      assert has_element?(view, "#species-synonyms .oc-sci-e", "repanda")
+      assert has_element?(view, "#species-subspecies .oc-sci-e", "latiloba")
     end
 
-    test "sets names italic with the hybrid sign and rank words roman", %{conn: conn} = ctx do
+    test "sets every name through sci_name, by its role", %{conn: conn} = ctx do
       {:ok, view, _html} = live(conn, ~p"/species/#{ctx.alba}")
       "×" <> bebbiana_epithet = ctx.bebbiana
 
-      assert has_element?(view, "h1.species-title", "Quercus #{ctx.alba}")
-      assert has_element?(view, "#species-synonyms i", ctx.alba)
-      assert has_element?(view, "#species-synonyms .sci-roman", "var.")
-      assert has_element?(view, "#species-hybrids .sci-roman", "×")
-      assert has_element?(view, "#species-hybrids i", bebbiana_epithet)
+      # The title row: the full genus at display size.
+      assert has_element?(view, "h1.species-title .oc-sci-display .oc-sci-g", "Quercus")
+      assert has_element?(view, "h1.species-title .oc-sci-display .oc-sci-e", ctx.alba)
+
+      # Synonyms as stored, with no genus; rank words roman.
+      assert has_element?(view, "#species-synonyms .oc-sci-e", ctx.alba)
+      refute has_element?(view, "#species-synonyms .oc-sci-g")
+      assert has_element?(view, "#species-synonyms .oc-sci-r", "var.")
+
+      # Hybrids and varieties: list entries under the species, Q. abbreviated.
+      assert has_element?(view, "#species-hybrids .oc-sci-title .oc-sci-g", "Q.")
+      assert has_element?(view, "#species-hybrids .oc-sci-x", "×")
+      assert has_element?(view, "#species-hybrids .oc-sci-e", bebbiana_epithet)
+      assert has_element?(view, "#species-subspecies .oc-sci-title .oc-sci-g", "Q.")
+      assert has_element?(view, "#species-related .oc-sci-title .oc-sci-g", "Q.")
     end
 
     test "relationship links point to detail pages", %{conn: conn} = ctx do

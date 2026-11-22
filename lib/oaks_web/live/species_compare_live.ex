@@ -11,6 +11,7 @@ defmodule OaksWeb.SpeciesCompareLive do
   alias Oaks.Markdown
   alias Oaks.Species
   alias OaksWeb.Params
+  alias OaksWeb.SpeciesName
 
   @max_sources 4
 
@@ -70,7 +71,8 @@ defmodule OaksWeb.SpeciesCompareLive do
            not_found: false,
            all_sources: sources,
            selected_ids: default_ids,
-           page_title: "Compare Sources — Quercus #{species.scientific_name}"
+           page_title:
+             "Compare Sources — #{SpeciesName.full_name(species.scientific_name, species.is_hybrid)}"
          )}
     end
   end
@@ -152,7 +154,7 @@ defmodule OaksWeb.SpeciesCompareLive do
       <.back navigate={~p"/species/#{@species.scientific_name}"}>Back to species</.back>
       <h1 class="comparison-title">
         <span class="comparison-title-prefix">Compare sources for</span>
-        <.species_binomial species={@species} />
+        <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} size="display" />
       </h1>
     </header>
     """
@@ -251,25 +253,6 @@ defmodule OaksWeb.SpeciesCompareLive do
       <% {:html, html} -> %>
         <div class="prose-content prose-content-compact">{raw(html)}</div>
     <% end %>
-    """
-  end
-
-  attr :species, :any, required: true
-
-  # The whole binomial is italic; a named hybrid's sign stays roman.
-  defp species_binomial(assigns) do
-    assigns =
-      assign(
-        assigns,
-        :sign,
-        hybrid_sign?(assigns.species.scientific_name, assigns.species.is_hybrid)
-      )
-
-    ~H"""
-    <span class="species-name">
-      <i :if={!@sign}>Quercus {epithet(@species.scientific_name)}</i>
-      <span :if={@sign}><i>Quercus</i> &times; <i>{epithet(@species.scientific_name)}</i></span>
-    </span>
     """
   end
 

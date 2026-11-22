@@ -74,7 +74,7 @@ defmodule OaksWeb.SpeciesMergeLiveTest do
       {:ok, view, _html} =
         conn |> authenticated_conn() |> live(~p"/species/#{stellata}/merge/#{alba}")
 
-      assert has_element?(view, ".merge-synonyms .sci-name i", stellata)
+      assert has_element?(view, ".merge-synonyms .oc-sci .oc-sci-e", stellata)
     end
 
     test "shows source transfer section", %{conn: conn, stellata: stellata, alba: alba} do

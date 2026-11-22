@@ -239,5 +239,20 @@ defmodule OaksWeb.TaxonomyLiveTest do
       refute html =~ "Taxon Not Found"
       assert html =~ ctx.velutina
     end
+
+    test "names the complex for its species, Q. abbreviated", %{conn: conn} = ctx do
+      group = "velutina-group#{ctx.l}"
+      taxon_fixture(name: group, level: "complex", parent: ctx.l)
+
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.l}/#{ctx.l}")
+      assert has_element?(view, ".taxon-card .oc-sci-title .oc-sci-g", "Q.")
+      assert has_element?(view, ".taxon-card .oc-sci-e", group)
+
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.l}/#{ctx.l}/#{group}")
+      assert has_element?(view, ".taxon-title h1 .oc-sci-display .oc-sci-g", "Q.")
+      assert has_element?(view, "#taxonomy-band [aria-current] .oc-sci-g", "Q.")
+      assert has_element?(view, "#taxonomy-band [aria-current] .oc-band-rk", "complex")
+      assert page_title(view) =~ "Q. #{group}"
+    end
   end
 end

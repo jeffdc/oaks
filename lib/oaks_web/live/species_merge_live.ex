@@ -12,7 +12,6 @@ defmodule OaksWeb.SpeciesMergeLive do
   alias Oaks.Species
   alias Oaks.Species.Merge
   alias OaksWeb.Params
-  alias OaksWeb.SpeciesName
 
   @scalar_fields ~w(author conservation_status subgenus section subsection complex parent1 parent2)
   # Fields whose values are scientific names, set italic when shown as text.
@@ -265,9 +264,17 @@ defmodule OaksWeb.SpeciesMergeLive do
     ~H"""
     <.header class="merge-title">
       Merge:
-      <span class="merge-title-source"><.merge_sci_name name={format_species_name(@preview.source)} /></span>
+      <.sci_name
+        name={@preview.source.scientific_name}
+        hybrid={@preview.source.is_hybrid}
+        size="display"
+      />
       <span class="merge-title-arrow">&rarr;</span>
-      <.merge_sci_name name={format_species_name(@preview.target)} />
+      <.sci_name
+        name={@preview.target.scientific_name}
+        hybrid={@preview.target.is_hybrid}
+        size="display"
+      />
       <:subtitle>The synonym will be deleted and its data merged into the target species.</:subtitle>
     </.header>
     """
@@ -285,14 +292,24 @@ defmodule OaksWeb.SpeciesMergeLive do
       <div></div>
       <div class="merge-col">
         <.link navigate={~p"/species/#{@source_name}"} class="merge-col-name">
-          <.merge_sci_name name={format_species_name(@preview.source)} />
+          <.sci_name
+            name={@preview.source.scientific_name}
+            hybrid={@preview.source.is_hybrid}
+            abbreviate
+            size="headline"
+          />
         </.link>
         <span class="merge-col-role">Synonym, read-only</span>
       </div>
       <div></div>
       <div class="merge-col">
         <.link navigate={~p"/species/#{@target_name}"} class="merge-col-name">
-          <.merge_sci_name name={format_species_name(@preview.target)} />
+          <.sci_name
+            name={@preview.target.scientific_name}
+            hybrid={@preview.target.is_hybrid}
+            abbreviate
+            size="headline"
+          />
         </.link>
         <span class="merge-col-role">Target, editable</span>
       </div>
@@ -343,7 +360,10 @@ defmodule OaksWeb.SpeciesMergeLive do
       <div :if={@preview.synonyms_to_add != []}>
         <h3 class="merge-subhead">Synonyms to Add</h3>
         <p class="merge-synonyms">
-          <.sci_name_list names={@preview.synonyms_to_add} />
+          <span :for={{name, i} <- Enum.with_index(@preview.synonyms_to_add, 1)}><.sci_name
+            name={name}
+            genus={nil}
+          />{if i < length(@preview.synonyms_to_add), do: ", "}</span>
         </p>
       </div>
     </div>
@@ -379,7 +399,7 @@ defmodule OaksWeb.SpeciesMergeLive do
           <% !@has_source_value -> %>
             &mdash;
           <% @field in @name_fields -> %>
-            <span class="sci-name"><i>{@source_value}</i></span>
+            <.sci_name name={@source_value} genus={nil} weight="regular" />
           <% true -> %>
             {@source_value}
         <% end %>
@@ -522,13 +542,24 @@ defmodule OaksWeb.SpeciesMergeLive do
 
       <div :if={@expanded} class="merge-refs-body">
         <p :if={@ref_count == 0} class="merge-empty">
-          No other species reference <.merge_sci_name name={format_species_name(@preview.source)} />
+          No other species reference
+          <.sci_name
+            name={@preview.source.scientific_name}
+            hybrid={@preview.source.is_hybrid}
+            abbreviate
+            weight="regular"
+          />
         </p>
 
         <div :if={@ref_count > 0}>
           <p class="merge-lede">
             These species will be updated to reference
-            <.merge_sci_name name={format_species_name(@preview.target)} /> instead.
+            <.sci_name
+              name={@preview.target.scientific_name}
+              hybrid={@preview.target.is_hybrid}
+              abbreviate
+              weight="regular"
+            /> instead.
           </p>
 
           <.reference_group
@@ -561,7 +592,12 @@ defmodule OaksWeb.SpeciesMergeLive do
       <h3 class="merge-subhead">{@title} ({length(@refs)})</h3>
       <ul class="merge-ref-list">
         <li :for={ref <- @refs}>
-          <.merge_sci_name name={ref.species.scientific_name} />
+          <.sci_name
+            name={ref.species.scientific_name}
+            hybrid={ref.species.is_hybrid}
+            abbreviate
+            size="title"
+          />
           <span :if={ref.reference_type in ["parent1", "parent2"]} class="merge-ref-type">
             {ref.reference_type}
           </span>
@@ -621,7 +657,12 @@ defmodule OaksWeb.SpeciesMergeLive do
         items={Enum.map(@preview.same_parent_hybrids, &{nil, &1.scientific_name, true})}
       >
         After merging, both parents of these hybrids will be
-        <.merge_sci_name name={format_species_name(@preview.target)} />. Review their parents afterwards.
+        <.sci_name
+          name={@preview.target.scientific_name}
+          hybrid={@preview.target.is_hybrid}
+          abbreviate
+          weight="regular"
+        />. Review their parents afterwards.
       </.merge_notice>
       <.merge_notice
         :if={@preview.list_additions != %{}}
@@ -630,7 +671,12 @@ defmodule OaksWeb.SpeciesMergeLive do
         items={list_addition_items(@preview.list_additions)}
       >
         These entries from the synonym are added to
-        <.merge_sci_name name={format_species_name(@preview.target)} />.
+        <.sci_name
+          name={@preview.target.scientific_name}
+          hybrid={@preview.target.is_hybrid}
+          abbreviate
+          weight="regular"
+        />.
       </.merge_notice>
       <.self_reference_warning :if={@self_ref_issues != []} issues={@self_ref_issues} />
     </div>
@@ -671,7 +717,7 @@ defmodule OaksWeb.SpeciesMergeLive do
       <ul class="merge-notice-list">
         <li :for={{label, text, name?} <- @items}>
           <span :if={label}>{label}:</span>
-          <.merge_sci_name :if={name?} name={text} />
+          <.sci_name :if={name?} name={text} abbreviate />
           <span :if={!name?}>{text}</span>
         </li>
       </ul>
@@ -724,7 +770,11 @@ defmodule OaksWeb.SpeciesMergeLive do
       <div class="merge-issues">
         <div :for={issue <- @issues} class="merge-issue">
           <div>
-            "<strong>{issue.field}</strong>" contains "<em>{issue.value}</em>"
+            "<strong>{issue.field}</strong>" contains "<.sci_name
+              name={issue.value}
+              genus={nil}
+              weight="regular"
+            />"
           </div>
           <div class="merge-issue-hint">{issue.hint}</div>
         </div>
@@ -811,8 +861,17 @@ defmodule OaksWeb.SpeciesMergeLive do
           <% true -> %>
             <h2 id="merge-dialog-title" class="merge-dialog-title">Confirm Merge</h2>
             <p class="merge-dialog-text">
-              You are about to merge <.merge_sci_name name={format_species_name(@preview.source)} />
-              into <.merge_sci_name name={format_species_name(@preview.target)} />. This will:
+              You are about to merge
+              <.sci_name
+                name={@preview.source.scientific_name}
+                hybrid={@preview.source.is_hybrid}
+                weight="regular"
+              /> into
+              <.sci_name
+                name={@preview.target.scientific_name}
+                hybrid={@preview.target.is_hybrid}
+                weight="regular"
+              />. This will:
             </p>
 
             <ul class="merge-dialog-steps">
@@ -820,14 +879,24 @@ defmodule OaksWeb.SpeciesMergeLive do
                 <.icon name="hero-check" class="size-5 flex-shrink-0" />
                 <span>
                   Add {count_noun(@synonyms_count, "synonym", "synonyms")} to
-                  <.merge_sci_name name={format_species_name(@preview.target)} />
+                  <.sci_name
+                    name={@preview.target.scientific_name}
+                    hybrid={@preview.target.is_hybrid}
+                    abbreviate
+                    weight="regular"
+                  />
                 </span>
               </li>
               <li>
                 <.icon name="hero-check" class="size-5 flex-shrink-0" />
                 <span>
-                  Update <.merge_sci_name name={format_species_name(@preview.target)} />
-                  with merged field values
+                  Update
+                  <.sci_name
+                    name={@preview.target.scientific_name}
+                    hybrid={@preview.target.is_hybrid}
+                    abbreviate
+                    weight="regular"
+                  /> with merged field values
                 </span>
               </li>
               <li :if={@sources_to_transfer > 0}>
@@ -840,13 +909,23 @@ defmodule OaksWeb.SpeciesMergeLive do
                 <.icon name="hero-check" class="size-5 flex-shrink-0" />
                 <span>
                   Update {@ref_count} other species that reference
-                  <.merge_sci_name name={format_species_name(@preview.source)} />
+                  <.sci_name
+                    name={@preview.source.scientific_name}
+                    hybrid={@preview.source.is_hybrid}
+                    abbreviate
+                    weight="regular"
+                  />
                 </span>
               </li>
               <li class="merge-dialog-delete">
                 <.icon name="hero-x-mark" class="size-5 flex-shrink-0" />
-                <span>Delete <.merge_sci_name name={format_species_name(@preview.source)} />
-                permanently</span>
+                <span>Delete
+                <.sci_name
+                  name={@preview.source.scientific_name}
+                  hybrid={@preview.source.is_hybrid}
+                  abbreviate
+                  weight="regular"
+                /> permanently</span>
               </li>
             </ul>
 
@@ -869,71 +948,6 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   # -- Helpers --
 
-  attr :name, :string, required: true
-
-  # A scientific name as text: the name words italic, the hybrid sign, rank
-  # words and the authority roman (the Botanical Italic Rule). Named apart
-  # from DesignComponents.sci_name/1, which replaces it in item a6c7.
-  defp merge_sci_name(assigns) do
-    assigns = assign(assigns, :html, name_html(assigns.name))
-
-    ~H"""
-    <span class="sci-name">{@html}</span>
-    """
-  end
-
-  attr :names, :list, required: true
-
-  # A comma list of scientific names, built as one run of text so no
-  # template whitespace opens a space before a comma.
-  defp sci_name_list(assigns) do
-    html =
-      assigns.names
-      |> Enum.map(fn name -> ["<span class=\"sci-name\">", name_iodata(name), "</span>"] end)
-      |> Enum.intersperse(", ")
-
-    assigns = assign(assigns, :html, Phoenix.HTML.raw(html))
-
-    ~H"""
-    {@html}
-    """
-  end
-
-  defp name_html(name), do: name |> name_iodata() |> Phoenix.HTML.raw()
-
-  defp name_iodata(name) do
-    name
-    |> name_parts()
-    |> Enum.map(fn
-      {:name, text} -> ["<i>", escape(text), "</i>"]
-      {:roman, text} -> escape(text)
-    end)
-  end
-
-  defp escape(text), do: text |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-
-  @rank_words ~w(× x var. subsp. ssp. f. nothosubsp. nothovar.)
-
-  # Splits a name into italic name words and roman words (hybrid sign, rank
-  # words, authority). The authority starts at the first word that isn't a
-  # lowercase epithet or a rank word, and runs to the end.
-  defp name_parts(name) do
-    name
-    |> String.replace(~r/^×(?=\S)/u, "× ")
-    |> String.split(" ", trim: true)
-    |> Enum.reduce({[], false}, fn word, {acc, in_authority} ->
-      cond do
-        in_authority -> {[{:roman, word} | acc], true}
-        word in @rank_words -> {[{:roman, word} | acc], false}
-        Regex.match?(~r/^\p{Ll}[\p{Ll}\d-]*$/u, word) -> {[{:name, word} | acc], false}
-        true -> {[{:roman, word} | acc], true}
-      end
-    end)
-    |> elem(0)
-    |> Enum.reverse()
-    |> Enum.intersperse({:roman, " "})
-  end
-
   defp count_noun(1, singular, _plural), do: "1 #{singular}"
   defp count_noun(n, _singular, plural), do: "#{n} #{plural}"
 
@@ -942,9 +956,6 @@ defmodule OaksWeb.SpeciesMergeLive do
       {field, Map.get(target, String.to_existing_atom(field))}
     end)
   end
-
-  defp format_species_name(species),
-    do: SpeciesName.label(species.scientific_name, species.is_hybrid)
 
   defp field_label("author"), do: "Author"
   defp field_label("conservation_status"), do: "Conservation Status"

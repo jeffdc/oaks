@@ -48,7 +48,7 @@ defmodule OaksWeb.AboutLive do
         <p>
           The Oak Compendium is a comprehensive database of oak species from around the world,
           providing botanists, naturalists, and oak enthusiasts with detailed information about
-          the amazing genus <em>Quercus</em>.
+          the amazing genus <.sci_name name="Quercus" weight="regular" />.
         </p>
       </section>
 

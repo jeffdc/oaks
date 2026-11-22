@@ -225,12 +225,7 @@ defmodule OaksWeb.SourceDetailLive do
           navigate={~p"/species/#{sp.scientific_name}"}
           class="source-species-link"
         >
-          <span class="source-species-name">
-            Q.{" "}
-            <span :if={hybrid_sign?(sp.scientific_name, sp.is_hybrid)}>&times;</span>{epithet(
-              sp.scientific_name
-            )}
-          </span>
+          <.sci_name name={sp.scientific_name} hybrid={sp.is_hybrid} abbreviate size="title" />
         </.link>
       </div>
     </section>
