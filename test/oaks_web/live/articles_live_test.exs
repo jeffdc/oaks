@@ -69,5 +69,17 @@ defmodule OaksWeb.ArticlesLiveTest do
       assert html =~ "No articles found"
       assert html =~ "Clear filter"
     end
+
+    test "marks a draft with a Draft tag for editors", %{
+      conn: conn,
+      draft: draft,
+      published: published
+    } do
+      %{conn: conn} = register_and_log_in_user(%{conn: conn})
+      {:ok, view, _html} = live(conn, ~p"/articles")
+
+      assert has_element?(view, ~s(a[href="/articles/#{draft.slug}"] .oc-status), "Draft")
+      refute has_element?(view, ~s(a[href="/articles/#{published.slug}"] .oc-status))
+    end
   end
 end

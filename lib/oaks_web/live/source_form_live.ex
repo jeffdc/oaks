@@ -123,30 +123,21 @@ defmodule OaksWeb.SourceFormLive do
   def render(assigns) do
     ~H"""
     <div :if={@form == nil} class="max-w-3xl mx-auto py-12 text-center">
-      <p style="color: var(--color-text-tertiary);">Loading...</p>
+      <p class="font-frame text-ink-3">Loading...</p>
     </div>
 
     <div :if={@form} class="max-w-3xl mx-auto">
-      <.link
-        navigate={cancel_path(@live_action, @source)}
-        class="inline-flex items-center gap-1 text-sm mb-4"
-        style="color: var(--color-forest-700);"
-      >
-        <.icon name="hero-arrow-left" class="size-4" /> Back
-      </.link>
+      <.back navigate={cancel_path(@live_action, @source)}>Back</.back>
 
-      <h1
-        class="text-2xl font-bold mb-6"
-        style="font-family: var(--font-serif); color: var(--color-forest-800);"
-      >
+      <h1 class="mt-s4 mb-s6 font-serif text-[clamp(28px,3vw,36px)]/[1.1] font-semibold text-balance">
         {@page_title}
       </h1>
 
       <.form for={@form} id="source-form" phx-change="validate" phx-submit="save">
-        <div class="space-y-6">
-          <div class="card p-6">
+        <div class="space-y-s7">
+          <div class="card">
             <h2 class="section-title section-title-sm mb-4">Source Information</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-s4">
               <div class="sm:col-span-2">
                 <.input
                   field={@form[:name]}
@@ -229,7 +220,7 @@ defmodule OaksWeb.SourceFormLive do
             </div>
           </div>
 
-          <div class="card p-6">
+          <div class="card">
             <h2 class="section-title section-title-sm mb-4">Description & Notes</h2>
             <div class="space-y-4">
               <.input
@@ -237,6 +228,7 @@ defmodule OaksWeb.SourceFormLive do
                 type="textarea"
                 label="Description"
                 placeholder="A brief description of this source..."
+                rows="6"
                 phx-debounce="300"
               />
               <.input
@@ -244,27 +236,17 @@ defmodule OaksWeb.SourceFormLive do
                 type="textarea"
                 label="Notes"
                 placeholder="Internal notes about how this source is used..."
+                rows="3"
                 phx-debounce="300"
               />
             </div>
           </div>
 
-          <div class="flex items-center justify-end gap-3">
-            <.link
-              navigate={cancel_path(@live_action, @source)}
-              class="px-4 py-2 rounded-lg text-sm font-medium"
-              style="color: var(--color-text-secondary);"
-            >
-              Cancel
-            </.link>
-            <button
-              type="submit"
-              phx-disable-with="Saving..."
-              class="px-6 py-2 rounded-lg text-sm font-medium text-white"
-              style="background-color: var(--color-forest-600);"
-            >
+          <div class="flex flex-wrap items-center justify-end gap-s2 pt-s4 border-t border-rule">
+            <.button navigate={cancel_path(@live_action, @source)}>Cancel</.button>
+            <.button type="submit" variant="primary" phx-disable-with="Saving...">
               {if @live_action == :new, do: "Create Source", else: "Save Changes"}
-            </button>
+            </.button>
           </div>
         </div>
       </.form>

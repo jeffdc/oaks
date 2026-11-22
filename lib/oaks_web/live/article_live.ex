@@ -100,20 +100,11 @@ defmodule OaksWeb.ArticleLive do
 
   defp not_found_view(assigns) do
     ~H"""
-    <div class="text-center py-16">
-      <.icon name="hero-document-text" class="size-16 mx-auto mb-4 text-base-content/30" />
-      <h1 class="text-2xl font-bold mb-2">Article Not Found</h1>
-      <p class="mb-6" style="color: var(--color-text-secondary);">
-        The article you're looking for doesn't exist or hasn't been published.
-      </p>
-      <.link
-        navigate={~p"/articles"}
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white"
-        style="background-color: var(--color-forest-600); text-decoration: none;"
-      >
-        <.icon name="hero-arrow-left" class="size-4" /> Back to Articles
-      </.link>
-    </div>
+    <.header>
+      Article Not Found
+      <:subtitle>The article you're looking for doesn't exist or hasn't been published.</:subtitle>
+    </.header>
+    <.back navigate={~p"/articles"}>Back to Articles</.back>
     """
   end
 
@@ -125,69 +116,40 @@ defmodule OaksWeb.ArticleLive do
 
   defp article_header(assigns) do
     ~H"""
-    <div class="mb-8">
-      <.link
-        navigate={~p"/articles"}
-        class="inline-flex items-center gap-1 text-sm mb-4"
-        style="color: var(--color-forest-600); text-decoration: none;"
-      >
-        <.icon name="hero-arrow-left" class="size-4" /> Back to Articles
-      </.link>
+    <div class="mb-s6">
+      <.back navigate={~p"/articles"}>Back to Articles</.back>
 
-      <div class="flex items-start justify-between gap-4">
-        <div class="flex-1">
-          <div class="flex items-center gap-3 mb-2">
-            <h1
-              class="text-3xl font-bold"
-              style="font-family: var(--font-serif); color: var(--color-forest-900);"
-            >
+      <div class="mt-s4 pb-s4 border-b-2 border-ink flex flex-wrap items-end justify-between gap-y-s3 gap-x-s5">
+        <div class="min-w-0 flex-[1_1_24rem]">
+          <div class="flex flex-wrap items-baseline gap-x-s4 gap-y-s2">
+            <h1 class="font-serif text-[clamp(30px,3.6vw,44px)]/[1.1] font-semibold tracking-[-0.01em] text-balance">
               {@article.title}
             </h1>
-            <span
-              :if={!@article.is_published}
-              class="badge badge-uppercase"
-              style="background-color: #fef3c7; color: #92400e;"
-            >
+            <.status_tag :if={!@article.is_published} class="border-dashed uppercase">
               Draft
-            </span>
+            </.status_tag>
           </div>
-          <div
-            class="flex flex-wrap items-center gap-2 text-sm"
-            style="color: var(--color-text-tertiary);"
-          >
-            <span>By {@article.author}</span>
+          <p class="mt-s2 font-frame text-[15px] font-semibold text-ink-2 tabular-nums">
+            By {@article.author}
             <span :if={@article.published_at}>
               &middot; Published {format_date(@article.published_at)}
             </span>
+          </p>
+          <div :if={@tags != []} class="flex flex-wrap gap-1.5 mt-s3">
+            <.link
+              :for={tag <- @tags}
+              navigate={~p"/articles?tag=#{tag}"}
+              class="badge badge-forest-light text-xs"
+              style="text-decoration: none;"
+            >
+              {tag}
+            </.link>
           </div>
         </div>
-        <div :if={@editor} class="flex items-center gap-2 flex-shrink-0">
-          <.link
-            navigate={~p"/articles/#{@article.slug}/edit"}
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium"
-            style="background-color: var(--color-forest-50); color: var(--color-forest-700); border: 1px solid var(--color-forest-200); text-decoration: none;"
-          >
-            <.icon name="hero-pencil-square" class="size-4" /> Edit
-          </.link>
-          <button
-            phx-click="confirm_delete"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium"
-            style="background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca;"
-          >
-            <.icon name="hero-trash" class="size-4" /> Delete
-          </button>
+        <div :if={@editor} class="flex items-center gap-s2 shrink-0">
+          <.button navigate={~p"/articles/#{@article.slug}/edit"} size="compact">Edit</.button>
+          <.button phx-click="confirm_delete" size="compact">Delete</.button>
         </div>
-      </div>
-
-      <div :if={@tags != []} class="flex flex-wrap gap-1.5 mt-3">
-        <.link
-          :for={tag <- @tags}
-          navigate={~p"/articles?tag=#{tag}"}
-          class="badge badge-forest-light text-xs"
-          style="text-decoration: none;"
-        >
-          {tag}
-        </.link>
       </div>
     </div>
     """
@@ -199,7 +161,7 @@ defmodule OaksWeb.ArticleLive do
 
   defp article_body(assigns) do
     ~H"""
-    <div class="card p-6 sm:p-8">
+    <div class="card">
       <div class="prose-content">
         {raw(@content)}
       </div>
@@ -214,22 +176,13 @@ defmodule OaksWeb.ArticleLive do
 
   defp article_footer(assigns) do
     ~H"""
-    <div
-      class="mt-6 pt-4 flex flex-wrap items-center justify-between gap-4 text-sm"
-      style="border-top: 1px solid var(--color-border-light); color: var(--color-text-tertiary);"
-    >
+    <div class="mt-s7 pt-s3 flex flex-wrap items-center justify-between gap-s4 border-t border-rule font-frame text-[13px] font-medium text-ink-3 tabular-nums">
       <div>
         <span :if={@article.updated_at}>
           Last updated {format_date(@article.updated_at)}
         </span>
       </div>
-      <.link
-        navigate={~p"/articles"}
-        class="inline-flex items-center gap-1"
-        style="color: var(--color-forest-600); text-decoration: none;"
-      >
-        <.icon name="hero-arrow-left" class="size-4" /> All Articles
-      </.link>
+      <.back navigate={~p"/articles"}>All Articles</.back>
     </div>
     """
   end
@@ -241,33 +194,25 @@ defmodule OaksWeb.ArticleLive do
   defp delete_modal(assigns) do
     ~H"""
     <div
-      class="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style="background-color: rgba(0, 0, 0, 0.5);"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/65"
       phx-window-keydown="cancel_delete"
       phx-key="Escape"
     >
-      <div class="card p-6 max-w-md w-full" style="background-color: var(--color-surface);">
-        <h3 class="text-lg font-bold mb-2" style="color: var(--color-text-primary);">
+      <div
+        class="card p-6 max-w-md w-full"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-article-title"
+      >
+        <h3 id="delete-article-title" class="mb-s3 font-serif text-[26px]/[1.15] font-semibold">
           Delete Article
         </h3>
-        <p class="mb-4" style="color: var(--color-text-secondary);">
-          Are you sure you want to delete "<strong>{@article.title}</strong>"? This cannot be undone.
+        <p class="mb-s4 text-ink-2">
+          Are you sure you want to delete <strong class="text-ink">{@article.title}</strong>? This cannot be undone.
         </p>
-        <div class="flex justify-end gap-3">
-          <button
-            phx-click="cancel_delete"
-            class="px-4 py-2 rounded-lg text-sm font-medium"
-            style="background-color: var(--color-base-200); color: var(--color-text-primary);"
-          >
-            Cancel
-          </button>
-          <button
-            phx-click="delete"
-            class="px-4 py-2 rounded-lg text-sm font-medium text-white"
-            style="background-color: #dc2626;"
-          >
-            Delete
-          </button>
+        <div class="flex flex-wrap justify-end gap-s2">
+          <.button phx-click="cancel_delete">Cancel</.button>
+          <.button phx-click="delete" variant="primary">Delete</.button>
         </div>
       </div>
     </div>
