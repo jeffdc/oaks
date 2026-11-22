@@ -62,13 +62,14 @@ defmodule OaksWeb.SpeciesListLiveTest do
 
     test "shows hybrid count", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/species")
-      assert html =~ "#{Species.count_hybrids()} hybrids"
+      hybrids = Species.count_hybrids()
+      assert html =~ "#{hybrids} #{if hybrids == 1, do: "hybrid", else: "hybrids"}<"
     end
 
     test "counts hybrids separately within a filter", %{conn: conn, q: q} do
       {:ok, _view, html} = live(conn, ~p"/species?subgenus=#{q}")
       assert html =~ "2 species"
-      assert html =~ "1 hybrids"
+      assert html =~ "1 hybrid<"
       assert html =~ "3 total"
     end
 

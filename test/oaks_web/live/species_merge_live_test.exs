@@ -70,6 +70,13 @@ defmodule OaksWeb.SpeciesMergeLiveTest do
       assert has_element?(view, ".merge-row-differs [data-standing='differs']", "differs")
     end
 
+    test "sets the synonyms to add as italic names", %{conn: conn, stellata: stellata, alba: alba} do
+      {:ok, view, _html} =
+        conn |> authenticated_conn() |> live(~p"/species/#{stellata}/merge/#{alba}")
+
+      assert has_element?(view, ".merge-synonyms .sci-name i", stellata)
+    end
+
     test "shows source transfer section", %{conn: conn, stellata: stellata, alba: alba} do
       {:ok, _view, html} =
         conn |> authenticated_conn() |> live(~p"/species/#{stellata}/merge/#{alba}")

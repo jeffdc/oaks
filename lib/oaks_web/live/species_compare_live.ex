@@ -110,11 +110,11 @@ defmodule OaksWeb.SpeciesCompareLive do
     ~H"""
     <div class="source-comparison-page">
       <div :if={@not_found} class="source-comparison-missing">
+        <.back navigate={~p"/species"}>Back to Species List</.back>
         <.header>
           Species Not Found
           <:subtitle>Could not find the requested species.</:subtitle>
         </.header>
-        <.back navigate={~p"/species"}>Back to Species List</.back>
       </div>
 
       <div :if={@species} class="source-comparison-card">

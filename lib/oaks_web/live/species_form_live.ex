@@ -268,7 +268,7 @@ defmodule OaksWeb.SpeciesFormLive do
             <p class="oc-hint species-form-lede">
               Enter names separated by commas. JSON arrays are also accepted.
             </p>
-            <div class="space-y-4">
+            <div class="species-form-stack">
               <.input
                 field={@form[:hybrids]}
                 type="text"

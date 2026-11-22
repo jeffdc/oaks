@@ -2170,11 +2170,6 @@ a.badge:hover {
   text-wrap: balance;
 }
 
-.comparison-title-prefix {
-  font-weight: 400;
-  color: var(--color-ink-2);
-}
-
 /* Source picker: DESIGN.md's option buttons. Pressed is ink with a small
    ochre tick, as in the ID tool's trait controls. */
 .source-picker {
@@ -2337,7 +2332,7 @@ a.comparison-source-name:hover {
   color: var(--color-ink-3);
 }
 
-.source-comparison-missing .oc-title {
+.source-comparison-missing .oc-back {
   margin-bottom: var(--spacing-s4);
 }
 
@@ -2497,6 +2492,11 @@ a.comparison-source-name:hover {
   color: var(--color-ink-3);
 }
 
+/* Rank names are italic in the serif; the rank word stays roman. */
+.species-row-rank i {
+  font: italic 400 14px/1.3 var(--font-serif);
+}
+
 .species-empty {
   padding: var(--spacing-s7) 0;
   font: 500 14px/1.5 var(--font-frame);
@@ -2515,8 +2515,11 @@ a.comparison-source-name:hover {
 
 /* --- Merge ---------------------------------------------------------------- */
 
-.merge-title em {
-  font-weight: 600;
+/* Scientific names set inside frame text: the name words in the serif
+   italic, the sign, rank words and authority in the surrounding face. */
+.sci-name i {
+  font-family: var(--font-serif);
+  font-style: italic;
 }
 
 .merge-title .merge-title-source {
@@ -2532,7 +2535,7 @@ a.comparison-source-name:hover {
   color: var(--color-ink-2);
 }
 
-.merge-error-state .oc-title {
+.merge-error-state .oc-back {
   margin-bottom: var(--spacing-s4);
 }
 
@@ -2569,17 +2572,15 @@ a.comparison-source-name:hover {
   gap: 4px;
 }
 
-.merge-col-label {
-  font: 800 13px/1.2 var(--font-frame);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-ink-2);
-}
-
 .merge-col-name {
-  font: italic 600 24px/1.15 var(--font-serif);
+  font: 600 24px/1.15 var(--font-serif);
   color: var(--color-ink);
   text-decoration: none;
+}
+
+.merge-col-role {
+  font: 600 14px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
 }
 
 .merge-col-name:hover {
@@ -2725,13 +2726,14 @@ a.comparison-source-name:hover {
   margin-top: 4px;
   display: grid;
   gap: 2px;
-  font: 400 13px/1.45 var(--font-frame);
-  color: var(--color-ink-3);
+  font: 400 14px/1.45 var(--font-serif);
+  color: var(--color-ink-2);
 }
 
+/* The source's own words are serif, as it wrote them; the labels are frame. */
 .merge-source-preview-label {
-  font-weight: 600;
-  color: var(--color-ink-2);
+  font: 600 13px/1.45 var(--font-frame);
+  color: var(--color-ink-3);
 }
 
 /* References to update: a section label that opens and closes, with a
@@ -2908,8 +2910,7 @@ a.comparison-source-name:hover {
   color: var(--color-ink-2);
 }
 
-.merge-dialog-text em {
-  font-family: var(--font-serif);
+.merge-dialog-text .sci-name {
   color: var(--color-ink);
 }
 
@@ -2973,6 +2974,11 @@ a.comparison-source-name:hover {
    bottom margin would double it. */
 .species-form-sections .oc-field {
   margin-bottom: 0;
+}
+
+.species-form-stack {
+  display: grid;
+  gap: var(--spacing-s4);
 }
 
 .species-form-note {

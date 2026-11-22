@@ -140,7 +140,7 @@ defmodule OaksWeb.SpeciesListLive do
     ~H"""
     <span class="species-counts">
       <span>{@non_hybrid} species</span>
-      <span>{@hybrid_count} hybrids</span>
+      <span>{@hybrid_count} {if @hybrid_count == 1, do: "hybrid", else: "hybrids"}</span>
       <span>{@species_count} total</span>
     </span>
     """
@@ -167,10 +167,10 @@ defmodule OaksWeb.SpeciesListLive do
       </span>
       <span class="species-row-meta">
         <span :if={@species.subgenus} class="species-row-rank hidden sm:inline">
-          {@species.subgenus}
+          <i>{@species.subgenus}</i>
         </span>
         <span :if={@species.section} class="species-row-rank hidden md:inline">
-          sect. {@species.section}
+          sect. <i>{@species.section}</i>
         </span>
         <.status_tag
           :if={@species.conservation_status}
