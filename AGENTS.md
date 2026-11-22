@@ -4,6 +4,8 @@ Project rules (investigation before action, SQLite, Nix toolchain, git workflow)
 
 **UI work uses the shared component library, always.** Before touching any page, read the Components section of [CODING_STANDARDS.md](CODING_STANDARDS.md): it says which component to use for each need. Never build a page-local version of a name, width, title row, button, dialog, stamp or anything else the library covers. If the component you need is missing or doesn't fit, stop: add it to the library as its own change for Jeff's review in `/dev/components`, or file `mull ask`. An agent that briefs other agents on UI work names the components they must use.
 
+**Dev servers: start them as background tasks and stop them with your stop tool, never with `kill`.** Run `PORT=<port> mix phx.server` (inside the Nix shell) through your shell tool's background option and stop it with the tool that stops background tasks (TaskStop in Claude Code), so stopping needs no approval. For a server left running, `scripts/stop-dev-server <port>` is the one pre-approved fallback: it stops only a Phoenix server on that port. Never touch Jeff's servers on 4444 (his `make dev`) and 4460 (the integration preview); the script refuses them.
+
 ## This project in mull
 
 - **Plans:**
