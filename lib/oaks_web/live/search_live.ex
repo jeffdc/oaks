@@ -45,8 +45,16 @@ defmodule OaksWeb.SearchLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div id="search-sync" phx-hook="SearchSync" data-query={@query}>
+    <div id="search-sync" class="search-page" phx-hook="SearchSync" data-query={@query}>
+      <div :if={@query == ""} class="search-start">
+        <h1 class="search-title">Search</h1>
+        <p class="search-empty">
+          Find species, taxa and sources by name, common name or synonym in the search field above.
+          <span class="search-key-hint">Press <kbd>/</kbd> to go to it from any page.</span>
+        </p>
+      </div>
       <div :if={@query != "" && @results}>
+        <h1 class="sr-only">Search results for {@query}</h1>
         <.counts_bar counts={@results.counts} editor={@current_scope != nil} />
         <.no_results :if={@results.counts.total == 0} query={@query} />
         <div :if={@results.counts.total > 0}>
@@ -66,42 +74,30 @@ defmodule OaksWeb.SearchLive do
 
   defp counts_bar(assigns) do
     ~H"""
-    <div class="card search-counts-bar">
+    <div class="search-counts-bar">
       <span :if={@counts.taxa > 0} class="search-count-item">
-        {@counts.taxa} {if(@counts.taxa == 1, do: "taxon", else: "taxa")}
+        <b>{@counts.taxa}</b> {if(@counts.taxa == 1, do: "taxon", else: "taxa")}
       </span>
-      <span :if={@counts.taxa > 0} class="search-separator">|</span>
+      <span :if={@counts.taxa > 0} class="search-separator" aria-hidden="true"></span>
       <span class="search-count-item">
-        {@counts.sources} {if(@counts.sources == 1, do: "source", else: "sources")}
+        <b>{@counts.sources}</b> {if(@counts.sources == 1, do: "source", else: "sources")}
       </span>
-      <span class="search-separator">|</span>
+      <span class="search-separator" aria-hidden="true"></span>
       <span class="search-count-item">
-        {@counts.species} species
+        <b>{@counts.species}</b> species
       </span>
-      <span class="search-separator">|</span>
+      <span class="search-separator" aria-hidden="true"></span>
       <span class="search-count-total">
-        {@counts.total} total
+        <b>{@counts.total}</b> total
       </span>
-      <.link
+      <.button
         :if={@editor}
         navigate={~p"/species/new"}
+        size="compact"
         class="search-add-species-btn"
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
         Add Species
-      </.link>
+      </.button>
     </div>
     """
   end
@@ -110,10 +106,11 @@ defmodule OaksWeb.SearchLive do
 
   defp no_results(assigns) do
     ~H"""
-    <div class="text-center py-12 text-base-content/50">
-      <.icon name="hero-magnifying-glass" class="size-12 mx-auto mb-4 opacity-50" />
-      <p class="text-lg mb-2">No results found for "{@query}"</p>
-      <p class="text-sm">Try adjusting your search term or using a different spelling.</p>
+    <div class="search-no-results">
+      <p class="search-empty">No results found for <b>{@query}</b>.</p>
+      <p class="search-empty-hint">
+        Try adjusting your search term or using a different spelling.
+      </p>
     </div>
     """
   end
@@ -122,28 +119,22 @@ defmodule OaksWeb.SearchLive do
 
   defp taxa_results(assigns) do
     ~H"""
-    <div class="search-section">
-      <h3 class="search-section-label">Taxa</h3>
-      <ul class="card search-results-list" id="taxa-results">
+    <section class="search-section">
+      <h2 class="search-section-label">Taxa</h2>
+      <ul class="search-results-list" id="taxa-results">
         <li :for={taxon <- @taxa}>
-          <.link
-            navigate={taxonomy_path(taxon)}
-            class="search-result-row"
-          >
-            <div class="search-result-main">
-              <span class="search-result-icon search-result-icon-taxon">
-                <.icon name="hero-squares-2x2" class="size-4" />
-              </span>
-              <span class="search-result-name search-result-name-taxon">{taxon.name}</span>
+          <.link navigate={taxonomy_path(taxon)} class="search-result-row">
+            <span class="search-result-main">
+              <i class="search-result-name search-result-name-taxon">{taxon.name}</i>
               <span class="search-taxon-level">{taxon.level}</span>
-            </div>
-            <div :if={taxon.species_count > 0} class="search-result-meta">
+            </span>
+            <span :if={taxon.species_count > 0} class="search-result-meta">
               {taxon.species_count} species
-            </div>
+            </span>
           </.link>
         </li>
       </ul>
-    </div>
+    </section>
     """
   end
 
@@ -151,28 +142,20 @@ defmodule OaksWeb.SearchLive do
 
   defp source_results(assigns) do
     ~H"""
-    <div class="search-section">
-      <h3 class="search-section-label">Sources</h3>
-      <ul class="card search-results-list" id="source-results">
+    <section class="search-section">
+      <h2 class="search-section-label">Sources</h2>
+      <ul class="search-results-list" id="source-results">
         <li :for={source <- @sources}>
-          <.link
-            navigate={~p"/sources/#{source.id}"}
-            class="search-result-row"
-          >
-            <div class="search-result-main">
-              <span class="search-result-icon search-result-icon-source">
-                <.icon name="hero-book-open" class="size-4" />
-              </span>
+          <.link navigate={~p"/sources/#{source.id}"} class="search-result-row">
+            <span class="search-result-main">
               <span class="search-result-name search-result-name-source">{source.name}</span>
               <span :if={source.author} class="search-result-author">{source.author}</span>
-            </div>
-            <div :if={source.year} class="search-result-meta">
-              {source.year}
-            </div>
+            </span>
+            <span :if={source.year} class="search-result-meta">{source.year}</span>
           </.link>
         </li>
       </ul>
-    </div>
+    </section>
     """
   end
 
@@ -180,39 +163,34 @@ defmodule OaksWeb.SearchLive do
 
   defp species_results(assigns) do
     ~H"""
-    <div class="search-section">
-      <h3 class="search-section-label">Species</h3>
-      <ul class="card search-results-list" id="species-results">
+    <section class="search-section">
+      <h2 class="search-section-label">Species</h2>
+      <ul class="search-results-list" id="species-results">
         <li :for={species <- @species}>
-          <.link
-            navigate={~p"/species/#{species.scientific_name}"}
-            class="search-result-row"
-          >
-            <div class="search-result-main">
-              <span class="search-result-icon search-result-icon-species">
-                <.icon name="hero-check" class="size-4" />
-              </span>
-              <span class="search-result-name search-result-name-species">
-                Quercus
+          <.link navigate={~p"/species/#{species.scientific_name}"} class="search-result-row">
+            <span class="search-result-main">
+              <i class="search-result-name search-result-name-species">
+                <span class="search-result-genus">Quercus</span>
                 <span
                   :if={hybrid_sign?(species.scientific_name, species.is_hybrid)}
-                  class="mr-0.5"
+                  class="not-italic"
                 >
                   &times;
                 </span>
-                <em>{epithet(species.scientific_name)}</em>
-              </span>
-              <span :if={species.author} class="search-result-author">
-                {species.author}
-              </span>
-            </div>
-            <div :if={species.section} class="search-result-meta">
-              {species.section}
-            </div>
+                <span :for={{part, i} <- Enum.with_index(formula_parts(species.scientific_name))}><span
+                  :if={i > 0}
+                  class="not-italic"
+                >{" × "}</span>{part}</span>
+              </i>
+              <span :if={species.author} class="search-result-author">{species.author}</span>
+            </span>
+            <span :if={species.section} class="search-result-meta">
+              Section <i>{species.section}</i>
+            </span>
           </.link>
         </li>
       </ul>
-    </div>
+    </section>
     """
   end
 
@@ -225,6 +203,11 @@ defmodule OaksWeb.SearchLive do
   defp perform_search(socket, query) do
     results = Search.search(query)
     assign(socket, query: query, results: results, page_title: "Search: #{query}")
+  end
+
+  # A hybrid formula's parts, so its sign can be set roman between them
+  defp formula_parts(scientific_name) do
+    scientific_name |> epithet() |> String.split(~r/\s*×\s*/u)
   end
 
   defp search_path(""), do: ~p"/search"

@@ -80,201 +80,130 @@ defmodule OaksWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-3xl mx-auto">
+    <div>
       <%!-- Welcome section --%>
-      <section class="text-center mb-10">
-        <h2
-          class="text-3xl font-bold mb-3"
-          style="font-family: var(--font-serif); color: var(--color-forest-800, #165132);"
-        >
-          Explore the World of Oaks
-        </h2>
-        <%= if @is_loading do %>
-          <p class="text-lg" style="color: var(--color-text-secondary);">Loading species data...</p>
-        <% else %>
-          <p class="text-lg leading-relaxed" style="color: var(--color-text-secondary);">
-            A comprehensive database of
-            <strong class="font-semibold" style="color: var(--color-forest-700);">
-              {@stats.oak_count}
-            </strong>
-            oak species and
-            <strong class="font-semibold" style="color: var(--color-forest-700);">
-              {@stats.hybrid_count}
-            </strong>
+      <.header>
+        Explore the World of Oaks
+        <:subtitle>
+          <%= if @is_loading do %>
+            Loading species data...
+          <% else %>
+            A comprehensive database of <strong class="text-ink">{@stats.oak_count}</strong>
+            oak species and <strong class="text-ink">{@stats.hybrid_count}</strong>
             hybrids from around the globe.
-          </p>
-        <% end %>
-      </section>
+          <% end %>
+        </:subtitle>
+      </.header>
 
-      <%!-- Browse options --%>
-      <section class="mb-10">
-        <h3 class="section-title">What would you like to do?</h3>
-        <div class="flex flex-col gap-4 sm:flex-row">
+      <div class="grid gap-x-s7 gap-y-s7 lg:grid-cols-2">
+        <%!-- Browse options --%>
+        <section class="lg:col-start-1 lg:row-start-1">
+          <h2 class="section-title">What would you like to do?</h2>
           <.browse_card
             navigate={~p"/taxonomy"}
-            icon="hero-squares-2x2"
             title="Taxonomy Tree"
             description="Explore by subgenus, section, and more"
           />
           <.disabled_card
-            icon="hero-magnifying-glass"
             title="Identification"
             badge="Coming Soon"
             description="Identify oaks by their characteristics"
           />
-        </div>
-      </section>
+        </section>
 
-      <%!-- Featured species --%>
-      <%= if !@is_loading && @featured_species do %>
-        <section class="mb-10">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="section-title">Featured Species</h3>
-            <button
+        <%!-- Featured species --%>
+        <section
+          :if={!@is_loading && @featured_species}
+          class="lg:col-start-1 lg:row-start-2"
+        >
+          <div class="flex items-center justify-between gap-s3 mb-s3">
+            <h2 class="section-title">Featured Species</h2>
+            <.button
               phx-click="shuffle"
+              size="compact"
               aria-label="Show another random species"
-              class="p-2 rounded text-stone-400 hover:bg-stone-100 hover:text-forest-600 focus-visible:outline-none focus-visible:bg-stone-100 focus-visible:text-forest-600 focus-visible:ring-2 focus-visible:ring-forest-600"
             >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-              >
-                #
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-            </button>
+              Show another
+            </.button>
           </div>
           <.list_card href={~p"/species/#{@featured_species.scientific_name}"}>
-            <span class="font-medium" style="color: var(--color-forest-700);">
-              <em>Quercus {@featured_species.scientific_name}</em>
+            <i class="font-serif text-lg font-semibold leading-snug group-hover:underline underline-offset-3">
+              <span class="font-normal">Quercus</span> {@featured_species.scientific_name}
+            </i>
+            <span :if={@featured_species.author} class="font-serif text-sm text-ink-3">
+              {@featured_species.author}
             </span>
-            <%= if @featured_species.author do %>
-              <span class="text-sm" style="color: var(--color-text-tertiary);">
-                {@featured_species.author}
-              </span>
-            <% end %>
-            <%= if @featured_species.section do %>
-              <span class="text-xs" style="color: var(--color-text-tertiary);">
-                Section {@featured_species.section}
-              </span>
-            <% end %>
+            <span :if={@featured_species.section} class="font-frame text-[13px] text-ink-2">
+              Section <i class="font-serif text-sm">{@featured_species.section}</i>
+            </span>
           </.list_card>
         </section>
-      <% end %>
 
-      <%!-- Data sources --%>
-      <%= if !@is_loading && !Enum.empty?(@sources) do %>
-        <section class="mb-10">
-          <h3 class="section-title">Data Sources</h3>
-          <div class="flex flex-col gap-2">
-            <%= for source <- @sources do %>
-              <.list_card href={~p"/sources/#{source.id}"}>
-                <span
-                  class="font-medium"
-                  style={
-                    if source.id === 3,
-                      do: "color: var(--color-forest-800); font-weight: 600;",
-                      else: "color: var(--color-forest-700);"
-                  }
-                >
-                  {source.name}
-                </span>
-                <%= if source.id === 3 do %>
-                  <span class="badge badge-uppercase badge-forest-dark">Primary</span>
-                <% end %>
-              </.list_card>
-            <% end %>
-          </div>
+        <%!-- Data sources --%>
+        <section
+          :if={!@is_loading && !Enum.empty?(@sources)}
+          class="lg:col-start-2 lg:row-start-1 lg:row-span-2"
+        >
+          <h2 class="section-title">Data Sources</h2>
+          <.list_card :for={source <- @sources} href={~p"/sources/#{source.id}"}>
+            <span class={[
+              "font-serif text-[17px] leading-snug group-hover:underline underline-offset-3",
+              source.id === 3 && "font-semibold"
+            ]}>
+              {source.name}
+            </span>
+            <span :if={source.id === 3} class="badge badge-uppercase badge-forest-dark">
+              Primary
+            </span>
+          </.list_card>
         </section>
-      <% end %>
+      </div>
     </div>
     """
   end
+
+  # A row of a ruled list: the whole row is the link, on a hairline.
+  attr :href, :string, required: true
+  slot :inner_block, required: true
 
   defp list_card(assigns) do
     ~H"""
     <a
       href={@href}
-      class="flex items-center justify-between px-4 py-3.5 rounded-lg transition-all bg-white border border-stone-200 hover:border-forest-400 hover:bg-forest-50"
-      style="text-decoration: none;"
+      class="group flex flex-wrap items-baseline gap-x-s3 gap-y-s1 py-s3 border-b border-rule text-ink no-underline"
     >
-      <div class="flex items-baseline gap-3">
-        {render_slot(@inner_block)}
-      </div>
-      <svg
-        class="w-5 h-5 flex-shrink-0"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        stroke-width="2"
-        style="color: var(--color-text-tertiary);"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-      </svg>
+      {render_slot(@inner_block)}
     </a>
     """
   end
 
+  attr :navigate, :string, required: true
+  attr :title, :string, required: true
+  attr :description, :string, required: true
+
   defp browse_card(assigns) do
     ~H"""
-    <.link
-      navigate={@navigate}
-      class="card card-interactive flex flex-row sm:flex-col items-center sm:items-center gap-4 p-5 sm:p-6 text-left sm:text-center flex-1"
-      style="text-decoration: none;"
-    >
-      <div class="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-forest-50 flex items-center justify-center text-forest-600 sm:mb-2">
-        <.icon name={@icon} class="size-6 sm:size-8" />
-      </div>
-      <div class="flex-1 sm:flex-none">
-        <h4 class="font-semibold text-base sm:text-lg" style="color: var(--color-text-primary);">
-          {@title}
-        </h4>
-        <p class="text-sm" style="color: var(--color-text-secondary);">
-          {@description}
-        </p>
-      </div>
-      <svg
-        class="flex-shrink-0 size-5 sm:hidden"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        stroke-width="2"
-        style="color: var(--color-text-tertiary);"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-      </svg>
+    <.link navigate={@navigate} class="group block py-s3 border-b border-rule text-ink no-underline">
+      <span class="block font-frame text-[17px] font-bold leading-snug group-hover:underline underline-offset-3">
+        {@title}
+      </span>
+      <span class="block mt-s1 font-frame text-sm text-ink-2">{@description}</span>
     </.link>
     """
   end
 
+  attr :title, :string, required: true
+  attr :badge, :string, required: true
+  attr :description, :string, required: true
+
   defp disabled_card(assigns) do
     ~H"""
-    <div class="card flex flex-row sm:flex-col items-center sm:items-center gap-4 p-5 sm:p-6 text-left sm:text-center opacity-70 flex-1">
-      <div
-        class="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-lg flex items-center justify-center sm:mb-2"
-        style="background-color: var(--color-stone-100, #f5f5f4); color: var(--color-text-tertiary);"
-      >
-        <.icon name={@icon} class="size-6 sm:size-8" />
-      </div>
-      <div class="flex-1 sm:flex-none">
-        <h4
-          class="font-semibold text-base sm:text-lg flex items-center gap-2 flex-wrap sm:justify-center"
-          style="color: var(--color-text-primary);"
-        >
-          {@title}
-          <span class="badge badge-uppercase badge-muted">{@badge}</span>
-        </h4>
-        <p class="text-sm" style="color: var(--color-text-secondary);">
-          {@description}
-        </p>
-      </div>
+    <div class="py-s3 border-b border-rule">
+      <span class="flex flex-wrap items-center gap-s2 font-frame text-[17px] font-bold leading-snug text-ink-2">
+        {@title}
+        <span class="badge badge-uppercase badge-muted">{@badge}</span>
+      </span>
+      <span class="block mt-s1 font-frame text-sm text-ink-3">{@description}</span>
     </div>
     """
   end

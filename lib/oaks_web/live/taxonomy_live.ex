@@ -181,168 +181,132 @@ defmodule OaksWeb.TaxonomyLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-7xl mx-auto">
-      <div :if={@not_found} class="text-center py-12">
-        <.icon name="hero-exclamation-triangle" class="size-12 mx-auto mb-4 text-amber-500" />
-        <h1
-          class="text-xl font-semibold mb-2"
-          style="font-family: var(--font-serif); color: var(--color-text-primary);"
-        >
+    <div class="taxonomy-page">
+      <div :if={@not_found}>
+        <.header>
           Taxon Not Found
-        </h1>
-        <p class="mb-4" style="color: var(--color-text-tertiary);">
-          The requested taxonomy path could not be found.
-        </p>
-        <.link
-          navigate={~p"/taxonomy"}
-          class="text-sm font-medium text-forest-700 hover:text-forest-900"
-        >
-          &larr; Return to taxonomy browser
-        </.link>
+          <:subtitle>The requested taxonomy path could not be found.</:subtitle>
+        </.header>
+        <.back navigate={~p"/taxonomy"}>Return to taxonomy browser</.back>
       </div>
 
       <div :if={not @not_found}>
-        <%!-- Header card with gradient --%>
-        <div
-          class="mb-6"
-          style="background: linear-gradient(135deg, var(--color-forest-50) 0%, var(--color-forest-100) 100%); border: 1px solid var(--color-forest-200); border-radius: 0.75rem; padding: 1rem 1.5rem;"
-        >
-          <div class="flex items-center justify-between flex-wrap gap-3">
-            <div class="flex items-center gap-3">
-              <span class="badge badge-forest badge-uppercase">
-                {@current_level}
-              </span>
-              <h1
-                class="text-2xl font-bold"
-                style="font-family: var(--font-serif); color: var(--color-forest-800);"
-              >
-                <.taxon_display_name
-                  is_genus={@is_genus_level}
-                  level={@current_level}
-                  taxon={@current_taxon}
-                />
-              </h1>
-            </div>
-            <div class="flex items-center gap-4">
-              <.link
-                :if={@current_scope}
-                navigate={create_taxon_path(@child_level, @current_taxon)}
-                class="create-taxon-btn"
-                style="text-decoration: none;"
-                id="create-taxon-btn"
-              >
-                <.icon name="hero-plus" class="size-4" /> Create Taxon
-              </.link>
-              <span class="text-sm font-medium" style="color: var(--color-text-secondary);">
-                {@species_count} species
-              </span>
-            </div>
-          </div>
-          <.breadcrumbs :if={not @is_genus_level} crumbs={@breadcrumbs} />
-          <div
-            :if={@current_scope && not @is_genus_level && @current_taxon}
-            class="flex items-center gap-2 mt-2"
+        <.taxonomy_band class="taxonomy-page-band" label="Taxonomy breadcrumb">
+          <:rank
+            :for={crumb <- Enum.drop(@breadcrumbs, -1)}
+            navigate={crumb.url}
+            rank={rank_word(crumb.level)}
+            rank_after={crumb.level == "complex"}
           >
-            <.link
-              navigate={~p"/taxonomy/#{@current_taxon.id}/edit"}
-              class="action-btn action-btn-edit"
-              style="text-decoration: none;"
+            <i>{band_name(crumb.level, crumb.name)}</i>
+          </:rank>
+          <:current>
+            <span :if={rank_word(@current_level) && @current_level != "complex"} class="oc-band-rk">
+              {rank_word(@current_level)}
+            </span>
+            <i>{band_name(@current_level, current_name(@current_taxon))}</i>
+            <span :if={@current_level == "complex"} class="oc-band-rk">complex</span>
+          </:current>
+        </.taxonomy_band>
+
+        <.header class="taxon-title">
+          <.taxon_display_name
+            is_genus={@is_genus_level}
+            level={@current_level}
+            taxon={@current_taxon}
+          />
+          <:subtitle>
+            {level_label(@current_level)}
+            <span class="taxon-title-sep" aria-hidden="true">·</span>
+            <span class="taxon-title-count">{@species_count} species</span>
+          </:subtitle>
+          <:actions :if={@current_scope}>
+            <.button
+              navigate={create_taxon_path(@child_level, @current_taxon)}
+              id="create-taxon-btn"
+              size="compact"
             >
-              <.icon name="hero-pencil-square" class="size-3.5" /> Edit
-            </.link>
-            <button
+              Create Taxon
+            </.button>
+            <.button
+              :if={not @is_genus_level && @current_taxon}
+              navigate={~p"/taxonomy/#{@current_taxon.id}/edit"}
+              size="compact"
+            >
+              Edit
+            </.button>
+            <.button
+              :if={not @is_genus_level && @current_taxon}
               phx-click="request_delete_taxon"
               phx-value-id={@current_taxon.id}
-              class="action-btn action-btn-delete"
+              size="compact"
             >
-              <.icon name="hero-trash" class="size-3.5" /> Delete
-            </button>
-          </div>
-        </div>
+              Delete
+            </.button>
+          </:actions>
+        </.header>
 
         <%!-- Taxon content --%>
-        <div
-          :if={@current_taxon && @current_taxon.content}
-          class="card p-4 mb-6"
-        >
-          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-            <h2 class="section-title section-title-sm" style="margin-bottom: 0;">
-              About this {@current_level}
-            </h2>
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <span
-                :if={@current_taxon.content_updated_at}
-                style="font-size: 0.8125rem; color: var(--color-text-tertiary);"
-              >
+        <section :if={@current_taxon && @current_taxon.content} class="taxon-section">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-s4">
+            <h2 class="section-title section-title-sm">About this {@current_level}</h2>
+            <div class="flex items-center gap-s3">
+              <span :if={@current_taxon.content_updated_at} class="taxon-section-note">
                 Updated {@current_taxon.content_updated_at}
               </span>
-              <.link
+              <.button
                 :if={@current_scope}
                 navigate={~p"/taxonomy/#{@current_taxon.id}/edit"}
-                class="edit-content-btn"
-                style="text-decoration: none;"
+                size="compact"
               >
-                <.icon name="hero-pencil-square" class="size-3.5" /> Edit
-              </.link>
+                Edit
+              </.button>
             </div>
           </div>
           <div class="prose-content">{raw(Markdown.render_html(@current_taxon.content))}</div>
-        </div>
+        </section>
 
         <%!-- Empty content prompt for logged-in users --%>
-        <div
+        <section
           :if={@current_scope && @current_taxon && !@current_taxon.content && !@is_genus_level}
-          class="card p-4 mb-6"
+          class="taxon-section"
         >
-          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-            <h2 class="section-title section-title-sm" style="margin-bottom: 0;">
-              About this {@current_level}
-            </h2>
-            <.link
-              navigate={~p"/taxonomy/#{@current_taxon.id}/edit"}
-              class="edit-content-btn"
-              style="text-decoration: none;"
-            >
-              <.icon name="hero-pencil-square" class="size-3.5" /> Add Content
-            </.link>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-s4">
+            <h2 class="section-title section-title-sm">About this {@current_level}</h2>
+            <.button navigate={~p"/taxonomy/#{@current_taxon.id}/edit"} size="compact">
+              Add Content
+            </.button>
           </div>
-          <p style="color: var(--color-text-tertiary); font-style: italic; margin: 0;">
-            No content yet. Click "Add Content" to describe this {@current_level}.
-          </p>
-        </div>
+          <p class="taxon-empty">No description of this {@current_level} yet.</p>
+        </section>
 
         <%!-- Child taxa --%>
-        <section :if={@child_taxa != []} class="card mb-6" style="padding: 1.5rem;">
-          <h2 class="section-title section-title-sm mb-3">{children_heading(@child_taxa)}</h2>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
+        <section :if={@child_taxa != []} class="taxon-section">
+          <h2 class="section-title section-title-sm">{children_heading(@child_taxa)}</h2>
+          <ul class="taxon-index">
             <.taxon_card
               :for={taxon <- @child_taxa}
               taxon={taxon}
               path={@taxonomy_path}
               editor={@current_scope != nil}
             />
-          </div>
+          </ul>
         </section>
 
         <%!-- Species --%>
-        <section :if={@species != []} class="card" style="padding: 1.5rem;">
-          <h2 class="section-title section-title-sm mb-3">
+        <section :if={@species != []} class="taxon-section">
+          <h2 class="section-title section-title-sm">
             {species_section_title(@is_genus_level, length(@species))}
           </h2>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem;">
-            <.species_card :for={species <- @species} species={species} />
-          </div>
+          <ul class="species-index">
+            <li :for={species <- @species}><.species_card species={species} /></li>
+          </ul>
         </section>
 
         <%!-- Empty state --%>
-        <div
-          :if={@child_taxa == [] and @species == []}
-          class="text-center py-12"
-          style="color: var(--color-text-tertiary);"
-        >
-          <.icon name="hero-folder-open" class="size-12 mx-auto mb-4 opacity-50" />
-          <p class="text-lg mb-1">No taxa or species at this level</p>
-        </div>
+        <p :if={@child_taxa == [] and @species == []} class="taxon-empty">
+          No taxa or species at this level.
+        </p>
       </div>
 
       <.delete_taxon_modal
@@ -356,23 +320,6 @@ defmodule OaksWeb.TaxonomyLive do
 
   # -- Components --
 
-  attr :crumbs, :list, required: true
-
-  defp breadcrumbs(assigns) do
-    ~H"""
-    <nav class="taxonomy-nav mt-2" aria-label="Taxonomy breadcrumb">
-      <span class="taxonomy-label">Taxonomy:</span>
-      <span :for={{crumb, idx} <- Enum.with_index(@crumbs)}>
-        <span :if={idx > 0} class="taxonomy-separator">&rsaquo;</span>
-        <.link navigate={crumb.url} class="taxonomy-link">
-          <span class="taxonomy-name">{crumb.name}</span>
-          <span class="taxonomy-level-label">({crumb.level})</span>
-        </.link>
-      </span>
-    </nav>
-    """
-  end
-
   attr :taxon, :any, required: true
   attr :path, :list, required: true
   attr :editor, :boolean, default: false
@@ -382,24 +329,17 @@ defmodule OaksWeb.TaxonomyLive do
     assigns = assign(assigns, :url, url)
 
     ~H"""
-    <div class="taxon-card-wrapper">
-      <.link
-        navigate={@url}
-        class="taxon-card flex flex-col items-start p-4"
-      >
-        <span class="font-semibold" style="color: var(--color-forest-800); font-size: 0.9375rem;">
-          {@taxon.name}
-        </span>
-        <span class="text-xs mt-1" style="color: var(--color-text-tertiary);">
-          {@taxon.species_count} species
-        </span>
+    <li class="taxon-card-wrapper">
+      <.link navigate={@url} class="taxon-card">
+        <i class="taxon-card-name"><.taxon_name level={@taxon.level} name={@taxon.name} /></i>
+        <span class="taxon-card-count">{@taxon.species_count} species</span>
       </.link>
       <div :if={@editor} class="taxon-card-actions">
         <.link
           navigate={~p"/taxonomy/#{@taxon.id}/edit"}
           class="taxon-action-icon"
-          title={"Edit #{@taxon.name}"}
-          style="text-decoration: none;"
+          title={"Edit #{band_name(@taxon.level, @taxon.name)}"}
+          aria-label={"Edit #{band_name(@taxon.level, @taxon.name)}"}
         >
           <.icon name="hero-pencil-square" class="size-3.5" />
         </.link>
@@ -407,12 +347,13 @@ defmodule OaksWeb.TaxonomyLive do
           phx-click="request_delete_taxon"
           phx-value-id={@taxon.id}
           class="taxon-action-icon taxon-action-delete"
-          title={"Delete #{@taxon.name}"}
+          title={"Delete #{band_name(@taxon.level, @taxon.name)}"}
+          aria-label={"Delete #{band_name(@taxon.level, @taxon.name)}"}
         >
           <.icon name="hero-trash" class="size-3.5" />
         </button>
       </div>
-    </div>
+    </li>
     """
   end
 
@@ -422,41 +363,40 @@ defmodule OaksWeb.TaxonomyLive do
 
   defp taxon_display_name(assigns) do
     ~H"""
-    <span :if={@is_genus}><em>Quercus</em></span>
-    <span :if={not @is_genus and @level == "complex"}>
-      Q. {@taxon.name}
-    </span>
-    <span :if={not @is_genus and @level != "complex"}>
-      {@taxon.name}
-    </span>
+    <i :if={@is_genus}>Quercus</i>
+    <i :if={not @is_genus}><.taxon_name level={@level} name={@taxon.name} /></i>
     """
   end
+
+  attr :level, :string, required: true
+  attr :name, :string, required: true
+
+  # A complex is named for its species: the genus initial at the reading
+  # weight, the epithet heavier, as in a species name.
+  defp taxon_name(%{level: "complex"} = assigns) do
+    ~H"""
+    <span class="font-normal">Q.</span> {@name}
+    """
+  end
+
+  defp taxon_name(assigns), do: ~H"{@name}"
 
   attr :species, :any, required: true
 
   defp species_card(assigns) do
     ~H"""
-    <.link
-      navigate={~p"/species/#{@species.scientific_name}"}
-      class="species-card p-4"
-      style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.375rem;"
-    >
-      <span style="font-style: italic; font-weight: 500; color: var(--color-forest-700); font-size: 0.9375rem;">
-        Quercus{" "}
-        <span
-          :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)}
-          style="font-style: normal;"
-        >
+    <.link navigate={~p"/species/#{@species.scientific_name}"} class="species-card">
+      <i class="species-card-name">
+        <span class="species-card-genus">Quercus</span>
+        <span :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)} class="not-italic">
           &times;
         </span>
-        {epithet(@species.scientific_name)}
-      </span>
-      <span
-        :if={@species.author}
-        style="font-size: 0.8125rem; color: var(--color-text-tertiary); font-weight: 400;"
-      >
-        {@species.author}
-      </span>
+        <span :for={{part, i} <- Enum.with_index(formula_parts(@species.scientific_name))}><span
+          :if={i > 0}
+          class="not-italic"
+        >{" × "}</span>{part}</span>
+      </i>
+      <span :if={@species.author} class="species-card-author">{@species.author}</span>
     </.link>
     """
   end
@@ -474,31 +414,35 @@ defmodule OaksWeb.TaxonomyLive do
       phx-window-keydown="cancel_delete_taxon"
       phx-key="Escape"
     >
-      <div class="fixed inset-0 bg-black/50" phx-click="cancel_delete_taxon" />
-      <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
-        <h3 class="text-lg font-bold text-red-800 mb-2">Delete Taxon</h3>
-        <p class="mb-4" style="color: var(--color-text-secondary);">
-          Are you sure you want to delete <strong>{@taxon.name}</strong> ({@taxon.level})?
-        </p>
-        <p :if={in_use?(@usage)} class="text-sm text-red-600 mb-4" id="delete-taxon-in-use">
-          {usage_text(@usage)} still use this taxon. Move or delete them first.
-        </p>
-        <div class="flex justify-end gap-3">
-          <button
-            phx-click="cancel_delete_taxon"
-            class="px-4 py-2 rounded-lg text-sm font-medium"
-            style="color: var(--color-text-secondary);"
-          >
-            Cancel
-          </button>
-          <button
+      <div class="oc-modal-backdrop" phx-click="cancel_delete_taxon" />
+      <div
+        class="relative oc-modal-panel max-w-md mx-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-taxon-title"
+      >
+        <div class="oc-modal-head">
+          <h2 id="delete-taxon-title">Delete Taxon</h2>
+        </div>
+        <div class="oc-modal-body">
+          <p class="taxon-modal-text">
+            Are you sure you want to delete <i>{band_name(@taxon.level, @taxon.name)}</i>
+            ({@taxon.level})?
+          </p>
+          <p :if={in_use?(@usage)} class="taxon-modal-in-use" id="delete-taxon-in-use">
+            {usage_text(@usage)} still use this taxon. Move or delete them first.
+          </p>
+        </div>
+        <div class="oc-modal-actions">
+          <.button phx-click="cancel_delete_taxon">Cancel</.button>
+          <.button
             :if={!in_use?(@usage)}
             phx-click="confirm_delete_taxon"
-            class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
+            class="taxon-delete-confirm"
             id="confirm-delete-taxon-btn"
           >
             Delete Taxon
-          </button>
+          </.button>
         </div>
       </div>
     </div>
@@ -518,6 +462,28 @@ defmodule OaksWeb.TaxonomyLive do
     |> Enum.filter(& &1)
     |> Enum.join(" and ")
   end
+
+  defp level_label(nil), do: nil
+  defp level_label(level), do: String.capitalize(level)
+
+  # The rank word the taxonomy band sets roman beside a name
+  defp rank_word("subgenus"), do: "subg."
+  defp rank_word("section"), do: "sect."
+  defp rank_word("subsection"), do: "subsect."
+  defp rank_word("complex"), do: "complex"
+  defp rank_word(_level), do: nil
+
+  # A complex is named for its species, so it reads as a species name
+  defp band_name("complex", name), do: "Q. #{name}"
+  defp band_name(_level, name), do: name
+
+  # A hybrid formula's parts, so its sign can be set roman between them
+  defp formula_parts(scientific_name) do
+    scientific_name |> epithet() |> String.split(~r/\s*×\s*/u)
+  end
+
+  defp current_name(nil), do: "Quercus"
+  defp current_name(taxon), do: taxon.name
 
   defp level_plural("subgenus"), do: "Subgenera"
   defp level_plural("section"), do: "Sections"
