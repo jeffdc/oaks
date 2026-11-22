@@ -6,6 +6,11 @@ item: 1adb
 source: reports/1adb-1.md
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-a11c0073ef452c088
 created: "2026-11-22T01:39:11Z"
+settled:
+  action: accept
+  by: Jeff
+  human: true
+  at: "2026-11-22T01:47:10Z"
 decisions:
   - 07ba
   - 23c0

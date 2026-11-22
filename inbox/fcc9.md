@@ -5,6 +5,12 @@ plan: compendium
 item: 1adb
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-a11c0073ef452c088
 created: "2026-11-22T01:29:47Z"
+settled:
+  action: accept
+  note: with review fef4
+  by: Jeff
+  human: true
+  at: "2026-11-22T01:47:10Z"
 ---
 
 The stored codes are exactly the IUCN Red List categories; the data holds no assessment edition to cite, so no source mark is invented
