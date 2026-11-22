@@ -163,58 +163,53 @@ defmodule OaksWeb.DesignComponents do
     {genus, words} = split_genus(assigns)
 
     rank = if assigns.rank, do: [{:roman, assigns.rank}], else: []
+    genus = if genus, do: [{:genus, genus}], else: []
+    tokens = genus ++ rank ++ Enum.map(words, &word_token/1)
 
-    tokens =
-      rank ++
-        Enum.map(words, fn
-          w when w in ["×", "x"] -> {:sign, "×"}
-          w when w in @rank_words -> {:roman, w}
-          w -> {:epithet, w}
-        end)
-
-    tokens = if genus, do: [{:genus, genus} | tokens], else: tokens
-
-    name = join_tokens(tokens)
-
-    author =
-      if assigns.author not in [nil, ""],
-        do: [" ", ~s(<span class="oc-sci-a">), escape(assigns.author), "</span>"],
-        else: []
-
-    Phoenix.HTML.raw([name, author])
+    Phoenix.HTML.raw([join_tokens(tokens), author_html(assigns.author)])
   end
 
-  defp split_genus(%{
-         name: name,
-         hybrid: hybrid,
-         genus: genus,
-         abbreviate: abbreviate,
-         rank: rank
-       }) do
-    name = String.trim(name)
+  defp word_token(w) when w in ["×", "x"], do: {:sign, "×"}
+  defp word_token(w) when w in @rank_words, do: {:roman, w}
+  defp word_token(w), do: {:epithet, w}
 
-    {stated_genus, rest} =
-      case rank == nil && Regex.run(~r/^(Quercus|Q\.)(?:\s+(.*))?$/u, name) do
-        [_, "Q." | rest] -> {"Quercus", Enum.join(rest)}
-        [_, g | rest] -> {g, Enum.join(rest)}
-        _ -> {nil, name}
-      end
+  defp author_html(author) when author in [nil, ""], do: []
 
-    cond do
-      # A name above species, after its rank word.
-      rank ->
-        {nil, words(name)}
+  defp author_html(author),
+    do: [" ", ~s(<span class="oc-sci-a">), escape(author), "</span>"]
+
+  # {genus or nil, the words after it}.
+  defp split_genus(%{name: name, rank: rank}) when is_binary(rank) do
+    {nil, words(String.trim(name))}
+  end
+
+  defp split_genus(%{name: name} = assigns) do
+    case stated_genus(String.trim(name)) do
+      {nil, ""} ->
+        {nil, []}
 
       # The genus on its own is a uninomial, set like any other name.
-      stated_genus && rest == "" ->
-        {nil, [stated_genus]}
+      {genus, ""} ->
+        {nil, [genus]}
 
-      true ->
-        genus = stated_genus || genus
-        genus = if genus && abbreviate, do: String.first(genus) <> ".", else: genus
-        {genus, rest |> OaksWeb.SpeciesName.label(hybrid) |> words()}
+      {genus, rest} ->
+        {genus_label(genus || assigns.genus, assigns.abbreviate),
+         rest_words(rest, assigns.hybrid)}
     end
   end
+
+  defp stated_genus(name) do
+    case Regex.run(~r/^(Quercus|Q\.)(?:\s+(.*))?$/u, name) do
+      [_, _genus | rest] -> {"Quercus", Enum.join(rest)}
+      nil -> {nil, name}
+    end
+  end
+
+  defp genus_label(nil, _abbreviate), do: nil
+  defp genus_label(genus, true), do: String.first(genus) <> "."
+  defp genus_label(genus, _abbreviate), do: genus
+
+  defp rest_words(rest, hybrid), do: rest |> OaksWeb.SpeciesName.label(hybrid) |> words()
 
   defp words(text) do
     text |> String.split(~r/\s+/u, trim: true) |> split_attached_sign()
