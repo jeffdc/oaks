@@ -250,7 +250,9 @@ defmodule OaksWeb.DevComponentsLive do
 
         <section class="mt-s8">
           <.section_heading id="title-pages">
-            Title page and contents<:note>title_page, chapter_heading, contents</:note>
+            Title page and contents<:note>
+              title_page, chapter_heading, contents, specimen, colophon
+            </:note>
           </.section_heading>
           <p class="max-w-[68ch]">
             The home page's pieces. On a page the title page runs in the bleed, so its ink spans
@@ -287,21 +289,49 @@ defmodule OaksWeb.DevComponentsLive do
               What the Compendium is and who keeps it.
             </:entry>
           </.contents>
-          <.chapter_heading class="mt-s8">An oak at random</.chapter_heading>
-          <div class="mt-s5 text-center">
-            <.taxonomy_band id="gallery-band-inline" label="Where it sits" inline>
-              <:rank navigate={~p"/taxonomy"}><.sci_name name="Quercus" /></:rank>
-              <:rank navigate={~p"/taxonomy/Quercus"} rank="subg.">
-                <.sci_name name="Quercus" />
-              </:rank>
-              <:rank navigate={~p"/taxonomy/Quercus/Lobatae"} rank="sect.">
-                <.sci_name name="Lobatae" genus={nil} />
-              </:rank>
-            </.taxonomy_band>
-          </div>
-          <.section_heading id="gallery-centred" align="center" class="mt-s7">
-            Sources
-          </.section_heading>
+          <.specimen id="gallery-specimen" heading="An oak at random">
+            <:name><.sci_name name="shumardii" /></:name>
+            <:author>Buckley</:author>
+            <:band>
+              <.taxonomy_band id="gallery-band-inline" label="Where it sits" inline>
+                <:rank navigate={~p"/taxonomy"}><.sci_name name="Quercus" /></:rank>
+                <:rank navigate={~p"/taxonomy/Quercus"} rank="subg.">
+                  <.sci_name name="Quercus" />
+                </:rank>
+                <:rank navigate={~p"/taxonomy/Quercus/Lobatae"} rank="sect.">
+                  <.sci_name name="Lobatae" genus={nil} />
+                </:rank>
+                <:rank navigate={~p"/taxonomy/Quercus/Lobatae/Coccineae"} rank="subsect.">
+                  <.sci_name name="Coccineae" genus={nil} />
+                </:rank>
+              </.taxonomy_band>
+            </:band>
+            <:about>
+              Hybrids
+              <.link navigate={~p"/species/× riparia"}>
+                <.sci_name name="× riparia" abbreviate />
+              </.link>
+              with <.sci_name name="rubra" genus={nil} weight="regular" />
+            </:about>
+            <:actions>
+              <.button variant="primary" navigate={~p"/species/shumardii"}>Open the page</.button>
+              <.button>Show another</.button>
+            </:actions>
+          </.specimen>
+          <.specimen id="gallery-specimen-loading" heading="Loading" loading />
+          <.colophon id="gallery-colophon" label="Sources">
+            <:item>
+              <.link navigate={~p"/sources/3"}>Oak Compendium</.link><.status_tag>
+                Primary
+              </.status_tag>
+            </:item>
+            <:item><.link navigate={~p"/sources/2"}>Oaks of the World</.link></:item>
+            <:item>
+              <.link navigate={~p"/sources/5"}>
+                <.work_title title="Notes on North American Trees. I. Quercus" />
+              </.link>
+            </:item>
+          </.colophon>
         </section>
 
         <section class="mt-s8">

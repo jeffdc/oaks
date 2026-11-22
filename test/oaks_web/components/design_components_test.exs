@@ -67,13 +67,13 @@ defmodule OaksWeb.DesignComponentsTest do
     test "keeps the hybrid sign roman and spaced, however it is stored" do
       for {name, hybrid} <- [{"× riparia", false}, {"×riparia", false}, {"riparia", true}] do
         assert sci(name: name, hybrid: hybrid) =~
-                 ~s(<i class="oc-sci-g">Quercus</i> <span class="oc-sci-x">×</span>\u00A0<i class="oc-sci-e">riparia</i>)
+                 ~s(<i class="oc-sci-g">Quercus</i>\u00A0<span class="oc-sci-x">×</span>\u00A0<i class="oc-sci-e">riparia</i>)
       end
     end
 
-    test "sets a formula's sign roman between its parents" do
+    test "sets a formula's sign roman between its parents, never breaking the formula" do
       assert sci(name: "agrifolia × parvula") =~
-               ~s(<i class="oc-sci-e">agrifolia</i> <span class="oc-sci-x">×</span>\u00A0<i class="oc-sci-e">parvula</i>)
+               ~s(<i class="oc-sci-e">agrifolia</i>\u00A0<span class="oc-sci-x">×</span>\u00A0<i class="oc-sci-e">parvula</i>)
     end
 
     test "reads a stated genus and keeps rank words roman" do
@@ -234,15 +234,71 @@ defmodule OaksWeb.DesignComponentsTest do
     end
   end
 
-  test "section_heading/1 centres on request" do
+  describe "specimen/1" do
+    test "sets the taxon under its chapter heading, with each part it is given" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.specimen id="s" heading="An oak at random">
+          <:name>michauxii</:name>
+          <:author>Nutt.</:author>
+          <:about>Hybrids</:about>
+          <:actions><button>Show another</button></:actions>
+        </DesignComponents.specimen>
+        """)
+
+      assert html =~ ~s(<section id="s" class="oc-specimen" aria-labelledby="s-heading">)
+      assert html =~ ~r{<h2 id="s-heading" class="oc-chapter ?">}
+      assert html =~ ~s(<p class="oc-specimen-name">michauxii</p>)
+      assert html =~ ~s(<p class="oc-specimen-author">Nutt.</p>)
+      assert html =~ ~s(<p class="oc-specimen-about">Hybrids</p>)
+      refute html =~ "oc-specimen-band"
+      refute html =~ "oc-specimen-wait"
+    end
+
+    test "holds its place while loading" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.specimen id="s" heading="An oak at random" loading>
+          <:name>michauxii</:name>
+        </DesignComponents.specimen>
+        """)
+
+      assert html =~ ~s(aria-busy="true")
+      assert html =~ "oc-specimen-wait"
+      refute html =~ "michauxii"
+    end
+  end
+
+  test "colophon/1 lists its items under a label" do
     assigns = %{}
 
     html =
       rendered_to_string(~H"""
-      <DesignComponents.section_heading align="center">Sources</DesignComponents.section_heading>
+      <DesignComponents.colophon id="c" label="Sources">
+        <:item>Oaks of the World</:item>
+        <:item>Sibley</:item>
+      </DesignComponents.colophon>
       """)
 
-    assert html =~ "oc-section-heading oc-section-heading-center"
+    assert html =~ ~s(<section id="c" class="oc-colophon" aria-labelledby="c-label">)
+    assert html =~ ~s(<h2 id="c-label">Sources</h2>)
+    assert html =~ ~r{<li>Oaks of the World</li>\s*<li>Sibley</li>}
+  end
+
+  test "work_title/1 sets the genus in a title as a scientific name" do
+    html =
+      render_component(&DesignComponents.work_title/1,
+        title: "Notes on North American Trees. I. Quercus & <Quercetum>"
+      )
+
+    assert html =~
+             ~r{Notes on North American Trees\. I\. <span class="oc-sci oc-sci-regular ?"><i class="oc-sci-e">Quercus</i></span>}
+
+    assert html =~ "&amp; &lt;Quercetum&gt;"
   end
 
   test "section_heading/1 renders the label and an optional note" do

@@ -405,8 +405,9 @@ Every page is built from the shared library: `OaksWeb.CoreComponents`, `OaksWeb.
 | Buttons | `<.button>`: `primary` (one per page), `ghost`, `danger` *(to add, item c13c)*; size `compact` |
 | Dialogs and confirmations | `<.modal>` with title, body and actions slots *(to consolidate, item c13c)* |
 | Status stamps | `<.status_tag>`; IUCN status through its IUCN variant *(in progress, item 12b4)* |
-| Section labels | `<.section_heading>` (`align="center"` on a centred page) |
-| A centred title page, its chapter headings and a contents list | `<.title_page>` (in the page's `:bleed`), `<.chapter_heading>`, `<.contents>` |
+| Section labels | `<.section_heading>` |
+| A centred page's parts: title page, chapter headings, contents list, a featured taxon, a closing list | `<.title_page>` (in the page's `:bleed`), `<.chapter_heading>`, `<.contents>`, `<.specimen>`, `<.colophon>` |
+| A work's title with a scientific name in it (a source's name) | `<.work_title>` |
 | Tables and ruled lists | `<.table>`, `<.list>` |
 | Form fields | `<.input>` |
 | Back links | `<.back>` |

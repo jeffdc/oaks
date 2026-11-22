@@ -990,10 +990,10 @@
     }
     .oc-tp-edge { padding: 0 calc(var(--oc-tp-gutter) + 10px); }
     .oc-tp-search input {
-      padding: 0 12px;
+      padding: 0 10px;
       font-size: 16px;
     }
-    .oc-tp-search button { padding: 0 16px; }
+    .oc-tp-search button { padding: 0 14px; }
     .oc-tp-counts { font-size: 15px; }
     .oc-tp-counts span + span::before { margin: 0 9px; }
   }
@@ -1100,10 +1100,95 @@
     .oc-contents-count { font-size: 19px; }
   }
 
-  /* Centred section heading (section_heading align="center") */
-  .oc-section-heading-center {
-    justify-content: center;
+  /* ---------------------------------------------------------------------
+     Specimen (DesignComponents.specimen): one taxon set large and centred.
+     --------------------------------------------------------------------- */
+  .oc-specimen {
+    margin-top: 88px;
     text-align: center;
+  }
+  .oc-specimen-wait { min-height: 300px; }
+  .oc-specimen-name {
+    margin: var(--spacing-s6) 0 0;
+    font: 400 clamp(44px, 5.6vw, 80px)/1 var(--font-serif);
+    letter-spacing: -0.02em;
+  }
+  .oc-specimen-author {
+    margin: var(--spacing-s3) 0 0;
+    font: 400 24px/1.2 var(--font-serif);
+    color: var(--color-ink-3);
+  }
+  .oc-specimen-band { margin-top: var(--spacing-s5); }
+  .oc-specimen-about {
+    display: inline-block;
+    max-width: 60ch;
+    margin: var(--spacing-s5) 0 0;
+    font: 500 15px/1.6 var(--font-frame);
+    color: var(--color-ink-2);
+    text-wrap: balance;
+  }
+  .oc-specimen-about a {
+    font-size: 18px;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .oc-specimen-about a:hover { text-decoration: underline; }
+  .oc-specimen-about .oc-sci-regular {
+    font-size: 17px;
+    color: var(--color-ink);
+  }
+  .oc-specimen-actions {
+    margin-top: var(--spacing-s5);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacing-s3);
+  }
+
+  /* ---------------------------------------------------------------------
+     Colophon (DesignComponents.colophon): a short centred list under a
+     small label on a hairline, the items separated by slashes.
+     --------------------------------------------------------------------- */
+  .oc-colophon {
+    max-width: 880px;
+    margin: 72px auto 0;
+    padding-top: 22px;
+    border-top: 1px solid var(--color-rule);
+    text-align: center;
+  }
+  .oc-colophon h2 {
+    margin: 0;
+    font: 800 13px/1.2 var(--font-frame);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .oc-colophon ul {
+    margin: var(--spacing-s3) 0 0;
+    padding: 0;
+    list-style: none;
+    font: 400 18px/1.7 var(--font-serif);
+    color: var(--color-ink-2);
+    text-wrap: balance;
+  }
+  .oc-colophon li { display: inline; }
+  .oc-colophon li + li::before {
+    content: "/";
+    margin: 0 10px;
+    color: var(--color-ink-3);
+  }
+  .oc-colophon a {
+    color: var(--color-ink);
+    text-decoration-color: color-mix(in srgb, var(--color-ink) 35%, transparent);
+  }
+  .oc-colophon a:hover { text-decoration-color: var(--color-ink); }
+  .oc-colophon .oc-status { margin-left: var(--spacing-s1); vertical-align: 3px; }
+
+  @media (max-width: 760px) {
+    .oc-specimen { margin-top: var(--spacing-s8); }
+    .oc-specimen-author { font-size: 20px; }
+    .oc-colophon { margin-top: var(--spacing-s8); }
+    .oc-colophon li { display: block; }
+    .oc-colophon li + li::before { content: none; }
   }
 
   /* Inline taxonomy band (taxonomy_band inline): an ochre plate the width
@@ -1121,6 +1206,18 @@
     justify-content: center;
     row-gap: var(--spacing-s1);
     padding: 10px 0;
+  }
+  /* The chevron trails its rank instead of leading the next, so a wrapped
+     line starts with a rank. */
+  .oc-band-inline ol > li + li::before { content: none; }
+  .oc-band-inline ol > li:not(:last-child)::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-top: 2px solid var(--color-ink);
+    border-right: 2px solid var(--color-ink);
+    transform: rotate(45deg);
+    margin: 0 6px 0 2px;
   }
   @media (max-width: 760px) {
     .oc-band-inline .oc-band-in { padding: 0 var(--spacing-s4); }

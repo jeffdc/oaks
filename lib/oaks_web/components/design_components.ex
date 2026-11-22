@@ -4,8 +4,8 @@ defmodule OaksWeb.DesignComponents do
   taxonomy band, section headings, source marks, standing marks, the
   status tag (and its IUCN Red List variant), the Compare button, the
   other-sources disclosure of the field-marks table, and the centred
-  pieces of the home page (the title page, chapter headings and the
-  contents list).
+  pieces of the home page (the title page, chapter headings, the contents
+  list, the specimen and the colophon).
 
   Imported into every LiveView and HTML module (see `OaksWeb`). The
   generic pieces (button, header, ruled table, list, modal, flash, input)
@@ -128,8 +128,9 @@ defmodule OaksWeb.DesignComponents do
 
   For a name above species (a subgenus, section or subsection), pass
   `rank` and the bare name: `<.sci_name name="Lobatae" rank="sect." />`
-  renders "sect. *Lobatae*" with no genus. `rank={nil}` with `genus={nil}`
-  renders a bare uninomial.
+  renders "sect. *Lobatae*" with no genus. `genus={nil}` renders a bare
+  uninomial. The hybrid sign is held to the words on both sides, so a
+  formula name never breaks across lines.
 
   ## Examples
 
@@ -157,8 +158,8 @@ defmodule OaksWeb.DesignComponents do
 
   # The name as one run of escaped HTML, so no template whitespace falls
   # between its parts: genus, rank words, signs and epithets joined by
-  # spaces (no-break after a rank word and the hybrid sign, so neither
-  # ends a line).
+  # spaces (no-break after a rank word and on both sides of the hybrid
+  # sign, so a formula never splits and no line starts or ends on one).
   defp sci_name_parts(assigns) do
     {genus, words} = split_genus(assigns)
 
@@ -231,6 +232,7 @@ defmodule OaksWeb.DesignComponents do
         cond do
           i == 0 -> ""
           elem(Enum.at(tokens, i - 1), 0) in [:roman, :sign] -> "\u00A0"
+          kind == :sign -> "\u00A0"
           true -> " "
         end
 
@@ -253,15 +255,9 @@ defmodule OaksWeb.DesignComponents do
 
       <.section_heading id="field-marks">Field marks</.section_heading>
       <.section_heading>Look-alikes<:note>3 taxa</:note></.section_heading>
-      <.section_heading align="center">Sources</.section_heading>
   """
   attr :id, :string, default: nil
   attr :level, :string, values: ~w(h2 h3), default: "h2"
-
-  attr :align, :string,
-    values: ~w(start center),
-    default: "start",
-    doc: "center on a centred page"
 
   attr :class, :any, default: nil
   slot :inner_block, required: true
@@ -269,11 +265,7 @@ defmodule OaksWeb.DesignComponents do
 
   def section_heading(assigns) do
     ~H"""
-    <.dynamic_tag
-      tag_name={@level}
-      id={@id}
-      class={["oc-section-heading", @align == "center" && "oc-section-heading-center", @class]}
-    >
+    <.dynamic_tag tag_name={@level} id={@id} class={["oc-section-heading", @class]}>
       <span>{render_slot(@inner_block)}</span>
       <small :if={@note != []} class="oc-section-heading-note">{render_slot(@note)}</small>
     </.dynamic_tag>
@@ -704,6 +696,115 @@ defmodule OaksWeb.DesignComponents do
       <% end %>
     </span>
     <span class="oc-contents-about">{render_slot(@entry)}</span>
+    """
+  end
+
+  @doc """
+  Renders a specimen: one taxon set large and centred under a chapter
+  heading, as the home page's oak at random. The name is in display type,
+  then the authority, where it sits (`:band`, an inline `taxonomy_band/1`),
+  a line about it (`:about`, such as its hybrids) and the actions.
+
+  With `loading` it holds the section's place at about its usual height
+  and announces nothing, so the page doesn't jump when the taxon arrives
+  after the live connection.
+
+  ## Examples
+
+      <.specimen id="oak-at-random" heading="An oak at random">
+        <:name><.sci_name name="michauxii" /></:name>
+        <:author>Nutt.</:author>
+        <:band><.taxonomy_band id="b" inline>...</.taxonomy_band></:band>
+        <:about>Hybrids ...</:about>
+        <:actions><.button phx-click="shuffle">Show another</.button></:actions>
+      </.specimen>
+  """
+  attr :id, :string, required: true
+  attr :heading, :string, required: true
+  attr :loading, :boolean, default: false
+  slot :name
+  slot :author
+  slot :band
+  slot :about
+  slot :actions
+
+  def specimen(assigns) do
+    ~H"""
+    <section
+      id={@id}
+      class="oc-specimen"
+      aria-labelledby={"#{@id}-heading"}
+      aria-busy={@loading && "true"}
+    >
+      <.chapter_heading id={"#{@id}-heading"}>{@heading}</.chapter_heading>
+      <div :if={@loading} class="oc-specimen-wait"></div>
+      <%= if !@loading do %>
+        <p class="oc-specimen-name">{render_slot(@name)}</p>
+        <p :if={@author != []} class="oc-specimen-author">{render_slot(@author)}</p>
+        <div :if={@band != []} class="oc-specimen-band">{render_slot(@band)}</div>
+        <p :if={@about != []} class="oc-specimen-about">{render_slot(@about)}</p>
+        <div :if={@actions != []} class="oc-specimen-actions">{render_slot(@actions)}</div>
+      <% end %>
+    </section>
+    """
+  end
+
+  @doc """
+  Renders a colophon: a short centred list closing a centred page, such
+  as the sources behind the home page, under a small label on a hairline.
+  The items run as one line separated by slashes, one per line on phones.
+
+  ## Examples
+
+      <.colophon id="home-sources" label="Sources">
+        <:item><.link navigate={~p"/sources/3"}>Oak Compendium</.link></:item>
+        <:item><.link navigate={~p"/sources/2"}>Oaks of the World</.link></:item>
+      </.colophon>
+  """
+  attr :id, :string, required: true
+  attr :label, :string, required: true
+  slot :item, required: true
+
+  def colophon(assigns) do
+    ~H"""
+    <section id={@id} class="oc-colophon" aria-labelledby={"#{@id}-label"}>
+      <h2 id={"#{@id}-label"}>{@label}</h2>
+      <ul>
+        <li :for={item <- @item}>{render_slot(item)}</li>
+      </ul>
+    </section>
+    """
+  end
+
+  @doc """
+  Renders a work's title, such as a source's name, with the genus
+  *Quercus* in it set as a scientific name (the Botanical Italic Rule).
+  The rest of the title is as stored.
+
+  ## Examples
+
+      <.work_title title="Notes on North American Trees. I. Quercus" />
+  """
+  attr :title, :string, required: true
+
+  def work_title(assigns) do
+    # One run of escaped HTML, so no template whitespace falls beside the
+    # name; the name is set as sci_name/1 sets a uninomial at 400.
+    html =
+      ~r/\b(Quercus)\b/u
+      |> Regex.split(assigns.title, include_captures: true)
+      |> Enum.map(fn
+        "Quercus" ->
+          [~s(<span class="oc-sci oc-sci-regular">), token_html(:epithet, "Quercus"), "</span>"]
+
+        part ->
+          escape(part)
+      end)
+
+    assigns = assign(assigns, :html, Phoenix.HTML.raw(html))
+
+    ~H"""
+    {@html}
     """
   end
 end
