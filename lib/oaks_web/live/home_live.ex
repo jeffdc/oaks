@@ -23,13 +23,11 @@ defmodule OaksWeb.HomeLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    # The counts and sources are a handful of small queries, so both renders
-    # have them and the title page never fills in late. The species list for
-    # the random oak loads once connected, so the pick doesn't change between
-    # the two renders.
-    if connected?(socket), do: send(self(), :load_species)
-
+    # Everything loads in both renders, so the static page is the whole page
+    # (for readers without JavaScript too) and nothing fills in late. The
+    # first oak is picked by the minute, so both renders show the same one.
     sources = list_sources()
+    oaks = Enum.reject(Species.list_all_species(), & &1.is_hybrid)
 
     {:ok,
      assign(socket,
@@ -38,17 +36,9 @@ defmodule OaksWeb.HomeLive do
          "A comprehensive guide to oak species (genus Quercus) featuring detailed information on taxonomy, morphology, distribution, and hybrid relationships.",
        counts: count_all(sources),
        sources: sources,
-       all_species: [],
-       featured: nil,
-       featured_hybrids: [],
-       loading: true
-     )}
-  end
-
-  @impl true
-  def handle_info(:load_species, socket) do
-    socket = assign(socket, all_species: Species.list_all_species(), loading: false)
-    {:noreply, feature_random(socket)}
+       oaks: oaks
+     )
+     |> feature(pick_of_the_minute(oaks))}
   end
 
   @impl true
@@ -76,29 +66,32 @@ defmodule OaksWeb.HomeLive do
 
   defp primary?(source), do: source.id == @primary_source_id
 
-  # A non-hybrid species at random, with its hybrids and each named
-  # hybrid's other parent. Show another never repeats the oak on screen when it can help it.
+  defp pick_of_the_minute([]), do: nil
+
+  defp pick_of_the_minute(oaks) do
+    minute = div(System.os_time(:second), 60)
+    Enum.at(oaks, :erlang.phash2(minute, length(oaks)))
+  end
+
+  # Show another: a different non-hybrid oak when there is one.
   defp feature_random(socket) do
-    current = socket.assigns.featured
-
-    candidates =
-      Enum.filter(socket.assigns.all_species, &(!&1.is_hybrid and &1 != current))
-
-    case candidates do
-      [] ->
-        socket
-
-      _ ->
-        featured = Enum.random(candidates)
-
-        hybrids =
-          featured.hybrids
-          |> Species.parse_name_list()
-          |> Species.get_hybrids_with_parents()
-          |> Enum.map(&Map.put(&1, :other, other_parent(&1, featured.scientific_name)))
-
-        assign(socket, featured: featured, featured_hybrids: hybrids)
+    case Enum.reject(socket.assigns.oaks, &(&1 == socket.assigns.featured)) do
+      [] -> socket
+      others -> feature(socket, Enum.random(others))
     end
+  end
+
+  # The featured oak with its hybrids and each named hybrid's other parent.
+  defp feature(socket, nil), do: assign(socket, featured: nil, featured_hybrids: [])
+
+  defp feature(socket, featured) do
+    hybrids =
+      featured.hybrids
+      |> Species.parse_name_list()
+      |> Species.get_hybrids_with_parents()
+      |> Enum.map(&Map.put(&1, :other, other_parent(&1, featured.scientific_name)))
+
+    assign(socket, featured: featured, featured_hybrids: hybrids)
   end
 
   # A formula name ("agrifolia × parvula") already names both parents.
@@ -181,15 +174,10 @@ defmodule OaksWeb.HomeLive do
         </:entry>
       </.contents>
 
-      <.specimen
-        :if={@loading or @featured}
-        id="oak-at-random"
-        heading="An oak at random"
-        loading={@loading}
-      >
+      <.specimen :if={@featured} id="oak-at-random" heading="An oak at random">
         <:name><.sci_name name={@featured.scientific_name} /></:name>
-        <:author :if={@featured && @featured.author}>{@featured.author}</:author>
-        <:band :if={@featured && ranks(@featured) != []}>
+        <:author :if={@featured.author}>{@featured.author}</:author>
+        <:band :if={ranks(@featured) != []}>
           <.taxonomy_band id="random-band" label="Where it sits" inline>
             <:rank navigate={~p"/taxonomy"}><.sci_name name="Quercus" /></:rank>
             <:rank

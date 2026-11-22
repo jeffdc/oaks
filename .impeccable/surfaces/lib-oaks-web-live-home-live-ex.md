@@ -38,6 +38,6 @@ STORY: The visitor reads what the Compendium is, types a name into the search or
 
 FIRST VIEWPORT: At 1440: masthead (60px), then about 290px of ink holding the centred title (88px) and the two-line subtitle (23px); the 640px search hangs across the ochre edge, half on ink and half on paper; the counts centred below on paper; the italic Contents heading with the acorn; the first row of the two-column contents list at the fold. The primary action is the search.
 
-FORM: The Title Page, Bookplate iteration; seed:3d50e731d9a63102; locked by Jeff on the decision page, round db8687fb. Sketch: .impeccable/mocks/decision/home-c3.html (in the 6b12-site-shell worktree). Build path code-led. Signature interaction: the search pinned across the ink's edge like a bookplate, focus ring in paper on the ink.
+FORM: The Title Page, Bookplate iteration; seed:3d50e731d9a63102; locked by Jeff on the decision page, round db8687fb. Sketch: .impeccable/mocks/decision/home-c3.html (in the 6b12-site-shell worktree). Build path code-led. Signature interaction: the search pinned across the ink's edge like a bookplate, its focus ring in pencil across both grounds as the sketch has it.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
