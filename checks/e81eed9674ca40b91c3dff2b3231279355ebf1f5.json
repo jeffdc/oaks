@@ -1,0 +1,14 @@
+{
+  "tree": "e81eed9674ca40b91c3dff2b3231279355ebf1f5",
+  "commit": "c4e5ccc5b26bb843759a15603749496fe3a87d7f",
+  "at": "2026-11-22T17:42:24Z",
+  "by": "/Users/jeff/dev/oaks/.claude/worktrees/agent-aee7c6f5d7dd8e5a5",
+  "passed": true,
+  "results": [
+    {
+      "command": "make done-checks",
+      "exit": 0,
+      "duration_ms": 62586
+    }
+  ]
+}
