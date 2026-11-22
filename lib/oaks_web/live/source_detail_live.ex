@@ -60,7 +60,7 @@ defmodule OaksWeb.SourceDetailLive do
         {:error, _changeset} ->
           {:noreply,
            socket
-           |> put_flash(:error, "Cannot delete: species have data from this source.")
+           |> put_flash(:error, "Can't delete: species have data from this source.")
            |> assign(show_delete_confirm: false)}
       end
     else
@@ -125,7 +125,7 @@ defmodule OaksWeb.SourceDetailLive do
     assigns = assign(assigns, :has_metadata, has_metadata)
 
     ~H"""
-    <section :if={@has_metadata} class="card source-metadata-card">
+    <section :if={@has_metadata} class="source-metadata-card">
       <dl class="source-metadata-grid">
         <.metadata_item :if={@source.author} label="Author" value={@source.author} />
         <.metadata_item :if={@source.year} label="Year" value={to_string(@source.year)} />
@@ -227,40 +227,32 @@ defmodule OaksWeb.SourceDetailLive do
 
   defp delete_confirm_modal(assigns) do
     ~H"""
-    <div
-      class="fixed inset-0 z-50 flex items-center justify-center bg-ink/65"
-      phx-window-keydown="cancel_delete"
-      phx-key="Escape"
+    <.modal
+      id="delete-source-modal"
+      show
+      on_cancel={JS.push("cancel_delete")}
+      cancel={if @species_count > 0, do: "Close", else: "Cancel"}
     >
-      <div
-        class="card p-6 w-full max-w-md mx-4"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="delete-source-title"
-      >
-        <h3 id="delete-source-title" class="mb-s3 font-serif text-[26px]/[1.15] font-semibold">
-          {if @species_count > 0, do: "Can't Delete Source", else: "Delete Source"}
-        </h3>
-        <p :if={@species_count == 0} class="mb-s4 text-ink-2">
-          Are you sure you want to delete <strong class="text-ink">{@source.name}</strong>?
-        </p>
-        <p
-          :if={@species_count > 0}
-          class="mb-s4 py-s2 border-y-2 border-ink font-frame text-sm font-bold"
-        >
-          Cannot delete: {@species_count} species have data from this source.
-        </p>
-        <div class="flex flex-wrap justify-end gap-s2">
-          <.button :if={@species_count == 0} phx-click="cancel_delete">Cancel</.button>
-          <.button :if={@species_count == 0} variant="primary" phx-click="confirm_delete">
-            Delete
-          </.button>
-          <.button :if={@species_count > 0} phx-click="cancel_delete">Close</.button>
-        </div>
-      </div>
-    </div>
+      <:title>{if @species_count > 0, do: "Can't delete source", else: "Delete source"}</:title>
+      <p :if={@species_count == 0}>
+        Delete <strong>{@source.name}</strong> from the Compendium?
+      </p>
+      <p :if={@species_count > 0}>
+        {species_have(@species_count)} data from <strong>{@source.name}</strong>.
+      </p>
+      <:note :if={@species_count > 0}>Delete that data on each species' page first.</:note>
+      <:note :if={@species_count == 0}><strong>This can't be undone.</strong></:note>
+      <:actions :if={@species_count == 0}>
+        <.button variant="danger" phx-click="confirm_delete" id="confirm-delete-source-btn">
+          Delete source
+        </.button>
+      </:actions>
+    </.modal>
     """
   end
+
+  defp species_have(1), do: "1 species has"
+  defp species_have(n), do: "#{n} species have"
 
   # -- Helpers --
 end

@@ -134,10 +134,8 @@ defmodule OaksWeb.ArticleLive do
 
   defp article_body(assigns) do
     ~H"""
-    <div class="card">
-      <div class="prose-content">
-        {raw(@content)}
-      </div>
+    <div class="prose-content">
+      {raw(@content)}
     </div>
     """
   end
@@ -166,29 +164,16 @@ defmodule OaksWeb.ArticleLive do
 
   defp delete_modal(assigns) do
     ~H"""
-    <div
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/65"
-      phx-window-keydown="cancel_delete"
-      phx-key="Escape"
-    >
-      <div
-        class="card p-6 max-w-md w-full"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="delete-article-title"
-      >
-        <h3 id="delete-article-title" class="mb-s3 font-serif text-[26px]/[1.15] font-semibold">
-          Delete Article
-        </h3>
-        <p class="mb-s4 text-ink-2">
-          Are you sure you want to delete <strong class="text-ink">{@article.title}</strong>? This cannot be undone.
-        </p>
-        <div class="flex flex-wrap justify-end gap-s2">
-          <.button phx-click="cancel_delete">Cancel</.button>
-          <.button phx-click="delete" variant="primary">Delete</.button>
-        </div>
-      </div>
-    </div>
+    <.modal id="delete-article-modal" show on_cancel={JS.push("cancel_delete")}>
+      <:title>Delete article</:title>
+      <p>Delete <strong>{@article.title}</strong>?</p>
+      <:note><strong>This can't be undone.</strong></:note>
+      <:actions>
+        <.button variant="danger" phx-click="delete" id="confirm-delete-article-btn">
+          Delete article
+        </.button>
+      </:actions>
+    </.modal>
     """
   end
 

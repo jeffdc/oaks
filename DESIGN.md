@@ -104,6 +104,19 @@ components:
   button-compare-hover:
     backgroundColor: "{colors.ink}"
     textColor: "{colors.ochre}"
+  button-danger:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.paper}"
+    rounded: "{rounded.none}"
+    padding: "10px 13px"
+  button-danger-hover:
+    backgroundColor: "{colors.ink-2}"
+    textColor: "{colors.paper}"
+  dialog:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.none}"
+    width: "34rem"
   status-tag:
     textColor: "{colors.ink}"
     rounded: "{rounded.none}"
@@ -233,7 +246,7 @@ Every page takes one of four named widths (`<.page>`), chosen by what the page i
 Entirely flat. There are no shadows anywhere. Depth is conveyed by rules (1px hairlines between rows, 2px ink rules under headings), by the two inks of the ground (paper and paper-2), and by the two solid fields, the ink masthead and the ochre band.
 
 ### Named Rules
-**The Statements On Rules Rule.** Statements stand on rules, never in boxes. No cards, no shadows, no tinted panels around content. The only bordered shapes are small: the Compare button, the status tag, photo frames and the dashed map slot.
+**The Statements On Rules Rule.** Statements stand on rules, never in boxes. No cards, no shadows, no tinted panels around content. The only bordered shapes are small: the Compare button, the status tag, photo frames and the dashed map slot, and the one panel that stands over the page, the dialog.
 
 ## Shapes
 
@@ -245,7 +258,17 @@ Square corners throughout (0px); the focus outline alone carries a 1px corner. B
 Plain, printed, square.
 - **Shape:** square corners (0px), 1.5px ink outline.
 - **Compare (primary):** ochre fill, ink text, Archivo 700 13px, 7px by 10px padding. Hover inverts to ink fill with ochre text.
+- **Ghost:** the ink outline alone, Archivo 700 14px; hover inverts to ink with paper text. Cancel, Close and every secondary action.
+- **Danger:** the ink plate, paper text on an ink fill in the ink outline; hover eases to ink-2. Only for the one action in a dialog that deletes something or can't be undone, and its label names what goes ("Delete species", "Merge species", never "OK" or "Yes"). There is no warning colour: weight and words carry it, as The One Field Rule keeps ochre for where you are and what to do next (item c13c).
 - **Focus:** 3px pencil-blue outline, 2px offset, on every interactive element.
+
+### Dialogs
+Every confirmation, picker and "can't" notice is one component, `modal` (item c13c): a square paper panel, 2px ink border, at most 34rem wide, centred over a 65% ink wash, no shadow.
+- **Title:** what the dialog is about, in sentence case ("Delete species", "Can't delete source", "Make synonym of…"), Source Serif 4 600 26px on a 2px ink rule.
+- **Body:** what will happen, as a question where there is a choice, in Source Serif 17px ink; scientific names at regular weight, *Quercus* in full at the first mention.
+- **Notes:** each consequence on its own line in Archivo 600 14px ink-2 ("Its data from 2 sources goes with it."), the irreversible one last and in 700 ink ("This can't be undone.").
+- **Actions:** on a hairline at the foot, right-aligned: the dialog's one close control first, a ghost Cancel (Close when the dialog only tells), then its one action, Danger for a delete or merge. No second close button in the head.
+- **Behaviour:** focus moves into the panel (Cancel, or the dialog's field) and stays there; Esc, a click on the wash and Cancel all close it, and focus returns to what opened it. A long body scrolls inside the panel, so the title and actions stay in view. On phones the panel keeps a 12px margin from the window's edges.
 
 ### Title Row
 Every page's title is one component, `header`, on one rule (item 7838): the title in the display serif (clamp(34px, 4vw, 50px), 600, balanced) standing on a 2px ink rule, 16px of space above the rule and 32px below it. The row uses the page's width; editing never shapes it.
@@ -253,6 +276,7 @@ Every page's title is one component, `header`, on one rule (item 7838): the titl
 - **Meta:** Archivo 600 14px ink-2 with lining tabular figures, items 16px apart with no separators. It holds what kind of thing the page is and its short facts, in this order: the kind word (Species, Hybrid, Subgenus) or the record a form edits (its name at 14px), counts (497 species), a byline and date, stamps (the status tag, the IUCN status, a dashed Draft), then links such as an article's tags.
 - **Subtitle:** a sentence describing the page, Archivo 600 16px ink-2 at most 70ch, under the title line.
 - **Edit menu:** an editor's actions for the page (Edit, Make synonym of…, Delete, Create taxon, New species…) sit in one small disclosure, `edit_menu`: a compact "Edit" button with a drawn chevron at the right end of the row, on the title's first baseline, reversed to paper on ink while open. Its list opens under it on its right edge, on paper in a 1.5px ink border, Archivo 600 14px items on paper-2 when hovered; Esc, a click outside or choosing an item closes it, and a destructive item opens its confirmation dialog. It never wraps: the title and meta take the rest of the row. Logged out there is no menu and no space kept for one.
+- **Quiet edit menu:** an editor's actions on one part of a page (a source's data on a species page, a sub-taxon or a source in a list) are the same menu with a quiet trigger: "Edit" and the chevron in Archivo 600 13px ink-3, no outline, ink and underlined on hover, reversed while open, held to the line it sits on so a row is the same height for Jeff as for a reader. Editing never shapes the reader's layout (item 7838): no editor buttons in tab strips, rows or empty states; a page-wide action such as Add source data goes in the title row's menu.
 - **Back link:** above the row, 16px over the title, in the page's head with it.
 
 ### Status Tag

@@ -68,19 +68,24 @@ defmodule OaksWeb.CoreComponents do
   Square, with a 1.5px ink outline. `variant="primary"` is the ochre fill
   for the one call to action in a view; it inverts to ink on hover. The
   default, `variant="ghost"`, is the outline alone and inverts to ink on
-  paper. `size="compact"` is the smaller size used for Compare.
+  paper. `variant="danger"` is the ink plate for the one action in a
+  confirmation dialog that deletes something or can't be undone: paper on
+  ink, easing to ink-2 on hover. Its label names what goes ("Delete
+  species", never "OK" or "Yes"). `size="compact"` is the smaller size
+  used for Compare.
 
   ## Examples
 
       <.button>Send!</.button>
       <.button phx-click="go" variant="primary">Send!</.button>
+      <.button phx-click="confirm_delete" variant="danger">Delete species</.button>
       <.button navigate={~p"/"}>Home</.button>
   """
   attr :rest, :global,
     include: ~w(href navigate patch method download name value disabled type form)
 
   attr :class, :any, default: nil
-  attr :variant, :string, values: ~w(primary ghost), default: "ghost"
+  attr :variant, :string, values: ~w(primary ghost danger), default: "ghost"
   attr :size, :string, values: ~w(regular compact), default: "regular"
   slot :inner_block, required: true
 
@@ -89,6 +94,7 @@ defmodule OaksWeb.CoreComponents do
       assign(assigns, :class, [
         "oc-btn",
         assigns.variant == "primary" && "oc-btn-primary",
+        assigns.variant == "danger" && "oc-btn-danger",
         assigns.size == "compact" && "oc-btn-compact",
         assigns.class
       ])
@@ -380,7 +386,16 @@ defmodule OaksWeb.CoreComponents do
 
   Each `:item` is a link (`navigate`, or `href` with `method`) or, with
   `click`, a button sending that event (`values` become `phx-value-*`). A
-  destructive item opens the page's own confirmation dialog.
+  destructive item opens the page's confirmation `<.modal>`; the menu's
+  trigger keeps its place on the focus stack, so closing the dialog puts
+  focus back on it.
+
+  `quiet` is the same menu for an editor's actions on one part of a page
+  (a source's data, a row in a list; item c13c): the trigger is small
+  Archivo text with the chevron, no outline, no taller than a line of
+  14px text, so it never shapes the reader's layout. Give it an
+  `aria_label` that names its object ("Edit Agrifoliae") when several sit
+  on one page.
 
   ## Examples
 
@@ -389,23 +404,40 @@ defmodule OaksWeb.CoreComponents do
         <:item click="show_merge_picker">Make synonym of…</:item>
         <:item click="request_delete_taxon" values={%{id: 12}}>Delete taxon</:item>
       </.edit_menu>
+
+      <.edit_menu id="taxon-12-menu" quiet aria_label="Edit Agrifoliae">
+        <:item navigate={~p"/taxonomy/12/edit"}>Edit subsection</:item>
+        <:item click="request_delete_taxon" values={%{id: 12}}>Delete subsection</:item>
+      </.edit_menu>
   """
   attr :id, :string, required: true
   attr :label, :string, default: "Edit", doc: "the trigger's label"
+  attr :quiet, :boolean, default: false, doc: "a small text trigger, for a part of a page"
+  attr :aria_label, :string, default: nil, doc: "the trigger's accessible name, naming its object"
 
   slot :item, required: true, doc: "one action: a link or an event" do
     attr :id, :string
     attr :navigate, :string, doc: "a LiveView path to go to"
     attr :href, :string, doc: "a plain link, with `method` for a delete link"
     attr :method, :string
-    attr :click, :any, doc: "the event (or `JS` command) the item's button sends"
+    attr :click, :string, doc: "the event the item's button sends"
     attr :values, :map, doc: "phx-value-* params sent with `click`"
   end
 
   def edit_menu(assigns) do
     ~H"""
-    <details id={@id} class="oc-edit-menu" data-menu phx-mounted={JS.ignore_attributes(["open"])}>
-      <summary class="oc-btn oc-btn-compact">{@label}</summary>
+    <details
+      id={@id}
+      class={["oc-edit-menu", @quiet && "oc-edit-menu-quiet"]}
+      data-menu
+      phx-mounted={JS.ignore_attributes(["open"])}
+    >
+      <summary
+        class={if @quiet, do: "oc-edit-menu-trigger", else: "oc-btn oc-btn-compact"}
+        aria-label={@aria_label}
+      >
+        {@label}
+      </summary>
       <ul class="oc-edit-menu-list">
         <li :for={item <- @item}>
           <.link :if={item[:navigate]} id={item[:id]} navigate={item[:navigate]}>
@@ -423,7 +455,7 @@ defmodule OaksWeb.CoreComponents do
             :if={!item[:navigate] && !item[:href]}
             type="button"
             id={item[:id]}
-            phx-click={item[:click]}
+            phx-click={JS.push_focus(to: "##{@id} > summary") |> JS.push(item[:click])}
             {phx_values(item[:values])}
           >
             {render_slot(item)}
@@ -584,33 +616,69 @@ defmodule OaksWeb.CoreComponents do
   end
 
   @doc """
-  Renders a modal dialog: a square paper panel with a 2px ink border over
-  an ink wash. Esc, a click outside and the Close button all close it.
+  Renders a dialog, the one every page uses for confirmations, pickers and
+  "can't" notices (item c13c): a square paper panel with a 2px ink border
+  over an ink wash, centred, at most 34rem wide.
+
+  Its parts, top to bottom:
+
+    * `:title`: what the dialog is about, in sentence case, in the serif
+      on a 2px rule ("Delete species", "Can't delete source").
+    * the body (the inner block): what will happen, in the reading
+      serif. A scientific name in it is `<.sci_name weight="regular">`.
+    * `:note`: each a consequence, in Archivo 600 14px ink-2 under the
+      body ("This can't be undone."); `<strong>` in a note is 700 ink.
+    * the actions row: the dialog's one close control first, a ghost
+      button labelled `cancel` ("Cancel", or "Close" when the dialog only
+      tells), then the `:actions` slot: the one action, a
+      `<.button variant="danger">` that names what goes, or primary for
+      an action that destroys nothing.
+
+  Esc, a click outside the panel and the close button all close it, and
+  each runs `on_cancel`. Focus goes into the panel when it opens and is
+  held there; when it closes, focus returns to what pushed it (an
+  `<.edit_menu>` item pushes its trigger). A long body scrolls inside the
+  panel, so the title and actions stay in view.
+
+  A page shows it from its own state: render it `:if` the state is set,
+  with `show`, and an `on_cancel` that clears the state. Removing it from
+  the page (the server answer to a cancel or a confirm) fades it out.
 
   ## Examples
 
-      <.modal id="confirm-modal">
-        Are you sure?
+      <.modal
+        :if={@show_delete_confirm}
+        id="delete-confirm-modal"
+        show
+        on_cancel={JS.push("cancel_delete")}
+      >
+        <:title>Delete species</:title>
+        Delete <.sci_name name="Quercus shumardii" weight="regular" />?
+        <:note>This can't be undone.</:note>
         <:actions>
-          <.button phx-click="confirm" variant="primary">OK</.button>
+          <.button variant="danger" phx-click="confirm_delete">Delete species</.button>
         </:actions>
       </.modal>
 
-  JS.exec("data-show", to: "#confirm-modal") to show it.
-  JS.exec("data-cancel", to: "#confirm-modal") to hide it.
+  A dialog shown from the browser alone (the gallery's) is left out with
+  no `show`: `show_modal("id")` shows it and
+  `JS.exec("data-cancel", to: "#id")` hides it.
   """
   attr :id, :string, required: true
-  attr :on_cancel, JS, default: %JS{}
+  attr :show, :boolean, default: false, doc: "open when it mounts (a dialog the page shows)"
+  attr :on_cancel, JS, default: %JS{}, doc: "run on Esc, a click outside and the close button"
+  attr :cancel, :string, default: "Cancel", doc: "the close button's label"
 
-  slot :inner_block, required: true
-  slot :title
-  slot :actions
+  slot :title, required: true, doc: "what the dialog is about, in sentence case"
+  slot :inner_block, required: true, doc: "the body: what will happen"
+  slot :note, doc: "a consequence, in the frame face, under the body"
+  slot :actions, doc: "the dialog's one action, after the close button"
 
   def modal(assigns) do
     ~H"""
     <div
       id={@id}
-      phx-mounted={@id == "confirm-modal" && show_modal(@id)}
+      phx-mounted={@show && show_modal(@id)}
       phx-remove={hide_modal(@id)}
       data-show={show_modal(@id)}
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
@@ -618,40 +686,35 @@ defmodule OaksWeb.CoreComponents do
     >
       <div id={"#{@id}-bg"} class="oc-modal-backdrop" aria-hidden="true" />
       <div
-        class="fixed inset-0 overflow-y-auto"
-        aria-labelledby={@title != [] && "#{@id}-title"}
+        class="oc-modal-frame"
+        aria-labelledby={"#{@id}-title"}
         aria-describedby={"#{@id}-description"}
         role="dialog"
         aria-modal="true"
-        tabindex="0"
       >
-        <div class="flex min-h-full items-center justify-center p-s4">
-          <.focus_wrap
-            id={"#{@id}-wrap"}
-            class="oc-modal-panel"
-            phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
-            phx-key="escape"
-            phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-          >
-            <div class="oc-modal-head">
-              <h2 :if={@title != []} id={"#{@id}-title"}>{render_slot(@title)}</h2>
-              <.button
-                type="button"
-                size="compact"
-                class="ml-auto"
-                phx-click={JS.exec("data-cancel", to: "##{@id}")}
-              >
-                Close <kbd>Esc</kbd>
-              </.button>
-            </div>
-            <div id={"#{@id}-description"} class="oc-modal-body">
-              {render_slot(@inner_block)}
-            </div>
-            <div :if={@actions != []} class="oc-modal-actions">
-              {render_slot(@actions)}
-            </div>
-          </.focus_wrap>
-        </div>
+        <.focus_wrap
+          id={"#{@id}-wrap"}
+          class="oc-modal-panel"
+          phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
+          phx-key="escape"
+          phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
+        >
+          <h2 id={"#{@id}-title"} class="oc-modal-title">{render_slot(@title)}</h2>
+          <div id={"#{@id}-description"} class="oc-modal-body">
+            {render_slot(@inner_block)}
+            <div :for={note <- @note} class="oc-modal-note">{render_slot(note)}</div>
+          </div>
+          <div class="oc-modal-actions">
+            <.button
+              type="button"
+              id={"#{@id}-cancel"}
+              phx-click={JS.exec("data-cancel", to: "##{@id}")}
+            >
+              {@cancel}
+            </.button>
+            {render_slot(@actions)}
+          </div>
+        </.focus_wrap>
       </div>
     </div>
     """

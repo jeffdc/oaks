@@ -182,7 +182,11 @@ defmodule OaksWeb.SpeciesDetailLive do
         <.taxonomy_band ranks={@band_ranks} current={TaxonPath.current(@species)} />
       </:bleed>
       <:head :if={@species}>
-        <.species_title species={@species} editor={@current_scope != nil} />
+        <.species_title
+          species={@species}
+          editor={@current_scope != nil}
+          can_add_source={@can_add_source}
+        />
       </:head>
 
       <div :if={@species}>
@@ -203,14 +207,12 @@ defmodule OaksWeb.SpeciesDetailLive do
           />
           <.synonyms_section :if={@synonyms != []} synonyms={@synonyms} />
 
-          <section class="card card-sm source-container full-width" aria-label="Source data">
+          <section class="source-container full-width" aria-label="Source data">
             <.source_tabs
               :if={@species_sources != []}
               sources={@species_sources}
               selected={@selected_source}
               species_name={@species.scientific_name}
-              editor={@current_scope != nil}
-              can_add_source={@can_add_source}
             />
             <.source_content
               :if={@selected_source}
@@ -219,19 +221,9 @@ defmodule OaksWeb.SpeciesDetailLive do
               species_name={@species.scientific_name}
             />
             <.section_heading :if={@species_sources == []}>Source data</.section_heading>
-            <div :if={@species_sources == []} class="species-no-sources">
-              <p class="oc-empty">No source data available for this species.</p>
-              <.button
-                :if={@current_scope}
-                navigate={~p"/species/#{@species.scientific_name}/sources/new"}
-                size="compact"
-                class="add-source-btn"
-                title="Add data from a source"
-                id="empty-add-source-btn"
-              >
-                Add source
-              </.button>
-            </div>
+            <p :if={@species_sources == []} class="oc-empty">
+              No source data available for this species.
+            </p>
           </section>
 
           <.external_links_section
@@ -268,6 +260,7 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   attr :species, :any, required: true
   attr :editor, :boolean, default: false
+  attr :can_add_source, :boolean, default: false
 
   defp species_title(assigns) do
     ~H"""
@@ -286,6 +279,13 @@ defmodule OaksWeb.SpeciesDetailLive do
         <.edit_menu id="species-edit-menu">
           <:item navigate={~p"/species/#{@species.scientific_name}/edit"} id="edit-species-btn">
             Edit {String.downcase(kind_word(@species))}
+          </:item>
+          <:item
+            :if={@can_add_source}
+            navigate={~p"/species/#{@species.scientific_name}/sources/new"}
+            id="add-source-btn"
+          >
+            Add source data
           </:item>
           <:item click="show_merge_picker" id="merge-species-btn">Make synonym of…</:item>
           <:item click="request_delete" id="delete-species-btn">
@@ -306,7 +306,7 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp parent_species_section(assigns) do
     ~H"""
-    <section class="card card-sm detail-section full-width" id="species-parents">
+    <section class="detail-section full-width" id="species-parents">
       <.section_heading>Parent Species</.section_heading>
       <ul class="species-rows">
         <li :for={parent <- Enum.reject([@species.parent1, @species.parent2], &is_nil/1)}>
@@ -324,7 +324,7 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp hybrids_section(assigns) do
     ~H"""
-    <section class="card card-sm detail-section full-width" id="species-hybrids">
+    <section class="detail-section full-width" id="species-hybrids">
       <.section_heading>
         Known Hybrids<:note>{length(@hybrids)} known</:note>
       </.section_heading>
@@ -349,7 +349,7 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp related_section(assigns) do
     ~H"""
-    <section class="card card-sm detail-section full-width" id="species-related">
+    <section class="detail-section full-width" id="species-related">
       <.section_heading>Closely Related</.section_heading>
       <ul class="species-rows">
         <li :for={name <- @related}>
@@ -366,7 +366,7 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp subspecies_section(assigns) do
     ~H"""
-    <section class="card card-sm detail-section full-width" id="species-subspecies">
+    <section class="detail-section full-width" id="species-subspecies">
       <.section_heading>Subspecies &amp; Varieties</.section_heading>
       <ul class="species-rows">
         <li :for={{name, author} <- Enum.map(@items, &name_and_authority/1)}>
@@ -383,7 +383,7 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp synonyms_section(assigns) do
     ~H"""
-    <section class="card card-sm detail-section full-width" id="species-synonyms">
+    <section class="detail-section full-width" id="species-synonyms">
       <.section_heading>
         Synonyms<:note>{count_label(length(@synonyms), "name")}</:note>
       </.section_heading>
@@ -405,8 +405,6 @@ defmodule OaksWeb.SpeciesDetailLive do
   attr :sources, :list, required: true
   attr :selected, :any, required: true
   attr :species_name, :string, required: true
-  attr :editor, :boolean, default: false
-  attr :can_add_source, :boolean, default: true
 
   defp source_tabs(assigns) do
     ~H"""
@@ -441,16 +439,6 @@ defmodule OaksWeb.SpeciesDetailLive do
       >
         Compare sources
       </.compare_button>
-      <div :if={@editor && @can_add_source} class="add-source-wrapper">
-        <.button
-          navigate={~p"/species/#{@species_name}/sources/new"}
-          size="compact"
-          class="add-source-btn"
-          title="Add data from another source"
-        >
-          Add source
-        </.button>
-      </div>
     </div>
     """
   end
@@ -469,22 +457,22 @@ defmodule OaksWeb.SpeciesDetailLive do
         <h2 class="source-content-title">
           Data from {@source.source.name}
         </h2>
-        <div :if={@editor} class="source-content-actions">
-          <.button
+        <.edit_menu
+          :if={@editor}
+          id="source-data-menu"
+          quiet
+          aria_label={"Edit the data from #{@source.source.name}"}
+        >
+          <:item
             navigate={~p"/species/#{@species_name}/sources/#{@source.source.id}/edit"}
-            size="compact"
+            id="edit-source-data-btn"
           >
-            Edit
-          </.button>
-          <.button
-            type="button"
-            phx-click="request_delete_source"
-            phx-value-id={@source.id}
-            size="compact"
-          >
-            Delete
-          </.button>
-        </div>
+            Edit source data
+          </:item>
+          <:item click="request_delete_source" values={%{id: @source.id}} id="delete-source-data-btn">
+            Delete source data
+          </:item>
+        </.edit_menu>
       </div>
 
       <.source_field label="Geographic Range" value={@source.range} />
@@ -531,7 +519,7 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp external_links_section(assigns) do
     ~H"""
-    <section class="card card-sm detail-section full-width" id="species-external-links">
+    <section class="detail-section full-width" id="species-external-links">
       <.section_heading>External Links</.section_heading>
       <ul class="external-links">
         <li :for={link <- @links}>
@@ -552,65 +540,51 @@ defmodule OaksWeb.SpeciesDetailLive do
   attr :references, :list, default: []
 
   defp delete_confirm_modal(assigns) do
+    assigns = assign(assigns, :kind, String.downcase(kind_word(assigns.species)))
+
     ~H"""
-    <div
-      class="fixed inset-0 z-50 flex items-center justify-center p-s4"
-      id="delete-confirm-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="delete-confirm-title"
-      phx-window-keydown="cancel_delete"
-      phx-key="Escape"
-    >
-      <div class="oc-modal-backdrop" phx-click="cancel_delete" />
-      <div class="oc-modal-panel species-dialog max-h-[80vh] flex flex-col">
-        <div class="oc-modal-head">
-          <h2 id="delete-confirm-title">Delete species</h2>
+    <.modal id="delete-confirm-modal" show on_cancel={JS.push("cancel_delete")}>
+      <:title>Delete {@kind}</:title>
+      <p>
+        Delete
+        <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} weight="regular" />
+        from the Compendium?
+      </p>
+      <:note :if={@source_count > 0}>
+        Its data from {count_label(@source_count, "source")} goes with it.
+      </:note>
+      <:note :if={@references != []}>
+        <div id="delete-references">
+          <p>{references_lead(length(@references))}</p>
+          <ul>
+            <li :for={ref <- @references}>
+              <.sci_name
+                name={ref.species.scientific_name}
+                hybrid={ref.species.is_hybrid}
+                abbreviate
+                weight="regular"
+              /> ({Enum.map_join(ref.fields, ", ", &reference_field_label/1)})
+            </li>
+          </ul>
         </div>
-        <div class="oc-modal-body">
-          <p>
-            Are you sure you want to delete
-            <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} weight="regular" />?
-          </p>
-          <p :if={@source_count > 0} class="species-dialog-warn">
-            This will also remove data from {@source_count} source(s).
-          </p>
-          <div :if={@references != []} class="species-dialog-note" id="delete-references">
-            <p>
-              {length(@references)} other species mention this name. Deleting removes it from:
-            </p>
-            <ul class="pl-4 list-disc">
-              <li :for={ref <- @references}>
-                <.sci_name
-                  name={ref.species.scientific_name}
-                  hybrid={ref.species.is_hybrid}
-                  abbreviate
-                />
-                <span class="text-ink-3">
-                  ({Enum.map_join(ref.fields, ", ", &reference_field_label/1)})
-                </span>
-              </li>
-            </ul>
-          </div>
-          <p :if={@source_count == 0} class="species-dialog-note">
-            This action cannot be undone.
-          </p>
-        </div>
-        <div class="oc-modal-actions">
-          <.button type="button" phx-click="cancel_delete">Cancel</.button>
-          <.button
-            type="button"
-            phx-click="confirm_delete"
-            class="species-btn-plate"
-            id="confirm-delete-btn"
-          >
-            Delete species
-          </.button>
-        </div>
-      </div>
-    </div>
+      </:note>
+      <:note><strong>This can't be undone.</strong></:note>
+      <:actions>
+        <.button
+          type="button"
+          variant="danger"
+          phx-click="confirm_delete"
+          id="confirm-delete-btn"
+        >
+          Delete {@kind}
+        </.button>
+      </:actions>
+    </.modal>
     """
   end
+
+  defp references_lead(1), do: "1 other species names it; deleting takes it out of:"
+  defp references_lead(n), do: "#{n} other species name it; deleting takes it out of:"
 
   defp reference_field_label(:parent1), do: "parent"
   defp reference_field_label(:parent2), do: "parent"
@@ -625,41 +599,25 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp delete_source_confirm_modal(assigns) do
     ~H"""
-    <div
-      class="fixed inset-0 z-50 flex items-center justify-center p-s4"
-      id="delete-source-confirm-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="delete-source-confirm-title"
-      phx-window-keydown="cancel_delete_source"
-      phx-key="Escape"
-    >
-      <div class="oc-modal-backdrop" phx-click="cancel_delete_source" />
-      <div class="oc-modal-panel species-dialog">
-        <div class="oc-modal-head">
-          <h2 id="delete-source-confirm-title">Delete source data</h2>
-        </div>
-        <div class="oc-modal-body">
-          <p>
-            Are you sure you want to remove <strong>{@target.source.name}</strong>
-            data from
-            <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} weight="regular" />?
-          </p>
-          <p class="species-dialog-note">This action cannot be undone.</p>
-        </div>
-        <div class="oc-modal-actions">
-          <.button type="button" phx-click="cancel_delete_source">Cancel</.button>
-          <.button
-            type="button"
-            phx-click="confirm_delete_source"
-            class="species-btn-plate"
-            id="confirm-delete-source-btn"
-          >
-            Delete source data
-          </.button>
-        </div>
-      </div>
-    </div>
+    <.modal id="delete-source-confirm-modal" show on_cancel={JS.push("cancel_delete_source")}>
+      <:title>Delete source data</:title>
+      <p>
+        Delete the data from <strong>{@target.source.name}</strong>
+        on <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} weight="regular" />?
+      </p>
+      <:note>The source itself stays.</:note>
+      <:note><strong>This can't be undone.</strong></:note>
+      <:actions>
+        <.button
+          type="button"
+          variant="danger"
+          phx-click="confirm_delete_source"
+          id="confirm-delete-source-btn"
+        >
+          Delete source data
+        </.button>
+      </:actions>
+    </.modal>
     """
   end
 
@@ -671,84 +629,61 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp merge_picker_dialog(assigns) do
     ~H"""
-    <div
-      class="fixed inset-0 z-50 flex items-center justify-center p-s4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="merge-picker-title"
-      phx-window-keydown="close_merge_picker"
-      phx-key="Escape"
-      id="merge-picker-dialog"
-    >
-      <div class="oc-modal-backdrop" phx-click="close_merge_picker" />
-      <div class="oc-modal-panel species-dialog max-h-[80vh] flex flex-col overflow-hidden">
-        <div class="oc-modal-head">
-          <h2 id="merge-picker-title">Select target species</h2>
-          <.button type="button" size="compact" phx-click="close_merge_picker">
-            Close <kbd>Esc</kbd>
-          </.button>
-        </div>
+    <.modal id="merge-picker-dialog" show on_cancel={JS.push("close_merge_picker")}>
+      <:title>Make synonym of…</:title>
+      <p>
+        Choose the species
+        <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} weight="regular" />
+        will become a synonym of. You'll see the merge before anything changes.
+      </p>
 
-        <div class="oc-modal-body flex-1 min-h-0 flex flex-col">
-          <p>
-            Select the species that
-            <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} weight="regular" />
-            will become a synonym of.
-          </p>
+      <form phx-change="merge_search" phx-submit="merge_search">
+        <input
+          type="text"
+          name="query"
+          value={@query}
+          placeholder="Search for a species"
+          aria-label="Search for a species"
+          autocomplete="off"
+          phx-debounce="300"
+          class="oc-input"
+        />
+      </form>
 
-          <form phx-change="merge_search" phx-submit="merge_search">
-            <input
-              type="text"
-              name="query"
-              value={@query}
-              placeholder="Search for a species..."
-              aria-label="Search for a species"
-              autofocus
-              phx-debounce="300"
-              class="oc-input"
-            />
-          </form>
+      <div class="h-[min(300px,40dvh)] overflow-y-auto">
+        <p :if={String.length(String.trim(@query)) < 2} class="oc-empty py-s4">
+          Type at least 2 letters of a name.
+        </p>
 
-          <div class="flex-1 overflow-y-auto min-h-[200px] max-h-[300px]">
-            <p :if={String.length(String.trim(@query)) < 2} class="species-dialog-note py-s5">
-              Type at least 2 characters to search
-            </p>
+        <p
+          :if={String.length(String.trim(@query)) >= 2 && @results == []}
+          class="oc-empty py-s4"
+        >
+          No species found matching “{@query}”.
+        </p>
 
-            <p
-              :if={String.length(String.trim(@query)) >= 2 && @results == []}
-              class="species-dialog-note py-s5"
+        <ul :if={@results != []} class="merge-results">
+          <li :for={species <- @results}>
+            <button
+              type="button"
+              phx-click="select_merge_target"
+              phx-value-name={species.scientific_name}
+              class="merge-target-option"
             >
-              No species found matching "{@query}"
-            </p>
-
-            <ul :if={@results != []} class="merge-results">
-              <li :for={species <- @results}>
-                <button
-                  type="button"
-                  phx-click="select_merge_target"
-                  phx-value-name={species.scientific_name}
-                  class="merge-target-option"
-                >
-                  <.sci_name
-                    name={species.scientific_name}
-                    hybrid={species.is_hybrid}
-                    author={species.author}
-                    size="title"
-                  />
-                  <span :if={species.section} class="merge-target-meta">
-                    <.sci_name name={species.section} rank="sect." size="meta" />
-                  </span>
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="oc-modal-actions">
-          <.button type="button" phx-click="close_merge_picker">Cancel</.button>
-        </div>
+              <.sci_name
+                name={species.scientific_name}
+                hybrid={species.is_hybrid}
+                author={species.author}
+                size="title"
+              />
+              <span :if={species.section} class="merge-target-meta">
+                <.sci_name name={species.section} rank="sect." size="meta" />
+              </span>
+            </button>
+          </li>
+        </ul>
       </div>
-    </div>
+    </.modal>
     """
   end
 

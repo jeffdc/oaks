@@ -292,18 +292,22 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert html =~ "No source data available"
     end
 
-    test "hides Add Source link when unauthenticated", %{conn: conn, velutina: velutina} do
+    test "hides Add source data when unauthenticated", %{conn: conn, velutina: velutina} do
       {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
-      refute has_element?(view, "#empty-add-source-btn")
+      refute has_element?(view, "#add-source-btn")
     end
 
-    test "shows Add Source link when authenticated", %{conn: conn, velutina: velutina} do
+    test "the Edit menu holds Add source data when authenticated", %{
+      conn: conn,
+      velutina: velutina
+    } do
       conn = log_in_user(conn, user_fixture())
       {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
 
       assert has_element?(
                view,
-               ~s|#empty-add-source-btn[href="/species/#{velutina}/sources/new"]|
+               ~s|#species-edit-menu #add-source-btn[href="/species/#{velutina}/sources/new"]|,
+               "Add source data"
              )
     end
   end

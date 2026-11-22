@@ -236,7 +236,7 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   defp loading_state(assigns) do
     ~H"""
-    <div class="card p-16 text-center">
+    <div class="py-s8 text-center">
       <div class="loading-spinner mx-auto mb-4"></div>
       <p class="merge-muted">Loading species data...</p>
     </div>
@@ -326,7 +326,7 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   defp field_comparison_section(assigns) do
     ~H"""
-    <div class="card mb-6">
+    <div class="mb-6">
       <h2 class="section-title">Species Fields</h2>
 
       <.merge_field_row
@@ -448,7 +448,7 @@ defmodule OaksWeb.SpeciesMergeLive do
     assigns = assign(assigns, synonym_only: synonym_only)
 
     ~H"""
-    <div :if={@synonym_only != []} class="card mb-6">
+    <div :if={@synonym_only != []} class="mb-6">
       <h2 class="section-title">Source Data Transfer</h2>
       <p class="merge-lede">
         These sources exist only on the synonym. Check the ones you want to transfer to the target.
@@ -829,122 +829,96 @@ defmodule OaksWeb.SpeciesMergeLive do
       assign(assigns,
         synonyms_count: synonyms_count,
         ref_count: ref_count,
-        sources_to_transfer: sources_to_transfer
+        sources_to_transfer: sources_to_transfer,
+        confirming: !assigns.merge_error && !assigns.merging
       )
 
     ~H"""
-    <div
-      class="merge-dialog fixed inset-0 z-50 flex items-center justify-center p-4"
-      phx-window-keydown="cancel_confirm"
-      phx-key="Escape"
+    <.modal
+      id="merge-confirm-modal"
+      show
+      on_cancel={JS.push("cancel_confirm")}
+      cancel={if @merge_error, do: "Close", else: "Cancel"}
     >
-      <div
-        class="card p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="merge-dialog-title"
-        phx-click-away="cancel_confirm"
-      >
-        <%= cond do %>
-          <% @merge_error -> %>
-            <h2 id="merge-dialog-title" class="merge-dialog-title">Merge Failed</h2>
-            <p class="merge-dialog-error">{@merge_error}</p>
-            <p class="merge-dialog-text">
-              The synonym was NOT deleted. You can fix the issue and try again.
-            </p>
-            <div class="merge-dialog-actions">
-              <.button phx-click="cancel_confirm">Close</.button>
-            </div>
-          <% @merging -> %>
-            <h2 id="merge-dialog-title" class="merge-dialog-title">Merging Species...</h2>
-            <div class="flex justify-center mb-4">
-              <div class="loading-spinner"></div>
-            </div>
-          <% true -> %>
-            <h2 id="merge-dialog-title" class="merge-dialog-title">Confirm Merge</h2>
-            <p class="merge-dialog-text">
-              You are about to merge
-              <.sci_name
-                name={@preview.source.scientific_name}
-                hybrid={@preview.source.is_hybrid}
-                weight="regular"
-              /> into
-              <.sci_name
-                name={@preview.target.scientific_name}
-                hybrid={@preview.target.is_hybrid}
-                weight="regular"
-              />. This will:
-            </p>
-
-            <ul class="merge-dialog-steps">
-              <li :if={@synonyms_count > 0}>
-                <.icon name="hero-check" class="size-5 flex-shrink-0" />
-                <span>
-                  Add {count_noun(@synonyms_count, "synonym", "synonyms")} to
-                  <.sci_name
-                    name={@preview.target.scientific_name}
-                    hybrid={@preview.target.is_hybrid}
-                    abbreviate
-                    weight="regular"
-                  />
-                </span>
-              </li>
-              <li>
-                <.icon name="hero-check" class="size-5 flex-shrink-0" />
-                <span>
-                  Update
-                  <.sci_name
-                    name={@preview.target.scientific_name}
-                    hybrid={@preview.target.is_hybrid}
-                    abbreviate
-                    weight="regular"
-                  /> with merged field values
-                </span>
-              </li>
-              <li :if={@sources_to_transfer > 0}>
-                <.icon name="hero-check" class="size-5 flex-shrink-0" />
-                <span>
-                  Transfer {count_noun(@sources_to_transfer, "source record", "source records")}
-                </span>
-              </li>
-              <li :if={@ref_count > 0}>
-                <.icon name="hero-check" class="size-5 flex-shrink-0" />
-                <span>
-                  Update {@ref_count} other species that reference
-                  <.sci_name
-                    name={@preview.source.scientific_name}
-                    hybrid={@preview.source.is_hybrid}
-                    abbreviate
-                    weight="regular"
-                  />
-                </span>
-              </li>
-              <li class="merge-dialog-delete">
-                <.icon name="hero-x-mark" class="size-5 flex-shrink-0" />
-                <span>Delete
-                <.sci_name
-                  name={@preview.source.scientific_name}
-                  hybrid={@preview.source.is_hybrid}
-                  abbreviate
-                  weight="regular"
-                /> permanently</span>
-              </li>
-            </ul>
-
-            <p class="merge-dialog-warn">
-              <.icon name="hero-exclamation-triangle" class="size-5 flex-shrink-0" />
-              This action cannot be undone.
-            </p>
-
-            <div class="merge-dialog-actions">
-              <.button phx-click="cancel_confirm">Cancel</.button>
-              <.button variant="primary" phx-click="execute_merge" id="confirm-merge-btn">
-                Confirm Merge
-              </.button>
-            </div>
-        <% end %>
-      </div>
-    </div>
+      <:title>
+        {cond do
+          @merge_error -> "Merge failed"
+          @merging -> "Merging species…"
+          true -> "Merge species"
+        end}
+      </:title>
+      <%= cond do %>
+        <% @merge_error -> %>
+          <p>{@merge_error}</p>
+        <% @merging -> %>
+          <div class="flex justify-center py-s4">
+            <div class="loading-spinner"></div>
+          </div>
+        <% true -> %>
+          <p>
+            Merge
+            <.sci_name
+              name={@preview.source.scientific_name}
+              hybrid={@preview.source.is_hybrid}
+              weight="regular"
+            /> into
+            <.sci_name
+              name={@preview.target.scientific_name}
+              hybrid={@preview.target.is_hybrid}
+              weight="regular"
+            />?
+          </p>
+      <% end %>
+      <:note :if={@merge_error}>
+        The synonym was not deleted. Fix the problem and try again.
+      </:note>
+      <:note :if={@confirming && @synonyms_count > 0}>
+        Adds {count_noun(@synonyms_count, "synonym", "synonyms")} to
+        <.sci_name
+          name={@preview.target.scientific_name}
+          hybrid={@preview.target.is_hybrid}
+          abbreviate
+          weight="regular"
+        />.
+      </:note>
+      <:note :if={@confirming}>
+        Updates
+        <.sci_name
+          name={@preview.target.scientific_name}
+          hybrid={@preview.target.is_hybrid}
+          abbreviate
+          weight="regular"
+        /> with the merged field values.
+      </:note>
+      <:note :if={@confirming && @sources_to_transfer > 0}>
+        Transfers {count_noun(@sources_to_transfer, "source record", "source records")}.
+      </:note>
+      <:note :if={@confirming && @ref_count > 0}>
+        Updates {count_noun(@ref_count, "other species", "other species")} that name
+        <.sci_name
+          name={@preview.source.scientific_name}
+          hybrid={@preview.source.is_hybrid}
+          abbreviate
+          weight="regular"
+        />.
+      </:note>
+      <:note :if={@confirming}>
+        <strong>
+          Deletes
+          <.sci_name
+            name={@preview.source.scientific_name}
+            hybrid={@preview.source.is_hybrid}
+            abbreviate
+            weight="regular"
+          /> permanently. This can't be undone.
+        </strong>
+      </:note>
+      <:actions :if={@confirming}>
+        <.button variant="danger" phx-click="execute_merge" id="confirm-merge-btn">
+          Merge species
+        </.button>
+      </:actions>
+    </.modal>
     """
   end
 

@@ -196,7 +196,7 @@ defmodule OaksWeb.SpeciesFormLiveTest do
       # Click delete button
       html = render_click(view, "request_delete")
       assert html =~ "Delete species"
-      assert html =~ "Are you sure"
+      assert html =~ "from the Compendium?"
 
       # Confirm delete
       {:ok, _view, html} =

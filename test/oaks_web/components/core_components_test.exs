@@ -25,6 +25,16 @@ defmodule OaksWeb.CoreComponentsTest do
       assert html =~ "oc-btn oc-btn-primary oc-btn-compact"
     end
 
+    test "danger is the ink plate" do
+      html =
+        render_component(&CoreComponents.button/1,
+          variant: "danger",
+          inner_block: text_slot("Delete species")
+        )
+
+      assert html =~ ~s(<button class="oc-btn oc-btn-danger">)
+    end
+
     test "renders a link when given a destination" do
       html =
         render_component(&CoreComponents.button/1,
@@ -96,15 +106,20 @@ defmodule OaksWeb.CoreComponentsTest do
         </CoreComponents.edit_menu>
         """)
 
-      assert html =~ ~r{<details id="m" class="oc-edit-menu" data-menu[^>]*phx-mounted=}
-      assert html =~ ~s(<summary class="oc-btn oc-btn-compact">Edit</summary>)
+      assert html =~ ~r{<details id="m" class="oc-edit-menu\s*" data-menu[^>]*phx-mounted=}
+      assert html =~ ~r{<summary class="oc-btn oc-btn-compact">\s*Edit\s*</summary>}
       assert html =~ ~s(<ul class="oc-edit-menu-list">)
       assert html =~ ~r{<a [^>]*href="/species/alba/edit"}
       assert html =~ ~r{<a [^>]*id="edit-btn"}
       assert html =~ ~r{<a [^>]*data-method="delete"}
 
-      assert html =~
-               ~r{<button type="button" id="delete-btn" phx-click="request_delete" phx-value-id="7">\s*Delete species\s*</button>}
+      # The event button keeps the menu's trigger on the focus stack, so a
+      # dialog it opens hands focus back to the trigger when it closes.
+      [button] = Regex.run(~r{<button type="button" id="delete-btn"[^>]*>}, html)
+      assert button =~ ~s(phx-value-id="7")
+      assert button =~ "push_focus"
+      assert button =~ "#m &gt; summary"
+      assert button =~ "request_delete"
     end
 
     test "takes another label" do
@@ -117,7 +132,22 @@ defmodule OaksWeb.CoreComponentsTest do
         </CoreComponents.edit_menu>
         """)
 
-      assert html =~ ~s(<summary class="oc-btn oc-btn-compact">Add</summary>)
+      assert html =~ ~r{<summary class="oc-btn oc-btn-compact">\s*Add\s*</summary>}
+    end
+
+    test "quiet is a small text trigger named for its object" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <CoreComponents.edit_menu id="m" quiet aria_label="Edit Agrifoliae">
+          <:item navigate="/taxonomy/1/edit">Edit subsection</:item>
+        </CoreComponents.edit_menu>
+        """)
+
+      assert html =~ ~r{<details id="m" class="oc-edit-menu oc-edit-menu-quiet"}
+      assert html =~ ~r{<summary class="oc-edit-menu-trigger" aria-label="Edit Agrifoliae">}
+      refute html =~ "oc-btn"
     end
   end
 
@@ -169,21 +199,51 @@ defmodule OaksWeb.CoreComponentsTest do
     assert html =~ ~r{<dd>\s*Buckley\s*</dd>}
   end
 
-  test "modal/1 renders a titled dialog with a Close button" do
-    assigns = %{}
+  describe "modal/1" do
+    test "renders a titled dialog with its notes and one close control before the action" do
+      assigns = %{}
 
-    html =
-      rendered_to_string(~H"""
-      <CoreComponents.modal id="confirm">
-        <:title>Discard your changes?</:title>
-        The edits will be lost.
-      </CoreComponents.modal>
-      """)
+      html =
+        rendered_to_string(~H"""
+        <CoreComponents.modal id="confirm">
+          <:title>Delete species</:title>
+          Delete it?
+          <:note>This can't be undone.</:note>
+          <:actions>
+            <CoreComponents.button variant="danger" id="go">Delete species</CoreComponents.button>
+          </:actions>
+        </CoreComponents.modal>
+        """)
 
-    assert html =~ ~s(role="dialog")
-    assert html =~ ~s(aria-labelledby="confirm-title")
-    assert html =~ "oc-modal-panel"
-    assert html =~ ~r{Close <kbd>Esc</kbd>}
+      assert html =~ ~s(role="dialog")
+      assert html =~ ~s(aria-modal="true")
+      assert html =~ ~s(aria-labelledby="confirm-title")
+      assert html =~ ~r{<h2 id="confirm-title" class="oc-modal-title">\s*Delete species\s*</h2>}
+      assert html =~ ~r{<div class="oc-modal-note">\s*This can't be undone.\s*</div>}
+      assert html =~ "oc-modal-panel"
+
+      # One close control, first in the actions row, then the action.
+      assert [_one] = Regex.scan(~r{id="confirm-cancel"}, html)
+      assert html =~ ~r{id="confirm-cancel"[^>]*>\s*Cancel\s*</button>\s*<button[^>]*id="go"}s
+      refute html =~ "Close <kbd>"
+      # Hidden until shown from the browser.
+      refute html =~ ~r{phx-mounted="[^"]*\[}
+    end
+
+    test "with show it opens when it mounts, and cancel names the close control" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <CoreComponents.modal id="cant" show cancel="Close">
+          <:title>Can't delete source</:title>
+          3 species have data from it.
+        </CoreComponents.modal>
+        """)
+
+      assert html =~ ~r{<div id="cant" phx-mounted="[^"]*show}
+      assert html =~ ~r{id="cant-cancel"[^>]*>\s*Close\s*</button>}
+    end
   end
 
   test "back/1 renders a back link" do

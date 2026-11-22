@@ -323,7 +323,9 @@
   /* ---------------------------------------------------------------------
      Buttons (CoreComponents.button, DesignComponents.compare_button):
      square, 1.5px ink outline. Primary is the ochre fill and inverts to
-     ink on hover; ghost is the outline alone.
+     ink on hover; ghost is the outline alone; danger is the ink plate for
+     a dialog's destructive action (item c13c), easing to ink-2 on hover.
+     DESIGN.md has no warning colour: weight and the label carry it.
      --------------------------------------------------------------------- */
   .oc-btn {
     display: inline-flex;
@@ -349,6 +351,15 @@
   .oc-btn-primary:hover {
     background: var(--color-ink);
     color: var(--color-ochre);
+  }
+  .oc-btn-danger {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .oc-btn-danger:hover {
+    background: var(--color-ink-2);
+    border-color: var(--color-ink-2);
+    color: var(--color-paper);
   }
   .oc-btn-compact {
     font-size: 13px;
@@ -450,6 +461,30 @@
   .oc-edit-menu[open] > summary::after {
     transform: rotate(-135deg);
     margin-top: 3px;
+  }
+  /* The quiet menu (item c13c), for an editor's actions on part of a
+     page: small Archivo text and the chevron, no outline, held to the
+     line it sits on so it never makes a row taller. */
+  .oc-edit-menu-trigger {
+    /* A block-level flex box, so the details holds no line box of the
+       page's text size and the row stays the height of its own text. */
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-block: -3px;
+    padding: 3px 6px;
+    font: 600 13px/1.2 var(--font-frame);
+    color: var(--color-ink-3);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .oc-edit-menu-trigger:hover {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .oc-edit-menu-quiet[open] > summary {
+    text-decoration: none;
   }
   .oc-edit-menu-list {
     position: absolute;
@@ -631,45 +666,85 @@
   }
 
   /* ---------------------------------------------------------------------
-     Modal (CoreComponents.modal): a square paper panel over an ink wash.
+     Modal (CoreComponents.modal): every dialog (item c13c). A square
+     paper panel, 2px ink border, over an ink wash, centred; the title on
+     a 2px rule, the body in the reading serif, consequences as notes in
+     the frame face, the actions on a hairline with the one close button
+     first. The panel never outgrows the window: its body scrolls, so the
+     title and actions stay in view.
      --------------------------------------------------------------------- */
   .oc-modal-backdrop {
     position: fixed;
     inset: 0;
     background: color-mix(in srgb, var(--color-ink) 65%, transparent);
   }
+  .oc-modal-frame {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-s4);
+  }
   .oc-modal-panel {
-    width: min(640px, 94vw);
+    display: flex;
+    flex-direction: column;
+    width: min(34rem, 100%);
+    max-height: 100%;
     background: var(--color-paper);
     color: var(--color-ink);
     border: 2px solid var(--color-ink);
   }
-  .oc-modal-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--spacing-s4);
-    padding: var(--spacing-s5) var(--spacing-s6) var(--spacing-s3);
+  .oc-modal-title {
+    flex: none;
+    margin: 0 var(--spacing-s6);
+    padding: var(--spacing-s5) 0 var(--spacing-s3);
+    font: 600 26px/1.15 var(--font-serif);
+    color: var(--color-ink);
+    text-wrap: balance;
     border-bottom: 2px solid var(--color-rule-strong);
   }
-  .oc-modal-head h2 {
-    margin: 0;
-    font: 600 26px/1.15 var(--font-serif);
-    text-wrap: balance;
-  }
   .oc-modal-body {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
     padding: var(--spacing-s4) var(--spacing-s6) var(--spacing-s5);
+    font: 400 17px/1.55 var(--font-serif);
+    color: var(--color-ink);
+    overflow-wrap: break-word;
+  }
+  .oc-modal-body :where(p, ul) { margin: 0; }
+  .oc-modal-body > * + * { margin-top: var(--spacing-s3); }
+  .oc-modal-note {
+    font: 600 14px/1.45 var(--font-frame);
+    color: var(--color-ink-2);
+  }
+  .oc-modal-note > * + * { margin-top: var(--spacing-s1); }
+  .oc-modal-note ul {
+    padding-left: var(--spacing-s5);
+    list-style: disc;
+  }
+  .oc-modal-note strong {
+    font-weight: 700;
+    color: var(--color-ink);
   }
   .oc-modal-actions {
+    flex: none;
     display: flex;
     justify-content: flex-end;
     flex-wrap: wrap;
     gap: var(--spacing-s2);
-    padding: var(--spacing-s3) var(--spacing-s6);
+    margin: 0 var(--spacing-s6);
+    padding: var(--spacing-s4) 0 var(--spacing-s5);
     border-top: 1px solid var(--color-rule);
   }
   @media (max-width: 760px) {
-    .oc-modal-head, .oc-modal-body, .oc-modal-actions {
+    .oc-modal-frame { padding: var(--spacing-s3); }
+    .oc-modal-title, .oc-modal-actions {
+      margin-left: var(--spacing-s4);
+      margin-right: var(--spacing-s4);
+    }
+    .oc-modal-body {
       padding-left: var(--spacing-s4);
       padding-right: var(--spacing-s4);
     }
@@ -1380,7 +1455,7 @@
     font-variant-numeric: lining-nums tabular-nums;
   }
   .oc-other p,
-  .oc-modal-head h2,
+  .oc-modal-title,
   .oc-title h1 {
     font-variant-numeric: oldstyle-nums proportional-nums;
   }

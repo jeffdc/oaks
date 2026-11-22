@@ -131,10 +131,37 @@ defmodule OaksWeb.SourceDetailLiveTest do
 
       view |> element("#delete-source-btn") |> render_click()
 
-      assert has_element?(view, "[role=dialog]", "Can't Delete Source")
-      assert has_element?(view, "[role=dialog]", "2 species have data from this source")
+      assert has_element?(view, "[role=dialog] h2", "Can't delete source")
+      assert has_element?(view, "[role=dialog]", "2 species have data from")
       refute has_element?(view, "[role=dialog] [phx-click=confirm_delete]")
-      assert has_element?(view, "[role=dialog] [phx-click=cancel_delete]", "Close")
+      assert has_element?(view, "[role=dialog] #delete-source-modal-cancel", "Close")
+    end
+
+    test "a source with one species says so in the singular", %{
+      conn: conn,
+      compendium: compendium
+    } do
+      %{conn: conn} = register_and_log_in_user(%{conn: conn})
+      {:ok, view, _html} = live(conn, ~p"/sources/#{compendium.id}")
+
+      view |> element("#delete-source-btn") |> render_click()
+
+      assert has_element?(view, "[role=dialog]", "1 species has data from")
+    end
+
+    test "an unused source asks first, and Cancel closes the dialog", %{conn: conn} do
+      source = source_fixture()
+      %{conn: conn} = register_and_log_in_user(%{conn: conn})
+      {:ok, view, _html} = live(conn, ~p"/sources/#{source.id}")
+
+      view |> element("#delete-source-btn") |> render_click()
+
+      assert has_element?(view, "[role=dialog] h2", "Delete source")
+      assert has_element?(view, "#confirm-delete-source-btn.oc-btn-danger", "Delete source")
+
+      render_click(view, "cancel_delete")
+      refute has_element?(view, "[role=dialog]")
+      assert Oaks.Sources.get_source(source.id)
     end
   end
 end

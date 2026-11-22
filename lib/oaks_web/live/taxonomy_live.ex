@@ -84,7 +84,7 @@ defmodule OaksWeb.TaxonomyLive do
 
         {:error, {:in_use, usage}} ->
           {:noreply,
-           put_flash(socket, :error, "Can't delete: #{usage_text(usage)} still use it.")}
+           put_flash(socket, :error, "Can't delete: #{usage_text(usage)} #{still_use(usage)} it.")}
 
         {:error, _changeset} ->
           {:noreply, put_flash(socket, :error, "Failed to delete taxon.")}
@@ -252,25 +252,17 @@ defmodule OaksWeb.TaxonomyLive do
         <.sci_name name={@taxon.name} level={@taxon.level} size="title" />
         <span class="taxon-card-count">{@taxon.species_count} species</span>
       </.link>
-      <div :if={@editor} class="taxon-card-actions">
-        <.link
-          navigate={~p"/taxonomy/#{@taxon.id}/edit"}
-          class="taxon-action-icon"
-          title={"Edit #{SpeciesName.taxon_label(@taxon.level, @taxon.name)}"}
-          aria-label={"Edit #{SpeciesName.taxon_label(@taxon.level, @taxon.name)}"}
-        >
-          <.icon name="hero-pencil-square" class="size-3.5" />
-        </.link>
-        <button
-          phx-click="request_delete_taxon"
-          phx-value-id={@taxon.id}
-          class="taxon-action-icon taxon-action-delete"
-          title={"Delete #{SpeciesName.taxon_label(@taxon.level, @taxon.name)}"}
-          aria-label={"Delete #{SpeciesName.taxon_label(@taxon.level, @taxon.name)}"}
-        >
-          <.icon name="hero-trash" class="size-3.5" />
-        </button>
-      </div>
+      <.edit_menu
+        :if={@editor}
+        id={"taxon-#{@taxon.id}-menu"}
+        quiet
+        aria_label={"Edit #{SpeciesName.taxon_label(@taxon.level, @taxon.name)}"}
+      >
+        <:item navigate={~p"/taxonomy/#{@taxon.id}/edit"}>Edit {@taxon.level}</:item>
+        <:item click="request_delete_taxon" values={%{id: @taxon.id}}>
+          Delete {@taxon.level}
+        </:item>
+      </.edit_menu>
     </li>
     """
   end
@@ -296,45 +288,34 @@ defmodule OaksWeb.TaxonomyLive do
   attr :usage, :map, default: nil
 
   defp delete_taxon_modal(assigns) do
+    assigns = assign(assigns, :in_use, in_use?(assigns.usage))
+
     ~H"""
-    <div
-      class="fixed inset-0 z-50 flex items-center justify-center"
+    <.modal
       id="delete-taxon-modal"
-      phx-window-keydown="cancel_delete_taxon"
-      phx-key="Escape"
+      show
+      on_cancel={JS.push("cancel_delete_taxon")}
+      cancel={if @in_use, do: "Close", else: "Cancel"}
     >
-      <div class="oc-modal-backdrop" phx-click="cancel_delete_taxon" />
-      <div
-        class="relative oc-modal-panel max-w-md mx-4"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="delete-taxon-title"
-      >
-        <div class="oc-modal-head">
-          <h2 id="delete-taxon-title">Delete Taxon</h2>
-        </div>
-        <div class="oc-modal-body">
-          <p class="taxon-modal-text">
-            Are you sure you want to delete
-            <.sci_name name={@taxon.name} level={@taxon.level} weight="regular" /> ({@taxon.level})?
-          </p>
-          <p :if={in_use?(@usage)} class="taxon-modal-in-use" id="delete-taxon-in-use">
-            {usage_text(@usage)} still use this taxon. Move or delete them first.
-          </p>
-        </div>
-        <div class="oc-modal-actions">
-          <.button phx-click="cancel_delete_taxon">Cancel</.button>
-          <.button
-            :if={!in_use?(@usage)}
-            phx-click="confirm_delete_taxon"
-            class="taxon-delete-confirm"
-            id="confirm-delete-taxon-btn"
-          >
-            Delete Taxon
-          </.button>
-        </div>
-      </div>
-    </div>
+      <:title>
+        {if @in_use, do: "Can't delete #{@taxon.level}", else: "Delete #{@taxon.level}"}
+      </:title>
+      <p :if={!@in_use}>
+        Delete the {@taxon.level}
+        <.sci_name name={@taxon.name} level={@taxon.level} weight="regular" />?
+      </p>
+      <p :if={@in_use} id="delete-taxon-in-use">
+        {usage_text(@usage)} {still_use(@usage)} the {@taxon.level}
+        <.sci_name name={@taxon.name} level={@taxon.level} weight="regular" />.
+      </p>
+      <:note :if={@in_use}>Move or delete them first.</:note>
+      <:note :if={!@in_use}><strong>This can't be undone.</strong></:note>
+      <:actions :if={!@in_use}>
+        <.button variant="danger" phx-click="confirm_delete_taxon" id="confirm-delete-taxon-btn">
+          Delete {@taxon.level}
+        </.button>
+      </:actions>
+    </.modal>
     """
   end
 
@@ -351,6 +332,12 @@ defmodule OaksWeb.TaxonomyLive do
     |> Enum.filter(& &1)
     |> Enum.join(" and ")
   end
+
+  # "1 species still uses", "2 species still use", "1 species and 1 child taxon still use"
+  defp still_use(%{species: species, children: children}) when species + children == 1,
+    do: "still uses"
+
+  defp still_use(_usage), do: "still use"
 
   defp level_label(nil), do: nil
   defp level_label(level), do: String.capitalize(level)

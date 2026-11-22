@@ -193,6 +193,26 @@ defmodule OaksWeb.TaxonomyLiveTest do
     end
   end
 
+  describe "a sub-taxon's editor actions" do
+    test "sit in a quiet Edit menu named for the taxon", %{conn: conn} = ctx do
+      conn = log_in_user(conn, user_fixture())
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.q}")
+
+      menu = "#taxon-#{ctx.section_q.id}-menu"
+      assert has_element?(view, menu <> ".oc-edit-menu-quiet summary[aria-label]")
+      assert has_element?(view, menu <> ~s( a[href="/taxonomy/#{ctx.section_q.id}/edit"]))
+      assert has_element?(view, menu <> " button", "Delete section")
+
+      view |> element(menu <> " button", "Delete section") |> render_click()
+      assert has_element?(view, "#delete-taxon-modal")
+    end
+
+    test "are not there logged out", %{conn: conn} = ctx do
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.q}")
+      refute has_element?(view, ".oc-edit-menu")
+    end
+  end
+
   describe "delete taxon" do
     setup %{conn: conn} do
       %{conn: log_in_user(conn, user_fixture())}
@@ -203,7 +223,9 @@ defmodule OaksWeb.TaxonomyLiveTest do
 
       html = render_click(view, "request_delete_taxon", %{"id" => to_string(ctx.section_q.id)})
 
-      assert html =~ "3 species and 1 child taxon still use this taxon"
+      assert has_element?(view, "#delete-taxon-modal h2", "Can't delete section")
+      assert html =~ "3 species and 1 child taxon still use the section"
+      assert has_element?(view, "#delete-taxon-modal-cancel", "Close")
       refute has_element?(view, "#confirm-delete-taxon-btn")
       assert Oaks.Taxonomy.get_taxon_by_id(ctx.section_q.id)
     end

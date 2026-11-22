@@ -101,6 +101,9 @@ defmodule OaksWeb.ArticleLiveTest do
       {:ok, view, _html} = live(conn, ~p"/articles/#{article.slug}")
 
       render_click(view, "confirm_delete")
+      assert has_element?(view, "#delete-article-modal h2", "Delete article")
+      assert has_element?(view, "#delete-article-modal-cancel", "Cancel")
+      assert has_element?(view, "#confirm-delete-article-btn.oc-btn-danger", "Delete article")
       assert {:error, {:live_redirect, %{to: "/articles"}}} = render_click(view, "delete")
 
       refute Oaks.Articles.get_article_by_slug(article.slug, true)

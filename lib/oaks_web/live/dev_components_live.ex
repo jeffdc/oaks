@@ -117,9 +117,30 @@ defmodule OaksWeb.DevComponentsLive do
             <div class="flex flex-wrap items-center gap-s3">
               <.button variant="primary">Insert</.button>
               <.button>Set aside</.button>
+              <.button variant="danger">Delete species</.button>
               <.button disabled>Mark written</.button>
               <.compare_button navigate={~p"/species/coccinea"} />
-              <.button phx-click={show_modal("gallery-modal")}>Open a dialog</.button>
+            </div>
+            <.section_heading id="dialogs" level="h3" class="mt-s7">
+              Dialogs<:note>one close control, the action last</:note>
+            </.section_heading>
+            <div class="flex flex-wrap items-center gap-s3">
+              <.button phx-click={show_modal("gallery-modal")}>Open a confirmation</.button>
+              <.button phx-click={show_modal("gallery-modal-cant")}>Open a notice</.button>
+            </div>
+            <.section_heading id="quiet-edit-menu" level="h3" class="mt-s7">
+              Quiet edit menu<:note>editing part of a page</:note>
+            </.section_heading>
+            <div class="flex flex-wrap items-baseline justify-between gap-s3 border-b border-rule pb-s2 font-frame text-sm font-semibold text-ink-2">
+              Data from Oaks of the World
+              <.edit_menu
+                id="gallery-quiet-menu"
+                quiet
+                aria_label="Edit the data from Oaks of the World"
+              >
+                <:item click="noop">Edit source data</:item>
+                <:item click="noop">Delete source data</:item>
+              </.edit_menu>
             </div>
             <.section_heading id="list" level="h3" class="mt-s7">List</.section_heading>
             <.list>
@@ -540,17 +561,23 @@ defmodule OaksWeb.DevComponentsLive do
     </main>
 
     <.modal id="gallery-modal">
-      <:title>Discard your changes?</:title>
-      <p class="max-w-[60ch]">
-        The edits to <.sci_name name="shumardii" weight="regular" />
-        since you last saved will be lost.
+      <:title>Delete species</:title>
+      <p>
+        Delete <.sci_name name="Quercus shumardii" weight="regular" /> from the Compendium?
       </p>
+      <:note>Its data from 2 sources goes with it.</:note>
+      <:note><strong>This can't be undone.</strong></:note>
       <:actions>
-        <.button phx-click={JS.exec("data-cancel", to: "#gallery-modal")}>Keep editing</.button>
-        <.button variant="primary" phx-click={JS.exec("data-cancel", to: "#gallery-modal")}>
-          Discard changes
+        <.button variant="danger" phx-click={JS.exec("data-cancel", to: "#gallery-modal")}>
+          Delete species
         </.button>
       </:actions>
+    </.modal>
+
+    <.modal id="gallery-modal-cant" cancel="Close">
+      <:title>Can't delete source</:title>
+      <p>3 species have data from <strong>The Sibley Guide to Trees</strong>.</p>
+      <:note>Delete that data on each species' page first.</:note>
     </.modal>
     """
   end

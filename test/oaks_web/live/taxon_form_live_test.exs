@@ -204,8 +204,8 @@ defmodule OaksWeb.TaxonFormLiveTest do
 
       # Request delete
       html = render_click(view, "request_delete_taxon", %{"id" => to_string(taxon.id)})
-      assert html =~ "Delete Taxon"
-      assert html =~ "Are you sure"
+      assert has_element?(view, "#delete-taxon-modal h2", "Delete #{taxon.level}")
+      assert has_element?(view, "#confirm-delete-taxon-btn.oc-btn-danger")
       assert html =~ taxon.name
 
       # Confirm
