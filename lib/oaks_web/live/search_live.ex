@@ -19,6 +19,7 @@ defmodule OaksWeb.SearchLive do
        page_title: "Search",
        query: "",
        results: nil,
+       synonyms: %{},
        loading: false
      )}
   end
@@ -46,8 +47,24 @@ defmodule OaksWeb.SearchLive do
   def render(assigns) do
     ~H"""
     <.page id="search-sync" phx-hook="SearchSync" data-query={@query}>
-      <:head :if={@query == ""}>
-        <.header>Search</.header>
+      <:head>
+        <.header :if={@query == ""}>Search</.header>
+        <.header :if={@query != "" && @results} id="search-title">
+          Results for “{@query}”
+          <:meta :if={@results.counts.taxa > 0}>
+            {count_label(@results.counts.taxa, "taxon", "taxa")}
+          </:meta>
+          <:meta :if={@results.counts.sources > 0}>
+            {count_label(@results.counts.sources, "source", "sources")}
+          </:meta>
+          <:meta :if={@results.counts.species > 0}>{@results.counts.species} species</:meta>
+          <:meta :if={kinds_found(@results.counts) > 1}>
+            <strong>{@results.counts.total} total</strong>
+          </:meta>
+          <:actions :if={@current_scope}>
+            <.button navigate={~p"/species/new"} id="search-add-species">Add Species</.button>
+          </:actions>
+        </.header>
       </:head>
       <div :if={@query == ""}>
         <p class="search-empty">
@@ -56,13 +73,15 @@ defmodule OaksWeb.SearchLive do
         </p>
       </div>
       <div :if={@query != "" && @results}>
-        <h1 class="sr-only">Search results for {@query}</h1>
-        <.counts_bar counts={@results.counts} editor={@current_scope != nil} />
         <.no_results :if={@results.counts.total == 0} query={@query} />
         <div :if={@results.counts.total > 0}>
           <.taxa_results :if={@results.taxa != []} taxa={@results.taxa} />
           <.source_results :if={@results.sources != []} sources={@results.sources} />
-          <.species_results :if={@results.species != []} species={@results.species} />
+          <.species_results
+            :if={@results.species != []}
+            species={@results.species}
+            synonyms={@synonyms}
+          />
         </div>
       </div>
     </.page>
@@ -70,39 +89,6 @@ defmodule OaksWeb.SearchLive do
   end
 
   # -- Components --
-
-  attr :counts, :map, required: true
-  attr :editor, :boolean, default: false
-
-  defp counts_bar(assigns) do
-    ~H"""
-    <div class="search-counts-bar">
-      <span :if={@counts.taxa > 0} class="search-count-item">
-        <b>{@counts.taxa}</b> {if(@counts.taxa == 1, do: "taxon", else: "taxa")}
-      </span>
-      <span :if={@counts.taxa > 0} class="search-separator" aria-hidden="true"></span>
-      <span class="search-count-item">
-        <b>{@counts.sources}</b> {if(@counts.sources == 1, do: "source", else: "sources")}
-      </span>
-      <span class="search-separator" aria-hidden="true"></span>
-      <span class="search-count-item">
-        <b>{@counts.species}</b> species
-      </span>
-      <span class="search-separator" aria-hidden="true"></span>
-      <span class="search-count-total">
-        <b>{@counts.total}</b> total
-      </span>
-      <.button
-        :if={@editor}
-        navigate={~p"/species/new"}
-        size="compact"
-        class="search-add-species-btn"
-      >
-        Add Species
-      </.button>
-    </div>
-    """
-  end
 
   attr :query, :string, required: true
 
@@ -122,24 +108,13 @@ defmodule OaksWeb.SearchLive do
   defp taxa_results(assigns) do
     ~H"""
     <section class="search-section">
-      <h2 class="search-section-label">Taxa</h2>
+      <.section_heading>Taxa</.section_heading>
       <ul class="search-results-list" id="taxa-results">
-        <li :for={taxon <- @taxa}>
-          <.link navigate={taxonomy_path(taxon)} class="search-result-row">
-            <span class="search-result-main">
-              <.sci_name
-                name={taxon.name}
-                genus={if taxon.level == "complex", do: "Quercus"}
-                abbreviate
-                size="title"
-              />
-              <span class="search-taxon-level">{taxon.level}</span>
-            </span>
-            <span :if={taxon.species_count > 0} class="search-result-meta">
-              {taxon.species_count} species
-            </span>
-          </.link>
-        </li>
+        <.result_row :for={taxon <- @taxa} navigate={taxonomy_path(taxon)}>
+          <.sci_name name={taxon.name} level={taxon.level} size="title" />
+          <span class="search-taxon-level">{taxon.level}</span>
+          <:meta :if={taxon.species_count > 0}>{taxon.species_count} species</:meta>
+        </.result_row>
       </ul>
     </section>
     """
@@ -150,58 +125,102 @@ defmodule OaksWeb.SearchLive do
   defp source_results(assigns) do
     ~H"""
     <section class="search-section">
-      <h2 class="search-section-label">Sources</h2>
+      <.section_heading>Sources</.section_heading>
       <ul class="search-results-list" id="source-results">
-        <li :for={source <- @sources}>
-          <.link navigate={~p"/sources/#{source.id}"} class="search-result-row">
-            <span class="search-result-main">
-              <span class="search-result-name search-result-name-source">{source.name}</span>
-              <span :if={source.author} class="search-result-author">{source.author}</span>
-            </span>
-            <span :if={source.year} class="search-result-meta">{source.year}</span>
-          </.link>
-        </li>
+        <.result_row :for={source <- @sources} navigate={~p"/sources/#{source.id}"}>
+          <span class="search-result-name"><.work_title title={source.name} /></span>
+          <span :if={source.author} class="search-result-author">{source.author}</span>
+          <:meta :if={source.year}>{source.year}</:meta>
+        </.result_row>
       </ul>
     </section>
     """
   end
 
   attr :species, :list, required: true
+  attr :synonyms, :map, required: true, doc: "species id => the synonym it was found through"
 
   defp species_results(assigns) do
     ~H"""
     <section class="search-section">
-      <h2 class="search-section-label">Species</h2>
+      <.section_heading>Species</.section_heading>
       <ul class="search-results-list" id="species-results">
-        <li :for={species <- @species}>
-          <.link navigate={~p"/species/#{species.scientific_name}"} class="search-result-row">
-            <span class="search-result-main">
-              <.sci_name
-                name={species.scientific_name}
-                hybrid={species.is_hybrid}
-                author={species.author}
-                size="title"
-              />
-            </span>
-            <span :if={species.section} class="search-result-meta">
-              <.sci_name name={species.section} rank="sect." size="meta" />
-            </span>
-          </.link>
-        </li>
+        <.result_row
+          :for={species <- @species}
+          navigate={~p"/species/#{species.scientific_name}"}
+          id={"species-result-#{species.id}"}
+        >
+          <.sci_name
+            name={species.scientific_name}
+            hybrid={species.is_hybrid}
+            author={species.author}
+            size="title"
+          />
+          <:note :if={@synonyms[species.id]}>
+            via
+            <.sci_name
+              name={@synonyms[species.id].name}
+              author={@synonyms[species.id].author}
+              abbreviate
+              size="meta"
+            />
+          </:note>
+          <:meta :if={species.section}>
+            <.sci_name name={species.section} rank="sect." size="meta" />
+          </:meta>
+        </.result_row>
       </ul>
     </section>
+    """
+  end
+
+  # One result: the name, then a details line (a note on why it matched,
+  # then its meta). The details stand beside the name, the meta at the
+  # right, and drop under the name on phones.
+  attr :navigate, :string, required: true
+  attr :id, :string, default: nil
+  slot :inner_block, required: true
+  slot :note
+  slot :meta
+
+  defp result_row(assigns) do
+    ~H"""
+    <li id={@id}>
+      <.link navigate={@navigate} class="search-result-row">
+        <span class="search-result-main">{render_slot(@inner_block)}</span>
+        <span :if={@note != [] || @meta != []} class="search-result-details">
+          <span :for={note <- @note} class="search-result-note">{render_slot(note)}</span>
+          <span :for={meta <- @meta} class="search-result-meta">{render_slot(meta)}</span>
+        </span>
+      </.link>
+    </li>
     """
   end
 
   # -- Helpers --
 
   defp perform_search(socket, "") do
-    assign(socket, query: "", results: nil, page_title: "Search")
+    assign(socket, query: "", results: nil, synonyms: %{}, page_title: "Search")
   end
 
   defp perform_search(socket, query) do
     results = Search.search(query)
-    assign(socket, query: query, results: results, page_title: "Search: #{query}")
+
+    assign(socket,
+      query: query,
+      results: results,
+      synonyms: Search.synonym_matches(results.species, query),
+      page_title: "Search: #{query}"
+    )
+  end
+
+  defp count_label(1, singular, _plural), do: "1 #{singular}"
+  defp count_label(n, _singular, plural), do: "#{n} #{plural}"
+
+  # How many kinds of result (taxa, sources, species) were found; the
+  # total is worth showing only beside two or more.
+  defp kinds_found(counts) do
+    Enum.count([counts.taxa, counts.sources, counts.species], &(&1 > 0))
   end
 
   defp search_path(""), do: ~p"/search"
