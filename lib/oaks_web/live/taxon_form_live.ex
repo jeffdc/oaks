@@ -211,9 +211,7 @@ defmodule OaksWeb.TaxonFormLive do
       </div>
 
       <:head :if={@form}>
-        <div class="mb-s4">
-          <.back navigate={~p"/taxonomy"}>Back to taxonomy</.back>
-        </div>
+        <.back navigate={~p"/taxonomy"}>Back to taxonomy</.back>
 
         <.header>
           <%= if @live_action == :new do %>

@@ -206,13 +206,10 @@ defmodule OaksWeb.TaxonomyLive do
           </:current>
         </.taxonomy_band>
 
-        <.header class="taxon-title">
+        <.header id="taxon-title">
           <.sci_name name={current_name(@current_taxon)} level={@current_level} size="display" />
-          <:subtitle>
-            {level_label(@current_level)}
-            <span class="taxon-title-sep" aria-hidden="true">·</span>
-            <span class="taxon-title-count">{@species_count} species</span>
-          </:subtitle>
+          <:meta>{level_label(@current_level)}</:meta>
+          <:meta>{@species_count} species</:meta>
           <:actions :if={@current_scope}>
             <.button
               navigate={create_taxon_path(@child_level, @current_taxon)}

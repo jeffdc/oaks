@@ -171,9 +171,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
       </div>
 
       <:head :if={@form}>
-        <div class="mb-s5">
-          <.back navigate={~p"/species/#{@species.scientific_name}"}>Back to species</.back>
-        </div>
+        <.back navigate={~p"/species/#{@species.scientific_name}"}>Back to species</.back>
 
         <.header>
           {if(@live_action == :new, do: "Add source data", else: "Edit source data")}

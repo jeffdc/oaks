@@ -190,7 +190,7 @@ The colours mean the Red List category and nothing else: they never mark standin
 **Character:** A heavy, plain grotesk builds the frame (headings, labels, trait names, derived values, buttons, source marks) while a sturdy text serif carries everything meant to be read, and every scientific name. The contrast between the two faces is how the page separates Jeff's voice from the apparatus around it.
 
 ### Hierarchy
-- **Display** (Source Serif 4 italic 600, clamp(34px, 4vw, 50px), 1.05): the taxon name in the title row. Genus at weight 400, epithet at 600. Followed by the authority in 22px roman serif at ink-3 and the common name in 21px Archivo 700.
+- **Display** (Source Serif 4 600, clamp(34px, 4vw, 50px), 1.05): every page title (Components, Title Row), roman; a taxon name there is italic, genus at weight 400, epithet at 600. Followed by the authority in 22px roman serif at ink-3 and the common name in 21px Archivo 700.
 - **Headline** (Source Serif 4 italic 600, 26px to 28px, 1.1): taxon names heading comparison columns and the parents strip on hybrid pages.
 - **Title** (Source Serif 4 italic 600, 18px, 1.25): a taxon name that is itself a list entry: the species list, search results, look-alikes, hybrids, relatives and a taxon's species, all at 18px (the authority 15px).
 - **Body** (Source Serif 4 400, 17px, 1.6; 16px under 760px): running text with oldstyle proportional figures. Prose pages hold it to the 720px reading measure; reading text inside a wider page holds at 68ch to 70ch.
@@ -245,6 +245,14 @@ Plain, printed, square.
 - **Shape:** square corners (0px), 1.5px ink outline.
 - **Compare (primary):** ochre fill, ink text, Archivo 700 13px, 7px by 10px padding. Hover inverts to ink fill with ochre text.
 - **Focus:** 3px pencil-blue outline, 2px offset, on every interactive element.
+
+### Title Row
+Every page's title is one component, `header`, on one rule (item 626c): the title in the display serif (clamp(34px, 4vw, 50px), 600, balanced) standing on a 2px ink rule, 16px of space above the rule and 32px below it.
+- **Text column:** grows to fill the row and keeps at least 20rem. In order: the title; the meta line; the subtitle.
+- **Meta line:** straight under the title, 12px below it, Archivo 600 14px ink-2 with lining tabular figures, items 16px apart with no separators, wrapping as one line. It holds what kind of thing the page is and its short facts: the kind word (Species, Hybrid, Subgenus), counts (497 species), a byline, and stamps (the status tag, the IUCN status, a dashed Draft). A stamp never floats beside the title.
+- **Subtitle:** a sentence describing the page, Archivo 600 16px ink-2 at most 70ch, under the meta line.
+- **Actions:** at the right end of the row, on the title's first baseline, 8px apart: compact buttons for a record's own actions (Edit, Make synonym of…, Delete), a regular button for a list's create action. When the text column can't keep 20rem beside them, they drop below the subtitle, at the left edge, 16px above the rule. No dividers between them.
+- **Back link:** above the row, 16px over the title, in the page's head with it.
 
 ### Status Tag
 An outlined ink stamp: Archivo 700 13px at 0.04em, 1.5px ink border, 4px by 7px padding, followed by a source mark when it is sourced. The IUCN status variant (IUCN LC with its assessment on the taxon page, the bare code in the species list) fills the stamp with its Red List category colour (The IUCN Exception).

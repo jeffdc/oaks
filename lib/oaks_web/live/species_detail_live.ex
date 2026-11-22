@@ -273,56 +273,51 @@ defmodule OaksWeb.SpeciesDetailLive do
     """
   end
 
-  # -- Species header: the title row on a 2px rule (bridge restyle) --
+  # -- Species header: the breadcrumb, then the title row --
 
   attr :species, :any, required: true
   attr :editor, :boolean, default: false
 
   defp species_header(assigns) do
     ~H"""
-    <header class="species-header">
-      <.taxonomy_breadcrumb species={@species} />
-      <div class="species-current">
-        <h1 class="species-title">
-          <.sci_name
-            name={@species.scientific_name}
-            hybrid={@species.is_hybrid}
-            author={@species.author}
-            size="display"
-          />
-        </h1>
-        <div class="species-meta">
-          <span>{if(@species.is_hybrid, do: "Hybrid", else: "Species")}</span>
-          <.iucn_status :if={@species.conservation_status} code={@species.conservation_status} />
-        </div>
-        <div :if={@editor} class="species-actions">
-          <.button
-            navigate={~p"/species/#{@species.scientific_name}/edit"}
-            size="compact"
-            id="edit-species-btn"
-          >
-            Edit
-          </.button>
-          <.button
-            type="button"
-            phx-click="show_merge_picker"
-            size="compact"
-            id="merge-species-btn"
-          >
-            Make synonym of…
-          </.button>
-          <.button
-            type="button"
-            phx-click="request_delete"
-            size="compact"
-            class="species-delete-btn"
-            id="delete-species-btn"
-          >
-            Delete
-          </.button>
-        </div>
-      </div>
-    </header>
+    <.taxonomy_breadcrumb species={@species} />
+    <.header id="species-title">
+      <.sci_name
+        name={@species.scientific_name}
+        hybrid={@species.is_hybrid}
+        author={@species.author}
+        size="display"
+      />
+      <:meta>{if(@species.is_hybrid, do: "Hybrid", else: "Species")}</:meta>
+      <:meta :if={@species.conservation_status}>
+        <.iucn_status code={@species.conservation_status} />
+      </:meta>
+      <:actions :if={@editor}>
+        <.button
+          navigate={~p"/species/#{@species.scientific_name}/edit"}
+          size="compact"
+          id="edit-species-btn"
+        >
+          Edit
+        </.button>
+        <.button
+          type="button"
+          phx-click="show_merge_picker"
+          size="compact"
+          id="merge-species-btn"
+        >
+          Make synonym of…
+        </.button>
+        <.button
+          type="button"
+          phx-click="request_delete"
+          size="compact"
+          id="delete-species-btn"
+        >
+          Delete
+        </.button>
+      </:actions>
+    </.header>
     """
   end
 

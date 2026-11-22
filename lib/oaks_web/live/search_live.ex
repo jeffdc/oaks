@@ -46,8 +46,10 @@ defmodule OaksWeb.SearchLive do
   def render(assigns) do
     ~H"""
     <.page id="search-sync" phx-hook="SearchSync" data-query={@query}>
-      <div :if={@query == ""} class="search-start">
-        <h1 class="search-title">Search</h1>
+      <:head :if={@query == ""}>
+        <.header>Search</.header>
+      </:head>
+      <div :if={@query == ""}>
         <p class="search-empty">
           Find species, taxa and sources by name, common name or synonym in the search field above.
           <span class="search-key-hint">Press <kbd>/</kbd> to go to it from any page.</span>

@@ -118,44 +118,32 @@ defmodule OaksWeb.ArticleLive do
 
   defp article_header(assigns) do
     ~H"""
-    <div class="mb-s6">
-      <.back navigate={~p"/articles"}>Back to Articles</.back>
-
-      <div class="mt-s4 pb-s4 border-b-2 border-ink flex flex-wrap sm:flex-nowrap items-start justify-between gap-y-s3 gap-x-s5">
-        <div class="min-w-0 flex-auto">
-          <div class="flex flex-wrap items-baseline gap-x-s4 gap-y-s2">
-            <h1 class="font-serif text-[clamp(34px,4vw,50px)]/[1.05] font-semibold tracking-[-0.01em] text-balance">
-              {@article.title}
-            </h1>
-            <.status_tag :if={!@article.is_published} class="border-dashed uppercase">
-              Draft
-            </.status_tag>
-          </div>
-          <p class="mt-s2 font-frame text-[15px] font-semibold text-ink-2 tabular-nums">
-            By {@article.author}
-            <span :if={@article.published_at}>
-              &middot; Published {format_date(@article.published_at)}
-            </span>
-          </p>
-          <p
-            :if={@tags != []}
-            class="mt-s2 flex flex-wrap gap-x-s2 font-frame text-[13px] font-semibold"
-          >
-            <.link
-              :for={tag <- @tags}
-              navigate={~p"/articles?tag=#{tag}"}
-              class="not-last:after:content-[','] after:text-ink-3"
-            >
-              {tag}
-            </.link>
-          </p>
-        </div>
-        <div :if={@editor} class="flex items-center gap-s2 shrink-0 sm:mt-s2">
-          <.button navigate={~p"/articles/#{@article.slug}/edit"} size="compact">Edit</.button>
-          <.button phx-click="confirm_delete" size="compact">Delete</.button>
-        </div>
-      </div>
-    </div>
+    <.back navigate={~p"/articles"}>Back to Articles</.back>
+    <.header id="article-title">
+      {@article.title}
+      <:meta :if={!@article.is_published}>
+        <.status_tag class="border-dashed uppercase">Draft</.status_tag>
+      </:meta>
+      <:meta>
+        By {@article.author}
+        <span :if={@article.published_at}>
+          &middot; Published {format_date(@article.published_at)}
+        </span>
+      </:meta>
+      <:meta :if={@tags != []}>
+        <.link
+          :for={tag <- @tags}
+          navigate={~p"/articles?tag=#{tag}"}
+          class="not-last:after:content-[','] after:text-ink-3"
+        >
+          {tag}
+        </.link>
+      </:meta>
+      <:actions :if={@editor}>
+        <.button navigate={~p"/articles/#{@article.slug}/edit"} size="compact">Edit</.button>
+        <.button phx-click="confirm_delete" size="compact">Delete</.button>
+      </:actions>
+    </.header>
     """
   end
 

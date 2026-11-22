@@ -299,11 +299,28 @@ defmodule OaksWeb.CoreComponents do
   end
 
   @doc """
-  Renders a page's title row: the title on a 2px ink rule, an optional
-  subtitle under it and actions at the right.
+  Renders a page's title row, the one title row every page uses (item
+  626c): the title on a 2px ink rule, with its meta and subtitle under it
+  and its actions at the right.
 
-  The title is set in the serif, roman. Wrap a scientific name in `<i>`
-  (the Botanical Italic Rule).
+  The row's one rule (DESIGN.md, Components, Title Row):
+
+    * The text column (title, meta, subtitle) grows and keeps at least
+      20rem; nothing else sits beside the title.
+    * `:meta` is one wrapping line straight under the title, in Archivo
+      600 14px ink-2 with lining figures: the kind word, counts, a byline,
+      status stamps (`<.status_tag>`, `<.iucn_status>`). Each entry is
+      one item on the line, so `:if` works per entry.
+    * `:subtitle` is a sentence describing the page, under the meta.
+    * `:actions` stand at the right on the title's first baseline. When
+      the text column can't keep 20rem beside them, they drop below the
+      subtitle, at the left edge, above the rule. Use compact buttons for a
+      record's actions (Edit, Delete) and a regular one for a list's create
+      action.
+
+  The title is set in the serif, roman; a scientific name in it is
+  `<.sci_name size="display">`. A back link goes before the row in the
+  page's `:head` (`<.back>`), which spaces it from the title.
 
   ## Examples
 
@@ -312,17 +329,32 @@ defmodule OaksWeb.CoreComponents do
         <:subtitle>Every work the Compendium cites.</:subtitle>
         <:actions><.button navigate={~p"/sources/new"}>Add source</.button></:actions>
       </.header>
+
+      <.header>
+        <.sci_name name="Quercus shumardii" author="Buckley" size="display" />
+        <:meta>Species</:meta>
+        <:meta><.iucn_status code="LC" /></:meta>
+        <:actions><.button size="compact" navigate={~p"/species/shumardii/edit"}>Edit</.button></:actions>
+      </.header>
   """
   attr :class, :any, default: nil
+  attr :rest, :global
   slot :inner_block, required: true
-  slot :subtitle
-  slot :actions
+
+  slot :meta,
+    doc: "one item on the meta line under the title: a kind word, count, byline or stamp"
+
+  slot :subtitle, doc: "a sentence describing the page, under the meta line"
+  slot :actions, doc: "buttons at the right on the title's first baseline"
 
   def header(assigns) do
     ~H"""
-    <header class={["oc-title", @class]}>
-      <div>
+    <header class={["oc-title", @class]} {@rest}>
+      <div class="oc-title-text">
         <h1>{render_slot(@inner_block)}</h1>
+        <div :if={@meta != []} class="oc-title-meta">
+          <span :for={meta <- @meta}>{render_slot(meta)}</span>
+        </div>
         <p :if={@subtitle != []} class="oc-title-sub">{render_slot(@subtitle)}</p>
       </div>
       <div :if={@actions != []} class="oc-title-actions">{render_slot(@actions)}</div>

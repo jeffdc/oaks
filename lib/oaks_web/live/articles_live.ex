@@ -44,13 +44,15 @@ defmodule OaksWeb.ArticlesLive do
   def render(assigns) do
     ~H"""
     <.page>
-      <.header class="mb-s4 [&>div:first-child]:flex-[1_1_20rem]">
-        Articles
-        <:subtitle>Guides, reviews, and notes about oak identification and taxonomy.</:subtitle>
-        <:actions :if={@current_scope}>
-          <.button navigate={~p"/articles/new"}>New Article</.button>
-        </:actions>
-      </.header>
+      <:head>
+        <.header>
+          Articles
+          <:subtitle>Guides, reviews, and notes about oak identification and taxonomy.</:subtitle>
+          <:actions :if={@current_scope}>
+            <.button navigate={~p"/articles/new"}>New Article</.button>
+          </:actions>
+        </.header>
+      </:head>
 
       <.tag_filter :if={@tags != []} tags={@tags} selected={@selected_tag} />
 

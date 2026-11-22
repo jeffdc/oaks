@@ -37,22 +37,48 @@ defmodule OaksWeb.CoreComponentsTest do
     end
   end
 
-  test "header/1 puts the title, subtitle and actions on the title row" do
-    assigns = %{}
+  describe "header/1" do
+    test "puts the title, subtitle and actions on the title row" do
+      assigns = %{}
 
-    html =
-      rendered_to_string(~H"""
-      <CoreComponents.header>
-        Sources
-        <:subtitle>Every work the Compendium cites.</:subtitle>
-        <:actions><button>Add</button></:actions>
-      </CoreComponents.header>
-      """)
+      html =
+        rendered_to_string(~H"""
+        <CoreComponents.header>
+          Sources
+          <:subtitle>Every work the Compendium cites.</:subtitle>
+          <:actions><button>Add</button></:actions>
+        </CoreComponents.header>
+        """)
 
-    assert html =~ ~r{<header class="oc-title\s*">}
-    assert html =~ ~r{<h1>\s*Sources\s*</h1>}
-    assert html =~ ~s(<p class="oc-title-sub">Every work the Compendium cites.</p>)
-    assert html =~ ~s(<div class="oc-title-actions">)
+      assert html =~ ~r{<header class="oc-title\s*">}
+      assert html =~ ~r{<div class="oc-title-text">\s*<h1>\s*Sources\s*</h1>}
+      assert html =~ ~s(<p class="oc-title-sub">Every work the Compendium cites.</p>)
+      assert html =~ ~s(<div class="oc-title-actions"><button>Add</button></div>)
+      refute html =~ "oc-title-meta"
+    end
+
+    test "sets each meta entry as one item on the line under the title, before the subtitle" do
+      assigns = %{draft: false}
+
+      html =
+        rendered_to_string(~H"""
+        <CoreComponents.header id="t">
+          Shumard oak
+          <:meta>Species</:meta>
+          <:meta :if={@draft}>Draft</:meta>
+          <:meta><strong>LC</strong></:meta>
+          <:subtitle>A red oak.</:subtitle>
+        </CoreComponents.header>
+        """)
+
+      assert html =~ ~r{<header class="oc-title\s*" id="t">}
+
+      assert html =~
+               ~r{</h1>\s*<div class="oc-title-meta">\s*<span>Species</span>\s*<span><strong>LC</strong></span>\s*</div>\s*<p class="oc-title-sub">}
+
+      refute html =~ "Draft"
+      refute html =~ "oc-title-actions"
+    end
   end
 
   describe "table/1" do

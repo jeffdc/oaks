@@ -78,16 +78,18 @@ defmodule OaksWeb.SourcesLive do
   def render(assigns) do
     ~H"""
     <.page>
-      <.header class="mb-s2 [&>div:first-child]:flex-[1_1_20rem]">
-        Data Sources
-        <:subtitle>
-          The Oak Compendium draws from multiple sources to provide comprehensive
-          information about oak species.
-        </:subtitle>
-        <:actions :if={@current_scope}>
-          <.button navigate={~p"/sources/new"} id="create-source-btn">Create Source</.button>
-        </:actions>
-      </.header>
+      <:head>
+        <.header>
+          Data Sources
+          <:subtitle>
+            The Oak Compendium draws from multiple sources to provide comprehensive
+            information about oak species.
+          </:subtitle>
+          <:actions :if={@current_scope}>
+            <.button navigate={~p"/sources/new"} id="create-source-btn">Create Source</.button>
+          </:actions>
+        </.header>
+      </:head>
 
       <p :if={@sources == []} class="py-s7 font-serif italic text-ink-3">No sources found.</p>
 

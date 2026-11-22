@@ -89,19 +89,20 @@ defmodule OaksWeb.DevComponentsLive do
             </:siblings>
           </.taxonomy_band>
         </:bleed>
-        <.back navigate={~p"/"}>Oak Compendium home</.back>
-
-        <.header class="mt-s4">
-          Components
-          <:subtitle>
-            The DESIGN.md system as Phoenix components, with real content from the taxon page
-            prototype. Development only.
-          </:subtitle>
-          <:actions>
-            <.button phx-click={show_modal("gallery-modal")}>Open a dialog</.button>
-            <.compare_button navigate={~p"/species/shumardii/compare"} />
-          </:actions>
-        </.header>
+        <:head>
+          <.back navigate={~p"/"}>Oak Compendium home</.back>
+          <.header>
+            Components
+            <:subtitle>
+              The DESIGN.md system as Phoenix components, with real content from the taxon page
+              prototype. Development only.
+            </:subtitle>
+            <:actions>
+              <.button phx-click={show_modal("gallery-modal")}>Open a dialog</.button>
+              <.compare_button navigate={~p"/species/shumardii/compare"} />
+            </:actions>
+          </.header>
+        </:head>
 
         <div class="grid gap-s7 lg:grid-cols-2">
           <section>
@@ -382,6 +383,72 @@ defmodule OaksWeb.DevComponentsLive do
               </.link>
             </:item>
           </.colophon>
+        </section>
+
+        <section class="mt-s8">
+          <.section_heading id="title-row">
+            Title row<:note>title, meta, subtitle and actions on the 2px rule</:note>
+          </.section_heading>
+          <p class="max-w-[68ch]">
+            Every page's title is one <code>header</code>. The text column grows and keeps 20rem:
+            the title, then the meta line (a kind word, counts, a byline, stamps), then a subtitle.
+            The actions stand at the right on the title's first baseline; when the column can't
+            keep 20rem beside them, they drop below it, at the left edge, above the rule. The last
+            two rows here are the same rows at a phone's width.
+          </p>
+          <div class="mt-s5 grid gap-s7">
+            <.header id="gallery-title-record">
+              <.sci_name name="Quercus shumardii" author="Buckley" size="display" />
+              <:meta>Species</:meta>
+              <:meta><.iucn_status code="LC" /></:meta>
+              <:actions>
+                <.button size="compact">Edit</.button>
+                <.button size="compact">Make synonym of…</.button>
+                <.button size="compact">Delete</.button>
+              </:actions>
+            </.header>
+            <.header id="gallery-title-list">
+              Data Sources
+              <:subtitle>
+                The Oak Compendium draws from multiple sources to provide comprehensive
+                information about oak species.
+              </:subtitle>
+              <:actions><.button>Create Source</.button></:actions>
+            </.header>
+            <.header id="gallery-title-work">
+              <.work_title title="Notes on North American Trees. I. Quercus" />
+              <:meta>
+                <.status_tag>Article</.status_tag>
+              </:meta>
+              <:actions>
+                <.button size="compact">Edit</.button>
+                <.button size="compact">Delete</.button>
+              </:actions>
+            </.header>
+            <div class="grid gap-s7 sm:grid-cols-2">
+              <div class="max-w-[390px] border border-dashed border-rule p-s4">
+                <.header id="gallery-title-narrow">
+                  <.sci_name name="Quercus shumardii" author="Buckley" size="display" />
+                  <:meta>Species</:meta>
+                  <:meta><.iucn_status code="LC" /></:meta>
+                  <:actions>
+                    <.button size="compact">Edit</.button>
+                    <.button size="compact">Make synonym of…</.button>
+                    <.button size="compact">Delete</.button>
+                  </:actions>
+                </.header>
+              </div>
+              <div class="max-w-[390px] border border-dashed border-rule p-s4">
+                <.header id="gallery-title-narrow-list">
+                  Articles
+                  <:subtitle>
+                    Guides, reviews, and notes about oak identification and taxonomy.
+                  </:subtitle>
+                  <:actions><.button>New Article</.button></:actions>
+                </.header>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section class="mt-s8">

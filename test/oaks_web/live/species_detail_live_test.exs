@@ -77,7 +77,7 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
 
     test "shows conservation status badge", %{conn: conn, alba: alba} do
       {:ok, view, html} = live(conn, ~p"/species/#{alba}")
-      assert has_element?(view, ".species-meta .oc-iucn-lc", "IUCN LC")
+      assert has_element?(view, "#species-title .oc-title-meta .oc-iucn-lc", "IUCN LC")
       assert html =~ "Least Concern"
     end
 
@@ -128,8 +128,8 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       "×" <> bebbiana_epithet = ctx.bebbiana
 
       # The title row: the full genus at display size.
-      assert has_element?(view, "h1.species-title .oc-sci-display .oc-sci-g", "Quercus")
-      assert has_element?(view, "h1.species-title .oc-sci-display .oc-sci-e", ctx.alba)
+      assert has_element?(view, "#species-title h1 .oc-sci-display .oc-sci-g", "Quercus")
+      assert has_element?(view, "#species-title h1 .oc-sci-display .oc-sci-e", ctx.alba)
 
       # Synonyms: names under the species, Q. abbreviated; rank words roman.
       assert has_element?(view, "#species-synonyms .oc-sci-g", "Q.")

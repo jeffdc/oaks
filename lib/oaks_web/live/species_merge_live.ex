@@ -185,8 +185,9 @@ defmodule OaksWeb.SpeciesMergeLive do
       <.loading_state :if={@loading} />
       <.error_state :if={@error} error={@error} source_name={@source_name} />
 
+      <:head :if={@preview && !@loading && !@error}><.merge_header preview={@preview} /></:head>
+
       <div :if={@preview && !@loading && !@error}>
-        <.merge_header preview={@preview} />
         <.column_headers preview={@preview} source_name={@source_name} target_name={@target_name} />
 
         <.field_comparison_section
@@ -262,7 +263,7 @@ defmodule OaksWeb.SpeciesMergeLive do
 
   defp merge_header(assigns) do
     ~H"""
-    <.header class="merge-title">
+    <.header id="merge-title">
       Merge:
       <.sci_name
         name={@preview.source.scientific_name}

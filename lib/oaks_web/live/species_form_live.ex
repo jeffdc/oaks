@@ -137,7 +137,7 @@ defmodule OaksWeb.SpeciesFormLive do
       <:head :if={@form}>
         <.back navigate={cancel_path(@live_action, @species)}>Back</.back>
 
-        <.header class="species-form-title">
+        <.header>
           <span :if={@live_action == :new}>New Species</span>
           <span :if={@live_action == :edit}>
             Edit

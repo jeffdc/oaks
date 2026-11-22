@@ -249,7 +249,7 @@ defmodule OaksWeb.TaxonomyLiveTest do
       assert has_element?(view, ".taxon-card .oc-sci-e", group)
 
       {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.l}/#{ctx.l}/#{group}")
-      assert has_element?(view, ".taxon-title h1 .oc-sci-display .oc-sci-g", "Q.")
+      assert has_element?(view, "#taxon-title h1 .oc-sci-display .oc-sci-g", "Q.")
       assert has_element?(view, "#taxonomy-band [aria-current] .oc-sci-g", "Q.")
       assert has_element?(view, "#taxonomy-band [aria-current] .oc-band-rk", "complex")
       assert page_title(view) =~ "Q. #{group}"

@@ -186,10 +186,11 @@ defmodule OaksWeb.TaxonFormLiveTest do
     end
 
     test "authenticated user sees Create Taxon button", %{conn: conn} do
-      {:ok, _view, html} = conn |> authenticated_conn() |> live(~p"/taxonomy")
+      {:ok, view, html} = conn |> authenticated_conn() |> live(~p"/taxonomy")
 
       assert html =~ "create-taxon-btn"
       assert html =~ "Create Taxon"
+      assert has_element?(view, "#taxon-title .oc-title-actions #create-taxon-btn")
     end
 
     test "delete taxon flow with confirmation", %{conn: conn} do

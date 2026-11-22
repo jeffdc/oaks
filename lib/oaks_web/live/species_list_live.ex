@@ -73,15 +73,17 @@ defmodule OaksWeb.SpeciesListLive do
   def render(assigns) do
     ~H"""
     <.page>
-      <.header>
-        Species List
-        <:subtitle>
-          <.counts_bar species_count={@species_count} hybrid_count={@hybrid_count} />
-        </:subtitle>
-        <:actions :if={@current_scope}>
-          <.button navigate={~p"/species/new"} id="new-species-btn">New Species</.button>
-        </:actions>
-      </.header>
+      <:head>
+        <.header id="species-list-title">
+          Species List
+          <:meta>{@species_count - @hybrid_count} species</:meta>
+          <:meta>{@hybrid_count} {if @hybrid_count == 1, do: "hybrid", else: "hybrids"}</:meta>
+          <:meta><strong>{@species_count} total</strong></:meta>
+          <:actions :if={@current_scope}>
+            <.button navigate={~p"/species/new"} id="new-species-btn">New Species</.button>
+          </:actions>
+        </.header>
+      </:head>
 
       <form id="filter-form" phx-change="filter" class="species-filters">
         <div class="species-search">
@@ -129,22 +131,6 @@ defmodule OaksWeb.SpeciesListLive do
   end
 
   # -- Components --
-
-  attr :species_count, :integer, required: true
-  attr :hybrid_count, :integer, required: true
-
-  defp counts_bar(assigns) do
-    non_hybrid = assigns.species_count - assigns.hybrid_count
-    assigns = assign(assigns, :non_hybrid, non_hybrid)
-
-    ~H"""
-    <span class="species-counts">
-      <span>{@non_hybrid} species</span>
-      <span>{@hybrid_count} {if @hybrid_count == 1, do: "hybrid", else: "hybrids"}</span>
-      <span>{@species_count} total</span>
-    </span>
-    """
-  end
 
   attr :id, :string, required: true
   attr :species, :any, required: true

@@ -344,17 +344,26 @@
   .oc-btn.phx-click-loading { cursor: progress; }
 
   /* ---------------------------------------------------------------------
-     Title row (CoreComponents.header): the page title on a 2px rule.
+     Title row (CoreComponents.header): the one title row (item 626c). The
+     text column grows and keeps 20rem: the title, then the meta line
+     (kind word, counts, byline, stamps), then the subtitle. The actions
+     stand at the right on the title's first baseline; when the column
+     can't keep 20rem beside them they wrap below it, at the left edge,
+     above the 2px rule.
      --------------------------------------------------------------------- */
   .oc-title {
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-end;
+    align-items: baseline;
     justify-content: space-between;
-    gap: var(--spacing-s2) var(--spacing-s5);
+    gap: var(--spacing-s4) var(--spacing-s5);
     padding-bottom: var(--spacing-s4);
     margin-bottom: var(--spacing-s6);
     border-bottom: 2px solid var(--color-rule-strong);
+  }
+  .oc-title-text {
+    flex: 1 1 20rem;
+    min-width: 0;
   }
   .oc-title h1 {
     margin: 0;
@@ -363,17 +372,34 @@
     color: var(--color-ink);
     text-wrap: balance;
   }
+  .oc-title-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--spacing-s1) var(--spacing-s4);
+    margin-top: var(--spacing-s3);
+    font: 600 14px/1.4 var(--font-frame);
+    color: var(--color-ink-2);
+  }
+  .oc-title-meta strong {
+    font-weight: 700;
+    color: var(--color-ink);
+  }
   .oc-title-sub {
     margin: var(--spacing-s2) 0 0;
     font: 600 16px/1.4 var(--font-frame);
     color: var(--color-ink-2);
     max-width: 70ch;
   }
+  .oc-title-meta + .oc-title-sub { margin-top: var(--spacing-s3); }
   .oc-title-actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: baseline;
     gap: var(--spacing-s2);
   }
+  /* A back link above the row, in the page's head. */
+  .oc-pg-head > .oc-back + .oc-title { margin-top: var(--spacing-s4); }
 
   /* ---------------------------------------------------------------------
      Ruled table (CoreComponents.table): rows on hairlines under a 2px
@@ -1269,6 +1295,7 @@
   .oc-input,
   .oc-tags-input,
   .oc-status,
+  .oc-title-meta,
   .oc-band ol {
     font-variant-numeric: lining-nums tabular-nums;
   }

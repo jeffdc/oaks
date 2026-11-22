@@ -158,10 +158,11 @@ defmodule OaksWeb.SpeciesFormLiveTest do
     end
 
     test "authenticated user sees New Species button", %{conn: conn} do
-      {:ok, _view, html} = conn |> authenticated_conn() |> live(~p"/species")
+      {:ok, view, html} = conn |> authenticated_conn() |> live(~p"/species")
 
       assert html =~ "new-species-btn"
       assert html =~ "New Species"
+      assert has_element?(view, "#species-list-title .oc-title-actions #new-species-btn")
     end
   end
 
@@ -173,10 +174,14 @@ defmodule OaksWeb.SpeciesFormLiveTest do
     end
 
     test "authenticated user sees edit/delete buttons", %{conn: conn, alba: alba} do
-      {:ok, _view, html} = conn |> authenticated_conn() |> live(~p"/species/#{alba}")
+      {:ok, view, html} = conn |> authenticated_conn() |> live(~p"/species/#{alba}")
 
       assert html =~ "edit-species-btn"
       assert html =~ "delete-species-btn"
+
+      for id <- ~w(edit-species-btn merge-species-btn delete-species-btn) do
+        assert has_element?(view, "#species-title .oc-title-actions ##{id}")
+      end
     end
 
     test "delete flow works with confirmation", %{conn: conn} do

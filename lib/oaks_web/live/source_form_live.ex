@@ -130,9 +130,7 @@ defmodule OaksWeb.SourceFormLive do
       <:head :if={@form}>
         <.back navigate={cancel_path(@live_action, @source)}>Back</.back>
 
-        <h1 class="mt-s4 mb-s6 font-serif text-[clamp(28px,3vw,36px)]/[1.1] font-semibold text-balance">
-          {@page_title}
-        </h1>
+        <.header>{@page_title}</.header>
       </:head>
 
       <div :if={@form}>

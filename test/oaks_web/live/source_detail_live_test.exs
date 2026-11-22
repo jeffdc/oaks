@@ -44,6 +44,21 @@ defmodule OaksWeb.SourceDetailLiveTest do
       assert html =~ ootw.name
     end
 
+    test "sets the name, type and editor actions on the title row", %{
+      conn: conn,
+      compendium: compendium
+    } do
+      {:ok, view, _html} = live(conn, ~p"/sources/#{compendium.id}")
+      assert has_element?(view, "#source-title h1", compendium.name)
+      assert has_element?(view, "#source-title .oc-title-meta .oc-status", "personal_observation")
+      refute has_element?(view, "#source-title .oc-title-actions")
+
+      %{conn: conn} = register_and_log_in_user(%{conn: conn})
+      {:ok, view, _html} = live(conn, ~p"/sources/#{compendium.id}")
+      assert has_element?(view, "#source-title .oc-title-actions #edit-source-btn")
+      assert has_element?(view, "#source-title .oc-title-actions #delete-source-btn")
+    end
+
     test "shows source metadata", %{conn: conn, ootw: ootw} do
       {:ok, _view, html} = live(conn, ~p"/sources/#{ootw.id}")
       assert html =~ "website"

@@ -79,9 +79,12 @@ defmodule OaksWeb.SourceDetailLive do
     <.page>
       <.not_found_view :if={@not_found} />
 
-      <article :if={@source}>
+      <:head :if={@source}>
         <.back navigate={~p"/sources"}>Back to Sources</.back>
         <.source_header source={@source} editor={@current_scope != nil} />
+      </:head>
+
+      <article :if={@source}>
         <.metadata_card source={@source} />
         <.coverage_section species={@species} />
         <.species_section :if={@species != []} species={@species} />
@@ -115,33 +118,20 @@ defmodule OaksWeb.SourceDetailLive do
 
   defp source_header(assigns) do
     ~H"""
-    <header class="source-header">
-      <div class="source-header-left">
-        <h1 class="source-name">
-          {@source.name}
-        </h1>
-        <.status_tag :if={@source.source_type} class="capitalize">
-          {@source.source_type}
-        </.status_tag>
-      </div>
-
-      <div :if={@editor} class="source-actions">
-        <.link
-          navigate={~p"/sources/#{@source.id}/edit"}
-          class="action-btn action-btn-edit"
-          id="edit-source-btn"
-        >
+    <.header id="source-title">
+      <.work_title title={@source.name} />
+      <:meta :if={@source.source_type}>
+        <.status_tag class="capitalize">{@source.source_type}</.status_tag>
+      </:meta>
+      <:actions :if={@editor}>
+        <.button navigate={~p"/sources/#{@source.id}/edit"} size="compact" id="edit-source-btn">
           Edit
-        </.link>
-        <button
-          phx-click="request_delete"
-          class="action-btn action-btn-delete"
-          id="delete-source-btn"
-        >
+        </.button>
+        <.button type="button" phx-click="request_delete" size="compact" id="delete-source-btn">
           Delete
-        </button>
-      </div>
-    </header>
+        </.button>
+      </:actions>
+    </.header>
     """
   end
 

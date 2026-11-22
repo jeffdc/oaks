@@ -119,10 +119,10 @@ defmodule OaksWeb.SpeciesCompareLive do
         </.header>
       </div>
 
+      <:head :if={@species}><.comparison_header species={@species} /></:head>
+
       <div :if={@species} class="source-comparison-card">
         <div class="source-comparison">
-          <.comparison_header species={@species} />
-
           <.source_picker
             :if={@all_sources != []}
             sources={@all_sources}
@@ -150,13 +150,11 @@ defmodule OaksWeb.SpeciesCompareLive do
 
   defp comparison_header(assigns) do
     ~H"""
-    <header class="comparison-header">
-      <.back navigate={~p"/species/#{@species.scientific_name}"}>Back to species</.back>
-      <h1 class="comparison-title">
-        <span class="comparison-title-prefix">Compare sources for</span>
-        <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} size="display" />
-      </h1>
-    </header>
+    <.back navigate={~p"/species/#{@species.scientific_name}"}>Back to species</.back>
+    <.header id="comparison-title">
+      Compare sources for
+      <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} size="display" />
+    </.header>
     """
   end
 
