@@ -5,10 +5,10 @@ defmodule OaksWeb.HomeLive do
   with the big search hanging across its ochre edge and the counts below
   it, then the contents of the site, an oak at random and the sources.
 
-  Built only from library components (`page/1` with the title page in its
-  bleed, `title_page/1`, `chapter_heading/1`, `contents/1`, `sci_name/1`,
-  the inline `taxonomy_band/1`, `button/1`, `section_heading/1`,
-  `status_tag/1`) and design tokens.
+  Built only from library components: `page/1` with the title page in its
+  bleed, `title_page/1`, `chapter_heading/1`, `contents/1`, `specimen/1`
+  (with `sci_name/1`, the inline `taxonomy_band/1` and `button/1`) and
+  `colophon/1` (with `work_title/1` and `status_tag/1`).
   """
   use OaksWeb, :live_view
 
@@ -40,13 +40,14 @@ defmodule OaksWeb.HomeLive do
        sources: sources,
        all_species: [],
        featured: nil,
-       featured_hybrids: []
+       featured_hybrids: [],
+       loading: true
      )}
   end
 
   @impl true
   def handle_info(:load_species, socket) do
-    socket = assign(socket, all_species: Species.list_all_species())
+    socket = assign(socket, all_species: Species.list_all_species(), loading: false)
     {:noreply, feature_random(socket)}
   end
 
@@ -75,8 +76,8 @@ defmodule OaksWeb.HomeLive do
 
   defp primary?(source), do: source.id == @primary_source_id
 
-  # A non-hybrid species at random, with its hybrids and each one's other
-  # parent. Show another never repeats the oak on screen when it can help it.
+  # A non-hybrid species at random, with its hybrids and each named
+  # hybrid's other parent. Show another never repeats the oak on screen when it can help it.
   defp feature_random(socket) do
     current = socket.assigns.featured
 
@@ -100,9 +101,14 @@ defmodule OaksWeb.HomeLive do
     end
   end
 
-  defp other_parent(%{parent1: name, parent2: other}, name), do: other
-  defp other_parent(%{parent1: other, parent2: name}, name), do: other
-  defp other_parent(_hybrid, _name), do: nil
+  # A formula name ("agrifolia × parvula") already names both parents.
+  defp other_parent(%{name: hybrid} = parents, name) do
+    if OaksWeb.SpeciesName.hybrid_sign?(hybrid, true), do: other_of(parents, name)
+  end
+
+  defp other_of(%{parent1: name, parent2: other}, name), do: other
+  defp other_of(%{parent1: other, parent2: name}, name), do: other
+  defp other_of(_hybrid, _name), do: nil
 
   # Where the species sits, outermost first: each rank with its path under
   # /taxonomy.
@@ -175,20 +181,15 @@ defmodule OaksWeb.HomeLive do
         </:entry>
       </.contents>
 
-      <section
-        :if={@featured}
+      <.specimen
+        :if={@loading or @featured}
         id="oak-at-random"
-        aria-labelledby="random-heading"
-        class="mt-[88px] text-center max-md:mt-s8"
+        heading="An oak at random"
+        loading={@loading}
       >
-        <.chapter_heading id="random-heading">An oak at random</.chapter_heading>
-        <p class="mt-s6 font-serif text-[clamp(44px,5.6vw,80px)] leading-none tracking-[-0.02em]">
-          <.sci_name name={@featured.scientific_name} />
-        </p>
-        <p :if={@featured.author} class="mt-s3 font-serif text-2xl text-ink-3 max-md:text-xl">
-          {@featured.author}
-        </p>
-        <div :if={ranks(@featured) != []} class="mt-s5">
+        <:name><.sci_name name={@featured.scientific_name} /></:name>
+        <:author :if={@featured && @featured.author}>{@featured.author}</:author>
+        <:band :if={@featured && ranks(@featured) != []}>
           <.taxonomy_band id="random-band" label="Where it sits" inline>
             <:rank navigate={~p"/taxonomy"}><.sci_name name="Quercus" /></:rank>
             <:rank
@@ -200,58 +201,38 @@ defmodule OaksWeb.HomeLive do
               <.sci_name name={rank.name} genus={nil} />
             </:rank>
           </.taxonomy_band>
-        </div>
-        <p
-          :if={@featured_hybrids != []}
-          class="mt-s5 inline-block max-w-[60ch] font-frame text-[15px] leading-[1.6] text-ink-2 text-balance"
-        >
+        </:band>
+        <:about :if={@featured_hybrids != []}>
           Hybrids
           <%= for {hybrid, i} <- Enum.with_index(@featured_hybrids) do %>
-            {" "}<span class="whitespace-nowrap"><.link
-              navigate={~p"/species/#{hybrid.name}"}
-              class="font-serif text-lg text-ink no-underline hover:underline"
-            ><.sci_name name={hybrid.name} hybrid abbreviate /></.link><span :if={hybrid.other}>
-                with
-                <.sci_name
-                  name={hybrid.other}
-                  genus={nil}
-                  weight="regular"
-                  class="text-[17px] text-ink"
-                /></span>{list_joint(
+            {" "}<span class="whitespace-nowrap"><.link navigate={~p"/species/#{hybrid.name}"}><.sci_name
+              name={hybrid.name}
+              hybrid
+              abbreviate
+            /></.link><span :if={hybrid.other}>
+                with <.sci_name name={hybrid.other} genus={nil} weight="regular" /></span>{list_joint(
               i,
               length(@featured_hybrids)
             )}</span>
           <% end %>
-        </p>
-        <div class="mt-s5 flex flex-wrap justify-center gap-s3">
+        </:about>
+        <:actions>
           <.button variant="primary" navigate={~p"/species/#{@featured.scientific_name}"}>
             Open the page
           </.button>
           <.button phx-click="shuffle">Show another</.button>
-        </div>
-      </section>
+        </:actions>
+      </.specimen>
 
-      <section
-        :if={@sources != []}
-        id="home-sources"
-        aria-labelledby="sources-heading"
-        class="mt-[88px] text-center max-md:mt-s8"
-      >
-        <.section_heading id="sources-heading" align="center">Sources</.section_heading>
-        <ul class="mt-s4 flex flex-wrap justify-center gap-x-s5 gap-y-s2 font-serif text-lg text-ink-2">
-          <li :for={source <- @sources}>
-            <.link
-              navigate={~p"/sources/#{source.id}"}
-              class="text-ink decoration-ink/35 hover:decoration-ink"
-            >
-              {source.name}
-            </.link>
-            <.status_tag :if={primary?(source)} class="ml-s1 align-[3px]">
-              Primary
-            </.status_tag>
-          </li>
-        </ul>
-      </section>
+      <.colophon :if={@sources != []} id="home-sources" label="Sources">
+        <:item :for={source <- @sources}>
+          <.link navigate={~p"/sources/#{source.id}"}><.work_title title={source.name} /></.link><.status_tag :if={
+            primary?(source)
+          }>
+            Primary
+          </.status_tag>
+        </:item>
+      </.colophon>
     </.page>
     """
   end

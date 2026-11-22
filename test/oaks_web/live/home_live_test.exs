@@ -54,16 +54,18 @@ defmodule OaksWeb.HomeLiveTest do
   test "features a non-hybrid oak with where it sits and its hybrids", %{conn: conn} do
     name = unique_species_name()
     hybrid_name = "× #{unique_species_name()}"
+    formula = "#{name} × palmeri"
 
     species_fixture(
       scientific_name: name,
       author: "Nutt.",
       subgenus: "Quercus",
       section: "Quercus",
-      hybrids: [hybrid_name]
+      hybrids: [hybrid_name, formula]
     )
 
     hybrid_fixture(scientific_name: hybrid_name, parent1: name, parent2: "macrocarpa")
+    hybrid_fixture(scientific_name: formula, parent1: name, parent2: "palmeri")
 
     {:ok, view, _html} = live(conn, ~p"/")
     html = render(view)
@@ -74,6 +76,12 @@ defmodule OaksWeb.HomeLiveTest do
 
     assert html =~
              ~r{with\s*<span class="oc-sci oc-sci-regular[^"]*"><i class="oc-sci-e">macrocarpa</i>}
+
+    # A formula already names both parents, so it has no "with".
+    assert has_element?(view, "#oak-at-random .oc-specimen-about", "palmeri")
+
+    refute html =~
+             ~r{with\s*<span class="oc-sci oc-sci-regular[^"]*"><i class="oc-sci-e">palmeri</i>}
 
     assert has_element?(view, ~s(#oak-at-random a[href="/species/#{name}"]), "Open the page")
   end
