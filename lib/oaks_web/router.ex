@@ -129,6 +129,7 @@ defmodule OaksWeb.Router do
     pipe_through :private_api
 
     get "/token", TokenController, :show
+    post "/import", ImportController, :create
   end
 
   # OpenAPI docs (outside the API module scope to avoid module prefix)

@@ -7,6 +7,7 @@ defmodule Oaks.Articles.Article do
   """
   use Ecto.Schema
   import Ecto.Changeset
+  import Oaks.ChangesetHelpers
 
   @type t :: %__MODULE__{}
 
@@ -39,6 +40,7 @@ defmodule Oaks.Articles.Article do
       :updated_at,
       :published_at
     ])
+    |> trim_strings()
     |> validate_required([:slug, :title, :author, :created_at, :updated_at])
     |> validate_length(:title, max: 200)
     |> validate_length(:author, max: 200)
@@ -52,6 +54,7 @@ defmodule Oaks.Articles.Article do
   def form_changeset(article, attrs) do
     article
     |> cast(attrs, [:title, :author, :content, :tags, :is_published])
+    |> trim_strings()
     |> validate_required([:title, :author])
     |> validate_length(:title, max: 200)
     |> validate_length(:author, max: 200)

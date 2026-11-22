@@ -15,6 +15,7 @@ defmodule Oaks.Accounts.ApiToken do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query
+  import Oaks.ChangesetHelpers
 
   alias Oaks.Accounts.ApiToken
 
@@ -57,7 +58,7 @@ defmodule Oaks.Accounts.ApiToken do
   def changeset(token \\ %ApiToken{}, attrs) do
     token
     |> cast(attrs, [:name, :scopes, :lifetime_in_days])
-    |> update_change(:name, &String.trim/1)
+    |> trim_strings()
     |> update_change(:scopes, fn scopes -> scopes |> Enum.reject(&(&1 == "")) |> Enum.uniq() end)
     |> validate_required([:name, :lifetime_in_days])
     |> validate_length(:name, max: 80)

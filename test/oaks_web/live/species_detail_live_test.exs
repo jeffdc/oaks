@@ -1,130 +1,177 @@
 defmodule OaksWeb.SpeciesDetailLiveTest do
   @moduledoc """
   Tests for the SpeciesDetailLive LiveView.
-  Uses seeded test data (see priv/repo/test_seeds.sql).
   """
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
   import Oaks.AccountsFixtures
+  import Oaks.SourcesFixtures
+  import Oaks.SpeciesFixtures
+
+  # alba has two sources (the preferred one with full data) and lists
+  # ×bebbiana, stellata, a synonym and a variety; ×bebbiana's parents are
+  # alba × macrocarpa; velutina has no sources.
+  setup do
+    n = System.unique_integer([:positive])
+    alba = "alba#{n}"
+    bebbiana = "×bebbiana#{n}"
+    stellata = species_fixture(scientific_name: "stellata#{n}").scientific_name
+
+    hybrid_fixture(scientific_name: bebbiana, parent1: alba, parent2: "macrocarpa")
+
+    alba_species =
+      species_fixture(
+        scientific_name: alba,
+        author: "L. 1753",
+        conservation_status: "LC",
+        subgenus: "Quercus",
+        section: "Quercus",
+        hybrids: [bebbiana],
+        closely_related_to: [stellata],
+        synonyms: ["#{alba} var. repanda"],
+        subspecies_varieties: ["#{alba} var. latiloba"]
+      )
+
+    ootw = source_fixture(name: "Oaks of the World #{n}")
+    inat = source_fixture(name: "iNaturalist #{n}")
+
+    species_source_fixture(alba_species, ootw,
+      is_preferred: true,
+      local_names: ["white oak", "eastern white oak"],
+      range: "Eastern North America; 0 to 1600 m",
+      growth_habit: "Reaches 25 m high",
+      leaves: "8-20 cm long, obovate"
+    )
+
+    species_source_fixture(alba_species, inat)
+
+    %{
+      alba: alba,
+      bebbiana: bebbiana,
+      stellata: stellata,
+      velutina: species_fixture(scientific_name: "velutina#{n}").scientific_name,
+      ootw: ootw,
+      inat: inat
+    }
+  end
 
   describe "GET /species/:name" do
-    test "renders species detail page", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/alba")
-      assert html =~ "alba"
+    test "renders species detail page", %{conn: conn, alba: alba} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
+      assert html =~ alba
       assert html =~ "L. 1753"
     end
 
-    test "shows species header with name and author", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/alba")
+    test "shows species header with name and author", %{conn: conn, alba: alba} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
       assert html =~ "Quercus"
-      assert html =~ "alba"
+      assert html =~ alba
       assert html =~ "L. 1753"
     end
 
-    test "shows Species badge for non-hybrids", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/alba")
+    test "shows Species badge for non-hybrids", %{conn: conn, alba: alba} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
       assert html =~ "Species"
     end
 
-    test "shows conservation status badge", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/alba")
+    test "shows conservation status badge", %{conn: conn, alba: alba} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
       assert html =~ "LC"
       assert html =~ "Least Concern"
     end
 
-    test "shows taxonomy breadcrumb", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/alba")
+    test "shows taxonomy breadcrumb", %{conn: conn, alba: alba} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
       assert html =~ "(subgenus)"
       assert html =~ "(section)"
     end
 
-    test "shows source data from preferred source", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/alba")
-      assert html =~ "Oaks of the World"
+    test "shows source data from preferred source", %{conn: conn, alba: alba, ootw: ootw} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
+      assert html =~ ootw.name
       assert html =~ "Eastern North America"
       assert html =~ "Reaches 25 m high"
       assert html =~ "8-20 cm long, obovate"
     end
 
-    test "shows common names from preferred source", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/alba")
+    test "shows common names from preferred source", %{conn: conn, alba: alba} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
       assert html =~ "white oak"
       assert html =~ "eastern white oak"
     end
 
-    test "shows source tabs", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/alba")
-      assert html =~ "Oaks of the World"
-      assert html =~ "iNaturalist"
+    test "shows source tabs", %{conn: conn, alba: alba, ootw: ootw, inat: inat} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
+      assert html =~ ootw.name
+      assert html =~ inat.name
     end
 
-    test "preferred source has star indicator", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/alba")
+    test "preferred source has star indicator", %{conn: conn, alba: alba} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
       # ★ character for preferred source
-      assert html =~ "\u2605"
+      assert html =~ "★"
     end
 
-    test "shows relationship sections", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/alba")
+    test "shows relationship sections", %{conn: conn} = ctx do
+      {:ok, _view, html} = live(conn, ~p"/species/#{ctx.alba}")
+      "×" <> bebbiana_epithet = ctx.bebbiana
       assert html =~ "Known Hybrids"
-      assert html =~ "bebbiana"
+      assert html =~ bebbiana_epithet
       assert html =~ "Closely Related"
-      assert html =~ "stellata"
+      assert html =~ ctx.stellata
       assert html =~ "Synonyms"
-      assert html =~ "alba var. repanda"
+      assert html =~ "#{ctx.alba} var. repanda"
       assert html =~ "Subspecies"
-      assert html =~ "alba var. latiloba"
+      assert html =~ "#{ctx.alba} var. latiloba"
     end
 
-    test "relationship links point to detail pages", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/alba")
+    test "relationship links point to detail pages", %{conn: conn} = ctx do
+      {:ok, _view, html} = live(conn, ~p"/species/#{ctx.alba}")
       # URL-encoded × in href
-      assert html =~ ~s(href="/species/%C3%97bebbiana")
-      assert html =~ ~s(href="/species/stellata")
+      assert html =~ ~s(href="#{~p"/species/#{ctx.bebbiana}"}")
+      assert html =~ ~s(href="/species/#{ctx.stellata}")
     end
   end
 
   describe "hybrid species" do
-    test "shows Hybrid badge", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/species/%C3%97bebbiana")
+    test "shows Hybrid badge", %{conn: conn, bebbiana: bebbiana} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{bebbiana}")
       assert html =~ "Hybrid"
     end
 
-    test "shows hybrid multiply symbol", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/species/%C3%97bebbiana")
+    test "shows hybrid multiply symbol", %{conn: conn, bebbiana: bebbiana} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{bebbiana}")
       # &times; renders as Unicode ×
-      assert html =~ "\u00D7"
+      assert html =~ "×"
     end
 
-    test "shows parent species section", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/species/%C3%97bebbiana")
+    test "shows parent species section", %{conn: conn, bebbiana: bebbiana, alba: alba} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{bebbiana}")
       assert html =~ "Parent Species"
-      assert html =~ "alba"
+      assert html =~ alba
       assert html =~ "macrocarpa"
     end
 
-    test "parent links point to detail pages", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/species/%C3%97bebbiana")
-      assert html =~ ~s(href="/species/alba")
+    test "parent links point to detail pages", %{conn: conn, bebbiana: bebbiana, alba: alba} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{bebbiana}")
+      assert html =~ ~s(href="/species/#{alba}")
       assert html =~ ~s(href="/species/macrocarpa")
     end
   end
 
   describe "source tab switching" do
-    test "clicking a source tab shows that source's data", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/species/alba")
+    test "clicking a source tab shows that source's data", %{conn: conn} = ctx do
+      {:ok, view, _html} = live(conn, ~p"/species/#{ctx.alba}")
 
-      # Initially shows preferred source (Oaks of the World, source_id=2)
-      assert render(view) =~ "Data from Oaks of the World"
+      # Initially shows the preferred source
+      assert render(view) =~ "Data from #{ctx.ootw.name}"
 
-      # Click iNaturalist tab (source_id=1)
       view
-      |> element("button[phx-value-id='1']")
+      |> element("button[phx-value-id='#{ctx.inat.id}']")
       |> render_click()
 
-      html = render(view)
-      assert html =~ "Data from iNaturalist"
+      assert render(view) =~ "Data from #{ctx.inat.name}"
     end
   end
 
@@ -142,69 +189,71 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
   end
 
   describe "synonym redirect" do
-    test "redirects to canonical species when synonym is found", %{conn: conn} do
-      # "alba var. repanda" is a synonym for alba in test seeds
+    test "redirects to canonical species when synonym is found", %{conn: conn, alba: alba} do
       # push_navigate causes a live_redirect which we must follow
-      assert {:error, {:live_redirect, %{to: "/species/alba"}}} =
-               live(conn, "/species/alba%20var.%20repanda")
+      path = "/species/#{alba}"
+
+      assert {:error, {:live_redirect, %{to: ^path}}} =
+               live(conn, ~p"/species/#{alba <> " var. repanda"}")
     end
 
     test "redirects when the stored synonym includes authorship", %{conn: conn} do
-      Oaks.Species.get_species_by_name("alba")
-      |> Ecto.Changeset.change(synonyms: ~s(["repanda Michx."]))
-      |> Oaks.Repo.update!()
+      species = species_fixture(synonyms: ["repanda#{System.unique_integer([:positive])} Michx."])
+      [synonym, _author] = species.synonyms |> Jason.decode!() |> hd() |> String.split()
+      path = "/species/#{species.scientific_name}"
 
-      assert {:error, {:live_redirect, %{to: "/species/alba"}}} =
-               live(conn, "/species/repanda")
+      assert {:error, {:live_redirect, %{to: ^path}}} = live(conn, ~p"/species/#{synonym}")
     end
   end
 
   describe "delete confirmation" do
-    test "lists the species that mention it", %{conn: conn} do
+    test "lists the species that mention it", %{conn: conn, alba: alba, bebbiana: bebbiana} do
       conn = log_in_user(conn, user_fixture())
-      {:ok, view, _html} = live(conn, ~p"/species/alba")
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
 
       render_click(view, "request_delete")
 
-      assert has_element?(view, "#delete-references", "bebbiana")
+      "×" <> bebbiana_epithet = bebbiana
+      assert has_element?(view, "#delete-references", bebbiana_epithet)
       assert has_element?(view, "#delete-references", "parent")
     end
   end
 
   describe "malformed stored lists" do
-    test "renders when list columns hold non-name entries", %{conn: conn} do
-      Oaks.Species.get_species_by_name("alba")
+    test "renders when list columns hold non-name entries", %{conn: conn} = ctx do
+      Oaks.Species.get_species_by_name(ctx.alba)
       |> Ecto.Changeset.change(
-        hybrids: ~s([1, "×bebbiana"]),
-        closely_related_to: ~s([{"name": "x"}, "stellata"]),
+        hybrids: ~s([1, "#{ctx.bebbiana}"]),
+        closely_related_to: ~s([{"name": "x"}, "#{ctx.stellata}"]),
         subspecies_varieties: ~s([null])
       )
       |> Oaks.Repo.update!()
 
-      {:ok, _view, html} = live(conn, ~p"/species/alba")
-      assert html =~ "bebbiana"
-      assert html =~ "stellata"
+      "×" <> bebbiana_epithet = ctx.bebbiana
+      {:ok, _view, html} = live(conn, ~p"/species/#{ctx.alba}")
+      assert html =~ bebbiana_epithet
+      assert html =~ ctx.stellata
     end
   end
 
   describe "species without sources" do
-    test "shows no source data message", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/velutina")
+    test "shows no source data message", %{conn: conn, velutina: velutina} do
+      {:ok, _view, html} = live(conn, ~p"/species/#{velutina}")
       assert html =~ "No source data available"
     end
 
-    test "hides Add Source link when unauthenticated", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/species/velutina")
+    test "hides Add Source link when unauthenticated", %{conn: conn, velutina: velutina} do
+      {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
       refute has_element?(view, "#empty-add-source-btn")
     end
 
-    test "shows Add Source link when authenticated", %{conn: conn} do
+    test "shows Add Source link when authenticated", %{conn: conn, velutina: velutina} do
       conn = log_in_user(conn, user_fixture())
-      {:ok, view, _html} = live(conn, ~p"/species/velutina")
+      {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
 
       assert has_element?(
                view,
-               ~s|#empty-add-source-btn[href="/species/velutina/sources/new"]|
+               ~s|#empty-add-source-btn[href="/species/#{velutina}/sources/new"]|
              )
     end
   end

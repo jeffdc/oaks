@@ -2,12 +2,16 @@ defmodule OaksWeb.InputHardeningTest do
   @moduledoc """
   Malformed query params and event values must not crash requests or
   LiveViews, and pagination params must stay within bounds.
-  Uses seeded test data (see priv/repo/test_seeds.sql).
   """
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
   import Oaks.AccountsFixtures
+  import Oaks.SpeciesFixtures
+
+  setup do
+    %{alba: species_fixture().scientific_name, rubra: species_fixture().scientific_name}
+  end
 
   defp authenticated_conn(conn) do
     log_in_user(conn, user_fixture())
@@ -41,8 +45,8 @@ defmodule OaksWeb.InputHardeningTest do
       assert %{"error" => _} = json_response(conn, 400)
     end
 
-    test "unified search ignores a list limit", %{conn: conn} do
-      conn = get(conn, "/api/v1/search?q=alba&limit[]=1")
+    test "unified search ignores a list limit", %{conn: conn, alba: alba} do
+      conn = get(conn, "/api/v1/search?q=#{alba}&limit[]=1")
       assert %{"species" => [_ | _]} = json_response(conn, 200)
     end
 
@@ -74,13 +78,13 @@ defmodule OaksWeb.InputHardeningTest do
   end
 
   describe "LiveView event and URL values" do
-    test "species detail ignores a non-numeric source tab id", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/species/alba")
-      assert render_click(view, "select_source", %{"id" => "abc"}) =~ "alba"
+    test "species detail ignores a non-numeric source tab id", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
+      assert render_click(view, "select_source", %{"id" => "abc"}) =~ alba
     end
 
-    test "species compare ignores a non-numeric source id", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/species/alba/compare")
+    test "species compare ignores a non-numeric source id", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}/compare")
       assert render_click(view, "toggle_source", %{"id" => "abc"})
     end
 
@@ -89,14 +93,16 @@ defmodule OaksWeb.InputHardeningTest do
                conn |> authenticated_conn() |> live("/taxonomy/abc/edit")
     end
 
-    test "species source edit with a non-numeric source id redirects", %{conn: conn} do
-      assert {:error, {:live_redirect, %{to: "/species/alba"}}} =
-               conn |> authenticated_conn() |> live("/species/alba/sources/abc/edit")
+    test "species source edit with a non-numeric source id redirects", %{conn: conn, alba: alba} do
+      path = "/species/#{alba}"
+
+      assert {:error, {:live_redirect, %{to: ^path}}} =
+               conn |> authenticated_conn() |> live("/species/#{alba}/sources/abc/edit")
     end
 
-    test "merge ignores unknown fields", %{conn: conn} do
+    test "merge ignores unknown fields", %{conn: conn, alba: alba, rubra: rubra} do
       {:ok, view, _html} =
-        conn |> authenticated_conn() |> live("/species/rubra/merge/alba")
+        conn |> authenticated_conn() |> live("/species/#{rubra}/merge/#{alba}")
 
       assert render_click(view, "copy_field", %{"field" => "not_a_field"})
       assert render_click(view, "update_field", %{"field" => "scientific_name", "value" => "x"})

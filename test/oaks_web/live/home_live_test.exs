@@ -2,6 +2,7 @@ defmodule OaksWeb.HomeLiveTest do
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.SpeciesFixtures
 
   test "renders home page", %{conn: conn} do
     {:ok, _view, html} = live(conn, ~p"/")
@@ -16,6 +17,8 @@ defmodule OaksWeb.HomeLiveTest do
   end
 
   test "tagline counts non-hybrid species separately from hybrids", %{conn: conn} do
+    species_fixture()
+    hybrid_fixture()
     non_hybrids = Oaks.Species.count() - Oaks.Species.count_hybrids()
     {:ok, view, _html} = live(conn, ~p"/")
 

@@ -1,12 +1,54 @@
 defmodule OaksWeb.TaxonomyLiveTest do
   @moduledoc """
   Tests for the TaxonomyLive LiveView.
-  Uses seeded test data (see priv/repo/test_seeds.sql).
   """
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
   import Oaks.AccountsFixtures
+  import Oaks.SpeciesFixtures
+  import Oaks.TaxonomyFixtures
+
+  alias Oaks.Species
+
+  # Two subgenera, each with a section of the same name, and a subsection
+  # under the first:
+  #
+  #   q / q        alba, ×bebbiana
+  #   q / q / st   stellata
+  #   l / l        rubra, velutina
+  #
+  # Names carry a unique suffix so they can't clash with seeded taxa.
+  setup do
+    n = System.unique_integer([:positive])
+    q = "Quercus#{n}"
+    l = "Lobatae#{n}"
+    st = "Stellatae#{n}"
+
+    subgenus_q = taxon_fixture(name: q, level: "subgenus")
+    section_q = taxon_fixture(name: q, level: "section", parent: subgenus_q)
+    subgenus_l = taxon_fixture(name: l, level: "subgenus")
+    taxon_fixture(name: l, level: "section", parent: subgenus_l)
+    taxon_fixture(name: st, level: "subsection", parent: section_q)
+
+    %{
+      q: q,
+      l: l,
+      st: st,
+      section_q: section_q,
+      alba: species_fixture(scientific_name: "alba#{n}", subgenus: q, section: q).scientific_name,
+      stellata:
+        species_fixture(scientific_name: "stellata#{n}", subgenus: q, section: q, subsection: st).scientific_name,
+      bebbiana:
+        hybrid_fixture(scientific_name: "×bebbiana#{n}", subgenus: q, section: q).scientific_name,
+      rubra:
+        species_fixture(scientific_name: "rubra#{n}", subgenus: l, section: l).scientific_name,
+      velutina:
+        species_fixture(scientific_name: "velutina#{n}", subgenus: l, section: l).scientific_name
+    }
+  end
+
+  defp card(view, path), do: view |> element(~s(a.taxon-card[href="#{path}"])) |> render()
 
   describe "GET /taxonomy (genus level)" do
     test "renders taxonomy root page", %{conn: conn} do
@@ -15,22 +57,21 @@ defmodule OaksWeb.TaxonomyLiveTest do
       assert html =~ "genus"
     end
 
-    test "shows subgenera as child taxa", %{conn: conn} do
+    test "shows subgenera as child taxa", %{conn: conn, l: l} do
       {:ok, _view, html} = live(conn, ~p"/taxonomy")
       assert html =~ "Subgenera"
-      assert html =~ "Lobatae"
+      assert html =~ l
     end
 
-    test "shows species counts on subgenus cards", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/taxonomy")
-      # Quercus subgenus: 3 species, Lobatae: 2 species
-      assert html =~ "3 species"
-      assert html =~ "2 species"
+    test "shows species counts on subgenus cards", %{conn: conn, q: q, l: l} do
+      {:ok, view, _html} = live(conn, ~p"/taxonomy")
+      assert card(view, "/taxonomy/#{q}") =~ "3 species"
+      assert card(view, "/taxonomy/#{l}") =~ "2 species"
     end
 
     test "shows total species count in header", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/taxonomy")
-      assert html =~ "5 species"
+      assert html =~ "#{Species.count()} species"
     end
 
     test "does not show breadcrumbs at genus level", %{conn: conn} do
@@ -38,85 +79,86 @@ defmodule OaksWeb.TaxonomyLiveTest do
       refute html =~ "Taxonomy:"
     end
 
-    test "subgenus cards link to drill-down pages", %{conn: conn} do
+    test "subgenus cards link to drill-down pages", %{conn: conn, q: q, l: l} do
       {:ok, _view, html} = live(conn, ~p"/taxonomy")
-      assert html =~ ~s(href="/taxonomy/Quercus")
-      assert html =~ ~s(href="/taxonomy/Lobatae")
+      assert html =~ ~s(href="/taxonomy/#{q}")
+      assert html =~ ~s(href="/taxonomy/#{l}")
     end
   end
 
-  describe "GET /taxonomy/Quercus (subgenus level)" do
-    test "renders subgenus page", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Quercus")
-      assert html =~ "Quercus"
+  describe "subgenus level" do
+    test "renders subgenus page", %{conn: conn, q: q} do
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}")
+      assert html =~ q
       assert html =~ "subgenus"
     end
 
-    test "shows breadcrumbs", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Quercus")
+    test "shows breadcrumbs", %{conn: conn, q: q} do
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}")
       assert html =~ "Taxonomy:"
       assert html =~ "(genus)"
       assert html =~ "(subgenus)"
     end
 
-    test "shows sections as child taxa", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Quercus")
+    test "shows sections as child taxa", %{conn: conn, q: q} do
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}")
       assert html =~ "Sections"
     end
   end
 
-  describe "GET /taxonomy/Quercus/Quercus (section level)" do
-    test "renders section page with species", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Quercus/Quercus")
+  describe "section level" do
+    test "renders section page with species", %{conn: conn, q: q, alba: alba} do
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}/#{q}")
       assert html =~ "section"
-      assert html =~ "alba"
+      assert html =~ alba
     end
 
-    test "shows hybrid species with multiply sign", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Quercus/Quercus")
+    test "shows hybrid species with multiply sign", %{conn: conn, q: q, bebbiana: bebbiana} do
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}/#{q}")
+      "×" <> epithet = bebbiana
       assert html =~ "×"
-      assert html =~ "bebbiana"
+      assert html =~ epithet
     end
 
-    test "does not show species from deeper levels", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Quercus/Quercus")
-      # stellata is in subsection Stellatae, should not appear at section level
-      refute html =~ "stellata"
+    test "does not show species from deeper levels", %{conn: conn, q: q, stellata: stellata} do
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}/#{q}")
+      # stellata is in the subsection, so it doesn't appear at section level
+      refute html =~ stellata
     end
 
-    test "species link to detail pages", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Quercus/Quercus")
-      assert html =~ ~s(href="/species/alba")
+    test "species link to detail pages", %{conn: conn, q: q, alba: alba} do
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}/#{q}")
+      assert html =~ ~s(href="/species/#{alba}")
     end
 
-    test "shows subsections as child taxa", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Quercus/Quercus")
+    test "shows subsections as child taxa", %{conn: conn, q: q, st: st} do
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}/#{q}")
       assert html =~ "Subsections"
-      assert html =~ "Stellatae"
+      assert html =~ st
     end
 
-    test "breadcrumbs show full ancestry", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Quercus/Quercus")
+    test "breadcrumbs show full ancestry", %{conn: conn, q: q} do
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}/#{q}")
       assert html =~ "(genus)"
       assert html =~ "(subgenus)"
       assert html =~ "(section)"
     end
   end
 
-  describe "GET /taxonomy/Quercus/Quercus/Stellatae (subsection level)" do
-    test "renders subsection page with species", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Quercus/Quercus/Stellatae")
-      assert html =~ "Stellatae"
+  describe "subsection level" do
+    test "renders subsection page with species", %{conn: conn} = ctx do
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{ctx.q}/#{ctx.q}/#{ctx.st}")
+      assert html =~ ctx.st
       assert html =~ "subsection"
-      assert html =~ "stellata"
+      assert html =~ ctx.stellata
     end
   end
 
-  describe "GET /taxonomy/Lobatae/Lobatae (section Lobatae)" do
-    test "shows Lobatae species", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Lobatae/Lobatae")
-      assert html =~ "rubra"
-      assert html =~ "velutina"
+  describe "a section without subsections" do
+    test "shows its species", %{conn: conn, l: l, rubra: rubra, velutina: velutina} do
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{l}/#{l}")
+      assert html =~ rubra
+      assert html =~ velutina
     end
   end
 
@@ -139,13 +181,14 @@ defmodule OaksWeb.TaxonomyLiveTest do
   end
 
   describe "navigation" do
-    test "clicking a subgenus card navigates to subgenus page", %{conn: conn} do
+    test "clicking a subgenus card navigates to subgenus page", %{conn: conn, q: q} do
       {:ok, view, _html} = live(conn, ~p"/taxonomy")
+      path = "/taxonomy/#{q}"
 
       # Clicking navigate links between separate live routes triggers a redirect
-      {:error, {:live_redirect, %{to: "/taxonomy/Quercus"}}} =
+      {:error, {:live_redirect, %{to: ^path}}} =
         view
-        |> element(~s(a[href="/taxonomy/Quercus"]))
+        |> element(~s(a[href="#{path}"]))
         |> render_click()
     end
   end
@@ -155,21 +198,20 @@ defmodule OaksWeb.TaxonomyLiveTest do
       %{conn: log_in_user(conn, user_fixture())}
     end
 
-    test "shows what still uses the taxon and offers no delete button", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/taxonomy/Quercus/Quercus")
+    test "shows what still uses the taxon and offers no delete button", %{conn: conn} = ctx do
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.q}/#{ctx.q}")
 
-      html = render_click(view, "request_delete_taxon", %{"id" => "2"})
+      html = render_click(view, "request_delete_taxon", %{"id" => to_string(ctx.section_q.id)})
 
       assert html =~ "3 species and 1 child taxon still use this taxon"
       refute has_element?(view, "#confirm-delete-taxon-btn")
-      assert Oaks.Taxonomy.get_taxon_by_id(2)
+      assert Oaks.Taxonomy.get_taxon_by_id(ctx.section_q.id)
     end
 
-    test "deletes an unused taxon", %{conn: conn} do
-      {:ok, taxon} =
-        Oaks.Taxonomy.create_taxon(%{name: "Unused", level: "complex", parent: "Stellatae"})
+    test "deletes an unused taxon", %{conn: conn} = ctx do
+      taxon = taxon_fixture(level: "complex", parent: ctx.st)
 
-      {:ok, view, _html} = live(conn, ~p"/taxonomy/Quercus/Quercus/Stellatae")
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.q}/#{ctx.q}/#{ctx.st}")
       render_click(view, "request_delete_taxon", %{"id" => to_string(taxon.id)})
 
       assert {:error, {:live_redirect, %{to: "/taxonomy"}}} =
@@ -180,21 +222,21 @@ defmodule OaksWeb.TaxonomyLiveTest do
   end
 
   describe "complex directly under a section" do
-    test "is listed on the section page and browsable", %{conn: conn} do
-      {:ok, _} =
-        Oaks.Taxonomy.create_taxon(%{name: "velutina-group", level: "complex", parent: "Lobatae"})
+    test "is listed on the section page and browsable", %{conn: conn} = ctx do
+      group = "velutina-group#{ctx.l}"
+      taxon_fixture(name: group, level: "complex", parent: ctx.l)
 
-      Oaks.Species.get_species_by_name("velutina")
-      |> Ecto.Changeset.change(complex: "velutina-group")
+      Oaks.Species.get_species_by_name(ctx.velutina)
+      |> Ecto.Changeset.change(complex: group)
       |> Oaks.Repo.update!()
 
-      {:ok, _view, html} = live(conn, ~p"/taxonomy/Lobatae/Lobatae")
-      assert html =~ "velutina-group"
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{ctx.l}/#{ctx.l}")
+      assert html =~ group
       assert html =~ "Complexes"
 
-      {:ok, _view, html} = live(conn, ~p"/taxonomy/Lobatae/Lobatae/velutina-group")
+      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{ctx.l}/#{ctx.l}/#{group}")
       refute html =~ "Taxon Not Found"
-      assert html =~ "velutina"
+      assert html =~ ctx.velutina
     end
   end
 end

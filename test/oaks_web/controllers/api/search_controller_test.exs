@@ -1,6 +1,9 @@
 defmodule OaksWeb.API.SearchControllerTest do
   use OaksWeb.ConnCase
 
+  import Oaks.SpeciesFixtures
+  import Oaks.TaxonomyFixtures
+
   describe "GET /api/v1/search" do
     test "returns results grouped by type", %{conn: conn} do
       conn = get(conn, "/api/v1/search?q=quercus")
@@ -11,15 +14,19 @@ defmodule OaksWeb.API.SearchControllerTest do
     end
 
     test "finds species by name", %{conn: conn} do
-      conn = get(conn, "/api/v1/search?q=alba")
+      %{scientific_name: name} = species_fixture()
+
+      conn = get(conn, "/api/v1/search?q=#{name}")
       %{"species" => species} = json_response(conn, 200)
-      assert Enum.any?(species, fn s -> s["scientific_name"] == "alba" end)
+      assert Enum.any?(species, fn s -> s["scientific_name"] == name end)
     end
 
     test "finds taxa by name", %{conn: conn} do
-      conn = get(conn, "/api/v1/search?q=lobatae")
+      %{name: name} = taxon_fixture()
+
+      conn = get(conn, "/api/v1/search?q=#{String.downcase(name)}")
       %{"taxa" => taxa} = json_response(conn, 200)
-      assert taxa != []
+      assert Enum.any?(taxa, fn t -> t["name"] == name end)
     end
 
     test "returns 400 when q is missing", %{conn: conn} do

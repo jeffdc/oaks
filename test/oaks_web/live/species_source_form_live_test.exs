@@ -1,14 +1,30 @@
 defmodule OaksWeb.SpeciesSourceFormLiveTest do
   @moduledoc """
   Tests for the SpeciesSourceFormLive LiveView (create/edit species source data).
-  Uses seeded test data (see priv/repo/test_seeds.sql).
   """
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
   import Oaks.AccountsFixtures
+  import Oaks.SourcesFixtures
+  import Oaks.SpeciesFixtures
 
   alias Oaks.Sources
+
+  # alba has data from `linked`; `unlinked` is a source alba lacks.
+  setup do
+    alba = species_fixture()
+    linked = source_fixture()
+    link = species_source_fixture(alba, linked, range: "Eastern North America")
+
+    %{
+      species: alba,
+      alba: alba.scientific_name,
+      linked: linked,
+      link: link,
+      unlinked: source_fixture()
+    }
+  end
 
   defp authenticated_conn(conn) do
     log_in_user(conn, user_fixture())
@@ -17,22 +33,23 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
   # -- New (unauthenticated) --
 
   describe "GET /species/:name/sources/new (unauthenticated)" do
-    test "redirects to species list", %{conn: conn} do
+    test "redirects to species list", %{conn: conn, alba: alba} do
       assert {:error, {:live_redirect, %{to: "/species"}}} =
-               live(conn, ~p"/species/alba/sources/new")
+               live(conn, ~p"/species/#{alba}/sources/new")
     end
   end
 
   # -- New (authenticated) --
 
   describe "GET /species/:name/sources/new (authenticated)" do
-    test "renders form with available sources dropdown", %{conn: conn} do
-      {:ok, _view, html} = conn |> authenticated_conn() |> live(~p"/species/alba/sources/new")
+    test "renders form with available sources dropdown", %{conn: conn} = ctx do
+      {:ok, view, html} =
+        conn |> authenticated_conn() |> live(~p"/species/#{ctx.alba}/sources/new")
 
       assert html =~ "Add Source Data"
       assert html =~ "Data Source"
-      # Source 3 (Oak Compendium) is not linked to alba
-      assert html =~ "Oak Compendium"
+      assert has_element?(view, ~s(option[value="#{ctx.unlinked.id}"]), ctx.unlinked.name)
+      refute has_element?(view, ~s(option[value="#{ctx.linked.id}"]))
       assert html =~ "Geographic Range"
     end
 
@@ -41,14 +58,15 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
                conn |> authenticated_conn() |> live(~p"/species/zzz_nonexistent/sources/new")
     end
 
-    test "creates species source on submit", %{conn: conn} do
-      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/alba/sources/new")
+    test "creates species source on submit", %{conn: conn} = ctx do
+      {:ok, view, _html} =
+        conn |> authenticated_conn() |> live(~p"/species/#{ctx.alba}/sources/new")
 
       {:ok, _view, html} =
         view
         |> form("#species-source-form",
           species_source: %{
-            source_id: "3",
+            source_id: to_string(ctx.unlinked.id),
             range: "Test range data",
             leaves: "Test leaf description"
           }
@@ -59,8 +77,8 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
       assert html =~ "Source data added"
     end
 
-    test "validates form on change", %{conn: conn} do
-      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/alba/sources/new")
+    test "validates form on change", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/#{alba}/sources/new")
 
       html =
         view
@@ -75,27 +93,32 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
   # -- Edit (unauthenticated) --
 
   describe "GET /species/:name/sources/:source_id/edit (unauthenticated)" do
-    test "redirects to species list", %{conn: conn} do
+    test "redirects to species list", %{conn: conn, alba: alba, linked: linked} do
       assert {:error, {:live_redirect, %{to: "/species"}}} =
-               live(conn, ~p"/species/alba/sources/2/edit")
+               live(conn, ~p"/species/#{alba}/sources/#{linked.id}/edit")
     end
   end
 
   # -- Edit (authenticated) --
 
   describe "GET /species/:name/sources/:source_id/edit (authenticated)" do
-    test "renders edit form with pre-populated data", %{conn: conn} do
+    test "renders edit form with pre-populated data", %{conn: conn} = ctx do
       {:ok, _view, html} =
-        conn |> authenticated_conn() |> live(~p"/species/alba/sources/2/edit")
+        conn
+        |> authenticated_conn()
+        |> live(~p"/species/#{ctx.alba}/sources/#{ctx.linked.id}/edit")
 
       assert html =~ "Edit Source Data"
-      assert html =~ "Oaks of the World"
+      assert html =~ ctx.linked.name
       assert html =~ "Geographic Range"
+      assert html =~ "Eastern North America"
     end
 
-    test "updates species source on submit", %{conn: conn} do
+    test "updates species source on submit", %{conn: conn} = ctx do
       {:ok, view, _html} =
-        conn |> authenticated_conn() |> live(~p"/species/alba/sources/2/edit")
+        conn
+        |> authenticated_conn()
+        |> live(~p"/species/#{ctx.alba}/sources/#{ctx.linked.id}/edit")
 
       {:ok, _view, html} =
         view
@@ -108,9 +131,11 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
       assert html =~ "Source data updated"
     end
 
-    test "redirects for nonexistent source", %{conn: conn} do
-      assert {:error, {:live_redirect, %{to: "/species/alba"}}} =
-               conn |> authenticated_conn() |> live(~p"/species/alba/sources/999/edit")
+    test "redirects for nonexistent source", %{conn: conn, alba: alba} do
+      path = "/species/#{alba}"
+
+      assert {:error, {:live_redirect, %{to: ^path}}} =
+               conn |> authenticated_conn() |> live(~p"/species/#{alba}/sources/0/edit")
     end
   end
 
@@ -118,16 +143,11 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
 
   describe "delete source from species detail" do
     test "delete source flow with confirmation", %{conn: conn} do
-      # Create a throwaway species_source to delete
-      {:ok, ss} =
-        Sources.create_species_source(%{
-          species_id: 4,
-          source_id: 1,
-          range: "Temporary data"
-        })
+      velutina = species_fixture()
+      ss = species_source_fixture(velutina, source_fixture(), range: "Temporary data")
 
       {:ok, view, _html} =
-        conn |> authenticated_conn() |> live(~p"/species/velutina")
+        conn |> authenticated_conn() |> live(~p"/species/#{velutina.scientific_name}")
 
       # Request delete
       html = render_click(view, "request_delete_source", %{"id" => to_string(ss.id)})
@@ -143,11 +163,10 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
       assert html =~ "Source data deleted"
     end
 
-    test "cancel delete hides modal", %{conn: conn} do
-      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/alba")
+    test "cancel delete hides modal", %{conn: conn, alba: alba, link: link} do
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/#{alba}")
 
-      # species_source id=1 is alba + Oaks of the World
-      html = render_click(view, "request_delete_source", %{"id" => "1"})
+      html = render_click(view, "request_delete_source", %{"id" => to_string(link.id)})
       assert html =~ "delete-source-confirm-modal"
 
       html = render_click(view, "cancel_delete_source")
@@ -156,26 +175,33 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
   end
 
   describe "duplicate source" do
-    test "shows the error on the source field", %{conn: conn} do
+    test "shows the error on the source field", %{conn: conn, alba: alba, linked: linked} do
       {:ok, view, _html} =
-        conn |> authenticated_conn() |> live(~p"/species/alba/sources/new")
+        conn |> authenticated_conn() |> live(~p"/species/#{alba}/sources/new")
 
-      html = render_submit(view, "save", %{"species_source" => %{"source_id" => "1"}})
+      html =
+        render_submit(view, "save", %{"species_source" => %{"source_id" => to_string(linked.id)}})
+
       assert html =~ "already has data for this species"
     end
   end
 
   describe "add source availability" do
-    test "hides Add Source once every source is linked", %{conn: conn} do
-      alba = Oaks.Species.get_species_by_name("alba")
-      {:ok, _} = Oaks.Sources.create_species_source(%{species_id: alba.id, source_id: 3})
+    test "hides Add Source once every source is linked", %{conn: conn, species: species} do
+      for source <- Sources.available_sources_for_species(species.id) do
+        species_source_fixture(species, source)
+      end
 
-      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/alba")
+      assert Sources.available_sources_for_species(species.id) == []
+
+      {:ok, view, _html} =
+        conn |> authenticated_conn() |> live(~p"/species/#{species.scientific_name}")
+
       refute has_element?(view, ".add-source-btn")
     end
 
-    test "shows Add Source while a source is still available", %{conn: conn} do
-      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/alba")
+    test "shows Add Source while a source is still available", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/#{alba}")
       assert has_element?(view, ".add-source-btn")
     end
   end

@@ -79,7 +79,7 @@ defmodule Oaks.MixProject do
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      test: [&isolate_test_db/1, "ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["compile", "tailwind oaks", "esbuild oaks"],
       "assets.deploy": [
@@ -95,6 +95,52 @@ defmodule Oaks.MixProject do
         "test"
       ]
     ]
+  end
+
+  # Each `mix test` runs on its own copy of the seeded test database (item
+  # b1b5). priv/oaks_test.sqlite, built by `make test-db` and CI, is only the
+  # template: two runs on one file starve each other (every test holds BEGIN
+  # IMMEDIATE), and `make test-db` deletes the file under a live run. Copies
+  # live in _build/test/test_dbs (per checkout, gitignored) and are deleted at
+  # exit; ones left by killed runs are swept after a day.
+  defp isolate_test_db(_args) do
+    config = Application.get_env(:oaks, Oaks.Repo)
+    template = Keyword.fetch!(config, :database)
+    dir = Path.join(Mix.Project.build_path(), "test_dbs")
+    File.mkdir_p!(dir)
+    sweep_stale_test_dbs(dir)
+
+    run_db = Path.join(dir, "oaks_test-#{System.pid()}.sqlite")
+    # A reused OS pid must not inherit a killed run's files.
+    remove_db_files(run_db)
+
+    if File.exists?(template) do
+      File.cp!(template, run_db)
+      wal = template <> "-wal"
+      if File.exists?(wal) and File.stat!(wal).size > 0, do: File.cp!(wal, run_db <> "-wal")
+    else
+      Mix.shell().info("No #{Path.relative_to_cwd(template)}; run make test-db for the seeds")
+    end
+
+    Application.put_env(:oaks, Oaks.Repo, Keyword.put(config, :database, run_db),
+      persistent: true
+    )
+
+    System.at_exit(fn _status -> remove_db_files(run_db) end)
+  end
+
+  defp sweep_stale_test_dbs(dir) do
+    cutoff = System.os_time(:second) - 86_400
+
+    for file <- File.ls!(dir),
+        path = Path.join(dir, file),
+        match?({:ok, %{mtime: mtime}} when mtime < cutoff, File.stat(path, time: :posix)) do
+      File.rm(path)
+    end
+  end
+
+  defp remove_db_files(db) do
+    Enum.each(["", "-wal", "-shm"], &File.rm(db <> &1))
   end
 
   defp dialyzer do

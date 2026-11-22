@@ -1,9 +1,14 @@
 defmodule Oaks.SchemaTest do
   @moduledoc """
-  Verifies that Ecto schemas can query the database correctly.
-  Runs against the test database (migrations + test_seeds.sql).
+  Verifies that each Ecto schema round-trips through the database: rows
+  inserted through fixtures read back with the same fields and associations.
   """
   use Oaks.DataCase
+
+  import Oaks.ArticlesFixtures
+  import Oaks.SourcesFixtures
+  import Oaks.SpeciesFixtures
+  import Oaks.TaxonomyFixtures
 
   alias Oaks.Articles.Article
   alias Oaks.Import.Metadata
@@ -14,118 +19,117 @@ defmodule Oaks.SchemaTest do
   alias Oaks.Taxonomy.Taxon
 
   describe "Species schema" do
-    test "loads all seeded species" do
-      species = Repo.all(Species)
-      assert length(species) == 5
+    test "reads back a species by scientific name" do
+      created =
+        species_fixture(author: "L. 1753", subgenus: "Quercus", section: "Quercus")
+
+      loaded = Repo.get_by!(Species, scientific_name: created.scientific_name)
+      assert loaded.id == created.id
+      assert loaded.author == "L. 1753"
+      assert loaded.is_hybrid == false
+      assert loaded.subgenus == "Quercus"
+      assert loaded.section == "Quercus"
     end
 
-    test "finds species by scientific name" do
-      alba = Repo.get_by!(Species, scientific_name: "alba")
-      assert alba.author == "L. 1753"
-      assert alba.is_hybrid == false
-      assert alba.subgenus == "Quercus"
-      assert alba.section == "Quercus"
-    end
+    test "reads back a hybrid with its parents" do
+      created = hybrid_fixture(parent1: "alba", parent2: "macrocarpa")
 
-    test "loads hybrid species" do
-      hybrid = Repo.get_by!(Species, scientific_name: "×bebbiana")
+      hybrid = Repo.get!(Species, created.id)
       assert hybrid.is_hybrid == true
       assert hybrid.parent1 == "alba"
       assert hybrid.parent2 == "macrocarpa"
     end
 
     test "preloads species_sources association" do
-      alba =
-        Species
-        |> Repo.get_by!(scientific_name: "alba")
-        |> Repo.preload(:species_sources)
+      species = species_fixture()
+      species_source_fixture(species, source_fixture())
+      species_source_fixture(species, source_fixture())
 
-      assert length(alba.species_sources) == 2
+      loaded = Species |> Repo.get!(species.id) |> Repo.preload(:species_sources)
+      assert length(loaded.species_sources) == 2
     end
   end
 
   describe "Taxon schema" do
-    test "loads all seeded taxa" do
-      taxa = Repo.all(Taxon)
-      assert length(taxa) == 5
-    end
+    test "reads back a taxon by name and level" do
+      created = taxon_fixture(author: "(L.) Oerst.")
 
-    test "finds taxon by name and level" do
-      subgenus = Repo.get_by!(Taxon, name: "Quercus", level: "subgenus")
+      subgenus = Repo.get_by!(Taxon, name: created.name, level: "subgenus")
+      assert subgenus.id == created.id
       assert subgenus.author == "(L.) Oerst."
       assert is_nil(subgenus.parent)
     end
 
-    test "finds child taxon with parent" do
-      section = Repo.get_by!(Taxon, name: "Quercus", level: "section")
-      assert section.parent == "Quercus"
+    test "reads back a child taxon with its parent" do
+      %{subgenus: subgenus, section: section} = taxon_tree_fixture()
+
+      assert Repo.get_by!(Taxon, name: section.name, level: "section").parent == subgenus.name
     end
   end
 
   describe "Source schema" do
-    test "loads all seeded sources" do
-      sources = Repo.all(Source)
-      assert length(sources) == 3
-    end
+    test "reads back a source by name" do
+      created = source_fixture(url: "https://oaksoftheworld.fr")
 
-    test "finds source by name" do
-      source = Repo.get_by!(Source, name: "Oaks of the World")
+      source = Repo.get_by!(Source, name: created.name)
       assert source.source_type == "website"
       assert source.url == "https://oaksoftheworld.fr"
     end
 
     test "preloads species_sources association" do
-      source =
-        Source
-        |> Repo.get_by!(name: "Oaks of the World")
-        |> Repo.preload(:species_sources)
+      source = source_fixture()
+      species_source_fixture(species_fixture(), source)
+      species_source_fixture(species_fixture(), source)
 
-      assert length(source.species_sources) == 2
+      loaded = Source |> Repo.get!(source.id) |> Repo.preload(:species_sources)
+      assert length(loaded.species_sources) == 2
     end
   end
 
   describe "SpeciesSource schema" do
-    test "loads all seeded species_sources" do
-      ss = Repo.all(SpeciesSource)
-      assert length(ss) == 4
-    end
-
     test "preloads species and source associations" do
-      ss =
-        SpeciesSource
-        |> Repo.get!(1)
-        |> Repo.preload([:species, :source])
+      species = species_fixture()
+      source = source_fixture()
 
-      assert ss.species.scientific_name == "alba"
-      assert ss.source.name == "Oaks of the World"
+      created =
+        species_source_fixture(species, source,
+          is_preferred: true,
+          local_names: ["white oak", "eastern white oak"]
+        )
+
+      ss = SpeciesSource |> Repo.get!(created.id) |> Repo.preload([:species, :source])
+
+      assert ss.species.scientific_name == species.scientific_name
+      assert ss.source.name == source.name
       assert ss.is_preferred == true
       assert ss.local_names == ~s(["white oak","eastern white oak"])
     end
   end
 
   describe "Article schema" do
-    test "loads seeded articles" do
-      articles = Repo.all(Article)
-      assert length(articles) == 2
+    test "reads back published and draft articles" do
+      published = article_fixture(tags: ["guide"])
+      draft = article_fixture(is_published: false)
 
-      published = Enum.find(articles, &(&1.slug == "getting-started"))
-      assert published.is_published == true
-      assert published.author == "Jeff"
+      loaded = Repo.get!(Article, published.id)
+      assert loaded.slug == published.slug
+      assert loaded.is_published == true
+      assert loaded.author == "Jeff"
+      assert loaded.tags == ~s(["guide"])
 
-      draft = Enum.find(articles, &(&1.slug == "advanced-taxonomy-draft"))
-      assert draft.is_published == false
+      assert Repo.get!(Article, draft.id).is_published == false
     end
   end
 
   describe "Import.Metadata schema" do
-    test "loads seeded metadata" do
-      all = Repo.all(Metadata)
-      assert length(all) == 2
-    end
+    test "reads back metadata by key" do
+      key = "last_import_date_#{System.unique_integer([:positive])}"
 
-    test "finds metadata by key" do
-      meta = Repo.get!(Metadata, "last_import_date")
-      assert meta.value == "2025-01-01"
+      %Metadata{}
+      |> Metadata.changeset(%{key: key, value: "2025-01-01"})
+      |> Repo.insert!()
+
+      assert Repo.get!(Metadata, key).value == "2025-01-01"
     end
   end
 end

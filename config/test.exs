@@ -8,6 +8,8 @@ config :oaks, env: :test
 # Configure your database
 # Use a separate test database (no production data)
 config :oaks, Oaks.Repo,
+  # The template `make test-db` and CI build. Each `mix test` runs on its own
+  # copy of it (see isolate_test_db/1 in mix.exs).
   database: Path.expand("../priv/oaks_test.sqlite", __DIR__),
   pool_size: 5,
   pool: Ecto.Adapters.SQL.Sandbox,

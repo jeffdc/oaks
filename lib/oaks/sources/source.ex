@@ -7,6 +7,7 @@ defmodule Oaks.Sources.Source do
   """
   use Ecto.Schema
   import Ecto.Changeset
+  import Oaks.ChangesetHelpers
 
   alias Oaks.Sources.SpeciesSource
 
@@ -45,6 +46,9 @@ defmodule Oaks.Sources.Source do
       :license,
       :license_url
     ])
+    |> trim_strings()
     |> validate_required(@required_fields)
+    |> validate_url(:url)
+    |> validate_url(:license_url)
   end
 end
