@@ -3,9 +3,12 @@
    Two systems side by side while the site is rebuilt page by page:
    * ./system: the DESIGN.md system (tokens, fonts, element defaults,
      components). New and rebuilt pages use only this.
-   * Everything else in this file: the V1 look (daisyUI theme, forest
-     tokens, page CSS), kept until the pages that use it are rebuilt. Its
-     :root text and background variables now point at the DESIGN.md tokens.
+   * Everything else in this file: the V1 layer (daisyUI theme, forest
+     tokens, shared utilities, page CSS), kept until the pages that use it
+     are rebuilt. Its tokens, daisyUI theme and shared utilities (prose,
+     cards, badges, section titles, breadcrumb, spinner) are bridged onto
+     DESIGN.md (item b4f7); the page sections below them are each page's
+     own and still carry V1 values.
 
    The V1 CSS is unlayered, so it beats the system's layered rules where
    both style the same element; the system's classes carry an oc- prefix
@@ -28,68 +31,138 @@
   themes: false;
 }
 
-/* Single light theme — V1 forest green palette (no dark mode) */
+/* Single light theme: daisyUI on the DESIGN.md tokens (item b4f7). Square,
+   flat, ink on paper, so the daisyUI pieces V1 pages still use (input,
+   select, badge, card) read like the system's own. DESIGN.md has no status
+   colours: error and success are ink plates, warning is the ochre field
+   with ink on it, info is pencil. */
 @plugin "../vendor/daisyui-theme" {
   name: "light";
   default: true;
   prefersdark: false;
   color-scheme: "light";
-  /* V1 background/surface colors (warm stone tones) */
-  --color-base-100: #fbfbf7;                     /* DESIGN.md paper */
-  --color-base-200: #f1f0e8;                     /* DESIGN.md paper-2 */
-  --color-base-300: oklch(92.2% 0.004 80);       /* ~#e7e5e4 */
-  --color-base-content: #161616;                 /* DESIGN.md ink */
-  /* Forest green primary */
-  --color-primary: oklch(48% 0.11 158);           /* ~#1e7e4b (forest-600) */
-  --color-primary-content: oklch(100% 0 0);       /* white */
-  /* Forest green secondary */
-  --color-secondary: oklch(43% 0.09 158);         /* ~#19653d (forest-700) */
-  --color-secondary-content: oklch(100% 0 0);
-  /* Oak brown accent */
-  --color-accent: oklch(55% 0.07 65);             /* ~#8b6f47 */
-  --color-accent-content: oklch(100% 0 0);
-  /* Neutral (stone text) */
-  --color-neutral: oklch(44% 0.012 50);           /* ~#57534e */
-  --color-neutral-content: oklch(98% 0 0);
-  /* Status colors */
-  --color-info: oklch(62% 0.19 250);
-  --color-info-content: oklch(97% 0.013 236.62);
-  --color-success: oklch(58% 0.13 158);           /* forest-500 green */
-  --color-success-content: oklch(100% 0 0);
-  --color-warning: oklch(75% 0.15 75);
-  --color-warning-content: oklch(30% 0.05 60);
-  --color-error: oklch(58% 0.22 25);
-  --color-error-content: oklch(96% 0.015 12.422);
-  /* Border radii */
-  --radius-selector: 0.375rem;
-  --radius-field: 0.375rem;
-  --radius-box: 0.75rem;
+  --color-base-100: #fbfbf7;                     /* paper */
+  --color-base-200: #f1f0e8;                     /* paper-2 */
+  --color-base-300: #16161626;                   /* rule */
+  --color-base-content: #161616;                 /* ink */
+  --color-primary: #161616;                      /* ink */
+  --color-primary-content: #fbfbf7;              /* paper */
+  --color-secondary: #3d3d3a;                    /* ink-2 */
+  --color-secondary-content: #fbfbf7;
+  --color-accent: #d9a21b;                       /* ochre: a fill, never text */
+  --color-accent-content: #161616;
+  --color-neutral: #161616;
+  --color-neutral-content: #fbfbf7;
+  --color-info: #2f5fb3;                         /* pencil */
+  --color-info-content: #fbfbf7;
+  --color-success: #161616;
+  --color-success-content: #fbfbf7;
+  --color-warning: #d9a21b;
+  --color-warning-content: #161616;
+  --color-error: #161616;
+  --color-error-content: #fbfbf7;
+  /* Square corners (DESIGN.md rounded.none), no depth, no noise */
+  --radius-selector: 0;
+  --radius-field: 0;
+  --radius-box: 0;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
-  --depth: 1;
+  --depth: 0;
   --noise: 0;
 }
 
 /* ============================================
-   Tailwind v4 @theme — V1 color tokens
-   Creates utility classes: bg-forest-600, text-oak-brown, etc.
+   Tailwind v4 @theme: V1 colour tokens, re-pointed (item b4f7)
+
+   The forest greens and oak browns now name DESIGN.md roles, so every V1
+   utility (text-forest-700, bg-forest-50 ...) and every inline
+   var(--color-forest-*) moves onto the system at once. Mapped by how each
+   shade is used in the V1 pages, not by lightness:
+     50   tinted panels, hover grounds    -> paper (no tinted panels)
+     100  chips, hover and active grounds -> paper-2
+     200  borders and dividers            -> rule
+     300  stronger and hover borders      -> ink at 40% (the field border)
+     400  hover borders, accent edges     -> ink
+     500  field icons, accent edges,
+          focus outlines                  -> ink-3 (decoration, not links)
+     600  button fills under white text,
+          back links, icons               -> ink
+     700  link and emphasis text          -> ink
+     800  page headings                   -> ink
+     900  headings, hover text            -> ink
+   Oak brown, acorn and bark were text tints: ink-2, ink-2, ink-3.
    ============================================ */
 @theme {
-  --color-forest-50: #f0f9f4;
-  --color-forest-100: #dcf3e4;
-  --color-forest-200: #bae6cd;
-  --color-forest-300: #86d4aa;
-  --color-forest-400: #4fb87f;
-  --color-forest-500: #2a9d5f;
-  --color-forest-600: #1e7e4b;
-  --color-forest-700: #19653d;
-  --color-forest-800: #165132;
-  --color-forest-900: #14432a;
+  --color-forest-50: var(--color-paper);
+  --color-forest-100: var(--color-paper-2);
+  --color-forest-200: var(--color-rule);
+  --color-forest-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  --color-forest-400: var(--color-ink);
+  --color-forest-500: var(--color-ink-3);
+  --color-forest-600: var(--color-ink);
+  --color-forest-700: var(--color-ink);
+  --color-forest-800: var(--color-ink);
+  --color-forest-900: var(--color-ink);
 
-  --color-oak-brown: #8b6f47;
-  --color-acorn: #a67c52;
-  --color-bark: #6b5747;
+  --color-oak-brown: var(--color-ink-2);
+  --color-acorn: var(--color-ink-2);
+  --color-bark: var(--color-ink-3);
+
+  /* Tailwind's warm and cool greys, which V1 templates use for borders,
+     icon tints and quiet grounds, take the same roles: 50 paper, 100
+     paper-2, 200 rule, 300 ink at 40%, 400-500 ink-3, 600-700 ink-2,
+     800-900 ink. No system file uses them. */
+  --color-stone-50: var(--color-paper);
+  --color-stone-100: var(--color-paper-2);
+  --color-stone-200: var(--color-rule);
+  --color-stone-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  --color-stone-400: var(--color-ink-3);
+  --color-stone-500: var(--color-ink-3);
+  --color-stone-600: var(--color-ink-2);
+  --color-stone-700: var(--color-ink-2);
+  --color-stone-800: var(--color-ink);
+  --color-stone-900: var(--color-ink);
+  --color-gray-50: var(--color-paper);
+  --color-gray-100: var(--color-paper-2);
+  --color-gray-200: var(--color-rule);
+  --color-gray-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  --color-gray-400: var(--color-ink-3);
+  --color-gray-500: var(--color-ink-3);
+  --color-gray-600: var(--color-ink-2);
+  --color-gray-700: var(--color-ink-2);
+  --color-gray-800: var(--color-ink);
+  --color-gray-900: var(--color-ink);
+  --color-zinc-50: var(--color-paper);
+  --color-zinc-100: var(--color-paper-2);
+  --color-zinc-200: var(--color-rule);
+  --color-zinc-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  --color-zinc-400: var(--color-ink-3);
+  --color-zinc-500: var(--color-ink-3);
+  --color-zinc-600: var(--color-ink-2);
+  --color-zinc-700: var(--color-ink-2);
+  --color-zinc-800: var(--color-ink);
+  --color-zinc-900: var(--color-ink);
+
+  /* Square and flat (DESIGN.md: corners 0, no shadows). Tailwind's radius
+     and shadow scales go to nothing, so the V1 templates' rounded-lg,
+     rounded-xl, shadow-sm ... draw square and flat until their pages are
+     rebuilt. rounded-full (dots, rings) is not on the scale and stays. */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
+  --shadow-2xs: 0 0 #0000;
+  --shadow-xs: 0 0 #0000;
+  --shadow-sm: 0 0 #0000;
+  --shadow-md: 0 0 #0000;
+  --shadow-lg: 0 0 #0000;
+  --shadow-xl: 0 0 #0000;
+  --shadow-2xl: 0 0 #0000;
 
   /* --font-serif is set in system/tokens.css (Source Serif 4). */
 }
@@ -99,35 +172,36 @@
    For use in CSS rules and component styles
    ============================================ */
 :root {
-  /* Semantic colors. Background and text are aliases of the DESIGN.md
-     tokens (item 21b7) so V1 pages sit on the same paper in the same inks. */
+  /* Semantic colours, all aliases of the DESIGN.md tokens (items 21b7 and
+     b4f7). Surfaces are paper: V1 cards and panels sit on the page ground
+     rather than as white boxes. Borders are the hairline rule. */
   --color-background: var(--color-paper);
-  --color-surface: #ffffff;
+  --color-surface: var(--color-paper);
   --color-text-primary: var(--color-ink);
   --color-text-secondary: var(--color-ink-2);
   --color-text-tertiary: var(--color-ink-3);
-  --color-border: #e7e5e4;
-  --color-border-light: #f5f5f4;
+  --color-border: var(--color-rule);
+  --color-border-light: var(--color-rule);
 
-  /* White transparency scale (for glassmorphism on dark backgrounds) */
-  --color-white-10: rgba(255, 255, 255, 0.1);
-  --color-white-15: rgba(255, 255, 255, 0.15);
-  --color-white-20: rgba(255, 255, 255, 0.2);
-  --color-white-30: rgba(255, 255, 255, 0.3);
-  --color-white-40: rgba(255, 255, 255, 0.4);
-  --color-white-60: rgba(255, 255, 255, 0.6);
-  --color-white-85: rgba(255, 255, 255, 0.85);
+  /* Paper over ink (V1's white scale, for marks on the ink masthead) */
+  --color-white-10: color-mix(in srgb, var(--color-paper) 10%, transparent);
+  --color-white-15: color-mix(in srgb, var(--color-paper) 15%, transparent);
+  --color-white-20: color-mix(in srgb, var(--color-paper) 20%, transparent);
+  --color-white-30: color-mix(in srgb, var(--color-paper) 30%, transparent);
+  --color-white-40: color-mix(in srgb, var(--color-paper) 40%, transparent);
+  --color-white-60: color-mix(in srgb, var(--color-paper) 60%, transparent);
+  --color-white-85: color-mix(in srgb, var(--color-paper) 85%, transparent);
 
-  /* Conservation status colors */
-  --color-status-warning-bg: #fef3c7;
-  --color-status-warning-text: #92400e;
-  --color-status-warning-border: #fcd34d;
+  /* Status: the outlined ink stamp, no colour (Marks Not Colours Rule) */
+  --color-status-warning-bg: transparent;
+  --color-status-warning-text: var(--color-ink);
+  --color-status-warning-border: var(--color-ink);
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  /* Shadows: none (DESIGN.md is entirely flat) */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
 }
 
 /* ============================================
@@ -143,17 +217,49 @@
 /* Base styles (body, links, focus, selection, reduced motion) live in
    system/base.css. */
 
+/* V1 text links coloured forest-600 or -700 (back links, names) would be
+   ink under the token map above, which keeps those shades ink for the
+   filled buttons that share them. Links are pencil (DESIGN.md), so a link
+   with one of those text colours and no fill goes back to pencil. The
+   !important is for the inline style="color: ..." forms. */
+a:where([class*="text-forest-6"], [class*="text-forest-7"], [style*="color: var(--color-forest-6"], [style*="color: var(--color-forest-7"]):not([style*="background"], [class*="bg-"]) {
+  color: var(--color-pencil) !important;
+}
+
+/* daisyUI's fields (the species list's search and filters) are the
+   system's input field: white, a 1.5px border at 40% ink, ink on focus. */
+.input,
+.select,
+.textarea {
+  background-color: #fff;
+  border: 1.5px solid color-mix(in srgb, var(--color-ink) 40%, transparent);
+  font-family: var(--font-frame);
+}
+
+.input:focus-within,
+.select:focus,
+.textarea:focus {
+  border-color: var(--color-ink);
+}
+
 /* ============================================
-   Prose Content (V1 rich text styling)
+   Prose Content (rendered markdown: articles, taxon write-ups, source
+   text, previews). DESIGN.md reading text: Source Serif 4 at 17px with
+   oldstyle figures, held to a 70ch measure; headings in the serif, then
+   the reader's uppercase Archivo subheads; pencil links; rules, not tints.
    ============================================ */
 .prose-content {
-  color: var(--color-text-primary);
+  max-width: 70ch;
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-size: 17px;
   line-height: 1.6;
-  font-size: 0.9375rem;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  text-wrap: pretty;
 }
 
 .prose-content p {
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 var(--spacing-s3) 0;
 }
 
 .prose-content p:last-child {
@@ -161,31 +267,34 @@
 }
 
 .prose-content ul {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
+  margin: 0 0 var(--spacing-s3);
+  padding-left: 1.1em;
   list-style-type: disc;
 }
 
 .prose-content ol {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
+  margin: 0 0 var(--spacing-s3);
+  padding-left: 1.4em;
   list-style-type: decimal;
 }
 
 .prose-content li {
-  margin: 0.25rem 0;
+  margin: 0 0 var(--spacing-s1);
+}
+
+.prose-content li::marker {
+  color: var(--color-ink-3);
 }
 
 .prose-content a {
-  color: var(--color-forest-700, #19653d);
-  text-decoration: underline;
-  text-decoration-color: var(--color-forest-300, #86d4aa);
-  transition: all 0.15s ease;
+  color: var(--color-pencil);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 .prose-content a:hover {
-  color: var(--color-forest-600, #1e7e4b);
-  text-decoration-color: var(--color-forest-600, #1e7e4b);
+  text-decoration-thickness: 2px;
 }
 
 .prose-content strong {
@@ -200,9 +309,9 @@
 .prose-content pre {
   overflow-x: auto;
   max-width: 100%;
-  padding: 0.75rem;
-  border-radius: 0.375rem;
-  background-color: #f0f9f4;
+  margin: 0 0 var(--spacing-s3);
+  padding: var(--spacing-s3) var(--spacing-s4);
+  background-color: var(--color-paper-2);
 }
 
 .prose-content pre code {
@@ -214,14 +323,28 @@
   display: block;
   overflow-x: auto;
   max-width: 100%;
+  margin: 0 0 var(--spacing-s4);
   border-collapse: collapse;
+  font-family: var(--font-frame);
+  font-size: 15px;
+  line-height: 1.5;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .prose-content th,
 .prose-content td {
-  padding: 0.375rem 0.625rem;
-  border: 1px solid var(--color-border);
+  padding: var(--spacing-s2) var(--spacing-s4) var(--spacing-s2) 0;
+  border-bottom: 1px solid var(--color-rule);
   text-align: left;
+  vertical-align: top;
+}
+
+.prose-content th {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--color-rule-strong);
 }
 
 .prose-content img {
@@ -229,115 +352,139 @@
   height: auto;
 }
 
+/* Code is the one place for a monospace face. */
 .prose-content code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  background-color: #f0f9f4;
-  padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.875em;
+  font-variant-numeric: lining-nums tabular-nums;
+  background-color: var(--color-paper-2);
+  padding: 1px 4px;
+}
+
+.prose-content h1,
+.prose-content h2 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--color-ink);
+  text-wrap: balance;
 }
 
 .prose-content h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-family: var(--font-serif);
-  color: #14432a;
-  margin: 1.5rem 0 0.75rem 0;
-}
-
-.prose-content h1:first-child {
-  margin-top: 0;
+  font-size: 26px;
+  line-height: 1.1;
+  margin: var(--spacing-s6) 0 var(--spacing-s3);
 }
 
 .prose-content h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  font-family: var(--font-serif);
-  color: #165132;
-  margin: 1.5rem 0 0.75rem 0;
+  font-size: 21px;
+  line-height: 1.2;
+  margin: var(--spacing-s5) 0 var(--spacing-s2);
 }
 
-.prose-content h2:first-child {
-  margin-top: 0;
-}
-
+/* The reader's subhead: Archivo capitals */
 .prose-content h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  font-family: var(--font-serif);
-  color: #19653d;
-  margin: 1.25rem 0 0.5rem 0;
-}
-
-.prose-content h3:first-child {
-  margin-top: 0;
+  font-family: var(--font-frame);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  margin: var(--spacing-s5) 0 var(--spacing-s2);
 }
 
 .prose-content h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin: 1rem 0 0.5rem 0;
+  font-family: var(--font-frame);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-ink);
+  margin: var(--spacing-s4) 0 var(--spacing-s1);
 }
 
+.prose-content h1:first-child,
+.prose-content h2:first-child,
+.prose-content h3:first-child,
 .prose-content h4:first-child {
   margin-top: 0;
 }
 
+/* A quoted passage: indented on a 1px ink rule, roman (italic is for
+   scientific names), in the second ink. */
 .prose-content blockquote {
-  border-left: 3px solid #86d4aa;
-  padding-left: 1rem;
-  margin: 1rem 0;
-  color: var(--color-text-secondary);
-  font-style: italic;
+  margin: 0 0 var(--spacing-s3);
+  padding-left: var(--spacing-s4);
+  border-left: 1px solid var(--color-rule-strong);
+  color: var(--color-ink-2);
+  font-size: 18px;
 }
 
 .prose-content hr {
   border: none;
-  border-top: 1px solid var(--color-border);
-  margin: 1.5rem 0;
+  border-top: 1px solid var(--color-rule);
+  margin: var(--spacing-s5) 0;
 }
 
 /* ============================================
-   Card Utilities (V1 card styling)
+   Card Utilities: V1 cards as ruled sections (item b4f7)
+
+   DESIGN.md: statements stand on rules, never in boxes. A .card keeps its
+   place in the page but loses the box: no ground, border, corner or
+   shadow, and no side padding, so its content lines up with the page
+   frame. Its heading (.section-title) carries the 2px ink rule. A card
+   used as a dialog panel (the direct child of a fixed overlay) is the
+   one box: paper with a 2px ink border, like the modal component.
    ============================================ */
 .card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
-  box-shadow: var(--shadow-sm);
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
+/* :where keeps this at class weight, so page sections can still set their
+   own padding; it beats the layered p-6 utilities. Rows (card-interactive
+   and plain cards listed with them) keep their padding for the hover
+   ground. */
+.card:where(:not(.fixed > .card, .card-interactive, .card-interactive ~ .card, .card:has(~ .card-interactive))) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.fixed > .card {
+  background-color: var(--color-paper);
+  border: 2px solid var(--color-ink);
+}
+
+/* A card that is a link or a row is a row on a hairline. */
 .card-interactive {
-  transition: all 0.15s ease;
+  border-bottom: 1px solid var(--color-rule);
   cursor: pointer;
   text-decoration: none;
+  color: inherit;
 }
 
 .card-interactive:hover {
-  border-color: #4fb87f;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.card-interactive:focus-visible {
-  outline: none;
-  border-color: #1e7e4b;
-  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.15);
+  background-color: var(--color-paper-2);
 }
 
 .card-sm {
-  border-radius: 0.5rem;
+  border-radius: 0;
 }
 
 .card-forest {
-  background-color: #f0f9f4;
-  border-color: #bae6cd;
+  background-color: transparent;
 }
 
 .card-forest.card-interactive:hover {
-  background-color: #dcf3e4;
-  border-color: #86d4aa;
+  background-color: var(--color-paper-2);
+}
+
+/* A plain card in a list of rows (home's disabled Identification) stands
+   on the same hairline, so the list ends on a rule. */
+.card-interactive ~ .card:where(:not(.card-interactive)),
+.card:where(:not(.card-interactive)):has(~ .card-interactive) {
+  border-bottom: 1px solid var(--color-rule);
 }
 
 /* Taxonomy sub-taxon cards (matches V1 .sub-taxon-card) */
@@ -1041,132 +1188,235 @@
 }
 
 /* ============================================
-   Badge/Pill Utilities (V1)
+   Badge/Pill Utilities as status tags (item b4f7)
+
+   A badge is DESIGN.md's status tag: an outlined ink stamp in Archivo,
+   square. Its variants are marks, not colours: the strong one (V1's dark
+   green: Primary, the current filter) reverses to an ink plate; the plain
+   ones are the outline; the muted one (Coming soon, the other filters) is
+   a lighter outline in the second ink. Pill tags (synonyms, common names)
+   are names, not tags: plain serif text in a comma list.
    ============================================ */
+/* No display here: daisyUI's .badge makes it inline-flex in a layer, so
+   the hidden and sm:inline-flex utilities on a badge still work. */
 .badge {
-  display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.625rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  gap: var(--spacing-s1);
+  height: auto;
+  padding: 4px 7px;
+  font-family: var(--font-frame);
+  font-size: 13px;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+  color: var(--color-ink);
+  background-color: transparent;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .badge-uppercase {
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  font-size: 12.5px;
 }
 
-.badge-forest {
-  background-color: #bae6cd;
-  color: #19653d;
+.badge-sm {
+  font-size: 12px;
+  padding: 2px 5px;
 }
 
+.badge-forest,
 .badge-forest-light {
-  background-color: #dcf3e4;
-  color: #14432a;
+  color: var(--color-ink);
+  background-color: transparent;
+  border-color: var(--color-ink);
 }
 
 .badge-forest-dark {
-  background-color: #1e7e4b;
-  color: white;
+  color: var(--color-paper);
+  background-color: var(--color-ink);
+  border-color: var(--color-ink);
 }
 
 .badge-muted {
-  background-color: #f5f5f4;
-  color: var(--color-text-secondary);
+  color: var(--color-ink-2);
+  background-color: transparent;
+  border-color: color-mix(in srgb, var(--color-ink) 40%, transparent);
+}
+
+/* daisyUI's ghost badge (the species list's subgenus and section) is a
+   classification, not a status: frame text with no stamp around it. */
+.badge-ghost {
+  color: var(--color-ink-2);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border-color: transparent;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+a.badge:hover {
+  color: var(--color-paper);
+  background-color: var(--color-ink);
+  border-color: var(--color-ink);
 }
 
 .pill-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.375rem 0.875rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  background-color: var(--color-forest-100);
-  color: var(--color-forest-900);
-  border: 1px solid var(--color-forest-200);
+  display: inline;
+  padding: 0;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-ink);
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+/* The comma hangs off the previous name: each tag after the first draws
+   it in front of itself and pulls it back across the row's 0.5rem gap
+   (gap-2 in both lists), so whitespace inside the span can't open a space
+   before it. */
+.pill-tag + .pill-tag::before {
+  content: ",";
+  margin-left: -0.5rem;
+  font-style: normal;
 }
 
 /* ============================================
-   Section Title Utility (V1)
+   Section Title: DESIGN.md's section label. Archivo 800 capitals standing
+   on a 2px ink rule, like the section_heading component
+   (.oc-section-heading). section-title-sm, V1's smaller step, is the
+   same label.
    ============================================ */
 .section-title {
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 1rem;
+  margin: 0 0 var(--spacing-s3);
+  padding: 0 0 var(--spacing-s2);
+  border-bottom: 2px solid var(--color-rule-strong);
+  font-family: var(--font-frame);
+  font-size: 15px;
+  font-weight: 800;
+  font-style: normal;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--color-ink);
 }
 
 .section-title-sm {
-  font-size: 1rem;
-  color: #165132;
+  font-size: 15px;
+  color: var(--color-ink);
+}
+
+/* A title sharing a row with its actions (home's Featured Species, the
+   taxon pages' About this ...): the row stands on the rule, so it runs
+   the full width under the label and the controls. */
+.justify-between:has(> .section-title),
+[style*="space-between"]:has(> .section-title) {
+  align-items: flex-end;
+  padding-bottom: var(--spacing-s2);
+  border-bottom: 2px solid var(--color-rule-strong);
+}
+
+.justify-between > .section-title,
+[style*="space-between"] > .section-title {
+  margin: 0;
+  padding: 0;
+  border-bottom: 0;
+}
+
+/* DESIGN.md's section label carries no icon; V1's heroicon glyphs in
+   titles are hidden, as the breadcrumb's glyph separators are. */
+.section-title > [class*="hero-"],
+.section-title > svg {
+  display: none;
 }
 
 /* ============================================
-   Taxonomy Navigation (V1 breadcrumb)
+   Taxonomy Navigation (V1 breadcrumb) in the taxonomy band's voice:
+   Archivo Narrow, names in the serif italic, rank words at 500 in the
+   second ink, drawn chevrons between ranks. It is not on the ochre band
+   yet (the page rebuilds put it there), so its links are ink, as on the
+   band.
    ============================================ */
 .taxonomy-nav {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
+  gap: var(--spacing-s1) var(--spacing-s2);
+  margin-top: var(--spacing-s1);
+  font-family: var(--font-narrow);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--color-ink);
 }
 
 .taxonomy-nav .taxonomy-label {
+  margin-right: var(--spacing-s1);
   font-weight: 600;
-  color: #19653d;
-  margin-right: 0.25rem;
+  color: var(--color-ink);
 }
 
 .taxonomy-nav .taxonomy-link {
   display: inline-flex;
   align-items: baseline;
-  gap: 0.25rem;
+  gap: var(--spacing-s1);
+  color: var(--color-ink);
   text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.taxonomy-nav .taxonomy-link:hover {
-  text-decoration: underline;
-  text-decoration-color: #4fb87f;
-}
-
-.taxonomy-nav .taxonomy-name {
-  font-style: italic;
-  font-weight: 500;
-  color: #19653d;
 }
 
 .taxonomy-nav .taxonomy-link:hover .taxonomy-name {
-  color: #14432a;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.taxonomy-nav .taxonomy-name {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-style: italic;
+  font-weight: 600;
+  color: var(--color-ink);
 }
 
 .taxonomy-nav .taxonomy-level-label {
-  font-size: 0.75rem;
+  font-size: 14px;
   font-style: normal;
-  font-weight: 400;
-  color: var(--color-text-tertiary);
+  font-weight: 500;
+  color: var(--color-ink-2);
 }
 
+/* The chevron is drawn from two borders; the V1 glyph is hidden. */
 .taxonomy-nav .taxonomy-separator {
-  color: #4fb87f;
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 6px 1px 0;
+  overflow: hidden;
+  font-size: 0;
+  color: transparent;
+  border-top: 2px solid var(--color-ink);
+  border-right: 2px solid var(--color-ink);
+  transform: rotate(45deg);
 }
 
 /* ============================================
-   Loading Spinner (V1)
+   Loading Spinner: a drawn ink arc on a hairline ring
    ============================================ */
 .loading-spinner {
-  width: 2rem;
-  height: 2rem;
-  border: 3px solid var(--color-border);
-  border-top-color: #1e7e4b;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-rule);
+  border-top-color: var(--color-ink);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
