@@ -6,6 +6,13 @@ Project rules (investigation before action, SQLite, Nix toolchain, git workflow)
 
 **Dev servers: start them as background tasks and stop them with your stop tool, never with `kill`.** Run `PORT=<port> mix phx.server` (inside the Nix shell) through your shell tool's background option and stop it with the tool that stops background tasks (TaskStop in Claude Code), so stopping needs no approval. For a server left running, `scripts/stop-dev-server <port>` is the one pre-approved fallback: it stops only a Phoenix server on that port. Never touch Jeff's servers on 4444 (his `make dev`) and 4460 (the integration preview); the script refuses them.
 
+**Size the work before starting it** (Jeff, 2026-11-22). Small changes must not take half an hour.
+- **Small** (one width, one wording, one component tweak, a few files): make it directly in the integration worktree, where Jeff's preview already runs. Check with `mix precommit`, `scripts/check-ui`, and a look at 2 widths on 2 or 3 pages. No worktree setup, no separate reviewer.
+- **Medium** (a component rolled out across a few pages): one agent in its own worktree. Impeccable's detector and one look across the affected pages at 2 widths; no separate finish-reviewer agent.
+- **Large** (a new page, a redesign, a new visual direction): the full process, including Impeccable's decision page and finish review.
+- Don't re-run the hard checks on a fast-forward merge: it is the exact commit that already passed `mull done`.
+- Keep reports, mull notes and tours short: what changed, what to look at, what Jeff must decide.
+
 ## This project in mull
 
 - **Plans:**
