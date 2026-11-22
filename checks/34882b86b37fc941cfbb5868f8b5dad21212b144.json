@@ -1,0 +1,14 @@
+{
+  "tree": "34882b86b37fc941cfbb5868f8b5dad21212b144",
+  "commit": "c053cecdfcf14ae73a8cd2e26f1f367002f4b42c",
+  "at": "2026-11-22T15:04:02Z",
+  "by": "/Users/jeff/dev/oaks/.claude/worktrees/b221-make-dev-branch",
+  "passed": true,
+  "results": [
+    {
+      "command": "make done-checks",
+      "exit": 0,
+      "duration_ms": 56033
+    }
+  ]
+}
