@@ -155,6 +155,26 @@
   }
 
   /* ---------------------------------------------------------------------
+     Scientific name (DesignComponents.sci_name): italic serif, the genus
+     at 400 and the epithets at 600; rank words, the hybrid sign and the
+     author roman. Size comes from the surrounding text.
+     --------------------------------------------------------------------- */
+  .oc-sci {
+    font-family: var(--font-serif);
+    font-weight: 600;
+  }
+  .oc-sci i { font-style: italic; }
+  .oc-sci-g,
+  .oc-sci-regular { font-weight: 400; }
+  .oc-sci-r,
+  .oc-sci-x,
+  .oc-sci-a {
+    font-style: normal;
+    font-weight: 400;
+  }
+  .oc-sci-a { color: var(--color-ink-3); }
+
+  /* ---------------------------------------------------------------------
      Section heading (DesignComponents.section_heading): an uppercase
      Archivo label standing on a 2px ink rule, with an optional note.
      --------------------------------------------------------------------- */

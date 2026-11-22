@@ -210,6 +210,45 @@ defmodule OaksWeb.DevComponentsLive do
         </div>
 
         <section class="mt-s8">
+          <.section_heading id="names">
+            Scientific names<:note>sci_name</:note>
+          </.section_heading>
+          <.list>
+            <:item title="Species, author">
+              <.sci_name name="shumardii" author="Buckley" />
+            </:item>
+            <:item title="Abbreviated">
+              <.sci_name name="shumardii" abbreviate />
+            </:item>
+            <:item title="Named hybrid">
+              <.sci_name name="× riparia" author="Laughlin" />
+            </:item>
+            <:item title="Hybrid flag, no sign stored">
+              <.sci_name name="riparia" hybrid abbreviate />
+            </:item>
+            <:item title="Formula">
+              <.sci_name name="agrifolia × parvula" />
+            </:item>
+            <:item title="Infraspecific">
+              <.sci_name name="agrifolia oxyadenia" abbreviate />
+            </:item>
+            <:item title="Rank word">
+              <.sci_name name="Quercus alba var. latiloba" />
+            </:item>
+            <:item title="Above species">
+              <.sci_name name="Coccineae" rank="subsect." />
+            </:item>
+            <:item title="In running text">
+              Two subgenera, <.sci_name name="Quercus" genus={nil} weight="regular" /> and
+              <.sci_name name="Cerris" genus={nil} weight="regular" />.
+            </:item>
+            <:item title="Display size">
+              <span class="text-[50px] leading-none"><.sci_name name="shumardii" /></span>
+            </:item>
+          </.list>
+        </section>
+
+        <section class="mt-s8">
           <.section_heading id="page">
             Page<:note>frame, read and form widths; the bleed</:note>
           </.section_heading>

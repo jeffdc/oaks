@@ -50,6 +50,64 @@ defmodule OaksWeb.DesignComponentsTest do
     end
   end
 
+  describe "sci_name/1" do
+    defp sci(attrs), do: render_component(&DesignComponents.sci_name/1, attrs)
+
+    test "sets the genus at 400 and the epithet at 600, with the author roman" do
+      html = sci(name: "shumardii", author: "Buckley")
+
+      assert html =~ ~s(<i class="oc-sci-g">Quercus</i> <i class="oc-sci-e">shumardii</i> )
+      assert html =~ ~s(<span class="oc-sci-a">Buckley</span></span>)
+    end
+
+    test "abbreviates the genus" do
+      assert sci(name: "michauxii", abbreviate: true) =~ ~s(<i class="oc-sci-g">Q.</i> <i)
+    end
+
+    test "keeps the hybrid sign roman and spaced, however it is stored" do
+      for {name, hybrid} <- [{"× riparia", false}, {"×riparia", false}, {"riparia", true}] do
+        assert sci(name: name, hybrid: hybrid) =~
+                 ~s(<i class="oc-sci-g">Quercus</i> <span class="oc-sci-x">×</span>\u00A0<i class="oc-sci-e">riparia</i>)
+      end
+    end
+
+    test "sets a formula's sign roman between its parents" do
+      assert sci(name: "agrifolia × parvula") =~
+               ~s(<i class="oc-sci-e">agrifolia</i> <span class="oc-sci-x">×</span>\u00A0<i class="oc-sci-e">parvula</i>)
+    end
+
+    test "reads a stated genus and keeps rank words roman" do
+      html = sci(name: "Quercus alba var. latiloba")
+
+      assert html =~ ~s(<i class="oc-sci-g">Quercus</i> <i class="oc-sci-e">alba</i>)
+      assert html =~ ~s(<span class="oc-sci-r">var.</span>\u00A0<i class="oc-sci-e">latiloba</i>)
+      refute html =~ "Quercus</i> <i class=\"oc-sci-g\">"
+    end
+
+    test "sets a name above species after its rank word, with no genus" do
+      html = sci(name: "Coccineae", rank: "subsect.")
+
+      assert html =~
+               ~s("><span class="oc-sci-r">subsect.</span>\u00A0<i class="oc-sci-e">Coccineae</i></span>)
+
+      refute html =~ "oc-sci-g"
+    end
+
+    test "sets a bare name at 400 for running text" do
+      html = sci(name: "Cerris", genus: nil, weight: "regular")
+
+      assert html =~ ~s(<span class="oc-sci oc-sci-regular"><i class="oc-sci-e">Cerris</i></span>)
+    end
+
+    test "escapes the name and author" do
+      html = sci(name: "<b>alba</b>", author: "L. & <i>x</i>")
+
+      refute html =~ "<b>"
+      assert html =~ "&lt;b&gt;alba&lt;/b&gt;"
+      assert html =~ "L. &amp; &lt;i&gt;x&lt;/i&gt;"
+    end
+  end
+
   test "section_heading/1 renders the label and an optional note" do
     html =
       render_component(&DesignComponents.section_heading/1,

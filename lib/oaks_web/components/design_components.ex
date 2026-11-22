@@ -13,7 +13,7 @@ defmodule OaksWeb.DesignComponents do
   The rules these components keep:
 
     * Scientific names are italic in the serif; rank words, authorities and
-      the hybrid sign stay roman. Callers wrap names in `<i>`.
+      the hybrid sign stay roman. Every name goes through `sci_name/1`.
     * Jeff's words appear in curly quotes and are followed by a
       `source_mark/1`, every time.
     * Agree, differs and unreviewed are drawn marks (`standing_mark/1`),
@@ -97,6 +97,136 @@ defmodule OaksWeb.DesignComponents do
     </nav>
     """
   end
+
+  @rank_words ~w(subsp. ssp. var. subvar. f. nothosubsp. nothovar. subg. sect. subsect. ser.)
+
+  @doc """
+  Renders a scientific name, the one way names are set anywhere on the
+  site (DESIGN.md, the Botanical Italic Rule).
+
+  The name is italic in the serif: the genus at weight 400 and the
+  epithets at 600 (`weight="regular"` sets them all at 400, for names in
+  running text). The hybrid sign stays roman and spaced (`Quercus ×
+  raineri`), and so do rank words (`var.`, `subsp.`, `sect.` ...). The
+  author follows in roman ink-3. The size comes from the surrounding text.
+
+  `name` is the name as stored: an epithet (`"alba"`), a named hybrid with
+  or without its sign (`"× raineri"`, `"×bebbiana"`), a formula
+  (`"agrifolia × parvula"`), an infraspecific name (`"agrifolia
+  oxyadenia"`, `"alba var. latiloba"`) or a full name with its genus
+  (`"Quercus alba"`, `"Q. alba"`). The genus is added unless the name
+  carries one or `genus={nil}`.
+
+  For a name above species (a subgenus, section or subsection), pass
+  `rank` and the bare name: `<.sci_name name="Lobatae" rank="sect." />`
+  renders "sect. *Lobatae*" with no genus. `rank={nil}` with `genus={nil}`
+  renders a bare uninomial.
+
+  ## Examples
+
+      <.sci_name name="alba" author="L." />
+      <.sci_name name={s.scientific_name} hybrid={s.is_hybrid} abbreviate />
+      <.sci_name name="Cerris" genus={nil} weight="regular" />
+      <.sci_name name="Albae" rank="subsect." />
+  """
+  attr :name, :string, required: true, doc: "the name as stored"
+  attr :hybrid, :boolean, default: false, doc: "a named hybrid stored without its sign"
+  attr :genus, :any, default: "Quercus", doc: "the genus to add (a string), or nil for none"
+  attr :abbreviate, :boolean, default: false, doc: "abbreviate the genus (Q.)"
+  attr :rank, :string, default: nil, doc: "a rank word before a name above species"
+  attr :author, :string, default: nil, doc: "the authority, set roman after the name"
+  attr :weight, :string, values: ~w(epithet regular), default: "epithet"
+  attr :class, :any, default: nil
+
+  def sci_name(assigns) do
+    assigns = assign(assigns, :parts, sci_name_parts(assigns))
+
+    ~H"""
+    <span class={["oc-sci", @weight == "regular" && "oc-sci-regular", @class]}>{@parts}</span>
+    """
+  end
+
+  # The name as one run of escaped HTML, so no template whitespace falls
+  # between its parts: genus, rank words, signs and epithets joined by
+  # spaces (no-break after a rank word and the hybrid sign, so neither
+  # ends a line).
+  defp sci_name_parts(assigns) do
+    {genus, words} = split_genus(assigns)
+
+    rank = if assigns.rank, do: [{:roman, assigns.rank}], else: []
+
+    tokens =
+      rank ++
+        Enum.map(words, fn
+          w when w in ["×", "x"] -> {:sign, "×"}
+          w when w in @rank_words -> {:roman, w}
+          w -> {:epithet, w}
+        end)
+
+    tokens = if genus, do: [{:genus, genus} | tokens], else: tokens
+
+    name = join_tokens(tokens)
+
+    author =
+      if assigns.author not in [nil, ""],
+        do: [" ", ~s(<span class="oc-sci-a">), escape(assigns.author), "</span>"],
+        else: []
+
+    Phoenix.HTML.raw([name, author])
+  end
+
+  defp split_genus(%{
+         name: name,
+         hybrid: hybrid,
+         genus: genus,
+         abbreviate: abbreviate,
+         rank: rank
+       }) do
+    name = String.trim(name)
+
+    {stated_genus, rest} =
+      case Regex.run(~r/^(Quercus|Q\.)(?:\s+(.*))?$/u, name) do
+        [_, "Q." | rest] -> {"Quercus", Enum.join(rest)}
+        [_, g | rest] -> {g, Enum.join(rest)}
+        nil -> {nil, name}
+      end
+
+    rest = if rank, do: rest, else: OaksWeb.SpeciesName.label(rest, hybrid)
+    genus = if rank, do: nil, else: stated_genus || genus
+    genus = if genus && abbreviate, do: String.first(genus) <> ".", else: genus
+
+    {genus, String.split(rest, ~r/\s+/u, trim: true) |> split_attached_sign()}
+  end
+
+  # "×bebbiana" inside a name reads as the sign and the epithet.
+  defp split_attached_sign(words) do
+    Enum.flat_map(words, fn
+      "×" <> rest when rest != "" -> ["×", rest]
+      w -> [w]
+    end)
+  end
+
+  defp join_tokens(tokens) do
+    tokens
+    |> Enum.with_index()
+    |> Enum.map(fn {{kind, text}, i} ->
+      sep =
+        cond do
+          i == 0 -> ""
+          elem(Enum.at(tokens, i - 1), 0) in [:roman, :sign] -> "\u00A0"
+          true -> " "
+        end
+
+      [sep, token_html(kind, text)]
+    end)
+  end
+
+  defp token_html(:genus, text), do: [~s(<i class="oc-sci-g">), escape(text), "</i>"]
+  defp token_html(:epithet, text), do: [~s(<i class="oc-sci-e">), escape(text), "</i>"]
+  defp token_html(:roman, text), do: [~s(<span class="oc-sci-r">), escape(text), "</span>"]
+  defp token_html(:sign, text), do: [~s(<span class="oc-sci-x">), escape(text), "</span>"]
+
+  defp escape(text), do: text |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
   @doc """
   Renders a section heading: an uppercase Archivo label standing on a 2px
