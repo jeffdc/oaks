@@ -2,7 +2,9 @@ defmodule OaksWeb.AuthComponents do
   @moduledoc """
   Pieces shared by the login, setup and security settings pages
   (`OaksWeb.UserSessionController`, `OaksWeb.UserSetupController`,
-  `OaksWeb.UserSettingsController`). They reuse the settings page styles.
+  `OaksWeb.UserSettingsController`). Fields are the system field
+  (CoreComponents' `oc-` field classes); the rest uses the settings page
+  styles in app.css.
   """
   use Phoenix.Component
 
@@ -14,14 +16,15 @@ defmodule OaksWeb.AuthComponents do
 
   def auth_field(assigns) do
     ~H"""
-    <div class="settings-form-group">
-      <label for={@field.id} class="settings-form-label">{@label}</label>
+    <div class="oc-field">
+      <label for={@field.id} class="oc-label">{@label}</label>
       <input
         type={@type}
         id={@field.id}
         name={@field.name}
         value={if @type == "password", do: nil, else: @field.value}
-        class="settings-form-input"
+        class="oc-input"
+        aria-invalid={@field.errors != [] && "true"}
         {@rest}
       />
       <.field_errors field={@field} />
@@ -29,20 +32,25 @@ defmodule OaksWeb.AuthComponents do
     """
   end
 
-  @doc "A form field's errors."
+  @doc "A form field's errors, marked as CoreComponents marks them: bold ink and a drawn sign."
   attr :field, Phoenix.HTML.FormField, required: true
 
   def field_errors(assigns) do
     assigns = assign(assigns, :errors, Enum.map(assigns.field.errors, &translate_error/1))
 
     ~H"""
-    <p :for={error <- @errors} class="settings-message settings-message-error" role="alert">
+    <p :for={error <- @errors} class="oc-error" role="alert">
+      <svg viewBox="0 0 14 14" aria-hidden="true">
+        <circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.6" />
+        <path d="M7 3.6v4.2" stroke="currentColor" stroke-width="1.8" />
+        <circle cx="7" cy="10.2" r="1" fill="currentColor" />
+      </svg>
       {error}
     </p>
     """
   end
 
-  @doc "A message box: an error or a confirmation."
+  @doc "A message: an error (an ink plate) or a confirmation (an ink outline)."
   attr :kind, :atom, values: [:error, :success], default: :error
   slot :inner_block, required: true
 
@@ -66,7 +74,7 @@ defmodule OaksWeb.AuthComponents do
       Save these recovery codes somewhere safe, such as a password manager. Each one
       works once in place of a code from your authenticator app. They won't be shown again.
     </p>
-    <ol id="recovery-codes" class="settings-info-box" style="font-family: ui-monospace, monospace;">
+    <ol id="recovery-codes" class="settings-codes">
       <li :for={code <- @codes}>{code}</li>
     </ol>
     """

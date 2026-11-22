@@ -144,85 +144,56 @@ defmodule OaksWeb.AnalyticsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-4xl mx-auto" data-active-range={@range}>
-      <header class="mb-8">
-        <h1
-          class="text-3xl font-bold mb-2"
-          style="font-family: var(--font-serif); color: var(--color-forest-800, #165132);"
-        >
-          Site Analytics
-        </h1>
-        <p style="color: var(--color-text-secondary);">
+    <div class="page-wide" data-active-range={@range}>
+      <.header>
+        Site Analytics
+        <:subtitle>
           Privacy-respecting page view stats for the Oak Compendium.
-          Showing <strong>{range_label(@range)}</strong> ({@from} &mdash; {@to}).
-        </p>
-      </header>
+          Showing <strong>{range_label(@range)}</strong> ({@from} &ndash; {@to}).
+        </:subtitle>
+      </.header>
 
       <%!-- Range buttons --%>
-      <div class="flex flex-wrap items-center gap-2 mb-6" role="group" aria-label="Date range">
-        <span class="text-sm" style="color: var(--color-text-secondary);">Period:</span>
+      <div class="analytics-ranges" role="group" aria-label="Date range">
+        <span class="analytics-ranges-label">Period:</span>
         <button
           :for={{key, label} <- @ranges}
           type="button"
           phx-click="set_range"
           phx-value-range={key}
-          class={[
-            "px-3 py-1 text-sm rounded-md border transition-colors",
-            if(key == @range,
-              do: "bg-forest-700 text-white border-forest-700",
-              else: "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
-            )
-          ]}
+          class="analytics-range"
+          aria-pressed={to_string(key == @range)}
         >
           {label}
         </button>
       </div>
 
-      <%!-- Totals header card --%>
-      <section class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div class="card p-5">
-          <div class="text-sm uppercase tracking-wide" style="color: var(--color-text-tertiary);">
-            Page Views
+      <%!-- Totals --%>
+      <section>
+        <dl class="page-figures" id="analytics-totals">
+          <div>
+            <dt>Page Views</dt>
+            <dd>{@stats.page_views}</dd>
           </div>
-          <div
-            class="text-3xl font-semibold mt-1"
-            style="color: var(--color-forest-800);"
-          >
-            {@stats.page_views}
+          <div>
+            <dt>Unique Visitors</dt>
+            <dd>{@stats.unique_visitors}</dd>
           </div>
-        </div>
-        <div class="card p-5">
-          <div class="text-sm uppercase tracking-wide" style="color: var(--color-text-tertiary);">
-            Unique Visitors
-          </div>
-          <div
-            class="text-3xl font-semibold mt-1"
-            style="color: var(--color-forest-800);"
-          >
-            {@stats.unique_visitors}
-          </div>
-        </div>
+        </dl>
       </section>
 
-      <%!-- Sparkline --%>
+      <%!-- Daily page views: an inline SVG line --%>
       <section
         :if={Enum.any?(@daily, &(&1.page_views > 0))}
-        class="card p-5 mb-6"
+        class="analytics-chart"
         aria-label="Daily page views"
       >
-        <div class="flex items-baseline justify-between mb-2">
-          <h2 class="text-lg font-semibold" style="color: var(--color-forest-800);">
-            Daily Page Views
-          </h2>
-          <span class="text-xs" style="color: var(--color-text-tertiary);">
-            {length(@daily)} day(s)
-          </span>
-        </div>
+        <.section_heading>
+          Daily Page Views<:note>{length(@daily)} day(s)</:note>
+        </.section_heading>
         <svg
           viewBox="0 0 300 60"
           preserveAspectRatio="none"
-          class="w-full h-16"
-          style="color: var(--color-forest-600, #2f7a4d);"
           role="img"
           aria-label="Sparkline of daily page views"
         >
@@ -232,154 +203,93 @@ defmodule OaksWeb.AnalyticsLive do
             stroke-width="2"
             stroke-linejoin="round"
             stroke-linecap="round"
+            vector-effect="non-scaling-stroke"
             points={sparkline_points(@daily)}
           />
         </svg>
+        <div class="analytics-chart-dates" aria-hidden="true">
+          <span>{@from}</span>
+          <span>{@to}</span>
+        </div>
       </section>
 
       <%!-- Top pages table --%>
-      <section class="card p-0 mb-6 overflow-hidden">
-        <div class="px-5 py-3 border-b border-stone-200 bg-stone-50">
-          <h2 class="text-lg font-semibold" style="color: var(--color-forest-800);">
-            Top Pages
-          </h2>
+      <section>
+        <.section_heading>Top Pages</.section_heading>
+        <div class="oc-table-wrap">
+          <table class="oc-table analytics-table">
+            <thead>
+              <tr>
+                <th scope="col">Path</th>
+                <th scope="col" class="analytics-num">Views</th>
+                <th scope="col" class="analytics-num">Unique Visitors</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr :for={page <- @top_pages}>
+                <td class="analytics-path">{display_path(page.path)}</td>
+                <td class="analytics-num">{page.page_views}</td>
+                <td class="analytics-num">{page.unique_visitors}</td>
+              </tr>
+              <tr :if={@top_pages == []}>
+                <td colspan="3" class="oc-empty">No page views recorded for this period.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <table class="w-full text-sm">
-          <thead class="bg-stone-50">
-            <tr>
-              <th class="text-left px-4 py-2 font-medium" style="color: var(--color-text-secondary);">
-                Path
-              </th>
-              <th
-                class="text-right px-4 py-2 font-medium"
-                style="color: var(--color-text-secondary);"
-              >
-                Views
-              </th>
-              <th
-                class="text-right px-4 py-2 font-medium"
-                style="color: var(--color-text-secondary);"
-              >
-                Unique Visitors
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              :for={page <- @top_pages}
-              class="border-t border-stone-100"
-            >
-              <td class="px-4 py-2 font-mono text-xs break-all">{display_path(page.path)}</td>
-              <td class="px-4 py-2 text-right">{page.page_views}</td>
-              <td class="px-4 py-2 text-right">{page.unique_visitors}</td>
-            </tr>
-            <tr :if={@top_pages == []}>
-              <td
-                colspan="3"
-                class="px-4 py-6 text-center"
-                style="color: var(--color-text-tertiary);"
-              >
-                No page views recorded for this period.
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </section>
 
       <%!-- Errors (collapsed by default) --%>
-      <details :if={@top_404s != [] or @top_other_errors != []} class="card p-0 mb-6 overflow-hidden">
-        <summary class="px-5 py-3 bg-stone-50 cursor-pointer flex items-center justify-between">
-          <h2 class="text-lg font-semibold" style="color: var(--color-forest-800);">
-            Errors
-          </h2>
-          <span class="text-sm" style="color: var(--color-text-tertiary);">
+      <details :if={@top_404s != [] or @top_other_errors != []} class="analytics-errors">
+        <summary class="oc-section-heading">
+          <h2>Errors</h2>
+          <small class="oc-section-heading-note">
             {length(@top_404s)} 404 paths &middot; {length(@top_other_errors)} other
-          </span>
+          </small>
         </summary>
 
         <%!-- Top 404s --%>
-        <div :if={@top_404s != []} class="border-t border-stone-200">
-          <div class="px-5 py-2 bg-stone-50/50 border-b border-stone-100">
-            <h3
-              class="text-sm font-medium uppercase tracking-wide"
-              style="color: var(--color-text-secondary);"
-            >
-              Top 404s
-            </h3>
+        <div :if={@top_404s != []}>
+          <h3>Top 404s</h3>
+          <div class="oc-table-wrap">
+            <table class="oc-table analytics-table">
+              <thead>
+                <tr>
+                  <th scope="col">Path</th>
+                  <th scope="col" class="analytics-num">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr :for={row <- @top_404s}>
+                  <td class="analytics-path">{display_path(row.path)}</td>
+                  <td class="analytics-num">{row.count}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <table class="w-full text-sm">
-            <thead class="bg-stone-50">
-              <tr>
-                <th
-                  class="text-left px-4 py-2 font-medium"
-                  style="color: var(--color-text-secondary);"
-                >
-                  Path
-                </th>
-                <th
-                  class="text-right px-4 py-2 font-medium"
-                  style="color: var(--color-text-secondary);"
-                >
-                  Count
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                :for={row <- @top_404s}
-                class="border-t border-stone-100"
-              >
-                <td class="px-4 py-2 font-mono text-xs break-all">{display_path(row.path)}</td>
-                <td class="px-4 py-2 text-right">{row.count}</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
 
         <%!-- Other 4xx / 5xx --%>
-        <div :if={@top_other_errors != []} class="border-t border-stone-200">
-          <div class="px-5 py-2 bg-stone-50/50 border-b border-stone-100">
-            <h3
-              class="text-sm font-medium uppercase tracking-wide"
-              style="color: var(--color-text-secondary);"
-            >
-              Top Other Errors
-            </h3>
+        <div :if={@top_other_errors != []}>
+          <h3>Top Other Errors</h3>
+          <div class="oc-table-wrap">
+            <table class="oc-table analytics-table">
+              <thead>
+                <tr>
+                  <th scope="col">Path</th>
+                  <th scope="col" class="analytics-num">Status</th>
+                  <th scope="col" class="analytics-num">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr :for={row <- @top_other_errors}>
+                  <td class="analytics-path">{display_path(row.path)}</td>
+                  <td class="analytics-num">{row.status}</td>
+                  <td class="analytics-num">{row.count}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <table class="w-full text-sm">
-            <thead class="bg-stone-50">
-              <tr>
-                <th
-                  class="text-left px-4 py-2 font-medium"
-                  style="color: var(--color-text-secondary);"
-                >
-                  Path
-                </th>
-                <th
-                  class="text-right px-4 py-2 font-medium"
-                  style="color: var(--color-text-secondary);"
-                >
-                  Status
-                </th>
-                <th
-                  class="text-right px-4 py-2 font-medium"
-                  style="color: var(--color-text-secondary);"
-                >
-                  Count
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                :for={row <- @top_other_errors}
-                class="border-t border-stone-100"
-              >
-                <td class="px-4 py-2 font-mono text-xs break-all">{display_path(row.path)}</td>
-                <td class="px-4 py-2 text-right font-mono">{row.status}</td>
-                <td class="px-4 py-2 text-right">{row.count}</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </details>
     </div>

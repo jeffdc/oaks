@@ -55,36 +55,20 @@ defmodule OaksWeb.HelpMarkdownLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-3xl mx-auto">
-      <h2
-        class="text-3xl font-bold mb-8"
-        style="font-family: var(--font-serif); color: var(--color-forest-800, #165132);"
-      >
-        Markdown Formatting Guide
-      </h2>
+    <div class="page-read">
+      <.header>Markdown Formatting Guide</.header>
 
-      <p
-        class="leading-relaxed mb-8"
-        style="color: var(--color-text-primary); font-size: 1.0625rem; line-height: 1.7;"
-      >
-        Text fields in the Oak Compendium support
-        <a href="https://github.github.com/gfm/" target="_blank" rel="noopener noreferrer">
-          GitHub Flavored Markdown
-        </a>
-        (GFM). Here's a quick reference of supported syntax.
-      </p>
+      <section class="prose-content">
+        <p>
+          Text fields in the Oak Compendium support
+          <a href="https://github.github.com/gfm/" target="_blank" rel="noopener noreferrer">GitHub Flavored Markdown</a>
+          (GFM). Here's a quick reference of supported syntax.
+        </p>
+      </section>
 
       <.md_section :for={section <- @sections} {section} />
 
-      <div class="mt-10">
-        <.link
-          navigate={~p"/"}
-          class="text-sm font-medium"
-          style="color: var(--color-forest-600);"
-        >
-          &larr; Back to home
-        </.link>
-      </div>
+      <.back navigate={~p"/"}>Back to home</.back>
     </div>
     """
   end
@@ -95,42 +79,19 @@ defmodule OaksWeb.HelpMarkdownLive do
 
   defp md_section(assigns) do
     ~H"""
-    <section class="mb-8">
-      <h3 class="section-title">{@title}</h3>
-      <p
-        :if={@description}
-        class="leading-relaxed mb-3"
-        style="color: var(--color-text-primary); font-size: 1.0625rem; line-height: 1.7;"
-      >
-        {@description}
-      </p>
-      <div
-        class="grid grid-cols-2 gap-4 max-[640px]:grid-cols-1"
-        style="margin-bottom: 0.5rem;"
-      >
+    <section>
+      <.section_heading>{@title}</.section_heading>
+      <div :if={@description} class="prose-content">
+        <p>{@description}</p>
+      </div>
+      <div class="page-md-example">
         <div>
-          <div
-            class="text-xs font-semibold mb-1 uppercase tracking-wide"
-            style="color: var(--color-text-tertiary);"
-          >
-            Syntax
-          </div>
-          <pre
-            class="text-sm p-3 rounded-lg overflow-x-auto"
-            style="background-color: var(--color-surface-alt, #f5f5f5); border: 1px solid var(--color-border); color: var(--color-text-primary); white-space: pre-wrap; word-wrap: break-word;"
-          >{@example}</pre>
+          <div class="page-md-label">Syntax</div>
+          <pre class="page-md-syntax">{@example}</pre>
         </div>
         <div>
-          <div
-            class="text-xs font-semibold mb-1 uppercase tracking-wide"
-            style="color: var(--color-text-tertiary);"
-          >
-            Result
-          </div>
-          <div
-            class="text-sm p-3 rounded-lg prose-content"
-            style="background-color: var(--color-surface); border: 1px solid var(--color-border);"
-          >
+          <div class="page-md-label">Result</div>
+          <div class="page-md-result prose-content">
             {raw(Markdown.render_html(@example))}
           </div>
         </div>

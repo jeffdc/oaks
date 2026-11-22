@@ -1,14 +1,14 @@
 <div class="settings-container" id="setup-page">
-  <h1 class="settings-title">Set up login</h1>
+  <.header>Set up login</.header>
 
-  <section class="card p-6">
+  <section class="settings-section">
     <p class="settings-description">
       Setting up login for <strong>{@user.email}</strong>. This replaces any password,
       authenticator app and recovery codes the account had, and logs out every other session.
     </p>
 
     <.form for={@form} id="setup-form" action={~p"/users/setup"}>
-      <h2 class="section-title" style="margin-bottom: 0.5rem;">1. Choose a password</h2>
+      <.section_heading class="mt-s6">1. Choose a password</.section_heading>
       <.auth_field
         field={@form[:password]}
         type="password"
@@ -24,19 +24,15 @@
         required
       />
 
-      <h2 class="section-title" style="margin-bottom: 0.5rem;">2. Add the authenticator app</h2>
+      <.section_heading class="mt-s7">2. Add the authenticator app</.section_heading>
       <p class="settings-description">
         Scan this code with an authenticator app (1Password, Google Authenticator, Authy and the like),
         or type in the key below it.
       </p>
-      <div id="setup-qr" style="background: white; display: inline-block; padding: 0.5rem;">
+      <div id="setup-qr" class="settings-qr">
         {@qr_svg}
       </div>
-      <p
-        id="setup-secret"
-        class="settings-description"
-        style="font-family: ui-monospace, monospace;"
-      >
+      <p id="setup-secret" class="settings-secret">
         {@display_secret}
       </p>
       <.auth_field
@@ -49,7 +45,7 @@
       />
 
       <div class="settings-button-group">
-        <button type="submit" class="settings-btn settings-btn-primary">Finish setup</button>
+        <.button type="submit" variant="primary">Finish setup</.button>
       </div>
     </.form>
   </section>

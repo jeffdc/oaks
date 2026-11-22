@@ -1,15 +1,15 @@
 <div class="settings-container" id="recovery-codes-page">
-  <h1 class="settings-title">Recovery codes</h1>
+  <.header>Recovery codes</.header>
 
-  <section class="card p-6">
+  <section class="settings-section">
     <p class="settings-description">
       You have <strong id="recovery-codes-remaining">{@remaining}</strong>
       unused recovery codes. Making new ones replaces all of them.
     </p>
     <.form for={%{}} id="regenerate-codes-form" action={~p"/users/settings/recovery-codes"}>
       <div class="settings-button-group">
-        <button type="submit" class="settings-btn settings-btn-primary">Make new codes</button>
-        <.link href={~p"/settings"} class="settings-btn settings-btn-secondary">Cancel</.link>
+        <.button type="submit" variant="primary">Make new codes</.button>
+        <.button href={~p"/settings"}>Cancel</.button>
       </div>
     </.form>
   </section>

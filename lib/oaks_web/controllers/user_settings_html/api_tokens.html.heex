@@ -1,8 +1,8 @@
 <div class="settings-container" id="api-tokens-page">
-  <h1 class="settings-title">Agent tokens</h1>
+  <.header>Agent tokens</.header>
 
-  <section class="card p-6">
-    <h2 class="section-title" style="margin-bottom: 0.5rem;">New token</h2>
+  <section class="settings-section">
+    <.section_heading>New token</.section_heading>
     <p class="settings-description">
       A token lets an agent use the private API with the scopes you pick. It's shown once,
       when you make it.
@@ -15,8 +15,8 @@
         required
       />
 
-      <fieldset class="settings-form-group">
-        <legend class="settings-form-label">Scopes</legend>
+      <fieldset class="settings-fieldset">
+        <legend class="oc-label">Scopes</legend>
         <input type="hidden" name={@form[:scopes].name <> "[]"} value="" />
         <label :for={scope <- @scopes} class="settings-check">
           <input
@@ -30,12 +30,12 @@
         <.field_errors field={@form[:scopes]} />
       </fieldset>
 
-      <div class="settings-form-group">
-        <label for={@form[:lifetime_in_days].id} class="settings-form-label">Expires after</label>
+      <div class="oc-field">
+        <label for={@form[:lifetime_in_days].id} class="oc-label">Expires after</label>
         <select
           id={@form[:lifetime_in_days].id}
           name={@form[:lifetime_in_days].name}
-          class="settings-form-input"
+          class="oc-input"
         >
           <option
             :for={days <- @lifetimes}
@@ -48,14 +48,16 @@
       </div>
 
       <div class="settings-button-group">
-        <button type="submit" class="settings-btn settings-btn-primary">Make token</button>
-        <.link href={~p"/settings"} class="settings-btn settings-btn-secondary">Cancel</.link>
+        <.button type="submit" variant="primary">Make token</.button>
+        <.button href={~p"/settings"}>Cancel</.button>
       </div>
     </.form>
   </section>
 
-  <section class="card p-6" style="margin-top: 1.5rem;">
-    <h2 class="section-title" style="margin-bottom: 0.5rem;">Tokens</h2>
+  <section class="settings-section">
+    <.section_heading>
+      Tokens<:note :if={@tokens != []}>{length(@tokens)}</:note>
+    </.section_heading>
     <p :if={@tokens == []} class="settings-description" id="api-tokens-none">
       No tokens yet.
     </p>
@@ -82,7 +84,7 @@
           method="delete"
           id={"revoke-api-token-#{token.id}"}
         >
-          <button type="submit" class="settings-btn settings-btn-secondary">Revoke</button>
+          <.button type="submit" size="compact">Revoke</.button>
         </.form>
       </li>
     </ul>
