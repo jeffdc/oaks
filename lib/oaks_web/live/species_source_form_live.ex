@@ -12,6 +12,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
   alias Oaks.Sources.SpeciesSource
   alias Oaks.Species
   alias OaksWeb.Params
+  alias OaksWeb.SpeciesName
 
   @impl true
   def mount(_params, _session, socket) do
@@ -50,7 +51,8 @@ defmodule OaksWeb.SpeciesSourceFormLive do
 
         socket
         |> assign(
-          page_title: "Add source data — Quercus #{epithet(species.scientific_name)}",
+          page_title:
+            "Add source data — #{SpeciesName.full_name(species.scientific_name, species.is_hybrid)}",
           species: species,
           species_source: species_source,
           available_sources: available,
@@ -80,7 +82,8 @@ defmodule OaksWeb.SpeciesSourceFormLive do
 
             socket
             |> assign(
-              page_title: "Edit source data — Quercus #{epithet(species.scientific_name)}",
+              page_title:
+                "Edit source data — #{SpeciesName.full_name(species.scientific_name, species.is_hybrid)}",
               species: species,
               species_source: species_source,
               form: to_form(changeset)
@@ -175,16 +178,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
         <.header>
           {if(@live_action == :new, do: "Add source data", else: "Edit source data")}
           <:subtitle>
-            <i class="font-serif text-lg">
-              Quercus{" "}
-              <span
-                :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)}
-                class="not-italic"
-              >
-                &times;
-              </span>
-              {epithet(@species.scientific_name)}
-            </i>
+            <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} />
           </:subtitle>
         </.header>
       </:head>

@@ -284,13 +284,12 @@ defmodule OaksWeb.SpeciesDetailLive do
       <.taxonomy_breadcrumb species={@species} />
       <div class="species-current">
         <h1 class="species-title">
-          <em>
-            <span class="species-genus">{"Quercus "}</span><span
-              :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)}
-              class="sci-roman"
-            >{"× "}</span>{sci_html(epithet(@species.scientific_name))}
-          </em>
-          <span :if={@species.author} class="author-text">{@species.author}</span>
+          <.sci_name
+            name={@species.scientific_name}
+            hybrid={@species.is_hybrid}
+            author={@species.author}
+            size="display"
+          />
         </h1>
         <div class="species-meta">
           <span>{if(@species.is_hybrid, do: "Hybrid", else: "Species")}</span>
@@ -340,13 +339,13 @@ defmodule OaksWeb.SpeciesDetailLive do
     >
       <span class="taxonomy-label">Taxonomy:</span>
       <.link navigate={~p"/taxonomy"} class="taxonomy-link">
-        <span class="taxonomy-name">Quercus</span>
+        <.sci_name name="Quercus" level="genus" />
         <span class="taxonomy-level-label">(genus)</span>
       </.link>
       <span :if={@species.subgenus}>
         <span class="taxonomy-separator">&rsaquo;</span>
         <.link navigate={~p"/taxonomy/#{@species.subgenus}"} class="taxonomy-link">
-          <span class="taxonomy-name">{@species.subgenus}</span>
+          <.sci_name name={@species.subgenus} level="subgenus" />
           <span class="taxonomy-level-label">(subgenus)</span>
         </.link>
       </span>
@@ -356,7 +355,7 @@ defmodule OaksWeb.SpeciesDetailLive do
           navigate={~p"/taxonomy/#{@species.subgenus || "unknown"}/#{@species.section}"}
           class="taxonomy-link"
         >
-          <span class="taxonomy-name">{@species.section}</span>
+          <.sci_name name={@species.section} level="section" />
           <span class="taxonomy-level-label">(section)</span>
         </.link>
       </span>
@@ -368,7 +367,7 @@ defmodule OaksWeb.SpeciesDetailLive do
           }
           class="taxonomy-link"
         >
-          <span class="taxonomy-name">{@species.subsection}</span>
+          <.sci_name name={@species.subsection} level="subsection" />
           <span class="taxonomy-level-label">(subsection)</span>
         </.link>
       </span>
@@ -380,7 +379,7 @@ defmodule OaksWeb.SpeciesDetailLive do
           }
           class="taxonomy-link"
         >
-          <span class="taxonomy-name">{@species.complex}</span>
+          <.sci_name name={@species.complex} level="complex" />
           <span class="taxonomy-level-label">(complex)</span>
         </.link>
       </span>
@@ -399,7 +398,7 @@ defmodule OaksWeb.SpeciesDetailLive do
       <ul class="species-rows">
         <li :for={parent <- Enum.reject([@species.parent1, @species.parent2], &is_nil/1)}>
           <.link navigate={~p"/species/#{parent}"} class="species-row-link">
-            <.sci name={"Quercus #{parent}"} />
+            <.sci_name name={parent} abbreviate size="title" />
           </.link>
         </li>
       </ul>
@@ -419,10 +418,13 @@ defmodule OaksWeb.SpeciesDetailLive do
       <ul class="species-rows hybrid-list">
         <li :for={hybrid <- @hybrids} class="hybrid-item">
           <.link navigate={~p"/species/#{hybrid.name}"} class="hybrid-name">
-            <.sci name={"Q. #{SpeciesName.label(hybrid.name, true)}"} />
+            <.sci_name name={hybrid.name} hybrid abbreviate size="title" />
           </.link>
           <span :if={other = get_other_parent(hybrid, @species_name)} class="hybrid-with">
-            with <.link navigate={~p"/species/#{other}"}><.sci name={other} /></.link>
+            with
+            <.link navigate={~p"/species/#{other}"}>
+              <.sci_name name={other} genus={nil} weight="regular" />
+            </.link>
           </span>
         </li>
       </ul>
@@ -439,7 +441,7 @@ defmodule OaksWeb.SpeciesDetailLive do
       <ul class="species-rows">
         <li :for={name <- @related}>
           <.link navigate={~p"/species/#{name}"} class="species-row-link">
-            <.sci name={"Quercus #{name}"} />
+            <.sci_name name={name} abbreviate size="title" />
           </.link>
         </li>
       </ul>
@@ -455,7 +457,9 @@ defmodule OaksWeb.SpeciesDetailLive do
       <.section_heading>Subspecies &amp; Varieties</.section_heading>
       <ul class="species-rows">
         <li :for={{name, author} <- Enum.map(@items, &name_and_authority/1)}>
-          <span class="species-row-name"><.sci name={name} />{author && " " <> author}</span>
+          <span class="species-row-name">
+            <.sci_name name={name} author={author} abbreviate size="title" />
+          </span>
         </li>
       </ul>
     </section>
@@ -476,20 +480,10 @@ defmodule OaksWeb.SpeciesDetailLive do
             {{name, author}, i} <- @synonyms |> Enum.map(&name_and_authority/1) |> Enum.with_index(1)
           }
           class="species-synonym"
-        ><.sci name={name} />{author && " " <> author}{if i < length(@synonyms), do: ", "}</span>
+        ><.sci_name name={name} author={author} genus={nil} />{if i < length(@synonyms),
+          do: ", "}</span>
       </p>
     </section>
-    """
-  end
-
-  # A scientific name in the serif: names italic, the hybrid sign and rank
-  # words roman. Built as one run of HTML so no template whitespace falls
-  # between the parts.
-  attr :name, :string, required: true
-
-  defp sci(assigns) do
-    ~H"""
-    <span class="sci">{sci_html(@name)}</span>
     """
   end
 
@@ -663,7 +657,7 @@ defmodule OaksWeb.SpeciesDetailLive do
         <div class="oc-modal-body">
           <p>
             Are you sure you want to delete
-            <.sci name={"Quercus #{epithet(@species.scientific_name)}"} />?
+            <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} weight="regular" />?
           </p>
           <p :if={@source_count > 0} class="species-dialog-warn">
             This will also remove data from {@source_count} source(s).
@@ -674,7 +668,11 @@ defmodule OaksWeb.SpeciesDetailLive do
             </p>
             <ul class="pl-4 list-disc">
               <li :for={ref <- @references}>
-                <.sci name={epithet(ref.species.scientific_name)} />
+                <.sci_name
+                  name={ref.species.scientific_name}
+                  hybrid={ref.species.is_hybrid}
+                  abbreviate
+                />
                 <span class="text-ink-3">
                   ({Enum.map_join(ref.fields, ", ", &reference_field_label/1)})
                 </span>
@@ -731,7 +729,8 @@ defmodule OaksWeb.SpeciesDetailLive do
         <div class="oc-modal-body">
           <p>
             Are you sure you want to remove <strong>{@target.source.name}</strong>
-            data from <.sci name={"Quercus #{epithet(@species.scientific_name)}"} />?
+            data from
+            <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} weight="regular" />?
           </p>
           <p class="species-dialog-note">This action cannot be undone.</p>
         </div>
@@ -779,7 +778,8 @@ defmodule OaksWeb.SpeciesDetailLive do
 
         <div class="oc-modal-body flex-1 min-h-0 flex flex-col">
           <p>
-            Select the species that <.sci name={"Quercus #{@species.scientific_name}"} />
+            Select the species that
+            <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} weight="regular" />
             will become a synonym of.
           </p>
 
@@ -816,14 +816,14 @@ defmodule OaksWeb.SpeciesDetailLive do
                   phx-value-name={species.scientific_name}
                   class="merge-target-option"
                 >
-                  <span class="merge-target-name">
-                    <.sci name={SpeciesName.label(species.scientific_name, species.is_hybrid)} />
-                  </span>
-                  <span :if={species.author} class="merge-target-author">
-                    {species.author}
-                  </span>
+                  <.sci_name
+                    name={species.scientific_name}
+                    hybrid={species.is_hybrid}
+                    author={species.author}
+                    size="title"
+                  />
                   <span :if={species.section} class="merge-target-meta">
-                    sect. <i>{species.section}</i>
+                    <.sci_name name={species.section} rank="sect." size="meta" />
                   </span>
                 </button>
               </li>
@@ -868,7 +868,7 @@ defmodule OaksWeb.SpeciesDetailLive do
        can_add_source: Sources.available_sources_for_species(species.id) != [],
        selected_source: selected_source,
        not_found: false,
-       page_title: "Quercus #{epithet(species.scientific_name)}"
+       page_title: SpeciesName.full_name(species.scientific_name, species.is_hybrid)
      )}
   end
 
@@ -950,24 +950,6 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   defp name_and_authority(%{"name" => name}), do: {name, nil}
   defp name_and_authority(other), do: {inspect(other), nil}
-
-  # The hybrid sign and rank words stay roman; everything else in a
-  # scientific name is italic.
-  @roman_part ~r/(×|\b(?:subsp|ssp|var|subvar|f|nothosubsp|nothovar)\.)/u
-
-  defp sci_html(name) do
-    @roman_part
-    |> Regex.split(name, include_captures: true, trim: true)
-    |> Enum.map(fn part ->
-      text = part |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-
-      if Regex.match?(@roman_part, part) and String.trim(part) == part,
-        do: [~s(<span class="sci-roman">), text, "</span>"],
-        else: ["<i>", text, "</i>"]
-    end)
-    |> IO.iodata_to_binary()
-    |> raw()
-  end
 
   defp link_host(url) do
     case URI.parse(url) do

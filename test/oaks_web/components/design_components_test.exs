@@ -26,8 +26,31 @@ defmodule OaksWeb.DesignComponentsTest do
       assert html =~ ~s(data-phx-link="redirect")
       assert html =~ ~r{<span class="oc-band-rk">sect\.</span>\s*<i>Lobatae</i>}
       assert html =~ ~r{<i>shumardii</i>\s*<span class="oc-band-rk">complex</span>}
-      assert html =~ ~r{<span aria-current="page"><i>Q\. shumardii</i></span>}
+      assert html =~ ~r{<span aria-current="page">\s*<i>Q\. shumardii</i>\s*</span>}
       refute html =~ "<details"
+    end
+
+    test "sets the current taxon's rank word in the band's roman" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.taxonomy_band>
+          <:current rank="sect."><i>Lobatae</i></:current>
+        </DesignComponents.taxonomy_band>
+        """)
+
+      assert html =~
+               ~r{<span aria-current="page">\s*<span class="oc-band-rk">\s*sect\.\s*</span>\s*<i>Lobatae</i>}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.taxonomy_band>
+          <:current rank="complex" rank_after><i>coccinea</i></:current>
+        </DesignComponents.taxonomy_band>
+        """)
+
+      assert html =~ ~r{<i>coccinea</i>\s*<span class="oc-band-rk">\s*complex\s*</span>}
     end
 
     test "adds the siblings menu when given" do
@@ -56,8 +79,50 @@ defmodule OaksWeb.DesignComponentsTest do
     test "sets the genus at 400 and the epithet at 600, with the author roman" do
       html = sci(name: "shumardii", author: "Buckley")
 
-      assert html =~ ~s(<i class="oc-sci-g">Quercus</i> <i class="oc-sci-e">shumardii</i> )
+      assert html =~
+               ~s(<span class="oc-sci-n"><i class="oc-sci-g">Quercus</i> <i class="oc-sci-e">shumardii</i></span> )
+
       assert html =~ ~s(<span class="oc-sci-a">Buckley</span></span>)
+    end
+
+    test "splits an authority stored in the name and sets it as the author" do
+      html = sci(name: "shumardii var. acerifolia E.J.Palmer 1927", genus: nil)
+
+      assert html =~
+               ~s(<i class="oc-sci-e">shumardii</i> <span class="oc-sci-r">var.</span>\u00A0<i class="oc-sci-e">acerifolia</i></span> <span class="oc-sci-a">E.J.Palmer 1927</span>)
+
+      assert sci(name: "phillyreoides Franch. non A.Gray", genus: nil) =~
+               ~s(<span class="oc-sci-a">Franch. non A.Gray</span>)
+
+      # The first word is the name, even when capitalised.
+      assert sci(name: "Coccineae", rank: "subsect.") =~ ~s(<i class="oc-sci-e">Coccineae</i>)
+      refute sci(name: "Coccineae", rank: "subsect.") =~ "oc-sci-a"
+
+      # A given author wins over the stored one.
+      assert sci(name: "candida Steud.", author: "Steudel") =~
+               ~s(<span class="oc-sci-a">Steudel</span>)
+    end
+
+    test "sets the size by the name's role" do
+      assert sci(name: "alba", size: "display") =~ ~s(class="oc-sci oc-sci-display)
+      assert sci(name: "alba", size: "headline") =~ ~s(class="oc-sci oc-sci-headline)
+      assert sci(name: "alba", size: "title") =~ ~s(class="oc-sci oc-sci-title)
+      assert sci(name: "Lobatae", rank: "sect.", size: "meta") =~ ~s(class="oc-sci oc-sci-meta)
+      refute sci(name: "alba") =~ "oc-sci-display"
+    end
+
+    test "names a taxon by its level" do
+      assert sci(name: "coccinea", level: "complex") =~
+               ~s(<i class="oc-sci-g">Q.</i> <i class="oc-sci-e">coccinea</i>)
+
+      for level <- ~w(genus subgenus section subsection) do
+        html = sci(name: "Lobatae", level: level)
+        refute html =~ "oc-sci-g"
+        assert html =~ ~s(<span class="oc-sci-n"><i class="oc-sci-e">Lobatae</i></span>)
+      end
+
+      assert sci(name: "Quercus", level: "subgenus") =~
+               ~s(<span class="oc-sci-n"><i class="oc-sci-e">Quercus</i></span>)
     end
 
     test "abbreviates the genus" do
@@ -88,7 +153,7 @@ defmodule OaksWeb.DesignComponentsTest do
       html = sci(name: "Coccineae", rank: "subsect.")
 
       assert html =~
-               ~s("><span class="oc-sci-r">subsect.</span>\u00A0<i class="oc-sci-e">Coccineae</i></span>)
+               ~s(<span class="oc-sci-n"><span class="oc-sci-r">subsect.</span>\u00A0<i class="oc-sci-e">Coccineae</i></span>)
 
       refute html =~ "oc-sci-g"
     end
@@ -96,12 +161,13 @@ defmodule OaksWeb.DesignComponentsTest do
     test "sets a bare name at 400 for running text" do
       html = sci(name: "Cerris", genus: nil, weight: "regular")
 
-      assert html =~ ~s(<span class="oc-sci oc-sci-regular"><i class="oc-sci-e">Cerris</i></span>)
+      assert html =~
+               ~s(<span class="oc-sci oc-sci-regular"><span class="oc-sci-n"><i class="oc-sci-e">Cerris</i></span></span>)
     end
 
     test "sets the genus on its own as a name, and a rank's name in full" do
       assert sci(name: "Quercus") =~
-               ~r{<span class="oc-sci ?"><i class="oc-sci-e">Quercus</i></span>}
+               ~r{<span class="oc-sci ?"><span class="oc-sci-n"><i class="oc-sci-e">Quercus</i></span></span>}
 
       assert sci(name: "Quercus", rank: "subg.") =~
                ~s(<span class="oc-sci-r">subg.</span>\u00A0<i class="oc-sci-e">Quercus</i>)

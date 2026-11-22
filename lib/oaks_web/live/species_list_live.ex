@@ -157,20 +157,19 @@ defmodule OaksWeb.SpeciesListLive do
       class="species-row"
     >
       <span class="species-row-name">
-        <i :if={!hybrid_sign?(@species.scientific_name, @species.is_hybrid)}>
-          Quercus {epithet(@species.scientific_name)}
-        </i>
-        <span :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)}>
-          <i>Quercus</i> &times; <i>{epithet(@species.scientific_name)}</i>
-        </span>
-        <span :if={@species.author} class="species-row-author">{@species.author}</span>
+        <.sci_name
+          name={@species.scientific_name}
+          hybrid={@species.is_hybrid}
+          author={@species.author}
+          size="title"
+        />
       </span>
       <span class="species-row-meta">
-        <span :if={@species.subgenus} class="species-row-rank hidden sm:inline">
-          <i>{@species.subgenus}</i>
+        <span :if={@species.subgenus} class="hidden sm:inline">
+          <.sci_name name={@species.subgenus} rank="subg." size="meta" />
         </span>
-        <span :if={@species.section} class="species-row-rank hidden md:inline">
-          sect. <i>{@species.section}</i>
+        <span :if={@species.section} class="hidden md:inline">
+          <.sci_name name={@species.section} rank="sect." size="meta" />
         </span>
         <.iucn_status
           :if={@species.conservation_status}

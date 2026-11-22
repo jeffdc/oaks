@@ -125,7 +125,12 @@ defmodule OaksWeb.SearchLive do
         <li :for={taxon <- @taxa}>
           <.link navigate={taxonomy_path(taxon)} class="search-result-row">
             <span class="search-result-main">
-              <i class="search-result-name search-result-name-taxon">{taxon.name}</i>
+              <.sci_name
+                name={taxon.name}
+                genus={if taxon.level == "complex", do: "Quercus"}
+                abbreviate
+                size="title"
+              />
               <span class="search-taxon-level">{taxon.level}</span>
             </span>
             <span :if={taxon.species_count > 0} class="search-result-meta">
@@ -169,23 +174,15 @@ defmodule OaksWeb.SearchLive do
         <li :for={species <- @species}>
           <.link navigate={~p"/species/#{species.scientific_name}"} class="search-result-row">
             <span class="search-result-main">
-              <i class="search-result-name search-result-name-species">
-                <span class="search-result-genus">Quercus</span>
-                <span
-                  :if={hybrid_sign?(species.scientific_name, species.is_hybrid)}
-                  class="not-italic"
-                >
-                  &times;
-                </span>
-                <span :for={{part, i} <- Enum.with_index(formula_parts(species.scientific_name))}><span
-                  :if={i > 0}
-                  class="not-italic"
-                >{" × "}</span>{part}</span>
-              </i>
-              <span :if={species.author} class="search-result-author">{species.author}</span>
+              <.sci_name
+                name={species.scientific_name}
+                hybrid={species.is_hybrid}
+                author={species.author}
+                size="title"
+              />
             </span>
             <span :if={species.section} class="search-result-meta">
-              Section <i>{species.section}</i>
+              <.sci_name name={species.section} rank="sect." size="meta" />
             </span>
           </.link>
         </li>
@@ -203,11 +200,6 @@ defmodule OaksWeb.SearchLive do
   defp perform_search(socket, query) do
     results = Search.search(query)
     assign(socket, query: query, results: results, page_title: "Search: #{query}")
-  end
-
-  # A hybrid formula's parts, so its sign can be set roman between them
-  defp formula_parts(scientific_name) do
-    scientific_name |> epithet() |> String.split(~r/\s*×\s*/u)
   end
 
   defp search_path(""), do: ~p"/search"

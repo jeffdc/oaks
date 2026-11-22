@@ -192,18 +192,21 @@ The colours mean the Red List category and nothing else: they never mark standin
 ### Hierarchy
 - **Display** (Source Serif 4 italic 600, clamp(34px, 4vw, 50px), 1.05): the taxon name in the title row. Genus at weight 400, epithet at 600. Followed by the authority in 22px roman serif at ink-3 and the common name in 21px Archivo 700.
 - **Headline** (Source Serif 4 italic 600, 26px to 28px, 1.1): taxon names heading comparison columns and the parents strip on hybrid pages.
-- **Title** (Source Serif 4 italic 600, 18px, 1.25): taxon names in the look-alike and hybrid lists (17px in the compact hybrid rows).
+- **Title** (Source Serif 4 italic 600, 18px, 1.25): a taxon name that is itself a list entry: the species list, search results, look-alikes, hybrids, relatives and a taxon's species, all at 18px (the authority 15px).
 - **Body** (Source Serif 4 400, 17px, 1.6; 16px under 760px): running text with oldstyle proportional figures. Reading columns hold at 68ch to 70ch.
 - **Quote** (Source Serif 4 400, 18px, 1.6, ink): Jeff's statements in the distinguishing-traits list; 16px in tables and comparisons.
 - **Frame** (Archivo 700, 15px, 1.45): trait names and derived values; Archivo 400 to 600 at 13px to 14px for "why" notes, captions and metadata.
 - **Section label** (Archivo 800, 15px, 0.06em, uppercase): section headings standing on a 2px ink rule, with an optional right-aligned 13px Archivo 500 note at ink-3. Table heads and range country headings use the same voice at 13px.
-- **Breadcrumb** (Archivo Narrow 600, 15px, 0.01em): the taxonomy band; rank words at weight 500, the current taxon in Source Serif 4 italic 700 at 16px.
+- **Breadcrumb** (Archivo Narrow 600, 15px, 0.01em): the taxonomy band; rank words at weight 500, names in Source Serif 4 italic at 16px, the current taxon's epithets at 700.
 - **Source mark** (Archivo 500, 12.5px): source links after a quote or value.
 
 ### Named Rules
 **The Verbatim Rule.** Jeff's words always appear in quotation marks (curly quotes) and are always followed by a source mark. Anything derived from his words, a summary value, a count, a label, is set in the frame face with a small Archivo tag ("summary", "from counts") and never in quotation marks.
 
-**The Botanical Italic Rule.** Scientific names are italic per botanical convention, in the serif, everywhere: titles, lists, breadcrumbs, tables, prose. Rank words (subg., sect., subsect., complex), authorities and the hybrid sign stay roman.
+**The Botanical Italic Rule.** Scientific names are italic per botanical convention, in the serif, everywhere: titles, lists, breadcrumbs, tables, prose. Rank words (subg., sect., subsect., complex), authorities and the hybrid sign stay roman, the sign spaced and held to its neighbours (*Quercus* × *bebbiana*). The genus is set at 400 and the epithets at 600, or all at 400 in running text; the authority follows in roman ink-3. Every name is one component, `sci_name`, so the same name looks the same everywhere at a given size.
+
+- **Size follows the name's role:** display in the title row (the authority at 22px), headline (26px) heading a comparison column, title (18px) for a name that is itself a list entry (the species list, search results, a taxon's species, a species' hybrids and relatives, a source's species), 14px at 400 in an Archivo metadata line beside a list entry (its rank word in the frame face, as in the band: sect. *Lobatae*), and otherwise the size of the text around it (prose, dialogs, table cells, field values). The taxonomy band keeps its own voice: names at 16px, the current taxon's epithets at 700.
+- **Quercus, Q. or no genus:** *Quercus* in full in the title row, at a name's first mention in a dialog or passage, and in lists whose entries each stand alone; *Q.* after that, in lists under a taxon or record already named (parents, hybrids, relatives, varieties, a source's species), in comparison column heads, for the current species in the band, and for a complex, which is named for its species (*Q. coccinea* complex); no genus for names above species (subgenus, section, subsection), for a hybrid's other parent after "with" (*Q.* × *bebbiana* with *macrocarpa*), and for synonyms, stored as epithets.
 
 **The Two Figures Rule.** Running text uses oldstyle figures; counts, measurements and table cells use lining tabular figures.
 

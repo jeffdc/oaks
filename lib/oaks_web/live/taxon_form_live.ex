@@ -77,7 +77,8 @@ defmodule OaksWeb.TaxonFormLive do
 
         socket
         |> assign(
-          page_title: "Edit #{level_label(taxon.level)}: #{taxon.name}",
+          page_title:
+            "Edit #{level_label(taxon.level)}: #{OaksWeb.SpeciesName.taxon_label(taxon.level, taxon.name)}",
           taxon: taxon,
           form: to_form(changeset),
           parent_options: parent_options_for_level(taxon.level),
@@ -218,7 +219,8 @@ defmodule OaksWeb.TaxonFormLive do
           <%= if @live_action == :new do %>
             Create Taxon
           <% else %>
-            Edit {level_label(@taxon.level)}: <i>{display_name(@taxon)}</i>
+            Edit {level_label(@taxon.level)}:
+            <.sci_name name={@taxon.name} level={@taxon.level} size="display" />
           <% end %>
         </.header>
       </:head>
@@ -327,10 +329,6 @@ defmodule OaksWeb.TaxonFormLive do
   defp level_label("subsection"), do: "Subsection"
   defp level_label("complex"), do: "Complex"
   defp level_label(_), do: "Taxon"
-
-  # A complex is named for its species, so it reads as a species name
-  defp display_name(%{level: "complex", name: name}), do: "Q. #{name}"
-  defp display_name(%{name: name}), do: name
 
   defp show_parent?(form) do
     level = form[:level].value

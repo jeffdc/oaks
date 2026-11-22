@@ -33,9 +33,13 @@ defmodule OaksWeb.DesignComponents do
   rank linked and separated by drawn chevrons, the current taxon last. It
   sits in the same place on every taxon page.
 
-  Each `:rank` takes `navigate` (or `href`) and an optional `rank` word
-  ("subg.", "sect.", "subsect.", "complex"), shown roman before the name,
-  or after it with `rank_after`. Wrap the name itself in `<i>`.
+  Each `:rank`, and `:current`, takes an optional `rank` word ("subg.",
+  "sect.", "subsect.", "complex"), shown in the band's roman before the
+  name, or after it with `rank_after`; a `:rank` also takes `navigate` (or
+  `href`). The name itself is a `sci_name/1` with no `size`: the band sets
+  names at 16px, the current taxon heavier (700). Genus, subgenus,
+  section and subsection names take `genus={nil}`; a complex and the
+  current species are abbreviated (Q.).
 
   The optional `:siblings` slot adds the menu at the band's right end; its
   `label` reads like "Coccineae · 7 species" and its content is `<li>`
@@ -55,9 +59,11 @@ defmodule OaksWeb.DesignComponents do
   ## Examples
 
       <.taxonomy_band>
-        <:rank navigate={~p"/taxonomy/Quercus"}><i>Quercus</i></:rank>
-        <:rank navigate={~p"/taxonomy/Quercus/Lobatae"} rank="sect."><i>Lobatae</i></:rank>
-        <:current><i>Q. shumardii</i></:current>
+        <:rank navigate={~p"/taxonomy/Quercus"}><.sci_name name="Quercus" /></:rank>
+        <:rank navigate={~p"/taxonomy/Quercus/Lobatae"} rank="sect.">
+          <.sci_name name="Lobatae" genus={nil} />
+        </:rank>
+        <:current><.sci_name name="shumardii" abbreviate /></:current>
       </.taxonomy_band>
   """
   attr :id, :string, default: "taxonomy-band"
@@ -72,7 +78,10 @@ defmodule OaksWeb.DesignComponents do
     attr :rank_after, :boolean, doc: "show the rank word after the name (complex)"
   end
 
-  slot :current, doc: "the current taxon (required unless inline)"
+  slot :current, doc: "the current taxon (required unless inline)" do
+    attr :rank, :string, doc: "the rank word, set roman"
+    attr :rank_after, :boolean, doc: "show the rank word after the name (complex)"
+  end
 
   slot :siblings, doc: "the siblings menu" do
     attr :label, :string, required: true
@@ -90,7 +99,17 @@ defmodule OaksWeb.DesignComponents do
               <span :if={rank[:rank] && rank[:rank_after]} class="oc-band-rk">{rank.rank}</span>
             </.link>
           </li>
-          <li :if={@current != []}><span aria-current="page">{render_slot(@current)}</span></li>
+          <li :for={current <- @current}>
+            <span aria-current="page">
+              <span :if={current[:rank] && !current[:rank_after]} class="oc-band-rk">
+                {current.rank}
+              </span>
+              {render_slot(current)}
+              <span :if={current[:rank] && current[:rank_after]} class="oc-band-rk">
+                {current.rank}
+              </span>
+            </span>
+          </li>
         </ol>
         <details
           :for={siblings <- @siblings}
@@ -111,31 +130,73 @@ defmodule OaksWeb.DesignComponents do
 
   @doc """
   Renders a scientific name, the one way names are set anywhere on the
-  site (DESIGN.md, the Botanical Italic Rule).
+  site (DESIGN.md, the Botanical Italic Rule). Pages never set a name, or
+  its size, any other way.
 
   The name is italic in the serif: the genus at weight 400 and the
-  epithets at 600 (`weight="regular"` sets them all at 400, for names in
-  running text). The hybrid sign stays roman and spaced (`Quercus ×
-  raineri`), and so do rank words (`var.`, `subsp.`, `sect.` ...). The
-  author follows in roman ink-3. The size comes from the surrounding text.
+  epithets at 600 (`weight="regular"` sets them all at 400, for a name in
+  running Archivo text or a quiet metadata line). The hybrid sign stays
+  roman and spaced (`Quercus × raineri`), and so do rank words (`var.`,
+  `subsp.`, `sect.` ...). The author follows in roman ink-3.
 
   `name` is the name as stored: an epithet (`"alba"`), a named hybrid with
   or without its sign (`"× raineri"`, `"×bebbiana"`), a formula
   (`"agrifolia × parvula"`), an infraspecific name (`"agrifolia
   oxyadenia"`, `"alba var. latiloba"`) or a full name with its genus
-  (`"Quercus alba"`, `"Q. alba"`). The genus is added unless the name
-  carries one or `genus={nil}`.
+  (`"Quercus alba"`, `"Q. alba"`). A stored name that carries its
+  authority (`"candida Steud."`) is split at the first word that isn't a
+  lower-case epithet, a rank word or the sign, and the rest set as the
+  author. The genus is added unless the name carries one or `genus={nil}`.
 
   For a name above species (a subgenus, section or subsection), pass
   `rank` and the bare name: `<.sci_name name="Lobatae" rank="sect." />`
   renders "sect. *Lobatae*" with no genus. `genus={nil}` renders a bare
-  uninomial. The hybrid sign is held to the words on both sides, so a
+  uninomial. For a taxon record, pass its `level` instead: a genus,
+  subgenus, section or subsection is a bare uninomial, and a complex,
+  named for its species, takes Q. (`<.sci_name name="coccinea"
+  level="complex" />` renders "*Q. coccinea*"). The hybrid sign is held to the words on both sides, so a
   formula name never breaks across lines.
+
+  ## Size: by the name's role, never by the page
+
+    * no `size` (the default): the size of the text around it, for names
+      in running text, dialogs, table cells and field values. In the taxonomy band the band sets its own voice (16px, the
+      current taxon at 700).
+    * `size="display"`: the name in a page's title row (the display size,
+      clamp 34px to 50px, with the author at 22px).
+    * `size="headline"`: a name heading a comparison column (26px, the
+      author at 17px).
+    * `size="title"`: a name that is itself an entry in a list (18px, the
+      author at 15px): the species list, search results, a taxon's
+      species, a species' hybrids and relatives, a source's species.
+    * `size="meta"`: a name in an Archivo metadata line beside a list
+      entry (`sect. Lobatae`, `subg. Cerris`): 14px, all at 400, the rank
+      word in the frame face as in the band.
+
+  ## Genus: Quercus, Q. or none
+
+    * `Quercus` in full (the default): in a title row, at a name's first
+      mention in a dialog or passage, and in a list whose entries each
+      stand alone (the species list, search results, a taxon's species, a
+      picker's results).
+    * `abbreviate` (Q.): after the full name has been given on the same
+      page or passage; in lists of names under a taxon or record named
+      above them (a species' parents, hybrids, relatives and varieties, a
+      source's species, the references on the merge page); in comparison
+      column heads; for the current species in the taxonomy band; and for
+      a complex, which is named for its species (Q. coccinea).
+    * `genus={nil}` (none): names above species (subgenus, section,
+      subsection); a hybrid's other parent after "with"; a stored value
+      shown as entered (the merge page's field values); synonyms, which
+      are stored as epithets.
+
+  A name in a link underlines its name words, not its author, on hover.
 
   ## Examples
 
-      <.sci_name name="alba" author="L." />
-      <.sci_name name={s.scientific_name} hybrid={s.is_hybrid} abbreviate />
+      <.sci_name name="alba" author="L." size="display" />
+      <.sci_name name={s.scientific_name} hybrid={s.is_hybrid} size="title" />
+      <.sci_name name={h.name} hybrid abbreviate size="title" />
       <.sci_name name="Cerris" genus={nil} weight="regular" />
       <.sci_name name="Albae" rank="subsect." />
   """
@@ -144,30 +205,66 @@ defmodule OaksWeb.DesignComponents do
   attr :genus, :any, default: "Quercus", doc: "the genus to add (a string), or nil for none"
   attr :abbreviate, :boolean, default: false, doc: "abbreviate the genus (Q.)"
   attr :rank, :string, default: nil, doc: "a rank word before a name above species"
+
+  attr :level, :string,
+    default: nil,
+    doc: "a taxon's level (genus to complex): no genus, or Q. for a complex"
+
   attr :author, :string, default: nil, doc: "the authority, set roman after the name"
   attr :weight, :string, values: ~w(epithet regular), default: "epithet"
+
+  attr :size, :string,
+    values: [nil, "display", "headline", "title", "meta"],
+    default: nil,
+    doc: "the name's role: nil takes the surrounding size"
+
   attr :class, :any, default: nil
 
   def sci_name(assigns) do
-    assigns = assign(assigns, :parts, sci_name_parts(assigns))
+    assigns =
+      assigns
+      |> level_genus()
+      |> then(&assign(&1, :parts, sci_name_parts(&1)))
 
     ~H"""
-    <span class={["oc-sci", @weight == "regular" && "oc-sci-regular", @class]}>{@parts}</span>
+    <span class={[
+      "oc-sci",
+      @size && "oc-sci-#{@size}",
+      @weight == "regular" && "oc-sci-regular",
+      @class
+    ]}>{@parts}</span>
     """
   end
+
+  # A complex is named for its species (Q. coccinea); a taxon above it is a
+  # bare uninomial.
+  defp level_genus(%{level: "complex"} = assigns),
+    do: assign(assigns, genus: "Quercus", abbreviate: true)
+
+  defp level_genus(%{level: level} = assigns) when is_binary(level),
+    do: assign(assigns, :genus, nil)
+
+  defp level_genus(assigns), do: assigns
 
   # The name as one run of escaped HTML, so no template whitespace falls
   # between its parts: genus, rank words, signs and epithets joined by
   # spaces (no-break after a rank word and on both sides of the hybrid
-  # sign, so a formula never splits and no line starts or ends on one).
+  # sign, so a formula never splits and no line starts or ends on one),
+  # wrapped in .oc-sci-n, then the author.
   defp sci_name_parts(assigns) do
-    {genus, words} = split_genus(assigns)
+    {name, stored_author} = split_author(assigns.name)
+    {genus, words} = split_genus(%{assigns | name: name})
 
     rank = if assigns.rank, do: [{:roman, assigns.rank}], else: []
     genus = if genus, do: [{:genus, genus}], else: []
     tokens = genus ++ rank ++ Enum.map(words, &word_token/1)
 
-    Phoenix.HTML.raw([join_tokens(tokens), author_html(assigns.author)])
+    Phoenix.HTML.raw([
+      ~s(<span class="oc-sci-n">),
+      join_tokens(tokens),
+      "</span>",
+      author_html(assigns.author || stored_author)
+    ])
   end
 
   defp word_token(w) when w in ["×", "x"], do: {:sign, "×"}
@@ -178,6 +275,28 @@ defmodule OaksWeb.DesignComponents do
 
   defp author_html(author),
     do: [" ", ~s(<span class="oc-sci-a">), escape(author), "</span>"]
+
+  # {the name, its stored authority or nil}. The first word is always the
+  # name (a genus or a uninomial may be capitalised); after it, the
+  # authority starts at the first word that isn't a lower-case epithet, a
+  # rank word or the hybrid sign: "shumardii var. acerifolia E.J.Palmer
+  # 1927" is {"shumardii var. acerifolia", "E.J.Palmer 1927"}.
+  defp split_author(name) do
+    [first | rest] =
+      case String.split(String.trim(name), ~r/\s+/u, trim: true) do
+        [] -> [""]
+        words -> words
+      end
+
+    {name_words, author_words} = Enum.split_while(rest, &name_word?/1)
+    author = if author_words == [], do: nil, else: Enum.join(author_words, " ")
+
+    {Enum.join([first | name_words], " "), author}
+  end
+
+  defp name_word?(w) do
+    w in ["×", "x"] or w in @rank_words or Regex.match?(~r/^×?\p{Ll}[\p{Ll}\d-]*$/u, w)
+  end
 
   # {genus or nil, the words after it}.
   defp split_genus(%{name: name, rank: rank}) when is_binary(rank) do

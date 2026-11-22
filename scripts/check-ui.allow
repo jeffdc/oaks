@@ -15,15 +15,4 @@ daisyui	lib/oaks_web/live/sources_live.ex	1
 daisyui	lib/oaks_web/live/species_detail_live.ex	7
 daisyui	lib/oaks_web/live/species_form_live.ex	4
 daisyui	lib/oaks_web/live/species_merge_live.ex	4
-sci-name	lib/oaks_web/live/about_live.ex	1
-sci-name	lib/oaks_web/live/dev_components_live.ex	4
-sci-name	lib/oaks_web/live/search_live.ex	4
-sci-name	lib/oaks_web/live/species_compare_live.ex	3
-sci-name	lib/oaks_web/live/species_detail_live.ex	5
-sci-name	lib/oaks_web/live/species_form_live.ex	2
-sci-name	lib/oaks_web/live/species_list_live.ex	4
-sci-name	lib/oaks_web/live/species_merge_live.ex	6
-sci-name	lib/oaks_web/live/species_source_form_live.ex	1
-sci-name	lib/oaks_web/live/taxon_form_live.ex	2
-sci-name	lib/oaks_web/live/taxonomy_live.ex	13
-app-css	assets/css/app.css	3493
+app-css	assets/css/app.css	3288

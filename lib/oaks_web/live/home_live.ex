@@ -112,15 +112,15 @@ defmodule OaksWeb.HomeLive do
   # /taxonomy.
   defp ranks(species) do
     [
-      {"subg.", species.subgenus},
-      {"sect.", species.section},
-      {"subsect.", species.subsection},
-      {"complex", species.complex}
+      {"subg.", "subgenus", species.subgenus},
+      {"sect.", "section", species.section},
+      {"subsect.", "subsection", species.subsection},
+      {"complex", "complex", species.complex}
     ]
-    |> Enum.reject(fn {_rank, name} -> name in [nil, ""] end)
-    |> Enum.map_reduce([], fn {rank, name}, path ->
+    |> Enum.reject(fn {_rank, _level, name} -> name in [nil, ""] end)
+    |> Enum.map_reduce([], fn {rank, level, name}, path ->
       path = path ++ [name]
-      {%{rank: rank, name: name, path: taxonomy_path(path)}, path}
+      {%{rank: rank, level: level, name: name, path: taxonomy_path(path)}, path}
     end)
     |> elem(0)
   end
@@ -190,14 +190,14 @@ defmodule OaksWeb.HomeLive do
         <:author :if={@featured.author}>{@featured.author}</:author>
         <:band :if={ranks(@featured) != []}>
           <.taxonomy_band id="random-band" label="Where it sits" inline>
-            <:rank navigate={~p"/taxonomy"}><.sci_name name="Quercus" /></:rank>
+            <:rank navigate={~p"/taxonomy"}><.sci_name name="Quercus" level="genus" /></:rank>
             <:rank
               :for={rank <- ranks(@featured)}
               navigate={rank.path}
               rank={rank.rank}
               rank_after={rank.rank == "complex"}
             >
-              <.sci_name name={rank.name} genus={nil} />
+              <.sci_name name={rank.name} level={rank.level} />
             </:rank>
           </.taxonomy_band>
         </:band>

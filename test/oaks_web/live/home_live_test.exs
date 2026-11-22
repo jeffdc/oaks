@@ -75,13 +75,13 @@ defmodule OaksWeb.HomeLiveTest do
     assert has_element?(view, ~s(#random-band a[href="/taxonomy/Quercus/Quercus"]))
 
     assert html =~
-             ~r{with\s*<span class="oc-sci oc-sci-regular[^"]*"><i class="oc-sci-e">macrocarpa</i>}
+             ~r{with\s*<span class="oc-sci oc-sci-regular[^"]*"><span class="oc-sci-n"><i class="oc-sci-e">macrocarpa</i>}
 
     # A formula already names both parents, so it has no "with".
     assert has_element?(view, "#oak-at-random .oc-specimen-about", "palmeri")
 
     refute html =~
-             ~r{with\s*<span class="oc-sci oc-sci-regular[^"]*"><i class="oc-sci-e">palmeri</i>}
+             ~r{with\s*<span class="oc-sci oc-sci-regular[^"]*"><span class="oc-sci-n"><i class="oc-sci-e">palmeri</i>}
 
     assert has_element?(view, ~s(#oak-at-random a[href="/species/#{name}"]), "Open the page")
   end

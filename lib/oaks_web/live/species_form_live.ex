@@ -11,6 +11,7 @@ defmodule OaksWeb.SpeciesFormLive do
   alias Oaks.Species
   alias Oaks.Species.Species, as: SpeciesSchema
   alias Oaks.Taxonomy
+  alias OaksWeb.SpeciesName
 
   @impl true
   def mount(_params, _session, socket) do
@@ -67,7 +68,7 @@ defmodule OaksWeb.SpeciesFormLive do
 
         socket
         |> assign(
-          page_title: "Edit Quercus #{epithet(species.scientific_name)}",
+          page_title: "Edit #{SpeciesName.full_name(species.scientific_name, species.is_hybrid)}",
           species: species,
           form: to_form(changeset)
         )
@@ -138,15 +139,9 @@ defmodule OaksWeb.SpeciesFormLive do
 
         <.header class="species-form-title">
           <span :if={@live_action == :new}>New Species</span>
-          <span :if={
-            @live_action == :edit && !hybrid_sign?(@species.scientific_name, @species.is_hybrid)
-          }>
-            Edit <i>Quercus {epithet(@species.scientific_name)}</i>
-          </span>
-          <span :if={
-            @live_action == :edit && hybrid_sign?(@species.scientific_name, @species.is_hybrid)
-          }>
-            Edit <i>Quercus</i> &times; <i>{epithet(@species.scientific_name)}</i>
+          <span :if={@live_action == :edit}>
+            Edit
+            <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} size="display" />
           </span>
         </.header>
       </:head>
