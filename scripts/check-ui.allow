@@ -7,7 +7,6 @@ width	lib/oaks_web/controllers/error_html.ex	3
 width	lib/oaks_web/live/article_form_live.ex	2
 width	lib/oaks_web/live/article_live.ex	1
 width	lib/oaks_web/live/articles_live.ex	1
-width	lib/oaks_web/live/home_live.ex	1
 width	lib/oaks_web/live/source_form_live.ex	2
 width	lib/oaks_web/live/sources_live.ex	1
 width	lib/oaks_web/live/species_form_live.ex	2
@@ -20,7 +19,6 @@ style	lib/oaks_web/live/species_compare_live.ex	1
 daisyui	lib/oaks_web/live/article_form_live.ex	2
 daisyui	lib/oaks_web/live/article_live.ex	2
 daisyui	lib/oaks_web/live/articles_live.ex	2
-daisyui	lib/oaks_web/live/home_live.ex	2
 daisyui	lib/oaks_web/live/source_detail_live.ex	2
 daisyui	lib/oaks_web/live/source_form_live.ex	2
 daisyui	lib/oaks_web/live/sources_live.ex	1
@@ -29,7 +27,6 @@ daisyui	lib/oaks_web/live/species_form_live.ex	4
 daisyui	lib/oaks_web/live/species_merge_live.ex	4
 sci-name	lib/oaks_web/live/about_live.ex	1
 sci-name	lib/oaks_web/live/dev_components_live.ex	4
-sci-name	lib/oaks_web/live/home_live.ex	2
 sci-name	lib/oaks_web/live/search_live.ex	4
 sci-name	lib/oaks_web/live/species_compare_live.ex	3
 sci-name	lib/oaks_web/live/species_detail_live.ex	5
