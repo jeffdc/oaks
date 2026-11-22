@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Runs the Phoenix dev server for a branch that lives in another worktree
+# (make dev BRANCH=<name> [PORT=<port>]).
+#
+# Git lets a branch be checked out in only one worktree, so the server runs in
+# the worktree that already has BRANCH checked out; when none does, one is
+# created at .claude/worktrees/<branch> in the main checkout. A worktree with
+# no dev database gets a copy of the main checkout's oaks.db (sqlite3 .backup,
+# safe while that database is open), so the branch never touches it. Pending
+# migrations are applied, then the server starts on PORT (default 4444). It
+# runs in the foreground: start it in a terminal or tmux pane and leave it;
+# merges into the branch land in the same directory and Phoenix reloads them.
+set -euo pipefail
+
+branch=${1:-}
+port=${2:-4444}
+
+if [[ -z "$branch" ]]; then
+  echo "usage: scripts/dev-branch <branch> [port]" >&2
+  exit 2
+fi
+
+# The main checkout: the parent of the shared .git directory, wherever this runs.
+common_dir=$(git rev-parse --path-format=absolute --git-common-dir)
+main_root=$(dirname "$common_dir")
+
+worktree=$(git worktree list --porcelain | awk -v ref="refs/heads/$branch" '
+  /^worktree / { path = substr($0, 10) }
+  $0 == "branch " ref { print path; exit }
+')
+
+if [[ -z "$worktree" ]]; then
+  worktree="$main_root/.claude/worktrees/$branch"
+  if git show-ref --verify --quiet "refs/heads/$branch"; then
+    git worktree add "$worktree" "$branch"
+  elif git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+    git worktree add --track -b "$branch" "$worktree" "origin/$branch"
+  else
+    echo "dev-branch: no branch named $branch here or on origin" >&2
+    exit 1
+  fi
+fi
+
+echo "dev-branch: $branch in $worktree on port $port"
+cd "$worktree"
+
+if [[ ! -f oaks.db && -f "$main_root/oaks.db" && "$worktree" != "$main_root" ]]; then
+  echo "dev-branch: copying the dev database from $main_root/oaks.db"
+  sqlite3 "$main_root/oaks.db" ".backup '$worktree/oaks.db'"
+fi
+
+make setup
+mix ecto.migrate
+PORT=$port exec mix phx.server
