@@ -55,7 +55,9 @@ defmodule OaksWeb.Endpoint do
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
-  plug Plug.Parsers,
+  # Plug.Parsers, except that the private API's refusals (bad JSON, a body
+  # too large) come back as its {"error": ...} JSON (OaksWeb.Plugs.Parsers).
+  plug OaksWeb.Plugs.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
     json_decoder: Phoenix.json_library()
