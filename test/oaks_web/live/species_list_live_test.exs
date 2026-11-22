@@ -86,7 +86,8 @@ defmodule OaksWeb.SpeciesListLiveTest do
 
     test "shows conservation status badges", %{conn: conn, alba: alba} do
       {:ok, view, _html} = live(conn, ~p"/species")
-      assert view |> element("#species-#{alba.id}") |> render() =~ "LC"
+      assert has_element?(view, "#species-#{alba.id} .oc-iucn-lc", "LC")
+      assert has_element?(view, ~s(#species-#{alba.id} [title="IUCN Red List: Least Concern"]))
     end
 
     test "shows subgenus and section badges", %{conn: conn, q: q, l: l} do

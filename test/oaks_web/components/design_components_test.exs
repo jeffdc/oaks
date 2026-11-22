@@ -131,6 +131,50 @@ defmodule OaksWeb.DesignComponentsTest do
              ~r{<span class="oc-status\s*" title="IUCN Red List: Least Concern">IUCN LC</span>}
   end
 
+  describe "iucn_status/1" do
+    for {code, category} <- [
+          {"EX", "Extinct"},
+          {"EW", "Extinct in the Wild"},
+          {"CR", "Critically Endangered"},
+          {"EN", "Endangered"},
+          {"VU", "Vulnerable"},
+          {"NT", "Near Threatened"},
+          {"LC", "Least Concern"},
+          {"DD", "Data Deficient"},
+          {"NE", "Not Evaluated"}
+        ] do
+      test "#{code} is the stamp in its Red List colour, with #{category} spelled out" do
+        html = render_component(&DesignComponents.iucn_status/1, code: unquote(code))
+        class = "oc-iucn-" <> String.downcase(unquote(code))
+
+        assert html =~ ~r{class="oc-status oc-iucn #{class}"}
+        assert html =~ ~s(title="IUCN Red List: #{unquote(category)}")
+        assert html =~ ~r{>\s*IUCN #{unquote(code)}<}
+        assert html =~ ~s(<span class="sr-only">: #{unquote(category)}</span>)
+        assert DesignComponents.iucn_category(unquote(code)) == unquote(category)
+      end
+    end
+
+    test "without the prefix, IUCN is for screen readers only" do
+      html = render_component(&DesignComponents.iucn_status/1, code: "VU", prefix: false)
+
+      assert html =~ ~r{>\s*<span class="sr-only">IUCN </span>VU<}
+      refute html =~ "false"
+      assert html =~ ~s(<span class="sr-only">: Vulnerable</span>)
+    end
+
+    test "a code that isn't a Red List category is the plain stamp" do
+      html = render_component(&DesignComponents.iucn_status/1, code: "XX")
+
+      assert html =~ ~r{class="oc-status\s*"}
+      refute html =~ "oc-iucn"
+      refute html =~ "title="
+      refute html =~ "sr-only"
+      assert html =~ "XX"
+      assert DesignComponents.iucn_category("XX") == nil
+    end
+  end
+
   describe "compare_button/1" do
     test "is a compact primary button reading Compare by default" do
       html = render_component(&DesignComponents.compare_button/1, navigate: "/species/rubra")
