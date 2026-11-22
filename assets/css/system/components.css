@@ -67,10 +67,10 @@
     font-weight: 500;
     color: #2e2306;
   }
-  .oc-band ol [aria-current] {
-    font: italic 700 16px/1.4 var(--font-serif);
-  }
-  .oc-band i { font-family: var(--font-serif); font-size: 16px; }
+  /* The band's own voice for names (sci_name): 16px, the current taxon's
+     epithets at 700 (its genus stays 400). */
+  .oc-band .oc-sci { font-size: 16px; }
+  .oc-band [aria-current] .oc-sci-e { font-weight: 700; }
 
   /* Siblings menu at the band's right end */
   .oc-band details {
@@ -125,15 +125,12 @@
   .oc-band-siblings [aria-current] {
     display: block;
     padding: 6px 16px;
-    font: italic 600 16px/1.3 var(--font-serif);
+    line-height: 1.3;
     color: var(--color-ink);
     text-decoration: none;
   }
   .oc-band-siblings a:hover { background: var(--color-paper-2); }
-  .oc-band-siblings [aria-current] {
-    font-weight: 700;
-    background: var(--color-ochre);
-  }
+  .oc-band-siblings [aria-current] { background: var(--color-ochre); }
 
   @media (max-width: 760px) {
     .oc-band-in {
@@ -157,7 +154,8 @@
   /* ---------------------------------------------------------------------
      Scientific name (DesignComponents.sci_name): italic serif, the genus
      at 400 and the epithets at 600; rank words, the hybrid sign and the
-     author roman. Size comes from the surrounding text.
+     author roman. With no size it takes the surrounding size; a size names
+     the name's role (title row, comparison column head, list entry).
      --------------------------------------------------------------------- */
   .oc-sci {
     font-family: var(--font-serif);
@@ -173,6 +171,28 @@
     font-weight: 400;
   }
   .oc-sci-a { color: var(--color-ink-3); }
+
+  .oc-sci-display {
+    font-size: clamp(34px, 4vw, 50px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+  .oc-sci-display .oc-sci-a {
+    font-size: 22px;
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+  .oc-sci-headline { font-size: 26px; line-height: 1.1; }
+  .oc-sci-headline .oc-sci-a { font-size: 17px; }
+  .oc-sci-title { font-size: 18px; line-height: 1.25; }
+  .oc-sci-title .oc-sci-a { font-size: 15px; }
+
+  /* In a link, hover underlines the name, not its author. */
+  :any-link:hover .oc-sci-n {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
 
   /* ---------------------------------------------------------------------
      Section heading (DesignComponents.section_heading): an uppercase

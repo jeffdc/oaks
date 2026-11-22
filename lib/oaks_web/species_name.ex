@@ -61,5 +61,19 @@ defmodule OaksWeb.SpeciesName do
   @spec full_name(String.t(), boolean() | nil) :: String.t()
   def full_name(name, is_hybrid), do: "Quercus " <> label(name, is_hybrid)
 
+  @doc """
+  Returns a taxon's name as plain text, for titles and labels. A complex
+  is named for its species, so it takes the abbreviated genus.
+
+      iex> OaksWeb.SpeciesName.taxon_label("complex", "coccinea")
+      "Q. coccinea"
+
+      iex> OaksWeb.SpeciesName.taxon_label("section", "Lobatae")
+      "Lobatae"
+  """
+  @spec taxon_label(String.t() | nil, String.t()) :: String.t()
+  def taxon_label("complex", name), do: "Q. " <> name
+  def taxon_label(_level, name), do: name
+
   defp formula?(name), do: epithet(name) =~ ~r/\s[×x]\s/u
 end

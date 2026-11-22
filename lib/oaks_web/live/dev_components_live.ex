@@ -64,24 +64,28 @@ defmodule OaksWeb.DevComponentsLive do
       <.page>
         <:bleed>
           <.taxonomy_band>
-            <:rank navigate={~p"/taxonomy"}><i>Quercus</i></:rank>
-            <:rank navigate={~p"/taxonomy/Quercus"} rank="subg."><i>Quercus</i></:rank>
-            <:rank navigate={~p"/taxonomy/Quercus/Lobatae"} rank="sect."><i>Lobatae</i></:rank>
+            <:rank navigate={~p"/taxonomy"}><.sci_name name="Quercus" level="genus" /></:rank>
+            <:rank navigate={~p"/taxonomy/Quercus"} rank="subg.">
+              <.sci_name name="Quercus" level="subgenus" />
+            </:rank>
+            <:rank navigate={~p"/taxonomy/Quercus/Lobatae"} rank="sect.">
+              <.sci_name name="Lobatae" level="section" />
+            </:rank>
             <:rank navigate={~p"/taxonomy/Quercus/Lobatae/Coccineae"} rank="subsect.">
-              <i>Coccineae</i>
+              <.sci_name name="Coccineae" level="subsection" />
             </:rank>
             <:rank navigate={~p"/species/shumardii"} rank="complex" rank_after>
-              <i>shumardii</i>
+              <.sci_name name="shumardii" level="complex" />
             </:rank>
-            <:current><i>Q. shumardii</i></:current>
+            <:current><.sci_name name="shumardii" abbreviate /></:current>
             <:siblings label="Coccineae · 7 species">
-              <li><.link navigate={~p"/species/acerifolia"}>Q. acerifolia</.link></li>
-              <li><.link navigate={~p"/species/buckleyi"}>Q. buckleyi</.link></li>
-              <li><.link navigate={~p"/species/coccinea"}>Q. coccinea</.link></li>
-              <li><.link navigate={~p"/species/ellipsoidalis"}>Q. ellipsoidalis</.link></li>
-              <li><.link navigate={~p"/species/rubra"}>Q. rubra</.link></li>
-              <li><span aria-current="page">Q. shumardii</span></li>
-              <li><.link navigate={~p"/species/velutina"}>Q. velutina</.link></li>
+              <li :for={name <- ~w(acerifolia buckleyi coccinea ellipsoidalis rubra)}>
+                <.link navigate={~p"/species/#{name}"}><.sci_name name={name} abbreviate /></.link>
+              </li>
+              <li><span aria-current="page"><.sci_name name="shumardii" abbreviate /></span></li>
+              <li>
+                <.link navigate={~p"/species/velutina"}><.sci_name name="velutina" abbreviate /></.link>
+              </li>
             </:siblings>
           </.taxonomy_band>
         </:bleed>
@@ -238,12 +242,45 @@ defmodule OaksWeb.DevComponentsLive do
             <:item title="Above species">
               <.sci_name name="Coccineae" rank="subsect." />
             </:item>
+            <:item title="A taxon by its level">
+              <.sci_name name="Lobatae" level="section" />,
+              <.sci_name name="coccinea" level="complex" />
+            </:item>
+            <:item title="Authority stored in the name">
+              <.sci_name name="shumardii var. acerifolia E.J.Palmer 1927" genus={nil} />
+            </:item>
             <:item title="In running text">
               Two subgenera, <.sci_name name="Quercus" genus={nil} weight="regular" /> and
               <.sci_name name="Cerris" genus={nil} weight="regular" />.
             </:item>
-            <:item title="Display size">
-              <span class="text-[50px] leading-none"><.sci_name name="shumardii" /></span>
+          </.list>
+          <p class="mt-s6 max-w-[68ch]">
+            Size follows the name's role, never the page: <code>size="display"</code>
+            in a title row, <code>"headline"</code>
+            heading a comparison column, <code>"title"</code>
+            for a name that is a list entry, and no size elsewhere (running text, dialogs, table
+            cells, metadata), where it takes the text around it. The genus is in full in titles, at
+            a first mention and in lists whose entries stand alone; Q. after that, in lists under a
+            named taxon or record and in column heads; none above species, after "with" and for
+            synonyms.
+          </p>
+          <.list>
+            <:item title="display">
+              <.sci_name name="shumardii" author="Buckley" size="display" />
+            </:item>
+            <:item title="headline">
+              <.sci_name name="coccinea" abbreviate size="headline" />
+            </:item>
+            <:item title="title">
+              <.sci_name name="× riparia" author="Laughlin" size="title" />
+            </:item>
+            <:item title="title, abbreviated">
+              <.link navigate={~p"/species/× riparia"}>
+                <.sci_name name="× riparia" abbreviate size="title" />
+              </.link>
+              <span class="text-ink-2">
+                with <.sci_name name="rubra" genus={nil} weight="regular" />
+              </span>
             </:item>
           </.list>
         </section>
@@ -364,7 +401,8 @@ defmodule OaksWeb.DevComponentsLive do
     <.modal id="gallery-modal">
       <:title>Discard your changes?</:title>
       <p class="max-w-[60ch]">
-        The edits to <i>Quercus shumardii</i> since you last saved will be lost.
+        The edits to <.sci_name name="shumardii" weight="regular" />
+        since you last saved will be lost.
       </p>
       <:actions>
         <.button phx-click={JS.exec("data-cancel", to: "#gallery-modal")}>Keep editing</.button>
