@@ -414,7 +414,7 @@ Every page is built from the shared library: `OaksWeb.CoreComponents`, `OaksWeb.
 
 **When the library doesn't have what you need:** stop. Don't build it into the page. Either add it to the library as its own change, shown in `/dev/components` and reviewed by Jeff before any page uses it, or file `mull ask` and work on something else. A component that almost fits is extended in the library, never overridden on the page.
 
-**Enforced:** `scripts/check-ui` runs in `make done-checks` and fails on page-width wrappers, inline styles, daisyUI cards and badges, hand-rolled scientific names, and any growth in `app.css`. Exceptions go in its allowlist, with Jeff's approval. *(The check is item b5b2.)*
+**Enforced:** `scripts/check-ui` runs in `make done-checks` and fails on page-width wrappers, inline styles, daisyUI cards and badges, hand-rolled scientific names, and any growth in `app.css`. Exceptions go in its allowlist, `scripts/check-ui.allow`, with Jeff's approval. The list only shrinks: when a file improves, lower its count in the same change (`scripts/check-ui --baseline`).
 
 Keep this table current: a change that adds or replaces a component updates its row in the same commit.
 
