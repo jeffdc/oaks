@@ -1,8 +1,9 @@
 defmodule OaksWeb.DesignComponents do
   @moduledoc """
   Content components of the DESIGN.md system: the taxonomy band, section
-  headings, source marks, standing marks, the status tag, the Compare
-  button and the other-sources disclosure of the field-marks table.
+  headings, source marks, standing marks, the status tag (and its IUCN
+  Red List variant), the Compare button and the other-sources disclosure
+  of the field-marks table.
 
   Imported into every LiveView and HTML module (see `OaksWeb`). The
   generic pieces (button, header, ruled table, list, modal, flash, input)
@@ -16,7 +17,8 @@ defmodule OaksWeb.DesignComponents do
     * Jeff's words appear in curly quotes and are followed by a
       `source_mark/1`, every time.
     * Agree, differs and unreviewed are drawn marks (`standing_mark/1`),
-      never colours.
+      never colours. IUCN status (`iucn_status/1`) is the one categorical
+      colour code, and always shows its code with the colour.
   """
   use Phoenix.Component
 
@@ -236,13 +238,14 @@ defmodule OaksWeb.DesignComponents do
   end
 
   @doc """
-  Renders a status tag: an outlined ink stamp, such as a conservation
-  status. Follow it with a `source_mark/1`.
+  Renders a status tag: an outlined ink stamp, such as a draft marker or
+  a source type. Follow it with a `source_mark/1` when it is sourced. For a
+  conservation status use `iucn_status/1`, which builds on it.
 
   ## Examples
 
-      <.status_tag title="IUCN Red List: Least Concern">IUCN LC</.status_tag>
-      <.source_mark href="#sources">IUCN 2024-2</.source_mark>
+      <.status_tag class="border-dashed uppercase">Draft</.status_tag>
+      <.status_tag title="HTTP status 404">Error 404</.status_tag>
   """
   attr :title, :string, default: nil, doc: "the status spelled out"
   attr :class, :any, default: nil
@@ -251,6 +254,62 @@ defmodule OaksWeb.DesignComponents do
   def status_tag(assigns) do
     ~H"""
     <span class={["oc-status", @class]} title={@title}>{render_slot(@inner_block)}</span>
+    """
+  end
+
+  @iucn_categories %{
+    "EX" => "Extinct",
+    "EW" => "Extinct in the Wild",
+    "CR" => "Critically Endangered",
+    "EN" => "Endangered",
+    "VU" => "Vulnerable",
+    "NT" => "Near Threatened",
+    "LC" => "Least Concern",
+    "DD" => "Data Deficient",
+    "NE" => "Not Evaluated"
+  }
+
+  @doc """
+  Returns the IUCN Red List category a code stands for ("LC" is "Least
+  Concern"), or nil for a code that isn't one.
+  """
+  @spec iucn_category(String.t() | nil) :: String.t() | nil
+  def iucn_category(code), do: Map.get(@iucn_categories, code)
+
+  @doc """
+  Renders an IUCN Red List status: a `status_tag/1` filled with the
+  category's conventional Red List colour, the one categorical colour code
+  DESIGN.md allows (decision 5604). The code always shows with the colour;
+  the category is spelled out in the title and for screen readers.
+
+  With `prefix={false}` (a list row) "IUCN" is read by screen readers but
+  not shown. A code that isn't a Red List category renders as the plain
+  stamp.
+
+  ## Examples
+
+      <.iucn_status code="LC" />
+      <.source_mark href="#sources">IUCN 2024-2</.source_mark>
+
+      <.iucn_status code={@species.conservation_status} prefix={false} />
+  """
+  attr :code, :string, required: true, doc: "the Red List code, such as LC"
+  attr :prefix, :boolean, default: true, doc: "show IUCN before the code"
+  attr :class, :any, default: nil
+
+  def iucn_status(assigns) do
+    assigns = assign(assigns, :category, iucn_category(assigns.code))
+
+    ~H"""
+    <.status_tag
+      class={[@category && "oc-iucn oc-iucn-#{String.downcase(@code)}", @class]}
+      title={@category && "IUCN Red List: #{@category}"}
+    >
+      {if @prefix, do: "IUCN "}<span :if={!@prefix} class="sr-only">IUCN </span>{@code}<span
+        :if={@category}
+        class="sr-only"
+      >: {@category}</span>
+    </.status_tag>
     """
   end
 

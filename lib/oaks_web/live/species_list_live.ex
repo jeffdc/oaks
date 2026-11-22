@@ -172,12 +172,11 @@ defmodule OaksWeb.SpeciesListLive do
         <span :if={@species.section} class="species-row-rank hidden md:inline">
           sect. <i>{@species.section}</i>
         </span>
-        <.status_tag
+        <.iucn_status
           :if={@species.conservation_status}
-          title={conservation_title(@species.conservation_status)}
-        >
-          {@species.conservation_status}
-        </.status_tag>
+          code={@species.conservation_status}
+          prefix={false}
+        />
       </span>
     </.link>
     """
@@ -200,15 +199,4 @@ defmodule OaksWeb.SpeciesListLive do
 
   defp maybe_put(map, _key, ""), do: map
   defp maybe_put(map, key, value), do: Map.put(map, key, value)
-
-  defp conservation_title("LC"), do: "IUCN Red List: Least Concern"
-  defp conservation_title("NT"), do: "IUCN Red List: Near Threatened"
-  defp conservation_title("VU"), do: "IUCN Red List: Vulnerable"
-  defp conservation_title("EN"), do: "IUCN Red List: Endangered"
-  defp conservation_title("CR"), do: "IUCN Red List: Critically Endangered"
-  defp conservation_title("EW"), do: "IUCN Red List: Extinct in the Wild"
-  defp conservation_title("EX"), do: "IUCN Red List: Extinct"
-  defp conservation_title("DD"), do: "IUCN Red List: Data Deficient"
-  defp conservation_title("NE"), do: "IUCN Red List: Not Evaluated"
-  defp conservation_title(_), do: nil
 end

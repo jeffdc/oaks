@@ -113,8 +113,11 @@ defmodule OaksWeb.DevComponentsLive do
             <.standing_mark standing="open">2 sources, not reviewed</.standing_mark>
           </.standing_marks>
           <p class="mt-s5 flex flex-wrap items-baseline gap-s2">
-            <.status_tag title="IUCN Red List: Least Concern">IUCN LC</.status_tag>
+            <.iucn_status code="LC" />
             <.source_mark href="#field-marks">IUCN 2024-2</.source_mark>
+          </p>
+          <p class="mt-s3 flex flex-wrap items-center gap-s2">
+            <.iucn_status :for={code <- ~w(EX EW CR EN VU NT LC DD NE)} code={code} prefix={false} />
           </p>
         </section>
 

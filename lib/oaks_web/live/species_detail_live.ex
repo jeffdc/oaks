@@ -294,14 +294,7 @@ defmodule OaksWeb.SpeciesDetailLive do
         </h1>
         <div class="species-meta">
           <span>{if(@species.is_hybrid, do: "Hybrid", else: "Species")}</span>
-          <.status_tag
-            :if={@species.conservation_status}
-            title={"IUCN Red List: #{conservation_label(@species.conservation_status)}"}
-          >
-            IUCN {@species.conservation_status}<span class="sr-only">: {conservation_label(
-              @species.conservation_status
-            )}</span>
-          </.status_tag>
+          <.iucn_status :if={@species.conservation_status} code={@species.conservation_status} />
         </div>
         <div :if={@editor} class="species-actions">
           <.button
@@ -992,15 +985,4 @@ defmodule OaksWeb.SpeciesDetailLive do
   defp selected_tab?(source, selected) do
     selected && source.id == selected.id
   end
-
-  defp conservation_label("LC"), do: "Least Concern"
-  defp conservation_label("NT"), do: "Near Threatened"
-  defp conservation_label("VU"), do: "Vulnerable"
-  defp conservation_label("EN"), do: "Endangered"
-  defp conservation_label("CR"), do: "Critically Endangered"
-  defp conservation_label("EW"), do: "Extinct in the Wild"
-  defp conservation_label("EX"), do: "Extinct"
-  defp conservation_label("DD"), do: "Data Deficient"
-  defp conservation_label("NE"), do: "Not Evaluated"
-  defp conservation_label(_), do: "Unknown"
 end

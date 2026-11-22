@@ -11,6 +11,13 @@ colors:
   pencil: "#2f5fb3"
   rule: "#16161626"
   rule-strong: "#161616"
+  iucn-ew: "#542344"
+  iucn-cr: "#d81e05"
+  iucn-en: "#fc7f3f"
+  iucn-vu: "#f9e814"
+  iucn-nt: "#cce226"
+  iucn-lc: "#60c659"
+  iucn-dd: "#d1d1c6"
 typography:
   display:
     fontFamily: "Source Serif 4, Georgia, Times New Roman, serif"
@@ -129,7 +136,7 @@ The key's printed materials are kept; its apparatus is not. There are no couplet
 - Ink on bright stock, one ochre field, pencil-blue source marks.
 - Archivo frames and labels; Source Serif 4 carries reading text and every scientific name.
 - Square corners everywhere; rules, not boxes, separate statements.
-- Agree, differs and unreviewed are drawn marks, never colours.
+- Agree, differs and unreviewed are drawn marks, never colours. IUCN status alone keeps its Red List colours.
 - Taxonomy breadcrumb in the ochre band, in the same place on every taxon page.
 - Counts and measurements in lining tabular figures; running text in oldstyle figures.
 
@@ -144,7 +151,7 @@ A near-monochrome printed palette with one saturated field and one working blue.
 - **Pencil Blue** (pencil): links and source marks. Every source mark is pencil blue with a thin underline at 40% (#2f5fb366), full strength on hover. Also the focus outline colour.
 
 ### Neutral
-- **Press Ink** (ink): body text, the masthead ground, the strong 2px rules under titles and section headings, the outlined status tag.
+- **Press Ink** (ink): body text, the masthead ground, the strong 2px rules under titles and section headings, the outlined status tag, the EX status fill.
 - **Second Ink** (ink-2): quoted and secondary reading text, captions, the standing marks' labels.
 - **Third Ink** (ink-3): authority, quiet metadata, empty states ("No statement yet"), source attributions under other sources' text.
 - **Bright Stock** (paper): the page ground and the text colour on the ink masthead.
@@ -153,9 +160,26 @@ A near-monochrome printed palette with one saturated field and one working blue.
 - **Strong Rule** (rule-strong): 2px rules under the title row, section headings and table heads.
 
 ### Named Rules
-**The One Field Rule.** Ochre is the only saturated fill in the world. It marks where you are (band, current nav item, current comparison), what to do next (Compare) and where two taxa differ. Nothing else gets a coloured ground.
+**The One Field Rule.** Ochre is the only saturated fill in the world. It marks where you are (band, current nav item, current comparison), what to do next (Compare) and where two taxa differ. Nothing else gets a coloured ground, except the IUCN status stamp (The IUCN Exception, below).
 
 **The Marks Not Colours Rule.** Agree, differs and unreviewed are drawn marks in ink: a ticked open circle for agree, a filled square carrying a paper not-equal sign (two bars struck through) for differs, a dashed open circle for unreviewed or not recorded. Never encode standing with green, red or amber.
+
+### The IUCN Exception
+IUCN Red List status is the one categorical colour code allowed outside the One Field and Marks Not Colours rules. The Red List's category colours are a convention identifiers and botanists already read at a glance, and the colourless stamp made the codes too hard to tell apart (Jeff, 2026-11-21, decision 5604). The status tag takes the category's fill, keeps its 1.5px ink outline and square corners, and always shows the code with the colour, never colour alone; the category is spelled out in its title and for screen readers. Every page uses one component, `iucn_status`. The fills are the Red List's own, except EX (ink instead of pure black) and NE (paper, the plain stamp):
+
+| Code | Category | Fill | Code text | Contrast |
+|------|----------|------|-----------|----------|
+| EX | Extinct | ink #161616 | paper | 17.4:1 |
+| EW | Extinct in the Wild | #542344 | paper | 11.9:1 |
+| CR | Critically Endangered | #d81e05 | paper | 4.9:1 |
+| EN | Endangered | #fc7f3f | ink | 7.1:1 |
+| VU | Vulnerable | #f9e814 | ink | 14.3:1 |
+| NT | Near Threatened | #cce226 | ink | 12.5:1 |
+| LC | Least Concern | #60c659 | ink | 8.4:1 |
+| DD | Data Deficient | #d1d1c6 | ink | 11.8:1 |
+| NE | Not Evaluated | paper #fbfbf7 | ink | 17.4:1 |
+
+The colours mean the Red List category and nothing else: they never mark standing, differences, sources or any other status.
 
 ## Typography
 
@@ -216,7 +240,7 @@ Plain, printed, square.
 - **Focus:** 3px pencil-blue outline, 2px offset, on every interactive element.
 
 ### Status Tag
-An outlined ink stamp: Archivo 700 13px at 0.04em, 1.5px ink border, 4px by 7px padding, followed by a source mark (for example IUCN LC with its assessment).
+An outlined ink stamp: Archivo 700 13px at 0.04em, 1.5px ink border, 4px by 7px padding, followed by a source mark when it is sourced. The IUCN status variant (IUCN LC with its assessment on the taxon page, the bare code in the species list) fills the stamp with its Red List category colour (The IUCN Exception).
 
 ### Source Marks
 Archivo 500 12.5px pencil blue, a 1px underline at 40% that firms up on hover, never wraps. Follows every quote and every sourced value. Other sources' text carries its attribution as an Archivo 600 13px ink-3 line beneath it.
@@ -291,7 +315,7 @@ On any taxon Jeff hasn't covered, placed under the title row of the full templat
 - **Don't** borrow the dichotomous key's structure: no couplets, key numbering, dotted leaders, key path or life-size callouts.
 - **Don't** encode agree, differs or unreviewed with colour.
 - **Don't** put statements in boxes, cards, tinted panels or shadows.
-- **Don't** add a second saturated colour or use ochre as text on paper.
+- **Don't** add a second saturated colour or use ochre as text on paper. The IUCN status fills are the one exception, and only for the Red List category.
 - **Don't** round corners.
 - **Don't** set anything that is not Jeff's verbatim wording in quotation marks or in a way that reads as his voice.
 - **Don't** hide conflicts between sources behind tabs; mark them in place.

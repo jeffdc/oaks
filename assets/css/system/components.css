@@ -236,6 +236,22 @@
     white-space: nowrap;
   }
 
+  /* IUCN Red List status (DesignComponents.iucn_status): the stamp filled
+     with the Red List's own category colour, the one categorical colour
+     code DESIGN.md allows (decision 5604). The ink outline stays, so the
+     pale fills (VU, NT, DD, NE) still read as a stamp on paper; the code
+     is ink on the light fills and paper on the dark ones, AA or better on
+     every one. EX is ink rather than pure black; NE is the plain stamp. */
+  .oc-iucn-ex { background: var(--color-ink); color: var(--color-paper); }
+  .oc-iucn-ew { background: #542344; color: var(--color-paper); }
+  .oc-iucn-cr { background: #d81e05; color: var(--color-paper); }
+  .oc-iucn-en { background: #fc7f3f; }
+  .oc-iucn-vu { background: #f9e814; }
+  .oc-iucn-nt { background: #cce226; }
+  .oc-iucn-lc { background: #60c659; }
+  .oc-iucn-dd { background: #d1d1c6; }
+  .oc-iucn-ne { background: var(--color-paper); }
+
   /* ---------------------------------------------------------------------
      Buttons (CoreComponents.button, DesignComponents.compare_button):
      square, 1.5px ink outline. Primary is the ochre fill and inverts to
