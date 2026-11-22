@@ -150,11 +150,11 @@ defmodule OaksWeb.ArticleFormLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div :if={@form == nil} class="max-w-5xl mx-auto py-12 text-center">
+    <div :if={@form == nil} class="max-w-4xl mx-auto py-12 text-center">
       <p class="font-frame text-ink-3">Loading...</p>
     </div>
 
-    <div :if={@form} class="max-w-5xl mx-auto">
+    <div :if={@form} class="max-w-4xl mx-auto">
       <.back navigate={cancel_path(@live_action, @article)}>Back to articles</.back>
 
       <h1 class="mt-s4 mb-s6 font-serif text-[clamp(28px,3vw,36px)]/[1.1] font-semibold text-balance">

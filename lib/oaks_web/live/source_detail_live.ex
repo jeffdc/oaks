@@ -80,6 +80,7 @@ defmodule OaksWeb.SourceDetailLive do
       <.not_found_view :if={@not_found} />
 
       <article :if={@source} class="source-detail">
+        <.back navigate={~p"/sources"}>Back to Sources</.back>
         <.source_header source={@source} editor={@current_scope != nil} />
         <.metadata_card source={@source} />
         <.coverage_section species={@species} />
@@ -148,7 +149,7 @@ defmodule OaksWeb.SourceDetailLive do
 
   defp metadata_card(assigns) do
     has_metadata =
-      assigns.source.source_type || assigns.source.author || assigns.source.year ||
+      assigns.source.author || assigns.source.year ||
         assigns.source.isbn || assigns.source.url ||
         assigns.source.description || assigns.source.notes
 
@@ -157,7 +158,6 @@ defmodule OaksWeb.SourceDetailLive do
     ~H"""
     <section :if={@has_metadata} class="card source-metadata-card">
       <dl class="source-metadata-grid">
-        <.metadata_item :if={@source.source_type} label="Type" value={@source.source_type} />
         <.metadata_item :if={@source.author} label="Author" value={@source.author} />
         <.metadata_item :if={@source.year} label="Year" value={to_string(@source.year)} />
         <.metadata_item :if={@source.isbn} label="ISBN" value={@source.isbn} />
@@ -206,10 +206,9 @@ defmodule OaksWeb.SourceDetailLive do
     ~H"""
     <section class="source-coverage">
       <h2 class="section-title">Coverage</h2>
-      <div class="card source-stat-card">
-        <span class="source-stat-value">{length(@species)}</span>
-        <span class="source-stat-label">Species</span>
-      </div>
+      <p class="source-coverage-count">
+        {length(@species)} species
+      </p>
     </section>
     """
   end
@@ -283,9 +282,9 @@ defmodule OaksWeb.SourceDetailLive do
         aria-labelledby="delete-source-title"
       >
         <h3 id="delete-source-title" class="mb-s3 font-serif text-[26px]/[1.15] font-semibold">
-          Delete Source
+          {if @species_count > 0, do: "Can't Delete Source", else: "Delete Source"}
         </h3>
-        <p class="mb-s4 text-ink-2">
+        <p :if={@species_count == 0} class="mb-s4 text-ink-2">
           Are you sure you want to delete <strong class="text-ink">{@source.name}</strong>?
         </p>
         <p
@@ -295,13 +294,11 @@ defmodule OaksWeb.SourceDetailLive do
           Cannot delete: {@species_count} species have data from this source.
         </p>
         <div class="flex flex-wrap justify-end gap-s2">
-          <.button phx-click="cancel_delete">Cancel</.button>
+          <.button :if={@species_count == 0} phx-click="cancel_delete">Cancel</.button>
           <.button :if={@species_count == 0} variant="primary" phx-click="confirm_delete">
             Delete
           </.button>
-          <.button :if={@species_count > 0} variant="primary" phx-click="cancel_delete">
-            OK
-          </.button>
+          <.button :if={@species_count > 0} phx-click="cancel_delete">Close</.button>
         </div>
       </div>
     </div>

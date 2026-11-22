@@ -119,10 +119,10 @@ defmodule OaksWeb.ArticleLive do
     <div class="mb-s6">
       <.back navigate={~p"/articles"}>Back to Articles</.back>
 
-      <div class="mt-s4 pb-s4 border-b-2 border-ink flex flex-wrap items-end justify-between gap-y-s3 gap-x-s5">
-        <div class="min-w-0 flex-[1_1_24rem]">
+      <div class="mt-s4 pb-s4 border-b-2 border-ink flex flex-wrap sm:flex-nowrap items-start justify-between gap-y-s3 gap-x-s5">
+        <div class="min-w-0 flex-auto">
           <div class="flex flex-wrap items-baseline gap-x-s4 gap-y-s2">
-            <h1 class="font-serif text-[clamp(30px,3.6vw,44px)]/[1.1] font-semibold tracking-[-0.01em] text-balance">
+            <h1 class="font-serif text-[clamp(34px,4vw,50px)]/[1.05] font-semibold tracking-[-0.01em] text-balance">
               {@article.title}
             </h1>
             <.status_tag :if={!@article.is_published} class="border-dashed uppercase">
@@ -135,18 +135,20 @@ defmodule OaksWeb.ArticleLive do
               &middot; Published {format_date(@article.published_at)}
             </span>
           </p>
-          <div :if={@tags != []} class="flex flex-wrap gap-1.5 mt-s3">
+          <p
+            :if={@tags != []}
+            class="mt-s2 flex flex-wrap gap-x-s2 font-frame text-[13px] font-semibold"
+          >
             <.link
               :for={tag <- @tags}
               navigate={~p"/articles?tag=#{tag}"}
-              class="badge badge-forest-light text-xs"
-              style="text-decoration: none;"
+              class="not-last:after:content-[','] after:text-ink-3"
             >
               {tag}
             </.link>
-          </div>
+          </p>
         </div>
-        <div :if={@editor} class="flex items-center gap-s2 shrink-0">
+        <div :if={@editor} class="flex items-center gap-s2 shrink-0 sm:mt-s2">
           <.button navigate={~p"/articles/#{@article.slug}/edit"} size="compact">Edit</.button>
           <.button phx-click="confirm_delete" size="compact">Delete</.button>
         </div>

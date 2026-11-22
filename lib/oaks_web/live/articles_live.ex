@@ -135,12 +135,22 @@ defmodule OaksWeb.ArticlesLive do
   defp get_preview(nil), do: ""
   defp get_preview(""), do: ""
 
+  @preview_length 150
+
   defp get_preview(content) do
-    content
-    |> String.replace(~r/[#*`>\[\]()_~\-]/, "")
-    |> String.replace(~r/\s+/, " ")
-    |> String.trim()
-    |> String.slice(0, 150)
+    text =
+      content
+      |> String.replace(~r/[#*`>\[\]()_~\-]/, "")
+      |> String.replace(~r/\s+/, " ")
+      |> String.trim()
+
+    if String.length(text) > @preview_length do
+      cut = String.slice(text, 0, @preview_length)
+      # Cut at the last word boundary and mark the cut.
+      String.replace(cut, ~r/\s+\S*$/, "") <> "…"
+    else
+      text
+    end
   end
 
   defp format_date(nil), do: ""

@@ -62,9 +62,9 @@ defmodule OaksWeb.SourceDetailLiveTest do
     end
 
     test "shows species count in coverage section", %{conn: conn, ootw: ootw} do
-      {:ok, _view, html} = live(conn, ~p"/sources/#{ootw.id}")
+      {:ok, view, html} = live(conn, ~p"/sources/#{ootw.id}")
       assert html =~ "Coverage"
-      assert html =~ "Species"
+      assert has_element?(view, ".source-coverage-count", "2 species")
     end
 
     test "lists associated species", %{conn: conn} = ctx do
@@ -104,6 +104,23 @@ defmodule OaksWeb.SourceDetailLiveTest do
     test "not found page has link back to sources list", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/sources/0")
       assert html =~ ~s(href="/sources")
+    end
+  end
+
+  describe "delete" do
+    test "a source with species data can't be deleted, and the dialog only closes", %{
+      conn: conn,
+      ootw: ootw
+    } do
+      %{conn: conn} = register_and_log_in_user(%{conn: conn})
+      {:ok, view, _html} = live(conn, ~p"/sources/#{ootw.id}")
+
+      view |> element("#delete-source-btn") |> render_click()
+
+      assert has_element?(view, "[role=dialog]", "Can't Delete Source")
+      assert has_element?(view, "[role=dialog]", "2 species have data from this source")
+      refute has_element?(view, "[role=dialog] [phx-click=confirm_delete]")
+      assert has_element?(view, "[role=dialog] [phx-click=cancel_delete]", "Close")
     end
   end
 end

@@ -77,7 +77,7 @@ defmodule OaksWeb.SourcesLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-4xl mx-auto">
       <.header class="mb-s2 [&>div:first-child]:flex-[1_1_20rem]">
         Data Sources
         <:subtitle>
@@ -186,9 +186,9 @@ defmodule OaksWeb.SourcesLive do
         aria-labelledby="delete-source-title"
       >
         <h3 id="delete-source-title" class="mb-s3 font-serif text-[26px]/[1.15] font-semibold">
-          Delete Source
+          {if @species_count > 0, do: "Can't Delete Source", else: "Delete Source"}
         </h3>
-        <p class="mb-s4 text-ink-2">
+        <p :if={@species_count == 0} class="mb-s4 text-ink-2">
           Are you sure you want to delete <strong class="text-ink">{@source.name}</strong>?
         </p>
         <p
@@ -198,13 +198,11 @@ defmodule OaksWeb.SourcesLive do
           Cannot delete: {@species_count} species have data from this source.
         </p>
         <div class="flex flex-wrap justify-end gap-s2">
-          <.button phx-click="cancel_delete">Cancel</.button>
+          <.button :if={@species_count == 0} phx-click="cancel_delete">Cancel</.button>
           <.button :if={@species_count == 0} variant="primary" phx-click="confirm_delete">
             Delete
           </.button>
-          <.button :if={@species_count > 0} variant="primary" phx-click="cancel_delete">
-            OK
-          </.button>
+          <.button :if={@species_count > 0} phx-click="cancel_delete">Close</.button>
         </div>
       </div>
     </div>
