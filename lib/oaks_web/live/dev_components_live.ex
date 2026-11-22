@@ -318,7 +318,6 @@ defmodule OaksWeb.DevComponentsLive do
               <.button>Show another</.button>
             </:actions>
           </.specimen>
-          <.specimen id="gallery-specimen-loading" heading="Loading" loading />
           <.colophon id="gallery-colophon" label="Sources">
             <:item>
               <.link navigate={~p"/sources/3"}>Oak Compendium</.link><.status_tag>

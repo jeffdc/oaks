@@ -254,22 +254,6 @@ defmodule OaksWeb.DesignComponentsTest do
       assert html =~ ~s(<p class="oc-specimen-author">Nutt.</p>)
       assert html =~ ~s(<p class="oc-specimen-about">Hybrids</p>)
       refute html =~ "oc-specimen-band"
-      refute html =~ "oc-specimen-wait"
-    end
-
-    test "holds its place while loading" do
-      assigns = %{}
-
-      html =
-        rendered_to_string(~H"""
-        <DesignComponents.specimen id="s" heading="An oak at random" loading>
-          <:name>michauxii</:name>
-        </DesignComponents.specimen>
-        """)
-
-      assert html =~ ~s(aria-busy="true")
-      assert html =~ "oc-specimen-wait"
-      refute html =~ "michauxii"
     end
   end
 

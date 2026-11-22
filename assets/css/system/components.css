@@ -1107,7 +1107,6 @@
     margin-top: 88px;
     text-align: center;
   }
-  .oc-specimen-wait { min-height: 300px; }
   .oc-specimen-name {
     margin: var(--spacing-s6) 0 0;
     font: 400 clamp(44px, 5.6vw, 80px)/1 var(--font-serif);

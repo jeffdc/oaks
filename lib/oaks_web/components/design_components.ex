@@ -705,10 +705,6 @@ defmodule OaksWeb.DesignComponents do
   then the authority, where it sits (`:band`, an inline `taxonomy_band/1`),
   a line about it (`:about`, such as its hybrids) and the actions.
 
-  With `loading` it holds the section's place at about its usual height
-  and announces nothing, so the page doesn't jump when the taxon arrives
-  after the live connection.
-
   ## Examples
 
       <.specimen id="oak-at-random" heading="An oak at random">
@@ -721,8 +717,7 @@ defmodule OaksWeb.DesignComponents do
   """
   attr :id, :string, required: true
   attr :heading, :string, required: true
-  attr :loading, :boolean, default: false
-  slot :name
+  slot :name, required: true
   slot :author
   slot :band
   slot :about
@@ -730,21 +725,13 @@ defmodule OaksWeb.DesignComponents do
 
   def specimen(assigns) do
     ~H"""
-    <section
-      id={@id}
-      class="oc-specimen"
-      aria-labelledby={"#{@id}-heading"}
-      aria-busy={@loading && "true"}
-    >
+    <section id={@id} class="oc-specimen" aria-labelledby={"#{@id}-heading"}>
       <.chapter_heading id={"#{@id}-heading"}>{@heading}</.chapter_heading>
-      <div :if={@loading} class="oc-specimen-wait"></div>
-      <%= if !@loading do %>
-        <p class="oc-specimen-name">{render_slot(@name)}</p>
-        <p :if={@author != []} class="oc-specimen-author">{render_slot(@author)}</p>
-        <div :if={@band != []} class="oc-specimen-band">{render_slot(@band)}</div>
-        <p :if={@about != []} class="oc-specimen-about">{render_slot(@about)}</p>
-        <div :if={@actions != []} class="oc-specimen-actions">{render_slot(@actions)}</div>
-      <% end %>
+      <p class="oc-specimen-name">{render_slot(@name)}</p>
+      <p :if={@author != []} class="oc-specimen-author">{render_slot(@author)}</p>
+      <div :if={@band != []} class="oc-specimen-band">{render_slot(@band)}</div>
+      <p :if={@about != []} class="oc-specimen-about">{render_slot(@about)}</p>
+      <div :if={@actions != []} class="oc-specimen-actions">{render_slot(@actions)}</div>
     </section>
     """
   end
