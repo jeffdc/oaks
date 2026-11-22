@@ -256,11 +256,11 @@ select.select {
 /* ============================================
    Prose Content (rendered markdown: articles, taxon write-ups, source
    text, previews). DESIGN.md reading text: Source Serif 4 at 17px with
-   oldstyle figures, held to a 70ch measure; headings in the serif, then
-   the reader's uppercase Archivo subheads; pencil links; rules, not tints.
+   oldstyle figures, held to the 720px reading measure; headings in the
+   serif, then the reader's uppercase Archivo subheads; pencil links.
    ============================================ */
 .prose-content {
-  max-width: 70ch;
+  max-width: var(--container-read);
   color: var(--color-ink);
   font-family: var(--font-serif);
   font-size: 17px;

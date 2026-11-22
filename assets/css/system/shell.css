@@ -226,10 +226,11 @@
   /* ---------------------------------------------------------------------
      Page (CoreComponents.page): the frame moves from <main> into the page,
      so a page can run a part full width (the bleed) above its framed
-     content. Single-column pages sit in one centred 960px column (column,
-     and read and form, whose content holds a 70ch or 640px measure from
-     the column's left edge); the head (the title row) spans the column.
-     Only pages that set columns side by side take the 1400px frame.
+     content. Single-column pages sit in one centred 960px column, the head
+     (the title row) across it. Prose (read) and forms (form) sit in a
+     narrower centred column of their own, 720px or 760px, the head and
+     the content both at that measure. Only pages that set columns side
+     by side take the 1400px frame.
      --------------------------------------------------------------------- */
   .oc-page:has(.oc-pg) {
     max-width: none;
@@ -241,8 +242,8 @@
     padding: var(--spacing-s6) var(--spacing-s6) var(--spacing-s8);
   }
   .oc-pg-frame { max-width: var(--container-frame); }
-  .oc-pg-read > .oc-pg-measure { max-width: var(--container-read); }
-  .oc-pg-form > .oc-pg-measure { max-width: var(--container-form); }
+  .oc-pg-read { max-width: calc(var(--container-read) + 2 * var(--spacing-s6)); }
+  .oc-pg-form { max-width: calc(var(--container-form) + 2 * var(--spacing-s6)); }
 
   /* ---------------------------------------------------------------------
      Site footer: the licensing line on a hairline, then the pages with no
