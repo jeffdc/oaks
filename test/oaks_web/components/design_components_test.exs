@@ -107,6 +107,7 @@ defmodule OaksWeb.DesignComponentsTest do
       assert sci(name: "alba", size: "display") =~ ~s(class="oc-sci oc-sci-display)
       assert sci(name: "alba", size: "headline") =~ ~s(class="oc-sci oc-sci-headline)
       assert sci(name: "alba", size: "title") =~ ~s(class="oc-sci oc-sci-title)
+      assert sci(name: "Lobatae", rank: "sect.", size: "meta") =~ ~s(class="oc-sci oc-sci-meta)
       refute sci(name: "alba") =~ "oc-sci-display"
     end
 

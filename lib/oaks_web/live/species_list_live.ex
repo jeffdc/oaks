@@ -166,10 +166,10 @@ defmodule OaksWeb.SpeciesListLive do
       </span>
       <span class="species-row-meta">
         <span :if={@species.subgenus} class="hidden sm:inline">
-          <.sci_name name={@species.subgenus} genus={nil} weight="regular" />
+          <.sci_name name={@species.subgenus} rank="subg." size="meta" />
         </span>
         <span :if={@species.section} class="hidden md:inline">
-          <.sci_name name={@species.section} rank="sect." weight="regular" />
+          <.sci_name name={@species.section} rank="sect." size="meta" />
         </span>
         <.iucn_status
           :if={@species.conservation_status}

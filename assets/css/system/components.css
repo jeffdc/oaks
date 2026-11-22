@@ -185,7 +185,12 @@
   .oc-sci-headline { font-size: 26px; line-height: 1.1; }
   .oc-sci-headline .oc-sci-a { font-size: 17px; }
   .oc-sci-title { font-size: 18px; line-height: 1.25; }
-  .oc-sci-title .oc-sci-a { font-size: 15px; }
+  .oc-sci-title .oc-sci-a { margin-left: 0.2em; font-size: 15px; }
+  /* In an Archivo metadata line: the serif a step up so it reads level
+     with the 13px frame text, all at 400, the rank word in the frame face
+     as in the taxonomy band. */
+  .oc-sci-meta { font-size: 14px; line-height: 1.3; font-weight: 400; }
+  .oc-sci-meta .oc-sci-r { font: 500 13px/1.3 var(--font-frame); }
 
   /* In a link, hover underlines the name, not its author. */
   :any-link:hover .oc-sci-n {

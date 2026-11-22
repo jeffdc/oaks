@@ -258,8 +258,9 @@ defmodule OaksWeb.DevComponentsLive do
             Size follows the name's role, never the page: <code>size="display"</code>
             in a title row, <code>"headline"</code>
             heading a comparison column, <code>"title"</code>
-            for a name that is a list entry, and no size elsewhere (running text, dialogs, table
-            cells, metadata), where it takes the text around it. The genus is in full in titles, at
+            for a name that is a list entry, <code>"meta"</code>
+            in a metadata line beside one, and no size elsewhere (running text, dialogs, table
+            cells), where it takes the text around it. The genus is in full in titles, at
             a first mention and in lists whose entries stand alone; Q. after that, in lists under a
             named taxon or record and in column heads; none above species, after "with" and for
             synonyms.
@@ -280,6 +281,12 @@ defmodule OaksWeb.DevComponentsLive do
               </.link>
               <span class="text-ink-2">
                 with <.sci_name name="rubra" genus={nil} weight="regular" />
+              </span>
+            </:item>
+            <:item title="meta">
+              <span class="text-ink-3">
+                <.sci_name name="Quercus" rank="subg." size="meta" />
+                <.sci_name name="Lobatae" rank="sect." size="meta" />
               </span>
             </:item>
           </.list>

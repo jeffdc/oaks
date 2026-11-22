@@ -823,7 +823,7 @@ defmodule OaksWeb.SpeciesDetailLive do
                     size="title"
                   />
                   <span :if={species.section} class="merge-target-meta">
-                    <.sci_name name={species.section} rank="sect." weight="regular" />
+                    <.sci_name name={species.section} rank="sect." size="meta" />
                   </span>
                 </button>
               </li>

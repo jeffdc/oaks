@@ -182,7 +182,7 @@ defmodule OaksWeb.SearchLive do
               />
             </span>
             <span :if={species.section} class="search-result-meta">
-              <.sci_name name={species.section} rank="sect." weight="regular" />
+              <.sci_name name={species.section} rank="sect." size="meta" />
             </span>
           </.link>
         </li>

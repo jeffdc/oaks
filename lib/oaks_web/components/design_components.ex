@@ -160,8 +160,7 @@ defmodule OaksWeb.DesignComponents do
   ## Size: by the name's role, never by the page
 
     * no `size` (the default): the size of the text around it, for names
-      in running text, dialogs, table cells, field values and metadata
-      lines. In the taxonomy band the band sets its own voice (16px, the
+      in running text, dialogs, table cells and field values. In the taxonomy band the band sets its own voice (16px, the
       current taxon at 700).
     * `size="display"`: the name in a page's title row (the display size,
       clamp 34px to 50px, with the author at 22px).
@@ -170,6 +169,9 @@ defmodule OaksWeb.DesignComponents do
     * `size="title"`: a name that is itself an entry in a list (18px, the
       author at 15px): the species list, search results, a taxon's
       species, a species' hybrids and relatives, a source's species.
+    * `size="meta"`: a name in an Archivo metadata line beside a list
+      entry (`sect. Lobatae`, `subg. Cerris`): 14px, all at 400, the rank
+      word in the frame face as in the band.
 
   ## Genus: Quercus, Q. or none
 
@@ -212,7 +214,7 @@ defmodule OaksWeb.DesignComponents do
   attr :weight, :string, values: ~w(epithet regular), default: "epithet"
 
   attr :size, :string,
-    values: [nil, "display", "headline", "title"],
+    values: [nil, "display", "headline", "title", "meta"],
     default: nil,
     doc: "the name's role: nil takes the surrounding size"
 
