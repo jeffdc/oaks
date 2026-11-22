@@ -41,6 +41,6 @@ STORY: The reader sees where the taxon sits, reads the few traits that separate 
 
 FIRST VIEWPORT: Ink masthead with nav and search. Ochre band with the taxonomy breadcrumb at fixed height. Title row: italic name, author, common name, status. Directly under it, Jeff's write-up as a short excerpt that opens the full text in a popover. Below, three columns: photo carousel left; distinguishing traits as the reading column centre; look-alikes (each with Compare) and hybrids (with the other parent) in the right rail.
 
-FORM: The Twig Key world (5th of 7 on the grounded list), its key structure removed at Jeff's direction; signature interaction: choosing a look-alike opens a side-by-side comparison aligned trait by trait, at a shareable URL. seed:48b50a33fc9e9d1f
+FORM: The Twig Key world (the "Twig Key" sketch, .impeccable/mocks/decision/assigned.html), its key structure removed at Jeff's direction; Jeff confirmed on 2026-11-21 that design/prototype/shumardii.html shows it. The decision page recorded no answer, and roll seed:48b50a33fc9e9d1f doesn't list this world, so the seed is not its source. Signature interaction: choosing a look-alike opens a side-by-side comparison aligned trait by trait, at a shareable URL.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
