@@ -214,7 +214,13 @@ defmodule OaksWeb.TaxonFormLive do
         <.back navigate={~p"/taxonomy"}>Back to taxonomy</.back>
       </div>
 
-      <.header>{@page_title}</.header>
+      <.header>
+        <%= if @live_action == :new do %>
+          Create Taxon
+        <% else %>
+          Edit {level_label(@taxon.level)}: <i>{display_name(@taxon)}</i>
+        <% end %>
+      </.header>
 
       <.form for={@form} id="taxon-form" phx-change="validate" phx-submit="save">
         <div class="space-y-s7">
@@ -318,6 +324,10 @@ defmodule OaksWeb.TaxonFormLive do
   defp level_label("subsection"), do: "Subsection"
   defp level_label("complex"), do: "Complex"
   defp level_label(_), do: "Taxon"
+
+  # A complex is named for its species, so it reads as a species name
+  defp display_name(%{level: "complex", name: name}), do: "Q. #{name}"
+  defp display_name(%{name: name}), do: name
 
   defp show_parent?(form) do
     level = form[:level].value

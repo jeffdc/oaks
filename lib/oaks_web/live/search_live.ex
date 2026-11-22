@@ -177,7 +177,10 @@ defmodule OaksWeb.SearchLive do
                 >
                   &times;
                 </span>
-                {epithet(species.scientific_name)}
+                <span :for={{part, i} <- Enum.with_index(formula_parts(species.scientific_name))}><span
+                  :if={i > 0}
+                  class="not-italic"
+                >{" × "}</span>{part}</span>
               </i>
               <span :if={species.author} class="search-result-author">{species.author}</span>
             </span>
@@ -200,6 +203,11 @@ defmodule OaksWeb.SearchLive do
   defp perform_search(socket, query) do
     results = Search.search(query)
     assign(socket, query: query, results: results, page_title: "Search: #{query}")
+  end
+
+  # A hybrid formula's parts, so its sign can be set roman between them
+  defp formula_parts(scientific_name) do
+    scientific_name |> epithet() |> String.split(~r/\s*×\s*/u)
   end
 
   defp search_path(""), do: ~p"/search"

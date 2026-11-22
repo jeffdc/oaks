@@ -1782,9 +1782,11 @@ a.badge:hover {
    name (scientific names in the serif italic) with its authority, and
    its meta at the right. No icons: the section says what a row is.
    ============================================ */
-/* A results list reads as one column: names and their meta stay within
-   reach of each other. */
-.search-page {
+/* A results list reads as one column, so names and their meta stay
+   within reach of each other; the title row's rule still runs the frame. */
+.search-section,
+.search-no-results,
+.search-start p {
   max-width: 56rem;
 }
 

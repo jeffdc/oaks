@@ -331,15 +331,15 @@ defmodule OaksWeb.TaxonomyLive do
     ~H"""
     <li class="taxon-card-wrapper">
       <.link navigate={@url} class="taxon-card">
-        <i class="taxon-card-name">{band_name(@taxon.level, @taxon.name)}</i>
+        <i class="taxon-card-name"><.taxon_name level={@taxon.level} name={@taxon.name} /></i>
         <span class="taxon-card-count">{@taxon.species_count} species</span>
       </.link>
       <div :if={@editor} class="taxon-card-actions">
         <.link
           navigate={~p"/taxonomy/#{@taxon.id}/edit"}
           class="taxon-action-icon"
-          title={"Edit #{@taxon.name}"}
-          aria-label={"Edit #{@taxon.name}"}
+          title={"Edit #{band_name(@taxon.level, @taxon.name)}"}
+          aria-label={"Edit #{band_name(@taxon.level, @taxon.name)}"}
         >
           <.icon name="hero-pencil-square" class="size-3.5" />
         </.link>
@@ -347,8 +347,8 @@ defmodule OaksWeb.TaxonomyLive do
           phx-click="request_delete_taxon"
           phx-value-id={@taxon.id}
           class="taxon-action-icon taxon-action-delete"
-          title={"Delete #{@taxon.name}"}
-          aria-label={"Delete #{@taxon.name}"}
+          title={"Delete #{band_name(@taxon.level, @taxon.name)}"}
+          aria-label={"Delete #{band_name(@taxon.level, @taxon.name)}"}
         >
           <.icon name="hero-trash" class="size-3.5" />
         </button>
@@ -364,9 +364,22 @@ defmodule OaksWeb.TaxonomyLive do
   defp taxon_display_name(assigns) do
     ~H"""
     <i :if={@is_genus}>Quercus</i>
-    <i :if={not @is_genus}>{band_name(@level, @taxon.name)}</i>
+    <i :if={not @is_genus}><.taxon_name level={@level} name={@taxon.name} /></i>
     """
   end
+
+  attr :level, :string, required: true
+  attr :name, :string, required: true
+
+  # A complex is named for its species: the genus initial at the reading
+  # weight, the epithet heavier, as in a species name.
+  defp taxon_name(%{level: "complex"} = assigns) do
+    ~H"""
+    <span class="font-normal">Q.</span> {@name}
+    """
+  end
+
+  defp taxon_name(assigns), do: ~H"{@name}"
 
   attr :species, :any, required: true
 
@@ -378,7 +391,10 @@ defmodule OaksWeb.TaxonomyLive do
         <span :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)} class="not-italic">
           &times;
         </span>
-        {epithet(@species.scientific_name)}
+        <span :for={{part, i} <- Enum.with_index(formula_parts(@species.scientific_name))}><span
+          :if={i > 0}
+          class="not-italic"
+        >{" × "}</span>{part}</span>
       </i>
       <span :if={@species.author} class="species-card-author">{@species.author}</span>
     </.link>
@@ -410,7 +426,8 @@ defmodule OaksWeb.TaxonomyLive do
         </div>
         <div class="oc-modal-body">
           <p class="taxon-modal-text">
-            Are you sure you want to delete <i>{@taxon.name}</i> ({@taxon.level})?
+            Are you sure you want to delete <i>{band_name(@taxon.level, @taxon.name)}</i>
+            ({@taxon.level})?
           </p>
           <p :if={in_use?(@usage)} class="taxon-modal-in-use" id="delete-taxon-in-use">
             {usage_text(@usage)} still use this taxon. Move or delete them first.
@@ -459,6 +476,11 @@ defmodule OaksWeb.TaxonomyLive do
   # A complex is named for its species, so it reads as a species name
   defp band_name("complex", name), do: "Q. #{name}"
   defp band_name(_level, name), do: name
+
+  # A hybrid formula's parts, so its sign can be set roman between them
+  defp formula_parts(scientific_name) do
+    scientific_name |> epithet() |> String.split(~r/\s*×\s*/u)
+  end
 
   defp current_name(nil), do: "Quercus"
   defp current_name(taxon), do: taxon.name
