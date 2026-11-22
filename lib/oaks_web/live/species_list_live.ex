@@ -73,75 +73,54 @@ defmodule OaksWeb.SpeciesListLive do
   def render(assigns) do
     ~H"""
     <div class="max-w-5xl mx-auto">
-      <div class="flex items-center justify-between mb-2">
-        <h1
-          class="text-2xl font-bold"
-          style="font-family: var(--font-serif); color: var(--color-forest-800);"
-        >
-          Species List
-        </h1>
-        <.link
-          :if={@current_scope}
-          navigate={~p"/species/new"}
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white"
-          style="background-color: var(--color-forest-600); text-decoration: none;"
-          id="new-species-btn"
-        >
-          <.icon name="hero-plus" class="size-4" /> New Species
-        </.link>
-      </div>
+      <.header>
+        Species List
+        <:subtitle>
+          <.counts_bar species_count={@species_count} hybrid_count={@hybrid_count} />
+        </:subtitle>
+        <:actions :if={@current_scope}>
+          <.button navigate={~p"/species/new"} id="new-species-btn">New Species</.button>
+        </:actions>
+      </.header>
 
-      <.counts_bar
-        species_count={@species_count}
-        hybrid_count={@hybrid_count}
-      />
-
-      <form id="filter-form" phx-change="filter" class="mb-6">
-        <div class="flex flex-col sm:flex-row gap-3">
-          <div class="relative flex-1">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <.icon name="hero-magnifying-glass" class="size-5 text-base-content/40" />
-            </div>
-            <input
-              type="search"
-              id="species-search"
-              name="q"
-              value={@query}
-              placeholder="Search by species name..."
-              class="w-full input input-bordered pl-10"
-              phx-debounce="300"
-            />
-          </div>
-          <select name="subgenus" class="select select-bordered">
-            <option value="">All Subgenera</option>
-            <option :for={sg <- @subgenera} value={sg} selected={sg == @subgenus}>
-              {sg}
-            </option>
-          </select>
-          <select name="section" class="select select-bordered">
-            <option value="">All Sections</option>
-            <option :for={sec <- @sections} value={sec} selected={sec == @section}>
-              {sec}
-            </option>
-          </select>
+      <form id="filter-form" phx-change="filter" class="species-filters">
+        <div class="species-search">
+          <.icon name="hero-magnifying-glass" class="species-search-icon" />
+          <input
+            type="search"
+            id="species-search"
+            name="q"
+            value={@query}
+            placeholder="Search by species name..."
+            aria-label="Search by species name"
+            class="input input-bordered"
+            phx-debounce="300"
+          />
         </div>
+        <select name="subgenus" class="select select-bordered" aria-label="Subgenus">
+          <option value="">All Subgenera</option>
+          <option :for={sg <- @subgenera} value={sg} selected={sg == @subgenus}>
+            {sg}
+          </option>
+        </select>
+        <select name="section" class="select select-bordered" aria-label="Section">
+          <option value="">All Sections</option>
+          <option :for={sec <- @sections} value={sec} selected={sec == @section}>
+            {sec}
+          </option>
+        </select>
       </form>
 
-      <div
-        :if={@species_count == 0}
-        class="text-center py-12"
-        style="color: var(--color-text-tertiary);"
-      >
-        <.icon name="hero-magnifying-glass" class="size-12 mx-auto mb-4 opacity-50" />
-        <p class="text-lg mb-1">No species found</p>
-        <p class="text-sm">Try adjusting your search or filters.</p>
+      <div :if={@species_count == 0} class="species-empty">
+        <p class="species-empty-title">No species found</p>
+        <p>Try adjusting your search or filters.</p>
       </div>
 
       <div
         :if={@species_count > 0}
         id="species-list"
         phx-update="stream"
-        class="space-y-0.5"
+        class="species-rows"
       >
         <.species_row :for={{dom_id, species} <- @streams.species} id={dom_id} species={species} />
       </div>
@@ -159,13 +138,11 @@ defmodule OaksWeb.SpeciesListLive do
     assigns = assign(assigns, :non_hybrid, non_hybrid)
 
     ~H"""
-    <div class="flex flex-wrap gap-3 mb-4 text-sm" style="color: var(--color-text-secondary);">
+    <span class="species-counts">
       <span>{@non_hybrid} species</span>
-      <span style="color: var(--color-text-tertiary);">|</span>
       <span>{@hybrid_count} hybrids</span>
-      <span style="color: var(--color-text-tertiary);">|</span>
-      <span class="font-medium">{@species_count} total</span>
-    </div>
+      <span>{@species_count} total</span>
+    </span>
     """
   end
 
@@ -177,43 +154,31 @@ defmodule OaksWeb.SpeciesListLive do
     <.link
       id={@id}
       navigate={~p"/species/#{@species.scientific_name}"}
-      class="flex items-center justify-between p-3 rounded-lg hover:bg-base-200 transition-colors group"
-      style="text-decoration: none;"
+      class="species-row"
     >
-      <div class="flex items-center gap-2">
-        <span class="font-medium group-hover:text-primary transition-colors">
-          Quercus{" "}
-          <span :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)}>&times;</span>
-          <em>{epithet(@species.scientific_name)}</em>
+      <span class="species-row-name">
+        <i :if={!hybrid_sign?(@species.scientific_name, @species.is_hybrid)}>
+          Quercus {epithet(@species.scientific_name)}
+        </i>
+        <span :if={hybrid_sign?(@species.scientific_name, @species.is_hybrid)}>
+          <i>Quercus</i> &times; <i>{epithet(@species.scientific_name)}</i>
         </span>
-        <span
-          :if={@species.author}
-          class="text-sm hidden sm:inline"
-          style="color: var(--color-text-tertiary);"
-        >
-          {@species.author}
-        </span>
-      </div>
-      <div class="flex items-center gap-2 text-xs">
-        <span
-          :if={@species.subgenus}
-          class="badge badge-sm badge-ghost hidden sm:inline-flex"
-        >
+        <span :if={@species.author} class="species-row-author">{@species.author}</span>
+      </span>
+      <span class="species-row-meta">
+        <span :if={@species.subgenus} class="species-row-rank hidden sm:inline">
           {@species.subgenus}
         </span>
-        <span
-          :if={@species.section}
-          class="badge badge-sm badge-ghost hidden md:inline-flex"
-        >
+        <span :if={@species.section} class="species-row-rank hidden md:inline">
           sect. {@species.section}
         </span>
-        <span
+        <.status_tag
           :if={@species.conservation_status}
-          class={["badge badge-sm border", conservation_classes(@species.conservation_status)]}
+          title={conservation_title(@species.conservation_status)}
         >
           {@species.conservation_status}
-        </span>
-      </div>
+        </.status_tag>
+      </span>
     </.link>
     """
   end
@@ -236,14 +201,14 @@ defmodule OaksWeb.SpeciesListLive do
   defp maybe_put(map, _key, ""), do: map
   defp maybe_put(map, key, value), do: Map.put(map, key, value)
 
-  defp conservation_classes("LC"), do: "bg-green-100 text-green-800 border-green-300"
-  defp conservation_classes("NT"), do: "bg-lime-100 text-lime-800 border-lime-300"
-  defp conservation_classes("VU"), do: "bg-yellow-100 text-yellow-800 border-yellow-300"
-  defp conservation_classes("EN"), do: "bg-orange-100 text-orange-800 border-orange-300"
-  defp conservation_classes("CR"), do: "bg-red-100 text-red-800 border-red-300"
-  defp conservation_classes("EW"), do: "bg-purple-100 text-purple-800 border-purple-300"
-  defp conservation_classes("EX"), do: "bg-gray-800 text-white border-gray-900"
-  defp conservation_classes("DD"), do: "bg-gray-100 text-gray-600 border-gray-300"
-  defp conservation_classes("NE"), do: "bg-white text-gray-500 border-gray-300"
-  defp conservation_classes(_), do: "bg-gray-100 text-gray-600 border-gray-300"
+  defp conservation_title("LC"), do: "IUCN Red List: Least Concern"
+  defp conservation_title("NT"), do: "IUCN Red List: Near Threatened"
+  defp conservation_title("VU"), do: "IUCN Red List: Vulnerable"
+  defp conservation_title("EN"), do: "IUCN Red List: Endangered"
+  defp conservation_title("CR"), do: "IUCN Red List: Critically Endangered"
+  defp conservation_title("EW"), do: "IUCN Red List: Extinct in the Wild"
+  defp conservation_title("EX"), do: "IUCN Red List: Extinct"
+  defp conservation_title("DD"), do: "IUCN Red List: Data Deficient"
+  defp conservation_title("NE"), do: "IUCN Red List: Not Evaluated"
+  defp conservation_title(_), do: nil
 end

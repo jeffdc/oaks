@@ -129,29 +129,30 @@ defmodule OaksWeb.SpeciesFormLive do
   def render(assigns) do
     ~H"""
     <div :if={@form == nil} class="max-w-3xl mx-auto py-12 text-center">
-      <p style="color: var(--color-text-tertiary);">Loading...</p>
+      <p class="oc-empty">Loading...</p>
     </div>
 
     <div :if={@form} class="max-w-3xl mx-auto">
-      <.link
-        navigate={cancel_path(@live_action, @species)}
-        class="inline-flex items-center gap-1 text-sm mb-4"
-        style="color: var(--color-forest-700);"
-      >
-        <.icon name="hero-arrow-left" class="size-4" /> Back
-      </.link>
+      <.back navigate={cancel_path(@live_action, @species)}>Back</.back>
 
-      <h1
-        class="text-2xl font-bold mb-6"
-        style="font-family: var(--font-serif); color: var(--color-forest-800);"
-      >
-        {@page_title}
-      </h1>
+      <.header class="species-form-title">
+        <span :if={@live_action == :new}>New Species</span>
+        <span :if={
+          @live_action == :edit && !hybrid_sign?(@species.scientific_name, @species.is_hybrid)
+        }>
+          Edit <i>Quercus {epithet(@species.scientific_name)}</i>
+        </span>
+        <span :if={
+          @live_action == :edit && hybrid_sign?(@species.scientific_name, @species.is_hybrid)
+        }>
+          Edit <i>Quercus</i> &times; <i>{epithet(@species.scientific_name)}</i>
+        </span>
+      </.header>
 
       <.form for={@form} id="species-form" phx-change="validate" phx-submit="save">
-        <div class="space-y-6">
+        <div class="species-form-sections">
           <%!-- Core fields --%>
-          <div class="card p-6">
+          <div class="card">
             <h2 class="section-title section-title-sm mb-4">Basic Information</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="sm:col-span-2">
@@ -162,11 +163,7 @@ defmodule OaksWeb.SpeciesFormLive do
                   placeholder="e.g. alba"
                   phx-debounce="300"
                 />
-                <p
-                  :if={@live_action == :edit}
-                  class="text-xs mt-1"
-                  style="color: var(--color-text-tertiary);"
-                >
+                <p :if={@live_action == :edit} class="oc-hint species-form-note">
                   Renaming updates every species that mentions this name and keeps the old name as a synonym.
                 </p>
               </div>
@@ -195,7 +192,7 @@ defmodule OaksWeb.SpeciesFormLive do
           </div>
 
           <%!-- Taxonomy fields --%>
-          <div class="card p-6">
+          <div class="card">
             <h2 class="section-title section-title-sm mb-4">Taxonomy</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -238,9 +235,9 @@ defmodule OaksWeb.SpeciesFormLive do
           </div>
 
           <%!-- Hybrid parentage (shown when is_hybrid is checked) --%>
-          <div class="card p-6">
+          <div class="card">
             <h2 class="section-title section-title-sm mb-4">Hybrid Parentage</h2>
-            <p class="text-sm mb-4" style="color: var(--color-text-tertiary);">
+            <p class="oc-hint species-form-lede">
               Only relevant for hybrid species.
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -266,9 +263,9 @@ defmodule OaksWeb.SpeciesFormLive do
           </div>
 
           <%!-- Relationships (JSON arrays stored as comma-separated text) --%>
-          <div class="card p-6">
+          <div class="card">
             <h2 class="section-title section-title-sm mb-4">Relationships</h2>
-            <p class="text-sm mb-4" style="color: var(--color-text-tertiary);">
+            <p class="oc-hint species-form-lede">
               Enter names separated by commas. JSON arrays are also accepted.
             </p>
             <div class="space-y-4">
@@ -304,22 +301,11 @@ defmodule OaksWeb.SpeciesFormLive do
           </div>
 
           <%!-- Submit --%>
-          <div class="flex items-center justify-end gap-3">
-            <.link
-              navigate={cancel_path(@live_action, @species)}
-              class="px-4 py-2 rounded-lg text-sm font-medium"
-              style="color: var(--color-text-secondary);"
-            >
-              Cancel
-            </.link>
-            <button
-              type="submit"
-              phx-disable-with="Saving..."
-              class="px-6 py-2 rounded-lg text-sm font-medium text-white"
-              style="background-color: var(--color-forest-600);"
-            >
+          <div class="species-form-actions">
+            <.button navigate={cancel_path(@live_action, @species)}>Cancel</.button>
+            <.button type="submit" variant="primary" phx-disable-with="Saving...">
               {if(@live_action == :new, do: "Create Species", else: "Save Changes")}
-            </button>
+            </.button>
           </div>
         </div>
       </.form>

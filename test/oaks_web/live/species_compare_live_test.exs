@@ -54,6 +54,20 @@ defmodule OaksWeb.SpeciesCompareLiveTest do
       assert html =~ "Select sources to compare"
     end
 
+    test "marks selected sources as pressed and unpresses one on click", %{
+      conn: conn,
+      alba: alba
+    } do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}/compare")
+
+      assert has_element?(view, ".source-chip[aria-pressed='true']", "preferred")
+
+      view |> element(".source-chip:not(:has(.source-chip-note))") |> render_click()
+
+      assert has_element?(view, ".source-chip[aria-pressed='false']")
+      assert has_element?(view, ".source-chip[aria-pressed='true']", "preferred")
+    end
+
     test "toggles source selection on click", %{conn: conn, alba: alba} do
       {:ok, view, _html} = live(conn, ~p"/species/#{alba}/compare")
 

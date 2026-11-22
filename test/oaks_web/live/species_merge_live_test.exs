@@ -58,6 +58,18 @@ defmodule OaksWeb.SpeciesMergeLiveTest do
       assert html =~ "Subgenus"
     end
 
+    test "marks a field that differs with the differs mark", %{
+      conn: conn,
+      stellata: stellata,
+      alba: alba
+    } do
+      {:ok, view, _html} =
+        conn |> authenticated_conn() |> live(~p"/species/#{stellata}/merge/#{alba}")
+
+      # The two authors differ, so the Author row carries the mark.
+      assert has_element?(view, ".merge-row-differs [data-standing='differs']", "differs")
+    end
+
     test "shows source transfer section", %{conn: conn, stellata: stellata, alba: alba} do
       {:ok, _view, html} =
         conn |> authenticated_conn() |> live(~p"/species/#{stellata}/merge/#{alba}")
