@@ -137,6 +137,35 @@ document.addEventListener("click", async e => {
   }
 })
 
+// The masthead search (OaksWeb.Layouts.site_header): "/" focuses it from
+// anywhere except a field the reader is typing in.
+document.addEventListener("keydown", e => {
+  if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return
+  if (e.target.closest?.("input, textarea, select, [contenteditable]")) return
+  const search = document.getElementById("header-search")
+  if (!search) return
+  e.preventDefault()
+  search.focus()
+  search.select()
+})
+
+// Menus built on <details data-menu> (the masthead's Editor menu) close on
+// Escape and on a click outside them. Document listeners rather than
+// phx-click-away, so the menu also closes on the controller pages.
+document.addEventListener("click", e => {
+  for (const menu of document.querySelectorAll("details[data-menu][open]")) {
+    if (!menu.contains(e.target)) menu.open = false
+  }
+})
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return
+  for (const menu of document.querySelectorAll("details[data-menu][open]")) {
+    const hadFocus = menu.contains(document.activeElement)
+    menu.open = false
+    if (hadFocus) menu.querySelector("summary")?.focus()
+  }
+})
+
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
