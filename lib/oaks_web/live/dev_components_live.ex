@@ -385,9 +385,9 @@ defmodule OaksWeb.DevComponentsLive do
             This gallery is a <code>page</code> at the frame: the band above runs in its bleed, the
             window's full width, and everything else sits in the 1400px frame, which only pages that
             set columns side by side take (the source comparison, a merge). Every single-column page
-            sits in one centred 960px column: lists, taxon pages and records take column; prose takes
-            read and forms and account pages take form, which hold the content under the head to
-            their measure from the column's left edge. The head spans the column.
+            sits in one centred 960px column: lists, taxon pages and records take column. Prose takes
+            read (720px) and forms and account pages take form (760px), narrower centred columns
+            whose head and content share the measure. The head spans the page's width.
           </p>
           <div :for={width <- ~w(column read form)} class="mt-s5 border border-dashed border-rule">
             <.page id={"gallery-page-#{width}"} width={width}>

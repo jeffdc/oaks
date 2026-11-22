@@ -239,7 +239,7 @@ defmodule OaksWeb.CoreComponentsTest do
       assert html =~ ~r{<div class="oc-pg-bleed">\s*Title page\s*</div>\s*<div class="oc-pg-body}
     end
 
-    test "sets the head across the column, above the measure" do
+    test "sets the head across the page's width, above the content" do
       html =
         render_component(&CoreComponents.page/1,
           width: "form",

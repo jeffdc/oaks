@@ -579,20 +579,19 @@ defmodule OaksWeb.CoreComponents do
     * `column` (the default): one centred 960px column. Every
       single-column page: lists, taxon pages, search, a record such as a
       source, analytics.
-    * `read`: the column, its content held to a 70ch reading measure.
+    * `read`: a narrower centred column at the 720px reading measure.
       Prose: articles, about, privacy and help pages.
-    * `form`: the column, its content held to a 640px measure. Forms that
-      create or edit something, and the account pages (log in, setup,
-      settings).
+    * `form`: a narrower centred column at the 760px form measure. Forms
+      that create or edit something, and the account pages (log in,
+      setup, settings).
     * `frame`: the 1400px frame, only for pages that set columns side by
       side: the source comparison, a merge.
 
   All four have 32px gutters (16px under 760px). The `:head` slot (a back
-  link and the title row) spans the column, so its 2px rule runs the
-  column's width; `read` and `form` hold only the content under it to
-  their measure, from the column's left edge, so every single-column page
-  shares one left edge. (The home page is set centred in the frame, as a
-  title page and contents.)
+  link and the title row) spans the page's width, so its 2px rule runs
+  the column, or for `read` and `form` their measure: the title and the
+  content under it share one centred measure. (The home page is set
+  centred in the frame, as a title page and contents.)
 
   The `:bleed` slot runs the full width of the window, edge to edge,
   above the page's content: a title page, a band. Its content sets its
@@ -636,7 +635,7 @@ defmodule OaksWeb.CoreComponents do
   attr :class, :any, default: nil, doc: "classes for the content under the head"
   attr :rest, :global
   slot :bleed, doc: "full-width content above the page"
-  slot :head, doc: "the title row, and a back link above it, across the column"
+  slot :head, doc: "the title row, and a back link above it, across the page's width"
   slot :inner_block, required: true
 
   def page(assigns) do
