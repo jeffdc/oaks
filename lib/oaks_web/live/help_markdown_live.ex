@@ -15,7 +15,7 @@ defmodule OaksWeb.HelpMarkdownLive do
       title: "Links & Images",
       description: nil,
       example:
-        "[Link text](https://example.com)\n![Alt text](https://example.com/image.jpg)\nhttps://example.com (auto-linked)"
+        "[Link text](https://example.com)\n![Oak Compendium logo](/images/oakcompendium-192.png)\nhttps://example.com (auto-linked)"
     },
     %{
       title: "Lists",

@@ -127,6 +127,32 @@ defmodule OaksWeb.AnalyticsLive do
 
   defp format_coord(value) when is_float(value), do: :erlang.float_to_binary(value, decimals: 2)
 
+  # The chart's note: how many days, and the busiest one.
+  defp chart_note(daily) do
+    days = length(daily)
+    peak = Enum.max_by(daily, & &1.page_views, fn -> nil end)
+    noun = if days == 1, do: "day", else: "days"
+
+    case peak do
+      %{page_views: views, date: date} when views > 0 ->
+        "#{days} #{noun} \u00b7 peak #{count(views)} on #{date}"
+
+      _ ->
+        "#{days} #{noun}"
+    end
+  end
+
+  # A count with thousands separated by commas: 1157 reads 1,157.
+  defp count(n) when is_integer(n) do
+    n
+    |> Integer.to_string()
+    |> String.reverse()
+    |> String.replace(~r/(\d{3})(?=\d)/, "\\1,")
+    |> String.reverse()
+  end
+
+  defp count(n), do: to_string(n)
+
   defp range_label(range) do
     Enum.find_value(@ranges, range, fn {key, label} -> if key == range, do: label end)
   end
@@ -149,7 +175,9 @@ defmodule OaksWeb.AnalyticsLive do
         Site Analytics
         <:subtitle>
           Privacy-respecting page view stats for the Oak Compendium.
-          Showing <strong>{range_label(@range)}</strong> ({@from} &ndash; {@to}).
+          Showing <strong>{range_label(@range)}</strong>
+          (<span class="analytics-date">{@from}</span>
+          &ndash; <span class="analytics-date">{@to}</span>).
         </:subtitle>
       </.header>
 
@@ -173,11 +201,11 @@ defmodule OaksWeb.AnalyticsLive do
         <dl class="page-figures" id="analytics-totals">
           <div>
             <dt>Page Views</dt>
-            <dd>{@stats.page_views}</dd>
+            <dd>{count(@stats.page_views)}</dd>
           </div>
           <div>
             <dt>Unique Visitors</dt>
-            <dd>{@stats.unique_visitors}</dd>
+            <dd>{count(@stats.unique_visitors)}</dd>
           </div>
         </dl>
       </section>
@@ -189,13 +217,13 @@ defmodule OaksWeb.AnalyticsLive do
         aria-label="Daily page views"
       >
         <.section_heading>
-          Daily Page Views<:note>{length(@daily)} day(s)</:note>
+          Daily Page Views<:note>{chart_note(@daily)}</:note>
         </.section_heading>
         <svg
           viewBox="0 0 300 60"
           preserveAspectRatio="none"
           role="img"
-          aria-label="Sparkline of daily page views"
+          aria-label={"Line of daily page views: " <> chart_note(@daily)}
         >
           <polyline
             fill="none"
@@ -228,8 +256,8 @@ defmodule OaksWeb.AnalyticsLive do
             <tbody>
               <tr :for={page <- @top_pages}>
                 <td class="analytics-path">{display_path(page.path)}</td>
-                <td class="analytics-num">{page.page_views}</td>
-                <td class="analytics-num">{page.unique_visitors}</td>
+                <td class="analytics-num">{count(page.page_views)}</td>
+                <td class="analytics-num">{count(page.unique_visitors)}</td>
               </tr>
               <tr :if={@top_pages == []}>
                 <td colspan="3" class="oc-empty">No page views recorded for this period.</td>
@@ -244,7 +272,7 @@ defmodule OaksWeb.AnalyticsLive do
         <summary class="oc-section-heading">
           <h2>Errors</h2>
           <small class="oc-section-heading-note">
-            {length(@top_404s)} 404 paths &middot; {length(@top_other_errors)} other
+            {length(@top_404s)} not found &middot; {length(@top_other_errors)} other
           </small>
         </summary>
 
@@ -262,7 +290,7 @@ defmodule OaksWeb.AnalyticsLive do
               <tbody>
                 <tr :for={row <- @top_404s}>
                   <td class="analytics-path">{display_path(row.path)}</td>
-                  <td class="analytics-num">{row.count}</td>
+                  <td class="analytics-num">{count(row.count)}</td>
                 </tr>
               </tbody>
             </table>
@@ -285,7 +313,7 @@ defmodule OaksWeb.AnalyticsLive do
                 <tr :for={row <- @top_other_errors}>
                   <td class="analytics-path">{display_path(row.path)}</td>
                   <td class="analytics-num">{row.status}</td>
-                  <td class="analytics-num">{row.count}</td>
+                  <td class="analytics-num">{count(row.count)}</td>
                 </tr>
               </tbody>
             </table>
