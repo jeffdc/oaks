@@ -49,6 +49,21 @@ defmodule OaksWeb.TaxonFormLiveTest do
       assert html =~ "Parent"
     end
 
+    test "changing the level swaps the parent options", %{conn: conn} do
+      %{subgenus: subgenus, section: section} = taxon_tree_fixture()
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/taxonomy/new")
+
+      option = &~s(#taxon-form select[name="taxon[parent]"] option[value="#{&1.name}"])
+
+      view |> form("#taxon-form", taxon: %{level: "section"}) |> render_change()
+      assert has_element?(view, option.(subgenus))
+      refute has_element?(view, option.(section))
+
+      view |> form("#taxon-form", taxon: %{level: "subsection"}) |> render_change()
+      assert has_element?(view, option.(section))
+      refute has_element?(view, option.(subgenus))
+    end
+
     test "creates taxon on submit", %{conn: conn} do
       {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/taxonomy/new")
 
@@ -126,6 +141,34 @@ defmodule OaksWeb.TaxonFormLiveTest do
       view |> form("#taxon-form") |> render_submit()
 
       assert Oaks.Taxonomy.get_taxon_by_id(taxon.id).content == "Edited **body**"
+    end
+
+    test "editing a field and saving keeps the taxon's parent", %{conn: conn} do
+      %{subgenus: subgenus, section: section, subsection: subsection} = taxon_tree_fixture()
+      conn = authenticated_conn(conn)
+
+      for {taxon, path} <- [
+            {section, [subgenus.name, section.name]},
+            {subsection, [subgenus.name, section.name, subsection.name]}
+          ] do
+        {:ok, view, _html} = live(conn, ~p"/taxonomy/#{taxon.id}/edit")
+
+        parent_option =
+          ~s(#taxon-form select[name="taxon[parent]"] option[selected][value="#{taxon.parent}"])
+
+        assert has_element?(view, parent_option)
+
+        view |> form("#taxon-form", taxon: %{content: "Edited"}) |> render_change()
+        assert has_element?(view, parent_option)
+
+        {:ok, _view, html} =
+          view |> form("#taxon-form") |> render_submit() |> follow_redirect(conn)
+
+        assert html =~ "Taxon updated"
+        assert Taxonomy.get_taxon_by_id(taxon.id).parent == taxon.parent
+        assert {:ok, _taxa} = Taxonomy.resolve_path(path)
+        assert {:ok, _view, _html} = live(conn, ~p"/taxonomy/#{path}")
+      end
     end
 
     test "redirects for nonexistent taxon", %{conn: conn} do

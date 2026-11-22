@@ -89,12 +89,16 @@ defmodule OaksWeb.TaxonFormLive do
   @impl true
   def handle_event("validate", %{"taxon" => taxon_params}, socket) do
     if socket.assigns[:current_scope] do
-      # Update parent options when level changes
-      new_level = taxon_params["level"] || ""
+      changeset =
+        socket.assigns.taxon
+        |> Taxonomy.change_taxon(taxon_params)
+        |> Map.put(:action, :validate)
 
-      old_level =
-        socket.assigns.form.source.changes[:level] ||
-          (socket.assigns.taxon && socket.assigns.taxon.level) || ""
+      # Update parent options when the level changes. Read the level from the
+      # changesets, not the params: the edit form has no level field, so its
+      # level is the taxon's own and its parent options must stay.
+      new_level = Ecto.Changeset.get_field(changeset, :level)
+      old_level = Ecto.Changeset.get_field(socket.assigns.form.source, :level)
 
       parent_options =
         if new_level != old_level do
@@ -102,11 +106,6 @@ defmodule OaksWeb.TaxonFormLive do
         else
           socket.assigns.parent_options
         end
-
-      changeset =
-        socket.assigns.taxon
-        |> Taxonomy.change_taxon(taxon_params)
-        |> Map.put(:action, :validate)
 
       {:noreply, assign(socket, form: to_form(changeset), parent_options: parent_options)}
     else
