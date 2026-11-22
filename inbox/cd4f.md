@@ -5,6 +5,12 @@ plan: compendium
 item: 626c
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-a625e2a1444b92500
 created: "2026-11-22T16:37:41Z"
+settled:
+  action: accept
+  note: with review 2521
+  by: Jeff
+  human: true
+  at: "2026-11-22T17:46:14Z"
 ---
 
 Of the two alignments the item allowed, the first baseline keeps the buttons level with the name they act on however long the subtitle is, and a flex wrap at 20rem gives the narrow layout with no breakpoint or dividers
