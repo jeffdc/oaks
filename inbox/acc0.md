@@ -5,6 +5,12 @@ plan: compendium
 item: 0a43
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-aec9ec4b743698667
 created: "2026-11-22T17:10:35Z"
+settled:
+  action: accept
+  note: with review a7da
+  by: Jeff
+  human: true
+  at: "2026-11-22T17:30:37Z"
 ---
 
 PRODUCT.md and the taxon page brief put a variety page under its species; all 68 stored varieties have their species on the site

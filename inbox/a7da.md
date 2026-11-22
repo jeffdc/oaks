@@ -6,6 +6,11 @@ item: 0a43
 source: reports/0a43-1.md
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-aec9ec4b743698667
 created: "2026-11-22T17:20:53Z"
+settled:
+  action: accept
+  by: Jeff
+  human: true
+  at: "2026-11-22T17:30:37Z"
 decisions:
   - 08ec
   - 47d4
