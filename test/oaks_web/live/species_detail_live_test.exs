@@ -81,10 +81,38 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert html =~ "Least Concern"
     end
 
-    test "shows taxonomy breadcrumb", %{conn: conn, alba: alba} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
-      assert html =~ "(subgenus)"
-      assert html =~ "(section)"
+    test "shows the taxonomy band above the title row, ending on the species", %{
+      conn: conn,
+      alba: alba
+    } do
+      {:ok, view, html} = live(conn, ~p"/species/#{alba}")
+      assert has_element?(view, ".oc-pg-bleed #taxonomy-band")
+      assert has_element?(view, ".oc-pg-head #species-title")
+      assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy"]), "Quercus")
+      assert has_element?(view, "#taxonomy-band a .oc-band-rk", "subg.")
+      assert has_element?(view, "#taxonomy-band a .oc-band-rk", "sect.")
+      assert has_element?(view, "#taxonomy-band [aria-current]", alba)
+      refute html =~ "taxonomy-nav"
+    end
+
+    test "places a hybrid with no ranks of its own in the band where its parents sit", %{
+      conn: conn,
+      alba: alba
+    } do
+      other = species_fixture(subgenus: "Quercus", section: "Quercus")
+      hybrid = hybrid_fixture(parent1: alba, parent2: other.scientific_name)
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{hybrid.scientific_name}")
+      assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy/Quercus/Quercus"]), "sect.")
+      assert has_element?(view, "#taxonomy-band [aria-current]", "×")
+    end
+
+    test "places a variety in the band under its species", %{conn: conn, alba: alba} do
+      variety = species_fixture(scientific_name: "#{alba} latiloba", subgenus: "Quercus")
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{variety.scientific_name}")
+      assert has_element?(view, ~s(#taxonomy-band a[href="/species/#{alba}"]), alba)
+      assert has_element?(view, "#taxonomy-band [aria-current]", "latiloba")
     end
 
     test "shows source data from preferred source", %{conn: conn, alba: alba, ootw: ootw} do

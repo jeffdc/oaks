@@ -512,25 +512,10 @@ select.select {
 }
 
 /* --------------------------------------------
-   Taxonomy pages (item 58ef): the ochre band, the title row on its 2px
-   rule, then sections whose sub-taxa and species are ruled index columns,
-   not boxes. The band is the component (.oc-band); here it is pulled out
-   to the page edges from inside the frame, since the layout gives page
-   bodies no place above the frame.
+   Taxonomy pages (item 58ef): the title row on its 2px rule, then
+   sections whose sub-taxa and species are ruled index columns, not boxes.
+   The band is the component (.oc-band), in the page's bleed.
    -------------------------------------------- */
-.taxonomy-page-band {
-  margin: calc(-1 * var(--spacing-s6)) calc(-1 * var(--spacing-s6)) var(--spacing-s6);
-  /* Past the 1400px frame the ochre runs on to the window's edges as
-     painted overflow, which never scrolls. */
-  border-image: conic-gradient(var(--color-ochre) 0 0) fill 0 / / 0 100vmax;
-}
-
-@media (max-width: 760px) {
-  .taxonomy-page-band {
-    margin: calc(-1 * var(--spacing-s5)) calc(-1 * var(--spacing-s4)) var(--spacing-s5);
-  }
-}
-
 .taxon-section + .taxon-section {
   margin-top: var(--spacing-s7);
 }
@@ -1148,62 +1133,6 @@ a.badge:hover {
 .section-title > [class*="hero-"],
 .section-title > svg {
   display: none;
-}
-
-/* ============================================
-   Taxonomy Navigation (V1 breadcrumb) in the taxonomy band's voice:
-   Archivo Narrow, names (sci_name), rank words at 500 in the
-   second ink, drawn chevrons between ranks. It is not on the ochre band
-   yet (the page rebuilds put it there), so its links are ink, as on the
-   band.
-   ============================================ */
-.taxonomy-nav {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: var(--spacing-s1) var(--spacing-s2);
-  margin: 0 0 var(--spacing-s4);
-  font-family: var(--font-narrow);
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0.01em;
-  color: var(--color-ink);
-}
-
-.taxonomy-nav .taxonomy-label {
-  margin-right: var(--spacing-s1);
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.taxonomy-nav .taxonomy-link {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--spacing-s1);
-  color: var(--color-ink);
-  text-decoration: none;
-}
-
-.taxonomy-nav .taxonomy-level-label {
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 500;
-  color: var(--color-ink-2);
-}
-
-/* The chevron is drawn from two borders; the V1 glyph is hidden. */
-.taxonomy-nav .taxonomy-separator {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin: 0 6px 1px 0;
-  overflow: hidden;
-  font-size: 0;
-  color: transparent;
-  border-top: 2px solid var(--color-ink);
-  border-right: 2px solid var(--color-ink);
-  transform: rotate(45deg);
 }
 
 /* ============================================

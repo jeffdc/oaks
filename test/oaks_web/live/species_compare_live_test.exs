@@ -114,6 +114,13 @@ defmodule OaksWeb.SpeciesCompareLiveTest do
       assert html =~ "Back to species"
       assert html =~ ~s(/species/#{alba})
     end
+
+    test "keeps the species' taxonomy band above the title row", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}/compare")
+
+      assert has_element?(view, ".oc-pg-bleed #taxonomy-band [aria-current]", alba)
+      assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy"]), "Quercus")
+    end
   end
 
   describe "no sources" do

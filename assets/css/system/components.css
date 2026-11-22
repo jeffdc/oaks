@@ -12,34 +12,48 @@
 @layer components {
   /* ---------------------------------------------------------------------
      Taxonomy band (DesignComponents.taxonomy_band): the ochre field with
-     the breadcrumb, ranks separated by drawn chevrons.
+     the breadcrumb, ranks separated by drawn chevrons. On a taxon page it
+     runs in the page's bleed under the masthead, its path in the
+     masthead's frame, one line at a fixed height at every width: a path
+     too long for the line scrolls, pinned to the current taxon.
      --------------------------------------------------------------------- */
   .oc-band {
+    --oc-band-h: 48px;
     background: var(--color-ochre);
     color: var(--color-ink);
   }
   .oc-band-in {
     max-width: var(--container-frame);
+    height: var(--oc-band-h);
     margin: 0 auto;
     display: flex;
     align-items: center;
     gap: var(--spacing-s5);
     padding: 0 var(--spacing-s6);
   }
+  /* The path's 6px inline padding (taken back by its margin, so the names
+     keep the frame's edge) leaves room for a focus ring the scroller
+     would clip. */
   .oc-band ol {
     flex: 1 1 auto;
     min-width: 0;
-    margin: 0;
-    padding: 13px 0;
+    align-self: stretch;
+    margin: 0 -6px;
+    padding: 0 6px;
     list-style: none;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 0 var(--spacing-s2);
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
     font: 600 15px/1.4 var(--font-narrow);
     letter-spacing: 0.01em;
   }
+  .oc-band ol::-webkit-scrollbar { display: none; }
   .oc-band ol > li {
+    flex: none;
     display: flex;
     align-items: center;
     gap: var(--spacing-s2);
@@ -132,22 +146,21 @@
   .oc-band-siblings a:hover { background: var(--color-paper-2); }
   .oc-band-siblings [aria-current] { background: var(--color-ochre); }
 
+  /* Phones: a shorter line that fades in at its left edge, so the path
+     scrolled to the current taxon reads as running on to the left. */
   @media (max-width: 760px) {
+    .oc-band { --oc-band-h: 42px; }
     .oc-band-in {
       gap: var(--spacing-s3);
       padding: 0 var(--spacing-s4) 0 0;
     }
     .oc-band ol {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      white-space: nowrap;
-      scrollbar-width: none;
-      padding: 10px 0 10px 28px;
+      margin: 0 -6px 0 0;
+      padding: 0 6px 0 28px;
       font-size: 14px;
       -webkit-mask-image: linear-gradient(to right, transparent 0, #000 36px);
       mask-image: linear-gradient(to right, transparent 0, #000 36px);
     }
-    .oc-band ol::-webkit-scrollbar { display: none; }
     .oc-band summary { padding: 6px 9px; font-size: 13px; }
   }
 
@@ -1242,20 +1255,29 @@
   }
 
   /* Inline taxonomy band (taxonomy_band inline): an ochre plate the width
-     of its path, wrapping rather than scrolling. */
+     of its path, wrapping rather than scrolling, so its height follows the
+     path. */
   .oc-band-inline {
     display: inline-flex;
     max-width: 100%;
   }
   .oc-band-inline .oc-band-in {
     max-width: none;
+    height: auto;
     margin: 0;
     padding: 0 var(--spacing-s4);
   }
+  /* Later than the band's phone rules, so it holds at every width. */
   .oc-band-inline ol {
     justify-content: center;
+    flex-wrap: wrap;
     row-gap: var(--spacing-s1);
+    margin: 0;
     padding: 10px 0;
+    overflow-x: visible;
+    white-space: normal;
+    -webkit-mask-image: none;
+    mask-image: none;
   }
   /* The chevron trails its rank instead of leading the next, so a wrapped
      line starts with a rank. */
@@ -1268,17 +1290,6 @@
     border-right: 2px solid var(--color-ink);
     transform: rotate(45deg);
     margin: 0 6px 0 2px;
-  }
-  @media (max-width: 760px) {
-    .oc-band-inline .oc-band-in { padding: 0 var(--spacing-s4); }
-    .oc-band-inline ol {
-      flex-wrap: wrap;
-      overflow-x: visible;
-      white-space: normal;
-      padding: 10px 0;
-      -webkit-mask-image: none;
-      mask-image: none;
-    }
   }
 
   /* ---------------------------------------------------------------------

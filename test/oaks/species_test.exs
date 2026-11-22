@@ -312,6 +312,58 @@ defmodule Oaks.SpeciesTest do
     end
   end
 
+  describe "placement/1" do
+    defp steps(species), do: Enum.map(Species.placement(species), &{&1.level, &1.name})
+
+    test "lists a species' stored ranks, outermost first, skipping the ones it lacks" do
+      species =
+        species_fixture(subgenus: "Quercus", section: "Lobatae", complex: unique("coccinea"))
+
+      assert [{"subgenus", "Quercus"}, {"section", "Lobatae"}, {"complex", _}] = steps(species)
+    end
+
+    test "keeps a hybrid's stored ranks" do
+      hybrid = hybrid_fixture(subgenus: "Quercus", section: "Quercus")
+      assert steps(hybrid) == [{"subgenus", "Quercus"}, {"section", "Quercus"}]
+    end
+
+    test "places a hybrid with no ranks of its own where both parents sit" do
+      a = species_fixture(subgenus: "Quercus", section: "Quercus", subsection: "Albae")
+      b = species_fixture(subgenus: "Quercus", section: "Quercus", subsection: "Stellatae")
+      c = species_fixture(subgenus: "Cerris", section: "Cerris")
+
+      shared = hybrid_fixture(parent1: a.scientific_name, parent2: b.scientific_name)
+      apart = hybrid_fixture(parent1: a.scientific_name, parent2: c.scientific_name)
+      unknown = hybrid_fixture(parent1: a.scientific_name, parent2: unique("missing"))
+
+      assert steps(shared) == [{"subgenus", "Quercus"}, {"section", "Quercus"}]
+      assert steps(apart) == []
+      assert steps(unknown) == []
+    end
+
+    test "places a variety under its species, after the species' ranks" do
+      species = species_fixture(subgenus: "Cerris")
+
+      variety =
+        species_fixture(scientific_name: "#{species.scientific_name} kingii", subgenus: "Cerris")
+
+      assert [_, %{level: "species", name: name, hybrid: false}] = Species.placement(variety)
+      assert name == species.scientific_name
+    end
+
+    test "places a named hybrid's subspecies under it, and never a formula under a word of it" do
+      named = hybrid_fixture()
+      nothosubspecies = hybrid_fixture(scientific_name: "#{named.scientific_name} montserratii")
+
+      assert [%{level: "species", hybrid: true, name: name}] = Species.placement(nothosubspecies)
+      assert name == named.scientific_name
+
+      a = species_fixture()
+      formula = hybrid_fixture(scientific_name: "#{a.scientific_name} × parvula")
+      assert Species.placement(formula) == []
+    end
+  end
+
   defp set_synonyms(species, synonyms) do
     species
     |> Ecto.Changeset.change(synonyms: Jason.encode!(synonyms))

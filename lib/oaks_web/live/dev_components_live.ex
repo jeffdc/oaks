@@ -63,21 +63,7 @@ defmodule OaksWeb.DevComponentsLive do
     <main id="main-content">
       <.page width="frame">
         <:bleed>
-          <.taxonomy_band>
-            <:rank navigate={~p"/taxonomy"}><.sci_name name="Quercus" level="genus" /></:rank>
-            <:rank navigate={~p"/taxonomy/Quercus"} rank="subg.">
-              <.sci_name name="Quercus" level="subgenus" />
-            </:rank>
-            <:rank navigate={~p"/taxonomy/Quercus/Lobatae"} rank="sect.">
-              <.sci_name name="Lobatae" level="section" />
-            </:rank>
-            <:rank navigate={~p"/taxonomy/Quercus/Lobatae/Coccineae"} rank="subsect.">
-              <.sci_name name="Coccineae" level="subsection" />
-            </:rank>
-            <:rank navigate={~p"/species/shumardii"} rank="complex" rank_after>
-              <.sci_name name="shumardii" level="complex" />
-            </:rank>
-            <:current><.sci_name name="shumardii" abbreviate /></:current>
+          <.taxonomy_band ranks={band_ranks(:species)} current={band_current(:species)}>
             <:siblings label="Coccineae · 7 species">
               <li :for={name <- ~w(acerifolia buckleyi coccinea ellipsoidalis rubra)}>
                 <.link navigate={~p"/species/#{name}"}><.sci_name name={name} abbreviate /></.link>
@@ -345,18 +331,12 @@ defmodule OaksWeb.DevComponentsLive do
             <:name><.sci_name name="shumardii" /></:name>
             <:author>Buckley</:author>
             <:band>
-              <.taxonomy_band id="gallery-band-inline" label="Where it sits" inline>
-                <:rank navigate={~p"/taxonomy"}><.sci_name name="Quercus" /></:rank>
-                <:rank navigate={~p"/taxonomy/Quercus"} rank="subg.">
-                  <.sci_name name="Quercus" />
-                </:rank>
-                <:rank navigate={~p"/taxonomy/Quercus/Lobatae"} rank="sect.">
-                  <.sci_name name="Lobatae" genus={nil} />
-                </:rank>
-                <:rank navigate={~p"/taxonomy/Quercus/Lobatae/Coccineae"} rank="subsect.">
-                  <.sci_name name="Coccineae" genus={nil} />
-                </:rank>
-              </.taxonomy_band>
+              <.taxonomy_band
+                id="gallery-band-inline"
+                label="Where it sits"
+                ranks={band_ranks(:species)}
+                inline
+              />
             </:band>
             <:about>
               Hybrids
@@ -452,6 +432,40 @@ defmodule OaksWeb.DevComponentsLive do
         </section>
 
         <section class="mt-s8">
+          <.section_heading id="band">
+            Taxonomy band<:note>one line, one height, on every taxon page</:note>
+          </.section_heading>
+          <p class="max-w-[68ch]">
+            Every taxon page puts the band in its page's bleed, straight under the masthead: taxonomy
+            pages, species, hybrids, varieties and the source comparison. The band sets each step
+            itself from data, so the crumbs read the same everywhere. A hybrid with no ranks of its
+            own sits where both its parents do, down to the last rank they share; a variety sits
+            under its species. On phones the line scrolls, pinned to the current taxon.
+          </p>
+          <.list>
+            <:item
+              :for={
+                {kind, label} <- [
+                  taxon: "a section",
+                  species: "a species",
+                  named_hybrid: "a named hybrid",
+                  formula_hybrid: "a formula hybrid",
+                  genus_hybrid: "parents in two subgenera",
+                  variety: "a variety"
+                ]
+              }
+              title={label}
+            >
+              <.taxonomy_band
+                id={"gallery-band-#{kind}"}
+                ranks={band_ranks(kind)}
+                current={band_current(kind)}
+              />
+            </:item>
+          </.list>
+        </section>
+
+        <section class="mt-s8">
           <.section_heading id="page">
             Page<:note>column, read, form and frame widths; the head; the bleed</:note>
           </.section_heading>
@@ -534,6 +548,39 @@ defmodule OaksWeb.DevComponentsLive do
 
   @impl true
   def handle_event("noop", _params, socket), do: {:noreply, socket}
+
+  # The band's examples: where each kind of taxon page's band starts from
+  # (as Oaks.Species.placement/1 gives it) and its current step.
+  @band_examples %{
+    species:
+      {~w(subgenus:Quercus section:Lobatae subsection:Coccineae complex:shumardii),
+       {"species", "shumardii", false}},
+    taxon: {~w(subgenus:Quercus), {"section", "Lobatae", false}},
+    named_hybrid: {~w(subgenus:Quercus section:Quercus), {"species", "× bebbiana", true}},
+    formula_hybrid:
+      {~w(subgenus:Quercus section:Lobatae subsection:Agrifoliae),
+       {"species", "agrifolia × parvula", true}},
+    genus_hybrid: {[], {"species", "× albescens", true}},
+    variety:
+      {~w(subgenus:Cerris section:Cerris subsection:Campylolepides species:acutissima),
+       {"species", "acutissima kingii", false}}
+  }
+
+  defp band_ranks(kind) do
+    {placement, _current} = @band_examples[kind]
+
+    placement
+    |> Enum.map(fn step ->
+      [level, name] = String.split(step, ":")
+      %{level: level, name: name, hybrid: false}
+    end)
+    |> OaksWeb.TaxonPath.ranks()
+  end
+
+  defp band_current(kind) do
+    {_placement, {level, name, hybrid}} = @band_examples[kind]
+    %{level: level, name: name, hybrid: hybrid}
+  end
 
   defmodule NotAvailable do
     @moduledoc false

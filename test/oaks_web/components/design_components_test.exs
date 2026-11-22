@@ -7,50 +7,72 @@ defmodule OaksWeb.DesignComponentsTest do
   alias OaksWeb.DesignComponents
 
   describe "taxonomy_band/1" do
+    defp band_ranks do
+      OaksWeb.TaxonPath.ranks([
+        %{level: "subgenus", name: "Quercus", hybrid: false},
+        %{level: "section", name: "Lobatae", hybrid: false},
+        %{level: "complex", name: "shumardii", hybrid: false}
+      ])
+    end
+
     test "links every rank, sets rank words roman and marks the current taxon" do
-      assigns = %{}
+      assigns = %{ranks: band_ranks()}
 
       html =
         rendered_to_string(~H"""
-        <DesignComponents.taxonomy_band>
-          <:rank navigate="/taxonomy"><i>Quercus</i></:rank>
-          <:rank navigate="/taxonomy/Quercus/Lobatae" rank="sect."><i>Lobatae</i></:rank>
-          <:rank href="/species/shumardii" rank="complex" rank_after><i>shumardii</i></:rank>
-          <:current><i>Q. shumardii</i></:current>
-        </DesignComponents.taxonomy_band>
+        <DesignComponents.taxonomy_band
+          ranks={@ranks}
+          current={%{level: "species", name: "shumardii", hybrid: false}}
+        />
         """)
 
       assert html =~ ~s(class="oc-band)
       assert html =~ ~s(aria-label="Taxonomy")
+      assert html =~ ~s(phx-hook="PinCurrentTaxon")
+      assert html =~ ~s(href="/taxonomy")
       assert html =~ ~s(href="/taxonomy/Quercus/Lobatae")
+      assert html =~ ~s(href="/taxonomy/Quercus/Lobatae/shumardii")
       assert html =~ ~s(data-phx-link="redirect")
-      assert html =~ ~r{<span class="oc-band-rk">sect\.</span>\s*<i>Lobatae</i>}
-      assert html =~ ~r{<i>shumardii</i>\s*<span class="oc-band-rk">complex</span>}
-      assert html =~ ~r{<span aria-current="page">\s*<i>Q\. shumardii</i>\s*</span>}
+      assert html =~ ~r{<span class="oc-band-rk">subg\.</span>\s*<span class="oc-sci\b}
+      assert html =~ ~r{<span class="oc-band-rk">sect\.</span>\s*<span class="oc-sci\b}
+      assert html =~ ~r{shumardii</i></span></span>\s*<span class="oc-band-rk">complex</span>}
+      assert html =~ ~r{<span aria-current="page"><span class="oc-sci\b.*Q\..*shumardii}s
       refute html =~ "<details"
     end
 
-    test "sets the current taxon's rank word in the band's roman" do
+    test "sets a taxon's rank word and a named hybrid's sign in the current step" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <DesignComponents.taxonomy_band>
-          <:current rank="sect."><i>Lobatae</i></:current>
-        </DesignComponents.taxonomy_band>
+        <DesignComponents.taxonomy_band current={%{level: "section", name: "Lobatae", hybrid: false}} />
         """)
 
-      assert html =~
-               ~r{<span aria-current="page">\s*<span class="oc-band-rk">\s*sect\.\s*</span>\s*<i>Lobatae</i>}
+      assert html =~ ~r{<span aria-current="page"><span class="oc-band-rk">sect\.</span>}
 
       html =
         rendered_to_string(~H"""
-        <DesignComponents.taxonomy_band>
-          <:current rank="complex" rank_after><i>coccinea</i></:current>
-        </DesignComponents.taxonomy_band>
+        <DesignComponents.taxonomy_band current={%{level: "species", name: "bebbiana", hybrid: true}} />
         """)
 
-      assert html =~ ~r{<i>coccinea</i>\s*<span class="oc-band-rk">\s*complex\s*</span>}
+      assert html =~ ~r{<span aria-current="page">.*Q\..*×.*bebbiana}s
+    end
+
+    test "links a variety's species to its species page" do
+      assigns = %{
+        ranks: OaksWeb.TaxonPath.ranks([%{level: "species", name: "acutissima", hybrid: false}])
+      }
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.taxonomy_band
+          ranks={@ranks}
+          current={%{level: "species", name: "acutissima kingii", hybrid: false}}
+        />
+        """)
+
+      assert html =~ ~s(href="/species/acutissima")
+      refute html =~ "oc-band-rk"
     end
 
     test "adds the siblings menu when given" do
@@ -58,8 +80,10 @@ defmodule OaksWeb.DesignComponentsTest do
 
       html =
         rendered_to_string(~H"""
-        <DesignComponents.taxonomy_band id="band">
-          <:current><i>Q. shumardii</i></:current>
+        <DesignComponents.taxonomy_band
+          id="band"
+          current={%{level: "species", name: "shumardii", hybrid: false}}
+        >
           <:siblings label="Coccineae · 7 species">
             <li><a href="/species/rubra">Q. rubra</a></li>
           </:siblings>
@@ -306,14 +330,13 @@ defmodule OaksWeb.DesignComponentsTest do
 
   describe "taxonomy_band/1 inline" do
     test "is a wrapping plate with no current taxon and no pinning hook" do
-      assigns = %{}
+      assigns = %{
+        ranks: OaksWeb.TaxonPath.ranks([%{level: "subgenus", name: "Quercus", hybrid: false}])
+      }
 
       html =
         rendered_to_string(~H"""
-        <DesignComponents.taxonomy_band id="b" label="Where it sits" inline>
-          <:rank navigate="/taxonomy"><i>Quercus</i></:rank>
-          <:rank navigate="/taxonomy/Quercus" rank="subg."><i>Quercus</i></:rank>
-        </DesignComponents.taxonomy_band>
+        <DesignComponents.taxonomy_band id="b" label="Where it sits" ranks={@ranks} inline />
         """)
 
       assert html =~ ~s(class="oc-band oc-band-inline")
