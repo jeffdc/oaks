@@ -1,0 +1,305 @@
+#!/usr/bin/env bash
+# Fails if page code builds its own version of something the component library
+# covers (CODING_STANDARDS.md, Components; Jeff's decision 8f6b). Run by
+# `make done-checks`, so `mull done` fails on a violation.
+#
+# Scans every .ex and .heex file under lib/oaks_web, line by line, with grep and
+# awk (no compile). Elixir `#` comment lines and one-line HEEx comments are
+# skipped. Rules:
+#
+#   width     A page-width wrapper outside lib/oaks_web/components/ (widths
+#             belong to the page component and the layout): a line whose class
+#             tokens include both a max-w-* and mx-auto, or any page-scale width
+#             token on its own: max-w-3xl to max-w-7xl, max-w-screen-*,
+#             max-w-prose, max-w-frame. Tailwind variants (md:max-w-3xl) count.
+#             Not matched: dialog and element widths (max-w-md, max-w-lg, ...)
+#             and text measures (max-w-[68ch]) unless paired with mx-auto, and
+#             widths set in CSS.
+#   style     An inline style attribute (style="..." or style={...}) anywhere
+#             under lib/oaks_web, components included. Not matched: style=
+#             inside an Elixir string (style=\"...\"), as in help text.
+#   daisyui   A daisyUI card or badge class anywhere under lib/oaks_web: the
+#             class token card or badge, or a card-*/badge-* modifier, inside a
+#             class= value on the line, or as the first word of a string
+#             literal made only of class tokens ("badge badge-muted"). Not
+#             matched: page classes that merely contain the word
+#             (taxon-card, comparison-preferred-badge), attributes named badge,
+#             and prose.
+#   sci-name  Hand-rolled scientific-name markup outside lib/oaks_web/components/
+#             (where the <.sci_name> component lives) and the shared text
+#             helpers in lib/oaks_web/species_name.ex. One per line that:
+#               - opens an <i> or <em> element whose content, up to its closing
+#                 tag (even lines later), names a taxon: scientific_name,
+#                 Quercus, "Q. ", a .subgenus/.section/.subsection field,
+#                 taxon.name, <.taxon_name, or a call to epithet, band_name,
+#                 display_name, taxon_display_name, full_name, sci_html or
+#                 name_iodata;
+#               - has the italic class token (not not-italic) and names a
+#                 taxon the same way on that line;
+#               - defines a name helper (one count per clause): sci, sci_*,
+#                 *_sci_name, *binomial*, epithet, formula_parts, name_iodata,
+#                 name_html, name_parts, taxon_name, taxon_display_name,
+#                 band_name, format_species_name; or
+#               - builds the abbreviated genus in a string ("Q. #{...}").
+#             Not matched: plain-text names (page titles, URLs, "Quercus #{x}"
+#             passed to a component), italics that don't name a taxon, and
+#             names in CSS.
+#   app-css   assets/css/app.css may not have more lines than its budget.
+#
+# Ratchet: scripts/check-ui.allow lists today's violations, one line per rule
+# and file: rule<TAB>path<TAB>count[<TAB>note] (counts per file, not line
+# numbers, so unrelated edits don't break it); the app-css line holds the
+# budget. The check fails when a file has more violations of a rule than its
+# allowance (a file with no line is allowed none), and also when it has fewer,
+# so the allowance is lowered in the same change and the list only ever
+# shrinks. `scripts/check-ui --baseline` writes the file from the tree when
+# there is none, and otherwise only lowers it: it drops entries that reached
+# zero, lowers counts that fell, keeps comments and notes, and never adds or
+# raises an entry. Adding or raising one is a hand edit that needs Jeff's
+# approval.
+#
+# CHECK_UI_ROOT overrides the directory the files are read from (for testing).
+
+set -euo pipefail
+
+root="${CHECK_UI_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+allow_rel="scripts/check-ui.allow"
+allow="$root/$allow_rel"
+css_rel="assets/css/app.css"
+
+mode=check
+case "${1:-}" in
+  "") ;;
+  --baseline) mode=baseline ;;
+  *)
+    echo "usage: scripts/check-ui [--baseline]" >&2
+    exit 2
+    ;;
+esac
+
+cd "$root"
+
+# Every violation as rule<TAB>path<TAB>line<TAB>text.
+scan() {
+  find lib/oaks_web -type f \( -name '*.ex' -o -name '*.heex' \) | LC_ALL=C sort |
+    tr '\n' '\0' | xargs -0 awk '
+    # A whole class-like token: not preceded or followed by a word character or -.
+    function has_token(s, re) {
+      return match(s, "(^|[^A-Za-z0-9_-])" re "($|[^A-Za-z0-9_-])")
+    }
+    function names_taxon(s) {
+      return s ~ /scientific_name|Quercus|Q\.[[:space:]]|taxon\.name|<\.taxon_name/ ||
+        s ~ /\.(subgenus|section|subsection)([^a-z_]|$)/ ||
+        s ~ /(^|[^a-z_])(epithet|band_name|display_name|taxon_display_name|full_name|sci_html|name_iodata)\(/
+    }
+    function hit(rule, line) {
+      text = L[line]
+      sub(/^[[:space:]]+/, "", text)
+      if (length(text) > 140) text = substr(text, 1, 137) "..."
+      printf "%s\t%s\t%d\t%s\n", rule, file, line, text
+    }
+    # daisyUI card/badge tokens in the class= values on a line.
+    function daisy_in_classes(s,   rest, val, q, cl) {
+      rest = s
+      while ((q = index(rest, "class=")) > 0) {
+        rest = substr(rest, q + 6)
+        if (substr(rest, 1, 1) == "\"") {
+          cl = index(substr(rest, 2), "\"")
+          val = cl ? substr(rest, 2, cl - 1) : substr(rest, 2)
+        } else if (substr(rest, 1, 1) == "{") {
+          cl = index(rest, "}")
+          val = cl ? substr(rest, 2, cl - 2) : substr(rest, 2)
+        } else continue
+        if (has_token(val, "(card|badge)(-[a-z0-9-]+)?")) return 1
+      }
+      return 0
+    }
+    function flush(   i, comp, names_ok, s, j, rest, p, tag, buf, k, e, done, marked) {
+      if (n == 0) return
+      comp = (file ~ /^lib\/oaks_web\/components\//)
+      names_ok = comp || file == "lib/oaks_web/species_name.ex"
+      for (i = 1; i <= n; i++) {
+        s = L[i]
+        if (s ~ /^[[:space:]]*#/ || s ~ /^[[:space:]]*<%!--.*--%>[[:space:]]*$/) { skip[i] = 1; continue }
+
+        if (!comp && ((has_token(s, "max-w-[^[:space:]\"]+") && has_token(s, "mx-auto")) ||
+             has_token(s, "max-w-([3-7]xl|screen-[a-z0-9]+|prose|frame)")))
+          hit("width", i)
+
+        if (s ~ /(^|[[:space:]])style=["{]/) hit("style", i)
+
+        if (daisy_in_classes(s) ||
+            s ~ /"(card|badge)(-[a-z0-9-]+)?([[:space:]]+[]A-Za-z0-9:_\/.[-]+)*[[:space:]]*"/)
+          hit("daisyui", i)
+      }
+      if (!names_ok) {
+        for (i = 1; i <= n; i++) {
+          if (skip[i]) continue
+          s = L[i]
+          marked = 0
+          if (s ~ /^[[:space:]]*defp?[[:space:]]+(sci|sci_[a-z0-9_]+|[a-z0-9_]+_sci_name|[a-z0-9_]*binomial[a-z0-9_]*|epithet|formula_parts|name_iodata|name_html|name_parts|taxon_name|taxon_display_name|band_name|format_species_name)[?!]?([[:space:](,]|$)/)
+            marked = 1
+          if (!marked && s ~ /"Q\.[[:space:]]#\{/) marked = 1
+          if (!marked && has_token(s, "italic") && names_taxon(s)) marked = 1
+          # <i> / <em> elements opened on this line, each read to its closing tag.
+          rest = s
+          while (!marked && match(rest, /<(i|em)[[:space:]>]/)) {
+            tag = (substr(rest, RSTART + 1, 1) == "i") ? "i" : "em"
+            buf = substr(rest, RSTART + RLENGTH - 1)
+            rest = substr(rest, RSTART + RLENGTH)
+            done = 0
+            for (k = i; k <= n && k < i + 20 && !done; k++) {
+              if (k > i) buf = buf "\n" L[k]
+              if ((e = index(buf, "</" tag ">")) > 0) { buf = substr(buf, 1, e - 1); done = 1 }
+            }
+            if (names_taxon(buf)) marked = 1
+          }
+          if (marked) hit("sci-name", i)
+        }
+      }
+      delete L; delete skip; n = 0
+    }
+    FNR == 1 { flush(); file = FILENAME }
+    { L[FNR] = $0; n = FNR }
+    END { flush() }
+  '
+}
+
+hits=$(scan)
+
+# Current counts as rule<TAB>path<TAB>count, in rule order, then path.
+rank() { case $1 in width) echo 1 ;; style) echo 2 ;; daisyui) echo 3 ;; sci-name) echo 4 ;; *) echo 5 ;; esac; }
+counts=$(
+  {
+    if [ -n "$hits" ]; then
+      printf '%s\n' "$hits" | awk -F'\t' '{ c[$1 "\t" $2]++ } END { for (k in c) print k "\t" c[k] }'
+    fi
+    if [ -f "$css_rel" ]; then
+      printf 'app-css\t%s\t%s\n' "$css_rel" "$(wc -l <"$css_rel" | tr -d ' ')"
+    fi
+  } | while IFS=$'\t' read -r rule path count; do
+    printf '%s\t%s\t%s\t%s\n' "$(rank "$rule")" "$rule" "$path" "$count"
+  done | LC_ALL=C sort -t$'\t' -k1,1n -k3,3 | cut -f2-
+)
+
+header='# scripts/check-ui allowlist: violations allowed today, per rule and file.
+# rule<TAB>path<TAB>count[<TAB>note]; the app-css line is the budget for its line count.
+# This list only shrinks. The check fails when a count falls until it is lowered here
+# (scripts/check-ui --baseline lowers it and never raises anything). A new or raised
+# entry is a hand edit that needs Jeff'"'"'s approval; give its reason in the note column.'
+
+if [ "$mode" = baseline ]; then
+  if [ ! -f "$allow" ]; then
+    { printf '%s\n' "$header"; printf '%s\n' "$counts"; } >"$allow"
+    echo "wrote $allow_rel from the tree: $(printf '%s\n' "$counts" | grep -c .) entries"
+    exit 0
+  fi
+  # Lower each entry to its current count; drop entries at zero (the app-css
+  # budget stays); keep comments, notes and order; never add or raise.
+  lowered=$(printf '%s\n' "$counts" | awk -F'\t' -v OFS='\t' -v allowfile="$allow" '
+    NF >= 3 { cur[$1 "\t" $2] = $3 }
+    END {
+      while ((getline line < allowfile) > 0) {
+        nf = split(line, f, "\t")
+        if (line ~ /^#/ || nf < 3) { print line; continue }
+        k = f[1] "\t" f[2]; found = (k in cur) ? cur[k] : 0; seen[k] = 1
+        if (found < f[3] + 0) {
+          printf "lowered   %s %s: %d -> %d\n", f[1], f[2], f[3], found > "/dev/stderr"
+          if (found == 0 && f[1] != "app-css") continue
+          f[3] = found
+        } else if (found > f[3] + 0) {
+          printf "kept      %s %s at %d (found %d; raising needs Jeff'"'"'s approval)\n", f[1], f[2], f[3], found > "/dev/stderr"
+        }
+        out = f[1]
+        for (j = 2; j <= nf; j++) out = out OFS f[j]
+        print out
+      }
+      for (k in cur) if (!(k in seen)) {
+        split(k, p, "\t")
+        printf "not added %s %s: %d (new; allowing it needs Jeff'"'"'s approval)\n", p[1], p[2], cur[k] > "/dev/stderr"
+      }
+    }')
+  printf '%s\n' "$lowered" >"$allow"
+  echo "updated $allow_rel (lowered only)"
+  exit 0
+fi
+
+if [ ! -f "$allow" ]; then
+  echo "FAIL      $allow_rel not found (scripts/check-ui --baseline writes it)"
+  exit 1
+fi
+
+# Compare: one result line per rule and file, then the offending lines.
+report=$(
+  printf '%s\n' "$counts" | awk -F'\t' -v allowfile="$allow" '
+    NF >= 3 { cur[$1 "\t" $2] = $3 }
+    END {
+      while ((getline line < allowfile) > 0) {
+        if (line ~ /^#/ || split(line, f, "\t") < 3) continue
+        allowed[f[1] "\t" f[2]] = f[3] + 0
+      }
+      for (k in cur) if (!(k in allowed)) allowed[k] = 0
+      for (k in allowed) {
+        found = (k in cur) ? cur[k] + 0 : 0
+        split(k, p, "\t")
+        state = (found > allowed[k]) ? "over" : (found < allowed[k]) ? "under" : "same"
+        print state "\t" p[1] "\t" p[2] "\t" found "\t" allowed[k]
+      }
+    }' | LC_ALL=C sort -t$'\t' -k2,2 -k3,3
+)
+
+over=0
+under=0
+for rule in width style daisyui sci-name app-css; do
+  rows=$(printf '%s\n' "$report" | awk -F'\t' -v r="$rule" '$2 == r')
+  bad=0
+  while IFS=$'\t' read -r state _ path found allowed; do
+    [ -n "${state:-}" ] || continue
+    case $state in
+      over)
+        bad=1
+        over=$((over + 1))
+        if [ "$rule" = app-css ]; then
+          echo "FAIL      app-css: $path has $found lines, budget $allowed. Put styles in the components and assets/css/system, not app.css."
+        else
+          echo "FAIL      $rule: $path has $found, allowed $allowed"
+          printf '%s\n' "$hits" | awk -F'\t' -v r="$rule" -v f="$path" '$1 == r && $2 == f { print "            " f ":" $3 ": " $4 }'
+        fi
+        ;;
+      under)
+        bad=1
+        under=$((under + 1))
+        if [ "$rule" = app-css ]; then
+          echo "FAIL      app-css: $path has shrunk to $found lines; lower its budget from $allowed to $found"
+        else
+          if [ "$found" = 0 ]; then
+            echo "FAIL      $rule: $path is clean now (allowed $allowed); remove its line"
+          else
+            echo "FAIL      $rule: $path is down to $found from $allowed; lower its allowance to $found"
+          fi
+        fi
+        ;;
+    esac
+  done <<<"$rows"
+  if [ "$bad" = 0 ]; then
+    if [ "$rule" = app-css ]; then
+      echo "ok        app-css: $(printf '%s\n' "$rows" | cut -f4 | head -1) lines, at budget"
+    else
+      total=$(printf '%s\n' "$rows" | awk -F'\t' 'NF { t += $4; f++ } END { print t + 0 " allowed in " f + 0 " files" }')
+      echo "ok        $rule: $total, none new"
+    fi
+  fi
+done
+
+if [ "$over" -gt 0 ] || [ "$under" -gt 0 ]; then
+  echo
+  if [ "$over" -gt 0 ]; then
+    echo "$over new violation(s). Use the component library (CODING_STANDARDS.md, Components); an exception goes in $allow_rel only with Jeff's approval."
+  fi
+  if [ "$under" -gt 0 ]; then
+    echo "$under allowance(s) can be lowered: run scripts/check-ui --baseline (it only lowers) and commit $allow_rel."
+  fi
+  exit 1
+fi
+echo
+echo "UI code uses the component library (within the allowlist)."

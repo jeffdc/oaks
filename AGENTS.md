@@ -12,7 +12,7 @@ Project rules (investigation before action, SQLite, Nix toolchain, git workflow)
   - `search` (Search rethink): shaping, not agreed yet. Captures and questions only.
   - `audit-2026-11` (Codebase audit follow-ups): open checks and decisions left from the November 2026 audit.
 - **Small, unrelated work is unplanned** (`--plan none`).
-- **Hard checks:** `make done-checks`, which `mull done` runs: it rebuilds the checkout's test database, then runs `scripts/check-toolchain`, `mix precommit` and `mix dialyzer`. Run it inside the Nix dev shell (direnv, or `nix develop -c make done-checks`).
+- **Hard checks:** `make done-checks`, which `mull done` runs: it rebuilds the checkout's test database, then runs `scripts/check-toolchain`, `scripts/check-ui`, `mix precommit` and `mix dialyzer`. Run it inside the Nix dev shell (direnv, or `nix develop -c make done-checks`).
 - **Layers** for done reports: `ui` (`lib/oaks_web`, `assets`; tours required), `domain` (`lib/oaks`), `data` (`priv/repo`), `tests`, `ops` (Docker, Fly, Litestream, `rel`, `infra`, `.github`, flake, `scripts`, Makefile), `scrapers`, `ios`, `docs` (`docs/**`, `*.md`).
 - **Old tracker:** `.mull/` is read-only history. "Matter xxxx" in code, notes or entries means `.mull/matters/xxxx-*.md`. Don't edit it or track work there.
 
