@@ -137,7 +137,7 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
 
     test "not found page has link back to list", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/species/nonexistent")
-      assert html =~ ~s(href="/list")
+      assert html =~ ~s(href="/species")
     end
   end
 

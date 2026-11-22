@@ -250,7 +250,7 @@ defmodule OaksWeb.SpeciesMergeLive do
       <h1 class="text-xl font-bold mb-2">Unable to Load Merge</h1>
       <p class="mb-6" style="color: var(--color-text-secondary);">{@error}</p>
       <.link
-        navigate={~p"/list"}
+        navigate={~p"/species"}
         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white"
         style="background-color: var(--color-forest-600); text-decoration: none;"
       >

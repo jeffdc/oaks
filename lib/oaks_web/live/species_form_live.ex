@@ -39,7 +39,7 @@ defmodule OaksWeb.SpeciesFormLive do
       {:noreply,
        socket
        |> put_flash(:error, "You must be authenticated to perform this action.")
-       |> push_navigate(to: ~p"/list")}
+       |> push_navigate(to: ~p"/species")}
     end
   end
 
@@ -60,7 +60,7 @@ defmodule OaksWeb.SpeciesFormLive do
       nil ->
         socket
         |> put_flash(:error, "Species not found.")
-        |> push_navigate(to: ~p"/list")
+        |> push_navigate(to: ~p"/species")
 
       species ->
         changeset = Species.change_species(species)
@@ -95,7 +95,7 @@ defmodule OaksWeb.SpeciesFormLive do
       {:noreply,
        socket
        |> put_flash(:error, "You must be authenticated to perform this action.")
-       |> push_navigate(to: ~p"/list")}
+       |> push_navigate(to: ~p"/species")}
     end
   end
 
@@ -329,7 +329,7 @@ defmodule OaksWeb.SpeciesFormLive do
 
   # -- Helpers --
 
-  defp cancel_path(:new, _species), do: ~p"/list"
+  defp cancel_path(:new, _species), do: ~p"/species"
 
   defp cancel_path(:edit, species) do
     ~p"/species/#{species.scientific_name}"

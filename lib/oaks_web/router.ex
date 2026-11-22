@@ -55,6 +55,9 @@ defmodule OaksWeb.Router do
   scope "/", OaksWeb do
     pipe_through :browser
 
+    # The species index was /list until item 3248.
+    get "/list", RedirectController, :species_list
+
     live_session :default,
       on_mount: [
         OaksWeb.Hooks.ActiveNav,
@@ -62,7 +65,7 @@ defmodule OaksWeb.Router do
         {OaksWeb.Analytics.TrackPageView, :default}
       ] do
       live "/", HomeLive
-      live "/list", SpeciesListLive
+      live "/species", SpeciesListLive
       live "/species/new", SpeciesFormLive, :new
       live "/species/:name/edit", SpeciesFormLive, :edit
       live "/species/:name", SpeciesDetailLive

@@ -7,15 +7,15 @@ defmodule OaksWeb.SpeciesListLiveTest do
 
   import Phoenix.LiveViewTest
 
-  describe "GET /list" do
+  describe "GET /species" do
     test "renders species list page", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list")
+      {:ok, _view, html} = live(conn, ~p"/species")
       assert html =~ "Species List"
       assert html =~ "species-search"
     end
 
     test "displays all species", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list")
+      {:ok, _view, html} = live(conn, ~p"/species")
       assert html =~ "alba"
       assert html =~ "rubra"
       assert html =~ "stellata"
@@ -24,33 +24,33 @@ defmodule OaksWeb.SpeciesListLiveTest do
     end
 
     test "shows species count", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list")
+      {:ok, _view, html} = live(conn, ~p"/species")
       assert html =~ "5 total"
     end
 
     test "shows hybrid count", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list")
+      {:ok, _view, html} = live(conn, ~p"/species")
       assert html =~ "1 hybrid"
     end
 
     test "displays hybrid symbol for hybrids", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list")
+      {:ok, _view, html} = live(conn, ~p"/species")
       # &times; renders as Unicode × in the HTML
       assert html =~ "\u00D7"
     end
 
     test "species link to detail page", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list")
+      {:ok, _view, html} = live(conn, ~p"/species")
       assert html =~ ~s(href="/species/alba")
     end
 
     test "shows conservation status badges", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list")
+      {:ok, _view, html} = live(conn, ~p"/species")
       assert html =~ "LC"
     end
 
     test "shows subgenus and section badges", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list")
+      {:ok, _view, html} = live(conn, ~p"/species")
       assert html =~ "Quercus"
       assert html =~ "Lobatae"
     end
@@ -58,13 +58,13 @@ defmodule OaksWeb.SpeciesListLiveTest do
 
   describe "filtering" do
     test "search narrows the list", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/list")
+      {:ok, view, _html} = live(conn, ~p"/species")
 
       view
       |> form("#filter-form", %{q: "alba", subgenus: "", section: ""})
       |> render_change()
 
-      assert_patch(view, ~p"/list?q=alba")
+      assert_patch(view, ~p"/species?q=alba")
 
       html = render(view)
       assert html =~ "alba"
@@ -73,13 +73,13 @@ defmodule OaksWeb.SpeciesListLiveTest do
     end
 
     test "filter by subgenus", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/list")
+      {:ok, view, _html} = live(conn, ~p"/species")
 
       view
       |> form("#filter-form", %{q: "", subgenus: "Lobatae", section: ""})
       |> render_change()
 
-      assert_patch(view, ~p"/list?subgenus=Lobatae")
+      assert_patch(view, ~p"/species?subgenus=Lobatae")
 
       html = render(view)
       assert html =~ "rubra"
@@ -88,13 +88,13 @@ defmodule OaksWeb.SpeciesListLiveTest do
     end
 
     test "filter by section", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/list")
+      {:ok, view, _html} = live(conn, ~p"/species")
 
       view
       |> form("#filter-form", %{q: "", subgenus: "", section: "Quercus"})
       |> render_change()
 
-      assert_patch(view, ~p"/list?section=Quercus")
+      assert_patch(view, ~p"/species?section=Quercus")
 
       html = render(view)
       assert html =~ "alba"
@@ -103,35 +103,50 @@ defmodule OaksWeb.SpeciesListLiveTest do
     end
 
     test "combined filters", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list?q=stella&subgenus=Quercus")
+      {:ok, _view, html} = live(conn, ~p"/species?q=stella&subgenus=Quercus")
       assert html =~ "stellata"
       refute html =~ "alba"
       assert html =~ "1 total"
     end
 
     test "shows empty state when no matches", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list?q=zzzznonexistent")
+      {:ok, _view, html} = live(conn, ~p"/species?q=zzzznonexistent")
       assert html =~ "No species found"
     end
 
     test "clearing filters shows all species", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/list?q=alba")
+      {:ok, view, _html} = live(conn, ~p"/species?q=alba")
 
       view
       |> form("#filter-form", %{q: "", subgenus: "", section: ""})
       |> render_change()
 
-      assert_patch(view, ~p"/list")
+      assert_patch(view, ~p"/species")
 
       html = render(view)
       assert html =~ "5 total"
     end
 
     test "filters from URL params on initial load", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list?subgenus=Lobatae")
+      {:ok, _view, html} = live(conn, ~p"/species?subgenus=Lobatae")
       assert html =~ "rubra"
       assert html =~ "velutina"
       assert html =~ "2 total"
+    end
+  end
+
+  describe "GET /list (the old species index)" do
+    test "redirects permanently to /species", %{conn: conn} do
+      conn = get(conn, "/list")
+
+      assert conn.status == 301
+      assert redirected_to(conn, 301) == ~p"/species"
+    end
+
+    test "keeps the query string", %{conn: conn} do
+      conn = get(conn, "/list?q=alba&subgenus=Quercus")
+
+      assert redirected_to(conn, 301) == "/species?q=alba&subgenus=Quercus"
     end
   end
 end

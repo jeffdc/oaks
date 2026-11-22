@@ -32,7 +32,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
       {:noreply,
        socket
        |> put_flash(:error, "You must be authenticated to perform this action.")
-       |> push_navigate(to: ~p"/list")}
+       |> push_navigate(to: ~p"/species")}
     end
   end
 
@@ -41,7 +41,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
       nil ->
         socket
         |> put_flash(:error, "Species not found.")
-        |> push_navigate(to: ~p"/list")
+        |> push_navigate(to: ~p"/species")
 
       species ->
         available = Sources.available_sources_for_species(species.id)
@@ -64,7 +64,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
       nil ->
         socket
         |> put_flash(:error, "Species not found.")
-        |> push_navigate(to: ~p"/list")
+        |> push_navigate(to: ~p"/species")
 
       species ->
         source_id = Params.int(source_id_str)
@@ -121,7 +121,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
       {:noreply,
        socket
        |> put_flash(:error, "You must be authenticated to perform this action.")
-       |> push_navigate(to: ~p"/list")}
+       |> push_navigate(to: ~p"/species")}
     end
   end
 

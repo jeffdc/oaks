@@ -18,7 +18,7 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
 
   describe "GET /species/:name/sources/new (unauthenticated)" do
     test "redirects to species list", %{conn: conn} do
-      assert {:error, {:live_redirect, %{to: "/list"}}} =
+      assert {:error, {:live_redirect, %{to: "/species"}}} =
                live(conn, ~p"/species/alba/sources/new")
     end
   end
@@ -37,7 +37,7 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
     end
 
     test "redirects for nonexistent species", %{conn: conn} do
-      assert {:error, {:live_redirect, %{to: "/list"}}} =
+      assert {:error, {:live_redirect, %{to: "/species"}}} =
                conn |> authenticated_conn() |> live(~p"/species/zzz_nonexistent/sources/new")
     end
 
@@ -76,7 +76,7 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
 
   describe "GET /species/:name/sources/:source_id/edit (unauthenticated)" do
     test "redirects to species list", %{conn: conn} do
-      assert {:error, {:live_redirect, %{to: "/list"}}} =
+      assert {:error, {:live_redirect, %{to: "/species"}}} =
                live(conn, ~p"/species/alba/sources/2/edit")
     end
   end

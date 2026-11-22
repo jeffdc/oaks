@@ -16,7 +16,7 @@ defmodule OaksWeb.SpeciesFormLiveTest do
 
   describe "GET /species/new (unauthenticated)" do
     test "redirects to species list", %{conn: conn} do
-      assert {:error, {:live_redirect, %{to: "/list"}}} =
+      assert {:error, {:live_redirect, %{to: "/species"}}} =
                live(conn, ~p"/species/new")
     end
   end
@@ -70,7 +70,7 @@ defmodule OaksWeb.SpeciesFormLiveTest do
 
   describe "GET /species/:name/edit (unauthenticated)" do
     test "redirects to species list", %{conn: conn} do
-      assert {:error, {:live_redirect, %{to: "/list"}}} =
+      assert {:error, {:live_redirect, %{to: "/species"}}} =
                live(conn, ~p"/species/alba/edit")
     end
   end
@@ -135,19 +135,19 @@ defmodule OaksWeb.SpeciesFormLiveTest do
     end
 
     test "redirects for nonexistent species", %{conn: conn} do
-      assert {:error, {:live_redirect, %{to: "/list"}}} =
+      assert {:error, {:live_redirect, %{to: "/species"}}} =
                conn |> authenticated_conn() |> live(~p"/species/zzz_nonexistent/edit")
     end
   end
 
   describe "species list new button" do
     test "unauthenticated user does not see New Species button", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list")
+      {:ok, _view, html} = live(conn, ~p"/species")
       refute html =~ "new-species-btn"
     end
 
     test "authenticated user sees New Species button", %{conn: conn} do
-      {:ok, _view, html} = conn |> authenticated_conn() |> live(~p"/list")
+      {:ok, _view, html} = conn |> authenticated_conn() |> live(~p"/species")
 
       assert html =~ "new-species-btn"
       assert html =~ "New Species"

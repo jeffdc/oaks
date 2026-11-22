@@ -228,8 +228,8 @@ defmodule OaksWeb.SpeciesListLive do
       |> maybe_put("section", section)
 
     case params do
-      p when p == %{} -> ~p"/list"
-      p -> ~p"/list?#{p}"
+      p when p == %{} -> ~p"/species"
+      p -> ~p"/species?#{p}"
     end
   end
 

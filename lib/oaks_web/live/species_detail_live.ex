@@ -87,7 +87,7 @@ defmodule OaksWeb.SpeciesDetailLive do
           {:noreply,
            socket
            |> put_flash(:info, "Species deleted.")
-           |> push_navigate(to: ~p"/list")}
+           |> push_navigate(to: ~p"/species")}
 
         {:error, _changeset} ->
           {:noreply,
@@ -275,7 +275,7 @@ defmodule OaksWeb.SpeciesDetailLive do
         The species you're looking for doesn't exist in our database.
       </p>
       <.link
-        navigate={~p"/list"}
+        navigate={~p"/species"}
         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white"
         style="background-color: var(--color-forest-600); text-decoration: none;"
       >

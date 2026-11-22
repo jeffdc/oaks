@@ -53,7 +53,7 @@ defmodule OaksWeb.AnalyticsRouteAuditTest do
   # `:live` (hook tracks) or `:get` (plug tracks).
   @public_live_routes [
     {"home", "/", :live},
-    {"species list", "/list", :live},
+    {"species list", "/species", :live},
     {"taxonomy index", "/taxonomy", :live},
     {"taxonomy splat", "/taxonomy/subgenus/cerris", :live},
     {"articles index", "/articles", :live},

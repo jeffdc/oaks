@@ -61,7 +61,7 @@ defmodule OaksWeb.InputHardeningTest do
 
   describe "LiveView list-valued params" do
     test "species list renders with list params", %{conn: conn} do
-      assert {:ok, _view, _html} = live(conn, "/list?q[]=alba&subgenus[]=Quercus")
+      assert {:ok, _view, _html} = live(conn, "/species?q[]=alba&subgenus[]=Quercus")
     end
 
     test "search page renders with a list q", %{conn: conn} do
