@@ -5,6 +5,12 @@ plan: compendium
 item: d5b1
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-a7d26533c71fe9776
 created: "2026-11-22T15:06:45Z"
+settled:
+  action: accept
+  note: with review fcfd
+  by: Jeff
+  human: true
+  at: "2026-11-22T15:37:59Z"
 ---
 
 The finish review found search the one page left with a fourth body width (896px), on rows built like the species list's, which now run 1336

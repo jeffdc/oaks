@@ -6,6 +6,11 @@ item: d5b1
 source: reports/d5b1-2.md
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-a2786b5a3a77a9153
 created: "2026-11-22T15:34:09Z"
+settled:
+  action: accept
+  by: Jeff
+  human: true
+  at: "2026-11-22T15:37:59Z"
 decisions:
   - "8531"
   - "0047"
