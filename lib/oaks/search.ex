@@ -68,6 +68,66 @@ defmodule Oaks.Search do
     }
   end
 
+  @doc """
+  Says which synonym each species in a search's results was found through.
+
+  Takes the species from `search/2` and the same query. A species whose own
+  name contains the query is left out; for any other, the first of its
+  synonyms that contains the query (case-insensitive, as `search/2` matches)
+  is returned as `%{name: name, author: author}`. A species found only by its
+  author or a common name is left out too, as is a stored synonym string
+  that joins several names with "=". The author is nil for a synonym stored
+  as a string, which keeps its authority in the name.
+
+  ## Examples
+
+      iex> Search.synonym_matches(Search.search("candida").species, "candida")
+      %{12 => %{name: "candida Steud.", author: nil}}
+  """
+  @spec synonym_matches([map()], String.t()) :: %{
+          integer() => %{name: String.t(), author: String.t() | nil}
+        }
+  def synonym_matches([], _query), do: %{}
+
+  def synonym_matches(species, query) do
+    needle = String.downcase(query)
+    ids = Enum.map(species, & &1.id)
+
+    from(s in Species, where: s.id in ^ids, select: {s.id, s.scientific_name, s.synonyms})
+    |> Repo.all()
+    |> Enum.reject(fn {_id, name, _synonyms} -> contains?(name, needle) end)
+    |> Enum.flat_map(fn {id, _name, synonyms} ->
+      synonyms
+      |> Oaks.Species.parse_json_array()
+      |> Enum.flat_map(&synonym_entry/1)
+      |> Enum.find(&contains?(synonym_text(&1), needle))
+      |> case do
+        nil -> []
+        synonym -> [{id, synonym}]
+      end
+    end)
+    |> Map.new()
+  end
+
+  defp contains?(text, needle), do: String.contains?(String.downcase(text), needle)
+
+  # A synonym is stored as a string, or as %{"name" => ..., "author" => ...}.
+  # A string holding several names joined by "=" (a few hybrids' records)
+  # isn't one name to show, so it is passed over.
+  defp synonym_entry(name) when is_binary(name) do
+    if String.contains?(name, "="), do: [], else: [%{name: name, author: nil}]
+  end
+
+  defp synonym_entry(%{"name" => name} = entry) when is_binary(name) do
+    author = entry["author"]
+    [%{name: name, author: if(is_binary(author) and author != "", do: author)}]
+  end
+
+  defp synonym_entry(_other), do: []
+
+  defp synonym_text(%{name: name, author: nil}), do: name
+  defp synonym_text(%{name: name, author: author}), do: name <> " " <> author
+
   defp search_species(term, limit) do
     # Use a subquery to find matching species IDs (avoiding DISTINCT multi-column,
     # which SQLite doesn't support). The left join on species_sources allows

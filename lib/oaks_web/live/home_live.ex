@@ -1,281 +1,215 @@
 defmodule OaksWeb.HomeLive do
+  @moduledoc """
+  The home page, set as a book's title page (item 1900, the Bookplate
+  sketch Jeff picked): the masthead's ink continues into the title page
+  with the big search hanging across its ochre edge and the counts below
+  it, then the contents of the site, an oak at random and the sources.
+
+  Built only from library components: `page/1` with the title page in its
+  bleed, `title_page/1`, `chapter_heading/1`, `contents/1`, `specimen/1`
+  (with `sci_name/1`, the inline `taxonomy_band/1` and `button/1`) and
+  `colophon/1` (with `work_title/1` and `status_tag/1`).
+  """
   use OaksWeb, :live_view
 
   alias Oaks.Sources
   alias Oaks.Species
+  alias Oaks.Taxonomy
+  alias OaksWeb.TaxonPath
+
+  # iNaturalist is the taxonomic backbone, not a source the home page lists.
+  @inaturalist_id 1
+  # Jeff's own observations: the primary source, listed first.
+  @primary_source_id 3
 
   @impl true
   def mount(_params, _session, socket) do
-    # Only fetch data when connected to avoid fetching twice
-    if connected?(socket) do
-      send(self(), :load_data)
-    end
+    # Everything loads in both renders, so the static page is the whole page
+    # (for readers without JavaScript too) and nothing fills in late. The
+    # static render picks the oak and hands it to the live mount as a
+    # connect param (data-connect-key on the specimen), so both show the
+    # same one.
+    sources = list_sources()
+    oaks = Enum.reject(Species.list_all_species(), & &1.is_hybrid)
+    picked = connected?(socket) && get_connect_params(socket)["featured"]
 
     {:ok,
      assign(socket,
        page_title: "Oak Compendium - A Database of the World's Oak Species",
        page_description:
          "A comprehensive guide to oak species (genus Quercus) featuring detailed information on taxonomy, morphology, distribution, and hybrid relationships.",
-       stats: %{oak_count: 0, hybrid_count: 0},
-       all_species: [],
-       sources: [],
-       featured_species: nil,
-       is_loading: true
-     )}
-  end
-
-  @impl true
-  def handle_info(:load_data, socket) do
-    stats = fetch_stats()
-    all_species = Species.list_all_species()
-    sources = fetch_and_sort_sources()
-    featured_species = pick_featured_species(all_species)
-
-    {:noreply,
-     assign(socket,
-       stats: stats,
-       all_species: all_species,
+       counts: count_all(sources),
        sources: sources,
-       featured_species: featured_species,
-       is_loading: false
-     )}
+       oaks: oaks
+     )
+     |> feature(first_oak(oaks, picked))}
   end
 
   @impl true
   def handle_event("shuffle", _params, socket) do
-    featured_species = pick_featured_species(socket.assigns.all_species)
-    {:noreply, assign(socket, featured_species: featured_species)}
+    {:noreply, feature_random(socket)}
   end
 
-  defp fetch_stats do
-    hybrid_count = Species.count_hybrids()
+  defp count_all(sources) do
+    hybrids = Species.count_hybrids()
 
-    # Species.count/0 includes hybrids; the tagline lists them separately.
-    %{oak_count: Species.count() - hybrid_count, hybrid_count: hybrid_count}
+    # Species.count/0 includes hybrids; the counts list them separately.
+    %{
+      species: Species.count() - hybrids,
+      hybrids: hybrids,
+      sections: length(Taxonomy.list_taxa_by_level("section")),
+      sources: length(sources)
+    }
   end
 
-  defp fetch_and_sort_sources do
+  defp list_sources do
     Sources.list_sources()
-    |> Enum.filter(&(&1.id != 1))
-    |> Enum.sort_by(fn source ->
-      case source.id do
-        3 -> {0, source.name}
-        _ -> {1, source.name}
-      end
-    end)
+    |> Enum.reject(&(&1.id == @inaturalist_id))
+    |> Enum.sort_by(&{&1.id != @primary_source_id, &1.name})
   end
 
-  defp pick_featured_species(all_species) do
-    non_hybrid_species =
-      all_species
-      |> Enum.filter(fn s -> !s.is_hybrid end)
+  defp primary?(source), do: source.id == @primary_source_id
 
-    if Enum.empty?(non_hybrid_species) do
-      nil
-    else
-      Enum.random(non_hybrid_species)
+  # The oak the static render picked, or a random one.
+  defp first_oak([], _picked), do: nil
+
+  defp first_oak(oaks, picked) when is_binary(picked) do
+    Enum.find(oaks, &(&1.scientific_name == picked)) || Enum.random(oaks)
+  end
+
+  defp first_oak(oaks, _picked), do: Enum.random(oaks)
+
+  # Show another: a different non-hybrid oak when there is one.
+  defp feature_random(socket) do
+    case Enum.reject(socket.assigns.oaks, &(&1 == socket.assigns.featured)) do
+      [] -> socket
+      others -> feature(socket, Enum.random(others))
     end
   end
+
+  # The featured oak with where it sits (the band's steps, none when it sits
+  # in the genus only), its hybrids and each named hybrid's other parent.
+  defp feature(socket, nil),
+    do: assign(socket, featured: nil, featured_ranks: [], featured_hybrids: [])
+
+  defp feature(socket, featured) do
+    hybrids =
+      featured.hybrids
+      |> Species.parse_name_list()
+      |> Species.get_hybrids_with_parents()
+      |> Enum.map(&Map.put(&1, :other, other_parent(&1, featured.scientific_name)))
+
+    ranks =
+      case Species.placement(featured) do
+        [] -> []
+        placement -> TaxonPath.ranks(placement)
+      end
+
+    assign(socket, featured: featured, featured_ranks: ranks, featured_hybrids: hybrids)
+  end
+
+  # A formula name ("agrifolia × parvula") already names both parents.
+  defp other_parent(%{name: hybrid} = parents, name) do
+    if OaksWeb.SpeciesName.hybrid_sign?(hybrid, true), do: other_of(parents, name)
+  end
+
+  defp other_of(%{parent1: name, parent2: other}, name), do: other
+  defp other_of(%{parent1: other, parent2: name}, name), do: other
+  defp other_of(_hybrid, _name), do: nil
+
+  # The joining words of a run of hybrids: "a, b and c".
+  defp list_joint(index, count) when index == count - 2, do: " and"
+  defp list_joint(index, count) when index < count - 2, do: ","
+  defp list_joint(_index, _count), do: ""
 
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-3xl mx-auto">
-      <%!-- Welcome section --%>
-      <section class="text-center mb-10">
-        <h2
-          class="text-3xl font-bold mb-3"
-          style="font-family: var(--font-serif); color: var(--color-forest-800, #165132);"
+    <.page width="frame">
+      <:bleed>
+        <.title_page search={~p"/search"}>
+          Oak <em>Compendium</em>
+          <:subtitle>Oaks, their varieties and their hybrids, and how to tell them apart</:subtitle>
+          <:count>{@counts.species} species</:count>
+          <:count>{@counts.hybrids} hybrids</:count>
+          <:count>{@counts.sections} sections</:count>
+          <:count>{@counts.sources} sources</:count>
+        </.title_page>
+      </:bleed>
+
+      <.chapter_heading id="contents-heading" mark class="mt-s6">Contents</.chapter_heading>
+      <.contents labelledby="contents-heading">
+        <:entry title="Species" navigate={~p"/species"} count={@counts.species}>
+          Every oak, A to Z, each on its own page: its names, its place in the taxonomy, its hybrids and what each source says.
+        </:entry>
+        <:entry title="Hybrids" navigate={~p"/species"} count={@counts.hybrids}>
+          Named hybrids and formula names such as
+          <.sci_name name="agrifolia × parvula" genus={nil} weight="regular" />, each between its two parents.
+        </:entry>
+        <:entry
+          title="Taxonomy"
+          navigate={~p"/taxonomy"}
+          count={@counts.sections}
+          count_label="sections"
         >
-          Explore the World of Oaks
-        </h2>
-        <%= if @is_loading do %>
-          <p class="text-lg" style="color: var(--color-text-secondary);">Loading species data...</p>
-        <% else %>
-          <p class="text-lg leading-relaxed" style="color: var(--color-text-secondary);">
-            A comprehensive database of
-            <strong class="font-semibold" style="color: var(--color-forest-700);">
-              {@stats.oak_count}
-            </strong>
-            oak species and
-            <strong class="font-semibold" style="color: var(--color-forest-700);">
-              {@stats.hybrid_count}
-            </strong>
-            hybrids from around the globe.
-          </p>
-        <% end %>
-      </section>
+          Two subgenera, <.sci_name name="Quercus" weight="regular" /> and
+          <.sci_name name="Cerris" genus={nil} weight="regular" />, their sections and subsections, every rank linked.
+        </:entry>
+        <:entry title="Identify" status="In preparation">
+          A trait filter that narrows the oaks by what you can see, and a helper for hybrids.
+        </:entry>
+        <:entry title="Sources" navigate={~p"/sources"} count={@counts.sources}>
+          Jeff Clark’s notes first; Oaks of the World, the Sibley guide and the literature behind them.
+        </:entry>
+        <:entry title="About" navigate={~p"/about"}>
+          What the Compendium is, how its facts are sourced, and who keeps it.
+        </:entry>
+      </.contents>
 
-      <%!-- Browse options --%>
-      <section class="mb-10">
-        <h3 class="section-title">What would you like to do?</h3>
-        <div class="flex flex-col gap-4 sm:flex-row">
-          <.browse_card
-            navigate={~p"/taxonomy"}
-            icon="hero-squares-2x2"
-            title="Taxonomy Tree"
-            description="Explore by subgenus, section, and more"
-          />
-          <.disabled_card
-            icon="hero-magnifying-glass"
-            title="Identification"
-            badge="Coming Soon"
-            description="Identify oaks by their characteristics"
-          />
-        </div>
-      </section>
-
-      <%!-- Featured species --%>
-      <%= if !@is_loading && @featured_species do %>
-        <section class="mb-10">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="section-title">Featured Species</h3>
-            <button
-              phx-click="shuffle"
-              aria-label="Show another random species"
-              class="p-2 rounded text-stone-400 hover:bg-stone-100 hover:text-forest-600 focus-visible:outline-none focus-visible:bg-stone-100 focus-visible:text-forest-600 focus-visible:ring-2 focus-visible:ring-forest-600"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-              >
-                #
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-            </button>
-          </div>
-          <.list_card href={~p"/species/#{@featured_species.scientific_name}"}>
-            <span class="font-medium" style="color: var(--color-forest-700);">
-              <em>Quercus {@featured_species.scientific_name}</em>
-            </span>
-            <%= if @featured_species.author do %>
-              <span class="text-sm" style="color: var(--color-text-tertiary);">
-                {@featured_species.author}
-              </span>
-            <% end %>
-            <%= if @featured_species.section do %>
-              <span class="text-xs" style="color: var(--color-text-tertiary);">
-                Section {@featured_species.section}
-              </span>
-            <% end %>
-          </.list_card>
-        </section>
-      <% end %>
-
-      <%!-- Data sources --%>
-      <%= if !@is_loading && !Enum.empty?(@sources) do %>
-        <section class="mb-10">
-          <h3 class="section-title">Data Sources</h3>
-          <div class="flex flex-col gap-2">
-            <%= for source <- @sources do %>
-              <.list_card href={~p"/sources/#{source.id}"}>
-                <span
-                  class="font-medium"
-                  style={
-                    if source.id === 3,
-                      do: "color: var(--color-forest-800); font-weight: 600;",
-                      else: "color: var(--color-forest-700);"
-                  }
-                >
-                  {source.name}
-                </span>
-                <%= if source.id === 3 do %>
-                  <span class="badge badge-uppercase badge-forest-dark">Primary</span>
-                <% end %>
-              </.list_card>
-            <% end %>
-          </div>
-        </section>
-      <% end %>
-    </div>
-    """
-  end
-
-  defp list_card(assigns) do
-    ~H"""
-    <a
-      href={@href}
-      class="flex items-center justify-between px-4 py-3.5 rounded-lg transition-all bg-white border border-stone-200 hover:border-forest-400 hover:bg-forest-50"
-      style="text-decoration: none;"
-    >
-      <div class="flex items-baseline gap-3">
-        {render_slot(@inner_block)}
-      </div>
-      <svg
-        class="w-5 h-5 flex-shrink-0"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        stroke-width="2"
-        style="color: var(--color-text-tertiary);"
+      <.specimen
+        :if={@featured}
+        id="oak-at-random"
+        heading="An oak at random"
+        data-connect-key="featured"
+        data-connect-value={@featured.scientific_name}
       >
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-      </svg>
-    </a>
-    """
-  end
+        <:name><.sci_name name={@featured.scientific_name} /></:name>
+        <:author :if={@featured.author}>{@featured.author}</:author>
+        <:band :if={@featured_ranks != []}>
+          <.taxonomy_band id="random-band" label="Where it sits" ranks={@featured_ranks} inline />
+        </:band>
+        <:about :if={@featured_hybrids != []}>
+          Hybrids
+          <%= for {hybrid, i} <- Enum.with_index(@featured_hybrids) do %>
+            {" "}<span class="whitespace-nowrap"><.link navigate={~p"/species/#{hybrid.name}"}><.sci_name
+              name={hybrid.name}
+              hybrid
+              abbreviate
+            /></.link><span :if={hybrid.other}>
+                with <.sci_name name={hybrid.other} genus={nil} weight="regular" /></span>{list_joint(
+              i,
+              length(@featured_hybrids)
+            )}</span>
+          <% end %>
+        </:about>
+        <:actions>
+          <.button variant="primary" navigate={~p"/species/#{@featured.scientific_name}"}>
+            Open the page
+          </.button>
+          <.button phx-click="shuffle">Show another</.button>
+        </:actions>
+      </.specimen>
 
-  defp browse_card(assigns) do
-    ~H"""
-    <.link
-      navigate={@navigate}
-      class="card card-interactive flex flex-row sm:flex-col items-center sm:items-center gap-4 p-5 sm:p-6 text-left sm:text-center flex-1"
-      style="text-decoration: none;"
-    >
-      <div class="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-forest-50 flex items-center justify-center text-forest-600 sm:mb-2">
-        <.icon name={@icon} class="size-6 sm:size-8" />
-      </div>
-      <div class="flex-1 sm:flex-none">
-        <h4 class="font-semibold text-base sm:text-lg" style="color: var(--color-text-primary);">
-          {@title}
-        </h4>
-        <p class="text-sm" style="color: var(--color-text-secondary);">
-          {@description}
-        </p>
-      </div>
-      <svg
-        class="flex-shrink-0 size-5 sm:hidden"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        stroke-width="2"
-        style="color: var(--color-text-tertiary);"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-      </svg>
-    </.link>
-    """
-  end
-
-  defp disabled_card(assigns) do
-    ~H"""
-    <div class="card flex flex-row sm:flex-col items-center sm:items-center gap-4 p-5 sm:p-6 text-left sm:text-center opacity-70 flex-1">
-      <div
-        class="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-lg flex items-center justify-center sm:mb-2"
-        style="background-color: var(--color-stone-100, #f5f5f4); color: var(--color-text-tertiary);"
-      >
-        <.icon name={@icon} class="size-6 sm:size-8" />
-      </div>
-      <div class="flex-1 sm:flex-none">
-        <h4
-          class="font-semibold text-base sm:text-lg flex items-center gap-2 flex-wrap sm:justify-center"
-          style="color: var(--color-text-primary);"
-        >
-          {@title}
-          <span class="badge badge-uppercase badge-muted">{@badge}</span>
-        </h4>
-        <p class="text-sm" style="color: var(--color-text-secondary);">
-          {@description}
-        </p>
-      </div>
-    </div>
+      <.colophon :if={@sources != []} id="home-sources" label="Sources">
+        <:item :for={source <- @sources}>
+          <.link navigate={~p"/sources/#{source.id}"}><.work_title title={source.name} /></.link><.status_tag :if={
+            primary?(source)
+          }>
+            Primary
+          </.status_tag>
+        </:item>
+      </.colophon>
+    </.page>
     """
   end
 end

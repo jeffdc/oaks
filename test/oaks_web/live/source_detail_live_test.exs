@@ -44,6 +44,21 @@ defmodule OaksWeb.SourceDetailLiveTest do
       assert html =~ ootw.name
     end
 
+    test "sets the name, type and editor actions on the title row", %{
+      conn: conn,
+      compendium: compendium
+    } do
+      {:ok, view, _html} = live(conn, ~p"/sources/#{compendium.id}")
+      assert has_element?(view, "#source-title h1", compendium.name)
+      assert has_element?(view, "#source-title .oc-title-meta .oc-status", "personal_observation")
+      refute has_element?(view, "#source-title .oc-title-actions")
+
+      %{conn: conn} = register_and_log_in_user(%{conn: conn})
+      {:ok, view, _html} = live(conn, ~p"/sources/#{compendium.id}")
+      assert has_element?(view, "#source-title .oc-title-actions #edit-source-btn")
+      assert has_element?(view, "#source-title .oc-title-actions #delete-source-btn")
+    end
+
     test "shows source metadata", %{conn: conn, ootw: ootw} do
       {:ok, _view, html} = live(conn, ~p"/sources/#{ootw.id}")
       assert html =~ "website"
@@ -62,9 +77,9 @@ defmodule OaksWeb.SourceDetailLiveTest do
     end
 
     test "shows species count in coverage section", %{conn: conn, ootw: ootw} do
-      {:ok, _view, html} = live(conn, ~p"/sources/#{ootw.id}")
+      {:ok, view, html} = live(conn, ~p"/sources/#{ootw.id}")
       assert html =~ "Coverage"
-      assert html =~ "Species"
+      assert has_element?(view, ".source-coverage-count", "2 species")
     end
 
     test "lists associated species", %{conn: conn} = ctx do
@@ -90,20 +105,63 @@ defmodule OaksWeb.SourceDetailLiveTest do
   end
 
   describe "not found" do
-    test "shows not found for unknown source ID", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/sources/0")
-      assert html =~ "Source Not Found"
-      assert html =~ "Back to Sources"
+    test "an unknown source ID is a 404 with the not-found page", %{conn: conn} do
+      {404, _headers, html} = assert_error_sent 404, fn -> get(conn, ~p"/sources/0") end
+
+      assert html =~ "<title>Source not found · Oak Compendium</title>"
+      assert html =~ ~r{<h1>\s*Source not found\s*</h1>}
+      assert html =~ "/sources/0"
+      assert html =~ ~r{<a href="/sources" class="oc-btn">\s*Sources\s*</a>}
+      assert_raise OaksWeb.NotFoundError, fn -> live(conn, ~p"/sources/0") end
     end
 
-    test "shows not found for invalid ID", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/sources/abc")
-      assert html =~ "Source Not Found"
+    test "an ID that isn't a number is a 404", %{conn: conn} do
+      {404, _headers, html} = assert_error_sent 404, fn -> get(conn, ~p"/sources/abc") end
+      assert html =~ ~r{<h1>\s*Source not found\s*</h1>}
+    end
+  end
+
+  describe "delete" do
+    test "a source with species data can't be deleted, and the dialog only closes", %{
+      conn: conn,
+      ootw: ootw
+    } do
+      %{conn: conn} = register_and_log_in_user(%{conn: conn})
+      {:ok, view, _html} = live(conn, ~p"/sources/#{ootw.id}")
+
+      view |> element("#delete-source-btn") |> render_click()
+
+      assert has_element?(view, "[role=dialog] h2", "Can't delete source")
+      assert has_element?(view, "[role=dialog]", "2 species have data from")
+      refute has_element?(view, "[role=dialog] [phx-click=confirm_delete]")
+      assert has_element?(view, "[role=dialog] #delete-source-modal-cancel", "Close")
     end
 
-    test "not found page has link back to sources list", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/sources/0")
-      assert html =~ ~s(href="/sources")
+    test "a source with one species says so in the singular", %{
+      conn: conn,
+      compendium: compendium
+    } do
+      %{conn: conn} = register_and_log_in_user(%{conn: conn})
+      {:ok, view, _html} = live(conn, ~p"/sources/#{compendium.id}")
+
+      view |> element("#delete-source-btn") |> render_click()
+
+      assert has_element?(view, "[role=dialog]", "1 species has data from")
+    end
+
+    test "an unused source asks first, and Cancel closes the dialog", %{conn: conn} do
+      source = source_fixture()
+      %{conn: conn} = register_and_log_in_user(%{conn: conn})
+      {:ok, view, _html} = live(conn, ~p"/sources/#{source.id}")
+
+      view |> element("#delete-source-btn") |> render_click()
+
+      assert has_element?(view, "[role=dialog] h2", "Delete source")
+      assert has_element?(view, "#confirm-delete-source-btn.oc-btn-danger", "Delete source")
+
+      render_click(view, "cancel_delete")
+      refute has_element?(view, "[role=dialog]")
+      assert Oaks.Sources.get_source(source.id)
     end
   end
 end

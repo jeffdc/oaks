@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Stops an agent's leftover Phoenix dev server by port: scripts/stop-dev-server <port>.
+#
+# Agents start dev servers as background tasks and stop them with their stop
+# tool; this is the fallback for a server left running, and the one way an
+# agent may stop a process. It is narrow on purpose so it can be pre-approved:
+# it refuses Jeff's servers (4444, the main checkout's make dev, and 4460, the
+# integration preview), and stops only a BEAM process (the Erlang VM a
+# Phoenix server runs in) that is listening on the given port, nothing else.
+set -euo pipefail
+
+port=${1:-}
+
+if [[ ! "$port" =~ ^[0-9]+$ ]]; then
+  echo "usage: scripts/stop-dev-server <port>" >&2
+  exit 2
+fi
+
+case "$port" in
+  4444|4460)
+    echo "stop-dev-server: port $port is Jeff's server; refusing" >&2
+    exit 1
+    ;;
+esac
+
+pids=$(lsof -nP -iTCP:"$port" -sTCP:LISTEN -t 2>/dev/null || true)
+
+if [[ -z "$pids" ]]; then
+  echo "stop-dev-server: nothing is listening on port $port"
+  exit 0
+fi
+
+for pid in $pids; do
+  command=$(ps -o comm= -p "$pid" 2>/dev/null || true)
+  case "$command" in
+    *beam.smp*|*beam*)
+      kill "$pid"
+      echo "stop-dev-server: stopped the Phoenix server (pid $pid) on port $port"
+      ;;
+    *)
+      echo "stop-dev-server: port $port belongs to '$command' (pid $pid), not a Phoenix server; leaving it" >&2
+      exit 1
+      ;;
+  esac
+done

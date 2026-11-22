@@ -56,14 +56,23 @@ defmodule OaksWeb.ArticleLiveTest do
       assert html =~ ~s(href="/articles")
     end
 
-    test "shows 404 for non-existent slug", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/articles/does-not-exist")
-      assert html =~ "Article Not Found"
+    test "a non-existent slug is a 404 with the not-found page", %{conn: conn} do
+      {404, _headers, html} =
+        assert_error_sent 404, fn -> get(conn, ~p"/articles/does-not-exist") end
+
+      assert html =~ "<title>Article not found · Oak Compendium</title>"
+      assert html =~ ~r{<h1>\s*Article not found\s*</h1>}
+      assert html =~ "/articles/does-not-exist"
+      assert html =~ ~r{<a href="/articles" class="oc-btn">\s*Articles\s*</a>}
+      assert_raise OaksWeb.NotFoundError, fn -> live(conn, ~p"/articles/does-not-exist") end
     end
 
-    test "hides unpublished article from unauthenticated users", %{conn: conn, draft: draft} do
-      {:ok, _view, html} = live(conn, ~p"/articles/#{draft.slug}")
-      assert html =~ "Article Not Found"
+    test "an unpublished article is a 404 for unauthenticated users", %{conn: conn, draft: draft} do
+      {404, _headers, html} =
+        assert_error_sent 404, fn -> get(conn, ~p"/articles/#{draft.slug}") end
+
+      assert html =~ ~r{<h1>\s*Article not found\s*</h1>}
+      refute html =~ draft.title
     end
 
     test "does not show edit/delete buttons for unauthenticated users", %{
@@ -92,6 +101,9 @@ defmodule OaksWeb.ArticleLiveTest do
       {:ok, view, _html} = live(conn, ~p"/articles/#{article.slug}")
 
       render_click(view, "confirm_delete")
+      assert has_element?(view, "#delete-article-modal h2", "Delete article")
+      assert has_element?(view, "#delete-article-modal-cancel", "Cancel")
+      assert has_element?(view, "#confirm-delete-article-btn.oc-btn-danger", "Delete article")
       assert {:error, {:live_redirect, %{to: "/articles"}}} = render_click(view, "delete")
 
       refute Oaks.Articles.get_article_by_slug(article.slug, true)

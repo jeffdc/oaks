@@ -76,15 +76,43 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
     end
 
     test "shows conservation status badge", %{conn: conn, alba: alba} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
-      assert html =~ "LC"
+      {:ok, view, html} = live(conn, ~p"/species/#{alba}")
+      assert has_element?(view, "#species-title .oc-title-meta .oc-iucn-lc", "IUCN LC")
       assert html =~ "Least Concern"
     end
 
-    test "shows taxonomy breadcrumb", %{conn: conn, alba: alba} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
-      assert html =~ "(subgenus)"
-      assert html =~ "(section)"
+    test "shows the taxonomy band above the title row, ending on the species", %{
+      conn: conn,
+      alba: alba
+    } do
+      {:ok, view, html} = live(conn, ~p"/species/#{alba}")
+      assert has_element?(view, ".oc-pg-bleed #taxonomy-band")
+      assert has_element?(view, ".oc-pg-head #species-title")
+      assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy"]), "Quercus")
+      assert has_element?(view, "#taxonomy-band a .oc-band-rk", "subg.")
+      assert has_element?(view, "#taxonomy-band a .oc-band-rk", "sect.")
+      assert has_element?(view, "#taxonomy-band [aria-current]", alba)
+      refute html =~ "taxonomy-nav"
+    end
+
+    test "places a hybrid with no ranks of its own in the band where its parents sit", %{
+      conn: conn,
+      alba: alba
+    } do
+      other = species_fixture(subgenus: "Quercus", section: "Quercus")
+      hybrid = hybrid_fixture(parent1: alba, parent2: other.scientific_name)
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{hybrid.scientific_name}")
+      assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy/Quercus/Quercus"]), "sect.")
+      assert has_element?(view, "#taxonomy-band [aria-current]", "×")
+    end
+
+    test "places a variety in the band under its species", %{conn: conn, alba: alba} do
+      variety = species_fixture(scientific_name: "#{alba} latiloba", subgenus: "Quercus")
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{variety.scientific_name}")
+      assert has_element?(view, ~s(#taxonomy-band a[href="/species/#{alba}"]), alba)
+      assert has_element?(view, "#taxonomy-band [aria-current]", "latiloba")
     end
 
     test "shows source data from preferred source", %{conn: conn, alba: alba, ootw: ootw} do
@@ -107,23 +135,41 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert html =~ inat.name
     end
 
-    test "preferred source has star indicator", %{conn: conn, alba: alba} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
-      # ★ character for preferred source
-      assert html =~ "★"
+    test "marks the preferred source's tab", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
+      assert has_element?(view, ".source-tab .source-tab-note", "preferred")
     end
 
     test "shows relationship sections", %{conn: conn} = ctx do
-      {:ok, _view, html} = live(conn, ~p"/species/#{ctx.alba}")
+      {:ok, view, html} = live(conn, ~p"/species/#{ctx.alba}")
       "×" <> bebbiana_epithet = ctx.bebbiana
       assert html =~ "Known Hybrids"
       assert html =~ bebbiana_epithet
       assert html =~ "Closely Related"
       assert html =~ ctx.stellata
-      assert html =~ "Synonyms"
-      assert html =~ "#{ctx.alba} var. repanda"
-      assert html =~ "Subspecies"
-      assert html =~ "#{ctx.alba} var. latiloba"
+      assert has_element?(view, "#species-synonyms .oc-sci-e", "repanda")
+      assert has_element?(view, "#species-subspecies .oc-sci-e", "latiloba")
+    end
+
+    test "sets every name through sci_name, by its role", %{conn: conn} = ctx do
+      {:ok, view, _html} = live(conn, ~p"/species/#{ctx.alba}")
+      "×" <> bebbiana_epithet = ctx.bebbiana
+
+      # The title row: the full genus at display size.
+      assert has_element?(view, "#species-title h1 .oc-sci-display .oc-sci-g", "Quercus")
+      assert has_element?(view, "#species-title h1 .oc-sci-display .oc-sci-e", ctx.alba)
+
+      # Synonyms: names under the species, Q. abbreviated; rank words roman.
+      assert has_element?(view, "#species-synonyms .oc-sci-g", "Q.")
+      assert has_element?(view, "#species-synonyms .oc-sci-e", ctx.alba)
+      assert has_element?(view, "#species-synonyms .oc-sci-r", "var.")
+
+      # Hybrids and varieties: list entries under the species, Q. abbreviated.
+      assert has_element?(view, "#species-hybrids .oc-sci-title .oc-sci-g", "Q.")
+      assert has_element?(view, "#species-hybrids .oc-sci-x", "×")
+      assert has_element?(view, "#species-hybrids .oc-sci-e", bebbiana_epithet)
+      assert has_element?(view, "#species-subspecies .oc-sci-title .oc-sci-g", "Q.")
+      assert has_element?(view, "#species-related .oc-sci-title .oc-sci-g", "Q.")
     end
 
     test "relationship links point to detail pages", %{conn: conn} = ctx do
@@ -176,15 +222,19 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
   end
 
   describe "not found" do
-    test "shows not found for unknown species", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/nonexistent")
-      assert html =~ "Species Not Found"
-      assert html =~ "Back to Species List"
+    test "an unknown species is a 404 with the not-found page", %{conn: conn} do
+      {404, _headers, html} =
+        assert_error_sent 404, fn -> get(conn, ~p"/species/nonexistent") end
+
+      assert html =~ "<title>Species not found · Oak Compendium</title>"
+      assert html =~ ~r{<h1>\s*Species not found\s*</h1>}
+      assert html =~ "/species/nonexistent"
+      assert html =~ ~s(value="nonexistent")
+      assert html =~ ~r{<a href="/species" class="oc-btn">\s*Species list\s*</a>}
     end
 
-    test "not found page has link back to list", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/nonexistent")
-      assert html =~ ~s(href="/list")
+    test "the LiveView raises the not-found error", %{conn: conn} do
+      assert_raise OaksWeb.NotFoundError, fn -> live(conn, ~p"/species/nonexistent") end
     end
   end
 
@@ -242,18 +292,22 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert html =~ "No source data available"
     end
 
-    test "hides Add Source link when unauthenticated", %{conn: conn, velutina: velutina} do
+    test "hides Add source data when unauthenticated", %{conn: conn, velutina: velutina} do
       {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
-      refute has_element?(view, "#empty-add-source-btn")
+      refute has_element?(view, "#add-source-btn")
     end
 
-    test "shows Add Source link when authenticated", %{conn: conn, velutina: velutina} do
+    test "the Edit menu holds Add source data when authenticated", %{
+      conn: conn,
+      velutina: velutina
+    } do
       conn = log_in_user(conn, user_fixture())
       {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
 
       assert has_element?(
                view,
-               ~s|#empty-add-source-btn[href="/species/#{velutina}/sources/new"]|
+               ~s|#species-edit-menu #add-source-btn[href="/species/#{velutina}/sources/new"]|,
+               "Add source data"
              )
     end
   end

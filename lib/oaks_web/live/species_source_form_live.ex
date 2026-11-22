@@ -12,6 +12,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
   alias Oaks.Sources.SpeciesSource
   alias Oaks.Species
   alias OaksWeb.Params
+  alias OaksWeb.SpeciesName
 
   @impl true
   def mount(_params, _session, socket) do
@@ -32,7 +33,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
       {:noreply,
        socket
        |> put_flash(:error, "You must be authenticated to perform this action.")
-       |> push_navigate(to: ~p"/list")}
+       |> push_navigate(to: ~p"/species")}
     end
   end
 
@@ -41,7 +42,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
       nil ->
         socket
         |> put_flash(:error, "Species not found.")
-        |> push_navigate(to: ~p"/list")
+        |> push_navigate(to: ~p"/species")
 
       species ->
         available = Sources.available_sources_for_species(species.id)
@@ -50,7 +51,8 @@ defmodule OaksWeb.SpeciesSourceFormLive do
 
         socket
         |> assign(
-          page_title: "Add Source Data — Quercus #{epithet(species.scientific_name)}",
+          page_title:
+            "Add source data — #{SpeciesName.full_name(species.scientific_name, species.is_hybrid)}",
           species: species,
           species_source: species_source,
           available_sources: available,
@@ -64,7 +66,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
       nil ->
         socket
         |> put_flash(:error, "Species not found.")
-        |> push_navigate(to: ~p"/list")
+        |> push_navigate(to: ~p"/species")
 
       species ->
         source_id = Params.int(source_id_str)
@@ -80,7 +82,8 @@ defmodule OaksWeb.SpeciesSourceFormLive do
 
             socket
             |> assign(
-              page_title: "Edit Source Data — Quercus #{epithet(species.scientific_name)}",
+              page_title:
+                "Edit source data — #{SpeciesName.full_name(species.scientific_name, species.is_hybrid)}",
               species: species,
               species_source: species_source,
               form: to_form(changeset)
@@ -121,7 +124,7 @@ defmodule OaksWeb.SpeciesSourceFormLive do
       {:noreply,
        socket
        |> put_flash(:error, "You must be authenticated to perform this action.")
-       |> push_navigate(to: ~p"/list")}
+       |> push_navigate(to: ~p"/species")}
     end
   end
 
@@ -162,161 +165,148 @@ defmodule OaksWeb.SpeciesSourceFormLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div :if={@form == nil} class="max-w-3xl mx-auto py-12 text-center">
-      <p style="color: var(--color-text-tertiary);">Loading...</p>
-    </div>
+    <.page width="form">
+      <div :if={@form == nil} class="py-s7">
+        <p class="oc-empty">Loading...</p>
+      </div>
 
-    <div :if={@form} class="max-w-3xl mx-auto">
-      <.link
-        navigate={~p"/species/#{@species.scientific_name}"}
-        class="inline-flex items-center gap-1 text-sm mb-4"
-        style="color: var(--color-forest-700);"
-      >
-        <.icon name="hero-arrow-left" class="size-4" /> Back to species
-      </.link>
+      <:head :if={@form}>
+        <.back navigate={~p"/species/#{@species.scientific_name}"}>Back to species</.back>
 
-      <h1
-        class="text-2xl font-bold mb-6"
-        style="font-family: var(--font-serif); color: var(--color-forest-800);"
-      >
-        {@page_title}
-      </h1>
+        <.header>
+          {if(@live_action == :new, do: "Add source data", else: "Edit source data")}
+          <:meta>
+            <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} size="meta" />
+          </:meta>
+        </.header>
+      </:head>
 
-      <.form for={@form} id="species-source-form" phx-change="validate" phx-submit="save">
-        <div class="space-y-6">
-          <%!-- Source selection (new only) --%>
-          <div :if={@live_action == :new} class="card p-6">
-            <h2 class="section-title section-title-sm mb-4">Source</h2>
-            <.input
-              field={@form[:source_id]}
-              type="select"
-              label="Data Source"
-              options={Enum.map(@available_sources, &{&1.name, &1.id})}
-              prompt="Select a source..."
-            />
-          </div>
+      <div :if={@form}>
+        <.form for={@form} id="species-source-form" phx-change="validate" phx-submit="save">
+          <div class="flex flex-col gap-s7">
+            <%!-- Source selection (new only) --%>
+            <section :if={@live_action == :new}>
+              <.section_heading>Source</.section_heading>
+              <.input
+                field={@form[:source_id]}
+                type="select"
+                label="Data Source"
+                options={Enum.map(@available_sources, &{&1.name, &1.id})}
+                prompt="Select a source..."
+              />
+            </section>
 
-          <div :if={@live_action == :edit} class="card p-6">
-            <h2 class="section-title section-title-sm mb-4">Source</h2>
-            <p style="color: var(--color-text-secondary);">
-              {@species_source.source.name}
-            </p>
-          </div>
+            <section :if={@live_action == :edit}>
+              <.section_heading>Source</.section_heading>
+              <p class="m-0 font-frame text-[15px] font-bold text-ink">
+                {@species_source.source.name}
+              </p>
+            </section>
 
-          <%!-- Descriptive fields --%>
-          <div class="card p-6">
-            <h2 class="section-title section-title-sm mb-4">Morphology & Description</h2>
-            <div class="space-y-4">
-              <.input
-                field={@form[:range]}
-                type="textarea"
-                label="Geographic Range"
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:growth_habit]}
-                type="textarea"
-                label="Growth Habit"
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:leaves]}
-                type="textarea"
-                label="Leaves"
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:flowers]}
-                type="textarea"
-                label="Flowers"
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:fruits]}
-                type="textarea"
-                label="Fruits"
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:bark]}
-                type="textarea"
-                label="Bark"
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:twigs]}
-                type="textarea"
-                label="Twigs"
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:buds]}
-                type="textarea"
-                label="Buds"
-                phx-debounce="300"
-              />
+            <%!-- Descriptive fields --%>
+            <section>
+              <.section_heading>Morphology & Description</.section_heading>
+              <div class="space-y-4">
+                <.input
+                  field={@form[:range]}
+                  type="textarea"
+                  label="Geographic Range"
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:growth_habit]}
+                  type="textarea"
+                  label="Growth Habit"
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:leaves]}
+                  type="textarea"
+                  label="Leaves"
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:flowers]}
+                  type="textarea"
+                  label="Flowers"
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:fruits]}
+                  type="textarea"
+                  label="Fruits"
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:bark]}
+                  type="textarea"
+                  label="Bark"
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:twigs]}
+                  type="textarea"
+                  label="Twigs"
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:buds]}
+                  type="textarea"
+                  label="Buds"
+                  phx-debounce="300"
+                />
+              </div>
+            </section>
+
+            <%!-- Additional info --%>
+            <section>
+              <.section_heading>Additional Information</.section_heading>
+              <div class="space-y-4">
+                <.input
+                  field={@form[:local_names]}
+                  type="text"
+                  label="Common Names"
+                  placeholder="e.g. white oak, eastern white oak"
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:hardiness_habitat]}
+                  type="textarea"
+                  label="Hardiness & Habitat"
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:miscellaneous]}
+                  type="textarea"
+                  label="Miscellaneous"
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:url]}
+                  type="text"
+                  label="Source URL"
+                  placeholder="https://..."
+                  phx-debounce="300"
+                />
+                <.input
+                  field={@form[:is_preferred]}
+                  type="checkbox"
+                  label="Preferred source for display"
+                />
+              </div>
+            </section>
+
+            <%!-- Submit --%>
+            <div class="flex flex-wrap items-center justify-end gap-s2 pt-s4 border-t-2 border-ink">
+              <.button navigate={~p"/species/#{@species.scientific_name}"}>Cancel</.button>
+              <.button type="submit" variant="primary" phx-disable-with="Saving...">
+                {if(@live_action == :new, do: "Add source data", else: "Save changes")}
+              </.button>
             </div>
           </div>
-
-          <%!-- Additional info --%>
-          <div class="card p-6">
-            <h2 class="section-title section-title-sm mb-4">Additional Information</h2>
-            <div class="space-y-4">
-              <.input
-                field={@form[:local_names]}
-                type="text"
-                label="Common Names"
-                placeholder="e.g. white oak, eastern white oak"
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:hardiness_habitat]}
-                type="textarea"
-                label="Hardiness & Habitat"
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:miscellaneous]}
-                type="textarea"
-                label="Miscellaneous"
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:url]}
-                type="text"
-                label="Source URL"
-                placeholder="https://..."
-                phx-debounce="300"
-              />
-              <.input
-                field={@form[:is_preferred]}
-                type="checkbox"
-                label="Preferred source for display"
-              />
-            </div>
-          </div>
-
-          <%!-- Submit --%>
-          <div class="flex items-center justify-end gap-3">
-            <.link
-              navigate={~p"/species/#{@species.scientific_name}"}
-              class="px-4 py-2 rounded-lg text-sm font-medium"
-              style="color: var(--color-text-secondary);"
-            >
-              Cancel
-            </.link>
-            <button
-              type="submit"
-              phx-disable-with="Saving..."
-              class="px-6 py-2 rounded-lg text-sm font-medium text-white"
-              style="background-color: var(--color-forest-600);"
-            >
-              {if(@live_action == :new, do: "Add Source Data", else: "Save Changes")}
-            </button>
-          </div>
-        </div>
-      </.form>
-    </div>
+        </.form>
+      </div>
+    </.page>
     """
   end
 end

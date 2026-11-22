@@ -11,6 +11,13 @@ colors:
   pencil: "#2f5fb3"
   rule: "#16161626"
   rule-strong: "#161616"
+  iucn-ew: "#542344"
+  iucn-cr: "#d81e05"
+  iucn-en: "#fc7f3f"
+  iucn-vu: "#f9e814"
+  iucn-nt: "#cce226"
+  iucn-lc: "#60c659"
+  iucn-dd: "#d1d1c6"
 typography:
   display:
     fontFamily: "Source Serif 4, Georgia, Times New Roman, serif"
@@ -87,7 +94,8 @@ components:
     backgroundColor: "{colors.ochre}"
     textColor: "{colors.ink}"
     typography: "{typography.breadcrumb}"
-    padding: "13px 32px"
+    height: "48px"
+    padding: "0 32px"
   button-compare:
     backgroundColor: "{colors.ochre}"
     textColor: "{colors.ink}"
@@ -96,6 +104,19 @@ components:
   button-compare-hover:
     backgroundColor: "{colors.ink}"
     textColor: "{colors.ochre}"
+  button-danger:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.paper}"
+    rounded: "{rounded.none}"
+    padding: "10px 13px"
+  button-danger-hover:
+    backgroundColor: "{colors.ink-2}"
+    textColor: "{colors.paper}"
+  dialog:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.none}"
+    width: "34rem"
   status-tag:
     textColor: "{colors.ink}"
     rounded: "{rounded.none}"
@@ -129,7 +150,7 @@ The key's printed materials are kept; its apparatus is not. There are no couplet
 - Ink on bright stock, one ochre field, pencil-blue source marks.
 - Archivo frames and labels; Source Serif 4 carries reading text and every scientific name.
 - Square corners everywhere; rules, not boxes, separate statements.
-- Agree, differs and unreviewed are drawn marks, never colours.
+- Agree, differs and unreviewed are drawn marks, never colours. IUCN status alone keeps its Red List colours.
 - Taxonomy breadcrumb in the ochre band, in the same place on every taxon page.
 - Counts and measurements in lining tabular figures; running text in oldstyle figures.
 
@@ -144,7 +165,7 @@ A near-monochrome printed palette with one saturated field and one working blue.
 - **Pencil Blue** (pencil): links and source marks. Every source mark is pencil blue with a thin underline at 40% (#2f5fb366), full strength on hover. Also the focus outline colour.
 
 ### Neutral
-- **Press Ink** (ink): body text, the masthead ground, the strong 2px rules under titles and section headings, the outlined status tag.
+- **Press Ink** (ink): body text, the masthead ground, the strong 2px rules under titles and section headings, the outlined status tag, the EX status fill.
 - **Second Ink** (ink-2): quoted and secondary reading text, captions, the standing marks' labels.
 - **Third Ink** (ink-3): authority, quiet metadata, empty states ("No statement yet"), source attributions under other sources' text.
 - **Bright Stock** (paper): the page ground and the text colour on the ink masthead.
@@ -153,9 +174,26 @@ A near-monochrome printed palette with one saturated field and one working blue.
 - **Strong Rule** (rule-strong): 2px rules under the title row, section headings and table heads.
 
 ### Named Rules
-**The One Field Rule.** Ochre is the only saturated fill in the world. It marks where you are (band, current nav item, current comparison), what to do next (Compare) and where two taxa differ. Nothing else gets a coloured ground.
+**The One Field Rule.** Ochre is the only saturated fill in the world. It marks where you are (band, current nav item, current comparison), what to do next (Compare) and where two taxa differ. Nothing else gets a coloured ground, except the IUCN status stamp (The IUCN Exception, below).
 
 **The Marks Not Colours Rule.** Agree, differs and unreviewed are drawn marks in ink: a ticked open circle for agree, a filled square carrying a paper not-equal sign (two bars struck through) for differs, a dashed open circle for unreviewed or not recorded. Never encode standing with green, red or amber.
+
+### The IUCN Exception
+IUCN Red List status is the one categorical colour code allowed outside the One Field and Marks Not Colours rules. The Red List's category colours are a convention identifiers and botanists already read at a glance, and the colourless stamp made the codes too hard to tell apart (Jeff, 2026-11-21, decision 5604). The status tag takes the category's fill, keeps its 1.5px ink outline and square corners, and always shows the code with the colour, never colour alone; the category is spelled out in its title and for screen readers. Every page uses one component, `iucn_status`. The fills are the Red List's own, except EX (ink instead of pure black) and NE (paper, the plain stamp):
+
+| Code | Category | Fill | Code text | Contrast |
+|------|----------|------|-----------|----------|
+| EX | Extinct | ink #161616 | paper | 17.4:1 |
+| EW | Extinct in the Wild | #542344 | paper | 11.9:1 |
+| CR | Critically Endangered | #d81e05 | paper | 4.9:1 |
+| EN | Endangered | #fc7f3f | ink | 7.1:1 |
+| VU | Vulnerable | #f9e814 | ink | 14.3:1 |
+| NT | Near Threatened | #cce226 | ink | 12.5:1 |
+| LC | Least Concern | #60c659 | ink | 8.4:1 |
+| DD | Data Deficient | #d1d1c6 | ink | 11.8:1 |
+| NE | Not Evaluated | paper #fbfbf7 | ink | 17.4:1 |
+
+The colours mean the Red List category and nothing else: they never mark standing, differences, sources or any other status.
 
 ## Typography
 
@@ -166,34 +204,41 @@ A near-monochrome printed palette with one saturated field and one working blue.
 **Character:** A heavy, plain grotesk builds the frame (headings, labels, trait names, derived values, buttons, source marks) while a sturdy text serif carries everything meant to be read, and every scientific name. The contrast between the two faces is how the page separates Jeff's voice from the apparatus around it.
 
 ### Hierarchy
-- **Display** (Source Serif 4 italic 600, clamp(34px, 4vw, 50px), 1.05): the taxon name in the title row. Genus at weight 400, epithet at 600. Followed by the authority in 22px roman serif at ink-3 and the common name in 21px Archivo 700.
+- **Display** (Source Serif 4 600, clamp(34px, 4vw, 50px), 1.05): every page title (Components, Title Row), roman; a taxon name there is italic, genus at weight 400, epithet at 600. Followed by the authority in 22px roman serif at ink-3 and the common name in 21px Archivo 700.
 - **Headline** (Source Serif 4 italic 600, 26px to 28px, 1.1): taxon names heading comparison columns and the parents strip on hybrid pages.
-- **Title** (Source Serif 4 italic 600, 18px, 1.25): taxon names in the look-alike and hybrid lists (17px in the compact hybrid rows).
-- **Body** (Source Serif 4 400, 17px, 1.6; 16px under 760px): running text with oldstyle proportional figures. Reading columns hold at 68ch to 70ch.
+- **Title** (Source Serif 4 italic 600, 18px, 1.25): a taxon name that is itself a list entry: the species list, search results, look-alikes, hybrids, relatives and a taxon's species, all at 18px (the authority 15px).
+- **Body** (Source Serif 4 400, 17px, 1.6; 16px under 760px): running text with oldstyle proportional figures. Prose pages hold it to the 720px reading measure; reading text inside a wider page holds at 68ch to 70ch.
 - **Quote** (Source Serif 4 400, 18px, 1.6, ink): Jeff's statements in the distinguishing-traits list; 16px in tables and comparisons.
 - **Frame** (Archivo 700, 15px, 1.45): trait names and derived values; Archivo 400 to 600 at 13px to 14px for "why" notes, captions and metadata.
 - **Section label** (Archivo 800, 15px, 0.06em, uppercase): section headings standing on a 2px ink rule, with an optional right-aligned 13px Archivo 500 note at ink-3. Table heads and range country headings use the same voice at 13px.
-- **Breadcrumb** (Archivo Narrow 600, 15px, 0.01em): the taxonomy band; rank words at weight 500, the current taxon in Source Serif 4 italic 700 at 16px.
+- **Breadcrumb** (Archivo Narrow 600, 15px, 0.01em): the taxonomy band; rank words at weight 500, names in Source Serif 4 italic at 16px, the current taxon's epithets at 700.
 - **Source mark** (Archivo 500, 12.5px): source links after a quote or value.
 
 ### Named Rules
 **The Verbatim Rule.** Jeff's words always appear in quotation marks (curly quotes) and are always followed by a source mark. Anything derived from his words, a summary value, a count, a label, is set in the frame face with a small Archivo tag ("summary", "from counts") and never in quotation marks.
 
-**The Botanical Italic Rule.** Scientific names are italic per botanical convention, in the serif, everywhere: titles, lists, breadcrumbs, tables, prose. Rank words (subg., sect., subsect., complex), authorities and the hybrid sign stay roman.
+**The Botanical Italic Rule.** Scientific names are italic per botanical convention, in the serif, everywhere: titles, lists, breadcrumbs, tables, prose. Rank words (subg., sect., subsect., complex), authorities and the hybrid sign stay roman, the sign spaced and held to its neighbours (*Quercus* × *bebbiana*). The genus is set at 400 and the epithets at 600, or all at 400 in running text; the authority follows in roman ink-3. Every name is one component, `sci_name`, so the same name looks the same everywhere at a given size.
+
+- **Size follows the name's role:** display in the title row (the authority at 22px), headline (26px) heading a comparison column, title (18px) for a name that is itself a list entry (the species list, search results, a taxon's species, a species' hybrids and relatives, a source's species), 14px at 400 in an Archivo metadata line beside a list entry (its rank word in the frame face, as in the band: sect. *Lobatae*), and otherwise the size of the text around it (prose, dialogs, table cells, field values). The taxonomy band keeps its own voice: names at 16px, the current taxon's epithets at 700.
+- **Quercus, Q. or no genus:** *Quercus* in full in the title row, at a name's first mention in a dialog or passage, and in lists whose entries each stand alone; *Q.* after that, in lists under a taxon or record already named (parents, hybrids, relatives, varieties, a source's species), in comparison column heads, for the current species in the band, for a complex, which is named for its species (*Q. coccinea* complex), and for a species' synonyms (*Q. candida* Steud.; a synonym in another genus keeps it in full, *Cyclobalanopsis glauca* (Thunb.) Oerst., since only *Quercus* is ever abbreviated); no genus for names above species (subgenus, section, subsection) and for a hybrid's other parent after "with" (*Q.* × *bebbiana* with *macrocarpa*).
 
 **The Two Figures Rule.** Running text uses oldstyle figures; counts, measurements and table cells use lining tabular figures.
 
 ## Layout
 
-A 1400px maximum frame with 32px side gutters (16px under 760px). Every taxon page stacks the same way: ink masthead (60px minimum), ochre taxonomy band, title row on a 2px rule, then content.
+The masthead and footer run a 1400px maximum frame with 32px side gutters (16px under 760px); a page's content takes the centred 960px column unless it sets columns side by side (see the named widths below). Every taxon page stacks the same way: ink masthead (60px minimum), ochre taxonomy band, title row on a 2px rule, then content. The band runs the window's full width straight under the masthead (the page's bleed), its path set in the masthead's 1400px frame, so it stands in the same place on every taxon page whatever the page's width; the title row follows in the page's head, as on every other page.
 
-The primary taxon page uses three columns at desktop: photos 300px left (sticky), the distinguishing traits as the reading column centre, look-alikes and hybrids in a 330px right rail, 48px apart. Under 1180px the rail drops below as two side-by-side lists. Under 760px everything is one column ordered traits, rail, photos; the field-marks table becomes one block per trait with each source labelled; the band scrolls horizontally, pinned to the current taxon with a fade on the left edge.
+The primary taxon page (the target design; today's single-column species and taxonomy pages take the column until it ships, and then it takes the frame) uses three columns at desktop: photos 300px left (sticky), the distinguishing traits as the reading column centre, look-alikes and hybrids in a 330px right rail, 48px apart. Under 1180px the rail drops below as two side-by-side lists. Under 760px everything is one column ordered traits, rail, photos; the field-marks table becomes one block per trait with each source labelled; the band scrolls horizontally, pinned to the current taxon with a fade on the left edge.
 
 Wide sections below (field marks, range, notes and names, sources) run the full frame, 64px apart. Range is text first with the map's place reserved beside it. Comparisons are an aligned grid: a 140px trait column then one column per taxon (three for a hybrid between its parents), collapsing to labelled stacks on phones.
 
 Spacing is an 8-step scale from 4px to 64px (s1 to s8); 16px and 24px carry most internal rhythm, 48px separates sections within a column.
 
+Every page takes one of four named widths (`<.page>`), chosen by what the page is: the **column** (960px, centred) for every single-column page, so lists, taxon pages, search, a record such as a source, the articles list and analytics; the **reading measure** (720px, centred) for prose, so articles, about, privacy and help; the **form measure** (760px, centred) for forms that create or edit, and the account pages (log in, setup, settings); the **frame** (1400px) only for pages that set columns side by side, so the source comparison and a merge. The home page is set centred in the frame, as a book's title page and contents: its title page in the full-width bleed above its frame, its contents and colophon centred in the frame. The error pages (403, 404, 500) take the reading measure, in the site's own masthead and footer.
+
 ### Named Rules
+**The Centred Column Rule.** A single-column page sits in one centred 960px column, and its title row and 2px rule run the column's width, not the window's (decision a0ac). Prose and forms sit in a narrower centred column at their reading (720px) or form (760px) measure, the title row and its rule at that measure too, so the title and the text under it share one centred edge (Jeff, 2026-11-22, item a44d); a row's name and its details never sit 1300px apart on a wide screen. The 1400px frame is only for pages whose content stands in columns side by side.
+
 **The One Template Rule.** Every taxon page uses the same template. A section appears because its data exists, never because Jeff has or hasn't covered the taxon: the source comparison appears whenever there are two or more sources (never with only one), and look-alikes, hybrids and range appear when their data exists. A taxon Jeff hasn't covered gets the same full page plus the not-covered notice, never a poorer stub layout.
 
 ## Elevation & Depth
@@ -201,7 +246,7 @@ Spacing is an 8-step scale from 4px to 64px (s1 to s8); 16px and 24px carry most
 Entirely flat. There are no shadows anywhere. Depth is conveyed by rules (1px hairlines between rows, 2px ink rules under headings), by the two inks of the ground (paper and paper-2), and by the two solid fields, the ink masthead and the ochre band.
 
 ### Named Rules
-**The Statements On Rules Rule.** Statements stand on rules, never in boxes. No cards, no shadows, no tinted panels around content. The only bordered shapes are small: the Compare button, the status tag, photo frames and the dashed map slot.
+**The Statements On Rules Rule.** Statements stand on rules, never in boxes. No cards, no shadows, no tinted panels around content. The only bordered shapes are small: the Compare button, the status tag, photo frames and the dashed map slot, and the one panel that stands over the page, the dialog.
 
 ## Shapes
 
@@ -213,10 +258,29 @@ Square corners throughout (0px); the focus outline alone carries a 1px corner. B
 Plain, printed, square.
 - **Shape:** square corners (0px), 1.5px ink outline.
 - **Compare (primary):** ochre fill, ink text, Archivo 700 13px, 7px by 10px padding. Hover inverts to ink fill with ochre text.
+- **Ghost:** the ink outline alone, Archivo 700 14px; hover inverts to ink with paper text. Cancel, Close and every secondary action.
+- **Danger:** the ink plate, paper text on an ink fill in the ink outline; hover eases to ink-2. Only for the one action in a dialog that deletes something or can't be undone, and its label names what goes ("Delete species", "Merge species", never "OK" or "Yes"). There is no warning colour: weight and words carry it, as The One Field Rule keeps ochre for where you are and what to do next (item c13c).
 - **Focus:** 3px pencil-blue outline, 2px offset, on every interactive element.
 
+### Dialogs
+Every confirmation, picker and "can't" notice is one component, `modal` (item c13c): a square paper panel, 2px ink border, at most 34rem wide, centred over a 65% ink wash, no shadow.
+- **Title:** what the dialog is about, in sentence case ("Delete species", "Can't delete source", "Make synonym of…"), Source Serif 4 600 26px on a 2px ink rule.
+- **Body:** what will happen, as a question where there is a choice, in Source Serif 17px ink; scientific names at regular weight, *Quercus* in full at the first mention.
+- **Notes:** each consequence on its own line in Archivo 600 14px ink-2 ("Its data from 2 sources goes with it."), the irreversible one last and in 700 ink ("This can't be undone.").
+- **Actions:** on a hairline at the foot, right-aligned: the dialog's one close control first, a ghost Cancel (Close when the dialog only tells), then its one action, Danger for a delete or merge. No second close button in the head.
+- **Behaviour:** focus moves into the panel (Cancel, or the dialog's field) and stays there; Esc, a click on the wash and Cancel all close it, and focus returns to what opened it. A long body scrolls inside the panel, so the title and actions stay in view. On phones the panel keeps a 12px margin from the window's edges.
+
+### Title Row
+Every page's title is one component, `header`, on one rule (item 7838): the title in the display serif (clamp(34px, 4vw, 50px), 600, balanced) standing on a 2px ink rule, 16px of space above the rule and 32px below it. The row uses the page's width; editing never shapes it.
+- **Title line:** the title, then the meta on the same line, 24px after the title (and a species' authority), on its baseline. The meta wraps under the title, 12px below it, only when the line has no room for it (long titles, phones).
+- **Meta:** Archivo 600 14px ink-2 with lining tabular figures, items 16px apart with no separators. It holds what kind of thing the page is and its short facts, in this order: the kind word (Species, Hybrid, Subgenus) or the record a form edits (its name at 14px), counts (497 species), a byline and date, stamps (the status tag, the IUCN status, a dashed Draft), then links such as an article's tags.
+- **Subtitle:** a sentence describing the page, Archivo 600 16px ink-2 at most 70ch, under the title line.
+- **Edit menu:** an editor's actions for the page (Edit, Make synonym of…, Delete, Create taxon, New species…) sit in one small disclosure, `edit_menu`: a compact "Edit" button with a drawn chevron at the right end of the row, on the title's first baseline, reversed to paper on ink while open. Its list opens under it on its right edge, on paper in a 1.5px ink border, Archivo 600 14px items on paper-2 when hovered; Esc, a click outside or choosing an item closes it, and a destructive item opens its confirmation dialog. It never wraps: the title and meta take the rest of the row. Logged out there is no menu and no space kept for one.
+- **Quiet edit menu:** an editor's actions on one part of a page (a source's data on a species page, a sub-taxon or a source in a list) are the same menu with a quiet trigger: "Edit" and the chevron in Archivo 600 13px ink-3, no outline, ink and underlined on hover, reversed while open, held to the line it sits on so a row is the same height for Jeff as for a reader. Editing never shapes the reader's layout (item 7838): no editor buttons in tab strips, rows or empty states; a page-wide action such as Add source data goes in the title row's menu.
+- **Back link:** above the row, 16px over the title, in the page's head with it.
+
 ### Status Tag
-An outlined ink stamp: Archivo 700 13px at 0.04em, 1.5px ink border, 4px by 7px padding, followed by a source mark (for example IUCN LC with its assessment).
+An outlined ink stamp: Archivo 700 13px at 0.04em, 1.5px ink border, 4px by 7px padding, followed by a source mark when it is sourced. The IUCN status variant (IUCN LC with its assessment on the taxon page, the bare code in the species list) fills the stamp with its Red List category colour (The IUCN Exception).
 
 ### Source Marks
 Archivo 500 12.5px pencil blue, a 1px underline at 40% that firms up on hover, never wraps. Follows every quote and every sourced value. Other sources' text carries its attribution as an Archivo 600 13px ink-3 line beneath it.
@@ -227,7 +291,10 @@ A 14px drawn mark plus an Archivo 600 12.5px ink-2 label: agree (ticked open cir
 ### Navigation
 - **Masthead:** ink ground, acorn mark and "Oak Compendium" in Archivo 800 19px, nav in Archivo 600 15px paper. Current item takes a 3px ochre underline; hover a 3px underline at 40% paper.
 - **Search:** square field on the masthead with a 1px paper border at 35%, a faint paper wash, paper text, and a "/" key hint that hides on phones.
-- **Taxonomy band:** the ochre band with every rank linked (genus, subgenus, section, subsection, complex, taxon), separated by drawn chevrons, in the same place on every taxon page including hybrids, varieties and the comparison view. At its right end a siblings menu (Archivo Narrow 600 14px, 1.5px ink outline, label like "Coccineae · 7 species") opens a list of the other taxa at that rank, the current one on an ochre ground; open, the button reverses to ochre on ink. Long groups list a few and link to all. On phones the path is one scrolling line, scrolled to the current taxon, fading at its left edge.
+- **Editor marks:** logged in, the nav's next item is Editor, a menu of the editor's tools on a paper panel with a 1.5px ink border, followed by the editor's name in Archivo 700 14px ochre. Until the authoring editor exists the menu holds Add species, Settings and Log out.
+- **Narrow masthead:** at 1024px and under the masthead stacks: the mark (with the editor marks at the right), the search full width, then the nav on its own scrolling row along the bottom edge.
+- **Site footer:** under a hairline, the licensing line in Archivo 500 13px ink-3 ("Oak Compendium’s prose is © all rights reserved", "All facts are free to use", "Other sources are under their own terms"), and at the right the pages with no main nav item in pencil: Articles, Privacy, API, and Log in when logged out.
+- **Taxonomy band:** the ochre band with every rank linked (genus, subgenus, section, subsection, complex, taxon), separated by drawn chevrons, in the same place on every taxon page including hybrids, varieties and the comparison view. One crumb format everywhere: rank words (subg., sect., subsect.) roman before the name and "complex" after it; names in the serif italic at 16px, bare from genus to subsection, *Q.* for a complex and a species, the current taxon's epithets at 700. The path is one line at a fixed height (48px, 42px on phones) on every page and at every width, so the band never grows. A variety sits under its species (*Q. acutissima* › *Q. acutissima kingii*). A hybrid sits at its own stored ranks; one with none stored sits where both its parents do, down to the last rank they share (*Q.* × *alentejana* under sect. *Quercus*), and under the genus alone when its parents part at the subgenus. On the source comparison the species stays the current taxon. At its right end a siblings menu (Archivo Narrow 600 14px, 1.5px ink outline, label like "Coccineae · 7 species") opens a list of the other taxa at that rank, the current one on an ochre ground; open, the button reverses to ochre on ink. Long groups list a few and link to all. On phones the band is 42px tall and its path starts at the 16px gutter. At any width a path longer than the line scrolls, scrolled to the current taxon; while steps are scrolled off to the left it fades at its left edge, and with a mouse a thin ink scrollbar along its foot leads back to them.
 
 ### Ruled Lists
 Look-alikes, hybrids, distinguishing traits and field marks are all rows on hairlines. A look-alike row holds the italic name, a one-line Archivo "why" note and a Compare button; a hybrid row holds the name and "with" its other parent. A distinguishing trait row is a 132px Archivo trait name beside the derived value, Jeff's quote with its source mark, and its standing mark.
@@ -288,7 +355,7 @@ On any taxon Jeff hasn't covered, placed under the title row of the full templat
 - **Don't** borrow the dichotomous key's structure: no couplets, key numbering, dotted leaders, key path or life-size callouts.
 - **Don't** encode agree, differs or unreviewed with colour.
 - **Don't** put statements in boxes, cards, tinted panels or shadows.
-- **Don't** add a second saturated colour or use ochre as text on paper.
+- **Don't** add a second saturated colour or use ochre as text on paper. The IUCN status fills are the one exception, and only for the Red List category.
 - **Don't** round corners.
 - **Don't** set anything that is not Jeff's verbatim wording in quotation marks or in a way that reads as his voice.
 - **Don't** hide conflicts between sources behind tabs; mark them in place.

@@ -1,0 +1,12 @@
+<.error_page
+  title={not_found_title(not_found_kind(assigns))}
+  description="There is no page at this address on the Oak Compendium."
+  path={requested_path(assigns)}
+>
+  <.not_found
+    kind={not_found_kind(assigns)}
+    path={requested_path(assigns)}
+    query={not_found_query(assigns)}
+    back={back_href(assigns)}
+  />
+</.error_page>

@@ -84,7 +84,7 @@ if Code.ensure_loaded?(Req) do
 
       results =
         results
-        |> run_and_accumulate(client, "Species list page", "/list", &check_page_not_empty/1)
+        |> run_and_accumulate(client, "Species list page", "/species", &check_page_not_empty/1)
         |> run_and_accumulate(client, "Taxonomy page", "/taxonomy", &check_page_not_empty/1)
         |> run_and_accumulate(client, "Articles page", "/articles", &check_page_not_empty/1)
         |> run_and_accumulate(client, "Sources page", "/sources", &check_page_not_empty/1)

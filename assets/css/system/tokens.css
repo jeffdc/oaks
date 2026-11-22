@@ -1,0 +1,45 @@
+/* ==========================================================================
+   Oak Compendium design system: tokens (DESIGN.md frontmatter)
+
+   Exposed as Tailwind theme variables, so each one is both a CSS custom
+   property (var(--color-ink)) and a utility (text-ink, bg-paper,
+   border-rule, font-frame, p-s4, gap-s5 ...).
+
+   The names sit beside the V1 forest/oak tokens in app.css without
+   colliding; V1 pages keep working until they are rebuilt.
+   ========================================================================== */
+
+@theme {
+  /* Colors */
+  --color-ink: #161616;          /* body text, masthead ground, strong rules, status tag */
+  --color-ink-2: #3d3d3a;        /* quoted and secondary reading text, captions, mark labels */
+  --color-ink-3: #5c5c57;        /* authority, quiet metadata, empty states */
+  --color-paper: #fbfbf7;        /* page ground; text on the ink masthead */
+  --color-paper-2: #f1f0e8;      /* photo placeholders, tinted comparison column */
+  --color-ochre: #d9a21b;        /* the one field: band, Compare, current item, differs underline, selection */
+  --color-pencil: #2f5fb3;       /* links, source marks, focus outline */
+  --color-rule: #16161626;       /* 1px hairline between rows */
+  --color-rule-strong: #161616;  /* 2px rule under titles, section heads, table heads */
+
+  /* Type. --font-serif replaces V1's Georgia stack, so V1 headings that use
+     var(--font-serif) pick up Source Serif 4 too. */
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-frame: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-narrow: "Archivo Narrow", "Archivo", "Helvetica Neue", Arial, sans-serif;
+
+  /* Spacing: the s1-s8 scale (p-s4, gap-s5, mt-s7 ...) */
+  --spacing-s1: 4px;
+  --spacing-s2: 8px;
+  --spacing-s3: 12px;
+  --spacing-s4: 16px;
+  --spacing-s5: 24px;
+  --spacing-s6: 32px;
+  --spacing-s7: 48px;
+  --spacing-s8: 64px;
+
+  /* Layout */
+  --container-frame: 1400px;     /* max-w-frame: the page frame (page width="frame") */
+  --container-column: 60rem;     /* the centred column, 960px (page width="column") */
+  --container-read: 45rem;       /* the reading measure, 720px (page width="read") */
+  --container-form: 47.5rem;     /* the form measure, 760px (page width="form") */
+}

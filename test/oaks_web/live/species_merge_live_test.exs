@@ -58,6 +58,26 @@ defmodule OaksWeb.SpeciesMergeLiveTest do
       assert html =~ "Subgenus"
     end
 
+    test "marks a field that differs with the differs mark", %{
+      conn: conn,
+      stellata: stellata,
+      alba: alba
+    } do
+      {:ok, view, _html} =
+        conn |> authenticated_conn() |> live(~p"/species/#{stellata}/merge/#{alba}")
+
+      # The two authors differ, so the Author row carries the mark.
+      assert has_element?(view, ".merge-row-differs [data-standing='differs']", "differs")
+    end
+
+    test "sets the synonyms to add as italic names", %{conn: conn, stellata: stellata, alba: alba} do
+      {:ok, view, _html} =
+        conn |> authenticated_conn() |> live(~p"/species/#{stellata}/merge/#{alba}")
+
+      assert has_element?(view, ".merge-synonyms .oc-sci .oc-sci-g", "Q.")
+      assert has_element?(view, ".merge-synonyms .oc-sci .oc-sci-e", stellata)
+    end
+
     test "shows source transfer section", %{conn: conn, stellata: stellata, alba: alba} do
       {:ok, _view, html} =
         conn |> authenticated_conn() |> live(~p"/species/#{stellata}/merge/#{alba}")
@@ -72,11 +92,23 @@ defmodule OaksWeb.SpeciesMergeLiveTest do
       assert html =~ "cannot be merged with itself"
     end
 
-    test "shows error for nonexistent species", %{conn: conn, alba: alba} do
-      {:ok, _view, html} =
-        conn |> authenticated_conn() |> live(~p"/species/nonexistent/merge/#{alba}")
+    test "a nonexistent species is a 404 with the not-found page", %{conn: conn, alba: alba} do
+      conn = authenticated_conn(conn)
 
-      assert html =~ "could not be found"
+      {404, _headers, html} =
+        assert_error_sent 404, fn -> get(conn, ~p"/species/nonexistent/merge/#{alba}") end
+
+      assert html =~ ~r{<h1>\s*Species not found\s*</h1>}
+      assert html =~ ~s(value="nonexistent")
+
+      {404, _headers, html} =
+        assert_error_sent 404, fn -> get(conn, ~p"/species/#{alba}/merge/nonexistent") end
+
+      assert html =~ ~s(value="nonexistent")
+
+      assert_raise OaksWeb.NotFoundError, fn ->
+        live(conn, ~p"/species/nonexistent/merge/#{alba}")
+      end
     end
   end
 

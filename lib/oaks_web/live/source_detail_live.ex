@@ -4,6 +4,7 @@ defmodule OaksWeb.SourceDetailLive do
 
   Shows source metadata (type, author, year, URL, ISBN) with description
   and notes, a coverage count, and a list of species associated with the source.
+  An id that names no source raises `OaksWeb.NotFoundError`, a real 404.
   """
 
   use OaksWeb, :live_view
@@ -17,7 +18,6 @@ defmodule OaksWeb.SourceDetailLive do
        page_title: "Source",
        source: nil,
        species: [],
-       not_found: false,
        show_delete_confirm: false
      )}
   end
@@ -29,12 +29,7 @@ defmodule OaksWeb.SourceDetailLive do
         load_source(socket, id)
 
       _ ->
-        {:noreply,
-         assign(socket,
-           source: nil,
-           not_found: true,
-           page_title: "Source Not Found"
-         )}
+        raise OaksWeb.NotFoundError, kind: :source
     end
   end
 
@@ -65,7 +60,7 @@ defmodule OaksWeb.SourceDetailLive do
         {:error, _changeset} ->
           {:noreply,
            socket
-           |> put_flash(:error, "Cannot delete: species have data from this source.")
+           |> put_flash(:error, "Can't delete: species have data from this source.")
            |> assign(show_delete_confirm: false)}
       end
     else
@@ -76,11 +71,13 @@ defmodule OaksWeb.SourceDetailLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="source-detail-page">
-      <.not_found_view :if={@not_found} />
-
-      <article :if={@source} class="source-detail">
+    <.page>
+      <:head :if={@source}>
+        <.back navigate={~p"/sources"}>Back to Sources</.back>
         <.source_header source={@source} editor={@current_scope != nil} />
+      </:head>
+
+      <article :if={@source}>
         <.metadata_card source={@source} />
         <.coverage_section species={@species} />
         <.species_section :if={@species != []} species={@species} />
@@ -91,63 +88,29 @@ defmodule OaksWeb.SourceDetailLive do
         source={@source}
         species_count={length(@species)}
       />
-    </div>
+    </.page>
     """
   end
 
   # -- Page sections --
-
-  defp not_found_view(assigns) do
-    ~H"""
-    <div class="text-center py-16">
-      <.icon name="hero-exclamation-circle" class="size-16 mx-auto mb-4 text-base-content/30" />
-      <h1 class="text-2xl font-bold mb-2">Source Not Found</h1>
-      <p class="mb-6" style="color: var(--color-text-secondary);">
-        The source you're looking for doesn't exist in our database.
-      </p>
-      <.link
-        navigate={~p"/sources"}
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white"
-        style="background-color: var(--color-forest-600); text-decoration: none;"
-      >
-        <.icon name="hero-arrow-left" class="size-4" /> Back to Sources
-      </.link>
-    </div>
-    """
-  end
 
   attr :source, :any, required: true
   attr :editor, :boolean, default: false
 
   defp source_header(assigns) do
     ~H"""
-    <header class="source-header">
-      <div class="source-header-left">
-        <h1 class="source-name">
-          {@source.name}
-        </h1>
-        <span :if={@source.source_type} class="type-badge">
-          {@source.source_type}
-        </span>
-      </div>
-
-      <div :if={@editor} class="source-actions">
-        <.link
-          navigate={~p"/sources/#{@source.id}/edit"}
-          class="action-btn action-btn-edit"
-          id="edit-source-btn"
-        >
-          <.icon name="hero-pencil-square" class="size-4" /> Edit
-        </.link>
-        <button
-          phx-click="request_delete"
-          class="action-btn action-btn-delete"
-          id="delete-source-btn"
-        >
-          <.icon name="hero-trash" class="size-4" /> Delete
-        </button>
-      </div>
-    </header>
+    <.header id="source-title">
+      <.work_title title={@source.name} />
+      <:meta :if={@source.source_type}>
+        <.status_tag class="capitalize">{@source.source_type}</.status_tag>
+      </:meta>
+      <:actions :if={@editor}>
+        <.edit_menu id="source-edit-menu">
+          <:item navigate={~p"/sources/#{@source.id}/edit"} id="edit-source-btn">Edit source</:item>
+          <:item click="request_delete" id="delete-source-btn">Delete source</:item>
+        </.edit_menu>
+      </:actions>
+    </.header>
     """
   end
 
@@ -155,16 +118,15 @@ defmodule OaksWeb.SourceDetailLive do
 
   defp metadata_card(assigns) do
     has_metadata =
-      assigns.source.source_type || assigns.source.author || assigns.source.year ||
+      assigns.source.author || assigns.source.year ||
         assigns.source.isbn || assigns.source.url ||
         assigns.source.description || assigns.source.notes
 
     assigns = assign(assigns, :has_metadata, has_metadata)
 
     ~H"""
-    <section :if={@has_metadata} class="card source-metadata-card">
+    <section :if={@has_metadata} class="source-metadata-card">
       <dl class="source-metadata-grid">
-        <.metadata_item :if={@source.source_type} label="Type" value={@source.source_type} />
         <.metadata_item :if={@source.author} label="Author" value={@source.author} />
         <.metadata_item :if={@source.year} label="Year" value={to_string(@source.year)} />
         <.metadata_item :if={@source.isbn} label="ISBN" value={@source.isbn} />
@@ -178,7 +140,7 @@ defmodule OaksWeb.SourceDetailLive do
               class="source-url-link"
             >
               {@source.url}
-              <.icon name="hero-arrow-top-right-on-square" class="size-3.5 flex-shrink-0" />
+              <.icon name="hero-arrow-top-right-on-square" class="size-3.5" />
             </a>
           </dd>
         </div>
@@ -213,10 +175,9 @@ defmodule OaksWeb.SourceDetailLive do
     ~H"""
     <section class="source-coverage">
       <h2 class="section-title">Coverage</h2>
-      <div class="card source-stat-card">
-        <span class="source-stat-value">{length(@species)}</span>
-        <span class="source-stat-label">Species</span>
-      </div>
+      <p class="source-coverage-count">
+        {length(@species)} species
+      </p>
     </section>
     """
   end
@@ -233,12 +194,7 @@ defmodule OaksWeb.SourceDetailLive do
           navigate={~p"/species/#{sp.scientific_name}"}
           class="source-species-link"
         >
-          <span class="source-species-name">
-            Q.{" "}
-            <span :if={hybrid_sign?(sp.scientific_name, sp.is_hybrid)}>&times;</span>{epithet(
-              sp.scientific_name
-            )}
-          </span>
+          <.sci_name name={sp.scientific_name} hybrid={sp.is_hybrid} abbreviate size="title" />
         </.link>
       </div>
     </section>
@@ -250,13 +206,7 @@ defmodule OaksWeb.SourceDetailLive do
   defp load_source(socket, id) do
     case Sources.get_source(id) do
       nil ->
-        {:noreply,
-         assign(socket,
-           source: nil,
-           species: [],
-           not_found: true,
-           page_title: "Source Not Found"
-         )}
+        raise OaksWeb.NotFoundError, kind: :source
 
       source ->
         species = Sources.get_species_for_source(id)
@@ -265,7 +215,6 @@ defmodule OaksWeb.SourceDetailLive do
          assign(socket,
            source: source,
            species: species,
-           not_found: false,
            page_title: source.name
          )}
     end
@@ -278,55 +227,32 @@ defmodule OaksWeb.SourceDetailLive do
 
   defp delete_confirm_modal(assigns) do
     ~H"""
-    <div
-      class="fixed inset-0 z-50 flex items-center justify-center"
-      style="background-color: rgba(0,0,0,0.5);"
-      phx-window-keydown="cancel_delete"
-      phx-key="Escape"
+    <.modal
+      id="delete-source-modal"
+      show
+      on_cancel={JS.push("cancel_delete")}
+      cancel={if @species_count > 0, do: "Close", else: "Cancel"}
     >
-      <div class="card p-6 w-full max-w-md mx-4">
-        <h3 class="text-lg font-bold mb-2" style="color: var(--color-text-primary);">
-          Delete Source
-        </h3>
-        <p class="mb-4" style="color: var(--color-text-secondary);">
-          Are you sure you want to delete <strong>{@source.name}</strong>?
-        </p>
-        <div
-          :if={@species_count > 0}
-          class="mb-4 p-3 rounded-lg text-sm"
-          style="background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca;"
-        >
-          Cannot delete: {@species_count} species have data from this source.
-        </div>
-        <div class="flex justify-end gap-2">
-          <button
-            phx-click="cancel_delete"
-            class="px-4 py-2 rounded-lg text-sm font-medium border transition-colors"
-            style="border-color: var(--color-border); color: var(--color-text-secondary);"
-          >
-            Cancel
-          </button>
-          <button
-            :if={@species_count == 0}
-            phx-click="confirm_delete"
-            class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
-            style="background-color: #dc2626;"
-          >
-            Delete
-          </button>
-          <button
-            :if={@species_count > 0}
-            phx-click="cancel_delete"
-            class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
-            style="background-color: #dc2626;"
-          >
-            OK
-          </button>
-        </div>
-      </div>
-    </div>
+      <:title>{if @species_count > 0, do: "Can't delete source", else: "Delete source"}</:title>
+      <p :if={@species_count == 0}>
+        Delete <strong>{@source.name}</strong> from the Compendium?
+      </p>
+      <p :if={@species_count > 0}>
+        {species_have(@species_count)} data from <strong>{@source.name}</strong>.
+      </p>
+      <:note :if={@species_count > 0}>Delete that data on each species' page first.</:note>
+      <:note :if={@species_count == 0}><strong>This can't be undone.</strong></:note>
+      <:actions :if={@species_count == 0}>
+        <.button variant="danger" phx-click="confirm_delete" id="confirm-delete-source-btn">
+          Delete source
+        </.button>
+      </:actions>
+    </.modal>
     """
   end
+
+  defp species_have(1), do: "1 species has"
+  defp species_have(n), do: "#{n} species have"
 
   # -- Helpers --
 end

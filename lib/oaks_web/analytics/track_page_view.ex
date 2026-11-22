@@ -5,7 +5,13 @@ defmodule OaksWeb.Analytics.TrackPageView do
   Pairs with `OaksWeb.Plugs.Analytics`, which handles non-LiveView
   traffic (controller routes, 404s on unrouted paths). The hook owns
   ALL LiveView mounts — including the initial connected mount and any
-  later `live_patch` / `live_redirect`.
+  later `live_patch` / `live_redirect` — that render. A LiveView that
+  raises instead (an `OaksWeb.NotFoundError` for an unknown species, say)
+  is recorded by the plug, with the error page's status: on a first visit
+  the page sent is the error page, which never connects; on a
+  `live_redirect` the failed mount never renders, so nothing is recorded
+  here, and LiveView falls back to a page request, which the plug sees.
+  This hook only ever records a 200.
 
   Why the hook owns LV mounts (and the plug does not): a
   `<.link navigate>` reuses the existing WebSocket and mounts the

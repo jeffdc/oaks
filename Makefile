@@ -77,6 +77,7 @@ precommit:
 # `mix test` only migrates its per-run copy of it (no seeds).
 done-checks: test-db
 	scripts/check-toolchain
+	scripts/check-ui
 	mix precommit
 	mix dialyzer
 
@@ -190,7 +191,7 @@ help:
 	@echo "  make format     Format Elixir code"
 	@echo "  make lint       Run Credo linter"
 	@echo "  make precommit  Run all pre-commit checks"
-	@echo "  make done-checks  Hard checks mull done runs (test DB + toolchain + precommit + dialyzer)"
+	@echo "  make done-checks  Hard checks mull done runs (test DB + toolchain + UI + precommit + dialyzer)"
 	@echo "  make ci         Run full CI checks (precommit + assets + dialyzer)"
 	@echo "  make build      Build production release"
 	@echo ""

@@ -120,5 +120,73 @@ defmodule Oaks.SearchTest do
     end
   end
 
+  describe "synonym_matches/2" do
+    setup %{n: n} do
+      bicolor =
+        species_fixture(
+          scientific_name: "bicolor#{n}",
+          synonyms: [
+            "platanoides#{n} Sudw.",
+            %{"name" => "Q. discolor#{n}", "author" => "Michx."}
+          ]
+        )
+
+      %{bicolor: bicolor}
+    end
+
+    test "names the first synonym the species was found through", %{n: n, bicolor: bicolor} do
+      query = "PLATANOIDES#{n}"
+      %{species: species} = Search.search(query)
+
+      assert Search.synonym_matches(species, query) == %{
+               bicolor.id => %{name: "platanoides#{n} Sudw.", author: nil}
+             }
+    end
+
+    test "returns a synonym stored with its author apart", %{n: n, bicolor: bicolor} do
+      query = "discolor#{n}"
+      %{species: species} = Search.search(query)
+
+      assert Search.synonym_matches(species, query) == %{
+               bicolor.id => %{name: "Q. discolor#{n}", author: "Michx."}
+             }
+    end
+
+    test "leaves out a species whose own name matched", %{bicolor: bicolor} do
+      %{species: species} = Search.search(bicolor.scientific_name)
+
+      assert bicolor.id in Enum.map(species, & &1.id)
+      assert Search.synonym_matches(species, bicolor.scientific_name) == %{}
+    end
+
+    test "passes over a synonym string that joins several names", %{n: n} do
+      joined =
+        species_fixture(
+          scientific_name: "×joined#{n}",
+          is_hybrid: true,
+          synonyms: ["ilex x petraea = koehnei#{n} Ambrosy", "koehnei#{n}a"]
+        )
+
+      query = "koehnei#{n}"
+      %{species: species} = Search.search(query)
+
+      assert Search.synonym_matches(species, query) == %{
+               joined.id => %{name: "koehnei#{n}a", author: nil}
+             }
+
+      %{species: species} = Search.search("petraea = koehnei#{n}")
+      assert joined.id in Enum.map(species, & &1.id)
+      assert Search.synonym_matches(species, "petraea = koehnei#{n}") == %{}
+    end
+
+    test "leaves out a species found by a common name", %{n: n, alba: alba} do
+      query = "white oak #{n}"
+      %{species: species} = Search.search(query)
+
+      assert alba.id in Enum.map(species, & &1.id)
+      assert Search.synonym_matches(species, query) == %{}
+    end
+  end
+
   defp names(%{species: species}), do: Enum.map(species, & &1.scientific_name)
 end

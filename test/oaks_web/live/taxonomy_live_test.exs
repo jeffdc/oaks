@@ -54,7 +54,7 @@ defmodule OaksWeb.TaxonomyLiveTest do
     test "renders taxonomy root page", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/taxonomy")
       assert html =~ "Quercus"
-      assert html =~ "genus"
+      assert html =~ "Genus"
     end
 
     test "shows subgenera as child taxa", %{conn: conn, l: l} do
@@ -74,9 +74,10 @@ defmodule OaksWeb.TaxonomyLiveTest do
       assert html =~ "#{Species.count()} species"
     end
 
-    test "does not show breadcrumbs at genus level", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/taxonomy")
-      refute html =~ "Taxonomy:"
+    test "the taxonomy band holds only the genus, as the current taxon", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/taxonomy")
+      assert has_element?(view, "#taxonomy-band [aria-current]", "Quercus")
+      refute has_element?(view, "#taxonomy-band a")
     end
 
     test "subgenus cards link to drill-down pages", %{conn: conn, q: q, l: l} do
@@ -90,14 +91,14 @@ defmodule OaksWeb.TaxonomyLiveTest do
     test "renders subgenus page", %{conn: conn, q: q} do
       {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}")
       assert html =~ q
-      assert html =~ "subgenus"
+      assert html =~ "Subgenus"
     end
 
-    test "shows breadcrumbs", %{conn: conn, q: q} do
-      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}")
-      assert html =~ "Taxonomy:"
-      assert html =~ "(genus)"
-      assert html =~ "(subgenus)"
+    test "shows the path in the taxonomy band", %{conn: conn, q: q} do
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{q}")
+      assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy"]), "Quercus")
+      assert has_element?(view, "#taxonomy-band [aria-current]", "subg.")
+      assert has_element?(view, "#taxonomy-band [aria-current]", q)
     end
 
     test "shows sections as child taxa", %{conn: conn, q: q} do
@@ -109,7 +110,7 @@ defmodule OaksWeb.TaxonomyLiveTest do
   describe "section level" do
     test "renders section page with species", %{conn: conn, q: q, alba: alba} do
       {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}/#{q}")
-      assert html =~ "section"
+      assert html =~ "Section"
       assert html =~ alba
     end
 
@@ -137,11 +138,11 @@ defmodule OaksWeb.TaxonomyLiveTest do
       assert html =~ st
     end
 
-    test "breadcrumbs show full ancestry", %{conn: conn, q: q} do
-      {:ok, _view, html} = live(conn, ~p"/taxonomy/#{q}/#{q}")
-      assert html =~ "(genus)"
-      assert html =~ "(subgenus)"
-      assert html =~ "(section)"
+    test "the taxonomy band shows the full ancestry", %{conn: conn, q: q} do
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{q}/#{q}")
+      assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy"]), "Quercus")
+      assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy/#{q}"]), "subg.")
+      assert has_element?(view, "#taxonomy-band [aria-current]", "sect.")
     end
   end
 
@@ -149,7 +150,7 @@ defmodule OaksWeb.TaxonomyLiveTest do
     test "renders subsection page with species", %{conn: conn} = ctx do
       {:ok, _view, html} = live(conn, ~p"/taxonomy/#{ctx.q}/#{ctx.q}/#{ctx.st}")
       assert html =~ ctx.st
-      assert html =~ "subsection"
+      assert html =~ "Subsection"
       assert html =~ ctx.stellata
     end
   end
@@ -163,20 +164,19 @@ defmodule OaksWeb.TaxonomyLiveTest do
   end
 
   describe "invalid paths" do
-    test "shows not found for nonexistent taxon", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Nonexistent")
-      assert html =~ "Taxon Not Found"
+    test "a nonexistent taxon is a 404 with the not-found page", %{conn: conn} do
+      {404, _headers, html} = assert_error_sent 404, fn -> get(conn, "/taxonomy/Nonexistent") end
+
+      assert html =~ "<title>Taxon not found · Oak Compendium</title>"
+      assert html =~ ~r{<h1>\s*Taxon not found\s*</h1>}
+      assert html =~ "/taxonomy/Nonexistent"
+      assert html =~ ~r{<a href="/taxonomy" class="oc-btn">\s*Taxonomy\s*</a>}
+      assert_raise OaksWeb.NotFoundError, fn -> live(conn, "/taxonomy/Nonexistent") end
     end
 
-    test "shows not found for path too deep", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/a/b/c/d/e")
-      assert html =~ "Taxon Not Found"
-    end
-
-    test "not found page links back to taxonomy root", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/taxonomy/Nonexistent")
-      assert html =~ ~s(href="/taxonomy")
-      assert html =~ "Return to taxonomy browser"
+    test "a path too deep is a 404", %{conn: conn} do
+      {404, _headers, html} = assert_error_sent 404, fn -> get(conn, "/taxonomy/a/b/c/d/e") end
+      assert html =~ ~r{<h1>\s*Taxon not found\s*</h1>}
     end
   end
 
@@ -193,6 +193,26 @@ defmodule OaksWeb.TaxonomyLiveTest do
     end
   end
 
+  describe "a sub-taxon's editor actions" do
+    test "sit in a quiet Edit menu named for the taxon", %{conn: conn} = ctx do
+      conn = log_in_user(conn, user_fixture())
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.q}")
+
+      menu = "#taxon-#{ctx.section_q.id}-menu"
+      assert has_element?(view, menu <> ".oc-edit-menu-quiet summary[aria-label]")
+      assert has_element?(view, menu <> ~s( a[href="/taxonomy/#{ctx.section_q.id}/edit"]))
+      assert has_element?(view, menu <> " button", "Delete section")
+
+      view |> element(menu <> " button", "Delete section") |> render_click()
+      assert has_element?(view, "#delete-taxon-modal")
+    end
+
+    test "are not there logged out", %{conn: conn} = ctx do
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.q}")
+      refute has_element?(view, ".oc-edit-menu")
+    end
+  end
+
   describe "delete taxon" do
     setup %{conn: conn} do
       %{conn: log_in_user(conn, user_fixture())}
@@ -203,7 +223,9 @@ defmodule OaksWeb.TaxonomyLiveTest do
 
       html = render_click(view, "request_delete_taxon", %{"id" => to_string(ctx.section_q.id)})
 
-      assert html =~ "3 species and 1 child taxon still use this taxon"
+      assert has_element?(view, "#delete-taxon-modal h2", "Can't delete section")
+      assert html =~ "3 species and 1 child taxon still use the section"
+      assert has_element?(view, "#delete-taxon-modal-cancel", "Close")
       refute has_element?(view, "#confirm-delete-taxon-btn")
       assert Oaks.Taxonomy.get_taxon_by_id(ctx.section_q.id)
     end
@@ -234,9 +256,24 @@ defmodule OaksWeb.TaxonomyLiveTest do
       assert html =~ group
       assert html =~ "Complexes"
 
+      # The complex is found: a path naming no taxon would raise (a 404).
       {:ok, _view, html} = live(conn, ~p"/taxonomy/#{ctx.l}/#{ctx.l}/#{group}")
-      refute html =~ "Taxon Not Found"
       assert html =~ ctx.velutina
+    end
+
+    test "names the complex for its species, Q. abbreviated", %{conn: conn} = ctx do
+      group = "velutina-group#{ctx.l}"
+      taxon_fixture(name: group, level: "complex", parent: ctx.l)
+
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.l}/#{ctx.l}")
+      assert has_element?(view, ".taxon-card .oc-sci-title .oc-sci-g", "Q.")
+      assert has_element?(view, ".taxon-card .oc-sci-e", group)
+
+      {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.l}/#{ctx.l}/#{group}")
+      assert has_element?(view, "#taxon-title h1 .oc-sci-display .oc-sci-g", "Q.")
+      assert has_element?(view, "#taxonomy-band [aria-current] .oc-sci-g", "Q.")
+      assert has_element?(view, "#taxonomy-band [aria-current] .oc-band-rk", "complex")
+      assert page_title(view) =~ "Q. #{group}"
     end
   end
 end

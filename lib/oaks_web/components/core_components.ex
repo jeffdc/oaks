@@ -2,8 +2,11 @@ defmodule OaksWeb.CoreComponents do
   @moduledoc """
   Provides core UI components for the Oak Compendium.
 
-  Components are styled to match the V1 visual design: forest greens,
-  earth tones, serif headings, and nature-inspired aesthetics.
+  Components follow DESIGN.md: ink on paper, square corners, no shadows,
+  Archivo for the frame and Source Serif 4 for reading. Their CSS is in
+  `assets/css/system/components.css` (classes prefixed `oc-`). The content
+  components of the design system (taxonomy band, marks, section heading)
+  are in `OaksWeb.DesignComponents`.
 
   References:
 
@@ -43,32 +46,18 @@ defmodule OaksWeb.CoreComponents do
       id={@id}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
-      class="fixed top-4 right-4 z-50"
+      class={["oc-flash", @kind == :error && "oc-flash-error"]}
       {@rest}
     >
-      <div class={[
-        "flex items-start gap-3 w-80 sm:w-96 p-4 rounded-lg shadow-lg border text-sm",
-        @kind == :info && "bg-forest-50 border-forest-200 text-forest-900",
-        @kind == :error && "bg-red-50 border-red-200 text-red-900"
-      ]}>
-        <.icon
-          :if={@kind == :info}
-          name="hero-information-circle"
-          class="size-5 shrink-0 text-forest-600"
-        />
-        <.icon
-          :if={@kind == :error}
-          name="hero-exclamation-circle"
-          class="size-5 shrink-0 text-red-600"
-        />
-        <div class="flex-1">
-          <p :if={@title} class="font-semibold">{@title}</p>
-          <p>{msg}</p>
-        </div>
-        <button type="button" class="group self-start cursor-pointer" aria-label="close">
-          <.icon name="hero-x-mark" class="size-5 opacity-40 group-hover:opacity-70" />
-        </button>
+      <div class="oc-flash-body">
+        <p :if={@title} class="oc-flash-title">{@title}</p>
+        <p>{msg}</p>
       </div>
+      <button type="button" class="oc-flash-close" aria-label="Close">
+        <svg viewBox="0 0 12 12" aria-hidden="true">
+          <path d="M1 1l10 10M11 1 1 11" fill="none" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </button>
     </div>
     """
   end
@@ -76,29 +65,39 @@ defmodule OaksWeb.CoreComponents do
   @doc """
   Renders a button with navigation support.
 
+  Square, with a 1.5px ink outline. `variant="primary"` is the ochre fill
+  for the one call to action in a view; it inverts to ink on hover. The
+  default, `variant="ghost"`, is the outline alone and inverts to ink on
+  paper. `variant="danger"` is the ink plate for the one action in a
+  confirmation dialog that deletes something or can't be undone: paper on
+  ink, easing to ink-2 on hover. Its label names what goes ("Delete
+  species", never "OK" or "Yes"). `size="compact"` is the smaller size
+  used for Compare.
+
   ## Examples
 
       <.button>Send!</.button>
       <.button phx-click="go" variant="primary">Send!</.button>
+      <.button phx-click="confirm_delete" variant="danger">Delete species</.button>
       <.button navigate={~p"/"}>Home</.button>
   """
-  attr :rest, :global, include: ~w(href navigate patch method download name value disabled)
-  attr :class, :any
-  attr :variant, :string, values: ~w(primary)
+  attr :rest, :global,
+    include: ~w(href navigate patch method download name value disabled type form)
+
+  attr :class, :any, default: nil
+  attr :variant, :string, values: ~w(primary ghost danger), default: "ghost"
+  attr :size, :string, values: ~w(regular compact), default: "regular"
   slot :inner_block, required: true
 
   def button(%{rest: rest} = assigns) do
-    variants = %{
-      "primary" =>
-        "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md text-white bg-forest-600 hover:bg-forest-700 shadow-sm transition-colors cursor-pointer",
-      nil =>
-        "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md text-forest-700 bg-forest-50 hover:bg-forest-100 border border-forest-200 transition-colors cursor-pointer"
-    }
-
     assigns =
-      assign_new(assigns, :class, fn ->
-        [Map.fetch!(variants, assigns[:variant])]
-      end)
+      assign(assigns, :class, [
+        "oc-btn",
+        assigns.variant == "primary" && "oc-btn-primary",
+        assigns.variant == "danger" && "oc-btn-danger",
+        assigns.size == "compact" && "oc-btn-compact",
+        assigns.class
+      ])
 
     if rest[:href] || rest[:navigate] || rest[:patch] do
       ~H"""
@@ -204,8 +203,8 @@ defmodule OaksWeb.CoreComponents do
       end)
 
     ~H"""
-    <div class="mb-2">
-      <label class="flex items-center gap-2 cursor-pointer">
+    <div class="oc-field">
+      <label class="oc-check">
         <input
           type="hidden"
           name={@name}
@@ -219,10 +218,11 @@ defmodule OaksWeb.CoreComponents do
           name={@name}
           value="true"
           checked={@checked}
-          class={@class || "size-4 rounded border-stone-300 text-forest-600 focus:ring-forest-500"}
+          class={@class}
+          aria-invalid={@errors != [] && "true"}
           {@rest}
         />
-        <span class="text-sm font-medium text-stone-700">{@label}</span>
+        <span>{@label}</span>
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
@@ -231,17 +231,14 @@ defmodule OaksWeb.CoreComponents do
 
   def input(%{type: "select"} = assigns) do
     ~H"""
-    <div class="mb-2">
+    <div class="oc-field">
       <label>
-        <span :if={@label} class="block text-sm font-medium text-stone-700 mb-1">{@label}</span>
+        <span :if={@label} class="oc-label">{@label}</span>
         <select
           id={@id}
           name={@name}
-          class={[
-            @class ||
-              "w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-forest-600 focus:ring-1 focus:ring-forest-600 focus:outline-none",
-            @errors != [] && (@error_class || "border-red-500")
-          ]}
+          class={[@class || "oc-input", @errors != [] && @error_class]}
+          aria-invalid={@errors != [] && "true"}
           multiple={@multiple}
           {@rest}
         >
@@ -256,17 +253,14 @@ defmodule OaksWeb.CoreComponents do
 
   def input(%{type: "textarea"} = assigns) do
     ~H"""
-    <div class="mb-2">
+    <div class="oc-field">
       <label>
-        <span :if={@label} class="block text-sm font-medium text-stone-700 mb-1">{@label}</span>
+        <span :if={@label} class="oc-label">{@label}</span>
         <textarea
           id={@id}
           name={@name}
-          class={[
-            @class ||
-              "w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-forest-600 focus:ring-1 focus:ring-forest-600 focus:outline-none min-h-[5rem] resize-y",
-            @errors != [] && (@error_class || "border-red-500")
-          ]}
+          class={[@class || "oc-input", @errors != [] && @error_class]}
+          aria-invalid={@errors != [] && "true"}
           {@rest}
         >{HtmlForm.normalize_value("textarea", @value)}</textarea>
       </label>
@@ -278,19 +272,16 @@ defmodule OaksWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
-    <div class="mb-2">
+    <div class="oc-field">
       <label>
-        <span :if={@label} class="block text-sm font-medium text-stone-700 mb-1">{@label}</span>
+        <span :if={@label} class="oc-label">{@label}</span>
         <input
           type={@type}
           name={@name}
           id={@id}
           value={HtmlForm.normalize_value(@type, @value)}
-          class={[
-            @class ||
-              "w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-forest-600 focus:ring-1 focus:ring-forest-600 focus:outline-none",
-            @errors != [] && (@error_class || "border-red-500")
-          ]}
+          class={[@class || "oc-input", @errors != [] && @error_class]}
+          aria-invalid={@errors != [] && "true"}
           {@rest}
         />
       </label>
@@ -302,41 +293,194 @@ defmodule OaksWeb.CoreComponents do
   # Helper used by inputs to generate form errors
   defp error(assigns) do
     ~H"""
-    <p class="mt-1.5 flex gap-2 items-center text-sm text-red-600">
-      <.icon name="hero-exclamation-circle" class="size-5" />
+    <p class="oc-error">
+      <svg viewBox="0 0 14 14" aria-hidden="true">
+        <circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.6" />
+        <path d="M7 3.6v4.2" stroke="currentColor" stroke-width="1.8" />
+        <circle cx="7" cy="10.2" r="1" fill="currentColor" />
+      </svg>
       {render_slot(@inner_block)}
     </p>
     """
   end
 
   @doc """
-  Renders a header with title.
+  Renders a page's title row, the one title row every page uses: the
+  title on a 2px ink rule, its meta on the title's line, a subtitle under
+  them, and the page's edit menu at the right.
+
+  The row's one rule (DESIGN.md, Components, Title Row; item 7838):
+
+    * `:meta` sits on the title's line, after the title (and a species'
+      authority), on its baseline, in Archivo 600 14px ink-2 with lining
+      figures, no separators, in this order: the kind word (or the record
+      a form edits, `<.sci_name size="meta">`), counts, a byline and date,
+      stamps (`<.status_tag>`, `<.iucn_status>`), links. It wraps under
+      the title only when the line has no room for it. Each entry is one
+      item, so `:if` works per entry.
+    * `:subtitle` is a sentence describing the page, under the title line.
+    * `:actions` holds the page's `<.edit_menu>`, editor-only, at the
+      right on the title's first baseline. It never wraps: the title and
+      meta take the rest of the row, and with no actions (logged out) the
+      whole row.
+
+  The title is set in the serif, roman; a scientific name in it is
+  `<.sci_name size="display">`. A back link goes before the row in the
+  page's `:head` (`<.back>`), which spaces it from the title.
+
+  ## Examples
+
+      <.header>
+        Sources
+        <:subtitle>Every work the Compendium cites.</:subtitle>
+      </.header>
+
+      <.header>
+        <.sci_name name="Quercus shumardii" author="Buckley" size="display" />
+        <:meta>Species</:meta>
+        <:meta><.iucn_status code="LC" /></:meta>
+        <:actions :if={@editor}>
+          <.edit_menu id="species-edit-menu">
+            <:item navigate={~p"/species/shumardii/edit"}>Edit species</:item>
+          </.edit_menu>
+        </:actions>
+      </.header>
   """
+  attr :class, :any, default: nil
+  attr :rest, :global
   slot :inner_block, required: true
-  slot :subtitle
-  slot :actions
+
+  slot :meta,
+    doc: "one item on the title's line, after the title: a kind word, count, byline or stamp"
+
+  slot :subtitle, doc: "a sentence describing the page, under the title line"
+  slot :actions, doc: "the page's `<.edit_menu>`, at the right on the title's first baseline"
 
   def header(assigns) do
     ~H"""
-    <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
-      <div>
-        <h1
-          class="text-lg font-semibold leading-8"
-          style="font-family: var(--font-serif); color: var(--color-text-primary);"
-        >
-          {render_slot(@inner_block)}
-        </h1>
-        <p :if={@subtitle != []} class="text-sm" style="color: var(--color-text-secondary);">
-          {render_slot(@subtitle)}
-        </p>
+    <header class={["oc-title", @class]} {@rest}>
+      <div class="oc-title-text">
+        <div class="oc-title-line">
+          <h1>{render_slot(@inner_block)}</h1>
+          <div :if={@meta != []} class="oc-title-meta">
+            <span :for={meta <- @meta}>{render_slot(meta)}</span>
+          </div>
+        </div>
+        <p :if={@subtitle != []} class="oc-title-sub">{render_slot(@subtitle)}</p>
       </div>
-      <div class="flex-none">{render_slot(@actions)}</div>
+      <div :if={@actions != []} class="oc-title-actions">{render_slot(@actions)}</div>
     </header>
     """
   end
 
   @doc """
-  Renders a table with generic styling.
+  Renders an editor's actions for a page as one small disclosure, "Edit",
+  in the title row's `:actions` (item 7838). Only an editor sees it, so the
+  page gates it (`<:actions :if={@editor}>`), and a logged-out title row
+  keeps no space for it.
+
+  Built on `<details data-menu>`, as the masthead's Editor menu: the
+  summary is a compact button that Enter or Space opens, and app.js closes
+  it on Escape (focus back on the summary), on a click outside and when an
+  item is chosen. The list opens under the trigger, on its right edge.
+
+  Each `:item` is a link (`navigate`, or `href` with `method`) or, with
+  `click`, a button sending that event (`values` become `phx-value-*`). A
+  destructive item opens the page's confirmation `<.modal>`; the menu's
+  trigger keeps its place on the focus stack, so closing the dialog puts
+  focus back on it.
+
+  `quiet` is the same menu for an editor's actions on one part of a page
+  (a source's data, a row in a list; item c13c): the trigger is small
+  Archivo text with the chevron, no outline, no taller than a line of
+  14px text, so it never shapes the reader's layout. Give it an
+  `aria_label` that names its object ("Edit Agrifoliae") when several sit
+  on one page.
+
+  ## Examples
+
+      <.edit_menu id="species-edit-menu">
+        <:item navigate={~p"/species/shumardii/edit"} id="edit-species-btn">Edit species</:item>
+        <:item click="show_merge_picker">Make synonym of…</:item>
+        <:item click="request_delete_taxon" values={%{id: 12}}>Delete taxon</:item>
+      </.edit_menu>
+
+      <.edit_menu id="taxon-12-menu" quiet aria_label="Edit Agrifoliae">
+        <:item navigate={~p"/taxonomy/12/edit"}>Edit subsection</:item>
+        <:item click="request_delete_taxon" values={%{id: 12}}>Delete subsection</:item>
+      </.edit_menu>
+  """
+  attr :id, :string, required: true
+  attr :label, :string, default: "Edit", doc: "the trigger's label"
+  attr :quiet, :boolean, default: false, doc: "a small text trigger, for a part of a page"
+  attr :aria_label, :string, default: nil, doc: "the trigger's accessible name, naming its object"
+
+  slot :item, required: true, doc: "one action: a link or an event" do
+    attr :id, :string
+    attr :navigate, :string, doc: "a LiveView path to go to"
+    attr :href, :string, doc: "a plain link, with `method` for a delete link"
+    attr :method, :string
+    attr :click, :string, doc: "the event the item's button sends"
+    attr :values, :map, doc: "phx-value-* params sent with `click`"
+  end
+
+  def edit_menu(assigns) do
+    ~H"""
+    <details
+      id={@id}
+      class={["oc-edit-menu", @quiet && "oc-edit-menu-quiet"]}
+      data-menu
+      phx-mounted={JS.ignore_attributes(["open"])}
+    >
+      <summary
+        class={if @quiet, do: "oc-edit-menu-trigger", else: "oc-btn oc-btn-compact"}
+        aria-label={@aria_label}
+      >
+        {@label}
+      </summary>
+      <ul class="oc-edit-menu-list">
+        <li :for={item <- @item}>
+          <.link :if={item[:navigate]} id={item[:id]} navigate={item[:navigate]}>
+            {render_slot(item)}
+          </.link>
+          <.link
+            :if={!item[:navigate] && item[:href]}
+            id={item[:id]}
+            href={item[:href]}
+            method={item[:method] || "get"}
+          >
+            {render_slot(item)}
+          </.link>
+          <button
+            :if={!item[:navigate] && !item[:href]}
+            type="button"
+            id={item[:id]}
+            phx-click={JS.push_focus(to: "##{@id} > summary") |> JS.push(item[:click])}
+            {phx_values(item[:values])}
+          >
+            {render_slot(item)}
+          </button>
+        </li>
+      </ul>
+    </details>
+    """
+  end
+
+  defp phx_values(nil), do: []
+  defp phx_values(values), do: Enum.map(values, fn {k, v} -> {"phx-value-#{k}", v} end)
+
+  @doc """
+  Renders a ruled table: rows on hairlines under a 2px head rule, Archivo
+  with lining tabular figures (the field-marks table in DESIGN.md).
+
+  Column options:
+
+    * `row_header` makes the column's cells row headers (`<th scope="row">`),
+      as for the trait column of a field-marks table.
+    * `voice` sets the column in the reading serif, for Jeff's words.
+
+  With `stack`, each row becomes one block on phones, every cell labelled
+  with its column's label; without it the table scrolls sideways.
 
   ## Examples
 
@@ -344,11 +488,19 @@ defmodule OaksWeb.CoreComponents do
         <:col :let={user} label="id">{user.id}</:col>
         <:col :let={user} label="username">{user.username}</:col>
       </.table>
+
+      <.table id="field-marks" rows={@traits} stack>
+        <:col :let={t} label="Trait" row_header>{t.name}</:col>
+        <:col :let={t} label="Jeff Clark" voice>...</:col>
+        <:col :let={t} label="Other sources">...</:col>
+      </.table>
   """
   attr :id, :string, required: true
   attr :rows, :list, required: true
   attr :row_id, :any, default: nil, doc: "the function for generating the row id"
   attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
+  attr :stack, :boolean, default: false, doc: "one labelled block per row on phones"
+  attr :class, :any, default: nil
 
   attr :row_item, :any,
     default: &Function.identity/1,
@@ -356,6 +508,8 @@ defmodule OaksWeb.CoreComponents do
 
   slot :col, required: true do
     attr :label, :string
+    attr :row_header, :boolean
+    attr :voice, :boolean
   end
 
   slot :action, doc: "the slot for showing user actions in the last table column"
@@ -367,52 +521,50 @@ defmodule OaksWeb.CoreComponents do
       end
 
     ~H"""
-    <table class="min-w-full border-collapse">
-      <thead>
-        <tr class="border-b border-stone-200 bg-forest-50">
-          <th
-            :for={col <- @col}
-            class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-forest-800"
-          >
-            {col[:label]}
-          </th>
-          <th :if={@action != []} class="px-4 py-3">
-            <span class="sr-only">Actions</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody
-        id={@id}
-        phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"}
-        class="divide-y divide-stone-100"
-      >
-        <tr
-          :for={row <- @rows}
-          id={@row_id && @row_id.(row)}
-          class="hover:bg-forest-50/50 transition-colors"
-        >
-          <td
-            :for={col <- @col}
-            phx-click={@row_click && @row_click.(row)}
-            class={["px-4 py-3 text-sm", @row_click && "hover:cursor-pointer"]}
-          >
-            {render_slot(col, @row_item.(row))}
-          </td>
-          <td :if={@action != []} class="w-0 px-4 py-3 font-semibold text-sm">
-            <div class="flex gap-4">
-              <%= for action <- @action do %>
-                {render_slot(action, @row_item.(row))}
-              <% end %>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class={["oc-table-wrap", @stack && "oc-table-stack", @class]}>
+      <table class="oc-table">
+        <thead>
+          <tr>
+            <th :for={col <- @col} scope="col">{col[:label]}</th>
+            <th :if={@action != []} scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody id={@id} phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"}>
+          <tr :for={row <- @rows} id={@row_id && @row_id.(row)}>
+            <%= for col <- @col do %>
+              <th
+                :if={col[:row_header]}
+                scope="row"
+                phx-click={@row_click && @row_click.(row)}
+                class={@row_click && "oc-clickable"}
+              >
+                {render_slot(col, @row_item.(row))}
+              </th>
+              <td
+                :if={!col[:row_header]}
+                data-label={col[:label]}
+                phx-click={@row_click && @row_click.(row)}
+                class={[col[:voice] && "oc-voice", @row_click && "oc-clickable"]}
+              >
+                {render_slot(col, @row_item.(row))}
+              </td>
+            <% end %>
+            <td :if={@action != []} class="w-0">
+              <div class="oc-table-actions">
+                <%= for action <- @action do %>
+                  {render_slot(action, @row_item.(row))}
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     """
   end
 
   @doc """
-  Renders a data list.
+  Renders a data list: each term beside its value, on hairlines.
 
   ## Examples
 
@@ -427,14 +579,12 @@ defmodule OaksWeb.CoreComponents do
 
   def list(assigns) do
     ~H"""
-    <ul class="divide-y divide-stone-100">
-      <li :for={item <- @item} class="py-3">
-        <div>
-          <div class="font-semibold text-sm text-forest-800">{item.title}</div>
-          <div class="text-sm" style="color: var(--color-text-secondary);">{render_slot(item)}</div>
-        </div>
-      </li>
-    </ul>
+    <dl class="oc-list">
+      <div :for={item <- @item}>
+        <dt>{item.title}</dt>
+        <dd>{render_slot(item)}</dd>
+      </div>
+    </dl>
     """
   end
 
@@ -466,79 +616,112 @@ defmodule OaksWeb.CoreComponents do
   end
 
   @doc """
-  Renders a modal dialog.
+  Renders a dialog, the one every page uses for confirmations, pickers and
+  "can't" notices (item c13c): a square paper panel with a 2px ink border
+  over an ink wash, centred, at most 34rem wide.
+
+  Its parts, top to bottom:
+
+    * `:title`: what the dialog is about, in sentence case, in the serif
+      on a 2px rule ("Delete species", "Can't delete source").
+    * the body (the inner block): what will happen, in the reading
+      serif. A scientific name in it is `<.sci_name weight="regular">`.
+    * `:note`: each a consequence, in Archivo 600 14px ink-2 under the
+      body ("This can't be undone."); `<strong>` in a note is 700 ink.
+    * the actions row: the dialog's one close control first, a ghost
+      button labelled `cancel` ("Cancel", or "Close" when the dialog only
+      tells), then the `:actions` slot: the one action, a
+      `<.button variant="danger">` that names what goes, or primary for
+      an action that destroys nothing.
+
+  Esc, a click outside the panel and the close button all close it, and
+  each runs `on_cancel`. Focus goes into the panel when it opens and is
+  held there; when it closes, focus returns to what pushed it (an
+  `<.edit_menu>` item pushes its trigger). A long body scrolls inside the
+  panel, so the title and actions stay in view.
+
+  A page shows it from its own state: render it `:if` the state is set,
+  with `show`, and an `on_cancel` that clears the state. Removing it from
+  the page (the server answer to a cancel or a confirm) fades it out.
 
   ## Examples
 
-      <.modal id="confirm-modal">
-        Are you sure?
+      <.modal
+        :if={@show_delete_confirm}
+        id="delete-confirm-modal"
+        show
+        on_cancel={JS.push("cancel_delete")}
+      >
+        <:title>Delete species</:title>
+        Delete <.sci_name name="Quercus shumardii" weight="regular" />?
+        <:note>This can't be undone.</:note>
         <:actions>
-          <.button phx-click="confirm">OK</.button>
+          <.button variant="danger" phx-click="confirm_delete">Delete species</.button>
         </:actions>
       </.modal>
 
-  JS.exec("data-show", to: "#confirm-modal") to show it.
-  JS.exec("data-cancel", to: "#confirm-modal") to hide it.
+  A dialog shown from the browser alone (the gallery's) is left out with
+  no `show`: `show_modal("id")` shows it and
+  `JS.exec("data-cancel", to: "#id")` hides it.
   """
   attr :id, :string, required: true
-  attr :on_cancel, JS, default: %JS{}
+  attr :show, :boolean, default: false, doc: "open when it mounts (a dialog the page shows)"
+  attr :on_cancel, JS, default: %JS{}, doc: "run on Esc, a click outside and the close button"
+  attr :cancel, :string, default: "Cancel", doc: "the close button's label"
 
-  slot :inner_block, required: true
-  slot :title
-  slot :actions
+  slot :title, required: true, doc: "what the dialog is about, in sentence case"
+  slot :inner_block, required: true, doc: "the body: what will happen"
+  slot :note, doc: "a consequence, in the frame face, under the body"
+  slot :actions, doc: "the dialog's one action, after the close button"
 
   def modal(assigns) do
     ~H"""
     <div
       id={@id}
-      phx-mounted={@id == "confirm-modal" && show_modal(@id)}
+      phx-mounted={@show && show_modal(@id)}
       phx-remove={hide_modal(@id)}
       data-show={show_modal(@id)}
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
       class="hidden relative z-50"
     >
+      <div id={"#{@id}-bg"} class="oc-modal-backdrop" aria-hidden="true" />
       <div
-        id={"#{@id}-bg"}
-        class="fixed inset-0 bg-black/60 transition-opacity"
-        aria-hidden="true"
-      />
-      <div
-        class="fixed inset-0 overflow-y-auto"
+        class="oc-modal-frame"
         aria-labelledby={"#{@id}-title"}
         aria-describedby={"#{@id}-description"}
         role="dialog"
         aria-modal="true"
-        tabindex="0"
       >
-        <div class="flex min-h-full items-center justify-center p-4">
-          <div class="w-full max-w-lg rounded-xl bg-white p-8 shadow-xl ring-1 ring-stone-200">
-            <.focus_wrap
-              id={"#{@id}-wrap"}
-              phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
-              phx-key="escape"
-              phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-            >
-              <div :if={@title != []} class="mb-4">
-                <h2 id={"#{@id}-title"} class="text-lg font-semibold">
-                  {render_slot(@title)}
-                </h2>
-              </div>
-              <div id={"#{@id}-description"}>
-                {render_slot(@inner_block)}
-              </div>
-              <div :if={@actions != []} class="mt-6 flex justify-end gap-3">
-                {render_slot(@actions)}
-              </div>
-            </.focus_wrap>
+        <.focus_wrap
+          id={"#{@id}-wrap"}
+          class="oc-modal-panel"
+          phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
+          phx-key="escape"
+          phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
+        >
+          <h2 id={"#{@id}-title"} class="oc-modal-title">{render_slot(@title)}</h2>
+          <div id={"#{@id}-description"} class="oc-modal-body">
+            {render_slot(@inner_block)}
+            <div :for={note <- @note} class="oc-modal-note">{render_slot(note)}</div>
           </div>
-        </div>
+          <div class="oc-modal-actions">
+            <.button
+              type="button"
+              id={"#{@id}-cancel"}
+              phx-click={JS.exec("data-cancel", to: "##{@id}")}
+            >
+              {@cancel}
+            </.button>
+            {render_slot(@actions)}
+          </div>
+        </.focus_wrap>
       </div>
     </div>
     """
   end
 
   @doc """
-  Renders a back navigation link.
+  Renders a back navigation link, with a drawn chevron.
 
   ## Examples
 
@@ -549,37 +732,112 @@ defmodule OaksWeb.CoreComponents do
 
   def back(assigns) do
     ~H"""
-    <.link
-      navigate={@navigate}
-      class="inline-flex items-center gap-1 text-sm font-semibold text-forest-700 hover:text-forest-900 transition-colors"
-      style="text-decoration: none;"
-    >
-      <.icon name="hero-arrow-left" class="size-4" />
+    <.link navigate={@navigate} class="oc-back">
       {render_slot(@inner_block)}
     </.link>
     """
   end
 
+  @doc """
+  Renders a page: its content in a centred column or the full page frame,
+  with an optional full-bleed part that spans the window above it. Every
+  page wraps its content in one `page/1`; a page never sets its own
+  max-width or centring.
+
+  Which width a page takes (DESIGN.md, Layout; decision a0ac):
+
+    * `column` (the default): one centred 960px column. Every
+      single-column page: lists, taxon pages, search, a record such as a
+      source, analytics.
+    * `read`: a narrower centred column at the 720px reading measure.
+      Prose: articles, about, privacy and help pages.
+    * `form`: a narrower centred column at the 760px form measure. Forms
+      that create or edit something, and the account pages (log in,
+      setup, settings).
+    * `frame`: the 1400px frame, only for pages that set columns side by
+      side: the source comparison, a merge.
+
+  All four have 32px gutters (16px under 760px). The `:head` slot (a back
+  link and the title row) spans the page's width, so its 2px rule runs
+  the column, or for `read` and `form` their measure: the title and the
+  content under it share one centred measure. (The home page is set
+  centred in the frame, as a title page and contents.)
+
+  The `:bleed` slot runs the full width of the window, edge to edge,
+  above the page's content: a title page, a band. Its content sets its
+  own frame inside (as the masthead does).
+
+  The layout's `<main>` is the frame for any page that doesn't use this
+  component; around a `page/1` it steps aside
+  (`.oc-page:has(.oc-pg)` in shell.css).
+
+  ## Examples
+
+      <.page>
+        <.header>Species</.header>
+        ...
+      </.page>
+
+      <.page width="read">
+        <:head><.header>About</.header></:head>
+        ...
+      </.page>
+
+      <.page width="form">
+        <:head>
+          <.back navigate={~p"/sources"}>Back to sources</.back>
+          <.header>Edit source</.header>
+        </:head>
+        <.form ...>...</.form>
+      </.page>
+
+      <.page>
+        <:bleed><.taxonomy_band>...</.taxonomy_band></:bleed>
+        ...
+      </.page>
+
+      <.page width="frame">
+        <.header>Compare sources</.header>
+        ...
+      </.page>
+  """
+  attr :width, :string, values: ~w(column read form frame), default: "column"
+  attr :class, :any, default: nil, doc: "classes for the content under the head"
+  attr :rest, :global
+  slot :bleed, doc: "full-width content above the page"
+  slot :head, doc: "the title row, and a back link above it, across the page's width"
+  slot :inner_block, required: true
+
+  def page(assigns) do
+    ~H"""
+    <div class="oc-pg" {@rest}>
+      <div :for={bleed <- @bleed} class="oc-pg-bleed">{render_slot(bleed)}</div>
+      <div class={["oc-pg-body", "oc-pg-#{@width}"]}>
+        <div :for={head <- @head} class="oc-pg-head">{render_slot(head)}</div>
+        <div class={["oc-pg-measure", @class]}>{render_slot(@inner_block)}</div>
+      </div>
+    </div>
+    """
+  end
+
   ## JS Commands
+
+  # Notices and dialogs fade in and out; the design keeps its one authored
+  # motion for the comparison, so nothing here slides or scales.
 
   def show(js \\ %JS{}, selector) do
     JS.show(js,
       to: selector,
-      time: 300,
-      transition:
-        {"transition-all ease-out duration-300",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
-         "opacity-100 translate-y-0 sm:scale-100"}
+      time: 150,
+      transition: {"transition-opacity ease-out duration-150", "opacity-0", "opacity-100"}
     )
   end
 
   def hide(js \\ %JS{}, selector) do
     JS.hide(js,
       to: selector,
-      time: 200,
-      transition:
-        {"transition-all ease-in duration-200", "opacity-100 translate-y-0 sm:scale-100",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
+      time: 100,
+      transition: {"transition-opacity ease-in duration-100", "opacity-100", "opacity-0"}
     )
   end
 
@@ -588,8 +846,8 @@ defmodule OaksWeb.CoreComponents do
     |> JS.show(to: "##{id}")
     |> JS.show(
       to: "##{id}-bg",
-      time: 300,
-      transition: {"transition-all ease-out duration-300", "opacity-0", "opacity-100"}
+      time: 150,
+      transition: {"transition-opacity ease-out duration-150", "opacity-0", "opacity-100"}
     )
     |> show("##{id}-wrap")
     |> JS.add_class("overflow-hidden", to: "body")
@@ -600,8 +858,8 @@ defmodule OaksWeb.CoreComponents do
     js
     |> JS.hide(
       to: "##{id}-bg",
-      time: 200,
-      transition: {"transition-all ease-in duration-200", "opacity-100", "opacity-0"}
+      time: 100,
+      transition: {"transition-opacity ease-in duration-100", "opacity-100", "opacity-0"}
     )
     |> hide("##{id}-wrap")
     |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})

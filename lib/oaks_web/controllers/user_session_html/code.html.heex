@@ -1,7 +1,9 @@
-<div class="settings-container" id="login-code-page">
-  <h1 class="settings-title">Log in</h1>
+<.page width="form" id="login-code-page">
+  <:head>
+    <.header>Log in</.header>
+  </:head>
 
-  <section class="card p-6">
+  <section class="settings-section">
     <p class="settings-description">
       Enter the 6-digit code from your authenticator app, or one of your recovery codes.
     </p>
@@ -12,13 +14,13 @@
     </.auth_message>
 
     <.form for={%{}} as={:login} id="login-code-form" action={~p"/users/log-in/code"}>
-      <div class="settings-form-group">
-        <label for="code" class="settings-form-label">Code</label>
+      <div class="oc-field">
+        <label for="code" class="oc-label">Code</label>
         <input
           type="text"
           id="code"
           name="code"
-          class="settings-form-input"
+          class="oc-input"
           autocomplete="one-time-code"
           spellcheck="false"
           required
@@ -26,8 +28,8 @@
         />
       </div>
       <div class="settings-button-group">
-        <button type="submit" class="settings-btn settings-btn-primary">Log in</button>
+        <.button type="submit" variant="primary">Log in</.button>
       </div>
     </.form>
   </section>
-</div>
+</.page>

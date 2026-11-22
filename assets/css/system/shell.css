@@ -1,0 +1,341 @@
+/* ==========================================================================
+   Oak Compendium design system: the site shell (DESIGN.md Layout and
+   Navigation; design/prototype/oc.css .mast, .nav, .search, footer.site)
+
+   The skip link, the ink masthead (OaksWeb.Layouts.site_header), the page
+   frame and the site footer (OaksWeb.Layouts.site_footer). Same layer and
+   oc- prefix as components.css.
+   ========================================================================== */
+
+@layer components {
+  /* ---------------------------------------------------------------------
+     Skip link: off screen until focused, then an ink plate at top left.
+     --------------------------------------------------------------------- */
+  .oc-skip {
+    position: absolute;
+    left: -999px;
+    top: var(--spacing-s2);
+    z-index: 60;
+    padding: var(--spacing-s2) var(--spacing-s4);
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font: 700 15px/1.2 var(--font-frame);
+    text-decoration: none;
+  }
+  .oc-skip:focus {
+    left: var(--spacing-s4);
+    outline-color: var(--color-paper);
+  }
+
+  /* ---------------------------------------------------------------------
+     Masthead: ink ground, 60px minimum, the 1400px frame inside.
+     --------------------------------------------------------------------- */
+  .oc-mast {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  /* Pencil on ink is about 3:1; focus turns paper on the masthead. */
+  .oc-mast :focus-visible { outline-color: var(--color-paper); }
+
+  .oc-mast-in {
+    max-width: var(--container-frame);
+    margin: 0 auto;
+    min-height: 60px;
+    padding: 0 var(--spacing-s6);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--spacing-s6);
+  }
+
+  /* The acorn mark and the name */
+  .oc-mark {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-s2);
+    font: 800 19px/1 var(--font-frame);
+    letter-spacing: 0.01em;
+    color: var(--color-paper);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .oc-mark svg { width: 22px; height: 22px; flex: none; }
+  .oc-mark-cap { fill: var(--color-ochre); }
+  .oc-mark-nut { fill: var(--color-paper); }
+  .oc-mark-stem { fill: none; stroke: var(--color-paper); stroke-width: 1.6; }
+
+  /* Main nav: each item stands on the masthead's bottom edge, so the 3px
+     underline (ochre for the current item, 40% paper on hover) is the
+     edge itself. */
+  .oc-nav {
+    align-self: stretch;
+    display: flex;
+    gap: var(--spacing-s5);
+    font: 600 15px/1 var(--font-frame);
+  }
+  .oc-nav a,
+  .oc-mast-menu summary {
+    display: flex;
+    align-items: center;
+    padding-top: 3px;
+    border-bottom: 3px solid transparent;
+    color: var(--color-paper);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .oc-nav a:hover,
+  .oc-mast-menu summary:hover {
+    border-bottom-color: color-mix(in srgb, var(--color-paper) 40%, transparent);
+  }
+  .oc-nav a[aria-current],
+  .oc-mast-menu summary[aria-current] { border-bottom-color: var(--color-ochre); }
+  /* The items run the masthead's full height, so the focus ring wraps the
+     label rather than the whole item. */
+  .oc-nav a:focus-visible,
+  .oc-mast-menu summary:focus-visible { outline: none; }
+  .oc-nav a:focus-visible > span,
+  .oc-mast-menu summary:focus-visible > span {
+    outline: 3px solid var(--color-paper);
+    outline-offset: 4px;
+  }
+
+  /* Editor marks: the Editor menu (a nav-voiced disclosure holding the
+     editor's tools) and the editor's name in ochre (DESIGN.md, Authoring
+     Editor: "The masthead marks Editor and Jeff"). */
+  .oc-mast-editor {
+    align-self: stretch;
+    display: flex;
+    align-items: stretch;
+    gap: var(--spacing-s4);
+    /* Editor reads as the nav's next item: 24px from About, as in the
+       editor prototypes, not the masthead's 32px group gap. */
+    margin-left: calc(var(--spacing-s5) - var(--spacing-s6));
+  }
+  .oc-mast-menu {
+    position: relative;
+    display: flex;
+  }
+  .oc-mast-menu summary {
+    gap: var(--spacing-s2);
+    font: 600 15px/1 var(--font-frame);
+    cursor: pointer;
+    list-style: none;
+  }
+  .oc-mast-menu summary::-webkit-details-marker { display: none; }
+  /* A drawn chevron, as in the band's menus */
+  .oc-mast-menu summary::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    margin-top: -3px;
+  }
+  .oc-mast-menu[open] summary::after {
+    transform: rotate(-135deg);
+    margin-top: 3px;
+  }
+  .oc-mast-menu-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 50;
+    min-width: 200px;
+    margin: 0;
+    padding: var(--spacing-s2) 0;
+    list-style: none;
+    background: var(--color-paper);
+    border: 1.5px solid var(--color-ink);
+  }
+  .oc-mast-menu-list a {
+    display: block;
+    padding: var(--spacing-s2) var(--spacing-s4);
+    font: 600 15px/1.3 var(--font-frame);
+    color: var(--color-ink);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .oc-mast-menu-list a:hover { background: var(--color-paper-2); }
+  .oc-mast-menu-list :focus-visible {
+    outline-color: var(--color-pencil);
+    outline-offset: -3px;
+  }
+  .oc-who {
+    align-self: center;
+    font: 700 14px/1 var(--font-frame);
+    color: var(--color-ochre);
+    white-space: nowrap;
+  }
+
+  /* Search: a square field with a 1px paper border at 35% and a faint
+     paper wash; the "/" key hint at its right. */
+  .oc-search {
+    margin-left: auto;
+    flex: 0 1 320px;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    background: color-mix(in srgb, var(--color-paper) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-paper) 35%, transparent);
+  }
+  .oc-search:focus-within {
+    outline: 3px solid var(--color-paper);
+    outline-offset: 2px;
+  }
+  .oc-search input {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: 11px 14px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-paper);
+    caret-color: var(--color-paper);
+    font: 400 15px/1.2 var(--font-frame);
+    appearance: none;
+  }
+  .oc-search input:focus,
+  .oc-search input:focus-visible { outline: none; }
+  .oc-search input::placeholder {
+    color: color-mix(in srgb, var(--color-paper) 77%, transparent);
+  }
+  .oc-search input::-webkit-search-cancel-button { appearance: none; }
+  .oc-search kbd {
+    margin-right: 10px;
+    padding: 3px 6px;
+    border: 1px solid color-mix(in srgb, var(--color-paper) 35%, transparent);
+    color: color-mix(in srgb, var(--color-paper) 77%, transparent);
+    font: 600 12px/1 var(--font-frame);
+  }
+
+  /* ---------------------------------------------------------------------
+     Page frame: 1400px, 32px gutters (16px under 760px).
+     --------------------------------------------------------------------- */
+  .oc-page {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: var(--container-frame);
+    margin: 0 auto;
+    padding: var(--spacing-s6) var(--spacing-s6) var(--spacing-s8);
+  }
+  /* The skip link focuses main; it needs no ring of its own. */
+  .oc-page:focus { outline: none; }
+
+  /* ---------------------------------------------------------------------
+     Page (CoreComponents.page): the frame moves from <main> into the page,
+     so a page can run a part full width (the bleed) above its framed
+     content. Single-column pages sit in one centred 960px column, the head
+     (the title row) across it. Prose (read) and forms (form) sit in a
+     narrower centred column of their own, 720px or 760px, the head and
+     the content both at that measure. Only pages that set columns side
+     by side take the 1400px frame.
+     --------------------------------------------------------------------- */
+  .oc-page:has(.oc-pg) {
+    max-width: none;
+    padding: 0;
+  }
+  .oc-pg-body {
+    max-width: calc(var(--container-column) + 2 * var(--spacing-s6));
+    margin: 0 auto;
+    padding: var(--spacing-s6) var(--spacing-s6) var(--spacing-s8);
+  }
+  .oc-pg-frame { max-width: var(--container-frame); }
+  .oc-pg-read { max-width: calc(var(--container-read) + 2 * var(--spacing-s6)); }
+  .oc-pg-form { max-width: calc(var(--container-form) + 2 * var(--spacing-s6)); }
+
+  /* ---------------------------------------------------------------------
+     Site footer: the licensing line on a hairline, then the pages with no
+     main nav item.
+     --------------------------------------------------------------------- */
+  .oc-footer { border-top: 1px solid var(--color-rule); }
+  .oc-footer-in {
+    max-width: var(--container-frame);
+    margin: 0 auto;
+    padding: var(--spacing-s5) var(--spacing-s6);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--spacing-s3) var(--spacing-s5);
+    font: 500 13px/1.5 var(--font-frame);
+    color: var(--color-ink-3);
+  }
+  .oc-footer-terms {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-s1) var(--spacing-s5);
+  }
+  .oc-footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-s1) var(--spacing-s4);
+  }
+
+  /* ---------------------------------------------------------------------
+     Flash placement in the shell: below the 60px masthead rather than over
+     its search field; at the bottom once the masthead stacks.
+     --------------------------------------------------------------------- */
+  .oc-flash { top: calc(60px + var(--spacing-s4)); }
+
+  /* ---------------------------------------------------------------------
+     Narrow screens (1024px and under, where the one-row masthead with the
+     editor marks no longer fits reliably): the mark (and editor marks) first, the
+     search full width, then the nav on its own scrolling row along the
+     bottom edge. Phones (760px and under) also take the 16px gutters and
+     drop the "/" hint.
+     --------------------------------------------------------------------- */
+  @media (max-width: 1024px) {
+    .oc-mast-in {
+      --oc-gutter: var(--spacing-s6);
+      gap: var(--spacing-s3) var(--spacing-s5);
+      padding: var(--spacing-s3) var(--oc-gutter) 0;
+    }
+    .oc-mast-editor {
+      order: 2;
+      margin-left: auto;
+      align-self: center;
+    }
+    .oc-mast-menu summary { padding: 8px 0 5px; }
+    /* The current mark belongs on the masthead's bottom edge; up here the
+       ochre name is the editor mark. */
+    .oc-mast-menu summary[aria-current] { border-bottom-color: transparent; }
+    .oc-mast-menu summary:hover {
+      border-bottom-color: color-mix(in srgb, var(--color-paper) 40%, transparent);
+    }
+    .oc-mast-menu-list { left: auto; right: 0; }
+    .oc-search {
+      order: 3;
+      flex: 1 1 100%;
+      min-width: 0;
+      margin-left: 0;
+    }
+    .oc-nav {
+      order: 4;
+      width: calc(100% + 2 * var(--oc-gutter));
+      margin: 0 calc(-1 * var(--oc-gutter));
+      padding: 0 var(--oc-gutter);
+      gap: var(--spacing-s4);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .oc-nav::-webkit-scrollbar { display: none; }
+    .oc-nav a { padding: 10px 0 7px; }
+
+    /* The stacked masthead runs three rows; notices sit at the bottom. */
+    .oc-flash {
+      top: auto;
+      bottom: var(--spacing-s4);
+    }
+  }
+
+  @media (max-width: 760px) {
+    .oc-mast-in { --oc-gutter: var(--spacing-s4); }
+    .oc-search kbd { display: none; }
+
+    .oc-page { padding: var(--spacing-s5) var(--spacing-s4) var(--spacing-s7); }
+    .oc-pg-body { padding: var(--spacing-s5) var(--spacing-s4) var(--spacing-s7); }
+    .oc-footer-in { padding: var(--spacing-s5) var(--spacing-s4); }
+  }
+}

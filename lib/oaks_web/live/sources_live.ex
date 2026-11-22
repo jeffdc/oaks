@@ -66,7 +66,7 @@ defmodule OaksWeb.SourcesLive do
         {:error, _changeset} ->
           {:noreply,
            socket
-           |> put_flash(:error, "Cannot delete: species have data from this source.")
+           |> put_flash(:error, "Can't delete: species have data from this source.")
            |> assign(show_delete_confirm: false, delete_source: nil)}
       end
     else
@@ -77,35 +77,23 @@ defmodule OaksWeb.SourcesLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-3xl mx-auto">
-      <header class="mb-8">
-        <div class="flex items-center justify-between gap-4 mb-2">
-          <h1
-            class="text-3xl font-bold"
-            style="font-family: var(--font-serif); color: var(--color-forest-800);"
-          >
-            Data Sources
-          </h1>
-          <.link
-            :if={@current_scope}
-            navigate={~p"/sources/new"}
-            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium"
-            style="background-color: var(--color-forest-600); color: white; text-decoration: none; white-space: nowrap;"
-            id="create-source-btn"
-          >
-            <.icon name="hero-plus" class="size-4" /> Create Source
-          </.link>
-        </div>
-        <p style="color: var(--color-text-secondary); line-height: 1.6;">
-          The Oak Compendium draws from multiple sources to provide comprehensive
-          information about oak species.
-        </p>
-      </header>
+    <.page>
+      <:head>
+        <.header>
+          Data Sources
+          <:subtitle>
+            The Oak Compendium draws from multiple sources to provide comprehensive
+            information about oak species.
+          </:subtitle>
+          <:actions :if={@current_scope}>
+            <.edit_menu id="sources-edit-menu">
+              <:item navigate={~p"/sources/new"} id="create-source-btn">Create source</:item>
+            </.edit_menu>
+          </:actions>
+        </.header>
+      </:head>
 
-      <div :if={@sources == []} class="text-center py-12" style="color: var(--color-text-tertiary);">
-        <.icon name="hero-document-text" class="size-12 mx-auto mb-4 opacity-50" />
-        <p class="text-lg">No sources found.</p>
-      </div>
+      <p :if={@sources == []} class="py-s7 font-serif italic text-ink-3">No sources found.</p>
 
       <div :if={@sources != []} class="sources-grid">
         <.source_card
@@ -120,7 +108,7 @@ defmodule OaksWeb.SourcesLive do
         source={@delete_source}
         species_count={assigns[:delete_species_count] || 0}
       />
-    </div>
+    </.page>
     """
   end
 
@@ -131,7 +119,7 @@ defmodule OaksWeb.SourcesLive do
 
   defp source_card(assigns) do
     ~H"""
-    <div class={["source-card", @editor && "can-edit"]}>
+    <div class="source-card">
       <.link
         navigate={~p"/sources/#{@source.id}"}
         class="source-card-link"
@@ -141,26 +129,16 @@ defmodule OaksWeb.SourcesLive do
         <div class="source-card-header">
           <h2 class="source-card-name">{@source.name}</h2>
           <div class="source-card-header-right">
-            <div :if={@editor} class="source-card-actions">
-              <.link
-                navigate={~p"/sources/#{@source.id}/edit"}
-                class="source-action-btn source-action-edit"
-                title="Edit source"
-              >
-                <.icon name="hero-pencil-square" class="size-3.5" />
-              </.link>
-              <button
-                phx-click="request_delete"
-                phx-value-id={@source.id}
-                class="source-action-btn source-action-delete"
-                title="Delete source"
-              >
-                <.icon name="hero-trash" class="size-3.5" />
-              </button>
-            </div>
-            <span :if={!@editor} class="source-card-arrow">
-              <.icon name="hero-chevron-right" class="size-5" />
-            </span>
+            <.edit_menu
+              :if={@editor}
+              id={"source-#{@source.id}-menu"}
+              quiet
+              aria_label={"Edit #{@source.name}"}
+            >
+              <:item navigate={~p"/sources/#{@source.id}/edit"}>Edit source</:item>
+              <:item click="request_delete" values={%{id: @source.id}}>Delete source</:item>
+            </.edit_menu>
+            <span :if={!@editor} class="source-card-arrow" aria-hidden="true"></span>
           </div>
         </div>
         <p :if={@source.description} class="source-card-desc">
@@ -168,18 +146,12 @@ defmodule OaksWeb.SourcesLive do
         </p>
         <div class="source-card-footer">
           <div class="source-card-meta">
-            <span
-              :if={@source.source_type}
-              class="badge badge-muted"
-              style="text-transform: capitalize;"
-            >
+            <.status_tag :if={@source.source_type} class="capitalize">
               {@source.source_type}
-            </span>
-            <span :if={@source.author} class="source-card-author">
+            </.status_tag>
+            <span :if={@source.author || @source.year} class="source-card-author">
               {@source.author}
-            </span>
-            <span :if={@source.year} class="source-card-author">
-              ({@source.year})
+              <span :if={@source.year}>({@source.year})</span>
             </span>
           </div>
           <span :if={@source.species_count > 0} class="source-card-count">
@@ -198,53 +170,30 @@ defmodule OaksWeb.SourcesLive do
 
   defp delete_confirm_modal(assigns) do
     ~H"""
-    <div
-      class="fixed inset-0 z-50 flex items-center justify-center"
-      style="background-color: rgba(0,0,0,0.5);"
-      phx-window-keydown="cancel_delete"
-      phx-key="Escape"
+    <.modal
+      id="delete-source-modal"
+      show
+      on_cancel={JS.push("cancel_delete")}
+      cancel={if @species_count > 0, do: "Close", else: "Cancel"}
     >
-      <div class="card p-6 w-full max-w-md mx-4">
-        <h3 class="text-lg font-bold mb-2" style="color: var(--color-text-primary);">
-          Delete Source
-        </h3>
-        <p class="mb-4" style="color: var(--color-text-secondary);">
-          Are you sure you want to delete <strong>{@source.name}</strong>?
-        </p>
-        <div
-          :if={@species_count > 0}
-          class="mb-4 p-3 rounded-lg text-sm"
-          style="background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca;"
-        >
-          Cannot delete: {@species_count} species have data from this source.
-        </div>
-        <div class="flex justify-end gap-2">
-          <button
-            phx-click="cancel_delete"
-            class="px-4 py-2 rounded-lg text-sm font-medium border transition-colors"
-            style="border-color: var(--color-border); color: var(--color-text-secondary);"
-          >
-            Cancel
-          </button>
-          <button
-            :if={@species_count == 0}
-            phx-click="confirm_delete"
-            class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
-            style="background-color: #dc2626;"
-          >
-            Delete
-          </button>
-          <button
-            :if={@species_count > 0}
-            phx-click="cancel_delete"
-            class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
-            style="background-color: #dc2626;"
-          >
-            OK
-          </button>
-        </div>
-      </div>
-    </div>
+      <:title>{if @species_count > 0, do: "Can't delete source", else: "Delete source"}</:title>
+      <p :if={@species_count == 0}>
+        Delete <strong>{@source.name}</strong> from the Compendium?
+      </p>
+      <p :if={@species_count > 0}>
+        {species_have(@species_count)} data from <strong>{@source.name}</strong>.
+      </p>
+      <:note :if={@species_count > 0}>Delete that data on each species' page first.</:note>
+      <:note :if={@species_count == 0}><strong>This can't be undone.</strong></:note>
+      <:actions :if={@species_count == 0}>
+        <.button variant="danger" phx-click="confirm_delete" id="confirm-delete-source-btn">
+          Delete source
+        </.button>
+      </:actions>
+    </.modal>
     """
   end
+
+  defp species_have(1), do: "1 species has"
+  defp species_have(n), do: "#{n} species have"
 end

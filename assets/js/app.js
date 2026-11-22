@@ -32,6 +32,35 @@ for (const key of ["oak:api_key", "oak:session_timestamp", "oak:session_timeout_
 
 const Hooks = {
   ...colocatedHooks,
+  // Taxonomy band (DesignComponents.taxonomy_band): the path is one line.
+  // When it is too long for the band, mark it (data-overflow) and keep the
+  // current taxon, at its end, in view; while anything is scrolled off to
+  // the left, mark that too (data-scrolled, which fades the left edge).
+  // Measured again when the band or the path's last step changes size, as
+  // when the band's fonts arrive.
+  PinCurrentTaxon: {
+    mounted() {
+      this.observer = new ResizeObserver(() => this.pin())
+      this.observer.observe(this.el)
+      this.el.addEventListener("scroll", () => this.mark(), {passive: true})
+      this.pin()
+    },
+    updated() { this.pin() },
+    destroyed() { this.observer?.disconnect() },
+    pin() {
+      const ol = this.el
+      const last = ol.lastElementChild
+      if (last !== this.last) {
+        if (this.last) this.observer.unobserve(this.last)
+        if (last) this.observer.observe(last)
+        this.last = last
+      }
+      ol.toggleAttribute("data-overflow", ol.scrollWidth > ol.clientWidth)
+      ol.scrollLeft = ol.scrollWidth
+      this.mark()
+    },
+    mark() { this.el.toggleAttribute("data-scrolled", this.el.scrollLeft > 0) }
+  },
   TagInput: {
     mounted() {
       this.el.addEventListener("keydown", (e) => {
@@ -94,9 +123,22 @@ const Hooks = {
 }
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
+// Connect params carried over from the static render: an element with
+// data-connect-key and data-connect-value hands its value to the live
+// mount (get_connect_params/1), so a choice the server made on the first
+// render, such as the home page's oak at random, survives the connection.
+const connectParams = () => {
+  const params = {_csrf_token: csrfToken}
+  document.querySelectorAll("[data-connect-key]").forEach(el => {
+    params[el.dataset.connectKey] = el.dataset.connectValue
+  })
+  return params
+}
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken},
+  params: connectParams,
   hooks: Hooks,
 })
 
@@ -127,6 +169,37 @@ document.addEventListener("click", async e => {
     window.getSelection().removeAllRanges()
     window.getSelection().addRange(range)
     if (status) status.textContent = "Press Ctrl+C or Cmd+C to copy"
+  }
+})
+
+// The masthead search (OaksWeb.Layouts.site_header): "/" focuses it from
+// anywhere except a field the reader is typing in.
+document.addEventListener("keydown", e => {
+  if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return
+  if (e.target.closest?.("input, textarea, select, [contenteditable]")) return
+  const search = document.getElementById("header-search")
+  if (!search) return
+  e.preventDefault()
+  search.focus()
+  search.select()
+})
+
+// Menus built on <details data-menu> (the masthead's Editor menu, a
+// page's Edit menu) close on Escape, on a click outside them and when one
+// of their items is chosen. Document listeners rather than phx-click-away,
+// so the menu also closes on the controller pages.
+document.addEventListener("click", e => {
+  for (const menu of document.querySelectorAll("details[data-menu][open]")) {
+    const chose = menu.contains(e.target) && e.target.closest("li a, li button")
+    if (!menu.contains(e.target) || chose) menu.open = false
+  }
+})
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return
+  for (const menu of document.querySelectorAll("details[data-menu][open]")) {
+    const hadFocus = menu.contains(document.activeElement)
+    menu.open = false
+    if (hadFocus) menu.querySelector("summary")?.focus()
   }
 })
 

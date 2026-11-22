@@ -1,7 +1,9 @@
-<div class="settings-container" id="new-api-token-page">
-  <h1 class="settings-title">New agent token</h1>
+<.page width="form" id="new-api-token-page">
+  <:head>
+    <.header>New agent token</.header>
+  </:head>
 
-  <section class="card p-6">
+  <section class="settings-section">
     <p class="settings-description">
       This token for <strong>{@token.name}</strong>
       won't be shown again: click it to copy it. It grants {Enum.join(@token.scopes, " and ")} until {date(
@@ -19,9 +21,7 @@
       <span class="settings-copy-status" data-copy-status aria-live="polite">Click to copy</span>
     </button>
     <div class="settings-button-group">
-      <.link href={~p"/users/settings/api-tokens"} class="settings-btn settings-btn-primary">
-        I've copied it
-      </.link>
+      <.button href={~p"/users/settings/api-tokens"} variant="primary">I've copied it</.button>
     </div>
   </section>
-</div>
+</.page>

@@ -55,6 +55,9 @@ defmodule OaksWeb.Router do
   scope "/", OaksWeb do
     pipe_through :browser
 
+    # The species index was /list until item 3248.
+    get "/list", RedirectController, :species_list
+
     live_session :default,
       on_mount: [
         OaksWeb.Hooks.ActiveNav,
@@ -62,7 +65,7 @@ defmodule OaksWeb.Router do
         {OaksWeb.Analytics.TrackPageView, :default}
       ] do
       live "/", HomeLive
-      live "/list", SpeciesListLive
+      live "/species", SpeciesListLive
       live "/species/new", SpeciesFormLive, :new
       live "/species/:name/edit", SpeciesFormLive, :edit
       live "/species/:name", SpeciesDetailLive
@@ -137,13 +140,17 @@ defmodule OaksWeb.Router do
     get "/", OpenApiSpex.Plug.SwaggerUI, path: "/api/v1/docs/openapi.json"
   end
 
-  # One-click login for local development (OaksWeb.DevLoginController).
-  # Compiled in only when dev_routes is set (dev and test), never in a release.
+  # Development-only routes: the one-click login (OaksWeb.DevLoginController)
+  # and the component gallery. Compiled in only when dev_routes is set (dev
+  # and test), never in a release.
   if Application.compile_env(:oaks, :dev_routes) do
     scope "/dev", OaksWeb do
       pipe_through :browser
 
       post "/log-in", DevLoginController, :create
+
+      # The DESIGN.md component gallery (OaksWeb.DevComponentsLive, item 21b7).
+      live "/components", DevComponentsLive
     end
   end
 

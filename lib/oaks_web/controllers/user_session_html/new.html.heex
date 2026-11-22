@@ -1,7 +1,9 @@
-<div class="settings-container" id="login-page">
-  <h1 class="settings-title">Log in</h1>
+<.page width="form" id="login-page">
+  <:head>
+    <.header>Log in</.header>
+  </:head>
 
-  <section class="card p-6">
+  <section class="settings-section">
     <.auth_message :if={@error == :invalid}>Invalid email or password.</.auth_message>
     <.auth_message :if={@error == :too_many}>
       Too many login attempts. Wait a while and try again.
@@ -25,20 +27,18 @@
         required
       />
       <div class="settings-button-group">
-        <button type="submit" class="settings-btn settings-btn-primary">Continue</button>
+        <.button type="submit" variant="primary">Continue</.button>
       </div>
     </.form>
   </section>
 
-  <section :if={@dev_login} class="card p-6" style="margin-top: 1.5rem;" id="dev-login">
+  <section :if={@dev_login} class="settings-section settings-aside" id="dev-login">
     <p class="settings-description">
       Local development: log in as the dev user, with no password or code.
     </p>
     <%!-- A plain path, not ~p: the route doesn't exist in a production build. --%>
     <.form for={%{}} action="/dev/log-in">
-      <button type="submit" class="settings-btn settings-btn-secondary">
-        Log in as dev user
-      </button>
+      <.button type="submit">Log in as dev user</.button>
     </.form>
   </section>
-</div>
+</.page>

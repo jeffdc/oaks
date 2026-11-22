@@ -65,6 +65,25 @@
         ],
         "createdAt": "2026-11-21T02:22:26.691Z",
         "reason": "Claude: spent direction-round sketch from before DESIGN.md existed; not shipping UI"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "sfmono-regular",
+        "files": [
+          "assets/css/app.css"
+        ],
+        "createdAt": "2026-11-22T00:50:43.713Z",
+        "reason": "Claude: monospace stack for code inside rendered markdown (.prose-content code); craft floor sanctions monospace for code, DESIGN.md has no code face"
+      },
+      {
+        "rule": "italic-serif-display",
+        "value": "*",
+        "files": [
+          "lib/oaks_web/components/design_components.ex",
+          "lib/oaks_web/live/home_live.ex"
+        ],
+        "createdAt": "2026-11-22T03:36:10.542Z",
+        "reason": "Jeff: locked the Bookplate sketch (round db8687fb, decision 2836), whose title sets Compendium in ochre italic serif; scientific names are italic by botanical convention"
       }
     ]
   }

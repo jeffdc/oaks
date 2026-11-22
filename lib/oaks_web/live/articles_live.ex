@@ -43,45 +43,32 @@ defmodule OaksWeb.ArticlesLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-4xl mx-auto">
-      <header class="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
-          <h1
-            class="text-3xl font-bold mb-2"
-            style="font-family: var(--font-serif); color: var(--color-forest-800);"
-          >
-            Articles
-          </h1>
-          <p style="color: var(--color-text-secondary); line-height: 1.6;">
-            Guides, reviews, and notes about oak identification and taxonomy.
-          </p>
-        </div>
-        <.link
-          :if={@current_scope}
-          navigate={~p"/articles/new"}
-          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium flex-shrink-0"
-          style="background-color: var(--color-forest-600); color: white; text-decoration: none;"
-        >
-          <.icon name="hero-plus" class="size-4" /> New Article
-        </.link>
-      </header>
+    <.page>
+      <:head>
+        <.header>
+          Articles
+          <:subtitle>Guides, reviews, and notes about oak identification and taxonomy.</:subtitle>
+          <:actions :if={@current_scope}>
+            <.edit_menu id="articles-edit-menu">
+              <:item navigate={~p"/articles/new"} id="new-article-btn">New article</:item>
+            </.edit_menu>
+          </:actions>
+        </.header>
+      </:head>
 
       <.tag_filter :if={@tags != []} tags={@tags} selected={@selected_tag} />
 
-      <div :if={@articles == []} class="text-center py-12" style="color: var(--color-text-tertiary);">
-        <.icon name="hero-document-text" class="size-12 mx-auto mb-4 opacity-50" />
-        <p class="text-lg">No articles found.</p>
-        <p :if={@selected_tag} class="mt-2">
-          <.link navigate={~p"/articles"} style="color: var(--color-forest-600);">
-            Clear filter
-          </.link>
+      <div :if={@articles == []} class="py-s7">
+        <p class="font-serif italic text-ink-3">No articles found.</p>
+        <p :if={@selected_tag} class="mt-s2 font-frame text-sm font-semibold">
+          <.link navigate={~p"/articles"}>Clear filter</.link>
         </p>
       </div>
 
-      <div :if={@articles != []} class="space-y-4">
+      <div :if={@articles != []}>
         <.article_card :for={article <- @articles} article={article} />
       </div>
-    </div>
+    </.page>
     """
   end
 
@@ -92,11 +79,12 @@ defmodule OaksWeb.ArticlesLive do
 
   defp tag_filter(assigns) do
     ~H"""
-    <div class="flex flex-wrap gap-2 mb-6">
+    <nav class="flex flex-wrap gap-s2 mb-s3" aria-label="Filter by tag">
       <.link
         navigate={~p"/articles"}
         class={["badge", if(!@selected, do: "badge-forest-dark", else: "badge-muted")]}
-        style="text-decoration: none; cursor: pointer;"
+        aria-current={!@selected && "page"}
+        style="text-decoration: none;"
       >
         All
       </.link>
@@ -104,11 +92,12 @@ defmodule OaksWeb.ArticlesLive do
         :for={%{tag: tag, count: count} <- @tags}
         navigate={~p"/articles?tag=#{tag}"}
         class={["badge", if(@selected == tag, do: "badge-forest-dark", else: "badge-muted")]}
-        style="text-decoration: none; cursor: pointer;"
+        aria-current={@selected == tag && "page"}
+        style="text-decoration: none;"
       >
-        {tag} <span class="ml-1 opacity-60">({count})</span>
+        {tag} <span class="ml-1 tabular-nums">({count})</span>
       </.link>
-    </div>
+    </nav>
     """
   end
 
@@ -122,44 +111,25 @@ defmodule OaksWeb.ArticlesLive do
     ~H"""
     <.link
       navigate={~p"/articles/#{@article.slug}"}
-      class="card card-interactive block p-5"
-      style={"text-decoration: none;#{unless @article.is_published, do: " border-left: 3px solid var(--color-warning, #f59e0b);", else: ""}"}
+      class="article-row group"
     >
-      <div class="flex items-start justify-between gap-3">
-        <h2
-          class="text-xl font-semibold"
-          style="font-family: var(--font-serif); color: var(--color-forest-800);"
-        >
+      <div class="flex items-baseline justify-between gap-s3">
+        <h2 class="font-serif text-[21px]/[1.25] font-semibold text-ink text-balance group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">
           {@article.title}
         </h2>
-        <span
-          :if={!@article.is_published}
-          class="badge badge-uppercase"
-          style="background-color: #fef3c7; color: #92400e; flex-shrink: 0;"
-        >
+        <.status_tag :if={!@article.is_published} class="shrink-0 border-dashed uppercase">
           Draft
-        </span>
+        </.status_tag>
       </div>
-      <div
-        class="flex flex-wrap items-center gap-2 mt-2 text-sm"
-        style="color: var(--color-text-tertiary);"
-      >
-        <span>{@article.author}</span>
-        <span>|</span>
-        <span>{format_date(@article.published_at || @article.updated_at)}</span>
-      </div>
-      <p
-        :if={@preview != ""}
-        class="mt-3 text-sm line-clamp-2"
-        style="color: var(--color-text-secondary);"
-      >
+      <p class="mt-s1 font-frame text-sm font-medium text-ink-2 tabular-nums">
+        {@article.author} &middot; {format_date(@article.published_at || @article.updated_at)}
+      </p>
+      <p :if={@preview != ""} class="mt-s2 max-w-[68ch] font-serif text-base text-ink-2 line-clamp-2">
         {@preview}
       </p>
-      <div :if={@tags != []} class="flex flex-wrap gap-1.5 mt-3">
-        <span :for={tag <- @tags} class="badge badge-forest-light text-xs">
-          {tag}
-        </span>
-      </div>
+      <p :if={@tags != []} class="mt-s2 font-frame text-[13px] font-semibold text-ink-3">
+        {Enum.join(@tags, ", ")}
+      </p>
     </.link>
     """
   end
@@ -169,12 +139,22 @@ defmodule OaksWeb.ArticlesLive do
   defp get_preview(nil), do: ""
   defp get_preview(""), do: ""
 
+  @preview_length 150
+
   defp get_preview(content) do
-    content
-    |> String.replace(~r/[#*`>\[\]()_~\-]/, "")
-    |> String.replace(~r/\s+/, " ")
-    |> String.trim()
-    |> String.slice(0, 150)
+    text =
+      content
+      |> String.replace(~r/[#*`>\[\]()_~\-]/, "")
+      |> String.replace(~r/\s+/, " ")
+      |> String.trim()
+
+    if String.length(text) > @preview_length do
+      cut = String.slice(text, 0, @preview_length)
+      # Cut at the last word boundary and mark the cut.
+      String.replace(cut, ~r/\s+\S*$/, "") <> "…"
+    else
+      text
+    end
   end
 
   defp format_date(nil), do: ""

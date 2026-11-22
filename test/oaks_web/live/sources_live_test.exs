@@ -86,5 +86,15 @@ defmodule OaksWeb.SourcesLiveTest do
 
       assert html =~ ootw.name
     end
+
+    test "editor buttons on a row name their source", %{conn: conn, ootw: ootw} do
+      %{conn: conn} = register_and_log_in_user(%{conn: conn})
+      {:ok, view, _html} = live(conn, ~p"/sources")
+
+      menu = "#source-#{ootw.id}-menu"
+      assert has_element?(view, menu <> ~s( summary[aria-label="Edit #{ootw.name}"]))
+      assert has_element?(view, menu <> ~s( a[href="/sources/#{ootw.id}/edit"]), "Edit source")
+      assert has_element?(view, menu <> " button", "Delete source")
+    end
   end
 end

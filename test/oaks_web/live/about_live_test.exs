@@ -40,8 +40,9 @@ defmodule OaksWeb.AboutLiveTest do
     {:ok, view, _html} = live(conn, ~p"/about")
     html = render(view)
 
-    assert html =~ ~r/>\s*#{total - hybrids}\s*<\/span>\s*<span[^>]*>Species</
-    assert html =~ ~r/>\s*#{total}\s*<\/span>\s*<span[^>]*>\s*Total Entries/
+    assert html =~ ~r/<dt>Species<\/dt>\s*<dd>\s*#{total - hybrids}\s*<\/dd>/
+    assert html =~ ~r/<dt>Hybrids<\/dt>\s*<dd>\s*#{hybrids}\s*<\/dd>/
+    assert html =~ ~r/<dt>Total Entries<\/dt>\s*<dd>\s*#{total}\s*<\/dd>/
   end
 
   test "shows the deployed app version and API version", %{conn: conn} do

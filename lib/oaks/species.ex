@@ -278,6 +278,63 @@ defmodule Oaks.Species do
     end)
   end
 
+  @ranks ~w(subgenus section subsection complex)a
+
+  @doc """
+  Returns where a species sits under the genus, outermost first: its
+  subgenus, section, subsection and complex as stored (those it has), then,
+  for a variety or subspecies, the species it belongs to. Each entry is a
+  map with `level`, `name` and `hybrid` (true only for a named hybrid's
+  species, as in `"× kerneri montserratii"`).
+
+  A hybrid with none of the four ranks stored sits where both its parents
+  do: the ranks the two parents share, from the subgenus down, stopping at
+  the first they don't (`"× albescens"`, `ilex × pubescens`, sits in the
+  genus only). A formula hybrid's stored ranks already are those.
+
+  A variety is any name of more than one word that isn't a formula
+  (`"acutissima kingii"`); its species is the first word, with a named
+  hybrid's sign, when that species exists.
+  """
+  @spec placement(Species.t()) :: [%{level: String.t(), name: String.t(), hybrid: boolean()}]
+  def placement(%Species{} = species) do
+    stored = stored_ranks(species)
+    ranks = if stored == [] and species.is_hybrid, do: shared_parent_ranks(species), else: stored
+
+    Enum.map(ranks, fn {level, name} -> %{level: to_string(level), name: name, hybrid: false} end) ++
+      parent_species(species)
+  end
+
+  defp stored_ranks(species) do
+    for level <- @ranks, (name = Map.get(species, level)) not in [nil, ""], do: {level, name}
+  end
+
+  defp shared_parent_ranks(%Species{parent1: p1, parent2: p2})
+       when is_binary(p1) and is_binary(p2) do
+    case Repo.all(from(s in Species, where: s.scientific_name in ^[p1, p2])) do
+      [a, b] ->
+        @ranks
+        |> Enum.map(&{&1, Map.get(a, &1), Map.get(b, &1)})
+        |> Enum.take_while(fn {_level, x, y} -> x not in [nil, ""] and x == y end)
+        |> Enum.map(fn {level, name, _} -> {level, name} end)
+
+      _ ->
+        []
+    end
+  end
+
+  defp shared_parent_ranks(_species), do: []
+
+  defp parent_species(%Species{scientific_name: name}) do
+    with false <- String.match?(name, ~r/\S\s*×/u),
+         [_, sign, first, _rest] <- Regex.run(~r/^(×\s*)?(\S+)\s+(.+)$/u, name),
+         parent when not is_nil(parent) <- get_species_by_name(sign <> first) do
+      [%{level: "species", name: parent.scientific_name, hybrid: parent.is_hybrid}]
+    else
+      _ -> []
+    end
+  end
+
   # -- Write operations --
 
   @doc """

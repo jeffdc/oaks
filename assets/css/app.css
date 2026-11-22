@@ -1,10 +1,29 @@
 /* Oak Compendium - Tailwind v4 + daisyUI Configuration
-   Visual design ported from V1 (web/src/app.css) */
+
+   Two systems side by side while the site is rebuilt page by page:
+   * ./system: the DESIGN.md system (tokens, fonts, element defaults,
+     components). New and rebuilt pages use only this.
+   * Everything else in this file: the V1 layer (daisyUI theme, forest
+     tokens, shared utilities, page CSS), kept until the pages that use it
+     are rebuilt. Its tokens, daisyUI theme and shared utilities (prose,
+     cards, badges, section titles, breadcrumb, spinner) are bridged onto
+     DESIGN.md (item b4f7); the page sections below them are each page's
+     own and still carry V1 values.
+
+   The V1 CSS is unlayered, so it beats the system's layered rules where
+   both style the same element; the system's classes carry an oc- prefix
+   so they never meet. */
 
 @import "tailwindcss" source(none);
 @source "../css";
 @source "../js";
 @source "../../lib/oaks_web";
+
+@import "./system/tokens.css";
+@import "./system/fonts.css";
+@import "./system/base.css";
+@import "./system/components.css";
+@import "./system/shell.css";
 
 @plugin "../vendor/heroicons";
 
@@ -12,70 +31,140 @@
   themes: false;
 }
 
-/* Single light theme — V1 forest green palette (no dark mode) */
+/* Single light theme: daisyUI on the DESIGN.md tokens (item b4f7). Square,
+   flat, ink on paper, so the daisyUI pieces V1 pages still use (input,
+   select, badge, card) read like the system's own. DESIGN.md has no status
+   colours: error and success are ink plates, warning is the ochre field
+   with ink on it, info is pencil. */
 @plugin "../vendor/daisyui-theme" {
   name: "light";
   default: true;
   prefersdark: false;
   color-scheme: "light";
-  /* V1 background/surface colors (warm stone tones) */
-  --color-base-100: oklch(98.7% 0.003 80);       /* ~#fafaf9 */
-  --color-base-200: oklch(96.5% 0.003 80);       /* ~#f5f5f4 */
-  --color-base-300: oklch(92.2% 0.004 80);       /* ~#e7e5e4 */
-  --color-base-content: oklch(21.5% 0.008 50);   /* ~#1c1917 */
-  /* Forest green primary */
-  --color-primary: oklch(48% 0.11 158);           /* ~#1e7e4b (forest-600) */
-  --color-primary-content: oklch(100% 0 0);       /* white */
-  /* Forest green secondary */
-  --color-secondary: oklch(43% 0.09 158);         /* ~#19653d (forest-700) */
-  --color-secondary-content: oklch(100% 0 0);
-  /* Oak brown accent */
-  --color-accent: oklch(55% 0.07 65);             /* ~#8b6f47 */
-  --color-accent-content: oklch(100% 0 0);
-  /* Neutral (stone text) */
-  --color-neutral: oklch(44% 0.012 50);           /* ~#57534e */
-  --color-neutral-content: oklch(98% 0 0);
-  /* Status colors */
-  --color-info: oklch(62% 0.19 250);
-  --color-info-content: oklch(97% 0.013 236.62);
-  --color-success: oklch(58% 0.13 158);           /* forest-500 green */
-  --color-success-content: oklch(100% 0 0);
-  --color-warning: oklch(75% 0.15 75);
-  --color-warning-content: oklch(30% 0.05 60);
-  --color-error: oklch(58% 0.22 25);
-  --color-error-content: oklch(96% 0.015 12.422);
-  /* Border radii */
-  --radius-selector: 0.375rem;
-  --radius-field: 0.375rem;
-  --radius-box: 0.75rem;
+  --color-base-100: #fbfbf7;                     /* paper */
+  --color-base-200: #f1f0e8;                     /* paper-2 */
+  --color-base-300: #16161626;                   /* rule */
+  --color-base-content: #161616;                 /* ink */
+  --color-primary: #161616;                      /* ink */
+  --color-primary-content: #fbfbf7;              /* paper */
+  --color-secondary: #3d3d3a;                    /* ink-2 */
+  --color-secondary-content: #fbfbf7;
+  --color-accent: #d9a21b;                       /* ochre: a fill, never text */
+  --color-accent-content: #161616;
+  --color-neutral: #161616;
+  --color-neutral-content: #fbfbf7;
+  --color-info: #2f5fb3;                         /* pencil */
+  --color-info-content: #fbfbf7;
+  --color-success: #161616;
+  --color-success-content: #fbfbf7;
+  --color-warning: #d9a21b;
+  --color-warning-content: #161616;
+  --color-error: #161616;
+  --color-error-content: #fbfbf7;
+  /* Square corners (DESIGN.md rounded.none), no depth, no noise */
+  --radius-selector: 0;
+  --radius-field: 0;
+  --radius-box: 0;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
-  --depth: 1;
+  --depth: 0;
   --noise: 0;
 }
 
 /* ============================================
-   Tailwind v4 @theme — V1 color tokens
-   Creates utility classes: bg-forest-600, text-oak-brown, etc.
+   Tailwind v4 @theme: V1 colour tokens, re-pointed (item b4f7)
+
+   The forest greens and oak browns now name DESIGN.md roles, so every V1
+   utility (text-forest-700, bg-forest-50 ...) and every inline
+   var(--color-forest-*) moves onto the system at once. Mapped by how each
+   shade is used in the V1 pages, not by lightness:
+     50   tinted panels, hover grounds    -> paper (no tinted panels)
+     100  chips, hover and active grounds -> paper-2
+     200  borders and dividers            -> rule
+     300  stronger and hover borders      -> ink at 40% (the field border)
+     400  hover borders, accent edges     -> ink
+     500  field icons, accent edges,
+          focus outlines                  -> ink-3 (decoration, not links)
+     600  button fills under white text,
+          back links, icons               -> ink
+     700  link and emphasis text          -> ink
+     800  page headings                   -> ink
+     900  headings, hover text            -> ink
+   Oak brown, acorn and bark were text tints: ink-2, ink-2, ink-3.
    ============================================ */
 @theme {
-  --color-forest-50: #f0f9f4;
-  --color-forest-100: #dcf3e4;
-  --color-forest-200: #bae6cd;
-  --color-forest-300: #86d4aa;
-  --color-forest-400: #4fb87f;
-  --color-forest-500: #2a9d5f;
-  --color-forest-600: #1e7e4b;
-  --color-forest-700: #19653d;
-  --color-forest-800: #165132;
-  --color-forest-900: #14432a;
+  --color-forest-50: var(--color-paper);
+  --color-forest-100: var(--color-paper-2);
+  --color-forest-200: var(--color-rule);
+  --color-forest-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  --color-forest-400: var(--color-ink);
+  --color-forest-500: var(--color-ink-3);
+  --color-forest-600: var(--color-ink);
+  --color-forest-700: var(--color-ink);
+  --color-forest-800: var(--color-ink);
+  --color-forest-900: var(--color-ink);
 
-  --color-oak-brown: #8b6f47;
-  --color-acorn: #a67c52;
-  --color-bark: #6b5747;
+  --color-oak-brown: var(--color-ink-2);
+  --color-acorn: var(--color-ink-2);
+  --color-bark: var(--color-ink-3);
 
-  --font-serif: 'Georgia', 'Cambria', 'Times New Roman', serif;
+  /* Tailwind's warm and cool greys, which V1 templates use for borders,
+     icon tints and quiet grounds, take the same roles: 50 paper, 100
+     paper-2, 200 rule, 300 ink at 40%, 400-500 ink-3, 600-700 ink-2,
+     800-900 ink. No system file uses them. */
+  --color-stone-50: var(--color-paper);
+  --color-stone-100: var(--color-paper-2);
+  --color-stone-200: var(--color-rule);
+  --color-stone-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  --color-stone-400: var(--color-ink-3);
+  --color-stone-500: var(--color-ink-3);
+  --color-stone-600: var(--color-ink-2);
+  --color-stone-700: var(--color-ink-2);
+  --color-stone-800: var(--color-ink);
+  --color-stone-900: var(--color-ink);
+  --color-gray-50: var(--color-paper);
+  --color-gray-100: var(--color-paper-2);
+  --color-gray-200: var(--color-rule);
+  --color-gray-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  --color-gray-400: var(--color-ink-3);
+  --color-gray-500: var(--color-ink-3);
+  --color-gray-600: var(--color-ink-2);
+  --color-gray-700: var(--color-ink-2);
+  --color-gray-800: var(--color-ink);
+  --color-gray-900: var(--color-ink);
+  --color-zinc-50: var(--color-paper);
+  --color-zinc-100: var(--color-paper-2);
+  --color-zinc-200: var(--color-rule);
+  --color-zinc-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  --color-zinc-400: var(--color-ink-3);
+  --color-zinc-500: var(--color-ink-3);
+  --color-zinc-600: var(--color-ink-2);
+  --color-zinc-700: var(--color-ink-2);
+  --color-zinc-800: var(--color-ink);
+  --color-zinc-900: var(--color-ink);
+
+  /* Square and flat (DESIGN.md: corners 0, no shadows). Tailwind's radius
+     and shadow scales go to nothing, so the V1 templates' rounded-lg,
+     rounded-xl, shadow-sm ... draw square and flat until their pages are
+     rebuilt. rounded-full (dots, rings) is not on the scale and stays. */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
+  --shadow-2xs: 0 0 #0000;
+  --shadow-xs: 0 0 #0000;
+  --shadow-sm: 0 0 #0000;
+  --shadow-md: 0 0 #0000;
+  --shadow-lg: 0 0 #0000;
+  --shadow-xl: 0 0 #0000;
+  --shadow-2xl: 0 0 #0000;
+
+  /* --font-serif is set in system/tokens.css (Source Serif 4). */
 }
 
 /* ============================================
@@ -83,34 +172,36 @@
    For use in CSS rules and component styles
    ============================================ */
 :root {
-  /* Semantic colors */
-  --color-background: #fafaf9;
-  --color-surface: #ffffff;
-  --color-text-primary: #1c1917;
-  --color-text-secondary: #57534e;
-  --color-text-tertiary: #6b6560;
-  --color-border: #e7e5e4;
-  --color-border-light: #f5f5f4;
+  /* Semantic colours, all aliases of the DESIGN.md tokens (items 21b7 and
+     b4f7). Surfaces are paper: V1 cards and panels sit on the page ground
+     rather than as white boxes. Borders are the hairline rule. */
+  --color-background: var(--color-paper);
+  --color-surface: var(--color-paper);
+  --color-text-primary: var(--color-ink);
+  --color-text-secondary: var(--color-ink-2);
+  --color-text-tertiary: var(--color-ink-3);
+  --color-border: var(--color-rule);
+  --color-border-light: var(--color-rule);
 
-  /* White transparency scale (for glassmorphism on dark backgrounds) */
-  --color-white-10: rgba(255, 255, 255, 0.1);
-  --color-white-15: rgba(255, 255, 255, 0.15);
-  --color-white-20: rgba(255, 255, 255, 0.2);
-  --color-white-30: rgba(255, 255, 255, 0.3);
-  --color-white-40: rgba(255, 255, 255, 0.4);
-  --color-white-60: rgba(255, 255, 255, 0.6);
-  --color-white-85: rgba(255, 255, 255, 0.85);
+  /* Paper over ink (V1's white scale, for marks on the ink masthead) */
+  --color-white-10: color-mix(in srgb, var(--color-paper) 10%, transparent);
+  --color-white-15: color-mix(in srgb, var(--color-paper) 15%, transparent);
+  --color-white-20: color-mix(in srgb, var(--color-paper) 20%, transparent);
+  --color-white-30: color-mix(in srgb, var(--color-paper) 30%, transparent);
+  --color-white-40: color-mix(in srgb, var(--color-paper) 40%, transparent);
+  --color-white-60: color-mix(in srgb, var(--color-paper) 60%, transparent);
+  --color-white-85: color-mix(in srgb, var(--color-paper) 85%, transparent);
 
-  /* Conservation status colors */
-  --color-status-warning-bg: #fef3c7;
-  --color-status-warning-text: #92400e;
-  --color-status-warning-border: #fcd34d;
+  /* Status: the outlined ink stamp, no colour (Marks Not Colours Rule) */
+  --color-status-warning-bg: transparent;
+  --color-status-warning-text: var(--color-ink);
+  --color-status-warning-border: var(--color-ink);
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  /* Shadows: none (DESIGN.md is entirely flat) */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
 }
 
 /* ============================================
@@ -123,209 +214,63 @@
 /* Make LiveView wrapper divs transparent for layout */
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
-/* ============================================
-   Base Styles (from V1 app.css)
-   ============================================ */
-html {
-  scroll-behavior: smooth;
+/* Base styles (body, links, focus, selection, reduced motion) live in
+   system/base.css. */
+
+/* V1 text links coloured forest-600 or -700 (back links, names) would be
+   ink under the token map above, which keeps those shades ink for the
+   filled buttons that share them. Links are pencil (DESIGN.md), so a link
+   with one of those text colours and no fill goes back to pencil. The
+   !important is for the inline style="color: ..." forms. */
+a:where([class*="text-forest-6"], [class*="text-forest-7"], [style*="color: var(--color-forest-6"], [style*="color: var(--color-forest-7"]):not([style*="background"], [class*="bg-"]) {
+  color: var(--color-pencil) !important;
 }
 
-body {
-  font-feature-settings: "kern" 1, "liga" 1;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
+/* daisyUI's fields (the species list's search and filters) are the
+   system's input field: white, a 1.5px border at 40% ink, ink on focus. */
+.input,
+.select,
+.textarea {
+  background-color: #fff;
+  border: 1.5px solid color-mix(in srgb, var(--color-ink) 40%, transparent);
+  font-family: var(--font-frame);
 }
 
-/* Global link styles */
-a {
-  color: var(--color-forest-700, #19653d);
-  text-decoration: underline;
-  text-decoration-color: var(--color-forest-300, #86d4aa);
-  text-underline-offset: 2px;
-  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+.input:focus-within,
+.select:focus,
+.textarea:focus {
+  border-color: var(--color-ink);
 }
 
-a:hover {
-  color: var(--color-forest-600, #1e7e4b);
-  text-decoration-color: var(--color-forest-600, #1e7e4b);
-}
-
-/* Global focus styles for accessibility (WCAG 2.1 AA) */
-:focus-visible {
-  outline: 2px solid var(--color-forest-600, #1e7e4b);
-  outline-offset: 2px;
-}
-
-:focus:not(:focus-visible) {
-  outline: none;
-}
-
-button:focus-visible,
-[role="button"]:focus-visible {
-  outline: 2px solid var(--color-forest-600, #1e7e4b);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(30, 126, 75, 0.15);
-}
-
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--color-forest-600, #1e7e4b);
-  outline-offset: 0;
-  border-color: var(--color-forest-600, #1e7e4b);
-}
-
-/* Focus on dark backgrounds */
-.dark-bg :focus-visible,
-[style*="background: linear-gradient"] :focus-visible {
-  outline-color: white;
-}
-
-/* Reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+/* daisyUI's select draws a filled caret; it takes the system select's
+   drawn chevron instead (assets/css/system/components.css). */
+select.select {
+  appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23161616' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px 6px;
 }
 
 /* ============================================
-   Navigation Styles (V1 header)
-   ============================================ */
-.nav-link {
-  padding: 0.5rem 1rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: var(--color-white-85);
-  border-radius: 0.375rem;
-  transition: all 0.15s;
-  text-decoration: none;
-}
-
-.nav-link:hover {
-  background-color: var(--color-white-10);
-  color: white;
-  text-decoration: none;
-}
-
-.nav-link:focus-visible {
-  outline: none;
-  background-color: var(--color-white-15);
-  box-shadow: 0 0 0 2px var(--color-white-30);
-}
-
-.nav-icon-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  color: var(--color-white-85);
-  border-radius: 0.375rem;
-  transition: all 0.15s;
-  text-decoration: none;
-}
-
-.nav-icon-link:hover {
-  background-color: var(--color-white-10);
-  color: white;
-  text-decoration: none;
-}
-
-.nav-icon-link:focus-visible {
-  outline: none;
-  background-color: var(--color-white-15);
-  box-shadow: 0 0 0 2px var(--color-white-30);
-}
-
-/* Active state for current page */
-.nav-link-active {
-  color: white;
-  background-color: var(--color-white-15);
-}
-
-.nav-icon-link-active {
-  color: white;
-  background-color: var(--color-white-15);
-}
-
-/* Add Species button (V1 white pill on dark header) */
-.add-species-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.875rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-forest-800);
-  background-color: white;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition: all 0.15s;
-  text-decoration: none;
-}
-
-.add-species-btn:hover {
-  background-color: var(--color-forest-50);
-  color: var(--color-forest-800);
-  text-decoration: none;
-}
-
-.add-species-btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-white-30);
-}
-
-/* Hide text on small screens, show only + icon */
-@media (max-width: 640px) {
-  .add-species-text {
-    display: none;
-  }
-
-  .add-species-btn {
-    padding: 0.5rem;
-  }
-}
-
-/* ============================================
-   Header Search Input (V1 glassmorphic)
-   ============================================ */
-.header-search-input {
-  background-color: var(--color-white-15);
-  backdrop-filter: blur(8px);
-  border: 1.5px solid var(--color-white-20);
-  color: white;
-  box-shadow: var(--shadow-sm);
-}
-
-.header-search-input:focus {
-  background-color: var(--color-white-20);
-  border-color: var(--color-white-40);
-  box-shadow: var(--shadow-md), 0 0 0 3px var(--color-white-10);
-}
-
-.header-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.75);
-}
-
-/* ============================================
-   Prose Content (V1 rich text styling)
+   Prose Content (rendered markdown: articles, taxon write-ups, source
+   text, previews). DESIGN.md reading text: Source Serif 4 at 17px with
+   oldstyle figures, held to the 720px reading measure; headings in the
+   serif, then the reader's uppercase Archivo subheads; pencil links.
    ============================================ */
 .prose-content {
-  color: var(--color-text-primary);
+  max-width: var(--container-read);
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-size: 17px;
   line-height: 1.6;
-  font-size: 0.9375rem;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  text-wrap: pretty;
 }
 
 .prose-content p {
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 var(--spacing-s3) 0;
 }
 
 .prose-content p:last-child {
@@ -333,35 +278,46 @@ textarea:focus-visible {
 }
 
 .prose-content ul {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
+  margin: 0 0 var(--spacing-s3);
+  padding-left: 1.1em;
   list-style-type: disc;
 }
 
 .prose-content ol {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
+  margin: 0 0 var(--spacing-s3);
+  padding-left: 1.4em;
   list-style-type: decimal;
 }
 
 .prose-content li {
-  margin: 0.25rem 0;
+  margin: 0 0 var(--spacing-s1);
+}
+
+.prose-content li::marker {
+  color: var(--color-ink-3);
 }
 
 .prose-content a {
-  color: var(--color-forest-700, #19653d);
-  text-decoration: underline;
-  text-decoration-color: var(--color-forest-300, #86d4aa);
-  transition: all 0.15s ease;
+  color: var(--color-pencil);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 .prose-content a:hover {
-  color: var(--color-forest-600, #1e7e4b);
-  text-decoration-color: var(--color-forest-600, #1e7e4b);
+  text-decoration-thickness: 2px;
 }
 
 .prose-content strong {
   font-weight: 600;
+}
+
+/* Highlighted text is an ochre fill, the one committed field colour, not
+   the browser's yellow. */
+.prose-content mark {
+  background: var(--color-ochre);
+  color: var(--color-ink);
+  padding: 0 2px;
 }
 
 .prose-content em {
@@ -372,9 +328,9 @@ textarea:focus-visible {
 .prose-content pre {
   overflow-x: auto;
   max-width: 100%;
-  padding: 0.75rem;
-  border-radius: 0.375rem;
-  background-color: #f0f9f4;
+  margin: 0 0 var(--spacing-s3);
+  padding: var(--spacing-s3) var(--spacing-s4);
+  background-color: var(--color-paper-2);
 }
 
 .prose-content pre code {
@@ -386,14 +342,28 @@ textarea:focus-visible {
   display: block;
   overflow-x: auto;
   max-width: 100%;
+  margin: 0 0 var(--spacing-s4);
   border-collapse: collapse;
+  font-family: var(--font-frame);
+  font-size: 15px;
+  line-height: 1.5;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .prose-content th,
 .prose-content td {
-  padding: 0.375rem 0.625rem;
-  border: 1px solid var(--color-border);
+  padding: var(--spacing-s2) var(--spacing-s4) var(--spacing-s2) 0;
+  border-bottom: 1px solid var(--color-rule);
   text-align: left;
+  vertical-align: top;
+}
+
+.prose-content th {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--color-rule-strong);
 }
 
 .prose-content img {
@@ -401,238 +371,272 @@ textarea:focus-visible {
   height: auto;
 }
 
+/* Code is the one place for a monospace face. */
 .prose-content code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  background-color: #f0f9f4;
-  padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.875em;
+  font-variant-numeric: lining-nums tabular-nums;
+  background-color: var(--color-paper-2);
+  padding: 1px 4px;
+}
+
+.prose-content h1,
+.prose-content h2 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--color-ink);
+  text-wrap: balance;
 }
 
 .prose-content h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-family: var(--font-serif);
-  color: #14432a;
-  margin: 1.5rem 0 0.75rem 0;
-}
-
-.prose-content h1:first-child {
-  margin-top: 0;
+  font-size: 26px;
+  line-height: 1.1;
+  margin: var(--spacing-s6) 0 var(--spacing-s3);
 }
 
 .prose-content h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  font-family: var(--font-serif);
-  color: #165132;
-  margin: 1.5rem 0 0.75rem 0;
+  font-size: 21px;
+  line-height: 1.2;
+  margin: var(--spacing-s5) 0 var(--spacing-s2);
 }
 
-.prose-content h2:first-child {
-  margin-top: 0;
-}
-
+/* The reader's subhead: Archivo capitals */
 .prose-content h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  font-family: var(--font-serif);
-  color: #19653d;
-  margin: 1.25rem 0 0.5rem 0;
+  font-family: var(--font-frame);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  margin: var(--spacing-s5) 0 var(--spacing-s2);
 }
 
-.prose-content h3:first-child {
+/* h5 and h6 take h4's voice: the ladder stops there (bug 17bc). */
+.prose-content h4,
+.prose-content h5,
+.prose-content h6 {
+  font-family: var(--font-frame);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-ink);
+  margin: var(--spacing-s4) 0 var(--spacing-s1);
+}
+
+.prose-content h1:first-child,
+.prose-content h2:first-child,
+.prose-content h3:first-child,
+.prose-content h4:first-child,
+.prose-content h5:first-child,
+.prose-content h6:first-child {
   margin-top: 0;
 }
 
-.prose-content h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin: 1rem 0 0.5rem 0;
-}
-
-.prose-content h4:first-child {
-  margin-top: 0;
-}
-
+/* A quoted passage: indented on a 1px ink rule, roman (italic is for
+   scientific names), in the second ink. */
 .prose-content blockquote {
-  border-left: 3px solid #86d4aa;
-  padding-left: 1rem;
-  margin: 1rem 0;
-  color: var(--color-text-secondary);
-  font-style: italic;
+  margin: 0 0 var(--spacing-s3);
+  padding-left: var(--spacing-s4);
+  border-left: 1px solid var(--color-rule-strong);
+  color: var(--color-ink-2);
+  font-size: 18px;
 }
 
 .prose-content hr {
   border: none;
-  border-top: 1px solid var(--color-border);
-  margin: 1.5rem 0;
+  border-top: 1px solid var(--color-rule);
+  margin: var(--spacing-s5) 0;
 }
 
 /* ============================================
-   Card Utilities (V1 card styling)
+   Card Utilities: V1 cards as ruled sections (item b4f7)
+
+   DESIGN.md: statements stand on rules, never in boxes. A .card keeps its
+   place in the page but loses the box: no ground, border, corner or
+   shadow, and no side padding, so its content lines up with the page
+   frame. Its heading (.section-title) carries the 2px ink rule. Dialogs
+   are the modal component, never a card (item c13c).
    ============================================ */
 .card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
-  box-shadow: var(--shadow-sm);
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
+/* :where keeps this at class weight, so page sections can still set their
+   own padding; it beats the layered p-6 utilities. Rows (card-interactive
+   and plain cards listed with them) keep their padding for the hover
+   ground. */
+.card:where(:not(.card-interactive, .card-interactive ~ .card, .card:has(~ .card-interactive))) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* A card that is a link or a row is a row on a hairline. */
 .card-interactive {
-  transition: all 0.15s ease;
+  border-bottom: 1px solid var(--color-rule);
   cursor: pointer;
   text-decoration: none;
+  color: inherit;
 }
 
 .card-interactive:hover {
-  border-color: #4fb87f;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.card-interactive:focus-visible {
-  outline: none;
-  border-color: #1e7e4b;
-  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.15);
+  background-color: var(--color-paper-2);
 }
 
 .card-sm {
-  border-radius: 0.5rem;
+  border-radius: 0;
 }
 
 .card-forest {
-  background-color: #f0f9f4;
-  border-color: #bae6cd;
+  background-color: transparent;
 }
 
 .card-forest.card-interactive:hover {
-  background-color: #dcf3e4;
-  border-color: #86d4aa;
+  background-color: var(--color-paper-2);
 }
 
-/* Taxonomy sub-taxon cards (matches V1 .sub-taxon-card) */
-.taxon-card {
-  background-color: var(--color-forest-50);
-  border: 1px solid var(--color-forest-200);
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  text-decoration: none;
+/* A plain card in a list of rows (home's disabled Identification) stands
+   on the same hairline, so the list ends on a rule. */
+.card-interactive ~ .card:where(:not(.card-interactive)),
+.card:where(:not(.card-interactive)):has(~ .card-interactive) {
+  border-bottom: 1px solid var(--color-rule);
 }
 
-.taxon-card:hover {
-  background-color: var(--color-forest-100);
-  border-color: var(--color-forest-300);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+/* --------------------------------------------
+   Taxonomy pages (item 58ef): the title row on its 2px rule, then
+   sections whose sub-taxa and species are ruled index columns, not boxes.
+   The band is the component (.oc-band), in the page's bleed.
+   -------------------------------------------- */
+.taxon-section + .taxon-section {
+  margin-top: var(--spacing-s7);
 }
 
-.taxon-card:focus-visible {
-  outline: none;
-  border-color: var(--color-forest-600);
-  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.2);
+.taxon-section-note {
+  font: 500 13px/1.2 var(--font-frame);
+  color: var(--color-ink-3);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-/* Taxon card wrapper with hover-visible edit/delete actions */
+.taxon-empty {
+  margin: 0;
+  font: italic 400 17px/1.6 var(--font-serif);
+  color: var(--color-ink-3);
+}
+
+/* Sub-taxa and species: index columns read down, each name on a hairline.
+   The first row stands on the section label's 2px rule. */
+.taxon-index,
+.species-index {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  column-gap: var(--spacing-s6);
+}
+
+.taxon-index {
+  column-width: 220px;
+}
+
+.species-index {
+  column-width: 260px;
+}
+
+.taxon-index > li,
+.species-index > li {
+  break-inside: avoid;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+/* A sub-taxon: its name, then its count in lining figures at the right. */
 .taxon-card-wrapper {
   position: relative;
-}
-
-.taxon-card-actions {
-  position: absolute;
-  top: 50%;
-  right: 0.5rem;
-  transform: translateY(-50%);
-  display: flex;
-  gap: 0.25rem;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-  z-index: 1;
-}
-
-.taxon-card-wrapper:hover .taxon-card-actions {
-  opacity: 1;
-}
-
-.taxon-action-icon {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 0.375rem;
-  border: none;
-  background: var(--color-forest-100);
-  color: var(--color-forest-700);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  padding: 0;
+  gap: var(--spacing-s3);
 }
 
-.taxon-action-icon:hover {
-  background: var(--color-forest-200);
-}
-
-.taxon-action-delete {
-  color: #dc2626;
-  background: #fef2f2;
-}
-
-.taxon-action-delete:hover {
-  background: #fee2e2;
-}
-
-/* Taxonomy species cards (matches V1 .species-card) */
-.species-card {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
+.taxon-card {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-s3);
+  padding: 10px 0;
+  color: var(--color-ink);
   text-decoration: none;
 }
 
-.species-card:hover {
-  background-color: var(--color-forest-50);
-  border-color: var(--color-forest-300);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+.taxon-card-count {
+  flex: none;
+  font: 500 13px/1.2 var(--font-frame);
+  color: var(--color-ink-3);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-.species-card:focus-visible {
-  outline: none;
-  border-color: var(--color-forest-600);
-  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.2);
+/* A species: its name (sci_name) and authority. */
+.species-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--spacing-s2);
+  padding: 9px 0;
+  color: var(--color-ink);
+  text-decoration: none;
 }
 
 /* ============================================
-   Sources List Page (matches V1 sources/+page.svelte)
+   Sources List Page (item fe6d)
+
+   DESIGN.md's ruled list: each source is a row on a hairline, not a card.
+   The whole row is one link (a stretched anchor), so it tints paper-2 on
+   hover and its focus ring goes round the row. The row bleeds 12px past
+   the column on each side so its text lines up with the title row while
+   the hover ground has room. Descriptions hold the reading measure.
    ============================================ */
 .sources-grid {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
-.source-card {
+/* The hairline is drawn inside the bleed, so it ends with the column. */
+.source-card,
+.article-row {
   position: relative;
-  padding: 1.5rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.2s;
+  margin: 0 calc(-1 * var(--spacing-s3));
+  padding: var(--spacing-s5) var(--spacing-s3);
+  background-image: linear-gradient(var(--color-rule), var(--color-rule));
+  background-position: center bottom;
+  background-size: calc(100% - 2 * var(--spacing-s3)) 1px;
+  background-repeat: no-repeat;
 }
 
-.source-card:hover {
-  border-color: var(--color-forest-400);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+.source-card:hover,
+.article-row:hover {
+  background-color: var(--color-paper-2);
 }
 
-/* Stretched link covers entire card */
+/* The articles list (articles_live) uses the same row: the whole row is
+   the link. */
+.article-row {
+  display: block;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.article-row:hover {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.article-row:focus-visible {
+  outline-offset: -3px;
+}
+
+/* Stretched link covers the entire row */
 .source-card-link {
   position: absolute;
   inset: 0;
@@ -640,40 +644,47 @@ textarea:focus-visible {
   text-decoration: none;
 }
 
+.source-card-link:focus-visible {
+  outline-offset: -3px;
+}
+
 .source-card-body {
   position: relative;
   pointer-events: none;
 }
 
-.source-card-header-right {
-  pointer-events: auto;
-}
-
 .source-card-header {
   display: flex;
-  align-items: flex-start;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--spacing-s4);
 }
 
 .source-card-header-right {
   flex-shrink: 0;
   position: relative;
   z-index: 1;
+  pointer-events: auto;
 }
 
 .source-card-name {
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-forest-800);
+  margin: 0;
+  font: 600 21px/1.25 var(--font-serif);
+  color: var(--color-ink);
+  text-wrap: balance;
+}
+
+.source-card:hover .source-card-name {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
 }
 
 .source-card-desc {
-  font-size: 0.9375rem;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-  margin-top: 0.5rem;
+  max-width: 68ch;
+  margin: var(--spacing-s2) 0 0;
+  font: 400 16px/1.55 var(--font-serif);
+  color: var(--color-ink-2);
 }
 
 .source-card-footer {
@@ -681,664 +692,330 @@ textarea:focus-visible {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+  gap: var(--spacing-s2) var(--spacing-s4);
+  margin-top: var(--spacing-s3);
 }
 
 .source-card-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-s2) var(--spacing-s3);
 }
 
 .source-card-author {
-  font-size: 0.875rem;
-  color: var(--color-text-tertiary);
+  font: 500 14px/1.3 var(--font-frame);
+  color: var(--color-ink-2);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .source-card-count {
-  font-family: var(--font-serif);
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: var(--color-forest-700);
+  margin-left: auto;
+  font: 700 14px/1.3 var(--font-frame);
+  color: var(--color-ink);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-/* Edit/delete action buttons */
-.source-card-actions {
-  display: flex;
-  gap: 0.25rem;
-  flex-shrink: 0;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.source-card.can-edit:hover .source-card-actions {
-  opacity: 1;
-}
-
-.source-action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  text-decoration: none;
-}
-
-.source-action-edit {
-  color: var(--color-forest-700);
-  background-color: var(--color-forest-100);
-}
-
-.source-action-edit:hover {
-  background-color: var(--color-forest-200);
-}
-
-.source-action-delete {
-  color: #dc2626;
-  background-color: #fef2f2;
-}
-
-.source-action-delete:hover {
-  background-color: #fee2e2;
-}
-
+/* Without a link's glyph: a chevron drawn from two borders. */
 .source-card-arrow {
-  color: var(--color-text-tertiary);
-  transition: color 0.15s ease;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 3px;
+  border-top: 2px solid var(--color-ink-3);
+  border-right: 2px solid var(--color-ink-3);
+  transform: rotate(45deg);
 }
 
 .source-card:hover .source-card-arrow {
-  color: var(--color-forest-500);
-}
-
-/* Mobile: always show action buttons */
-@media (max-width: 640px) {
-  .source-card.can-edit .source-card-actions {
-    opacity: 1;
-  }
-
-  .source-action-btn {
-    width: 2.75rem;
-    height: 2.75rem;
-  }
+  border-color: var(--color-ink);
 }
 
 /* ============================================
-   Source Detail Page (matches V1 SourceDetail.svelte)
+   Source Detail Page (item fe6d)
+
+   The source page on DESIGN.md's terms: the name on a title row over a
+   2px rule with its type as a status tag, the bibliographic facts as a
+   ruled term list, the description at the reading measure, the coverage
+   as a count, and the species as a ruled list of names. The title row
+   is CoreComponents.header.
    ============================================ */
-.source-detail-page {
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-xl);
-  border-radius: 0.75rem;
-  padding: 2rem;
-  overflow: hidden;
-}
-
-.source-detail {
-  max-width: 48rem;
-  margin: 0 auto;
-}
-
-/* Header: title + badge + action buttons */
-.source-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.source-header-left {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.75rem;
-}
-
-.source-name {
-  font-family: var(--font-serif);
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--color-forest-800);
-}
-
-.type-badge {
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.25rem 0.625rem;
-  background-color: var(--color-stone-100);
-  color: var(--color-text-secondary);
-  border-radius: 9999px;
-  text-transform: capitalize;
-}
-
-/* Edit/Delete action buttons */
-.source-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  border: 1px solid transparent;
-  text-decoration: none;
-}
-
-.action-btn-edit {
-  color: var(--color-forest-700);
-  background-color: var(--color-forest-100);
-  border-color: var(--color-forest-200);
-}
-
-.action-btn-edit:hover {
-  background-color: var(--color-forest-200);
-  border-color: var(--color-forest-300);
-}
-
-.action-btn-delete {
-  color: #dc2626;
-  background-color: #fef2f2;
-  border-color: #fecaca;
-}
-
-.action-btn-delete:hover {
-  background-color: #fee2e2;
-  border-color: #fca5a5;
-}
-
-/* Edit/Add content button (small pill style) */
-.edit-content-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.625rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-forest-700);
-  background-color: var(--color-forest-50);
-  border: 1px solid var(--color-forest-200);
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.edit-content-btn:hover {
-  background-color: var(--color-forest-100);
-  border-color: var(--color-forest-300);
-}
-
-.edit-content-btn:focus-visible {
-  outline: 2px solid var(--color-forest-500);
-  outline-offset: 2px;
-}
-
-/* Create Taxon button (outlined style) */
-.create-taxon-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.875rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-forest-700);
-  background-color: white;
-  border: 1px solid var(--color-forest-300);
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.create-taxon-btn:hover {
-  background-color: var(--color-forest-50);
-  border-color: var(--color-forest-400);
-}
-
-/* Markdown editor with Write/Preview tabs */
-.markdown-editor {
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  overflow: hidden;
-}
-
-.markdown-editor-tabs {
-  display: flex;
-  gap: 0;
-  border-bottom: 1px solid var(--color-forest-200);
-  background-color: var(--color-forest-50);
-}
-
-.markdown-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-tertiary);
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.markdown-tab:hover {
-  color: var(--color-text-secondary);
-}
-
-.markdown-tab-active {
-  color: var(--color-forest-700);
-  border-bottom-color: var(--color-forest-600);
-}
-
-.markdown-editor-textarea {
-  width: 100%;
-  min-height: 12rem;
-  padding: 0.75rem 1rem;
-  font-size: 0.9375rem;
-  font-family: inherit;
-  line-height: 1.6;
-  color: var(--color-text-primary);
-  background-color: white;
-  border: none;
-  resize: vertical;
-}
-
-.markdown-editor-textarea::placeholder {
-  color: var(--color-text-tertiary);
-}
-
-.markdown-editor-textarea:focus {
-  outline: none;
-  background-color: white;
-}
-
-.markdown-editor-preview {
-  min-height: 12rem;
-  padding: 0.75rem 1rem;
-  background-color: white;
-}
-
-.markdown-editor-hint {
-  padding: 0.5rem 1rem;
-  font-size: 0.8125rem;
-  color: var(--color-text-tertiary);
-  background-color: var(--color-forest-50);
-  border-top: 1px solid var(--color-forest-200);
-}
-
-/* Tag input (for links, etc.) */
-.tag-input-container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.375rem;
-  min-height: 2.5rem;
-  padding: 0.375rem 0.5rem;
-  background-color: white;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  cursor: text;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.tag-input-container:focus-within {
-  border-color: var(--color-forest-600);
-  box-shadow: 0 0 0 3px rgba(30, 126, 75, 0.15);
-}
-
-.tag-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-}
-
-.tag-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.125rem 0.25rem 0.125rem 0.5rem;
-  font-size: 0.875rem;
-  line-height: 1.4;
-  color: var(--color-forest-800);
-  background-color: var(--color-forest-100);
-  border-radius: 0.25rem;
-}
-
-.tag-chip-text {
-  max-width: 250px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tag-chip-remove {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.125rem;
-  height: 1.125rem;
-  padding: 0;
-  color: var(--color-forest-600);
-  background: transparent;
-  border: none;
-  border-radius: 0.125rem;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.tag-chip-remove:hover {
-  color: var(--color-forest-900);
-  background-color: var(--color-forest-200);
-}
-
-.tag-input-form {
-  flex: 1;
-  min-width: 120px;
-}
-
-.tag-input-field {
-  width: 100%;
-  padding: 0.125rem 0.25rem;
-  font-size: 0.9375rem;
-  color: var(--color-text-primary);
-  background: transparent;
-  border: none;
-  outline: none;
-}
-
-.tag-input-field::placeholder {
-  color: var(--color-text-tertiary);
-}
-
-/* Metadata card */
+/* Bibliographic facts: a term list on hairlines, as CoreComponents.list */
 .source-metadata-card {
-  padding: 1.25rem;
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-s7);
 }
 
 .source-metadata-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-  gap: 1rem;
+  margin: 0;
 }
 
-.source-metadata-url {
-  grid-column: 1 / -1;
+.source-metadata-grid > div {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--spacing-s1) var(--spacing-s5);
+  padding: var(--spacing-s3) 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+@media (max-width: 480px) {
+  .source-metadata-grid > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .metadata-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  color: var(--color-text-tertiary);
-  margin-bottom: 0.25rem;
+  font: 700 14px/1.45 var(--font-frame);
+  color: var(--color-ink);
 }
 
 .metadata-value {
-  font-size: 0.9375rem;
-  color: var(--color-text-primary);
+  margin: 0;
+  font: 400 16px/1.5 var(--font-serif);
+  color: var(--color-ink);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.source-metadata-url dd {
+  margin: 0;
 }
 
 .source-url-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  color: var(--color-forest-600);
-  text-decoration: none;
-  word-break: break-all;
+  font: 500 15px/1.45 var(--font-frame);
+  color: var(--color-pencil);
+  overflow-wrap: anywhere;
 }
 
-.source-url-link:hover {
-  color: var(--color-forest-700);
-  text-decoration: underline;
+.source-url-link .hero-arrow-top-right-on-square {
+  margin-left: 4px;
+  vertical-align: -1px;
 }
 
-/* Description and notes (inside the metadata card) */
+/* Description and notes: the description at the reading measure; the
+   notes are quiet metadata in the frame face. */
 .source-description {
-  margin: 1rem 0 0;
-  padding-top: 1rem;
-  border-top: 1px solid var(--color-border);
-  font-size: 0.9375rem;
-  color: var(--color-text-secondary);
-  line-height: 1.6;
+  max-width: 68ch;
+  margin: var(--spacing-s5) 0 0;
+  font: 400 17px/1.6 var(--font-serif);
+  color: var(--color-ink);
 }
 
 .source-notes {
-  margin: 0.75rem 0 0;
-  font-size: 0.875rem;
-  font-style: italic;
-  color: var(--color-text-tertiary);
+  max-width: 68ch;
+  margin: var(--spacing-s3) 0 0;
+  font: 500 14px/1.5 var(--font-frame);
+  color: var(--color-ink-3);
 }
 
-/* Coverage section */
+/* Coverage: a count in the frame face, not a stat tile */
 .source-coverage {
-  margin-bottom: 2.5rem;
+  margin-bottom: var(--spacing-s7);
 }
 
-.source-stat-card {
-  display: flex;
-  flex-direction: column;
-  padding: 1.25rem;
-  text-align: center;
-  max-width: 10rem;
+.source-coverage-count {
+  margin: 0;
+  font: 600 15px/1.45 var(--font-frame);
+  color: var(--color-ink);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-.source-stat-value {
-  font-family: var(--font-serif);
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-forest-700);
-}
-
-.source-stat-label {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  margin-top: 0.25rem;
-}
-
-/* Species grid */
+/* Species: a ruled list of italic names in columns */
 .source-species {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-s7);
 }
 
 .source-species-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.25rem 1rem;
+  column-gap: var(--spacing-s5);
 }
 
 @media (min-width: 480px) {
   .source-species-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 768px) {
   .source-species-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1024px) {
   .source-species-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
 .source-species-link {
   display: block;
-  padding: 0.375rem 0.5rem;
+  padding: var(--spacing-s2) 0;
+  border-bottom: 1px solid var(--color-rule);
+  color: var(--color-ink);
   text-decoration: none;
-  border-radius: 0.25rem;
-  transition: background-color 0.15s;
-}
-
-.source-species-link:hover {
-  background-color: var(--color-forest-50);
-}
-
-.source-species-name {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 0.9375rem;
-  color: var(--color-forest-700);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.species-name {
-  font-family: var(--font-serif);
-  font-style: italic;
 }
 
 /* ============================================
-   Badge/Pill Utilities (V1)
+   Badge/Pill Utilities as status tags (item b4f7)
+
+   A badge is DESIGN.md's status tag: an outlined ink stamp in Archivo,
+   square. Its variants are marks, not colours: the strong one (V1's dark
+   green: Primary, the current filter) reverses to an ink plate; the plain
+   ones are the outline; the muted one (Coming soon, the other filters) is
+   a lighter outline in the second ink. Pill tags (synonyms, common names)
+   are names, not tags: plain serif text in a comma list.
    ============================================ */
+/* No display here: daisyUI's .badge makes it inline-flex in a layer, so
+   the hidden and sm:inline-flex utilities on a badge still work. */
 .badge {
-  display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.625rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  gap: var(--spacing-s1);
+  height: auto;
+  padding: 4px 7px;
+  font-family: var(--font-frame);
+  font-size: 13px;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+  color: var(--color-ink);
+  background-color: transparent;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .badge-uppercase {
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  font-size: 12.5px;
 }
 
-.badge-forest {
-  background-color: #bae6cd;
-  color: #19653d;
+.badge-sm {
+  font-size: 12px;
+  padding: 2px 5px;
 }
 
+.badge-forest,
 .badge-forest-light {
-  background-color: #dcf3e4;
-  color: #14432a;
+  color: var(--color-ink);
+  background-color: transparent;
+  border-color: var(--color-ink);
 }
 
 .badge-forest-dark {
-  background-color: #1e7e4b;
-  color: white;
+  color: var(--color-paper);
+  background-color: var(--color-ink);
+  border-color: var(--color-ink);
 }
 
 .badge-muted {
-  background-color: #f5f5f4;
-  color: var(--color-text-secondary);
+  color: var(--color-ink-2);
+  background-color: transparent;
+  border-color: color-mix(in srgb, var(--color-ink) 40%, transparent);
+}
+
+/* daisyUI's ghost badge (the species list's subgenus and section) is a
+   classification, not a status: frame text with no stamp around it. */
+.badge-ghost {
+  color: var(--color-ink-2);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border-color: transparent;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+a.badge:hover {
+  color: var(--color-paper);
+  background-color: var(--color-ink);
+  border-color: var(--color-ink);
 }
 
 .pill-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.375rem 0.875rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  background-color: var(--color-forest-100);
-  color: var(--color-forest-900);
-  border: 1px solid var(--color-forest-200);
+  display: inline;
+  padding: 0;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-ink);
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+/* The comma hangs off the previous name: each tag after the first draws
+   it in front of itself and pulls it back across the row's 0.5rem gap
+   (gap-2 in both lists), so whitespace inside the span can't open a space
+   before it. */
+.pill-tag + .pill-tag::before {
+  content: ",";
+  margin-left: -0.5rem;
+  font-style: normal;
 }
 
 /* ============================================
-   Section Title Utility (V1)
+   Section Title: DESIGN.md's section label. Archivo 800 capitals standing
+   on a 2px ink rule, like the section_heading component
+   (.oc-section-heading). section-title-sm, V1's smaller step, is the
+   same label.
    ============================================ */
 .section-title {
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 1rem;
+  margin: 0 0 var(--spacing-s3);
+  padding: 0 0 var(--spacing-s2);
+  border-bottom: 2px solid var(--color-rule-strong);
+  font-family: var(--font-frame);
+  font-size: 15px;
+  font-weight: 800;
+  font-style: normal;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--color-ink);
 }
 
 .section-title-sm {
-  font-size: 1rem;
-  color: #165132;
+  font-size: 15px;
+  color: var(--color-ink);
+}
+
+/* A title sharing a row with its actions (home's Featured Species, the
+   taxon pages' About this ...): the row stands on the rule, so it runs
+   the full width under the label and the controls. */
+.justify-between:has(> .section-title),
+[style*="space-between"]:has(> .section-title) {
+  align-items: flex-end;
+  padding-bottom: var(--spacing-s2);
+  border-bottom: 2px solid var(--color-rule-strong);
+}
+
+.justify-between > .section-title,
+[style*="space-between"] > .section-title {
+  margin: 0;
+  padding: 0;
+  border-bottom: 0;
+}
+
+/* DESIGN.md's section label carries no icon; V1's heroicon glyphs in
+   titles are hidden, as the breadcrumb's glyph separators are. */
+.section-title > [class*="hero-"],
+.section-title > svg {
+  display: none;
 }
 
 /* ============================================
-   Taxonomy Navigation (V1 breadcrumb)
-   ============================================ */
-.taxonomy-nav {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-}
-
-.taxonomy-nav .taxonomy-label {
-  font-weight: 600;
-  color: #19653d;
-  margin-right: 0.25rem;
-}
-
-.taxonomy-nav .taxonomy-link {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.25rem;
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.taxonomy-nav .taxonomy-link:hover {
-  text-decoration: underline;
-  text-decoration-color: #4fb87f;
-}
-
-.taxonomy-nav .taxonomy-name {
-  font-style: italic;
-  font-weight: 500;
-  color: #19653d;
-}
-
-.taxonomy-nav .taxonomy-link:hover .taxonomy-name {
-  color: #14432a;
-}
-
-.taxonomy-nav .taxonomy-level-label {
-  font-size: 0.75rem;
-  font-style: normal;
-  font-weight: 400;
-  color: var(--color-text-tertiary);
-}
-
-.taxonomy-nav .taxonomy-separator {
-  color: #4fb87f;
-}
-
-/* ============================================
-   Loading Spinner (V1)
+   Loading Spinner: a drawn ink arc on a hairline ring
    ============================================ */
 .loading-spinner {
-  width: 2rem;
-  height: 2rem;
-  border: 3px solid var(--color-border);
-  border-top-color: #1e7e4b;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-rule);
+  border-top-color: var(--color-ink);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -1348,208 +1025,250 @@ textarea:focus-visible {
 }
 
 /* ============================================
-   Skip Link (V1 accessibility)
+   Settings and login pages, and the About, Privacy, Markdown guide and
+   Analytics pages (bridge). Each page has CoreComponents' title row and
+   section headings; this section holds what is particular to them. The
+   account pages are a narrow form column: Archivo for the apparatus, the
+   system field (CoreComponents' oc-input) and buttons. The reading pages
+   hold their text to a reading measure, and every count is a ruled
+   figure in Archivo lining tabular numerals.
    ============================================ */
-.skip-link {
-  position: absolute;
-  top: -100%;
-  left: 1rem;
-  z-index: 100;
-  padding: 0.75rem 1.5rem;
-  background-color: #19653d;
-  color: white;
-  font-weight: 600;
-  border-radius: 0 0 0.5rem 0.5rem;
-  text-decoration: none;
-  transition: top 0.2s;
+
+/* Code, tokens, keys and recovery codes: the one monospace face. */
+.settings-description code,
+.settings-check code,
+.settings-token-scope,
+.settings-copy-text,
+.settings-secret,
+.settings-codes,
+.page-md-syntax {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-.skip-link:focus {
-  top: 0;
-  outline: 2px solid white;
-  outline-offset: 2px;
-  color: white;
+/* ---------- Account pages (login, setup, settings) ---------- */
+/* A section of an account page: no box, its heading carries the rule. */
+.settings-section {
+  margin: 0 0 var(--spacing-s7);
 }
 
-/* ============================================
-   Settings and login pages (V1 port)
-   ============================================ */
-.settings-container {
-  max-width: 40rem;
-  margin: 0 auto;
+.settings-section:last-child {
+  margin-bottom: 0;
 }
 
-.settings-title {
-  font-family: var(--font-serif);
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 2rem;
+/* The dev login sits apart, under a hairline. */
+.settings-aside {
+  padding-top: var(--spacing-s4);
+  border-top: 1px solid var(--color-rule);
 }
 
 .settings-description {
-  color: var(--color-text-secondary);
-  font-size: 0.9375rem;
-  margin: 0 0 1.5rem 0;
+  max-width: 60ch;
+  margin: 0 0 var(--spacing-s4);
+  font: 500 15px/1.5 var(--font-frame);
+  color: var(--color-ink-2);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-.settings-form-group {
-  margin-bottom: 1rem;
+.settings-description strong {
+  font-weight: 700;
+  color: var(--color-ink);
 }
 
-.settings-form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  margin-bottom: 0.5rem;
+.settings-description code {
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  padding: 1px 4px;
 }
 
-
-.settings-form-input {
-  width: 100%;
-  padding: 0.625rem 0.875rem;
-  font-size: 0.9375rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  background: white;
-  color: var(--color-text-primary);
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.settings-form-input:focus {
-  outline: none;
-  border-color: var(--color-forest-500);
-  box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
-}
-
-
-
-
+/* An error is a reversed ink plate, a confirmation an ink outline:
+   weight and reversal carry the state, never a colour. */
 .settings-message {
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-.settings-message-success {
-  background: #f0fdf4;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
+  margin: 0 0 var(--spacing-s4);
+  padding: var(--spacing-s3) var(--spacing-s4);
+  border: 1.5px solid var(--color-ink);
+  font: 600 14px/1.45 var(--font-frame);
 }
 
 .settings-message-error {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
+  background: var(--color-ink);
+  color: var(--color-paper);
 }
 
+.settings-message-success {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+/* Buttons wrap rather than run past the column on phones (bug 65c2). */
 .settings-button-group {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.settings-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.settings-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.settings-btn-primary {
-  background: var(--color-forest-600);
-  color: white;
-  border: none;
-}
-
-.settings-btn-primary:hover:not(:disabled) {
-  background: var(--color-forest-700);
-}
-
-.settings-btn-secondary {
-  background: white;
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-}
-
-.settings-btn-secondary:hover:not(:disabled) {
-  background: var(--color-background);
-}
-
-.settings-info-box {
-  background: var(--color-background);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.settings-copy-value {
-  display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-  width: 100%;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  background: var(--color-background);
-  color: var(--color-text-primary);
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  gap: var(--spacing-s2);
+  margin: var(--spacing-s5) 0 var(--spacing-s4);
 }
 
-.settings-copy-value:hover,
-.settings-copy-value:focus-visible {
-  border-color: var(--color-forest-500);
-  box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
-  outline: none;
+.settings-button-group:last-child {
+  margin-bottom: 0;
 }
 
-.settings-copy-text {
-  font-family: ui-monospace, monospace;
-  overflow-wrap: anywhere;
-}
-
-.settings-copy-status {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-}
-
-.settings-copy-value[data-copied] .settings-copy-status {
-  color: var(--color-forest-600);
+.settings-fieldset {
+  margin: 0 0 var(--spacing-s4);
+  padding: 0;
+  border: 0;
 }
 
 .settings-check {
   display: flex;
   align-items: baseline;
-  gap: 0.5rem;
-  font-size: 0.9375rem;
-  color: var(--color-text-primary);
-  margin-bottom: 0.375rem;
+  flex-wrap: wrap;
+  gap: 2px var(--spacing-s2);
+  margin: 0 0 var(--spacing-s2);
+  font: 500 15px/1.4 var(--font-frame);
+  color: var(--color-ink-2);
+  cursor: pointer;
 }
 
-.settings-token-list {
+/* A square checkbox: a 1.5px ink box, inked when checked with a drawn
+   paper tick (the native box is rounded). */
+.settings-check input {
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  align-self: center;
+  background: #fff;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.settings-check input:checked {
+  background: var(--color-ink);
+}
+
+.settings-check input:checked::before {
+  content: "";
+  width: 4px;
+  height: 8px;
+  margin-top: -2px;
+  border-right: 2px solid var(--color-paper);
+  border-bottom: 2px solid var(--color-paper);
+  transform: rotate(45deg);
+}
+
+.settings-check code {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+/* The setup page's authenticator QR code keeps its white quiet zone. */
+.settings-qr {
+  display: inline-block;
+  padding: var(--spacing-s2);
+  background: #fff;
+  border: 1px solid var(--color-rule);
+  line-height: 0;
+}
+
+.settings-qr svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.settings-secret {
+  margin: var(--spacing-s2) 0 var(--spacing-s5);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+
+/* Recovery codes: codes on hairlines, two columns where they fit. */
+.settings-codes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  column-gap: var(--spacing-s5);
+  margin: 0 0 var(--spacing-s4);
+  padding: 0;
   list-style: none;
+  border-top: 2px solid var(--color-rule-strong);
+}
+
+.settings-codes li {
+  padding: var(--spacing-s2) 0;
+  border-bottom: 1px solid var(--color-rule);
+  font-size: 16px;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--color-ink);
+}
+
+/* The new agent token: the field's white box, the whole of it a button
+   that copies the token (app.js reads data-copy). */
+.settings-copy-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-s2) var(--spacing-s4);
+  width: 100%;
+  margin: 0 0 var(--spacing-s4);
+  padding: var(--spacing-s3) var(--spacing-s4);
+  background: #fff;
+  border: 1.5px solid color-mix(in srgb, var(--color-ink) 40%, transparent);
+  color: var(--color-ink);
+  text-align: left;
+  cursor: copy;
+}
+
+.settings-copy-value:hover,
+.settings-copy-value[data-copied] {
+  border-color: var(--color-ink);
+}
+
+.settings-copy-text {
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.settings-copy-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 13px/1.3 var(--font-frame);
+  color: var(--color-ink-2);
+  white-space: nowrap;
+}
+
+/* Copied: ink, with a drawn tick. */
+.settings-copy-value[data-copied] .settings-copy-status {
+  color: var(--color-ink);
+}
+
+.settings-copy-value[data-copied] .settings-copy-status::before {
+  content: "";
+  width: 5px;
+  height: 9px;
+  margin-top: -3px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+/* Agent tokens: rows on hairlines. */
+.settings-token-list {
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 
 .settings-token {
@@ -1557,775 +1276,849 @@ textarea:focus-visible {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0;
-  border-top: 1px solid var(--color-border);
+  gap: var(--spacing-s3);
+  padding: var(--spacing-s3) 0;
+  border-bottom: 1px solid var(--color-rule);
+  font: 500 15px/1.4 var(--font-frame);
+  color: var(--color-ink);
 }
 
-.settings-token .settings-btn {
-  padding: 0.375rem 0.875rem;
-  font-size: 0.875rem;
+.settings-token strong {
+  font-weight: 700;
 }
 
+/* A scope is an outlined stamp, like DESIGN.md's status tag. */
 .settings-token-scope {
   display: inline-block;
-  margin-left: 0.375rem;
-  padding: 0 0.375rem;
-  border-radius: 0.25rem;
-  background: var(--color-background);
-  font-family: ui-monospace, monospace;
-  font-size: 0.8125rem;
-  color: var(--color-text-secondary);
+  margin-left: var(--spacing-s2);
+  padding: 2px 6px;
+  border: 1.5px solid var(--color-ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-ink);
 }
 
 .settings-token-meta {
-  margin: 0.25rem 0 0;
-  font-size: 0.8125rem;
-  color: var(--color-text-secondary);
+  margin: var(--spacing-s1) 0 0;
+  font: 500 13px/1.4 var(--font-frame);
+  color: var(--color-ink-3);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
+.settings-token-meta strong {
+  font-weight: 700;
+  color: var(--color-ink);
+}
 
+/* ---------- Reading pages (About, Privacy, Markdown guide) ---------- */
+.page-lead {
+  font-size: 18px;
+  line-height: 1.55;
+}
 
+/* Ruled figures: counts in Archivo lining tabular numerals, side by side
+   on a hairline, each labelled above. */
+.page-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-s2) var(--spacing-s7);
+  margin: 0;
+  padding: var(--spacing-s2) 0 var(--spacing-s3);
+  border-bottom: 1px solid var(--color-rule);
+}
 
+.page-figures > div {
+  min-width: 5rem;
+}
 
+.page-figures dt {
+  font: 600 13px/1.3 var(--font-frame);
+  color: var(--color-ink-2);
+}
 
+.page-figures dd {
+  margin: var(--spacing-s1) 0 0;
+  font: 700 28px/1.1 var(--font-frame);
+  color: var(--color-ink);
+  font-variant-numeric: lining-nums tabular-nums;
+}
 
+/* The page's own foot (versions, last updated), above the site footer. */
+.page-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-s1) var(--spacing-s2);
+  margin-top: var(--spacing-s8);
+  padding-top: var(--spacing-s4);
+  border-top: 1px solid var(--color-rule);
+  font: 500 13px/1.4 var(--font-frame);
+  color: var(--color-ink-3);
+  font-variant-numeric: lining-nums tabular-nums;
+}
 
+/* Markdown guide: the syntax beside what it renders, each labelled. */
+.page-md-example {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-s4) var(--spacing-s5);
+}
 
+.page-md-label {
+  margin: 0 0 var(--spacing-s3);
+  padding-bottom: var(--spacing-s1);
+  border-bottom: 1px solid var(--color-rule);
+  font: 800 12px/1.2 var(--font-frame);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+}
 
+.page-md-syntax {
+  margin: 0;
+  padding: var(--spacing-s3) var(--spacing-s4);
+  background: var(--color-paper-2);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 
+.page-md-result {
+  font-size: 16px;
+}
 
+.prose-content + .page-md-example {
+  margin-top: var(--spacing-s4);
+}
 
+@media (max-width: 640px) {
+  .page-md-example { grid-template-columns: minmax(0, 1fr); }
+}
 
+/* ---------- Analytics ---------- */
+/* The period picker: the current period takes the ochre underline. */
+.analytics-ranges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-s1) var(--spacing-s4);
+  margin: 0 0 var(--spacing-s6);
+  font: 600 14px/1.3 var(--font-frame);
+}
 
+.analytics-date {
+  white-space: nowrap;
+}
+
+.analytics-ranges-label {
+  font-weight: 500;
+  color: var(--color-ink-3);
+}
+
+.analytics-range {
+  padding: var(--spacing-s1) 0 3px;
+  font: inherit;
+  color: var(--color-ink);
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+}
+
+.analytics-range:hover {
+  border-bottom-color: color-mix(in srgb, var(--color-ink) 40%, transparent);
+}
+
+.analytics-range[aria-pressed="true"] {
+  font-weight: 800;
+  border-bottom-color: var(--color-ochre);
+}
+
+/* Daily page views: an ink line on a hairline base, its dates below. */
+.analytics-chart svg {
+  display: block;
+  width: 100%;
+  height: 64px;
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-rule-strong);
+}
+
+.analytics-chart-dates {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-s4);
+  margin-top: var(--spacing-s1);
+  font: 500 13px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.analytics-table th.analytics-num,
+.analytics-table td.analytics-num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.analytics-table th:last-child,
+.analytics-table td:last-child {
+  padding-right: 0;
+}
+
+.analytics-path {
+  overflow-wrap: anywhere;
+}
+
+/* Errors fold away under their section label, with a drawn chevron. */
+.analytics-errors > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.analytics-errors > summary::-webkit-details-marker {
+  display: none;
+}
+
+.analytics-errors > summary > h2 {
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-s3);
+}
+
+.analytics-errors > summary > h2::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-top: -4px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.analytics-errors[open] > summary > h2::after {
+  margin-top: 4px;
+  transform: rotate(-135deg);
+}
+
+.analytics-errors h3 {
+  margin: var(--spacing-s5) 0 var(--spacing-s2);
+  font: 800 13px/1.2 var(--font-frame);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+}
 
 /* ============================================
-   Search Results (V1 port)
+   Search Results (item 58ef; item 5148)
+
+   The title row is the shared header: Results for the query, the counts
+   as its meta. Each kind of result is a section heading over a ruled
+   list; a row is the name (a scientific name is sci_name) with its
+   authority, then its details: a note on why it matched (a synonym),
+   and its meta at the right. On phones the details drop under the name
+   on every row. No icons: the section says what a row is.
    ============================================ */
-.search-counts-bar {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1.5rem;
+/* The / hotkey needs a keyboard; phones hide its hint, as the masthead
+   does. */
+@media (max-width: 760px) {
+  .search-key-hint {
+    display: none;
+  }
 }
 
-.search-count-item {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-}
-
-.search-count-total {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-forest-700);
-}
-
-.search-separator {
-  color: var(--color-border);
-  font-weight: 300;
-}
-
-.search-section {
-  margin-bottom: 1.5rem;
-}
-
-.search-section-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-tertiary);
-  margin-bottom: 0.5rem;
-  padding-left: 0.25rem;
+.search-section + .search-section {
+  margin-top: var(--spacing-s7);
 }
 
 .search-results-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  overflow: hidden;
 }
 
 .search-results-list li {
-  border-bottom: 1px solid var(--color-border);
-}
-
-.search-results-list li:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid var(--color-rule);
 }
 
 .search-result-row {
-  display: block;
-  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-s5);
+  padding: var(--spacing-s3) 0;
+  color: var(--color-ink);
   text-decoration: none;
-  transition: background-color 0.15s ease;
-}
-
-.search-result-row:hover {
-  background-color: var(--color-forest-50);
-  text-decoration: none;
-}
-
-.search-result-row:focus-visible {
-  outline: none;
-  background-color: var(--color-forest-50);
-  box-shadow: inset 0 0 0 2px var(--color-forest-400);
 }
 
 .search-result-main {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: baseline;
+  gap: 2px var(--spacing-s3);
+  min-width: 0;
 }
 
-.search-result-icon {
+.search-result-details {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 0.25rem;
-  flex-shrink: 0;
-}
-
-.search-result-icon-source {
-  background-color: #fef3c7;
-  color: var(--color-oak-brown);
-}
-
-.search-result-icon-taxon {
-  background-color: var(--color-forest-100);
-  color: var(--color-forest-700);
-}
-
-.search-result-icon-species {
-  background-color: var(--color-forest-100);
-  color: var(--color-forest-600);
-}
-
-.search-result-name {
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.search-result-name-source {
-  color: var(--color-oak-brown);
-}
-
-.search-result-name-taxon {
-  color: var(--color-forest-800);
-}
-
-.search-result-name-species {
-  color: var(--color-forest-800);
-  font-family: var(--font-serif);
-}
-
-.search-result-author {
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: var(--color-text-secondary);
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--spacing-s4);
+  min-width: 0;
+  font: 500 13px/1.3 var(--font-frame);
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--color-ink-2);
 }
 
 .search-result-meta {
-  font-size: 0.8125rem;
-  color: var(--color-text-tertiary);
-  margin-top: 0.25rem;
-  padding-left: 2rem;
+  margin-left: auto;
+}
+
+@media (max-width: 760px) {
+  .search-result-row {
+    flex-direction: column;
+    gap: var(--spacing-s1);
+  }
+
+  .search-result-meta {
+    margin-left: 0;
+  }
+}
+
+.search-result-name {
+  font: 400 17px/1.3 var(--font-serif);
+  color: var(--color-ink);
+}
+
+.search-result-row:hover .search-result-name {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.search-result-author {
+  font: 400 14px/1.3 var(--font-serif);
+  color: var(--color-ink-3);
 }
 
 .search-taxon-level {
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--color-text-tertiary);
-  background-color: var(--color-forest-50);
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
+  font: 500 13px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
 }
 
-.search-add-species-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  margin-left: auto;
-  padding: 0.5rem 0.875rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-forest-700);
-  background-color: var(--color-forest-100);
-  border: 1px solid var(--color-forest-200);
-  text-decoration: none;
-  transition: all 0.15s ease;
+.search-empty {
+  margin: 0;
+  max-width: 70ch;
+  overflow-wrap: break-word;
+  font: 400 17px/1.6 var(--font-serif);
+  color: var(--color-ink-2);
 }
 
-.search-add-species-btn:hover {
-  background-color: var(--color-forest-200);
-  border-color: var(--color-forest-300);
-  text-decoration: none;
+.search-empty b {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.search-empty-hint {
+  margin: var(--spacing-s2) 0 0;
+  font: 500 14px/1.45 var(--font-frame);
+  color: var(--color-ink-3);
 }
 
 /* ============================================
-   Species Detail - Container (V1 SpeciesDetail.svelte:1102-1105)
+   Species Detail - Container (bridge restyle, item 1adb)
+
+   V1's species page in DESIGN.md's voice, its structure kept until the
+   taxon page is rebuilt: the page frame gives the gutters, and sections
+   stand on their 2px rules, 48px apart, with nothing boxed.
    ============================================ */
 .species-detail {
-  background-color: var(--color-surface);
-  padding: 1rem;
+  min-width: 0;
 }
 
 .content-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  background-color: var(--color-background);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-s7);
 }
 
-@media (min-width: 1024px) {
-  .content-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-  }
-}
-
-.detail-section {
-  padding: 1rem;
-}
-
-.detail-section.full-width {
-  grid-column: 1 / -1;
-}
-
-/* Source container (no padding, edge-to-edge) */
-.source-container {
-  /* overflow: hidden removed to allow dropdown visibility */
-}
-
+.detail-section.full-width,
 .source-container.full-width {
   grid-column: 1 / -1;
 }
 
+.detail-section .oc-section-heading {
+  margin-bottom: 0;
+}
+
 /* ============================================
-   Species Detail - Header (V1 SpeciesDetail.svelte:1237-1282)
+   Species Detail - Relationship lists: names on hairlines
    ============================================ */
-.species-current {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+.species-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.species-current-left {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+.species-rows > li {
+  border-bottom: 1px solid var(--color-rule);
 }
 
-.species-title {
+.species-row-link,
+.species-rows .species-row-name {
+  display: block;
+  padding: var(--spacing-s3) 0;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+/* Synonyms and common names: a comma list in the serif, each synonym
+   with its authority roman. The commas are in the text, so a wrapped line
+   never starts with one. */
+.species-synonyms,
+.source-names {
+  margin: 0;
+  font: 400 16px/1.6 var(--font-serif);
+  color: var(--color-ink);
+}
+
+.species-synonyms {
+  padding-top: var(--spacing-s3);
+}
+
+/* ============================================
+   Species Detail - Hybrid Items: name, then "with" the other parent
+   ============================================ */
+.hybrid-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: var(--spacing-s7);
+}
+
+@media (min-width: 761px) {
+  .hybrid-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.hybrid-item {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.5rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-forest-900);
-  font-family: var(--font-serif);
+  gap: 0 var(--spacing-s3);
+  padding: var(--spacing-s3) 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.hybrid-name {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.hybrid-with {
+  font: 400 14px/1.4 var(--font-frame);
+  color: var(--color-ink-2);
+}
+
+.hybrid-with a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+/* ============================================
+   Species Detail - External Links: a ruled list of pencil links, each
+   with its site
+   ============================================ */
+.external-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  column-gap: var(--spacing-s7);
   margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.author-text {
-  font-size: 1rem;
-  font-weight: 400;
-  font-style: normal;
-  color: var(--color-text-secondary);
-  font-family: sans-serif;
+.external-links > li {
+  border-bottom: 1px solid var(--color-rule);
 }
 
-.species-actions {
+.external-link {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-.action-btn svg {
-  flex-shrink: 0;
-}
-
-.action-btn-synonym {
-  color: #9333ea;
-  background-color: #faf5ff;
-  border-color: #e9d5ff;
-}
-
-.action-btn-synonym:hover {
-  background-color: #f3e8ff;
-  border-color: #d8b4fe;
-}
-
-.action-btn-synonym:focus-visible {
-  outline: 2px solid #9333ea;
-  outline-offset: 2px;
-}
-
-/* Conservation status badge */
-.conservation-badge {
-  display: inline-flex;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border: 1px solid transparent;
-  flex-shrink: 0;
-}
-
-/* Species link (V1 SpeciesDetail.svelte:1148-1159) */
-.species-link {
-  color: var(--color-forest-700);
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.15s ease;
-  border-bottom: 1px solid transparent;
-}
-
-.species-link:hover {
-  color: var(--color-forest-600);
-  border-bottom-color: var(--color-forest-400);
-}
-
-/* ============================================
-   Species Detail - Hybrid Items
-   ============================================ */
-.hybrid-item {
-  padding: 0.75rem;
-  padding-left: 1rem;
-  border-left: 4px solid var(--color-forest-500);
-  background: linear-gradient(90deg, var(--color-forest-50) 0%, transparent 100%);
-  border-radius: 0.375rem;
-}
-
-/* ============================================
-   Species Detail - External Links
-   ============================================ */
-.external-link-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.5rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: var(--color-forest-700);
-  background-color: var(--color-forest-50);
-  border: 1.5px solid var(--color-forest-300);
-  transition: all 0.2s ease;
-  text-decoration: none;
-}
-.external-link-btn:hover {
-  background-color: var(--color-forest-100);
-  border-color: var(--color-forest-400);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--spacing-s3);
+  padding: var(--spacing-s3) 0;
   text-decoration: none;
 }
 
+.external-link-name {
+  font: 600 15px/1.4 var(--font-frame);
+  color: var(--color-pencil);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-pencil) 40%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.external-link:hover .external-link-name {
+  text-decoration-color: var(--color-pencil);
+}
+
+.external-link-host {
+  font: 500 13px/1.4 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
 /* ============================================
-   Species Detail - Source Tabs (browser-style)
+   Species Detail - Source Tabs: still tabs, in DESIGN.md's voice. The
+   strip stands on the 2px ink rule and the current tab carries the 3px
+   ochre underline along it, as the masthead's current nav item does.
    ============================================ */
 .source-tabs-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 0;
-  background-color: var(--color-forest-50);
-  border-bottom: 1px solid var(--color-border);
-  padding: 0.5rem 0.5rem 0;
-  border-radius: 0.75rem 0.75rem 0 0;
+  align-items: flex-end;
+  gap: 0 var(--spacing-s5);
+  border-bottom: 2px solid var(--color-rule-strong);
 }
+
+.source-tabs-list {
+  display: flex;
+  gap: 0 var(--spacing-s5);
+  min-width: 0;
+}
+
+/* On a phone the tabs keep one row on the rule and scroll sideways, as the
+   band does; Compare and Add source go on the row under it. */
+@media (max-width: 760px) {
+  .source-tabs-strip {
+    border-bottom: 0;
+  }
+
+  .source-tabs-list {
+    flex-basis: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-right: var(--spacing-s6);
+    border-bottom: 2px solid var(--color-rule-strong);
+    /* The tabs fade out at the right edge; the rule under them doesn't. */
+    mask-image:
+      linear-gradient(to right, var(--color-ink) calc(100% - var(--spacing-s6)), transparent),
+      linear-gradient(var(--color-ink), var(--color-ink));
+    mask-size: 100% calc(100% - 2px), 100% 2px;
+    mask-position: top, bottom;
+    mask-repeat: no-repeat;
+  }
+
+  .source-tabs-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .source-tab {
+    flex: none;
+  }
+
+  .source-tabs-strip .compare-sources-link {
+    margin-left: 0;
+  }
+}
+
 .source-tab {
   display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.625rem 1rem;
-  border: none;
-  background: transparent;
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
-  font-weight: 500;
+  align-items: baseline;
+  gap: var(--spacing-s2);
+  padding: 12px 0 9px;
+  font: 700 15px/1.2 var(--font-frame);
+  color: var(--color-ink-2);
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
   cursor: pointer;
-  border-radius: 0.375rem 0.375rem 0 0;
-  transition: all 0.15s ease;
-  position: relative;
-  margin-bottom: -1px;
 }
+
 .source-tab:hover:not(.active) {
-  background-color: var(--color-forest-100);
-  color: var(--color-text-primary);
+  color: var(--color-ink);
+  border-bottom-color: color-mix(in srgb, var(--color-ink) 25%, transparent);
 }
+
 .source-tab.active {
-  background-color: var(--color-surface);
-  color: var(--color-forest-800);
-  border: 1px solid var(--color-border);
-  border-bottom-color: var(--color-surface);
+  color: var(--color-ink);
+  border-bottom-color: var(--color-ochre);
 }
-.preferred-star {
-  color: var(--color-oak-brown);
-  font-size: 0.75rem;
+
+/* The preferred source is said in words, in the standing marks' voice. */
+.source-tab-note {
+  font: 500 12.5px/1 var(--font-frame);
+  color: var(--color-ink-3);
 }
+
 .source-tab-link {
   display: inline-flex;
-  align-items: center;
-  color: var(--color-text-tertiary);
-  padding: 0.125rem;
-  border-radius: 0.25rem;
-  transition: all 0.15s ease;
-  cursor: pointer;
+  align-self: center;
+  color: var(--color-ink-3);
   text-decoration: none;
 }
+
 .source-tab-link:hover {
-  color: var(--color-forest-600);
-  background-color: var(--color-forest-100);
+  color: var(--color-pencil);
   text-decoration: none;
 }
+
+/* Compare (the ochre call to action) and Add source sit at the strip's
+   right end, clear of the rule. */
 .compare-sources-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.875rem;
   margin-left: auto;
-  color: var(--color-forest-600);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  border-radius: 0.375rem;
-  transition: all 0.15s ease;
-  text-decoration: none;
-}
-.compare-sources-link:hover {
-  background-color: var(--color-forest-100);
-  color: var(--color-forest-800);
-  text-decoration: none;
 }
 
-/* Add source button and wrapper */
-.add-source-wrapper {
-  position: relative;
-  margin-left: 0.5rem;
+.compare-sources-link {
+  align-self: center;
+  margin-block: var(--spacing-s2);
 }
 
-.add-source-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.875rem;
-  border: 1px dashed var(--color-forest-300);
-  background: transparent;
-  color: var(--color-forest-600);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: 0.375rem;
-  transition: all 0.15s ease;
-}
-
-.add-source-btn:hover {
-  background-color: var(--color-forest-50);
-  border-color: var(--color-forest-400);
-  color: var(--color-forest-700);
-}
-
-.add-source-btn:focus-visible {
-  outline: 2px solid var(--color-forest-500);
-  outline-offset: 2px;
-}
-
-/* Source content */
+/* Source content: "Data from ..." then each field as a label beside its
+   text on a hairline; the label stacks above the text on a phone. */
 .source-content {
-  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
 .source-content-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--color-border-light);
+  gap: var(--spacing-s2) var(--spacing-s4);
+  padding: var(--spacing-s3) 0;
+  border-bottom: 1px solid var(--color-rule);
 }
 
 .source-content-title {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+  margin: 0;
+  font: 600 14px/1.3 var(--font-frame);
+  color: var(--color-ink-2);
 }
 
 .source-field {
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--color-border-light);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-s1);
+  padding: var(--spacing-s4) 0;
+  border-bottom: 1px solid var(--color-rule);
 }
 
-.source-field:last-child {
-  padding-bottom: 0;
-  border-bottom: none;
+@media (min-width: 761px) {
+  .source-field {
+    grid-template-columns: 11rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--spacing-s5);
+  }
 }
 
-/* Source content seamless join with tabs */
-.source-tabs-strip + .card {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  border-top: none;
+.source-field-label {
+  margin: 0;
+  font: 700 15px/1.45 var(--font-frame);
+  color: var(--color-ink);
+}
+
+.source-field .prose-content > :first-child {
+  margin-top: 0;
+}
+
+.source-field .prose-content > :last-child {
+  margin-bottom: 0;
+}
+
+.source-original {
+  margin: 0;
+  padding: var(--spacing-s4) 0 0;
+}
+
+.source-original .oc-src {
+  margin-left: 0;
 }
 
 /* ==========================================================================
-   Source Comparison Page
-   Matches V1 SourceComparison.svelte layout exactly.
+   Source Comparison Page, Species List, Merge and Species Form
+   (item c49c, the bridge restyle onto DESIGN.md)
+
+   The comparison is DESIGN.md's comparison voice: a 140px trait column
+   and one column per source, rows on hairlines under a 2px head rule,
+   one labelled block per trait on phones. The species list is ruled rows
+   of italic names; the merge page lines the synonym and the target up in
+   the same trait-column grid, with the differs mark and the 3px ochre
+   underline on rows that differ.
    ========================================================================== */
 
-.source-comparison-page {
-  max-width: 80rem;
-  margin: 0 auto;
-  padding: 1.5rem 1rem;
-}
+/* --- Comparison ----------------------------------------------------------- */
 
-.source-comparison-card {
-  border-radius: 0.75rem;
-  overflow: hidden;
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-xl);
-}
-
-.source-comparison {
-  padding: 1.5rem;
-}
-
-/* Header */
-.comparison-header {
-  margin-bottom: 1.5rem;
-}
-
-.comparison-back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.875rem;
-  color: var(--color-forest-700);
-  text-decoration: none;
-  margin-bottom: 0.75rem;
-  transition: color 0.15s ease;
-}
-
-.comparison-back-link:hover {
-  color: var(--color-forest-500);
-}
-
-.comparison-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-forest-900);
-  font-family: var(--font-serif);
-  margin: 0;
-}
-
-.comparison-title-prefix {
-  font-weight: 400;
-  font-style: normal;
-  color: var(--color-text-secondary);
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  display: block;
-  margin-bottom: 0.25rem;
-}
-
-/* Source picker */
+/* Source picker: DESIGN.md's option buttons. Pressed is ink with a small
+   ochre tick, as in the ID tool's trait controls. */
 .source-picker {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: var(--color-forest-50);
-  border-radius: 0.5rem;
-  border: 1px solid var(--color-forest-200);
+  gap: var(--spacing-s2) var(--spacing-s3);
+  padding-bottom: var(--spacing-s4);
+  margin-bottom: var(--spacing-s5);
+  border-bottom: 1px solid var(--color-rule);
 }
 
 .source-picker-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+  font: 700 14px/1.4 var(--font-frame);
+  color: var(--color-ink);
 }
 
 .source-picker-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--spacing-s2);
 }
 
 .source-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.5rem 0.875rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border: 1.5px solid var(--color-forest-300);
-  background-color: var(--color-surface);
-  color: var(--color-text-secondary);
+  gap: 6px;
+  font: 600 14px/1 var(--font-frame);
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border: 1.5px solid color-mix(in srgb, var(--color-ink) 40%, transparent);
+  padding: 9px 11px;
   cursor: pointer;
-  transition: all 0.15s ease;
 }
 
 .source-chip:hover {
-  border-color: var(--color-forest-500);
-  color: var(--color-forest-700);
+  border-color: var(--color-ink);
 }
 
 .source-chip.selected {
-  background-color: var(--color-forest-600);
-  border-color: var(--color-forest-600);
-  color: white;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-color: var(--color-ink);
 }
 
-.source-chip.selected:hover {
-  background-color: var(--color-forest-700);
-  border-color: var(--color-forest-700);
+.source-chip.selected::before {
+  content: "";
+  width: 8px;
+  height: 5px;
+  border-left: 2px solid var(--color-ochre);
+  border-bottom: 2px solid var(--color-ochre);
+  transform: rotate(-45deg);
+  margin: -3px 1px 0 0;
 }
 
-.source-chip-star {
-  font-size: 0.75rem;
-  color: var(--color-oak-brown);
+.source-chip-note {
+  font-weight: 500;
+  font-size: 12.5px;
+  color: var(--color-ink-3);
 }
 
-.source-chip.selected .source-chip-star {
-  color: #fef3c7;
+.source-chip.selected .source-chip-note {
+  color: color-mix(in srgb, var(--color-paper) 78%, transparent);
 }
 
 .source-picker-hint {
-  font-size: 0.75rem;
-  color: var(--color-text-tertiary);
+  font: 500 13px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
 }
 
-/* Comparison grid */
+/* The aligned grid */
 .comparison-grid {
   display: grid;
-  grid-template-columns: minmax(140px, 180px) repeat(var(--column-count), 1fr);
-  gap: 0;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  background-color: var(--color-surface);
+  grid-template-columns: 140px repeat(var(--column-count), minmax(0, 1fr));
 }
 
-.comparison-grid-header {
-  display: contents;
-}
-
-.comparison-header-cell {
-  padding: 0.875rem 1rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  background-color: var(--color-forest-100);
-  border-bottom: 2px solid var(--color-forest-300);
-  color: var(--color-forest-800);
-}
-
-.comparison-field-label {
-  padding: 0.875rem 1rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: var(--color-forest-700);
-  background-color: var(--color-forest-50);
-  border-right: 1px solid var(--color-border);
-}
-
-.comparison-source-header {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  border-right: 1px solid var(--color-border);
-}
-
-.comparison-source-header:last-child {
-  border-right: none;
-}
-
-.comparison-source-name {
-  white-space: nowrap;
-}
-
-.comparison-preferred-badge {
-  font-size: 0.75rem;
-  color: var(--color-oak-brown);
-}
-
-.comparison-source-link {
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-text-tertiary);
-  padding: 0.125rem;
-  border-radius: 0.25rem;
-  transition: all 0.15s ease;
-}
-
-.comparison-source-link:hover {
-  color: var(--color-forest-600);
-  background-color: var(--color-forest-200);
-}
-
-/* Table rows */
+.comparison-grid-header,
 .comparison-row {
   display: contents;
 }
 
-.comparison-row:nth-child(even) .comparison-field-label,
-.comparison-row:nth-child(even) .comparison-value-cell {
-  background-color: var(--color-background);
+.comparison-grid-header .comparison-header-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 0 var(--spacing-s5) var(--spacing-s3) 0;
+  border-bottom: 2px solid var(--color-rule-strong);
+}
+
+.comparison-grid-header .comparison-field-label {
+  font: 800 13px/1.2 var(--font-frame);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.comparison-source-name {
+  font: 700 17px/1.25 var(--font-frame);
+  color: var(--color-ink);
+}
+
+a.comparison-source-name {
+  color: var(--color-pencil);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-pencil) 40%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a.comparison-source-name:hover {
+  text-decoration-color: var(--color-pencil);
+}
+
+.comparison-preferred-badge {
+  font: 600 13px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
 }
 
 .comparison-row .comparison-field-label,
-.comparison-row .comparison-value-cell {
-  border-bottom: 1px solid var(--color-border);
+.comparison-value-cell {
+  padding: var(--spacing-s4) var(--spacing-s5) var(--spacing-s4) 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.comparison-row .comparison-field-label {
+  font: 700 15px/1.45 var(--font-frame);
+  color: var(--color-ink);
 }
 
 .comparison-value-cell {
-  padding: 0.875rem 1rem;
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  color: var(--color-text-primary);
-  border-right: 1px solid var(--color-border);
+  font: 400 16px/1.55 var(--font-serif);
+  color: var(--color-ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
-.comparison-value-cell:last-child {
-  border-right: none;
+.comparison-value-cell:last-child,
+.comparison-header-cell:last-child {
+  padding-right: 0;
 }
 
-.comparison-no-data {
-  color: var(--color-text-tertiary);
-  font-style: italic;
+.comparison-value-cell .prose-content {
+  font-size: 16px;
+  max-width: none;
 }
 
-.comparison-text-content {
-  line-height: 1.5;
+.comparison-value-cell .prose-content > :first-child {
+  margin-top: 0;
 }
 
-/* Empty state */
+.comparison-value-cell .prose-content > :last-child {
+  margin-bottom: 0;
+}
+
 .source-comparison-empty {
-  text-align: center;
-  padding: 3rem;
-  color: var(--color-text-secondary);
+  margin: 0;
+  padding: var(--spacing-s5) 0;
+  font: italic 400 17px/1.5 var(--font-serif);
+  color: var(--color-ink-3);
 }
 
-/* Responsive: stack on mobile */
-@media (max-width: 768px) {
+/* Phones: one labelled block per trait */
+@media (max-width: 760px) {
   .comparison-grid {
     display: block;
   }
@@ -2336,44 +2129,559 @@ textarea:focus-visible {
 
   .comparison-row {
     display: block;
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
-    overflow: hidden;
+    padding-top: var(--spacing-s3);
+    border-top: 2px solid var(--color-rule-strong);
+  }
+
+  .comparison-row + .comparison-row {
+    margin-top: var(--spacing-s5);
   }
 
   .comparison-row .comparison-field-label {
-    display: block;
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--color-border);
-    background-color: var(--color-forest-100);
-    font-weight: 700;
+    padding: 0 0 var(--spacing-s1);
+    border-bottom: 0;
   }
 
   .comparison-row .comparison-value-cell {
     display: block;
-    border-right: none;
-    padding: 0.75rem 1rem;
+    padding: var(--spacing-s3) 0;
+  }
+
+  .comparison-row .comparison-value-cell:last-child {
+    border-bottom: 0;
   }
 
   .comparison-row .comparison-value-cell::before {
     content: attr(data-source);
     display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-forest-600);
-    margin-bottom: 0.25rem;
+    margin-bottom: var(--spacing-s1);
+    font: 600 13px/1.3 var(--font-frame);
+    color: var(--color-ink-3);
   }
 }
 
-/* Merge picker results (species detail "Make Synonym Of...") */
+/* --- Species list --------------------------------------------------------- */
+
+.species-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-s3);
+  margin-bottom: var(--spacing-s5);
+}
+
+@media (min-width: 640px) {
+  .species-filters {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.species-filters .input,
+.species-filters .select {
+  width: 100%;
+  max-width: none;
+}
+
+/* The magnifier sits above the field (bug a590: daisyUI's input painted
+   over it). */
+.species-search {
+  position: relative;
+}
+
+.species-search-icon {
+  position: absolute;
+  z-index: 1;
+  left: 12px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  color: var(--color-ink-3);
+  pointer-events: none;
+}
+
+.species-search .input {
+  padding-left: 38px;
+}
+
+.species-rows {
+  border-top: 1px solid var(--color-rule);
+}
+
+.species-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-s4);
+  padding: var(--spacing-s3) 0;
+  border-bottom: 1px solid var(--color-rule);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+/* The hover tint reaches a little past the frame so the text doesn't sit
+   on its edge; the hairlines stay on the frame. */
+.species-row:hover {
+  background: var(--color-paper-2);
+  box-shadow:
+    calc(var(--spacing-s2) * -1) 0 0 var(--color-paper-2),
+    var(--spacing-s2) 0 0 var(--color-paper-2);
+  text-decoration: none;
+}
+
+.species-row .species-row-name {
+  min-width: 0;
+  line-height: 1.3;
+  color: var(--color-ink);
+}
+
+.species-row-meta {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--spacing-s3);
+  font: 500 13px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
+.species-empty {
+  padding: var(--spacing-s7) 0;
+  font: 500 14px/1.5 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
+.species-empty p {
+  margin: 0;
+}
+
+.species-empty .species-empty-title {
+  margin-bottom: var(--spacing-s1);
+  font: italic 400 20px/1.4 var(--font-serif);
+  color: var(--color-ink-2);
+}
+
+/* --- Merge ---------------------------------------------------------------- */
+
+.merge-title-arrow {
+  color: var(--color-ink-3);
+  font-weight: 400;
+}
+
+.merge-muted {
+  color: var(--color-ink-2);
+}
+
+.merge-error-state .oc-back {
+  margin-bottom: var(--spacing-s4);
+}
+
+/* Synonym | copy | target, under a 140px trait column. Column heads show
+   only where the grid does; on phones each value carries its label. */
+.merge-cols,
+.merge-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-s2) var(--spacing-s3);
+}
+
+.merge-cols {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .merge-cols,
+  .merge-row {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr) 36px minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .merge-cols {
+    margin-bottom: var(--spacing-s5);
+    align-items: end;
+  }
+}
+
+.merge-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.merge-col-name {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.merge-col-role {
+  font: 600 14px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
+.merge-row {
+  padding: var(--spacing-s3) 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+/* Rows that differ: the differs mark by the trait name and the 3px ochre
+   underline along the row's bottom edge. */
+.merge-row-differs {
+  background: linear-gradient(var(--color-ochre), var(--color-ochre)) left bottom / 100% 3px
+    no-repeat;
+}
+
+.merge-row-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font: 700 15px/1.45 var(--font-frame);
+  color: var(--color-ink);
+}
+
+.merge-row-source {
+  min-width: 0;
+  padding: 10px 0;
+  font: 500 15px/1.4 var(--font-frame);
+  color: var(--color-ink-2);
+  overflow-wrap: anywhere;
+}
+
+.merge-row-copy {
+  display: flex;
+  justify-content: center;
+  min-height: 1px;
+}
+
+.merge-copy-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--color-ink);
+  background: transparent;
+  border: 1.5px solid var(--color-ink);
+  cursor: pointer;
+}
+
+.merge-copy-btn:hover {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+@media (max-width: 767px) {
+  .merge-row-label {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-s3);
+  }
+
+  .merge-row-source::before,
+  .merge-row-target::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    font: 800 12px/1.2 var(--font-frame);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink-3);
+  }
+
+  .merge-row-source {
+    padding: 0;
+  }
+
+  .merge-row-copy {
+    justify-content: flex-start;
+  }
+
+  .merge-copy-btn .hero-arrow-right {
+    transform: rotate(90deg);
+  }
+}
+
+.merge-subhead {
+  margin: var(--spacing-s6) 0 var(--spacing-s2);
+  font: 800 13px/1.2 var(--font-frame);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.merge-synonyms {
+  margin: 0;
+  font: 400 16px/1.5 var(--font-serif);
+  color: var(--color-ink);
+}
+
+.merge-lede {
+  margin: 0 0 var(--spacing-s3);
+  font: 500 15px/1.5 var(--font-frame);
+  color: var(--color-ink-2);
+}
+
+.merge-empty {
+  margin: var(--spacing-s3) 0 0;
+  font: italic 400 16px/1.5 var(--font-serif);
+  color: var(--color-ink-3);
+}
+
+/* Sources only the synonym has: a checklist on hairlines */
+.merge-source {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.merge-source-label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s3);
+  padding: var(--spacing-s3) 0;
+  cursor: pointer;
+}
+
+.merge-source-label input {
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  accent-color: var(--color-ink);
+}
+
+.merge-source-name {
+  font: 700 15px/1.4 var(--font-frame);
+  color: var(--color-ink);
+}
+
+.merge-source-preview {
+  margin-top: 4px;
+  display: grid;
+  gap: 2px;
+  font: 400 14px/1.45 var(--font-serif);
+  color: var(--color-ink-2);
+}
+
+/* The source's own words are serif, as it wrote them; the labels are frame. */
+.merge-source-preview-label {
+  font: 600 13px/1.45 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
+/* References to update: a section label that opens and closes, with a
+   drawn chevron */
+.merge-refs {
+  margin-bottom: var(--spacing-s6);
+}
+
+.merge-refs-title {
+  margin: 0;
+  border-bottom: 2px solid var(--color-rule-strong);
+}
+
+.merge-refs-toggle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-s3);
+  width: 100%;
+  padding: 0 0 var(--spacing-s2);
+  font: 800 15px/1.2 var(--font-frame);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--color-ink);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.merge-refs-toggle::after {
+  content: "";
+  align-self: center;
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.merge-refs-toggle[aria-expanded="true"]::after {
+  transform: translateY(2px) rotate(-135deg);
+}
+
+.merge-refs-count {
+  font: 500 13px/1.2 var(--font-frame);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-ink-3);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.merge-refs-body {
+  padding-top: var(--spacing-s3);
+}
+
+.merge-ref-group .merge-subhead {
+  margin-top: var(--spacing-s4);
+}
+
+.merge-ref-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.merge-ref-list li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-s2);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-rule);
+  color: var(--color-ink);
+}
+
+.merge-ref-type {
+  font: 500 13px/1.3 var(--font-frame);
+  color: var(--color-ink-3);
+}
+
+/* Notices: statements on rules. A warning stands between two 2px ink
+   rules (the not-covered notice) with a drawn warning glyph; the others
+   sit on a hairline. */
+.merge-notice {
+  padding: var(--spacing-s4) 0;
+  border-top: 1px solid var(--color-rule);
+  font: 500 15px/1.5 var(--font-frame);
+  color: var(--color-ink-2);
+}
+
+.merge-notice-warn {
+  border-top: 2px solid var(--color-rule-strong);
+  border-bottom: 2px solid var(--color-rule-strong);
+}
+
+.merge-notice-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s2);
+  margin: 0 0 4px;
+  font: 800 15px/1.3 var(--font-frame);
+  color: var(--color-ink);
+}
+
+.merge-notice-text {
+  margin: 0 0 var(--spacing-s2);
+  max-width: 70ch;
+}
+
+.merge-notice-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: square;
+  font: 400 16px/1.5 var(--font-serif);
+  color: var(--color-ink);
+}
+
+.merge-notice-list li::marker {
+  color: var(--color-ink-3);
+}
+
+.merge-notice-foot {
+  margin: var(--spacing-s2) 0 0;
+  font-size: 13px;
+  color: var(--color-ink-3);
+}
+
+.merge-issue {
+  padding: var(--spacing-s2) 0;
+  border-bottom: 1px solid var(--color-rule);
+  color: var(--color-ink);
+}
+
+.merge-issue em {
+  font-family: var(--font-serif);
+}
+
+.merge-issue-hint {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--color-ink-3);
+}
+
+/* The action bar stays in reach at the bottom of the screen: flat, on a
+   2px ink rule. */
+.merge-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-s3);
+  margin-top: var(--spacing-s6);
+  padding: var(--spacing-s3) 0;
+  background: var(--color-paper);
+  border-top: 2px solid var(--color-rule-strong);
+}
+
+/* --- Species form --------------------------------------------------------- */
+
+.species-form-sections {
+  display: grid;
+  gap: var(--spacing-s7);
+}
+
+/* The grids and stacks set the space between fields; the field's own
+   bottom margin would double it. */
+.species-form-sections .oc-field {
+  margin-bottom: 0;
+}
+
+.species-form-stack {
+  display: grid;
+  gap: var(--spacing-s4);
+}
+
+.species-form-note {
+  margin: 6px 0 0;
+}
+
+.species-form-lede {
+  margin: 0 0 var(--spacing-s4);
+}
+
+.species-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--spacing-s3);
+  padding-top: var(--spacing-s4);
+  border-top: 2px solid var(--color-rule-strong);
+}
+
+/* The Make synonym of… dialog's results (in the modal component): rows
+   on hairlines that tint paper-2 on hover. */
+.merge-results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-rule);
+}
+
 .merge-target-option {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
+  display: block;
+  width: 100%;
+  padding: var(--spacing-s3) var(--spacing-s2);
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--color-rule);
+  cursor: pointer;
 }
 
 .merge-target-option:hover {
-  background-color: var(--color-forest-50);
-  border-color: var(--color-forest-300);
+  background-color: var(--color-paper-2);
+}
+
+.merge-target-meta {
+  display: block;
+  margin-top: 2px;
+  font: 500 13px/1.4 var(--font-frame);
+  color: var(--color-ink-3);
 }

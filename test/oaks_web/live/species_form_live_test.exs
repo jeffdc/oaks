@@ -22,7 +22,7 @@ defmodule OaksWeb.SpeciesFormLiveTest do
 
   describe "GET /species/new (unauthenticated)" do
     test "redirects to species list", %{conn: conn} do
-      assert {:error, {:live_redirect, %{to: "/list"}}} =
+      assert {:error, {:live_redirect, %{to: "/species"}}} =
                live(conn, ~p"/species/new")
     end
   end
@@ -77,7 +77,7 @@ defmodule OaksWeb.SpeciesFormLiveTest do
 
   describe "GET /species/:name/edit (unauthenticated)" do
     test "redirects to species list", %{conn: conn, alba: alba} do
-      assert {:error, {:live_redirect, %{to: "/list"}}} =
+      assert {:error, {:live_redirect, %{to: "/species"}}} =
                live(conn, ~p"/species/#{alba}/edit")
     end
   end
@@ -146,22 +146,27 @@ defmodule OaksWeb.SpeciesFormLiveTest do
     end
 
     test "redirects for nonexistent species", %{conn: conn} do
-      assert {:error, {:live_redirect, %{to: "/list"}}} =
+      assert {:error, {:live_redirect, %{to: "/species"}}} =
                conn |> authenticated_conn() |> live(~p"/species/zzz_nonexistent/edit")
     end
   end
 
   describe "species list new button" do
     test "unauthenticated user does not see New Species button", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/list")
+      {:ok, _view, html} = live(conn, ~p"/species")
       refute html =~ "new-species-btn"
     end
 
     test "authenticated user sees New Species button", %{conn: conn} do
-      {:ok, _view, html} = conn |> authenticated_conn() |> live(~p"/list")
+      {:ok, view, html} = conn |> authenticated_conn() |> live(~p"/species")
 
       assert html =~ "new-species-btn"
-      assert html =~ "New Species"
+      assert html =~ "New species"
+
+      assert has_element?(
+               view,
+               "#species-list-title .oc-title-actions #species-list-edit-menu #new-species-btn"
+             )
     end
   end
 
@@ -173,10 +178,14 @@ defmodule OaksWeb.SpeciesFormLiveTest do
     end
 
     test "authenticated user sees edit/delete buttons", %{conn: conn, alba: alba} do
-      {:ok, _view, html} = conn |> authenticated_conn() |> live(~p"/species/#{alba}")
+      {:ok, view, html} = conn |> authenticated_conn() |> live(~p"/species/#{alba}")
 
       assert html =~ "edit-species-btn"
       assert html =~ "delete-species-btn"
+
+      for id <- ~w(edit-species-btn merge-species-btn delete-species-btn) do
+        assert has_element?(view, "#species-title .oc-title-actions #species-edit-menu ##{id}")
+      end
     end
 
     test "delete flow works with confirmation", %{conn: conn} do
@@ -186,8 +195,8 @@ defmodule OaksWeb.SpeciesFormLiveTest do
 
       # Click delete button
       html = render_click(view, "request_delete")
-      assert html =~ "Delete Species"
-      assert html =~ "Are you sure"
+      assert html =~ "Delete species"
+      assert html =~ "from the Compendium?"
 
       # Confirm delete
       {:ok, _view, html} =

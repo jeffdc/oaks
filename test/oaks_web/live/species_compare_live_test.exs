@@ -33,10 +33,15 @@ defmodule OaksWeb.SpeciesCompareLiveTest do
       assert html =~ "Quercus #{alba}"
     end
 
-    test "shows not found for unknown species", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/species/nonexistent/compare")
+    test "an unknown species is a 404 with the not-found page", %{conn: conn} do
+      {404, _headers, html} =
+        assert_error_sent 404, fn -> get(conn, ~p"/species/nonexistent/compare") end
 
-      assert html =~ "Species Not Found"
+      assert html =~ ~r{<h1>\s*Species not found\s*</h1>}
+      assert html =~ "/species/nonexistent/compare"
+      assert html =~ ~s(value="nonexistent")
+      assert html =~ ~r{<a href="/species" class="oc-btn">\s*Species list\s*</a>}
+      assert_raise OaksWeb.NotFoundError, fn -> live(conn, ~p"/species/nonexistent/compare") end
     end
 
     test "sets page title with species name", %{conn: conn, alba: alba} do
@@ -52,6 +57,20 @@ defmodule OaksWeb.SpeciesCompareLiveTest do
       {:ok, _view, html} = live(conn, ~p"/species/#{alba}/compare")
 
       assert html =~ "Select sources to compare"
+    end
+
+    test "marks selected sources as pressed and unpresses one on click", %{
+      conn: conn,
+      alba: alba
+    } do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}/compare")
+
+      assert has_element?(view, ".source-chip[aria-pressed='true']", "preferred")
+
+      view |> element(".source-chip:not(:has(.source-chip-note))") |> render_click()
+
+      assert has_element?(view, ".source-chip[aria-pressed='false']")
+      assert has_element?(view, ".source-chip[aria-pressed='true']", "preferred")
     end
 
     test "toggles source selection on click", %{conn: conn, alba: alba} do
@@ -94,6 +113,13 @@ defmodule OaksWeb.SpeciesCompareLiveTest do
 
       assert html =~ "Back to species"
       assert html =~ ~s(/species/#{alba})
+    end
+
+    test "keeps the species' taxonomy band above the title row", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}/compare")
+
+      assert has_element?(view, ".oc-pg-bleed #taxonomy-band [aria-current]", alba)
+      assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy"]), "Quercus")
     end
   end
 

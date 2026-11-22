@@ -2,8 +2,10 @@ defmodule OaksWeb.FormComponents do
   @moduledoc """
   Reusable form components for the Oak Compendium admin forms.
 
-  Provides a tabbed markdown editor (Write/Preview) and a chip-style
-  tag input, both used across taxon and article forms.
+  Provides a tabbed markdown editor (Write/Preview) and a tag input,
+  both used across taxon and article forms. They are styled as the
+  DESIGN.md input field (`oc-md`, `oc-tags` in
+  assets/css/system/components.css).
   """
 
   use Phoenix.Component
@@ -39,34 +41,28 @@ defmodule OaksWeb.FormComponents do
 
   def markdown_editor(assigns) do
     ~H"""
-    <div>
-      <label
-        :if={@label}
-        for={@field.id}
-        class="block text-sm font-semibold leading-6 text-zinc-800 mb-1"
-      >
-        {@label}
-      </label>
-      <p :if={@hint} class="text-xs mb-2" style="color: var(--color-text-tertiary);">
-        {@hint}
-      </p>
-      <div class="markdown-editor">
-        <div class="markdown-editor-tabs">
+    <div class="oc-field">
+      <label :if={@label} for={@field.id} class="oc-label">{@label}</label>
+      <p :if={@hint} class="oc-hint">{@hint}</p>
+      <div class="oc-md">
+        <div class="oc-md-tabs">
           <button
             type="button"
-            class={"markdown-tab #{if @content_tab == "write", do: "markdown-tab-active"}"}
+            class="oc-md-tab"
+            aria-pressed={to_string(@content_tab == "write")}
             phx-click={@tab_event}
             phx-value-tab="write"
           >
-            <.icon name="hero-pencil-square" class="size-3.5" /> Write
+            Write
           </button>
           <button
             type="button"
-            class={"markdown-tab #{if @content_tab == "preview", do: "markdown-tab-active"}"}
+            class="oc-md-tab"
+            aria-pressed={to_string(@content_tab == "preview")}
             phx-click={@tab_event}
             phx-value-tab="preview"
           >
-            <.icon name="hero-eye" class="size-3.5" /> Preview
+            Preview
           </button>
         </div>
         <%!-- Keep the textarea in the DOM while previewing so the form still submits it. --%>
@@ -75,26 +71,16 @@ defmodule OaksWeb.FormComponents do
             id={@field.id}
             name={@field.name}
             rows={@rows}
-            class="markdown-editor-textarea"
+            class="oc-md-text"
             placeholder={@placeholder}
             phx-debounce="300"
           >{Phoenix.HTML.Form.normalize_value("textarea", @field.value)}</textarea>
         </div>
-        <div
-          :if={@content_tab == "preview"}
-          class="markdown-editor-preview prose-content"
-        >
+        <div :if={@content_tab == "preview"} class="oc-md-preview prose-content">
           {raw(preview_content(@field.value))}
         </div>
-        <div class="markdown-editor-hint">
-          Markdown supported &mdash;
-          <a
-            href="/help/markdown"
-            target="_blank"
-            style="color: var(--color-forest-600); text-decoration: underline;"
-          >
-            formatting guide
-          </a>
+        <div class="oc-md-foot">
+          Markdown supported: <a href="/help/markdown" target="_blank">formatting guide</a>
         </div>
       </div>
     </div>
@@ -132,36 +118,26 @@ defmodule OaksWeb.FormComponents do
     assigns = update(assigns, :display_fn, fn fun -> fun || (&to_string/1) end)
 
     ~H"""
-    <div>
-      <label
-        :if={@label}
-        for={@input_id}
-        class="block text-sm font-semibold leading-6 text-zinc-800 mb-1"
-      >
-        {@label}
-      </label>
-      <p :if={@hint} class="text-xs mb-2" style="color: var(--color-text-tertiary);">
-        {@hint}
-      </p>
-      <div class="tag-input-container">
-        <div :if={@tags != []} class="tag-list">
-          <span :for={{tag, idx} <- Enum.with_index(@tags)} class="tag-chip">
-            <span class="tag-chip-text">{@display_fn.(tag)}</span>
-            <button
-              type="button"
-              class="tag-chip-remove"
-              phx-click={@remove_event}
-              phx-value-index={idx}
-              aria-label={"Remove #{@display_fn.(tag)}"}
-            >
-              <.icon name="hero-x-mark" class="size-3" />
-            </button>
-          </span>
-        </div>
+    <div class="oc-field">
+      <label :if={@label} for={@input_id} class="oc-label">{@label}</label>
+      <p :if={@hint} class="oc-hint">{@hint}</p>
+      <div class="oc-tags">
+        <span :for={{tag, idx} <- Enum.with_index(@tags)} class="oc-tag">
+          <span class="oc-tag-text">{@display_fn.(tag)}</span>
+          <button
+            type="button"
+            class="oc-tag-remove"
+            phx-click={@remove_event}
+            phx-value-index={idx}
+            aria-label={"Remove #{@display_fn.(tag)}"}
+          >
+            <.icon name="hero-x-mark" class="size-3" />
+          </button>
+        </span>
         <input
           type="text"
           id={@input_id}
-          class="tag-input-field"
+          class="oc-tags-input"
           placeholder={@placeholder}
           autocomplete="off"
           phx-hook="TagInput"
@@ -172,13 +148,7 @@ defmodule OaksWeb.FormComponents do
     """
   end
 
-  defp preview_content(nil),
-    do:
-      "<p style=\"color: var(--color-text-tertiary); font-style: italic;\">Nothing to preview</p>"
-
-  defp preview_content(""),
-    do:
-      "<p style=\"color: var(--color-text-tertiary); font-style: italic;\">Nothing to preview</p>"
-
+  defp preview_content(nil), do: ~s(<p class="oc-empty">Nothing to preview</p>)
+  defp preview_content(""), do: ~s(<p class="oc-empty">Nothing to preview</p>)
   defp preview_content(content), do: Markdown.render_html(content)
 end

@@ -12,7 +12,8 @@ defmodule OaksWeb.AnalyticsRouteAuditTest do
     * Static / no-fixture public LiveView routes — each visited via
       `live/2` so the WebSocket connects and the on_mount hook fires.
     * Plus an unrouted 404 to exercise the plug's only-non-LV-route
-      tracking path.
+      tracking path, and LiveView not-found pages (a real 404 the
+      LiveView raises), which the plug records too.
 
   Dynamic LV routes (`/species/:name`, `/articles/:slug`, `/sources/:id`,
   `/taxonomy/:id/edit`) are exercised at the family level by hitting
@@ -53,17 +54,15 @@ defmodule OaksWeb.AnalyticsRouteAuditTest do
   # `:live` (hook tracks) or `:get` (plug tracks).
   @public_live_routes [
     {"home", "/", :live},
-    {"species list", "/list", :live},
+    {"species list", "/species", :live},
     {"taxonomy index", "/taxonomy", :live},
-    {"taxonomy splat", "/taxonomy/subgenus/cerris", :live},
     {"articles index", "/articles", :live},
     {"sources index", "/sources", :live},
     {"search", "/search", :live},
     {"about", "/about", :live},
     {"help markdown", "/help/markdown", :live},
     {"analytics dashboard", "/analytics", :live},
-    {"privacy", "/privacy", :live},
-    {"settings", "/settings", :live}
+    {"privacy", "/privacy", :live}
   ]
 
   describe "route audit" do
@@ -100,6 +99,32 @@ defmodule OaksWeb.AnalyticsRouteAuditTest do
       [pv] = Repo.all(PageView)
       assert pv.path == "/this-route-does-not-exist-anywhere"
       assert pv.status == 404
+    end
+
+    # The splat needs a taxon that exists: a path naming none is a 404.
+    test "tracks the taxonomy splat (/taxonomy/:subgenus)", %{conn: conn} do
+      subgenus = Oaks.TaxonomyFixtures.taxon_fixture().name
+      path = "/taxonomy/#{subgenus}"
+
+      conn |> put_req_header("user-agent", @browser_ua) |> live(path)
+
+      await_tasks()
+
+      assert count_page_views() == 1
+      assert last_path() == path
+    end
+
+    test "tracks a LiveView's not-found page once, as a 404 (plug catches it)", %{conn: conn} do
+      for path <- ["/species/no-such-oak", "/taxonomy/NoSuchTaxon", "/sources/0"] do
+        Repo.delete_all(PageView)
+        conn = put_req_header(conn, "user-agent", @browser_ua)
+
+        assert_error_sent 404, fn -> get(conn, path) end
+
+        await_tasks()
+
+        assert [%PageView{path: ^path, status: 404}] = Repo.all(PageView)
+      end
     end
   end
 end

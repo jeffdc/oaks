@@ -1,0 +1,105 @@
+/* ==========================================================================
+   Oak Compendium design system: element defaults (DESIGN.md)
+
+   Applies to every page. In @layer base, so utilities and component rules
+   override it, and so does the unlayered V1 CSS in app.css: old cards, nav
+   and badges keep their own look until their pages are rebuilt.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  /* Reading text: Source Serif 4 with oldstyle proportional figures. */
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-serif);
+    font-size: 17px;
+    line-height: 1.6;
+    font-variant-numeric: oldstyle-nums proportional-nums;
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (max-width: 760px) {
+    body { font-size: 16px; }
+  }
+
+  /* The Two Figures Rule: counts, measurements and table cells use lining
+     tabular figures (the lining-nums tabular-nums utilities do the same
+     inline). */
+  table, kbd, input, select, textarea {
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  /* The Verbatim Rule: Jeff's words sit in curly quotes. */
+  q {
+    quotes: "\201C" "\201D" "\2018" "\2019";
+  }
+
+  ::selection {
+    background: var(--color-ochre);
+    color: var(--color-ink);
+  }
+
+  /* Links are pencil blue with a 1px underline that thickens on hover. */
+  a {
+    color: var(--color-pencil);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  /* Focus: a 3px pencil outline, 2px off, on every interactive element. */
+  :focus-visible {
+    outline: 3px solid var(--color-pencil);
+    outline-offset: 2px;
+    border-radius: 1px;
+  }
+
+  /* On a dark ground (the V1 header carries .dark-bg) the outline turns
+     paper so it still shows. */
+  .dark-bg :focus-visible {
+    outline-color: var(--color-paper);
+  }
+
+  input, textarea, select {
+    caret-color: var(--color-ink);
+  }
+
+  ::placeholder {
+    color: var(--color-ink-3);
+    opacity: 1;
+  }
+
+  kbd {
+    font: 600 11px/1 var(--font-frame);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 40%, transparent);
+    padding: 2px 5px;
+    color: inherit;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
