@@ -3,7 +3,7 @@ plan: compendium
 phase: 6b12
 rank: 50
 title: 'Bridge restyle: sources and articles'
-stage: active
+stage: in-review
 docs:
   - DESIGN.md
 claim:
@@ -12,7 +12,7 @@ claim:
   at: "2026-11-22T01:15:44Z"
   base: 235b0199cf04435e202b7b382887d836a9995190
 created: "2026-11-22T00:38:13Z"
-updated: "2026-11-22T01:15:44Z"
+updated: "2026-11-22T01:43:08Z"
 ---
 
 After the shared bridge item. Restyle sources_live, source_detail_live, source_form_live, articles_live, article_live and article_form_live (app.css Sources List, Source Detail, markdown editor, tag input) onto DESIGN.md tokens and components, keeping the page structure.
