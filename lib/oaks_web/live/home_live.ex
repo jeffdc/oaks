@@ -80,7 +80,7 @@ defmodule OaksWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div>
+    <div class="max-w-4xl">
       <%!-- Welcome section --%>
       <.header>
         Explore the World of Oaks
@@ -95,9 +95,9 @@ defmodule OaksWeb.HomeLive do
         </:subtitle>
       </.header>
 
-      <div class="grid gap-x-s7 gap-y-s7 lg:grid-cols-2">
+      <div class="space-y-s7">
         <%!-- Browse options --%>
-        <section class="lg:col-start-1 lg:row-start-1">
+        <section>
           <h2 class="section-title">What would you like to do?</h2>
           <.browse_card
             navigate={~p"/taxonomy"}
@@ -112,10 +112,7 @@ defmodule OaksWeb.HomeLive do
         </section>
 
         <%!-- Featured species --%>
-        <section
-          :if={!@is_loading && @featured_species}
-          class="lg:col-start-1 lg:row-start-2"
-        >
+        <section :if={!@is_loading && @featured_species}>
           <div class="flex items-center justify-between gap-s3 mb-s3">
             <h2 class="section-title">Featured Species</h2>
             <.button
@@ -140,10 +137,7 @@ defmodule OaksWeb.HomeLive do
         </section>
 
         <%!-- Data sources --%>
-        <section
-          :if={!@is_loading && !Enum.empty?(@sources)}
-          class="lg:col-start-2 lg:row-start-1 lg:row-span-2"
-        >
+        <section :if={!@is_loading && !Enum.empty?(@sources)}>
           <h2 class="section-title">Data Sources</h2>
           <.list_card :for={source <- @sources} href={~p"/sources/#{source.id}"}>
             <span class={[
