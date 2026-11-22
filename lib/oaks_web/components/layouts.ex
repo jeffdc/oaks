@@ -115,9 +115,9 @@ defmodule OaksWeb.Layouts do
     <footer class="oc-footer" id="site-footer">
       <div class="oc-footer-in">
         <p class="oc-footer-terms">
-          <span>Jeff Clark’s text © all rights reserved</span>
-          <span>Facts free to use</span>
-          <span>Other sources under their own terms</span>
+          <span>Oak Compendium’s prose is © all rights reserved</span>
+          <span>All facts are free to use</span>
+          <span>Other sources are under their own terms</span>
         </p>
         <nav class="oc-footer-nav" aria-label="More">
           <.link navigate={~p"/articles"}>Articles</.link>

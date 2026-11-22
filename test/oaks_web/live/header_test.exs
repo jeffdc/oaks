@@ -127,9 +127,9 @@ defmodule OaksWeb.HeaderTest do
     test "carries the licensing line and the secondary pages", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/")
 
-      assert has_element?(view, "#site-footer", "Jeff Clark’s text © all rights reserved")
-      assert has_element?(view, "#site-footer", "Facts free to use")
-      assert has_element?(view, "#site-footer", "Other sources under their own terms")
+      assert has_element?(view, "#site-footer", "Oak Compendium’s prose is © all rights reserved")
+      assert has_element?(view, "#site-footer", "All facts are free to use")
+      assert has_element?(view, "#site-footer", "Other sources are under their own terms")
       assert has_element?(view, "#site-footer a[href='/articles']", "Articles")
       assert has_element?(view, "#site-footer a[href='/privacy']", "Privacy")
       assert has_element?(view, "#site-footer a[href='/api/v1/docs']", "API")
@@ -150,7 +150,7 @@ defmodule OaksWeb.HeaderTest do
       assert html =~ ~s(id="site-header")
       assert html =~ ~s(id="header-search")
       assert html =~ ~s(id="site-footer")
-      assert html =~ "Facts free to use"
+      assert html =~ "All facts are free to use"
     end
 
     test "mark Editor current on the security settings", %{conn: conn} do

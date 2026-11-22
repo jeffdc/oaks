@@ -65,7 +65,7 @@ defmodule OaksWeb.ErrorHTMLTest do
       assert html =~ "<!DOCTYPE html>", status
       assert html =~ ~s(href="/assets/css/app.css"), status
       assert html =~ ~s(aria-label="Oak Compendium home"), status
-      assert html =~ "Facts free to use", status
+      assert html =~ "All facts are free to use", status
       assert html =~ ~s(<meta name="description"), status
       refute html =~ "<script", status
       refute html =~ "<style", status

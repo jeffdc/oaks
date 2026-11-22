@@ -97,9 +97,9 @@ defmodule OaksWeb.ErrorHTML do
 
         <footer class="border-t border-rule">
           <div class="mx-auto flex max-w-frame flex-wrap gap-x-s5 gap-y-s1 px-s6 py-s5 font-frame text-[13px] leading-normal font-medium text-ink-3 max-[760px]:px-s4">
-            <span>Jeff Clark’s text © all rights reserved</span>
-            <span>Facts free to use</span>
-            <span>Other sources under their own terms</span>
+            <span>Oak Compendium’s prose is © all rights reserved</span>
+            <span>All facts are free to use</span>
+            <span>Other sources are under their own terms</span>
           </div>
         </footer>
       </body>
