@@ -92,7 +92,12 @@ defmodule OaksWeb.SourcesLiveTest do
       {:ok, view, _html} = live(conn, ~p"/sources")
 
       assert has_element?(view, ~s(.source-card a[aria-label="Edit #{ootw.name}"]), "Edit")
-      assert has_element?(view, ~s(.source-card button[aria-label="Delete #{ootw.name}"]), "Delete")
+
+      assert has_element?(
+               view,
+               ~s(.source-card button[aria-label="Delete #{ootw.name}"]),
+               "Delete"
+             )
     end
   end
 end
