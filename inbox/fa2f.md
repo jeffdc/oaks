@@ -5,4 +5,10 @@ plan: compendium
 item: "1900"
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-a82f13f5068f54dfe
 created: "2026-11-22T03:53:49Z"
+settled:
+  action: decide
+  note: Add it. I reviewed the page already.
+  by: Jeff
+  human: true
+  at: "2026-11-22T16:16:09Z"
 ---
