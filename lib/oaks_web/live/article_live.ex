@@ -117,8 +117,12 @@ defmodule OaksWeb.ArticleLive do
         </.link>
       </:meta>
       <:actions :if={@editor}>
-        <.button navigate={~p"/articles/#{@article.slug}/edit"} size="compact">Edit</.button>
-        <.button phx-click="confirm_delete" size="compact">Delete</.button>
+        <.edit_menu id="article-edit-menu">
+          <:item navigate={~p"/articles/#{@article.slug}/edit"} id="edit-article-btn">
+            Edit article
+          </:item>
+          <:item click="confirm_delete" id="delete-article-btn">Delete article</:item>
+        </.edit_menu>
       </:actions>
     </.header>
     """

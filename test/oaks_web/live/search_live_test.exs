@@ -144,7 +144,12 @@ defmodule OaksWeb.SearchLiveTest do
 
       %{conn: conn} = register_and_log_in_user(%{conn: conn})
       {:ok, view, _html} = live(conn, ~p"/search?q=#{alba}")
-      assert has_element?(view, ".oc-title-actions #search-add-species", "Add Species")
+
+      assert has_element?(
+               view,
+               ".oc-title-actions #search-edit-menu #search-add-species",
+               "Add species"
+             )
     end
   end
 

@@ -278,38 +278,27 @@ defmodule OaksWeb.SpeciesDetailLive do
         author={@species.author}
         size="display"
       />
-      <:meta>{if(@species.is_hybrid, do: "Hybrid", else: "Species")}</:meta>
+      <:meta>{kind_word(@species)}</:meta>
       <:meta :if={@species.conservation_status}>
         <.iucn_status code={@species.conservation_status} />
       </:meta>
       <:actions :if={@editor}>
-        <.button
-          navigate={~p"/species/#{@species.scientific_name}/edit"}
-          size="compact"
-          id="edit-species-btn"
-        >
-          Edit
-        </.button>
-        <.button
-          type="button"
-          phx-click="show_merge_picker"
-          size="compact"
-          id="merge-species-btn"
-        >
-          Make synonym of…
-        </.button>
-        <.button
-          type="button"
-          phx-click="request_delete"
-          size="compact"
-          id="delete-species-btn"
-        >
-          Delete
-        </.button>
+        <.edit_menu id="species-edit-menu">
+          <:item navigate={~p"/species/#{@species.scientific_name}/edit"} id="edit-species-btn">
+            Edit {String.downcase(kind_word(@species))}
+          </:item>
+          <:item click="show_merge_picker" id="merge-species-btn">Make synonym of…</:item>
+          <:item click="request_delete" id="delete-species-btn">
+            Delete {String.downcase(kind_word(@species))}
+          </:item>
+        </.edit_menu>
       </:actions>
     </.header>
     """
   end
+
+  defp kind_word(%{is_hybrid: true}), do: "Hybrid"
+  defp kind_word(_species), do: "Species"
 
   # -- Relationship sections: names on hairlines --
 

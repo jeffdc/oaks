@@ -49,7 +49,9 @@ defmodule OaksWeb.ArticlesLive do
           Articles
           <:subtitle>Guides, reviews, and notes about oak identification and taxonomy.</:subtitle>
           <:actions :if={@current_scope}>
-            <.button navigate={~p"/articles/new"}>New Article</.button>
+            <.edit_menu id="articles-edit-menu">
+              <:item navigate={~p"/articles/new"} id="new-article-btn">New article</:item>
+            </.edit_menu>
           </:actions>
         </.header>
       </:head>

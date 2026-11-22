@@ -162,28 +162,26 @@ defmodule OaksWeb.TaxonomyLive do
           <:meta>{level_label(@current_level)}</:meta>
           <:meta>{@species_count} species</:meta>
           <:actions :if={@current_scope}>
-            <.button
-              navigate={create_taxon_path(@child_level, @current_taxon)}
-              id="create-taxon-btn"
-              size="compact"
-            >
-              Create Taxon
-            </.button>
-            <.button
-              :if={not @is_genus_level && @current_taxon}
-              navigate={~p"/taxonomy/#{@current_taxon.id}/edit"}
-              size="compact"
-            >
-              Edit
-            </.button>
-            <.button
-              :if={not @is_genus_level && @current_taxon}
-              phx-click="request_delete_taxon"
-              phx-value-id={@current_taxon.id}
-              size="compact"
-            >
-              Delete
-            </.button>
+            <.edit_menu id="taxon-edit-menu">
+              <:item navigate={create_taxon_path(@child_level, @current_taxon)} id="create-taxon-btn">
+                Create taxon
+              </:item>
+              <:item
+                :if={not @is_genus_level && @current_taxon}
+                navigate={~p"/taxonomy/#{@current_taxon.id}/edit"}
+                id="edit-taxon-btn"
+              >
+                Edit {@current_level}
+              </:item>
+              <:item
+                :if={not @is_genus_level && @current_taxon}
+                click="request_delete_taxon"
+                values={%{id: @current_taxon.id}}
+                id="delete-taxon-btn"
+              >
+                Delete {@current_level}
+              </:item>
+            </.edit_menu>
           </:actions>
         </.header>
       </:head>
@@ -193,34 +191,11 @@ defmodule OaksWeb.TaxonomyLive do
         <section :if={@current_taxon && @current_taxon.content} class="taxon-section">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-s4">
             <h2 class="section-title section-title-sm">About this {@current_level}</h2>
-            <div class="flex items-center gap-s3">
-              <span :if={@current_taxon.content_updated_at} class="taxon-section-note">
-                Updated {@current_taxon.content_updated_at}
-              </span>
-              <.button
-                :if={@current_scope}
-                navigate={~p"/taxonomy/#{@current_taxon.id}/edit"}
-                size="compact"
-              >
-                Edit
-              </.button>
-            </div>
+            <span :if={@current_taxon.content_updated_at} class="taxon-section-note">
+              Updated {@current_taxon.content_updated_at}
+            </span>
           </div>
           <div class="prose-content">{raw(Markdown.render_html(@current_taxon.content))}</div>
-        </section>
-
-        <%!-- Empty content prompt for logged-in users --%>
-        <section
-          :if={@current_scope && @current_taxon && !@current_taxon.content && !@is_genus_level}
-          class="taxon-section"
-        >
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-s4">
-            <h2 class="section-title section-title-sm">About this {@current_level}</h2>
-            <.button navigate={~p"/taxonomy/#{@current_taxon.id}/edit"} size="compact">
-              Add Content
-            </.button>
-          </div>
-          <p class="taxon-empty">No description of this {@current_level} yet.</p>
         </section>
 
         <%!-- Child taxa --%>

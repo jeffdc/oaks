@@ -161,8 +161,12 @@ defmodule OaksWeb.SpeciesFormLiveTest do
       {:ok, view, html} = conn |> authenticated_conn() |> live(~p"/species")
 
       assert html =~ "new-species-btn"
-      assert html =~ "New Species"
-      assert has_element?(view, "#species-list-title .oc-title-actions #new-species-btn")
+      assert html =~ "New species"
+
+      assert has_element?(
+               view,
+               "#species-list-title .oc-title-actions #species-list-edit-menu #new-species-btn"
+             )
     end
   end
 
@@ -180,7 +184,7 @@ defmodule OaksWeb.SpeciesFormLiveTest do
       assert html =~ "delete-species-btn"
 
       for id <- ~w(edit-species-btn merge-species-btn delete-species-btn) do
-        assert has_element?(view, "#species-title .oc-title-actions ##{id}")
+        assert has_element?(view, "#species-title .oc-title-actions #species-edit-menu ##{id}")
       end
     end
 

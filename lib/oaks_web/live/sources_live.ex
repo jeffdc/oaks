@@ -86,7 +86,9 @@ defmodule OaksWeb.SourcesLive do
             information about oak species.
           </:subtitle>
           <:actions :if={@current_scope}>
-            <.button navigate={~p"/sources/new"} id="create-source-btn">Create Source</.button>
+            <.edit_menu id="sources-edit-menu">
+              <:item navigate={~p"/sources/new"} id="create-source-btn">Create source</:item>
+            </.edit_menu>
           </:actions>
         </.header>
       </:head>

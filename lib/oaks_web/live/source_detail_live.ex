@@ -105,12 +105,10 @@ defmodule OaksWeb.SourceDetailLive do
         <.status_tag class="capitalize">{@source.source_type}</.status_tag>
       </:meta>
       <:actions :if={@editor}>
-        <.button navigate={~p"/sources/#{@source.id}/edit"} size="compact" id="edit-source-btn">
-          Edit
-        </.button>
-        <.button type="button" phx-click="request_delete" size="compact" id="delete-source-btn">
-          Delete
-        </.button>
+        <.edit_menu id="source-edit-menu">
+          <:item navigate={~p"/sources/#{@source.id}/edit"} id="edit-source-btn">Edit source</:item>
+          <:item click="request_delete" id="delete-source-btn">Delete source</:item>
+        </.edit_menu>
       </:actions>
     </.header>
     """

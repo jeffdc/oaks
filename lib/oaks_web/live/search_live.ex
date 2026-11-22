@@ -62,7 +62,9 @@ defmodule OaksWeb.SearchLive do
             <strong>{@results.counts.total} total</strong>
           </:meta>
           <:actions :if={@current_scope}>
-            <.button navigate={~p"/species/new"} id="search-add-species">Add Species</.button>
+            <.edit_menu id="search-edit-menu">
+              <:item navigate={~p"/species/new"} id="search-add-species">Add species</:item>
+            </.edit_menu>
           </:actions>
         </.header>
       </:head>

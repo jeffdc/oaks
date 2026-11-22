@@ -80,7 +80,9 @@ defmodule OaksWeb.SpeciesListLive do
           <:meta>{@hybrid_count} {if @hybrid_count == 1, do: "hybrid", else: "hybrids"}</:meta>
           <:meta><strong>{@species_count} total</strong></:meta>
           <:actions :if={@current_scope}>
-            <.button navigate={~p"/species/new"} id="new-species-btn">New Species</.button>
+            <.edit_menu id="species-list-edit-menu">
+              <:item navigate={~p"/species/new"} id="new-species-btn">New species</:item>
+            </.edit_menu>
           </:actions>
         </.header>
       </:head>
