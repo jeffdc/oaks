@@ -11,6 +11,7 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.SpeciesFixtures
 
   alias Oaks.Analytics.PageView
   alias Oaks.Repo
@@ -93,19 +94,23 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
     end
 
     test "a navigation that redirects from handle_params does NOT add a row", %{conn: conn} do
+      name = "alba#{System.unique_integer([:positive])}"
+      species_fixture(scientific_name: name, synonyms: ["#{name} var. repanda"])
+      canonical = "/species/#{name}"
+
       conn = put_req_header(conn, "user-agent", browser_ua())
-      {:ok, view, _html} = live(conn, ~p"/species/alba")
+      {:ok, view, _html} = live(conn, ~p"/species/#{name}")
 
       # A synonym URL mounts SpeciesDetailLive, whose handle_params
       # push_navigates to the canonical page. The synonym URL is a
       # redirect, not a page view; the canonical page counts when the
       # browser follows it.
-      assert {:error, {:live_redirect, %{to: "/species/alba"}}} =
-               live_redirect(view, to: "/species/alba%20var.%20repanda")
+      assert {:error, {:live_redirect, %{to: ^canonical}}} =
+               live_redirect(view, to: ~p"/species/#{name <> " var. repanda"}")
 
       await_tasks()
 
-      assert [%PageView{path: "/species/alba"}] = Repo.all(PageView)
+      assert [%PageView{path: ^canonical}] = Repo.all(PageView)
     end
 
     test "same-path patch (query-only change) does NOT add another row", %{conn: conn} do
