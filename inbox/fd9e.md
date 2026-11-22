@@ -5,6 +5,12 @@ plan: compendium
 item: "5148"
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-a4c229c4e72060aaf
 created: "2026-11-22T17:03:11Z"
+settled:
+  action: accept
+  note: with review 9726
+  by: Jeff
+  human: true
+  at: "2026-11-22T17:31:19Z"
 ---
 
 Adding a field to the public API is Jeff's call; a second small query by id costs nothing
