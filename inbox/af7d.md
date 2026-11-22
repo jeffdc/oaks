@@ -6,6 +6,11 @@ item: c13c
 source: reports/c13c-1.md
 by: /Users/jeff/dev/oaks/.claude/worktrees/agent-ac0329f484e0d22b6
 created: "2026-11-22T18:15:25Z"
+settled:
+  action: accept
+  by: Jeff
+  human: true
+  at: "2026-11-22T19:53:11Z"
 decisions:
   - 4a17
   - 4d72
