@@ -59,7 +59,8 @@ defmodule OaksWeb.PrivateAPI.ImportControllerTest do
     end
 
     test "refuses bad JSON", %{conn: conn, raw: raw} do
-      assert_error_sent 400, fn -> post_import(conn, raw, ~s({"species": [), dry_run: true) end
+      conn = post_import(conn, raw, ~s({"species": [), dry_run: true)
+      assert json_response(conn, 400)["error"] =~ "isn't valid JSON"
     end
 
     test "dry_run must be true when given", %{conn: conn, raw: raw} do

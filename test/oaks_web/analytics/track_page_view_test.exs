@@ -11,6 +11,7 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.SpeciesFixtures
 
   alias Oaks.Analytics.PageView
   alias Oaks.Repo
@@ -92,6 +93,26 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
       assert count_page_views() == 0
     end
 
+    test "a navigation that redirects from handle_params does NOT add a row", %{conn: conn} do
+      name = "alba#{System.unique_integer([:positive])}"
+      species_fixture(scientific_name: name, synonyms: ["#{name} var. repanda"])
+      canonical = "/species/#{name}"
+
+      conn = put_req_header(conn, "user-agent", browser_ua())
+      {:ok, view, _html} = live(conn, ~p"/species/#{name}")
+
+      # A synonym URL mounts SpeciesDetailLive, whose handle_params
+      # push_navigates to the canonical page. The synonym URL is a
+      # redirect, not a page view; the canonical page counts when the
+      # browser follows it.
+      assert {:error, {:live_redirect, %{to: ^canonical}}} =
+               live_redirect(view, to: ~p"/species/#{name <> " var. repanda"}")
+
+      await_tasks()
+
+      assert [%PageView{path: ^canonical}] = Repo.all(PageView)
+    end
+
     test "same-path patch (query-only change) does NOT add another row", %{conn: conn} do
       assert count_page_views() == 0
 
@@ -118,17 +139,19 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
     end
   end
 
-  describe "track_navigation/3 (direct)" do
+  describe "track_navigation/3 and track_pending/1 (direct)" do
     # Build a connected-looking socket with the hook's private assigns wired
     # up. We can't drive a real cross-LiveView navigation in a unit test,
-    # so we exercise the path-tracking logic directly.
+    # so we exercise the path-tracking logic directly: track_navigation/3
+    # runs as the :handle_params hook, track_pending/1 as :after_render.
     defp connected_socket(opts \\ []) do
       hash = String.duplicate("a", 64)
 
       assigns = %{
         __changed__: %{},
         __analytics_visitor_hash__: hash,
-        __analytics_last_path__: Keyword.get(opts, :last_path, nil)
+        __analytics_last_path__: Keyword.get(opts, :last_path, nil),
+        __analytics_pending_path__: nil
       }
 
       %Phoenix.LiveView.Socket{
@@ -137,42 +160,79 @@ defmodule OaksWeb.Analytics.TrackPageViewTest do
       }
     end
 
-    test "first call (last_path nil) tracks the path" do
-      socket = connected_socket()
+    defp navigate(socket, uri) do
+      {:cont, socket} = TrackPageView.track_navigation(%{}, uri, socket)
+      socket
+    end
 
-      assert {:cont, returned} =
-               TrackPageView.track_navigation(%{}, "https://example.com/about", socket)
+    test "first call (last_path nil) tracks the path once rendered" do
+      socket = navigate(connected_socket(), "https://example.com/about")
+
+      assert socket.assigns.__analytics_last_path__ == "/about"
+      await_tasks()
+      assert count_page_views() == 0
+
+      socket = TrackPageView.track_pending(socket)
 
       await_tasks()
-      assert count_page_views() == 1
-      [pv] = Repo.all(PageView)
-      assert pv.path == "/about"
-      assert returned.assigns.__analytics_last_path__ == "/about"
+      assert [%PageView{path: "/about"}] = Repo.all(PageView)
+      assert socket.assigns.__analytics_pending_path__ == nil
     end
 
     test "navigation to a new path tracks one row" do
-      socket = connected_socket(last_path: "/about")
+      connected_socket(last_path: "/about")
+      |> navigate("https://example.com/species")
+      |> TrackPageView.track_pending()
 
-      assert {:cont, returned} =
-               TrackPageView.track_navigation(%{}, "https://example.com/species", socket)
+      await_tasks()
+      assert [%PageView{path: "/species", status: 200}] = Repo.all(PageView)
+    end
+
+    test "later renders don't track the same navigation again" do
+      connected_socket()
+      |> navigate("https://example.com/about")
+      |> TrackPageView.track_pending()
+      |> TrackPageView.track_pending()
 
       await_tasks()
       assert count_page_views() == 1
-      [pv] = Repo.all(PageView)
-      assert pv.path == "/species"
-      assert pv.status == 200
-      assert returned.assigns.__analytics_last_path__ == "/species"
+    end
+
+    test "a navigation that never renders is not tracked" do
+      # A LiveView that redirects from handle_params never renders, so
+      # track_pending/1 never runs for its path.
+      _socket = navigate(connected_socket(), "https://example.com/species/a-synonym")
+
+      await_tasks()
+      assert count_page_views() == 0
+    end
+
+    test "a patch to a new path before the render replaces the pending path" do
+      # handle_params that push_patches to another path: only the path the
+      # LiveView renders counts.
+      connected_socket()
+      |> navigate("https://example.com/old")
+      |> navigate("https://example.com/new")
+      |> TrackPageView.track_pending()
+
+      await_tasks()
+      assert [%PageView{path: "/new"}] = Repo.all(PageView)
+    end
+
+    test "a same-path patch before the render keeps the pending path" do
+      connected_socket()
+      |> navigate("https://example.com/search")
+      |> navigate("https://example.com/search?q=alba")
+      |> TrackPageView.track_pending()
+
+      await_tasks()
+      assert [%PageView{path: "/search"}] = Repo.all(PageView)
     end
 
     test "patch to the same path (different query) does not track" do
-      socket = connected_socket(last_path: "/analytics")
-
-      assert {:cont, _returned} =
-               TrackPageView.track_navigation(
-                 %{},
-                 "https://example.com/analytics?range=30",
-                 socket
-               )
+      connected_socket(last_path: "/analytics")
+      |> navigate("https://example.com/analytics?range=30")
+      |> TrackPageView.track_pending()
 
       await_tasks()
       assert count_page_views() == 0

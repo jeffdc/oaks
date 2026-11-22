@@ -113,6 +113,37 @@ defmodule OaksWeb.AnalyticsIntegrationTest do
       assert pv.status == 404
     end
 
+    test "GET to a controller page tracks the 200", %{conn: conn} do
+      conn
+      |> put_req_header(
+        "user-agent",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15"
+      )
+      |> get(~p"/users/log-in")
+
+      await_tasks()
+
+      assert [%PageView{path: "/users/log-in", status: 200}] = Repo.all(PageView)
+    end
+
+    test "a redirect response inserts NO row (the page it leads to counts)", %{conn: conn} do
+      # Logged out, a settings page redirects to the log-in page. The visit
+      # counts once, when the browser follows the redirect.
+      conn =
+        conn
+        |> put_req_header(
+          "user-agent",
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15"
+        )
+        |> get(~p"/users/settings/password")
+
+      assert redirected_to(conn) == ~p"/users/log-in"
+
+      await_tasks()
+
+      assert count_page_views() == 0
+    end
+
     # Note: /assets/* is served by Plug.Static at the endpoint level and
     # never reaches the router, so it can't be exercised here. The plug's
     # `should_track?/2` rule is still covered by unit tests in

@@ -55,9 +55,11 @@ defmodule OaksWeb.Endpoint do
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
+  # Plug.Parsers, except that the private API's refusals (bad JSON, a body
+  # too large) come back as its {"error": ...} JSON (OaksWeb.Plugs.Parsers).
   # OaksWeb.BodyDigest hashes the raw body of import requests, which the
   # import's dry-run token is bound to; other requests read as usual.
-  plug Plug.Parsers,
+  plug OaksWeb.Plugs.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
     body_reader: {OaksWeb.BodyDigest, :read_body, []},
