@@ -15,6 +15,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   alias Oaks.Species
   alias OaksWeb.Params
   alias OaksWeb.SpeciesName
+  alias OaksWeb.TaxonPath
 
   @impl true
   def mount(_params, _session, socket) do
@@ -22,6 +23,7 @@ defmodule OaksWeb.SpeciesDetailLive do
      assign(socket,
        page_title: "Species",
        species: nil,
+       band_ranks: [],
        hybrids: [],
        closely_related: [],
        subspecies_varieties: [],
@@ -176,9 +178,14 @@ defmodule OaksWeb.SpeciesDetailLive do
   def render(assigns) do
     ~H"""
     <.page class="species-detail">
-      <div :if={@species}>
-        <.species_header species={@species} editor={@current_scope != nil} />
+      <:bleed :if={@species}>
+        <.taxonomy_band ranks={@band_ranks} current={TaxonPath.current(@species)} />
+      </:bleed>
+      <:head :if={@species}>
+        <.species_title species={@species} editor={@current_scope != nil} />
+      </:head>
 
+      <div :if={@species}>
         <div class="content-grid">
           <.parent_species_section
             :if={@species.is_hybrid && (@species.parent1 || @species.parent2)}
@@ -257,14 +264,13 @@ defmodule OaksWeb.SpeciesDetailLive do
     """
   end
 
-  # -- Species header: the breadcrumb, then the title row --
+  # -- Title row --
 
   attr :species, :any, required: true
   attr :editor, :boolean, default: false
 
-  defp species_header(assigns) do
+  defp species_title(assigns) do
     ~H"""
-    <.taxonomy_breadcrumb species={@species} />
     <.header id="species-title">
       <.sci_name
         name={@species.scientific_name}
@@ -302,67 +308,6 @@ defmodule OaksWeb.SpeciesDetailLive do
         </.button>
       </:actions>
     </.header>
-    """
-  end
-
-  # -- Taxonomy breadcrumb --
-
-  attr :species, :any, required: true
-
-  defp taxonomy_breadcrumb(assigns) do
-    ~H"""
-    <nav
-      :if={@species.subgenus || @species.section || @species.subsection || @species.complex}
-      class="taxonomy-nav"
-      aria-label="Taxonomy"
-    >
-      <span class="taxonomy-label">Taxonomy:</span>
-      <.link navigate={~p"/taxonomy"} class="taxonomy-link">
-        <.sci_name name="Quercus" level="genus" />
-        <span class="taxonomy-level-label">(genus)</span>
-      </.link>
-      <span :if={@species.subgenus}>
-        <span class="taxonomy-separator">&rsaquo;</span>
-        <.link navigate={~p"/taxonomy/#{@species.subgenus}"} class="taxonomy-link">
-          <.sci_name name={@species.subgenus} level="subgenus" />
-          <span class="taxonomy-level-label">(subgenus)</span>
-        </.link>
-      </span>
-      <span :if={@species.section}>
-        <span class="taxonomy-separator">&rsaquo;</span>
-        <.link
-          navigate={~p"/taxonomy/#{@species.subgenus || "unknown"}/#{@species.section}"}
-          class="taxonomy-link"
-        >
-          <.sci_name name={@species.section} level="section" />
-          <span class="taxonomy-level-label">(section)</span>
-        </.link>
-      </span>
-      <span :if={@species.subsection}>
-        <span class="taxonomy-separator">&rsaquo;</span>
-        <.link
-          navigate={
-            ~p"/taxonomy/#{@species.subgenus || "unknown"}/#{@species.section || "unknown"}/#{@species.subsection}"
-          }
-          class="taxonomy-link"
-        >
-          <.sci_name name={@species.subsection} level="subsection" />
-          <span class="taxonomy-level-label">(subsection)</span>
-        </.link>
-      </span>
-      <span :if={@species.complex}>
-        <span class="taxonomy-separator">&rsaquo;</span>
-        <.link
-          navigate={
-            ~p"/taxonomy/#{@species.subgenus || "unknown"}/#{@species.section || "unknown"}/#{@species.subsection || "unknown"}/#{@species.complex}"
-          }
-          class="taxonomy-link"
-        >
-          <.sci_name name={@species.complex} level="complex" />
-          <span class="taxonomy-level-label">(complex)</span>
-        </.link>
-      </span>
-    </nav>
     """
   end
 
@@ -837,6 +782,7 @@ defmodule OaksWeb.SpeciesDetailLive do
     {:noreply,
      assign(socket,
        species: species,
+       band_ranks: species |> Species.placement() |> TaxonPath.ranks(),
        hybrids: hybrids,
        closely_related: closely_related,
        subspecies_varieties: subspecies_varieties,

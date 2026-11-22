@@ -12,34 +12,49 @@
 @layer components {
   /* ---------------------------------------------------------------------
      Taxonomy band (DesignComponents.taxonomy_band): the ochre field with
-     the breadcrumb, ranks separated by drawn chevrons.
+     the breadcrumb, ranks separated by drawn chevrons. On a taxon page it
+     runs in the page's bleed under the masthead, its path in the
+     masthead's frame, one line at a fixed height at every width: a path
+     too long for the line scrolls, pinned to the current taxon.
      --------------------------------------------------------------------- */
   .oc-band {
+    --oc-band-h: 48px;
+    --oc-band-gutter: var(--spacing-s6);
     background: var(--color-ochre);
     color: var(--color-ink);
   }
   .oc-band-in {
     max-width: var(--container-frame);
+    height: var(--oc-band-h);
     margin: 0 auto;
     display: flex;
     align-items: center;
     gap: var(--spacing-s5);
-    padding: 0 var(--spacing-s6);
+    padding: 0 var(--oc-band-gutter);
   }
+  /* The path's scroller runs out over the gutter on the left and 6px on
+     the right, padded back so the names keep the frame's edge: a focus
+     ring has room, and a scrolled path runs on to the band's edge. */
   .oc-band ol {
     flex: 1 1 auto;
     min-width: 0;
-    margin: 0;
-    padding: 13px 0;
+    align-self: stretch;
+    margin: 0 -6px 0 calc(-1 * var(--oc-band-gutter));
+    padding: 0 6px 0 var(--oc-band-gutter);
     list-style: none;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 0 var(--spacing-s2);
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
     font: 600 15px/1.4 var(--font-narrow);
     letter-spacing: 0.01em;
   }
+  .oc-band ol::-webkit-scrollbar { display: none; }
   .oc-band ol > li {
+    flex: none;
     display: flex;
     align-items: center;
     gap: var(--spacing-s2);
@@ -132,22 +147,30 @@
   .oc-band-siblings a:hover { background: var(--color-paper-2); }
   .oc-band-siblings [aria-current] { background: var(--color-ochre); }
 
+  /* A path too long for the band (on phones, mostly) is scrolled to the
+     current taxon. While steps are scrolled off to the left it fades in
+     at its left edge, so it reads as running on (PinCurrentTaxon sets
+     data-overflow and data-scrolled). With a mouse, a thin ink scrollbar
+     is the way back to the first steps. */
+  .oc-band ol[data-scrolled] {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 36px);
+    mask-image: linear-gradient(to right, transparent 0, #000 36px);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .oc-band ol[data-overflow] {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-ink) transparent;
+    }
+  }
+
+  /* Phones: a shorter line in the 16px gutters. */
   @media (max-width: 760px) {
-    .oc-band-in {
-      gap: var(--spacing-s3);
-      padding: 0 var(--spacing-s4) 0 0;
+    .oc-band {
+      --oc-band-h: 42px;
+      --oc-band-gutter: var(--spacing-s4);
     }
-    .oc-band ol {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      white-space: nowrap;
-      scrollbar-width: none;
-      padding: 10px 0 10px 28px;
-      font-size: 14px;
-      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 36px);
-      mask-image: linear-gradient(to right, transparent 0, #000 36px);
-    }
-    .oc-band ol::-webkit-scrollbar { display: none; }
+    .oc-band-in { gap: var(--spacing-s3); }
+    .oc-band ol { font-size: 14px; }
     .oc-band summary { padding: 6px 9px; font-size: 13px; }
   }
 
@@ -1244,20 +1267,26 @@
   }
 
   /* Inline taxonomy band (taxonomy_band inline): an ochre plate the width
-     of its path, wrapping rather than scrolling. */
+     of its path, wrapping rather than scrolling, so its height follows the
+     path. */
   .oc-band-inline {
     display: inline-flex;
     max-width: 100%;
   }
   .oc-band-inline .oc-band-in {
     max-width: none;
+    height: auto;
     margin: 0;
     padding: 0 var(--spacing-s4);
   }
   .oc-band-inline ol {
     justify-content: center;
+    flex-wrap: wrap;
     row-gap: var(--spacing-s1);
+    margin: 0;
     padding: 10px 0;
+    overflow-x: visible;
+    white-space: normal;
   }
   /* The chevron trails its rank instead of leading the next, so a wrapped
      line starts with a rank. */
@@ -1270,17 +1299,6 @@
     border-right: 2px solid var(--color-ink);
     transform: rotate(45deg);
     margin: 0 6px 0 2px;
-  }
-  @media (max-width: 760px) {
-    .oc-band-inline .oc-band-in { padding: 0 var(--spacing-s4); }
-    .oc-band-inline ol {
-      flex-wrap: wrap;
-      overflow-x: visible;
-      white-space: normal;
-      padding: 10px 0;
-      -webkit-mask-image: none;
-      mask-image: none;
-    }
   }
 
   /* ---------------------------------------------------------------------

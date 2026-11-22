@@ -32,58 +32,61 @@ defmodule OaksWeb.DesignComponents do
 
   @doc """
   Renders the taxonomy band: the ochre field holding the breadcrumb, every
-  rank linked and separated by drawn chevrons, the current taxon last. It
-  sits in the same place on every taxon page.
+  rank linked and separated by drawn chevrons, the current taxon last. On
+  a taxon page it goes in `page/1`'s `:bleed` slot, straight under the
+  masthead: the same place, height and voice on every taxon page
+  (taxonomy, species, hybrid, variety and comparison).
 
-  Each `:rank`, and `:current`, takes an optional `rank` word ("subg.",
-  "sect.", "subsect.", "complex"), shown in the band's roman before the
-  name, or after it with `rank_after`; a `:rank` also takes `navigate` (or
-  `href`). The name itself is a `sci_name/1` with no `size`: the band sets
-  names at 16px, the current taxon heavier (700). Genus, subgenus,
-  section and subsection names take `genus={nil}`; a complex and the
-  current species are abbreviated (Q.).
+  The band sets every step itself, from data: pages pass `ranks` (the
+  linked steps, from `OaksWeb.TaxonPath.ranks/1`) and `current` (a taxon
+  step, or `OaksWeb.TaxonPath.current/1` for a species). Rank words
+  (subg., sect., subsect.) stand roman before a name and "complex" after
+  it; names are `sci_name/1` in the band's own voice, 16px with the
+  current taxon's epithets at 700: genus to subsection bare, a complex
+  and a species abbreviated (Q.).
+
+  The path is one line at every width, so the band's height never
+  changes. A path longer than the line (on phones, mostly) scrolls,
+  pinned to the current taxon, fading at its left edge while steps are
+  scrolled off there, with a thin scrollbar for a mouse (the
+  PinCurrentTaxon hook in assets/js/app.js marks it `data-overflow` and
+  `data-scrolled`).
 
   The optional `:siblings` slot adds the menu at the band's right end; its
   `label` reads like "Coccineae · 7 species" and its content is `<li>`
   items, the current taxon as `<span aria-current="page">`. A click
-  outside or Esc closes it.
-
-  On phones the path is one scrolling line, scrolled to the current taxon
-  (the PinCurrentTaxon hook in assets/js/app.js) and fading at its left
-  edge.
+  outside or Esc closes it. No page uses it yet.
 
   With `inline`, the band is an ochre plate the width of its path rather
   than a full-width field, and it wraps rather than scrolls: for showing
   where a taxon sits away from its own page (the home page's oak at
-  random). There `:current` is optional; leave it out when the taxon is
+  random). There `current` is optional; leave it out when the taxon is
   named beside the band.
 
   ## Examples
 
-      <.taxonomy_band>
-        <:rank navigate={~p"/taxonomy/Quercus"}><.sci_name name="Quercus" /></:rank>
-        <:rank navigate={~p"/taxonomy/Quercus/Lobatae"} rank="sect.">
-          <.sci_name name="Lobatae" genus={nil} />
-        </:rank>
-        <:current><.sci_name name="shumardii" abbreviate /></:current>
-      </.taxonomy_band>
+      <.page>
+        <:bleed><.taxonomy_band ranks={@band_ranks} current={TaxonPath.current(@species)} /></:bleed>
+        ...
+      </.page>
+
+      <.taxonomy_band
+        ranks={[%{level: "genus", name: "Quercus", hybrid: false, path: ~p"/taxonomy"}]}
+        current={%{level: "subgenus", name: "Cerris", hybrid: false}}
+      />
   """
   attr :id, :string, default: "taxonomy-band"
   attr :label, :string, default: "Taxonomy", doc: "the nav's accessible name"
   attr :class, :any, default: nil
   attr :inline, :boolean, default: false, doc: "a plate the width of its path, wrapping"
 
-  slot :rank, doc: "a linked rank, outermost first" do
-    attr :navigate, :string
-    attr :href, :string
-    attr :rank, :string, doc: "the rank word, set roman"
-    attr :rank_after, :boolean, doc: "show the rank word after the name (complex)"
-  end
+  attr :ranks, :list,
+    default: [],
+    doc: "the linked steps, outermost first: maps with level, name, hybrid and path"
 
-  slot :current, doc: "the current taxon (required unless inline)" do
-    attr :rank, :string, doc: "the rank word, set roman"
-    attr :rank_after, :boolean, doc: "show the rank word after the name (complex)"
-  end
+  attr :current, :map,
+    default: nil,
+    doc: "the current step (level, name, hybrid); required unless inline"
 
   slot :siblings, doc: "the siblings menu" do
     attr :label, :string, required: true
@@ -94,23 +97,11 @@ defmodule OaksWeb.DesignComponents do
     <nav id={@id} class={["oc-band", @inline && "oc-band-inline", @class]} aria-label={@label}>
       <div class="oc-band-in">
         <ol id={"#{@id}-path"} phx-hook={if @inline, do: nil, else: "PinCurrentTaxon"}>
-          <li :for={rank <- @rank}>
-            <.link navigate={rank[:navigate]} href={rank[:href]}>
-              <span :if={rank[:rank] && !rank[:rank_after]} class="oc-band-rk">{rank.rank}</span>
-              {render_slot(rank)}
-              <span :if={rank[:rank] && rank[:rank_after]} class="oc-band-rk">{rank.rank}</span>
-            </.link>
+          <li :for={rank <- @ranks}>
+            <.link navigate={rank.path}><.band_step step={rank} /></.link>
           </li>
-          <li :for={current <- @current}>
-            <span aria-current="page">
-              <span :if={current[:rank] && !current[:rank_after]} class="oc-band-rk">
-                {current.rank}
-              </span>
-              {render_slot(current)}
-              <span :if={current[:rank] && current[:rank_after]} class="oc-band-rk">
-                {current.rank}
-              </span>
-            </span>
+          <li :if={@current}>
+            <span aria-current="page"><.band_step step={@current} /></span>
           </li>
         </ol>
         <details
@@ -125,6 +116,28 @@ defmodule OaksWeb.DesignComponents do
         </details>
       </div>
     </nav>
+    """
+  end
+
+  @band_rank_words %{"subgenus" => "subg.", "section" => "sect.", "subsection" => "subsect."}
+
+  # One step of the band: the rank word, then the name (a complex's word
+  # after it). Every band on the site sets its steps here.
+  attr :step, :map, required: true
+
+  defp band_step(%{step: %{level: "species"}} = assigns) do
+    ~H"""
+    <.sci_name name={@step.name} hybrid={@step.hybrid} abbreviate />
+    """
+  end
+
+  defp band_step(assigns) do
+    assigns = assign(assigns, :rank, @band_rank_words[assigns.step.level])
+
+    ~H"""
+    <span :if={@rank} class="oc-band-rk">{@rank}</span>
+    <.sci_name name={@step.name} level={@step.level} />
+    <span :if={@step.level == "complex"} class="oc-band-rk">complex</span>
     """
   end
 

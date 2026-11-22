@@ -15,6 +15,7 @@ defmodule OaksWeb.HomeLive do
   alias Oaks.Sources
   alias Oaks.Species
   alias Oaks.Taxonomy
+  alias OaksWeb.TaxonPath
 
   # iNaturalist is the taxonomic backbone, not a source the home page lists.
   @inaturalist_id 1
@@ -86,8 +87,10 @@ defmodule OaksWeb.HomeLive do
     end
   end
 
-  # The featured oak with its hybrids and each named hybrid's other parent.
-  defp feature(socket, nil), do: assign(socket, featured: nil, featured_hybrids: [])
+  # The featured oak with where it sits (the band's steps, none when it sits
+  # in the genus only), its hybrids and each named hybrid's other parent.
+  defp feature(socket, nil),
+    do: assign(socket, featured: nil, featured_ranks: [], featured_hybrids: [])
 
   defp feature(socket, featured) do
     hybrids =
@@ -96,7 +99,13 @@ defmodule OaksWeb.HomeLive do
       |> Species.get_hybrids_with_parents()
       |> Enum.map(&Map.put(&1, :other, other_parent(&1, featured.scientific_name)))
 
-    assign(socket, featured: featured, featured_hybrids: hybrids)
+    ranks =
+      case Species.placement(featured) do
+        [] -> []
+        placement -> TaxonPath.ranks(placement)
+      end
+
+    assign(socket, featured: featured, featured_ranks: ranks, featured_hybrids: hybrids)
   end
 
   # A formula name ("agrifolia × parvula") already names both parents.
@@ -107,28 +116,6 @@ defmodule OaksWeb.HomeLive do
   defp other_of(%{parent1: name, parent2: other}, name), do: other
   defp other_of(%{parent1: other, parent2: name}, name), do: other
   defp other_of(_hybrid, _name), do: nil
-
-  # Where the species sits, outermost first: each rank with its path under
-  # /taxonomy.
-  defp ranks(species) do
-    [
-      {"subg.", "subgenus", species.subgenus},
-      {"sect.", "section", species.section},
-      {"subsect.", "subsection", species.subsection},
-      {"complex", "complex", species.complex}
-    ]
-    |> Enum.reject(fn {_rank, _level, name} -> name in [nil, ""] end)
-    |> Enum.map_reduce([], fn {rank, level, name}, path ->
-      path = path ++ [name]
-      {%{rank: rank, level: level, name: name, path: taxonomy_path(path)}, path}
-    end)
-    |> elem(0)
-  end
-
-  defp taxonomy_path(segments) do
-    "/taxonomy/" <>
-      Enum.map_join(segments, "/", fn s -> URI.encode(s, &URI.char_unreserved?/1) end)
-  end
 
   # The joining words of a run of hybrids: "a, b and c".
   defp list_joint(index, count) when index == count - 2, do: " and"
@@ -188,18 +175,8 @@ defmodule OaksWeb.HomeLive do
       >
         <:name><.sci_name name={@featured.scientific_name} /></:name>
         <:author :if={@featured.author}>{@featured.author}</:author>
-        <:band :if={ranks(@featured) != []}>
-          <.taxonomy_band id="random-band" label="Where it sits" inline>
-            <:rank navigate={~p"/taxonomy"}><.sci_name name="Quercus" level="genus" /></:rank>
-            <:rank
-              :for={rank <- ranks(@featured)}
-              navigate={rank.path}
-              rank={rank.rank}
-              rank_after={rank.rank == "complex"}
-            >
-              <.sci_name name={rank.name} level={rank.level} />
-            </:rank>
-          </.taxonomy_band>
+        <:band :if={@featured_ranks != []}>
+          <.taxonomy_band id="random-band" label="Where it sits" ranks={@featured_ranks} inline />
         </:band>
         <:about :if={@featured_hybrids != []}>
           Hybrids

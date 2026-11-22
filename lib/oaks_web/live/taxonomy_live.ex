@@ -3,8 +3,8 @@ defmodule OaksWeb.TaxonomyLive do
   LiveView for the taxonomy browser.
 
   Supports hierarchical drill-down through the Quercus taxonomy
-  (genus > subgenus > section > subsection > complex) with
-  breadcrumbs, species counts, and species lists at each level. A path
+  (genus > subgenus > section > subsection > complex) with the
+  taxonomy band, species counts, and species lists at each level. A path
   that names no taxon raises `OaksWeb.NotFoundError`, a real 404.
   """
 
@@ -15,6 +15,7 @@ defmodule OaksWeb.TaxonomyLive do
   alias Oaks.Taxonomy
   alias OaksWeb.Params
   alias OaksWeb.SpeciesName
+  alias OaksWeb.TaxonPath
 
   # The level a new child taxon gets when created from a taxon's page
   @child_levels %{"subgenus" => "section", "section" => "subsection", "subsection" => "complex"}
@@ -108,7 +109,8 @@ defmodule OaksWeb.TaxonomyLive do
       child_taxa: child_taxa,
       species: species,
       species_count: total,
-      breadcrumbs: [],
+      band_ranks: [],
+      band_current: %{level: "genus", name: "Quercus", hybrid: false},
       is_genus_level: true,
       page_title: "Taxonomy"
     )
@@ -124,7 +126,11 @@ defmodule OaksWeb.TaxonomyLive do
         taxon_name = SpeciesName.taxon_label(current_taxon.level, current_taxon.name)
         child_taxa = Taxonomy.get_children(current_taxon)
         species = Taxonomy.get_species_in_taxon(path)
-        breadcrumbs = build_breadcrumbs(path, taxa)
+
+        steps =
+          taxa
+          |> Enum.map(&%{level: &1.level, name: &1.name, hybrid: false})
+          |> TaxonPath.ranks()
 
         assign(socket,
           taxonomy_path: path,
@@ -135,29 +141,12 @@ defmodule OaksWeb.TaxonomyLive do
           species: species,
           # Everything in the taxon, matching the count on its card one level up.
           species_count: Taxonomy.taxon_usage(current_taxon).species,
-          breadcrumbs: breadcrumbs,
+          band_ranks: Enum.drop(steps, -1),
+          band_current: steps |> List.last() |> Map.delete(:path),
           is_genus_level: false,
           page_title: "#{taxon_name} — Taxonomy"
         )
     end
-  end
-
-  defp build_breadcrumbs(path, taxa) do
-    root = %{name: "Quercus", level: "genus", url: ~p"/taxonomy"}
-
-    segments =
-      taxa
-      |> Enum.with_index(1)
-      |> Enum.map(fn {taxon, depth} ->
-        %{name: taxon.name, level: taxon.level, url: taxonomy_url(Enum.take(path, depth))}
-      end)
-
-    [root | segments]
-  end
-
-  defp taxonomy_url(segments) do
-    encoded = Enum.map_join(segments, "/", &URI.encode_www_form/1)
-    "/taxonomy/#{encoded}"
   end
 
   # -- Render --
@@ -166,21 +155,8 @@ defmodule OaksWeb.TaxonomyLive do
   def render(assigns) do
     ~H"""
     <.page>
-      <div>
-        <.taxonomy_band class="taxonomy-page-band" label="Taxonomy breadcrumb">
-          <:rank
-            :for={crumb <- Enum.drop(@breadcrumbs, -1)}
-            navigate={crumb.url}
-            rank={rank_word(crumb.level)}
-            rank_after={crumb.level == "complex"}
-          >
-            <.sci_name name={crumb.name} level={crumb.level} />
-          </:rank>
-          <:current rank={rank_word(@current_level)} rank_after={@current_level == "complex"}>
-            <.sci_name name={current_name(@current_taxon)} level={@current_level} />
-          </:current>
-        </.taxonomy_band>
-
+      <:bleed><.taxonomy_band ranks={@band_ranks} current={@band_current} /></:bleed>
+      <:head>
         <.header id="taxon-title">
           <.sci_name name={current_name(@current_taxon)} level={@current_level} size="display" />
           <:meta>{level_label(@current_level)}</:meta>
@@ -210,7 +186,9 @@ defmodule OaksWeb.TaxonomyLive do
             </.button>
           </:actions>
         </.header>
+      </:head>
 
+      <div>
         <%!-- Taxon content --%>
         <section :if={@current_taxon && @current_taxon.content} class="taxon-section">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-s4">
@@ -290,7 +268,7 @@ defmodule OaksWeb.TaxonomyLive do
   attr :editor, :boolean, default: false
 
   defp taxon_card(assigns) do
-    url = taxonomy_url(assigns.path ++ [assigns.taxon.name])
+    url = TaxonPath.taxonomy_path(assigns.path ++ [assigns.taxon.name])
     assigns = assign(assigns, :url, url)
 
     ~H"""
@@ -401,13 +379,6 @@ defmodule OaksWeb.TaxonomyLive do
 
   defp level_label(nil), do: nil
   defp level_label(level), do: String.capitalize(level)
-
-  # The rank word the taxonomy band sets roman beside a name
-  defp rank_word("subgenus"), do: "subg."
-  defp rank_word("section"), do: "sect."
-  defp rank_word("subsection"), do: "subsect."
-  defp rank_word("complex"), do: "complex"
-  defp rank_word(_level), do: nil
 
   defp current_name(nil), do: "Quercus"
   defp current_name(taxon), do: taxon.name

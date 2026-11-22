@@ -32,12 +32,34 @@ for (const key of ["oak:api_key", "oak:session_timestamp", "oak:session_timeout_
 
 const Hooks = {
   ...colocatedHooks,
-  // Taxonomy band (DesignComponents.taxonomy_band): on phones the path is
-  // one scrolling line; keep the current taxon, at its end, in view.
+  // Taxonomy band (DesignComponents.taxonomy_band): the path is one line.
+  // When it is too long for the band, mark it (data-overflow) and keep the
+  // current taxon, at its end, in view; while anything is scrolled off to
+  // the left, mark that too (data-scrolled, which fades the left edge).
+  // Measured again when the band or the path's last step changes size, as
+  // when the band's fonts arrive.
   PinCurrentTaxon: {
-    mounted() { this.pin() },
+    mounted() {
+      this.observer = new ResizeObserver(() => this.pin())
+      this.observer.observe(this.el)
+      this.el.addEventListener("scroll", () => this.mark(), {passive: true})
+      this.pin()
+    },
     updated() { this.pin() },
-    pin() { this.el.scrollLeft = this.el.scrollWidth }
+    destroyed() { this.observer?.disconnect() },
+    pin() {
+      const ol = this.el
+      const last = ol.lastElementChild
+      if (last !== this.last) {
+        if (this.last) this.observer.unobserve(this.last)
+        if (last) this.observer.observe(last)
+        this.last = last
+      }
+      ol.toggleAttribute("data-overflow", ol.scrollWidth > ol.clientWidth)
+      ol.scrollLeft = ol.scrollWidth
+      this.mark()
+    },
+    mark() { this.el.toggleAttribute("data-scrolled", this.el.scrollLeft > 0) }
   },
   TagInput: {
     mounted() {

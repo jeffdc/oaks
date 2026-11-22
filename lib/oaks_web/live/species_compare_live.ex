@@ -14,6 +14,7 @@ defmodule OaksWeb.SpeciesCompareLive do
   alias Oaks.Species
   alias OaksWeb.Params
   alias OaksWeb.SpeciesName
+  alias OaksWeb.TaxonPath
 
   @max_sources 4
 
@@ -37,6 +38,7 @@ defmodule OaksWeb.SpeciesCompareLive do
      assign(socket,
        page_title: "Compare Sources",
        species: nil,
+       band_ranks: [],
        all_sources: [],
        selected_ids: [],
        fields: @fields
@@ -64,6 +66,7 @@ defmodule OaksWeb.SpeciesCompareLive do
         {:noreply,
          assign(socket,
            species: species,
+           band_ranks: species |> Species.placement() |> TaxonPath.ranks(),
            all_sources: sources,
            selected_ids: default_ids,
            page_title:
@@ -106,6 +109,9 @@ defmodule OaksWeb.SpeciesCompareLive do
 
     ~H"""
     <.page width="frame">
+      <:bleed :if={@species}>
+        <.taxonomy_band ranks={@band_ranks} current={TaxonPath.current(@species)} />
+      </:bleed>
       <:head :if={@species}><.comparison_header species={@species} /></:head>
 
       <div :if={@species} class="source-comparison-card">
