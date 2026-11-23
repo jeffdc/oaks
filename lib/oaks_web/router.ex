@@ -4,23 +4,6 @@ defmodule OaksWeb.Router do
   import OaksWeb.UserAuth,
     only: [fetch_current_scope_for_user: 2, require_authenticated_user: 2, require_sudo_mode: 2]
 
-  # Scripts only from our own origin, so injected markup can't run code even if
-  # it slips past markdown sanitizing. Inline styles are allowed because the
-  # templates use style attributes; images may come from any HTTPS host
-  # (iNaturalist photos in articles).
-  @content_security_policy [
-    "default-src 'self'",
-    "script-src 'self'",
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: https:",
-    "font-src 'self' data:",
-    "connect-src 'self'",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'self'"
-  ]
-
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -28,10 +11,9 @@ defmodule OaksWeb.Router do
     plug :put_root_layout, html: {OaksWeb.Layouts, :root}
     plug :protect_from_forgery
 
-    plug :put_secure_browser_headers, %{
-      "content-security-policy" => Enum.join(@content_security_policy, "; ")
-    }
-
+    # The CSP and Phoenix's secure defaults; the endpoint puts the same
+    # headers on error responses (OaksWeb.Plugs.SecurityHeaders).
+    plug OaksWeb.Plugs.SecurityHeaders
     plug :fetch_current_scope_for_user
   end
 

@@ -24,6 +24,15 @@ defmodule Oaks.MarkdownTest do
     refute html =~ "style="
   end
 
+  test "strips inline styles from every tag, keeping the content" do
+    for tag <- ~w(span div pre code p mark td) do
+      html = Markdown.render_html(~s(<#{tag} style="color: red;">kept</#{tag}>))
+
+      refute html =~ "style", html
+      assert html =~ "kept", html
+    end
+  end
+
   test "strips scripts, event handlers, iframes, and javascript: URLs" do
     for evil <- [
           ~S|<script>alert(1)</script>|,
