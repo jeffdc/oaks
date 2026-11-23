@@ -42,14 +42,19 @@ COPY config/runtime.exs config/
 # Compile first (needed for colocated hooks)
 RUN mix compile
 
-# Place a pinned, checksummed Tailwind binary where the tailwind package looks
-# for it (_build/tailwind-<target>-<version>, tailwind >= 0.5); `mix tailwind`
-# then skips its own unverified download. Keep the version, in the URL and in
-# the path, in sync with `config :tailwind` in config/config.exs
-# (scripts/check-toolchain checks both).
-ADD https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.12/tailwindcss-linux-x64-musl /app/_build/tailwind-linux-x64-musl-4.1.12
-RUN echo "a8a1926a2951a5da0684c568d612bc0a590600334d3a85d0e63ea90ac7ced2e5  /app/_build/tailwind-linux-x64-musl-4.1.12" | sha256sum -c - && \
-    chmod +x /app/_build/tailwind-linux-x64-musl-4.1.12
+# A pinned, checksummed Tailwind binary, handed to the tailwind package with
+# MIX_TAILWIND_PATH (read by `config :tailwind, path:` in config/config.exs),
+# as flake.nix does for dev and CI. `mix tailwind` then always runs this file
+# and never makes its own unverified download, whatever the package's default
+# path naming. It is the linux-x64-musl build (Fly), so a build on another
+# platform (arm64) fails at `mix tailwind` rather than fetching a different,
+# unchecked binary. Keep the
+# version, in the URL and in the path, in sync with `config :tailwind` in
+# config/config.exs (scripts/check-toolchain checks both).
+ENV MIX_TAILWIND_PATH=/usr/local/bin/tailwindcss-4.1.12
+ADD https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.12/tailwindcss-linux-x64-musl ${MIX_TAILWIND_PATH}
+RUN echo "a8a1926a2951a5da0684c568d612bc0a590600334d3a85d0e63ea90ac7ced2e5  ${MIX_TAILWIND_PATH}" | sha256sum -c - && \
+    chmod +x "${MIX_TAILWIND_PATH}"
 
 # Build assets (esbuild is installed via mix from npm; tailwind is placed above)
 RUN mix assets.deploy
