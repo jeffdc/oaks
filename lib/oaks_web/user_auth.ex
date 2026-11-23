@@ -54,10 +54,15 @@ defmodule OaksWeb.UserAuth do
 
   @doc """
   Starts a session for `user` without redirecting: after setup or a password
-  change, where the response then shows a page.
+  change, where the response then shows a page. It also assigns the
+  user's `:current_scope`, so that page renders with the logged-in shell.
   """
   def put_new_session(conn, user) do
-    create_or_extend_session(conn, %{user | authenticated_at: DateTime.utc_now(:second)})
+    user = %{user | authenticated_at: DateTime.utc_now(:second)}
+
+    conn
+    |> create_or_extend_session(user)
+    |> assign(:current_scope, Scope.for_user(user))
   end
 
   @doc "Logs the user out: ends the session, its LiveViews and the remember-me cookie."
