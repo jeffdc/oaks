@@ -35,9 +35,10 @@ defmodule OaksWeb.HelpMarkdownLive do
     },
     %{
       title: "Inline HTML",
-      description: "You can use HTML tags for formatting not covered by Markdown.",
+      description:
+        "You can use HTML tags for formatting not covered by Markdown. Inline styles (style attributes) are removed, so text keeps the site's colours and fonts.",
       example:
-        "<sup>superscript</sup> and <sub>subscript</sub>\n<mark>highlighted text</mark>\n<u>underlined text</u>\n<kbd>Ctrl</kbd> + <kbd>S</kbd>\n<span style=\"color: red;\">colored text</span>\n\n<details>\n<summary>Click to expand</summary>\nHidden content goes here.\n</details>"
+        "<sup>superscript</sup> and <sub>subscript</sub>\n<mark>highlighted text</mark>\n<u>underlined text</u>\n<kbd>Ctrl</kbd> + <kbd>S</kbd>\n\n<details>\n<summary>Click to expand</summary>\nHidden content goes here.\n</details>"
     },
     %{
       title: "Line Breaks",
