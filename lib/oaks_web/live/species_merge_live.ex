@@ -271,8 +271,7 @@ defmodule OaksWeb.SpeciesMergeLive do
         hybrid={@preview.source.is_hybrid}
         size="display"
       />
-      <span class="merge-title-arrow">&rarr;</span>
-      <.sci_name
+      <span class="merge-title-arrow">&rarr;</span>&nbsp;<.sci_name
         name={@preview.target.scientific_name}
         hybrid={@preview.target.is_hybrid}
         size="display"
