@@ -169,11 +169,15 @@
   }
 
   /* Search: a square field with a 1px paper border at 35% and a faint
-     paper wash; the "/" key hint at its right. */
+     paper wash; the "/" key hint at its right. It is 320px wide where
+     the row has room and shrinks to 200px before it would wrap (the line
+     break goes by the 200px basis), so the editor marks fit on one row
+     down to the 1024px stack. */
   .oc-search {
     margin-left: auto;
-    flex: 0 1 320px;
+    flex: 1 1 200px;
     min-width: 200px;
+    max-width: 320px;
     display: flex;
     align-items: center;
     background: color-mix(in srgb, var(--color-paper) 8%, transparent);
@@ -310,6 +314,7 @@
       flex: 1 1 100%;
       min-width: 0;
       margin-left: 0;
+      max-width: none;
     }
     .oc-nav {
       order: 4;
