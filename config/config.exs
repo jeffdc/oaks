@@ -46,8 +46,9 @@ config :esbuild,
   ]
 
 # Configure tailwind (the version is required)
-# The Nix dev shell sets MIX_TAILWIND_PATH to a pinned binary; when it is unset the
-# tailwind package uses its default location under _build (see flake.nix, Dockerfile).
+# The Nix dev shell and the Dockerfile set MIX_TAILWIND_PATH to a pinned, hashed
+# binary; when it is unset the tailwind package downloads one to its default
+# location under _build (see flake.nix, Dockerfile).
 config :tailwind,
   version: "4.1.12",
   path: System.get_env("MIX_TAILWIND_PATH"),

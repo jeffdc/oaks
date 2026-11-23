@@ -37,7 +37,7 @@ defmodule OaksWeb.SourcesLiveTest do
   describe "GET /sources" do
     test "renders sources list page", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/sources")
-      assert html =~ "Data Sources"
+      assert html =~ "Data sources"
     end
 
     test "displays all sources", %{conn: conn, sources: sources} do

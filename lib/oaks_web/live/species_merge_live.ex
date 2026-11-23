@@ -131,17 +131,21 @@ defmodule OaksWeb.SpeciesMergeLive do
     {:noreply, assign(socket, show_confirm: false, merge_error: nil)}
   end
 
+  # The merge runs in a message to self, after this event's render has
+  # sent the dialog's "Merging species…" state to the browser.
   def handle_event("execute_merge", _params, socket) do
-    if socket.assigns[:current_scope] do
-      execute_merge(socket)
+    if socket.assigns[:current_scope] && !socket.assigns.merging do
+      send(self(), :run_merge)
+      {:noreply, assign(socket, merging: true, merge_error: nil, completed_steps: [])}
     else
       {:noreply, socket}
     end
   end
 
-  defp execute_merge(socket) do
-    socket = assign(socket, merging: true, merge_error: nil, completed_steps: [])
+  @impl true
+  def handle_info(:run_merge, socket), do: execute_merge(socket)
 
+  defp execute_merge(socket) do
     include_sources =
       socket.assigns.source_checkboxes
       |> Enum.filter(fn {_id, checked} -> checked end)
@@ -237,7 +241,7 @@ defmodule OaksWeb.SpeciesMergeLive do
   defp loading_state(assigns) do
     ~H"""
     <div class="py-s8 text-center">
-      <div class="loading-spinner mx-auto mb-4"></div>
+      <div class="merge-spinner mx-auto mb-4"></div>
       <p class="merge-muted">Loading species data...</p>
     </div>
     """
@@ -249,9 +253,9 @@ defmodule OaksWeb.SpeciesMergeLive do
   defp error_state(assigns) do
     ~H"""
     <div class="merge-error-state">
-      <.back navigate={~p"/species"}>Back to Species List</.back>
+      <.back navigate={~p"/species"}>Back to species list</.back>
       <.header>
-        Unable to Load Merge
+        Unable to load merge
         <:subtitle>{@error}</:subtitle>
       </.header>
     </div>
@@ -271,8 +275,7 @@ defmodule OaksWeb.SpeciesMergeLive do
         hybrid={@preview.source.is_hybrid}
         size="display"
       />
-      <span class="merge-title-arrow">&rarr;</span>
-      <.sci_name
+      <span class="merge-title-arrow">&rarr;</span>&nbsp;<.sci_name
         name={@preview.target.scientific_name}
         hybrid={@preview.target.is_hybrid}
         size="display"
@@ -327,7 +330,7 @@ defmodule OaksWeb.SpeciesMergeLive do
   defp field_comparison_section(assigns) do
     ~H"""
     <div class="mb-6">
-      <h2 class="section-title">Species Fields</h2>
+      <.section_heading>Species Fields</.section_heading>
 
       <.merge_field_row
         :for={field <- ~w(author conservation_status)}
@@ -449,7 +452,7 @@ defmodule OaksWeb.SpeciesMergeLive do
 
     ~H"""
     <div :if={@synonym_only != []} class="mb-6">
-      <h2 class="section-title">Source Data Transfer</h2>
+      <.section_heading>Source Data Transfer</.section_heading>
       <p class="merge-lede">
         These sources exist only on the synonym. Check the ones you want to transfer to the target.
       </p>
@@ -852,7 +855,7 @@ defmodule OaksWeb.SpeciesMergeLive do
           <p>{@merge_error}</p>
         <% @merging -> %>
           <div class="flex justify-center py-s4">
-            <div class="loading-spinner"></div>
+            <div class="merge-spinner"></div>
           </div>
         <% true -> %>
           <p>

@@ -50,7 +50,7 @@ defmodule OaksWeb.SpeciesFormLive do
 
     socket
     |> assign(
-      page_title: "New Species",
+      page_title: "New species",
       species: species,
       form: to_form(changeset)
     )
@@ -135,10 +135,10 @@ defmodule OaksWeb.SpeciesFormLive do
       </div>
 
       <:head :if={@form}>
-        <.back navigate={cancel_path(@live_action, @species)}>Back</.back>
+        <.back navigate={cancel_path(@live_action, @species)}>Back to species</.back>
 
         <.header>
-          <span :if={@live_action == :new}>New Species</span>
+          <span :if={@live_action == :new}>New species</span>
           <span :if={@live_action == :edit}>
             Edit
             <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} size="display" />
@@ -150,8 +150,8 @@ defmodule OaksWeb.SpeciesFormLive do
         <.form for={@form} id="species-form" phx-change="validate" phx-submit="save">
           <div class="species-form-sections">
             <%!-- Core fields --%>
-            <div class="card">
-              <h2 class="section-title section-title-sm mb-4">Basic Information</h2>
+            <section>
+              <.section_heading>Basic Information</.section_heading>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="sm:col-span-2">
                   <.input
@@ -187,11 +187,11 @@ defmodule OaksWeb.SpeciesFormLive do
                   <.input field={@form[:is_hybrid]} type="checkbox" label="Is Hybrid" />
                 </div>
               </div>
-            </div>
+            </section>
 
             <%!-- Taxonomy fields --%>
-            <div class="card">
-              <h2 class="section-title section-title-sm mb-4">Taxonomy</h2>
+            <section>
+              <.section_heading>Taxonomy</.section_heading>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <.input
@@ -230,11 +230,11 @@ defmodule OaksWeb.SpeciesFormLive do
                   />
                 </div>
               </div>
-            </div>
+            </section>
 
             <%!-- Hybrid parentage (shown when is_hybrid is checked) --%>
-            <div class="card">
-              <h2 class="section-title section-title-sm mb-4">Hybrid Parentage</h2>
+            <section>
+              <.section_heading>Hybrid Parentage</.section_heading>
               <p class="oc-hint species-form-lede">
                 Only relevant for hybrid species.
               </p>
@@ -258,11 +258,11 @@ defmodule OaksWeb.SpeciesFormLive do
                   />
                 </div>
               </div>
-            </div>
+            </section>
 
             <%!-- Relationships (JSON arrays stored as comma-separated text) --%>
-            <div class="card">
-              <h2 class="section-title section-title-sm mb-4">Relationships</h2>
+            <section>
+              <.section_heading>Relationships</.section_heading>
               <p class="oc-hint species-form-lede">
                 Enter names separated by commas. JSON arrays are also accepted.
               </p>
@@ -296,13 +296,13 @@ defmodule OaksWeb.SpeciesFormLive do
                   phx-debounce="300"
                 />
               </div>
-            </div>
+            </section>
 
             <%!-- Submit --%>
             <div class="species-form-actions">
               <.button navigate={cancel_path(@live_action, @species)}>Cancel</.button>
               <.button type="submit" variant="primary" phx-disable-with="Saving...">
-                {if(@live_action == :new, do: "Create Species", else: "Save Changes")}
+                {if(@live_action == :new, do: "Create species", else: "Save changes")}
               </.button>
             </div>
           </div>

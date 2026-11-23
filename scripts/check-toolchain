@@ -9,8 +9,8 @@
 #     `elixir --short-version` and the exact OTP version
 #   - runtime image alpine:<alpine> matches the builder's Alpine version
 #   - Tailwind download version matches `config :tailwind, version:` in config/config.exs
-#   - the version in the binary's _build/tailwind-<target>-<version> path (where
-#     the tailwind package looks for it, so it skips its own download) matches too
+#   - the version in the binary's path, `ENV MIX_TAILWIND_PATH=.../tailwindcss-<version>`
+#     (which the tailwind package runs, so it never downloads its own), matches too
 # and that flake.nix's pinned tailwindVersion matches config/config.exs.
 #
 # Mirrors gallformers' scripts/check-toolchain.
@@ -63,16 +63,16 @@ if [ -f "$file" ]; then
   d_alpine=$(echo "$builder" | sed -n 's|.*-alpine-\(.*\)$|\1|p')
   d_runtime_alpine=$(sed -n 's|^FROM alpine:\([^ ]*\) AS runtime.*|\1|p' "$file")
   d_tailwind=$(sed -n 's|.*tailwindcss/releases/download/v\([^/]*\)/.*|\1|p' "$file" | head -1)
-  # Every _build/tailwind-<target>-<version> path (ADD, sha256sum, chmod), deduplicated;
-  # more than one distinct version shows up as a space-separated list and fails.
-  d_tailwind_path=$(grep -o '_build/tailwind-[a-z0-9-]*-[0-9][0-9.]*[0-9]' "$file" |
-    sed 's|^_build/tailwind-[a-z0-9-]*-\([0-9][0-9.]*\)$|\1|' | sort -u | tr '\n' ' ' | sed 's/ $//')
+  # The version in `ENV MIX_TAILWIND_PATH=.../tailwindcss-<version>`; more than one
+  # such line shows up as a space-separated list and fails.
+  d_tailwind_path=$(sed -n 's|^ENV MIX_TAILWIND_PATH=.*/tailwindcss-\([0-9][0-9.]*\)$|\1|p' "$file" |
+    tr '\n' ' ' | sed 's/ $//')
 
   check "Dockerfile Elixir" "$elixir_version" "$d_elixir"
   check "Dockerfile OTP" "$otp_version" "$d_otp"
   check "Dockerfile runtime Alpine (= builder Alpine)" "$d_alpine" "$d_runtime_alpine"
   check "Dockerfile Tailwind (= config.exs)" "$tailwind_version" "$d_tailwind"
-  check "Dockerfile Tailwind _build path (= config.exs)" "$tailwind_version" "$d_tailwind_path"
+  check "Dockerfile MIX_TAILWIND_PATH (= config.exs)" "$tailwind_version" "$d_tailwind_path"
 else
   fail "Dockerfile not found"
 fi

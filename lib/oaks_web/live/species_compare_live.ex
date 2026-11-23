@@ -191,17 +191,9 @@ defmodule OaksWeb.SpeciesCompareLive do
       <div class="comparison-grid-header">
         <div class="comparison-field-label comparison-header-cell">Field</div>
         <div :for={ss <- @sources} class="comparison-source-header comparison-header-cell">
-          <a
-            :if={ss.source.url}
-            href={ss.source.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="comparison-source-name"
-            title="Visit source"
-          >
+          <.link navigate={~p"/sources/#{ss.source.id}"} class="comparison-source-name">
             {ss.source.name}
-          </a>
-          <span :if={!ss.source.url} class="comparison-source-name">{ss.source.name}</span>
+          </.link>
           <span :if={ss.is_preferred} class="comparison-preferred-badge">Preferred source</span>
         </div>
       </div>
@@ -242,7 +234,7 @@ defmodule OaksWeb.SpeciesCompareLive do
       <% {:text, text} -> %>
         <div class="comparison-text-content">{text}</div>
       <% {:html, html} -> %>
-        <div class="prose-content prose-content-compact">{raw(html)}</div>
+        <div class="oc-prose">{raw(html)}</div>
     <% end %>
     """
   end

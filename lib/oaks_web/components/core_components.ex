@@ -121,6 +121,16 @@ defmodule OaksWeb.CoreComponents do
   which is used to retrieve the input name, id, and values.
   Otherwise all attributes may be passed explicitly.
 
+  ## Faces (DESIGN.md, Form Fields: the Field Face Rule)
+
+  A field takes the face of what goes in it. A prose field, where
+  someone writes sentences to be read (a description, notes, a source's
+  account of a trait), is `type="textarea"` and set in the serif, as the
+  text will read. Every other field (names, authors, years, URLs,
+  choices, codes) is one line in Archivo. Pick the type by that rule:
+  never a one-line input for prose, never a textarea for a short value.
+  Long Markdown text uses `FormComponents.markdown_editor/1`, also serif.
+
   ## Types
 
   This function accepts all HTML input types, considering that:

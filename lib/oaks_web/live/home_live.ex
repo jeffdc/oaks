@@ -159,7 +159,7 @@ defmodule OaksWeb.HomeLive do
           A trait filter that narrows the oaks by what you can see, and a helper for hybrids.
         </:entry>
         <:entry title="Sources" navigate={~p"/sources"} count={@counts.sources}>
-          Jeff Clark’s notes first; Oaks of the World, the Sibley guide and the literature behind them.
+          Where the data comes from. Much is unique to the Compendium but some we also use other sources of fact.
         </:entry>
         <:entry title="About" navigate={~p"/about"}>
           What the Compendium is, how its facts are sourced, and who keeps it.

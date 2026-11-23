@@ -55,7 +55,7 @@ defmodule OaksWeb.TaxonFormLive do
 
     socket
     |> assign(
-      page_title: "Create Taxon",
+      page_title: "New taxon",
       taxon: taxon,
       form: to_form(changeset),
       parent_options: parent_options_for_level(default_level),
@@ -215,7 +215,7 @@ defmodule OaksWeb.TaxonFormLive do
 
         <.header>
           <%= if @live_action == :new do %>
-            Create Taxon
+            New taxon
           <% else %>
             Edit {level_label(@taxon.level)}:
             <.sci_name name={@taxon.name} level={@taxon.level} size="display" />
@@ -228,7 +228,7 @@ defmodule OaksWeb.TaxonFormLive do
           <div class="space-y-s7">
             <%!-- Core fields --%>
             <section>
-              <h2 class="section-title section-title-sm mb-s4">Core Information</h2>
+              <.section_heading>Core Information</.section_heading>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-s5">
                 <div>
                   <%= if @live_action == :new do %>
@@ -281,7 +281,7 @@ defmodule OaksWeb.TaxonFormLive do
 
             <%!-- Content --%>
             <section>
-              <h2 class="section-title section-title-sm mb-s4">Content</h2>
+              <.section_heading>Content</.section_heading>
               <div class="space-y-s4">
                 <.markdown_editor
                   field={@form[:content]}
@@ -308,7 +308,7 @@ defmodule OaksWeb.TaxonFormLive do
             <div class="flex items-center justify-end gap-s2 pt-s4 border-t border-rule">
               <.button navigate={~p"/taxonomy"}>Cancel</.button>
               <.button type="submit" variant="primary" phx-disable-with="Saving...">
-                {if(@live_action == :new, do: "Create Taxon", else: "Save Changes")}
+                {if(@live_action == :new, do: "Create taxon", else: "Save changes")}
               </.button>
             </div>
           </div>

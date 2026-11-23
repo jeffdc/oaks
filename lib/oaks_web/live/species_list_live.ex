@@ -20,7 +20,7 @@ defmodule OaksWeb.SpeciesListLive do
     {:ok,
      socket
      |> assign(
-       page_title: "Species List",
+       page_title: "Species list",
        subgenera: subgenera,
        sections: sections,
        query: "",
@@ -75,7 +75,7 @@ defmodule OaksWeb.SpeciesListLive do
     <.page>
       <:head>
         <.header id="species-list-title">
-          Species List
+          Species list
           <:meta>{@species_count - @hybrid_count} species</:meta>
           <:meta>{@hybrid_count} {if @hybrid_count == 1, do: "hybrid", else: "hybrids"}</:meta>
           <:meta><strong>{@species_count} total</strong></:meta>
@@ -90,29 +90,34 @@ defmodule OaksWeb.SpeciesListLive do
       <form id="filter-form" phx-change="filter" class="species-filters">
         <div class="species-search">
           <.icon name="hero-magnifying-glass" class="species-search-icon" />
-          <input
+          <.input
             type="search"
             id="species-search"
             name="q"
             value={@query}
             placeholder="Search by species name..."
             aria-label="Search by species name"
-            class="input input-bordered"
             phx-debounce="300"
           />
         </div>
-        <select name="subgenus" class="select select-bordered" aria-label="Subgenus">
-          <option value="">All Subgenera</option>
-          <option :for={sg <- @subgenera} value={sg} selected={sg == @subgenus}>
-            {sg}
-          </option>
-        </select>
-        <select name="section" class="select select-bordered" aria-label="Section">
-          <option value="">All Sections</option>
-          <option :for={sec <- @sections} value={sec} selected={sec == @section}>
-            {sec}
-          </option>
-        </select>
+        <.input
+          type="select"
+          id="species-subgenus"
+          name="subgenus"
+          value={@subgenus}
+          options={@subgenera}
+          prompt="All Subgenera"
+          aria-label="Subgenus"
+        />
+        <.input
+          type="select"
+          id="species-section"
+          name="section"
+          value={@section}
+          options={@sections}
+          prompt="All Sections"
+          aria-label="Section"
+        />
       </form>
 
       <div :if={@species_count == 0} class="species-empty">
@@ -124,7 +129,7 @@ defmodule OaksWeb.SpeciesListLive do
         :if={@species_count > 0}
         id="species-list"
         phx-update="stream"
-        class="species-rows"
+        class="species-rows species-index"
       >
         <.species_row :for={{dom_id, species} <- @streams.species} id={dom_id} species={species} />
       </div>
@@ -153,17 +158,19 @@ defmodule OaksWeb.SpeciesListLive do
         />
       </span>
       <span class="species-row-meta">
-        <span :if={@species.subgenus} class="hidden sm:inline">
-          <.sci_name name={@species.subgenus} rank="subg." size="meta" />
+        <span class="hidden sm:block">
+          <.sci_name :if={@species.subgenus} name={@species.subgenus} rank="subg." size="meta" />
         </span>
-        <span :if={@species.section} class="hidden md:inline">
-          <.sci_name name={@species.section} rank="sect." size="meta" />
+        <span class="hidden md:block">
+          <.sci_name :if={@species.section} name={@species.section} rank="sect." size="meta" />
         </span>
-        <.iucn_status
-          :if={@species.conservation_status}
-          code={@species.conservation_status}
-          prefix={false}
-        />
+        <span class="species-row-status">
+          <.iucn_status
+            :if={@species.conservation_status}
+            code={@species.conservation_status}
+            prefix={false}
+          />
+        </span>
       </span>
     </.link>
     """

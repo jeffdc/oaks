@@ -35,9 +35,10 @@ defmodule OaksWeb.HelpMarkdownLive do
     },
     %{
       title: "Inline HTML",
-      description: "You can use HTML tags for formatting not covered by Markdown.",
+      description:
+        "You can use HTML tags for formatting not covered by Markdown. Inline styles (style attributes) are removed, so text keeps the site's colours and fonts.",
       example:
-        "<sup>superscript</sup> and <sub>subscript</sub>\n<mark>highlighted text</mark>\n<u>underlined text</u>\n<kbd>Ctrl</kbd> + <kbd>S</kbd>\n<span style=\"color: red;\">colored text</span>\n\n<details>\n<summary>Click to expand</summary>\nHidden content goes here.\n</details>"
+        "<sup>superscript</sup> and <sub>subscript</sub>\n<mark>highlighted text</mark>\n<u>underlined text</u>\n<kbd>Ctrl</kbd> + <kbd>S</kbd>\n\n<details>\n<summary>Click to expand</summary>\nHidden content goes here.\n</details>"
     },
     %{
       title: "Line Breaks",
@@ -55,12 +56,12 @@ defmodule OaksWeb.HelpMarkdownLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page width="read" class="space-y-s7">
+    <.page class="space-y-s7">
       <:head>
         <.header>Markdown Formatting Guide</.header>
       </:head>
 
-      <section class="prose-content">
+      <section class="oc-prose">
         <p>
           Text fields in the Oak Compendium support
           <a href="https://github.github.com/gfm/" target="_blank" rel="noopener noreferrer">GitHub Flavored Markdown</a>
@@ -83,7 +84,7 @@ defmodule OaksWeb.HelpMarkdownLive do
     ~H"""
     <section>
       <.section_heading>{@title}</.section_heading>
-      <div :if={@description} class="prose-content">
+      <div :if={@description} class="oc-prose">
         <p>{@description}</p>
       </div>
       <div class="page-md-example">
@@ -93,7 +94,7 @@ defmodule OaksWeb.HelpMarkdownLive do
         </div>
         <div>
           <div class="page-md-label">Result</div>
-          <div class="page-md-result prose-content">
+          <div class="page-md-result oc-prose">
             {raw(Markdown.render_html(@example))}
           </div>
         </div>

@@ -43,6 +43,9 @@ defmodule OaksWeb.UserSetupControllerTest do
     html = html_response(conn, 200)
     assert html =~ "Setup complete"
     assert [_ | _] = Regex.scan(~r/[A-Z2-7]{4}-[A-Z2-7]{4}-[A-Z2-7]{4}-[A-Z2-7]{4}/, html)
+    # The page shows the logged-in shell: the Editor menu, no Log in link.
+    assert html =~ ~s(id="editor-menu")
+    refute html =~ ~s(href="/users/log-in")
 
     assert token = get_session(conn, :user_token)
     refute get_session(conn, :setup)

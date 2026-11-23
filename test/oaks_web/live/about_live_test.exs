@@ -13,7 +13,7 @@ defmodule OaksWeb.AboutLiveTest do
 
   test "has data sources section", %{conn: conn} do
     {:ok, _view, html} = live(conn, ~p"/about")
-    assert html =~ "Data Sources"
+    assert html =~ "Data sources"
     assert html =~ "iNaturalist"
     assert html =~ "Oaks of the World"
   end
@@ -40,9 +40,8 @@ defmodule OaksWeb.AboutLiveTest do
     {:ok, view, _html} = live(conn, ~p"/about")
     html = render(view)
 
-    assert html =~ ~r/<dt>Species<\/dt>\s*<dd>\s*#{total - hybrids}\s*<\/dd>/
-    assert html =~ ~r/<dt>Hybrids<\/dt>\s*<dd>\s*#{hybrids}\s*<\/dd>/
-    assert html =~ ~r/<dt>Total Entries<\/dt>\s*<dd>\s*#{total}\s*<\/dd>/
+    assert html =~
+             "The database holds #{total - hybrids} species and #{hybrids} hybrids, #{total} entries in all."
   end
 
   test "shows the deployed app version and API version", %{conn: conn} do

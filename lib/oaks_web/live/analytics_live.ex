@@ -31,7 +31,7 @@ defmodule OaksWeb.AnalyticsLive do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:page_title, "Site Analytics")
+     |> assign(:page_title, "Site analytics")
      |> assign(:ranges, @ranges)}
   end
 
@@ -173,7 +173,7 @@ defmodule OaksWeb.AnalyticsLive do
     <.page class="space-y-s7" data-active-range={@range}>
       <:head>
         <.header>
-          Site Analytics
+          Site analytics
           <:subtitle>
             Privacy-respecting page view stats for the Oak Compendium.
             Showing <strong>{range_label(@range)}</strong>

@@ -73,7 +73,7 @@ defmodule OaksWeb.SourceDetailLive do
     ~H"""
     <.page>
       <:head :if={@source}>
-        <.back navigate={~p"/sources"}>Back to Sources</.back>
+        <.back navigate={~p"/sources"}>Back to sources</.back>
         <.source_header source={@source} editor={@current_scope != nil} />
       </:head>
 
@@ -174,7 +174,7 @@ defmodule OaksWeb.SourceDetailLive do
   defp coverage_section(assigns) do
     ~H"""
     <section class="source-coverage">
-      <h2 class="section-title">Coverage</h2>
+      <.section_heading>Coverage</.section_heading>
       <p class="source-coverage-count">
         {length(@species)} species
       </p>
@@ -187,7 +187,7 @@ defmodule OaksWeb.SourceDetailLive do
   defp species_section(assigns) do
     ~H"""
     <section class="source-species">
-      <h2 class="section-title">Species with Data from This Source</h2>
+      <.section_heading>Species with Data from This Source</.section_heading>
       <div class="source-species-grid">
         <.link
           :for={sp <- @species}

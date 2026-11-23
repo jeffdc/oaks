@@ -410,26 +410,30 @@ defmodule OaksWeb.SpeciesDetailLive do
     ~H"""
     <div class="source-tabs-strip">
       <div class="source-tabs-list" role="tablist" aria-label="Sources">
-        <button
+        <div
           :for={ss <- @sources}
-          phx-click="select_source"
-          phx-value-id={ss.source.id}
           class={["source-tab", selected_tab?(ss, @selected) && "active"]}
-          role="tab"
-          aria-selected={to_string(selected_tab?(ss, @selected))}
+          role="presentation"
         >
-          <span class="source-tab-name">{ss.source.name}</span>
-          <span :if={ss.is_preferred} class="source-tab-note">preferred</span>
+          <button
+            type="button"
+            phx-click="select_source"
+            phx-value-id={ss.source.id}
+            role="tab"
+            aria-selected={to_string(selected_tab?(ss, @selected))}
+          >
+            <span class="source-tab-name">{ss.source.name}</span>
+            <span :if={ss.is_preferred} class="source-tab-note">preferred</span>
+          </button>
           <.link
             navigate={~p"/sources/#{ss.source.id}"}
             class="source-tab-link"
             title="View source details"
             aria-label={"About #{ss.source.name}"}
-            tabindex="0"
           >
             <.icon name="hero-information-circle" class="size-4" />
           </.link>
-        </button>
+        </div>
       </div>
       <.compare_button
         :if={length(@sources) > 1}
@@ -508,7 +512,7 @@ defmodule OaksWeb.SpeciesDetailLive do
     ~H"""
     <section :if={@value && @value != ""} class="source-field">
       <h3 class="source-field-label">{@label}</h3>
-      <div class="prose-content">{raw(Markdown.render_html(@value))}</div>
+      <div class="oc-prose">{raw(Markdown.render_html(@value))}</div>
     </section>
     """
   end

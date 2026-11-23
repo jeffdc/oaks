@@ -194,9 +194,9 @@ defmodule Oaks.Species.Merge do
   defp list_additions(source, target) do
     for field <- @list_fields ++ [:external_links],
         current = References.decode(Map.get(target, field)),
-        (merged = merged_list(field, source, target)) != current,
+        (added = merged_list(field, source, target) -- current) != [],
         into: %{} do
-      {field, merged -- current}
+      {field, added}
     end
   end
 

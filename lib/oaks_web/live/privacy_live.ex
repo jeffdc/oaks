@@ -22,7 +22,7 @@ defmodule OaksWeb.PrivacyLive do
 
       <section>
         <.section_heading>Privacy-Protecting Analytics</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             The Oak Compendium uses a custom, self-hosted analytics system designed to respect
             visitor privacy while providing useful insights for site improvement. We do not use
@@ -33,7 +33,7 @@ defmodule OaksWeb.PrivacyLive do
 
       <section>
         <.section_heading>How It Works</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             We compute a daily visitor identifier as <code>SHA256(daily_salt &Vert; ip &Vert; user_agent)</code>, where
             the salt is a random secret generated each day and held only in server memory. The IP
@@ -63,7 +63,7 @@ defmodule OaksWeb.PrivacyLive do
 
       <section>
         <.section_heading>View Live Analytics</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             You can view real-time site analytics on the public <a href="/analytics">Analytics page</a>,
             which shows the same data collected using this privacy-protecting approach.
@@ -73,7 +73,7 @@ defmodule OaksWeb.PrivacyLive do
 
       <section>
         <.section_heading>What We Don't Store</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <ul>
             <li><strong>IP Addresses:</strong> never written to disk or logged</li>
             <li>
@@ -95,7 +95,7 @@ defmodule OaksWeb.PrivacyLive do
 
       <section>
         <.section_heading>What We Do Collect</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             The following is recorded per page view and aggregated for statistical purposes only:
           </p>
@@ -120,7 +120,7 @@ defmodule OaksWeb.PrivacyLive do
 
       <section>
         <.section_heading>Data Retention</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             Individual page-view records are kept for 30 days. After that they are rolled up
             into daily totals (views and unique visitors per page, referring sites, and error
@@ -133,7 +133,7 @@ defmodule OaksWeb.PrivacyLive do
 
       <section>
         <.section_heading>No Third-Party Trackers</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             The Oak Compendium does not use Google Analytics, Facebook Pixel, or any other
             third-party tracking service. All analytics happen in this application, on our
@@ -144,18 +144,18 @@ defmodule OaksWeb.PrivacyLive do
 
       <section>
         <.section_heading>Authentication</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
-            The Oak Compendium has no public user accounts and no login flow for visitors.
-            Write access to the database is gated by an API key used only by the site author;
-            no personal data is collected from visitors at any point.
+            The Oak Compendium has no public accounts and no sign-up: visitors never log in, and
+            no personal data is collected from them. Only the site's author logs in, and the login
+            cookies are never set for visitors.
           </p>
         </div>
       </section>
 
       <section>
         <.section_heading>Cookies</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             A standard Phoenix session cookie is used to carry the daily-rotating visitor hash
             between the initial page request and any client-side navigation that follows. It is
@@ -166,7 +166,7 @@ defmodule OaksWeb.PrivacyLive do
 
       <section>
         <.section_heading>External Services</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             The Oak Compendium relies on the following external services:
           </p>
@@ -182,7 +182,7 @@ defmodule OaksWeb.PrivacyLive do
 
       <section>
         <.section_heading>Changes to This Policy</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             We may update this privacy policy from time to time. Any changes will be posted on
             this page with an updated revision date below.
@@ -192,7 +192,7 @@ defmodule OaksWeb.PrivacyLive do
 
       <section>
         <.section_heading>Contact</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             If you have questions about this privacy policy or our data practices, please <a
               href="https://github.com/jeffdc/oaks/issues"
