@@ -1041,7 +1041,7 @@
 }
 
 .species-row-link,
-.species-rows .species-row-name {
+.species-rows > li > .species-row-name {
   display: block;
   padding: var(--spacing-s3) 0;
   color: var(--color-ink);
@@ -1575,11 +1575,17 @@ a.comparison-source-name:hover {
   border-top: 1px solid var(--color-rule);
 }
 
+/* Rows are subgrids of one grid, so the subgenus, section and status columns
+   line up; phones show the status, 640px adds subgenus and 768px section. */
+.species-index { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--spacing-s4); }
+@media (min-width: 640px) { .species-index { grid-template-columns: minmax(0, 1fr) auto auto; } }
+@media (min-width: 768px) { .species-index { grid-template-columns: minmax(0, 1fr) auto auto auto; } }
+
 .species-row {
-  display: flex;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-s4);
   padding: var(--spacing-s3) 0;
   border-bottom: 1px solid var(--color-rule);
   color: var(--color-ink);
@@ -1596,17 +1602,11 @@ a.comparison-source-name:hover {
   text-decoration: none;
 }
 
-.species-row .species-row-name {
-  min-width: 0;
-  line-height: 1.3;
-  color: var(--color-ink);
-}
+.species-row .species-row-name { line-height: 1.3; }
+.species-row-status { justify-self: end; }
 
 .species-row-meta {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: var(--spacing-s3);
+  display: contents;
   font: 500 13px/1.3 var(--font-frame);
   color: var(--color-ink-3);
 }

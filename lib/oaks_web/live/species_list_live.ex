@@ -129,7 +129,7 @@ defmodule OaksWeb.SpeciesListLive do
         :if={@species_count > 0}
         id="species-list"
         phx-update="stream"
-        class="species-rows"
+        class="species-rows species-index"
       >
         <.species_row :for={{dom_id, species} <- @streams.species} id={dom_id} species={species} />
       </div>
@@ -158,17 +158,19 @@ defmodule OaksWeb.SpeciesListLive do
         />
       </span>
       <span class="species-row-meta">
-        <span :if={@species.subgenus} class="hidden sm:inline">
-          <.sci_name name={@species.subgenus} rank="subg." size="meta" />
+        <span class="hidden sm:block">
+          <.sci_name :if={@species.subgenus} name={@species.subgenus} rank="subg." size="meta" />
         </span>
-        <span :if={@species.section} class="hidden md:inline">
-          <.sci_name name={@species.section} rank="sect." size="meta" />
+        <span class="hidden md:block">
+          <.sci_name :if={@species.section} name={@species.section} rank="sect." size="meta" />
         </span>
-        <.iucn_status
-          :if={@species.conservation_status}
-          code={@species.conservation_status}
-          prefix={false}
-        />
+        <span class="species-row-status">
+          <.iucn_status
+            :if={@species.conservation_status}
+            code={@species.conservation_status}
+            prefix={false}
+          />
+        </span>
       </span>
     </.link>
     """
