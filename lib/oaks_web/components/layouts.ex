@@ -125,6 +125,7 @@ defmodule OaksWeb.Layouts do
         <nav class="oc-footer-nav" aria-label="More">
           <.link navigate={~p"/articles"}>Articles</.link>
           <.link navigate={~p"/privacy"}>Privacy</.link>
+          <.link navigate={~p"/analytics"}>Analytics</.link>
           <a href="/api/v1/docs">API</a>
           <.link :if={!@current_scope} href={~p"/users/log-in"}>Log in</.link>
         </nav>

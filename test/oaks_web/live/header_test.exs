@@ -132,6 +132,7 @@ defmodule OaksWeb.HeaderTest do
       assert has_element?(view, "#site-footer", "Other sources are under their own terms")
       assert has_element?(view, "#site-footer a[href='/articles']", "Articles")
       assert has_element?(view, "#site-footer a[href='/privacy']", "Privacy")
+      assert has_element?(view, "#site-footer a[href='/analytics']", "Analytics")
       assert has_element?(view, "#site-footer a[href='/api/v1/docs']", "API")
       assert has_element?(view, "#site-footer a[href='/users/log-in']", "Log in")
     end

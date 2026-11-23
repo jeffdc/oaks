@@ -35,6 +35,17 @@ defmodule OaksWeb.UserSettingsControllerTest do
   describe "a recent login" do
     setup :register_and_log_in_user
 
+    test "every page links back to settings", %{conn: conn} do
+      for path <- [
+            ~p"/users/settings/password",
+            ~p"/users/settings/recovery-codes",
+            ~p"/users/settings/api-tokens"
+          ] do
+        assert html_response(get(conn, path), 200) =~
+                 ~r{<a[^>]*href="/settings"[^>]*>\s*Back to settings}
+      end
+    end
+
     test "changes the password, ends other sessions and stays logged in", %{
       conn: conn,
       user: user

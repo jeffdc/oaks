@@ -108,20 +108,11 @@ defmodule OaksWeb.AboutLive do
 
       <section>
         <.section_heading>Database Statistics</.section_heading>
-        <dl class="page-figures" id="about-stats">
-          <div>
-            <dt>Species</dt>
-            <dd>{if @is_loading, do: "\u2014", else: @stats.species_count}</dd>
-          </div>
-          <div>
-            <dt>Hybrids</dt>
-            <dd>{if @is_loading, do: "\u2014", else: @stats.hybrid_count}</dd>
-          </div>
-          <div>
-            <dt>Total Entries</dt>
-            <dd>{if @is_loading, do: "\u2014", else: @stats.total}</dd>
-          </div>
-        </dl>
+        <div class="oc-prose" id="about-stats">
+          <p :if={!@is_loading}>
+            The database holds {@stats.species_count} species and {@stats.hybrid_count} hybrids, {@stats.total} entries in all.
+          </p>
+        </div>
       </section>
 
       <section>
