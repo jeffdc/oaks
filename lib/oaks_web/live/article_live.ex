@@ -134,7 +134,7 @@ defmodule OaksWeb.ArticleLive do
 
   defp article_body(assigns) do
     ~H"""
-    <div class="prose-content">
+    <div class="oc-prose">
       {raw(@content)}
     </div>
     """

@@ -237,7 +237,7 @@ defmodule OaksWeb.SpeciesMergeLive do
   defp loading_state(assigns) do
     ~H"""
     <div class="py-s8 text-center">
-      <div class="loading-spinner mx-auto mb-4"></div>
+      <div class="merge-spinner mx-auto mb-4"></div>
       <p class="merge-muted">Loading species data...</p>
     </div>
     """
@@ -327,7 +327,7 @@ defmodule OaksWeb.SpeciesMergeLive do
   defp field_comparison_section(assigns) do
     ~H"""
     <div class="mb-6">
-      <h2 class="section-title">Species Fields</h2>
+      <.section_heading>Species Fields</.section_heading>
 
       <.merge_field_row
         :for={field <- ~w(author conservation_status)}
@@ -449,7 +449,7 @@ defmodule OaksWeb.SpeciesMergeLive do
 
     ~H"""
     <div :if={@synonym_only != []} class="mb-6">
-      <h2 class="section-title">Source Data Transfer</h2>
+      <.section_heading>Source Data Transfer</.section_heading>
       <p class="merge-lede">
         These sources exist only on the synonym. Check the ones you want to transfer to the target.
       </p>
@@ -852,7 +852,7 @@ defmodule OaksWeb.SpeciesMergeLive do
           <p>{@merge_error}</p>
         <% @merging -> %>
           <div class="flex justify-center py-s4">
-            <div class="loading-spinner"></div>
+            <div class="merge-spinner"></div>
           </div>
         <% true -> %>
           <p>

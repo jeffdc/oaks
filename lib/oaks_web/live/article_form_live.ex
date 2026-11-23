@@ -163,10 +163,10 @@ defmodule OaksWeb.ArticleFormLive do
 
       <div :if={@form}>
         <.form for={@form} id="article-form" phx-change="validate" phx-submit="save">
-          <div class="space-y-s7">
+          <div class="grid grid-cols-1 gap-s7">
             <%!-- Core fields --%>
-            <div class="card">
-              <h2 class="section-title section-title-sm mb-4">Article Details</h2>
+            <section>
+              <.section_heading>Article Details</.section_heading>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-s4">
                 <div>
                   <.input
@@ -197,11 +197,11 @@ defmodule OaksWeb.ArticleFormLive do
                   Uncheck to save as draft (only visible to logged-in users)
                 </p>
               </div>
-            </div>
+            </section>
 
             <%!-- Content --%>
-            <div class="card">
-              <h2 class="section-title section-title-sm mb-4">Content</h2>
+            <section>
+              <.section_heading>Content</.section_heading>
               <div class="space-y-4">
                 <.markdown_editor
                   field={@form[:content]}
@@ -222,7 +222,7 @@ defmodule OaksWeb.ArticleFormLive do
                   hint="Press Enter to add tags"
                 />
               </div>
-            </div>
+            </section>
 
             <%!-- Submit --%>
             <div class="flex flex-wrap items-center justify-end gap-s2 pt-s4 border-t border-rule">

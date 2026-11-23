@@ -84,6 +84,15 @@
         ],
         "createdAt": "2026-11-22T03:36:10.542Z",
         "reason": "Jeff: locked the Bookplate sketch (round db8687fb, decision 2836), whose title sets Compendium in ochre italic serif; scientific names are italic by botanical convention"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "sfmono-regular",
+        "files": [
+          "assets/css/system/components.css"
+        ],
+        "createdAt": "2026-11-23T14:22:33.134Z",
+        "reason": "Claude: the same code-in-prose monospace stack already sanctioned for app.css (.prose-content code), moved with the prose block to .oc-prose code (item d33e); DESIGN.md has no code face"
       }
     ]
   }

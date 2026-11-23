@@ -189,18 +189,18 @@ defmodule OaksWeb.TaxonomyLive do
       <div>
         <%!-- Taxon content --%>
         <section :if={@current_taxon && @current_taxon.content} class="taxon-section">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-s4">
-            <h2 class="section-title section-title-sm">About this {@current_level}</h2>
-            <span :if={@current_taxon.content_updated_at} class="taxon-section-note">
+          <.section_heading>
+            About this {@current_level}
+            <:note :if={@current_taxon.content_updated_at}>
               Updated {@current_taxon.content_updated_at}
-            </span>
-          </div>
-          <div class="prose-content">{raw(Markdown.render_html(@current_taxon.content))}</div>
+            </:note>
+          </.section_heading>
+          <div class="oc-prose">{raw(Markdown.render_html(@current_taxon.content))}</div>
         </section>
 
         <%!-- Child taxa --%>
         <section :if={@child_taxa != []} class="taxon-section">
-          <h2 class="section-title section-title-sm">{children_heading(@child_taxa)}</h2>
+          <.section_heading>{children_heading(@child_taxa)}</.section_heading>
           <ul class="taxon-index">
             <.taxon_card
               :for={taxon <- @child_taxa}
@@ -213,9 +213,9 @@ defmodule OaksWeb.TaxonomyLive do
 
         <%!-- Species --%>
         <section :if={@species != []} class="taxon-section">
-          <h2 class="section-title section-title-sm">
+          <.section_heading>
             {species_section_title(@is_genus_level, length(@species))}
-          </h2>
+          </.section_heading>
           <ul class="species-index">
             <li :for={species <- @species}><.species_card species={species} /></li>
           </ul>

@@ -228,7 +228,7 @@ defmodule OaksWeb.TaxonFormLive do
           <div class="space-y-s7">
             <%!-- Core fields --%>
             <section>
-              <h2 class="section-title section-title-sm mb-s4">Core Information</h2>
+              <.section_heading>Core Information</.section_heading>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-s5">
                 <div>
                   <%= if @live_action == :new do %>
@@ -281,7 +281,7 @@ defmodule OaksWeb.TaxonFormLive do
 
             <%!-- Content --%>
             <section>
-              <h2 class="section-title section-title-sm mb-s4">Content</h2>
+              <.section_heading>Content</.section_heading>
               <div class="space-y-s4">
                 <.markdown_editor
                   field={@form[:content]}

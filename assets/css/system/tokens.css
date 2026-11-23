@@ -4,9 +4,6 @@
    Exposed as Tailwind theme variables, so each one is both a CSS custom
    property (var(--color-ink)) and a utility (text-ink, bg-paper,
    border-rule, font-frame, p-s4, gap-s5 ...).
-
-   The names sit beside the V1 forest/oak tokens in app.css without
-   colliding; V1 pages keep working until they are rebuilt.
    ========================================================================== */
 
 @theme {
@@ -21,8 +18,7 @@
   --color-rule: #16161626;       /* 1px hairline between rows */
   --color-rule-strong: #161616;  /* 2px rule under titles, section heads, table heads */
 
-  /* Type. --font-serif replaces V1's Georgia stack, so V1 headings that use
-     var(--font-serif) pick up Source Serif 4 too. */
+  /* Type */
   --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
   --font-frame: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --font-narrow: "Archivo Narrow", "Archivo", "Helvetica Neue", Arial, sans-serif;

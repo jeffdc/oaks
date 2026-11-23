@@ -82,18 +82,16 @@ defmodule OaksWeb.ArticlesLive do
     <nav class="flex flex-wrap gap-s2 mb-s3" aria-label="Filter by tag">
       <.link
         navigate={~p"/articles"}
-        class={["badge", if(!@selected, do: "badge-forest-dark", else: "badge-muted")]}
+        class="article-tag"
         aria-current={!@selected && "page"}
-        style="text-decoration: none;"
       >
         All
       </.link>
       <.link
         :for={%{tag: tag, count: count} <- @tags}
         navigate={~p"/articles?tag=#{tag}"}
-        class={["badge", if(@selected == tag, do: "badge-forest-dark", else: "badge-muted")]}
+        class="article-tag"
         aria-current={@selected == tag && "page"}
-        style="text-decoration: none;"
       >
         {tag} <span class="ml-1 tabular-nums">({count})</span>
       </.link>

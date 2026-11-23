@@ -76,7 +76,7 @@ defmodule OaksWeb.FormComponents do
             phx-debounce="300"
           >{Phoenix.HTML.Form.normalize_value("textarea", @field.value)}</textarea>
         </div>
-        <div :if={@content_tab == "preview"} class="oc-md-preview prose-content">
+        <div :if={@content_tab == "preview"} class="oc-md-preview oc-prose">
           {raw(preview_content(@field.value))}
         </div>
         <div class="oc-md-foot">

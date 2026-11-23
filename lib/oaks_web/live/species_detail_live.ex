@@ -508,7 +508,7 @@ defmodule OaksWeb.SpeciesDetailLive do
     ~H"""
     <section :if={@value && @value != ""} class="source-field">
       <h3 class="source-field-label">{@label}</h3>
-      <div class="prose-content">{raw(Markdown.render_html(@value))}</div>
+      <div class="oc-prose">{raw(Markdown.render_html(@value))}</div>
     </section>
     """
   end

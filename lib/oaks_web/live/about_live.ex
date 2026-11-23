@@ -44,7 +44,7 @@ defmodule OaksWeb.AboutLive do
         <.header>About the Oak Compendium</.header>
       </:head>
 
-      <section class="prose-content page-lead">
+      <section class="oc-prose page-lead">
         <p>
           The Oak Compendium is a comprehensive database of oak species from around the world,
           providing botanists, naturalists, and oak enthusiasts with detailed information about
@@ -54,7 +54,7 @@ defmodule OaksWeb.AboutLive do
 
       <section>
         <.section_heading>Why This Site?</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             Almost everyone knows what an oak is, and many can even point to one in the wild.
             But getting them to species can be a huge challenge that stumps even the most seasoned
@@ -71,7 +71,7 @@ defmodule OaksWeb.AboutLive do
 
       <section>
         <.section_heading>About the Author</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             My name is
             <a
@@ -126,7 +126,7 @@ defmodule OaksWeb.AboutLive do
 
       <section>
         <.section_heading>Data Sources</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             The taxonomic structure used in this compendium follows <a
               href="https://www.inaturalist.org/taxa/47851-Quercus"
@@ -160,7 +160,7 @@ defmodule OaksWeb.AboutLive do
 
       <section>
         <.section_heading>Data Licensing</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             <strong>Species Data</strong>:
             <a
@@ -179,7 +179,7 @@ defmodule OaksWeb.AboutLive do
 
       <section>
         <.section_heading>Open Source</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             This project is open source. View the code, report issues, or contribute on <a
               href="https://github.com/jeffdc/oaks"
@@ -200,7 +200,7 @@ defmodule OaksWeb.AboutLive do
 
       <section>
         <.section_heading>API</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             The Oak Compendium provides a public REST API for programmatic access to species data.
             Read operations are open to all; write operations require authentication.
@@ -210,7 +210,7 @@ defmodule OaksWeb.AboutLive do
 
       <section>
         <.section_heading>Privacy &amp; Analytics</.section_heading>
-        <div class="prose-content">
+        <div class="oc-prose">
           <p>
             We use a custom, self-hosted, privacy-respecting analytics system &mdash;
             no third-party trackers, no cookies for visitors, no personal data collected.

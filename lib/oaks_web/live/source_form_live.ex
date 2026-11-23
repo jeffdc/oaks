@@ -135,9 +135,9 @@ defmodule OaksWeb.SourceFormLive do
 
       <div :if={@form}>
         <.form for={@form} id="source-form" phx-change="validate" phx-submit="save">
-          <div class="space-y-s7">
-            <div class="card">
-              <h2 class="section-title section-title-sm mb-4">Source Information</h2>
+          <div class="grid grid-cols-1 gap-s7">
+            <section>
+              <.section_heading>Source Information</.section_heading>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-s4">
                 <div class="sm:col-span-2">
                   <.input
@@ -219,10 +219,10 @@ defmodule OaksWeb.SourceFormLive do
                   />
                 </div>
               </div>
-            </div>
+            </section>
 
-            <div class="card">
-              <h2 class="section-title section-title-sm mb-4">Description & Notes</h2>
+            <section>
+              <.section_heading>Description & Notes</.section_heading>
               <div class="space-y-4">
                 <.input
                   field={@form[:description]}
@@ -241,7 +241,7 @@ defmodule OaksWeb.SourceFormLive do
                   phx-debounce="300"
                 />
               </div>
-            </div>
+            </section>
 
             <div class="flex flex-wrap items-center justify-end gap-s2 pt-s4 border-t border-rule">
               <.button navigate={cancel_path(@live_action, @source)}>Cancel</.button>

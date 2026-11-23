@@ -1,18 +1,14 @@
-/* Oak Compendium - Tailwind v4 + daisyUI Configuration
+/* Oak Compendium: Tailwind v4 and the DESIGN.md system.
 
-   Two systems side by side while the site is rebuilt page by page:
-   * ./system: the DESIGN.md system (tokens, fonts, element defaults,
-     components). New and rebuilt pages use only this.
-   * Everything else in this file: the V1 layer (daisyUI theme, forest
-     tokens, shared utilities, page CSS), kept until the pages that use it
-     are rebuilt. Its tokens, daisyUI theme and shared utilities (prose,
-     cards, badges, section titles, breadcrumb, spinner) are bridged onto
-     DESIGN.md (item b4f7); the page sections below them are each page's
-     own and still carry V1 values.
+   The system lives in ./system: tokens, fonts, element defaults, the
+   components (oc- classes, one block per function component) and the site
+   shell. Pages are built from those components and Tailwind utilities on
+   the system's tokens.
 
-   The V1 CSS is unlayered, so it beats the system's layered rules where
-   both style the same element; the system's classes carry an oc- prefix
-   so they never meet. */
+   What stays below is each page's own layout, the parts no component
+   covers (a ruled index, the comparison grid, the merge rows ...), on the
+   system's tokens. It is unlayered, so it beats the system's layered rules
+   where both style the same element. */
 
 @import "tailwindcss" source(none);
 @source "../css";
@@ -27,483 +23,10 @@
 
 @plugin "../vendor/heroicons";
 
-@plugin "../vendor/daisyui" {
-  themes: false;
-}
-
-/* Single light theme: daisyUI on the DESIGN.md tokens (item b4f7). Square,
-   flat, ink on paper, so the daisyUI pieces V1 pages still use (input,
-   select, badge, card) read like the system's own. DESIGN.md has no status
-   colours: error and success are ink plates, warning is the ochre field
-   with ink on it, info is pencil. */
-@plugin "../vendor/daisyui-theme" {
-  name: "light";
-  default: true;
-  prefersdark: false;
-  color-scheme: "light";
-  --color-base-100: #fbfbf7;                     /* paper */
-  --color-base-200: #f1f0e8;                     /* paper-2 */
-  --color-base-300: #16161626;                   /* rule */
-  --color-base-content: #161616;                 /* ink */
-  --color-primary: #161616;                      /* ink */
-  --color-primary-content: #fbfbf7;              /* paper */
-  --color-secondary: #3d3d3a;                    /* ink-2 */
-  --color-secondary-content: #fbfbf7;
-  --color-accent: #d9a21b;                       /* ochre: a fill, never text */
-  --color-accent-content: #161616;
-  --color-neutral: #161616;
-  --color-neutral-content: #fbfbf7;
-  --color-info: #2f5fb3;                         /* pencil */
-  --color-info-content: #fbfbf7;
-  --color-success: #161616;
-  --color-success-content: #fbfbf7;
-  --color-warning: #d9a21b;
-  --color-warning-content: #161616;
-  --color-error: #161616;
-  --color-error-content: #fbfbf7;
-  /* Square corners (DESIGN.md rounded.none), no depth, no noise */
-  --radius-selector: 0;
-  --radius-field: 0;
-  --radius-box: 0;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 0;
-  --noise: 0;
-}
-
-/* ============================================
-   Tailwind v4 @theme: V1 colour tokens, re-pointed (item b4f7)
-
-   The forest greens and oak browns now name DESIGN.md roles, so every V1
-   utility (text-forest-700, bg-forest-50 ...) and every inline
-   var(--color-forest-*) moves onto the system at once. Mapped by how each
-   shade is used in the V1 pages, not by lightness:
-     50   tinted panels, hover grounds    -> paper (no tinted panels)
-     100  chips, hover and active grounds -> paper-2
-     200  borders and dividers            -> rule
-     300  stronger and hover borders      -> ink at 40% (the field border)
-     400  hover borders, accent edges     -> ink
-     500  field icons, accent edges,
-          focus outlines                  -> ink-3 (decoration, not links)
-     600  button fills under white text,
-          back links, icons               -> ink
-     700  link and emphasis text          -> ink
-     800  page headings                   -> ink
-     900  headings, hover text            -> ink
-   Oak brown, acorn and bark were text tints: ink-2, ink-2, ink-3.
-   ============================================ */
-@theme {
-  --color-forest-50: var(--color-paper);
-  --color-forest-100: var(--color-paper-2);
-  --color-forest-200: var(--color-rule);
-  --color-forest-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
-  --color-forest-400: var(--color-ink);
-  --color-forest-500: var(--color-ink-3);
-  --color-forest-600: var(--color-ink);
-  --color-forest-700: var(--color-ink);
-  --color-forest-800: var(--color-ink);
-  --color-forest-900: var(--color-ink);
-
-  --color-oak-brown: var(--color-ink-2);
-  --color-acorn: var(--color-ink-2);
-  --color-bark: var(--color-ink-3);
-
-  /* Tailwind's warm and cool greys, which V1 templates use for borders,
-     icon tints and quiet grounds, take the same roles: 50 paper, 100
-     paper-2, 200 rule, 300 ink at 40%, 400-500 ink-3, 600-700 ink-2,
-     800-900 ink. No system file uses them. */
-  --color-stone-50: var(--color-paper);
-  --color-stone-100: var(--color-paper-2);
-  --color-stone-200: var(--color-rule);
-  --color-stone-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
-  --color-stone-400: var(--color-ink-3);
-  --color-stone-500: var(--color-ink-3);
-  --color-stone-600: var(--color-ink-2);
-  --color-stone-700: var(--color-ink-2);
-  --color-stone-800: var(--color-ink);
-  --color-stone-900: var(--color-ink);
-  --color-gray-50: var(--color-paper);
-  --color-gray-100: var(--color-paper-2);
-  --color-gray-200: var(--color-rule);
-  --color-gray-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
-  --color-gray-400: var(--color-ink-3);
-  --color-gray-500: var(--color-ink-3);
-  --color-gray-600: var(--color-ink-2);
-  --color-gray-700: var(--color-ink-2);
-  --color-gray-800: var(--color-ink);
-  --color-gray-900: var(--color-ink);
-  --color-zinc-50: var(--color-paper);
-  --color-zinc-100: var(--color-paper-2);
-  --color-zinc-200: var(--color-rule);
-  --color-zinc-300: color-mix(in srgb, var(--color-ink) 40%, transparent);
-  --color-zinc-400: var(--color-ink-3);
-  --color-zinc-500: var(--color-ink-3);
-  --color-zinc-600: var(--color-ink-2);
-  --color-zinc-700: var(--color-ink-2);
-  --color-zinc-800: var(--color-ink);
-  --color-zinc-900: var(--color-ink);
-
-  /* Square and flat (DESIGN.md: corners 0, no shadows). Tailwind's radius
-     and shadow scales go to nothing, so the V1 templates' rounded-lg,
-     rounded-xl, shadow-sm ... draw square and flat until their pages are
-     rebuilt. rounded-full (dots, rings) is not on the scale and stays. */
-  --radius-xs: 0;
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-xl: 0;
-  --radius-2xl: 0;
-  --radius-3xl: 0;
-  --radius-4xl: 0;
-  --shadow-2xs: 0 0 #0000;
-  --shadow-xs: 0 0 #0000;
-  --shadow-sm: 0 0 #0000;
-  --shadow-md: 0 0 #0000;
-  --shadow-lg: 0 0 #0000;
-  --shadow-xl: 0 0 #0000;
-  --shadow-2xl: 0 0 #0000;
-
-  /* --font-serif is set in system/tokens.css (Source Serif 4). */
-}
-
-/* ============================================
-   CSS Custom Properties — V1 semantic tokens
-   For use in CSS rules and component styles
-   ============================================ */
-:root {
-  /* Semantic colours, all aliases of the DESIGN.md tokens (items 21b7 and
-     b4f7). Surfaces are paper: V1 cards and panels sit on the page ground
-     rather than as white boxes. Borders are the hairline rule. */
-  --color-background: var(--color-paper);
-  --color-surface: var(--color-paper);
-  --color-text-primary: var(--color-ink);
-  --color-text-secondary: var(--color-ink-2);
-  --color-text-tertiary: var(--color-ink-3);
-  --color-border: var(--color-rule);
-  --color-border-light: var(--color-rule);
-
-  /* Paper over ink (V1's white scale, for marks on the ink masthead) */
-  --color-white-10: color-mix(in srgb, var(--color-paper) 10%, transparent);
-  --color-white-15: color-mix(in srgb, var(--color-paper) 15%, transparent);
-  --color-white-20: color-mix(in srgb, var(--color-paper) 20%, transparent);
-  --color-white-30: color-mix(in srgb, var(--color-paper) 30%, transparent);
-  --color-white-40: color-mix(in srgb, var(--color-paper) 40%, transparent);
-  --color-white-60: color-mix(in srgb, var(--color-paper) 60%, transparent);
-  --color-white-85: color-mix(in srgb, var(--color-paper) 85%, transparent);
-
-  /* Status: the outlined ink stamp, no colour (Marks Not Colours Rule) */
-  --color-status-warning-bg: transparent;
-  --color-status-warning-text: var(--color-ink);
-  --color-status-warning-border: var(--color-ink);
-
-  /* Shadows: none (DESIGN.md is entirely flat) */
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
-  --shadow-xl: none;
-}
-
-/* ============================================
-   LiveView Variants
-   ============================================ */
+/* LiveView variants */
 @custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
 @custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
 @custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
-
-/* Make LiveView wrapper divs transparent for layout */
-[data-phx-session], [data-phx-teleported-src] { display: contents }
-
-/* Base styles (body, links, focus, selection, reduced motion) live in
-   system/base.css. */
-
-/* V1 text links coloured forest-600 or -700 (back links, names) would be
-   ink under the token map above, which keeps those shades ink for the
-   filled buttons that share them. Links are pencil (DESIGN.md), so a link
-   with one of those text colours and no fill goes back to pencil. The
-   !important is for the inline style="color: ..." forms. */
-a:where([class*="text-forest-6"], [class*="text-forest-7"], [style*="color: var(--color-forest-6"], [style*="color: var(--color-forest-7"]):not([style*="background"], [class*="bg-"]) {
-  color: var(--color-pencil) !important;
-}
-
-/* daisyUI's fields (the species list's search and filters) are the
-   system's input field: white, a 1.5px border at 40% ink, ink on focus. */
-.input,
-.select,
-.textarea {
-  background-color: #fff;
-  border: 1.5px solid color-mix(in srgb, var(--color-ink) 40%, transparent);
-  font-family: var(--font-frame);
-}
-
-.input:focus-within,
-.select:focus,
-.textarea:focus {
-  border-color: var(--color-ink);
-}
-
-/* daisyUI's select draws a filled caret; it takes the system select's
-   drawn chevron instead (assets/css/system/components.css). */
-select.select {
-  appearance: none;
-  padding-right: 34px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23161616' stroke-width='1.5'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 10px 6px;
-}
-
-/* ============================================
-   Prose Content (rendered markdown: articles, taxon write-ups, source
-   text, previews). DESIGN.md reading text: Source Serif 4 at 17px with
-   oldstyle figures, held to the 720px reading measure; headings in the
-   serif, then the reader's uppercase Archivo subheads; pencil links.
-   ============================================ */
-.prose-content {
-  max-width: var(--container-read);
-  color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 17px;
-  line-height: 1.6;
-  font-variant-numeric: oldstyle-nums proportional-nums;
-  text-wrap: pretty;
-}
-
-.prose-content p {
-  margin: 0 0 var(--spacing-s3) 0;
-}
-
-.prose-content p:last-child {
-  margin-bottom: 0;
-}
-
-.prose-content ul {
-  margin: 0 0 var(--spacing-s3);
-  padding-left: 1.1em;
-  list-style-type: disc;
-}
-
-.prose-content ol {
-  margin: 0 0 var(--spacing-s3);
-  padding-left: 1.4em;
-  list-style-type: decimal;
-}
-
-.prose-content li {
-  margin: 0 0 var(--spacing-s1);
-}
-
-.prose-content li::marker {
-  color: var(--color-ink-3);
-}
-
-.prose-content a {
-  color: var(--color-pencil);
-  text-decoration-line: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-}
-
-.prose-content a:hover {
-  text-decoration-thickness: 2px;
-}
-
-.prose-content strong {
-  font-weight: 600;
-}
-
-/* Highlighted text is an ochre fill, the one committed field colour, not
-   the browser's yellow. */
-.prose-content mark {
-  background: var(--color-ochre);
-  color: var(--color-ink);
-  padding: 0 2px;
-}
-
-.prose-content em {
-  font-style: italic;
-}
-
-/* Wide markdown blocks scroll inside themselves instead of widening the page */
-.prose-content pre {
-  overflow-x: auto;
-  max-width: 100%;
-  margin: 0 0 var(--spacing-s3);
-  padding: var(--spacing-s3) var(--spacing-s4);
-  background-color: var(--color-paper-2);
-}
-
-.prose-content pre code {
-  padding: 0;
-  background-color: transparent;
-}
-
-.prose-content table {
-  display: block;
-  overflow-x: auto;
-  max-width: 100%;
-  margin: 0 0 var(--spacing-s4);
-  border-collapse: collapse;
-  font-family: var(--font-frame);
-  font-size: 15px;
-  line-height: 1.5;
-  font-variant-numeric: lining-nums tabular-nums;
-}
-
-.prose-content th,
-.prose-content td {
-  padding: var(--spacing-s2) var(--spacing-s4) var(--spacing-s2) 0;
-  border-bottom: 1px solid var(--color-rule);
-  text-align: left;
-  vertical-align: top;
-}
-
-.prose-content th {
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  border-bottom: 2px solid var(--color-rule-strong);
-}
-
-.prose-content img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Code is the one place for a monospace face. */
-.prose-content code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.875em;
-  font-variant-numeric: lining-nums tabular-nums;
-  background-color: var(--color-paper-2);
-  padding: 1px 4px;
-}
-
-.prose-content h1,
-.prose-content h2 {
-  font-family: var(--font-serif);
-  font-weight: 600;
-  color: var(--color-ink);
-  text-wrap: balance;
-}
-
-.prose-content h1 {
-  font-size: 26px;
-  line-height: 1.1;
-  margin: var(--spacing-s6) 0 var(--spacing-s3);
-}
-
-.prose-content h2 {
-  font-size: 21px;
-  line-height: 1.2;
-  margin: var(--spacing-s5) 0 var(--spacing-s2);
-}
-
-/* The reader's subhead: Archivo capitals */
-.prose-content h3 {
-  font-family: var(--font-frame);
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.3;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--color-ink);
-  margin: var(--spacing-s5) 0 var(--spacing-s2);
-}
-
-/* h5 and h6 take h4's voice: the ladder stops there (bug 17bc). */
-.prose-content h4,
-.prose-content h5,
-.prose-content h6 {
-  font-family: var(--font-frame);
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--color-ink);
-  margin: var(--spacing-s4) 0 var(--spacing-s1);
-}
-
-.prose-content h1:first-child,
-.prose-content h2:first-child,
-.prose-content h3:first-child,
-.prose-content h4:first-child,
-.prose-content h5:first-child,
-.prose-content h6:first-child {
-  margin-top: 0;
-}
-
-/* A quoted passage: indented on a 1px ink rule, roman (italic is for
-   scientific names), in the second ink. */
-.prose-content blockquote {
-  margin: 0 0 var(--spacing-s3);
-  padding-left: var(--spacing-s4);
-  border-left: 1px solid var(--color-rule-strong);
-  color: var(--color-ink-2);
-  font-size: 18px;
-}
-
-.prose-content hr {
-  border: none;
-  border-top: 1px solid var(--color-rule);
-  margin: var(--spacing-s5) 0;
-}
-
-/* ============================================
-   Card Utilities: V1 cards as ruled sections (item b4f7)
-
-   DESIGN.md: statements stand on rules, never in boxes. A .card keeps its
-   place in the page but loses the box: no ground, border, corner or
-   shadow, and no side padding, so its content lines up with the page
-   frame. Its heading (.section-title) carries the 2px ink rule. Dialogs
-   are the modal component, never a card (item c13c).
-   ============================================ */
-.card {
-  background-color: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-/* :where keeps this at class weight, so page sections can still set their
-   own padding; it beats the layered p-6 utilities. Rows (card-interactive
-   and plain cards listed with them) keep their padding for the hover
-   ground. */
-.card:where(:not(.card-interactive, .card-interactive ~ .card, .card:has(~ .card-interactive))) {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-/* A card that is a link or a row is a row on a hairline. */
-.card-interactive {
-  border-bottom: 1px solid var(--color-rule);
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-}
-
-.card-interactive:hover {
-  background-color: var(--color-paper-2);
-}
-
-.card-sm {
-  border-radius: 0;
-}
-
-.card-forest {
-  background-color: transparent;
-}
-
-.card-forest.card-interactive:hover {
-  background-color: var(--color-paper-2);
-}
-
-/* A plain card in a list of rows (home's disabled Identification) stands
-   on the same hairline, so the list ends on a rule. */
-.card-interactive ~ .card:where(:not(.card-interactive)),
-.card:where(:not(.card-interactive)):has(~ .card-interactive) {
-  border-bottom: 1px solid var(--color-rule);
-}
 
 /* --------------------------------------------
    Taxonomy pages (item 58ef): the title row on its 2px rule, then
@@ -512,12 +35,6 @@ select.select {
    -------------------------------------------- */
 .taxon-section + .taxon-section {
   margin-top: var(--spacing-s7);
-}
-
-.taxon-section-note {
-  font: 500 13px/1.2 var(--font-frame);
-  color: var(--color-ink-3);
-  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .taxon-empty {
@@ -634,6 +151,30 @@ select.select {
 
 .article-row:focus-visible {
   outline-offset: -3px;
+}
+
+/* The articles list's tag filter: each tag a stamp, a lighter outline in
+   the second ink; the current one (and a hovered one) the ink plate. */
+.article-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-s1);
+  padding: 4px 7px;
+  font: 700 13px/1 var(--font-frame);
+  letter-spacing: 0.04em;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+  color: var(--color-ink-2);
+  border: 1.5px solid color-mix(in srgb, var(--color-ink) 40%, transparent);
+  text-decoration: none;
+}
+
+.article-tag:hover,
+.article-tag[aria-current="page"] {
+  color: var(--color-paper);
+  background-color: var(--color-ink);
+  border-color: var(--color-ink);
+  text-decoration: none;
 }
 
 /* Stretched link covers the entire row */
@@ -857,176 +398,8 @@ select.select {
 }
 
 /* ============================================
-   Badge/Pill Utilities as status tags (item b4f7)
-
-   A badge is DESIGN.md's status tag: an outlined ink stamp in Archivo,
-   square. Its variants are marks, not colours: the strong one (V1's dark
-   green: Primary, the current filter) reverses to an ink plate; the plain
-   ones are the outline; the muted one (Coming soon, the other filters) is
-   a lighter outline in the second ink. Pill tags (synonyms, common names)
-   are names, not tags: plain serif text in a comma list.
-   ============================================ */
-/* No display here: daisyUI's .badge makes it inline-flex in a layer, so
-   the hidden and sm:inline-flex utilities on a badge still work. */
-.badge {
-  align-items: center;
-  gap: var(--spacing-s1);
-  height: auto;
-  padding: 4px 7px;
-  font-family: var(--font-frame);
-  font-size: 13px;
-  font-weight: 700;
-  font-style: normal;
-  line-height: 1;
-  letter-spacing: 0.04em;
-  font-variant-numeric: lining-nums tabular-nums;
-  white-space: nowrap;
-  color: var(--color-ink);
-  background-color: transparent;
-  border: 1.5px solid var(--color-ink);
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.badge-uppercase {
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 12.5px;
-}
-
-.badge-sm {
-  font-size: 12px;
-  padding: 2px 5px;
-}
-
-.badge-forest,
-.badge-forest-light {
-  color: var(--color-ink);
-  background-color: transparent;
-  border-color: var(--color-ink);
-}
-
-.badge-forest-dark {
-  color: var(--color-paper);
-  background-color: var(--color-ink);
-  border-color: var(--color-ink);
-}
-
-.badge-muted {
-  color: var(--color-ink-2);
-  background-color: transparent;
-  border-color: color-mix(in srgb, var(--color-ink) 40%, transparent);
-}
-
-/* daisyUI's ghost badge (the species list's subgenus and section) is a
-   classification, not a status: frame text with no stamp around it. */
-.badge-ghost {
-  color: var(--color-ink-2);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  border-color: transparent;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-a.badge:hover {
-  color: var(--color-paper);
-  background-color: var(--color-ink);
-  border-color: var(--color-ink);
-}
-
-.pill-tag {
-  display: inline;
-  padding: 0;
-  font-family: var(--font-serif);
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.5;
-  color: var(--color-ink);
-  background: none;
-  border: 0;
-  border-radius: 0;
-}
-
-/* The comma hangs off the previous name: each tag after the first draws
-   it in front of itself and pulls it back across the row's 0.5rem gap
-   (gap-2 in both lists), so whitespace inside the span can't open a space
-   before it. */
-.pill-tag + .pill-tag::before {
-  content: ",";
-  margin-left: -0.5rem;
-  font-style: normal;
-}
-
-/* ============================================
-   Section Title: DESIGN.md's section label. Archivo 800 capitals standing
-   on a 2px ink rule, like the section_heading component
-   (.oc-section-heading). section-title-sm, V1's smaller step, is the
-   same label.
-   ============================================ */
-.section-title {
-  margin: 0 0 var(--spacing-s3);
-  padding: 0 0 var(--spacing-s2);
-  border-bottom: 2px solid var(--color-rule-strong);
-  font-family: var(--font-frame);
-  font-size: 15px;
-  font-weight: 800;
-  font-style: normal;
-  line-height: 1.2;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-variant-numeric: lining-nums tabular-nums;
-  color: var(--color-ink);
-}
-
-.section-title-sm {
-  font-size: 15px;
-  color: var(--color-ink);
-}
-
-/* A title sharing a row with its actions (home's Featured Species, the
-   taxon pages' About this ...): the row stands on the rule, so it runs
-   the full width under the label and the controls. */
-.justify-between:has(> .section-title),
-[style*="space-between"]:has(> .section-title) {
-  align-items: flex-end;
-  padding-bottom: var(--spacing-s2);
-  border-bottom: 2px solid var(--color-rule-strong);
-}
-
-.justify-between > .section-title,
-[style*="space-between"] > .section-title {
-  margin: 0;
-  padding: 0;
-  border-bottom: 0;
-}
-
-/* DESIGN.md's section label carries no icon; V1's heroicon glyphs in
-   titles are hidden, as the breadcrumb's glyph separators are. */
-.section-title > [class*="hero-"],
-.section-title > svg {
-  display: none;
-}
-
-/* ============================================
-   Loading Spinner: a drawn ink arc on a hairline ring
-   ============================================ */
-.loading-spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid var(--color-rule);
-  border-top-color: var(--color-ink);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ============================================
    Settings and login pages, and the About, Privacy, Markdown guide and
-   Analytics pages (bridge). Each page has CoreComponents' title row and
+   Analytics pages. Each page has CoreComponents' title row and
    section headings; this section holds what is particular to them. The
    account pages are a narrow form column: Archivo for the apparatus, the
    system field (CoreComponents' oc-input) and buttons. The reading pages
@@ -1390,7 +763,7 @@ a.badge:hover {
   font-size: 16px;
 }
 
-.prose-content + .page-md-example {
+.oc-prose + .page-md-example {
   margin-top: var(--spacing-s4);
 }
 
@@ -1630,11 +1003,10 @@ a.badge:hover {
 }
 
 /* ============================================
-   Species Detail - Container (bridge restyle, item 1adb)
+   Species Detail - Container (item 1adb)
 
-   V1's species page in DESIGN.md's voice, its structure kept until the
-   taxon page is rebuilt: the page frame gives the gutters, and sections
-   stand on their 2px rules, 48px apart, with nothing boxed.
+   The page frame gives the gutters, and sections stand on their 2px
+   rules, 48px apart, with nothing boxed.
    ============================================ */
 .species-detail {
   min-width: 0;
@@ -1868,13 +1240,10 @@ a.badge:hover {
   text-decoration: none;
 }
 
-/* Compare (the ochre call to action) and Add source sit at the strip's
-   right end, clear of the rule. */
+/* Compare (the ochre call to action) sits at the strip's right end, clear
+   of the rule. */
 .compare-sources-link {
   margin-left: auto;
-}
-
-.compare-sources-link {
   align-self: center;
   margin-block: var(--spacing-s2);
 }
@@ -1924,11 +1293,11 @@ a.badge:hover {
   color: var(--color-ink);
 }
 
-.source-field .prose-content > :first-child {
+.source-field .oc-prose > :first-child {
   margin-top: 0;
 }
 
-.source-field .prose-content > :last-child {
+.source-field .oc-prose > :last-child {
   margin-bottom: 0;
 }
 
@@ -1943,7 +1312,7 @@ a.badge:hover {
 
 /* ==========================================================================
    Source Comparison Page, Species List, Merge and Species Form
-   (item c49c, the bridge restyle onto DESIGN.md)
+   (item c49c)
 
    The comparison is DESIGN.md's comparison voice: a 140px trait column
    and one column per source, rows on hairlines under a 2px head rule,
@@ -2097,16 +1466,16 @@ a.comparison-source-name:hover {
   padding-right: 0;
 }
 
-.comparison-value-cell .prose-content {
+.comparison-value-cell .oc-prose {
   font-size: 16px;
   max-width: none;
 }
 
-.comparison-value-cell .prose-content > :first-child {
+.comparison-value-cell .oc-prose > :first-child {
   margin-top: 0;
 }
 
-.comparison-value-cell .prose-content > :last-child {
+.comparison-value-cell .oc-prose > :last-child {
   margin-bottom: 0;
 }
 
@@ -2175,14 +1544,13 @@ a.comparison-source-name:hover {
   }
 }
 
-.species-filters .input,
-.species-filters .select {
-  width: 100%;
-  max-width: none;
+/* The grid sets the space round the fields; the field's own bottom margin
+   would add to it. */
+.species-filters .oc-field {
+  margin-bottom: 0;
 }
 
-/* The magnifier sits above the field (bug a590: daisyUI's input painted
-   over it). */
+/* The magnifier sits in the field, above its white ground (bug a590). */
 .species-search {
   position: relative;
 }
@@ -2199,7 +1567,7 @@ a.comparison-source-name:hover {
   pointer-events: none;
 }
 
-.species-search .input {
+.species-search .oc-input {
   padding-left: 38px;
 }
 
@@ -2264,6 +1632,20 @@ a.comparison-source-name:hover {
 .merge-title-arrow {
   color: var(--color-ink-3);
   font-weight: 400;
+}
+
+/* Loading and merging: a drawn ink arc turning on a hairline ring. */
+.merge-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-rule);
+  border-top-color: var(--color-ink);
+  border-radius: 50%;
+  animation: merge-spin 0.8s linear infinite;
+}
+
+@keyframes merge-spin {
+  to { transform: rotate(360deg); }
 }
 
 .merge-muted {

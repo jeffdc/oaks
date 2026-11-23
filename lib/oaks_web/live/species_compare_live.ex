@@ -242,7 +242,7 @@ defmodule OaksWeb.SpeciesCompareLive do
       <% {:text, text} -> %>
         <div class="comparison-text-content">{text}</div>
       <% {:html, html} -> %>
-        <div class="prose-content prose-content-compact">{raw(html)}</div>
+        <div class="oc-prose">{raw(html)}</div>
     <% end %>
     """
   end

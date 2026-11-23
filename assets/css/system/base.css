@@ -1,14 +1,19 @@
 /* ==========================================================================
    Oak Compendium design system: element defaults (DESIGN.md)
 
-   Applies to every page. In @layer base, so utilities and component rules
-   override it, and so does the unlayered V1 CSS in app.css: old cards, nav
-   and badges keep their own look until their pages are rebuilt.
+   Applies to every page. In @layer base, so utilities, component rules and
+   the page CSS in app.css override it.
    ========================================================================== */
 
 @layer base {
   :root {
     color-scheme: light;
+  }
+
+  /* LiveView's wrapper elements take no part in the layout. */
+  [data-phx-session],
+  [data-phx-teleported-src] {
+    display: contents;
   }
 
   html {
@@ -68,12 +73,6 @@
     outline: 3px solid var(--color-pencil);
     outline-offset: 2px;
     border-radius: 1px;
-  }
-
-  /* On a dark ground (the V1 header carries .dark-bg) the outline turns
-     paper so it still shows. */
-  .dark-bg :focus-visible {
-    outline-color: var(--color-paper);
   }
 
   input, textarea, select {

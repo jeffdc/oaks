@@ -90,29 +90,34 @@ defmodule OaksWeb.SpeciesListLive do
       <form id="filter-form" phx-change="filter" class="species-filters">
         <div class="species-search">
           <.icon name="hero-magnifying-glass" class="species-search-icon" />
-          <input
+          <.input
             type="search"
             id="species-search"
             name="q"
             value={@query}
             placeholder="Search by species name..."
             aria-label="Search by species name"
-            class="input input-bordered"
             phx-debounce="300"
           />
         </div>
-        <select name="subgenus" class="select select-bordered" aria-label="Subgenus">
-          <option value="">All Subgenera</option>
-          <option :for={sg <- @subgenera} value={sg} selected={sg == @subgenus}>
-            {sg}
-          </option>
-        </select>
-        <select name="section" class="select select-bordered" aria-label="Section">
-          <option value="">All Sections</option>
-          <option :for={sec <- @sections} value={sec} selected={sec == @section}>
-            {sec}
-          </option>
-        </select>
+        <.input
+          type="select"
+          id="species-subgenus"
+          name="subgenus"
+          value={@subgenus}
+          options={@subgenera}
+          prompt="All Subgenera"
+          aria-label="Subgenus"
+        />
+        <.input
+          type="select"
+          id="species-section"
+          name="section"
+          value={@section}
+          options={@sections}
+          prompt="All Sections"
+          aria-label="Section"
+        />
       </form>
 
       <div :if={@species_count == 0} class="species-empty">

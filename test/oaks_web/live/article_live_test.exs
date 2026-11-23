@@ -37,7 +37,7 @@ defmodule OaksWeb.ArticleLiveTest do
 
     test "renders markdown content as HTML", %{conn: conn, article: article} do
       {:ok, _view, html} = live(conn, ~p"/articles/#{article.slug}")
-      # Markdown headings render inside prose-content div
+      # Markdown headings render inside oc-prose div
       assert html =~ "Key Features"
       assert html =~ "<strong>"
       assert html =~ "leaves"
