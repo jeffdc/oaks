@@ -146,9 +146,9 @@ defmodule OaksWeb.PrivacyLive do
         <.section_heading>Authentication</.section_heading>
         <div class="oc-prose">
           <p>
-            The Oak Compendium has no public user accounts and no login flow for visitors.
-            Write access to the database is gated by an API key used only by the site author;
-            no personal data is collected from visitors at any point.
+            The Oak Compendium has no public accounts and no sign-up: visitors never log in, and
+            no personal data is collected from them. Only the site's author logs in, and the login
+            cookies are never set for visitors.
           </p>
         </div>
       </section>
