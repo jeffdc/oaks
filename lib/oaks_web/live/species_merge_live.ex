@@ -253,9 +253,9 @@ defmodule OaksWeb.SpeciesMergeLive do
   defp error_state(assigns) do
     ~H"""
     <div class="merge-error-state">
-      <.back navigate={~p"/species"}>Back to Species List</.back>
+      <.back navigate={~p"/species"}>Back to species list</.back>
       <.header>
-        Unable to Load Merge
+        Unable to load merge
         <:subtitle>{@error}</:subtitle>
       </.header>
     </div>

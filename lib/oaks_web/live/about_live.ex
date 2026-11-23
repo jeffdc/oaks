@@ -116,7 +116,7 @@ defmodule OaksWeb.AboutLive do
       </section>
 
       <section>
-        <.section_heading>Data Sources</.section_heading>
+        <.section_heading>Data sources</.section_heading>
         <div class="oc-prose">
           <p>
             The taxonomic structure used in this compendium follows <a

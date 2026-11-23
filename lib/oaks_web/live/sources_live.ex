@@ -17,7 +17,7 @@ defmodule OaksWeb.SourcesLive do
     {:ok,
      socket
      |> assign(
-       page_title: "Data Sources",
+       page_title: "Data sources",
        sources: sources,
        show_delete_confirm: false,
        delete_source: nil
@@ -80,7 +80,7 @@ defmodule OaksWeb.SourcesLive do
     <.page>
       <:head>
         <.header>
-          Data Sources
+          Data sources
           <:subtitle>
             The Oak Compendium draws from multiple sources to provide comprehensive
             information about oak species.

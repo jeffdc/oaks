@@ -99,7 +99,7 @@ defmodule OaksWeb.ArticleLive do
 
   defp article_header(assigns) do
     ~H"""
-    <.back navigate={~p"/articles"}>Back to Articles</.back>
+    <.back navigate={~p"/articles"}>Back to articles</.back>
     <.header id="article-title">
       {@article.title}
       <:meta>By {@article.author}</:meta>
@@ -153,7 +153,7 @@ defmodule OaksWeb.ArticleLive do
           Last updated {format_date(@article.updated_at)}
         </span>
       </div>
-      <.back navigate={~p"/articles"}>All Articles</.back>
+      <.back navigate={~p"/articles"}>Back to articles</.back>
     </div>
     """
   end

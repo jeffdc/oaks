@@ -16,7 +16,7 @@ defmodule OaksWeb.AnalyticsLiveTest do
     test "renders Last 7 days as the active range by default", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/analytics")
 
-      assert html =~ "Site Analytics"
+      assert html =~ "Site analytics"
       assert html =~ "Last 7 days"
       # The default range "7" button should be marked active.
       assert html =~ ~s(phx-value-range="7")
@@ -187,7 +187,7 @@ defmodule OaksWeb.AnalyticsLiveTest do
     test "with no rows, all-time still renders without error", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/analytics")
       html_all = render_click(view, "set_range", %{"range" => "all"})
-      assert html_all =~ "Site Analytics"
+      assert html_all =~ "Site analytics"
       assert html_all =~ ~s(data-active-range="all")
     end
   end

@@ -43,7 +43,7 @@ defmodule OaksWeb.SpeciesListLiveTest do
   describe "GET /species" do
     test "renders species list page", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/species")
-      assert html =~ "Species List"
+      assert html =~ "Species list"
       assert html =~ "species-search"
     end
 

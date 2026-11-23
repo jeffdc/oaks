@@ -228,7 +228,7 @@ defmodule OaksWeb.ArticleFormLive do
             <div class="flex flex-wrap items-center justify-end gap-s2 pt-s4 border-t border-rule">
               <.button navigate={cancel_path(@live_action, @article)}>Cancel</.button>
               <.button type="submit" variant="primary" phx-disable-with="Saving...">
-                {if(@live_action == :new, do: "Create Article", else: "Save Changes")}
+                {if(@live_action == :new, do: "Create article", else: "Save changes")}
               </.button>
             </div>
           </div>

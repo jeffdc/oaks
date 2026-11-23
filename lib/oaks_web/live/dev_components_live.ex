@@ -76,7 +76,7 @@ defmodule OaksWeb.DevComponentsLive do
           </.taxonomy_band>
         </:bleed>
         <:head>
-          <.back navigate={~p"/"}>Oak Compendium home</.back>
+          <.back navigate={~p"/"}>Back to home</.back>
           <.header>
             Components
             <:subtitle>
@@ -415,7 +415,7 @@ defmodule OaksWeb.DevComponentsLive do
               <:meta><.iucn_status code="LC" /></:meta>
             </.header>
             <.header id="gallery-title-list">
-              Species List
+              Species list
               <:meta>640 species</:meta>
               <:meta>94 hybrids</:meta>
               <:meta><strong>734 total</strong></:meta>

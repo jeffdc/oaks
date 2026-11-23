@@ -55,7 +55,7 @@ defmodule OaksWeb.TaxonFormLive do
 
     socket
     |> assign(
-      page_title: "Create Taxon",
+      page_title: "New taxon",
       taxon: taxon,
       form: to_form(changeset),
       parent_options: parent_options_for_level(default_level),
@@ -215,7 +215,7 @@ defmodule OaksWeb.TaxonFormLive do
 
         <.header>
           <%= if @live_action == :new do %>
-            Create Taxon
+            New taxon
           <% else %>
             Edit {level_label(@taxon.level)}:
             <.sci_name name={@taxon.name} level={@taxon.level} size="display" />
@@ -308,7 +308,7 @@ defmodule OaksWeb.TaxonFormLive do
             <div class="flex items-center justify-end gap-s2 pt-s4 border-t border-rule">
               <.button navigate={~p"/taxonomy"}>Cancel</.button>
               <.button type="submit" variant="primary" phx-disable-with="Saving...">
-                {if(@live_action == :new, do: "Create Taxon", else: "Save Changes")}
+                {if(@live_action == :new, do: "Create taxon", else: "Save changes")}
               </.button>
             </div>
           </div>

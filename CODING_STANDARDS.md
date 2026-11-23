@@ -420,6 +420,8 @@ Every page is built from the shared library: `OaksWeb.CoreComponents`, `OaksWeb.
 
 **Enforced:** `scripts/check-ui` runs in `make done-checks` and fails on page-width wrappers, inline styles, daisyUI cards and badges, hand-rolled scientific names, and any growth in `app.css`. Exceptions go in its allowlist, `scripts/check-ui.allow`, with Jeff's approval. The list only shrinks: when a file improves, lower its count in the same change (`scripts/check-ui --baseline`).
 
+**Wording:** sentence case for page titles, buttons, menu items and dialog titles ("Species list", "Save changes"); back links read "Back to <place>" in lower case ("Back to sources"); create actions read "New <thing>" in menus and titles, and the form's submit button names the act ("Create source", "Save changes").
+
 Keep this table current: a change that adds or replaces a component updates its row in the same commit.
 
 ---

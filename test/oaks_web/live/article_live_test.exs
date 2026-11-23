@@ -52,7 +52,7 @@ defmodule OaksWeb.ArticleLiveTest do
 
     test "shows back link to articles list", %{conn: conn, article: article} do
       {:ok, _view, html} = live(conn, ~p"/articles/#{article.slug}")
-      assert html =~ "Back to Articles"
+      assert html =~ "Back to articles"
       assert html =~ ~s(href="/articles")
     end
 

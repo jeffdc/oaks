@@ -33,7 +33,7 @@ defmodule OaksWeb.TaxonFormLiveTest do
     test "renders create taxon form", %{conn: conn} do
       {:ok, _view, html} = conn |> authenticated_conn() |> live(~p"/taxonomy/new")
 
-      assert html =~ "Create Taxon"
+      assert html =~ "New taxon"
       assert html =~ "Level"
       assert html =~ "Name"
     end
@@ -44,7 +44,7 @@ defmodule OaksWeb.TaxonFormLiveTest do
         |> authenticated_conn()
         |> live(~p"/taxonomy/new?level=section&parent=#{taxon.name}")
 
-      assert html =~ "Create Taxon"
+      assert html =~ "New taxon"
       # The parent dropdown should be present since level is section
       assert html =~ "Parent"
     end

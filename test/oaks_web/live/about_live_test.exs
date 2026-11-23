@@ -13,7 +13,7 @@ defmodule OaksWeb.AboutLiveTest do
 
   test "has data sources section", %{conn: conn} do
     {:ok, _view, html} = live(conn, ~p"/about")
-    assert html =~ "Data Sources"
+    assert html =~ "Data sources"
     assert html =~ "iNaturalist"
     assert html =~ "Oaks of the World"
   end

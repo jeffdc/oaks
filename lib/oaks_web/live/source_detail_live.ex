@@ -73,7 +73,7 @@ defmodule OaksWeb.SourceDetailLive do
     ~H"""
     <.page>
       <:head :if={@source}>
-        <.back navigate={~p"/sources"}>Back to Sources</.back>
+        <.back navigate={~p"/sources"}>Back to sources</.back>
         <.source_header source={@source} editor={@current_scope != nil} />
       </:head>
 

@@ -128,7 +128,9 @@ defmodule OaksWeb.SourceFormLive do
       </div>
 
       <:head :if={@form}>
-        <.back navigate={cancel_path(@live_action, @source)}>Back</.back>
+        <.back navigate={cancel_path(@live_action, @source)}>
+          {if @live_action == :new, do: "Back to sources", else: "Back to source"}
+        </.back>
 
         <.header>{@page_title}</.header>
       </:head>
@@ -246,7 +248,7 @@ defmodule OaksWeb.SourceFormLive do
             <div class="flex flex-wrap items-center justify-end gap-s2 pt-s4 border-t border-rule">
               <.button navigate={cancel_path(@live_action, @source)}>Cancel</.button>
               <.button type="submit" variant="primary" phx-disable-with="Saving...">
-                {if @live_action == :new, do: "Create Source", else: "Save Changes"}
+                {if @live_action == :new, do: "Create source", else: "Save changes"}
               </.button>
             </div>
           </div>

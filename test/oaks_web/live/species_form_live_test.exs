@@ -31,9 +31,9 @@ defmodule OaksWeb.SpeciesFormLiveTest do
     test "renders new species form", %{conn: conn} do
       {:ok, _view, html} = conn |> authenticated_conn() |> live(~p"/species/new")
 
-      assert html =~ "New Species"
+      assert html =~ "New species"
       assert html =~ "Scientific Name"
-      assert html =~ "Create Species"
+      assert html =~ "Create species"
     end
 
     test "validates form on change", %{conn: conn} do
@@ -88,7 +88,7 @@ defmodule OaksWeb.SpeciesFormLiveTest do
 
       assert html =~ "Edit"
       assert html =~ alba
-      assert html =~ "Save Changes"
+      assert html =~ "Save changes"
     end
 
     test "updates species on submit", %{conn: conn, alba: alba} do

@@ -20,7 +20,7 @@ defmodule OaksWeb.SpeciesListLive do
     {:ok,
      socket
      |> assign(
-       page_title: "Species List",
+       page_title: "Species list",
        subgenera: subgenera,
        sections: sections,
        query: "",
@@ -75,7 +75,7 @@ defmodule OaksWeb.SpeciesListLive do
     <.page>
       <:head>
         <.header id="species-list-title">
-          Species List
+          Species list
           <:meta>{@species_count - @hybrid_count} species</:meta>
           <:meta>{@hybrid_count} {if @hybrid_count == 1, do: "hybrid", else: "hybrids"}</:meta>
           <:meta><strong>{@species_count} total</strong></:meta>

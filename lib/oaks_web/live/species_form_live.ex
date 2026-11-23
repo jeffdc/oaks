@@ -50,7 +50,7 @@ defmodule OaksWeb.SpeciesFormLive do
 
     socket
     |> assign(
-      page_title: "New Species",
+      page_title: "New species",
       species: species,
       form: to_form(changeset)
     )
@@ -135,10 +135,10 @@ defmodule OaksWeb.SpeciesFormLive do
       </div>
 
       <:head :if={@form}>
-        <.back navigate={cancel_path(@live_action, @species)}>Back</.back>
+        <.back navigate={cancel_path(@live_action, @species)}>Back to species</.back>
 
         <.header>
-          <span :if={@live_action == :new}>New Species</span>
+          <span :if={@live_action == :new}>New species</span>
           <span :if={@live_action == :edit}>
             Edit
             <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} size="display" />
@@ -302,7 +302,7 @@ defmodule OaksWeb.SpeciesFormLive do
             <div class="species-form-actions">
               <.button navigate={cancel_path(@live_action, @species)}>Cancel</.button>
               <.button type="submit" variant="primary" phx-disable-with="Saving...">
-                {if(@live_action == :new, do: "Create Species", else: "Save Changes")}
+                {if(@live_action == :new, do: "Create species", else: "Save changes")}
               </.button>
             </div>
           </div>
