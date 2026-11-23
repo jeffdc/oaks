@@ -21,7 +21,8 @@ defmodule OaksWeb.Plugs.Parsers do
       browser caller can read the error.
 
   Every other request raises as before, so the rest of the site keeps
-  Phoenix's error pages.
+  Phoenix's error pages (wrapped in `Plug.Conn.WrapperError` with the conn,
+  so the page carries the endpoint's security headers).
 
   The refusal comes before the router, so before the agent token is checked:
   a bad body is a 400 or 413 even without a valid token, as it was before.
@@ -32,6 +33,7 @@ defmodule OaksWeb.Plugs.Parsers do
   import Plug.Conn
 
   alias OaksWeb.Plugs.CORS
+  alias Plug.Conn.WrapperError
   alias Plug.Parsers
 
   # Plug.Conn.read_body/2's default, which the JSON parser uses when the
@@ -56,7 +58,10 @@ defmodule OaksWeb.Plugs.Parsers do
         |> send_resp(Plug.Exception.status(exception), Jason.encode!(%{error: message}))
         |> halt()
       else
-        reraise exception, __STACKTRACE__
+        # Wrapped with the conn so Phoenix renders the error page from it,
+        # with the security headers the endpoint registered
+        # (OaksWeb.Plugs.SecurityHeaders), not from the endpoint's bare conn.
+        WrapperError.reraise(conn, :error, exception, __STACKTRACE__)
       end
   end
 

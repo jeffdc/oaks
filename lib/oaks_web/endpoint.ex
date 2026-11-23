@@ -55,6 +55,11 @@ defmodule OaksWeb.Endpoint do
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
+  # The CSP and other browser security headers on every error response,
+  # including error pages no router pipeline reaches (an unmatched route, a
+  # request the parsers refuse). Pages get them in the :browser pipeline.
+  plug OaksWeb.Plugs.SecurityHeaders, :errors
+
   # Plug.Parsers, except that the APIs' refusals (bad JSON, a body too large,
   # a bad query string) come back as their {"error": ...} JSON
   # (OaksWeb.Plugs.Parsers).
