@@ -6,8 +6,9 @@ defmodule OaksWeb.Plugs.SecurityHeaders do
 
   Two uses:
 
-    * `plug OaksWeb.Plugs.SecurityHeaders` in the router's `:browser`
-      pipeline puts them on every page.
+    * The router's `:browser` pipeline calls `put_secure_browser_headers`
+      itself with `headers/0`, so every page gets them (and Sobelow, which
+      looks for that call in the pipeline, can see it).
     * `plug OaksWeb.Plugs.SecurityHeaders, :errors` in the endpoint, before
       anything that can raise, puts them on every error response (status 400
       and up) as it is sent (item 8be6). An error page from an unmatched
@@ -40,6 +41,10 @@ defmodule OaksWeb.Plugs.SecurityHeaders do
   ]
 
   @headers %{"content-security-policy" => Enum.join(@content_security_policy, "; ")}
+
+  @doc "The headers this plug adds beyond Phoenix's defaults: the content security policy."
+  @spec headers() :: %{String.t() => String.t()}
+  def headers, do: @headers
 
   @impl Plug
   def init(:errors), do: :errors
