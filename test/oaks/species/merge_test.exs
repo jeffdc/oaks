@@ -104,6 +104,13 @@ defmodule Oaks.Species.MergeTest do
       assert subsection_cmp.differs
     end
 
+    test "lists no additions when the synonym adds nothing", ctx do
+      # alba's hybrids name ×bebbiana itself, which the merge drops, so the
+      # merged list differs from alba's without adding an entry.
+      assert {:ok, preview} = Merge.preview_merge(ctx.bebbiana, ctx.alba)
+      assert preview.list_additions == %{}
+    end
+
     test "returns error for same species", ctx do
       assert {:error, :same_species} = Merge.preview_merge(ctx.alba, ctx.alba)
     end

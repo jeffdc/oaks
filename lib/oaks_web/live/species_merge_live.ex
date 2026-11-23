@@ -131,17 +131,21 @@ defmodule OaksWeb.SpeciesMergeLive do
     {:noreply, assign(socket, show_confirm: false, merge_error: nil)}
   end
 
+  # The merge runs in a message to self, after this event's render has
+  # sent the dialog's "Merging species…" state to the browser.
   def handle_event("execute_merge", _params, socket) do
-    if socket.assigns[:current_scope] do
-      execute_merge(socket)
+    if socket.assigns[:current_scope] && !socket.assigns.merging do
+      send(self(), :run_merge)
+      {:noreply, assign(socket, merging: true, merge_error: nil, completed_steps: [])}
     else
       {:noreply, socket}
     end
   end
 
-  defp execute_merge(socket) do
-    socket = assign(socket, merging: true, merge_error: nil, completed_steps: [])
+  @impl true
+  def handle_info(:run_merge, socket), do: execute_merge(socket)
 
+  defp execute_merge(socket) do
     include_sources =
       socket.assigns.source_checkboxes
       |> Enum.filter(fn {_id, checked} -> checked end)
@@ -271,8 +275,7 @@ defmodule OaksWeb.SpeciesMergeLive do
         hybrid={@preview.source.is_hybrid}
         size="display"
       />
-      <span class="merge-title-arrow">&rarr;</span>
-      <.sci_name
+      <span class="merge-title-arrow">&rarr;</span>&nbsp;<.sci_name
         name={@preview.target.scientific_name}
         hybrid={@preview.target.is_hybrid}
         size="display"

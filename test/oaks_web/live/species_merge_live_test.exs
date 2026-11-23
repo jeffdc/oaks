@@ -122,8 +122,9 @@ defmodule OaksWeb.SpeciesMergeLiveTest do
 
       path = "/species/#{rubra}"
 
-      # Execute merge
-      assert {:error, {:live_redirect, %{to: ^path}}} = render_click(view, "execute_merge")
+      # Execute merge: the dialog shows its merging state before the merge runs
+      assert render_click(view, "execute_merge") =~ "Merging species…"
+      assert_redirect(view, path, 1000)
 
       # Verify source was deleted
       assert Species.get_species_by_name(velutina) == nil
