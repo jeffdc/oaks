@@ -1,0 +1,14 @@
+{
+  "tree": "27294110d12d8277bf789db1adc2eee4947f764c",
+  "commit": "533f91dcf397bfc393ea2ac786b82b7c399becae",
+  "at": "2026-11-23T15:24:35Z",
+  "by": "/Users/jeff/dev/oaks/.claude/worktrees/polish-followups",
+  "passed": true,
+  "results": [
+    {
+      "command": "make done-checks",
+      "exit": 0,
+      "duration_ms": 9449
+    }
+  ]
+}
