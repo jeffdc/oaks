@@ -56,7 +56,7 @@ defmodule OaksWeb.HelpMarkdownLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page width="read" class="space-y-s7">
+    <.page class="space-y-s7">
       <:head>
         <.header>Markdown Formatting Guide</.header>
       </:head>
