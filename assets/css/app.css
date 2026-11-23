@@ -1199,18 +1199,18 @@
   }
 }
 
+/* A tab is its button (name and note) and, beside it, the link to the
+   source's page, which can't sit inside the button (bug 49ff). */
 .source-tab {
   display: inline-flex;
   align-items: baseline;
   gap: var(--spacing-s2);
-  padding: 12px 0 9px;
   font: 700 15px/1.2 var(--font-frame);
   color: var(--color-ink-2);
-  background: none;
-  border: 0;
   border-bottom: 3px solid transparent;
-  cursor: pointer;
 }
+
+.source-tab > button { display: inline-flex; align-items: baseline; gap: var(--spacing-s2); padding: 12px 0 9px; cursor: pointer; }
 
 .source-tab:hover:not(.active) {
   color: var(--color-ink);
