@@ -823,6 +823,8 @@
   /* ---------------------------------------------------------------------
      Inputs (CoreComponents.input): the one sanctioned box. White field,
      1.5px border at 40% ink that goes full ink on focus and when invalid.
+     The Field Face Rule (DESIGN.md, Form Fields): one-line fields are
+     Archivo; a textarea is a prose field and takes the serif.
      --------------------------------------------------------------------- */
   .oc-field { margin-bottom: var(--spacing-s4); }
   .oc-label {

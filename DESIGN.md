@@ -270,6 +270,10 @@ Every confirmation, picker and "can't" notice is one component, `modal` (item c1
 - **Actions:** on a hairline at the foot, right-aligned: the dialog's one close control first, a ghost Cancel (Close when the dialog only tells), then its one action, Danger for a delete or merge. No second close button in the head.
 - **Behaviour:** focus moves into the panel (Cancel, or the dialog's field) and stays there; Esc, a click on the wash and Cancel all close it, and focus returns to what opened it. A long body scrolls inside the panel, so the title and actions stay in view. On phones the panel keeps a 12px margin from the window's edges.
 
+### Form Fields
+Every field is one component, `input` (or `markdown_editor` for a long Markdown text): white, square, a 1.5px border at 40% ink that goes full ink on focus, its label above in Archivo 700 14px.
+- **The Field Face Rule.** A field takes the face of what goes in it. Prose fields, where someone writes sentences to be read (a description, notes, a source's account of the leaves, an article's content), are multi-line and set in Source Serif 4 400 16px, 1.6, as the text will read on the page. Every other field (names, authors, years, URLs, choices, tags, search, passwords and codes) is one line in Archivo 500 15px with lining tabular figures. So a textarea is serif and a text field, select or tag field is Archivo; a prose field is never a one-line input, and a one-line value never a textarea (item 0edd).
+
 ### Title Row
 Every page's title is one component, `header`, on one rule (item 7838): the title in the display serif (clamp(34px, 4vw, 50px), 600, balanced) standing on a 2px ink rule, 16px of space above the rule and 32px below it. The row uses the page's width; editing never shapes it.
 - **Title line:** the title, then the meta on the same line, 24px after the title (and a species' authority), on its baseline. The meta wraps under the title, 12px below it, only when the line has no room for it (long titles, phones).
