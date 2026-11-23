@@ -44,21 +44,15 @@
 }
 
 /* Sub-taxa and species: index columns read down, each name on a hairline.
-   The first row stands on the section label's 2px rule. */
+   The first row stands on the section label's 2px rule. Both lists take
+   the same columns, so their edges line up at every width. */
 .taxon-index,
 .species-index {
   list-style: none;
   margin: 0;
   padding: 0;
-  column-gap: var(--spacing-s6);
-}
-
-.taxon-index {
-  column-width: 220px;
-}
-
-.species-index {
   column-width: 260px;
+  column-gap: var(--spacing-s6);
 }
 
 .taxon-index > li,
@@ -94,13 +88,15 @@
   font-variant-numeric: lining-nums tabular-nums;
 }
 
-/* A species: its name (sci_name) and authority. */
+/* A species: its name (sci_name) and authority on one line; a long
+   authority ends in an ellipsis rather than making its row taller. */
 .species-card {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px var(--spacing-s2);
-  padding: 9px 0;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 10px 0;
+  line-height: 1.25;
   color: var(--color-ink);
   text-decoration: none;
 }
