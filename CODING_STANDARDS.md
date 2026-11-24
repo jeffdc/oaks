@@ -416,7 +416,7 @@ Every page is built from the shared library: `OaksWeb.CoreComponents`, `OaksWeb.
 | Not found and error pages | A LiveView that finds nothing at its address raises `OaksWeb.NotFoundError` (`kind: :species \| :taxon \| :source \| :article`, optional `query` for the search), never renders a not-found state of its own: Phoenix then sends the real 404, `OaksWeb.ErrorHTML`'s page, which is `<.not_found>` (DesignComponents) in the site's masthead and footer. Redirects (a synonym's address) stay redirects. The 403 and 500 are `<.error_notice>` |
 | Sources and standing marks | `<.source_mark>`, `<.standing_mark>` |
 
-**When the library doesn't have what you need:** stop. Don't build it into the page. Either add it to the library as its own change, shown in `/dev/components` and reviewed by Jeff before any page uses it, or file `mull ask` and work on something else. A component that almost fits is extended in the library, never overridden on the page.
+**When the library doesn't have what you need:** stop. Don't build it into the page. Either add it to the library as its own change, shown in `/dev/components` and reviewed by Jeff before any page uses it, or ask Jeff and work on something else. A component that almost fits is extended in the library, never overridden on the page.
 
 **Enforced:** `scripts/check-ui` runs in `make done-checks` and fails on page-width wrappers, inline styles, daisyUI cards and badges, hand-rolled scientific names, and any growth in `app.css`. Exceptions go in its allowlist, `scripts/check-ui.allow`, with Jeff's approval. The list only shrinks: when a file improves, lower its count in the same change (`scripts/check-ui --baseline`).
 
