@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Fails if page code builds its own version of something the component library
 # covers (CODING_STANDARDS.md, Components; Jeff's decision 8f6b). Run by
-# `make done-checks`, so `mull done` fails on a violation.
+# `make done-checks`, so the hard checks fail on a violation.
 #
 # Scans every .ex and .heex file under lib/oaks_web, line by line, with grep and
 # awk (no compile). Elixir `#` comment lines and one-line HEEx comments are

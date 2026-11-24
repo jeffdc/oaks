@@ -72,7 +72,7 @@ lint:
 precommit:
 	mix precommit
 
-# The hard check `mull done` runs (`mull config checks "make done-checks"`).
+# The hard checks to pass before handing work over (AGENTS.md).
 # Rebuilds this checkout's test database first: a worktree has its own, and
 # `mix test` only migrates its per-run copy of it (no seeds).
 done-checks: test-db
@@ -191,7 +191,7 @@ help:
 	@echo "  make format     Format Elixir code"
 	@echo "  make lint       Run Credo linter"
 	@echo "  make precommit  Run all pre-commit checks"
-	@echo "  make done-checks  Hard checks mull done runs (test DB + toolchain + UI + precommit + dialyzer)"
+	@echo "  make done-checks  Hard checks before handing work over (test DB + toolchain + UI + precommit + dialyzer)"
 	@echo "  make ci         Run full CI checks (precommit + assets + dialyzer)"
 	@echo "  make build      Build production release"
 	@echo ""
