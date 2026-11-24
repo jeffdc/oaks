@@ -2,6 +2,8 @@
 
 Add photos to species, imported only from iNaturalist, stored in S3, served through CloudFront on `images.oakcompendium.org`, and shown in the gallformers carousel. The model is gallformers on the `taxogall` branch; "port" below means copy from there and adapt.
 
+The plan also rebuilds the species page on the redesign's taxon page (`design/prototype/shumardii.html`, brief in `.impeccable/surfaces/design-prototype-shumardii-html.md`, rules in DESIGN.md), as far as today's data allows, and lets an editor add an iNat observation's photos from that page. Parts of the prototype need the compendium's facts model, which doesn't exist yet; the scope table in Phase 4 says what this plan builds and what waits.
+
 ## Decisions
 
 - Photos come only from iNat observations. Browser and phone uploads are out of scope.
@@ -10,6 +12,9 @@ Add photos to species, imported only from iNaturalist, stored in S3, served thro
 - Dev uses a local storage adapter with no AWS credentials.
 - AWS is managed with OpenTofu, its state in S3, as in gallformers. Fly stays managed with `fly.toml` and `fly secrets`.
 - CSP needs no change: `img-src` already allows `https:` (`lib/oaks_web/plugs/security_headers.ex`).
+- The species page follows the redesign's taxon page, adapted with Impeccable to the data that exists today (Phase 4). The adaptation is a real design pass, not a cut-down build of the prototype.
+- Editors add photos from the species page itself, not the species edit page.
+- Every photo imported here is an exemplar photo. The other observation roles in the compendium plan (evidence, material, trait illustration) are out of scope.
 
 ## Phase 0: Infra baseline
 
@@ -54,18 +59,63 @@ Done when dev and prod can both store an image, make its variants and serve it.
 
 Done when, in tests, an observation becomes stored images with full attribution.
 
-## Phase 4: Editor UI
+## Phase 4: Species page design for today's data
 
-- Port `InatImportComponent` (`lib/gallformers_web/live/admin/inat_import_component.ex`) into the species edit page: paste an observation URL or ID, pick photos, import. All Rights Reserved photos are shown but can't be picked.
-- Manage the photos already imported: captions, drag to reorder (port `sortable_images.js`) and delete.
+Work with Impeccable (`impeccable:impeccable`) to adapt the taxon page prototype to the data the site has now. This is Large work: the full process, with Impeccable's decision page and Jeff's choices, before any build. The result is an updated prototype in `design/prototype/` and the decisions recorded in this plan.
+
+What today's data can and can't fill (a starting point for the design, not a layout):
+
+| Prototype section | Today's data | This plan |
+|---|---|---|
+| Taxonomy band, title row, IUCN stamp | Already built | Kept |
+| Siblings menu in the band | Taxonomy | Built |
+| Common name in the title | Sources' local names, Oak Compendium first | Built |
+| Photos and carousel | The images from Phases 3 and 5 | Built |
+| Jeff's write-up (fragment and reader) | Oak Compendium's text, by field | Built if the design keeps it; the reader is a new library component |
+| Hybrids, each with its other parent | `hybrids`, `parent1`, `parent2` | Built |
+| Look-alikes | `closely_related_to`, names only | Partly: no "why" note, no Compare |
+| Field marks table | One source field per trait | Mostly: other sources show as not reviewed |
+| Range | Each source's range text | Partly: text per source, the map's place reserved; no place list, no native or introduced |
+| Name and synonyms | `synonyms` | Partly: no accepted or misapplied status |
+| Sources and cite-this-page line | The species' sources | Built |
+| Link to the source comparison | `SpeciesCompareLive` | Built |
+| What sets it apart (ranked traits) | None | Waits for the facts model |
+| Agree, differs and unreviewed marks | None | Waits for the facts model |
+| Taxon comparison (`?vs=`) | None | Waits for the facts model |
+| The page in the 1400px frame, three columns | | Built |
+
+Open questions for the design pass, not to be settled by a build:
+
+- What the reading column holds while there are no distinguishing traits.
+- Whether Oak Compendium's text stands in for Jeff's write-up, and how the page says what it is.
+- Where editors manage photos (captions, order, delete): a dialog on the species page or elsewhere.
+- How look-alikes, field marks, range and synonyms read honestly with the data they lack.
+- The add-observation dialog, starting from the Observation panel in `design/prototype/id-mode.html` (URL and Load, the photo strip, the observation's meta line).
+
+Done when Jeff has approved the adapted prototype and its decisions are written here.
+
+## Phase 5: Editor UI
+
+- Port `InatImportComponent` (`lib/gallformers_web/live/admin/inat_import_component.ex`) as the add-observation dialog designed in Phase 4, opened from the species page by editors: paste an observation URL or ID, load it, pick photos, import. All Rights Reserved photos are shown but can't be picked.
+- Manage the photos already imported where Phase 4 puts it: captions, drag to reorder (port `sortable_images.js`) and delete.
+- The dialog is `<.modal>` and the entry points are `<.edit_menu>` items, per CODING_STANDARDS.md.
 - Every write handler checks `socket.assigns[:current_scope]`.
 
-Done when an editor can import, reorder, caption and delete photos in dev.
+Done when an editor can import, reorder, caption and delete photos from the species page in dev.
 
-## Phase 5: Carousel
+## Phase 6: Carousel
 
-- Port `photo_viewer/1` from `lib/gallformers_web/components/domain_components.ex` into `design_components.ex`, and `photo_viewer.js` with its test. Map its classes to oaks' theme tokens.
-- Put it on `species_detail_live.ex` with the medium variant on the stage and small for thumbnails. An editor sees "Add photos" when a species has none.
+- Port `photo_viewer/1` from `lib/gallformers_web/components/domain_components.ex` into `design_components.ex`, and `photo_viewer.js` with its test. Restyle it to DESIGN.md (photo frames, Second Stock thumbnails, pencil source marks) rather than gallformers' look.
+- Medium variant on the stage, small for thumbnails, credit and license under each photo.
 - Add it to `dev_components_live.ex`.
 
-Done when the species page shows imported photos with credit and license, and the keyboard, swipe, lightbox and details dialog all work.
+Done when the component shows imported photos with credit and license, and the keyboard, swipe, lightbox and details dialog all work.
+
+## Phase 7: Species page rebuild
+
+- Rebuild `species_detail_live.ex` on the Phase 4 design: the carousel in its place, and every section the scope table marks built.
+- New pieces go into the library first, each in `/dev/components` for Jeff's review before the page uses it: likely the write-up fragment and reader, the look-alike and hybrid rows, the field marks table and the range list.
+- The source tabs give way to the field marks table and the link to the source comparison.
+- Update the API or other pages only if they read what the page drops.
+
+Done when the species page matches the approved design at desktop, tablet and phone widths, the sections that wait for the facts model are listed in this plan, and `make done-checks` passes.
