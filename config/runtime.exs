@@ -116,6 +116,7 @@ if config_env() == :prod do
     url: [host: host, port: 443, scheme: "https"],
     check_origin: [
       "https://#{host}",
+      "https://oaks.fly.dev",
       "https://oakcompendium.org",
       "https://oakcompendium.com",
       "https://www.oakcompendium.org",

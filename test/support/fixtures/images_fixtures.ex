@@ -142,6 +142,34 @@ defmodule Oaks.ImagesFixtures do
     image
   end
 
+  @doc """
+  A ready photo of `species`, inserted as stored (no import and no files),
+  for pages that only show it. `attrs` override its fields.
+  """
+  def ready_image_fixture(species, attrs \\ %{}) do
+    inat_id = unique_inat_id()
+
+    Repo.insert!(
+      struct!(
+        %Oaks.Images.Image{
+          species_id: species.id,
+          path: "species/#{species.id}/#{species.id}_#{inat_id}_ab_original.jpg",
+          sort_order: 0,
+          status: "ready",
+          creator: "janedoe - Jane Doe",
+          license: "CC-BY",
+          licenselink: "https://creativecommons.org/licenses/by/4.0/",
+          sourcelink: "https://www.inaturalist.org/observations/#{inat_id}",
+          inat_observation_id: inat_id,
+          inat_photo_id: inat_id,
+          uploader: "editor@example.com",
+          lastchangedby: "editor@example.com"
+        },
+        attrs
+      )
+    )
+  end
+
   @doc "The image as stored now."
   def reload(%Oaks.Images.Image{id: id}), do: Repo.get(Oaks.Images.Image, id)
 

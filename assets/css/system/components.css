@@ -1361,6 +1361,43 @@
     justify-content: center;
     gap: var(--spacing-s3);
   }
+  /* With a photo (specimen photo=...): the photo in the left 40%, the
+     text set left in the rest, under the centred heading. */
+  .oc-specimen-plate .oc-specimen-body {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: var(--spacing-s7);
+    align-items: center;
+    margin-top: var(--spacing-s6);
+    text-align: left;
+  }
+  .oc-specimen-plate .oc-specimen-name { margin-top: 0; }
+  .oc-specimen-plate .oc-specimen-about { text-wrap: pretty; }
+  .oc-specimen-plate .oc-specimen-actions { justify-content: flex-start; }
+  .oc-specimen-plate .oc-band-inline ol { justify-content: flex-start; }
+  .oc-specimen-photo { margin: 0; }
+  .oc-specimen-photo img {
+    display: block;
+    width: 100%;
+    max-height: 640px;
+    object-fit: cover;
+  }
+  .oc-specimen-photo figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--spacing-s2);
+    margin-top: var(--spacing-s2);
+    font: 500 13px/1.5 var(--font-frame);
+    color: var(--color-ink-3);
+  }
+  .oc-specimen-photo figcaption a { color: var(--color-ink-2); }
+  .oc-specimen-source::before {
+    content: "·";
+    display: inline-block;
+    margin-right: var(--spacing-s2);
+    font-weight: 500;
+    color: var(--color-ink-3);
+  }
 
   /* ---------------------------------------------------------------------
      Colophon (DesignComponents.colophon): a short centred list under a
@@ -1403,6 +1440,10 @@
   @media (max-width: 760px) {
     .oc-specimen { margin-top: var(--spacing-s8); }
     .oc-specimen-author { font-size: 20px; }
+    .oc-specimen-plate .oc-specimen-body {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--spacing-s5);
+    }
     .oc-colophon { margin-top: var(--spacing-s8); }
     .oc-colophon li { display: block; }
     .oc-colophon li + li::before { content: none; }
@@ -2146,6 +2187,8 @@
     --pv-ink-2: var(--color-ink-2);
     --pv-ink-3: var(--color-ink-3);
     --pv-ground: var(--color-paper-2);
+    /* The whole photo on the stage, on the ground, never cropped. */
+    --pv-fit: contain;
     --pv-paper: var(--color-paper);
     --pv-rule: var(--color-rule);
     --pv-rule-strong: var(--color-rule-strong);

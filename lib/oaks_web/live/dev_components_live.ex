@@ -581,6 +581,22 @@ defmodule OaksWeb.DevComponentsLive do
               <.button>Show another</.button>
             </:actions>
           </.specimen>
+          <.specimen
+            :if={@db_photos}
+            id="gallery-specimen-photo"
+            heading="An oak at random, with a photo"
+            photo={List.first(@db_photos.images)}
+            photo_label={@db_photos.name}
+            photo_navigate={~p"/species/#{@db_photos.name}"}
+          >
+            <:name><.sci_name name={@db_photos.name} /></:name>
+            <:actions>
+              <.button variant="primary" navigate={~p"/species/#{@db_photos.name}"}>
+                Open the page
+              </.button>
+              <.button>Show another</.button>
+            </:actions>
+          </.specimen>
           <.colophon id="gallery-colophon" label="Sources">
             <:item>
               <.link navigate={~p"/sources/3"}>Oak Compendium</.link><.status_tag>

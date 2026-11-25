@@ -2,9 +2,11 @@ defmodule OaksWeb.HomeLiveTest do
   use OaksWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Oaks.ImagesFixtures, only: [ready_image_fixture: 1, ready_image_fixture: 2]
   import Oaks.SourcesFixtures
   import Oaks.SpeciesFixtures
 
+  alias Oaks.Images.Image
   alias Oaks.Sources
   alias Oaks.Species
   alias Oaks.Taxonomy
@@ -125,6 +127,77 @@ defmodule OaksWeb.HomeLiveTest do
              view,
              ~s(#oak-at-random[data-connect-key="featured"][data-connect-value="#{picked.scientific_name}"])
            )
+  end
+
+  describe "with photos" do
+    test "features only an oak with a photo, its first beside the text", %{conn: conn} do
+      species_fixture()
+      pictured = species_fixture()
+      ready_image_fixture(pictured, %{sort_order: 1, creator: "second"})
+      first = ready_image_fixture(pictured, %{sort_order: 0, creator: "first - First Person"})
+      ready_image_fixture(species_fixture(), %{status: "failed", path: nil})
+
+      for _ <- 1..5 do
+        {:ok, view, _html} = live(conn, ~p"/")
+
+        assert has_element?(
+                 view,
+                 "#oak-at-random.oc-specimen-plate .oc-sci-e",
+                 pictured.scientific_name
+               )
+
+        assert has_element?(
+                 view,
+                 ~s(#oak-at-random .oc-specimen-photo a[href="/species/#{pictured.scientific_name}"] img[src="#{Image.url(first, :medium)}"])
+               )
+
+        assert has_element?(view, "#oak-at-random figcaption", "first - First Person")
+        assert has_element?(view, "#oak-at-random figcaption", "CC-BY")
+
+        assert has_element?(
+                 view,
+                 ~s(#oak-at-random figcaption a[href="#{first.sourcelink}"]),
+                 "iNaturalist observation"
+               )
+      end
+    end
+
+    test "Show another stays with the oaks that have photos", %{conn: conn} do
+      species_fixture()
+      pictured = for _ <- 1..2, do: species_fixture()
+      Enum.each(pictured, &ready_image_fixture/1)
+
+      {:ok, view, _html} = live(conn, ~p"/")
+
+      for _ <- 1..4 do
+        view |> element("button", "Show another") |> render_click()
+
+        assert Enum.any?(pictured, fn s ->
+                 has_element?(
+                   view,
+                   ~s(#oak-at-random a[href="/species/#{s.scientific_name}"]),
+                   "Open the page"
+                 )
+               end)
+
+        assert has_element?(view, "#oak-at-random .oc-specimen-photo img")
+      end
+    end
+
+    test "a hybrid with a photo isn't featured", %{conn: conn} do
+      oak = species_fixture()
+      ready_image_fixture(hybrid_fixture())
+
+      {:ok, view, _html} = live(conn, ~p"/")
+
+      assert has_element?(
+               view,
+               ~s(#oak-at-random a[href="/species/#{oak.scientific_name}"]),
+               "Open the page"
+             )
+
+      refute has_element?(view, "#oak-at-random .oc-specimen-photo")
+    end
   end
 
   test "lists the sources with the primary one first and not iNaturalist", %{conn: conn} do

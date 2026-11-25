@@ -101,6 +101,19 @@ defmodule Oaks.Images do
   def list_for_species(species),
     do: species |> species_images() |> where(status: "ready") |> Repo.all()
 
+  @doc "A species' first ready photo, the one shown for it alone; nil when it has none."
+  @spec first_for_species(Species.t() | integer()) :: Image.t() | nil
+  def first_for_species(species),
+    do: species |> species_images() |> where(status: "ready") |> limit(1) |> Repo.one()
+
+  @doc "The ids of the species with at least one ready photo."
+  @spec species_ids_with_photos() :: MapSet.t(integer())
+  def species_ids_with_photos do
+    from(i in Image, where: i.status == "ready", distinct: true, select: i.species_id)
+    |> Repo.all()
+    |> MapSet.new()
+  end
+
   @doc "All of a species' photos, in order, including pending and failed imports."
   @spec list_for_editor(Species.t() | integer()) :: [Image.t()]
   def list_for_editor(species), do: species |> species_images() |> Repo.all()

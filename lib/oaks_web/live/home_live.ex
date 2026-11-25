@@ -5,6 +5,9 @@ defmodule OaksWeb.HomeLive do
   with the big search hanging across its ochre edge and the counts below
   it, then the contents of the site, an oak at random and the sources.
 
+  The oak at random is one with a photo, shown beside it (its first), when
+  any oak has one; otherwise any oak, without a photo.
+
   Built only from library components: `page/1` with the title page in its
   bleed, `title_page/1`, `chapter_heading/1`, `contents/1`, `specimen/1`
   (with `sci_name/1`, the inline `taxonomy_band/1` and `button/1`) and
@@ -12,6 +15,7 @@ defmodule OaksWeb.HomeLive do
   """
   use OaksWeb, :live_view
 
+  alias Oaks.Images
   alias Oaks.Sources
   alias Oaks.Species
   alias Oaks.Taxonomy
@@ -30,7 +34,7 @@ defmodule OaksWeb.HomeLive do
     # connect param (data-connect-key on the specimen), so both show the
     # same one.
     sources = list_sources()
-    oaks = Enum.reject(Species.list_all_species(), & &1.is_hybrid)
+    oaks = list_oaks()
     picked = connected?(socket) && get_connect_params(socket)["featured"]
 
     {:ok,
@@ -62,6 +66,18 @@ defmodule OaksWeb.HomeLive do
     }
   end
 
+  # The non-hybrid oaks to feature: those with a photo, or all of them when
+  # none has one.
+  defp list_oaks do
+    oaks = Enum.reject(Species.list_all_species(), & &1.is_hybrid)
+    with_photos = Images.species_ids_with_photos()
+
+    case Enum.filter(oaks, &MapSet.member?(with_photos, &1.id)) do
+      [] -> oaks
+      pictured -> pictured
+    end
+  end
+
   defp list_sources do
     Sources.list_sources()
     |> Enum.reject(&(&1.id == @inaturalist_id))
@@ -87,10 +103,17 @@ defmodule OaksWeb.HomeLive do
     end
   end
 
-  # The featured oak with where it sits (the band's steps, none when it sits
-  # in the genus only), its hybrids and each named hybrid's other parent.
+  # The featured oak with its first photo, where it sits (the band's steps,
+  # none when it sits in the genus only), its hybrids and each named
+  # hybrid's other parent.
   defp feature(socket, nil),
-    do: assign(socket, featured: nil, featured_ranks: [], featured_hybrids: [])
+    do:
+      assign(socket,
+        featured: nil,
+        featured_photo: nil,
+        featured_ranks: [],
+        featured_hybrids: []
+      )
 
   defp feature(socket, featured) do
     hybrids =
@@ -105,7 +128,12 @@ defmodule OaksWeb.HomeLive do
         placement -> TaxonPath.ranks(placement)
       end
 
-    assign(socket, featured: featured, featured_ranks: ranks, featured_hybrids: hybrids)
+    assign(socket,
+      featured: featured,
+      featured_photo: Images.first_for_species(featured),
+      featured_ranks: ranks,
+      featured_hybrids: hybrids
+    )
   end
 
   # A formula name ("agrifolia × parvula") already names both parents.
@@ -170,6 +198,9 @@ defmodule OaksWeb.HomeLive do
         :if={@featured}
         id="oak-at-random"
         heading="An oak at random"
+        photo={@featured_photo}
+        photo_label={OaksWeb.SpeciesName.full_name(@featured.scientific_name, false)}
+        photo_navigate={~p"/species/#{@featured.scientific_name}"}
         data-connect-key="featured"
         data-connect-value={@featured.scientific_name}
       >
