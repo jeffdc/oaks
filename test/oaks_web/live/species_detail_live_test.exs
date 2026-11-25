@@ -684,6 +684,26 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
 
       assert has_element?(view, "#delete-confirm-modal", "Its 2 photos go with it")
     end
+
+    test "a visitor's forged delete events keep the species and its photos", %{
+      conn: conn,
+      velutina: velutina
+    } do
+      observation = Oaks.ImagesFixtures.observation()
+      species = Oaks.Species.get_species_by_name(velutina)
+
+      image =
+        Oaks.ImagesFixtures.import_photo(species, observation, Oaks.ImagesFixtures.editor_scope())
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
+      render_click(view, "request_delete")
+      refute has_element?(view, "#delete-confirm-modal")
+      render_click(view, "confirm_delete")
+
+      assert Oaks.Species.get_species_by_name(velutina)
+      assert Oaks.ImagesFixtures.reload(image)
+      assert Oaks.ImagesFixtures.cleanups_for(image) == []
+    end
   end
 
   describe "malformed stored lists" do

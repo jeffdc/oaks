@@ -39,7 +39,7 @@ defmodule Oaks.Species.MergePhotosTest do
     {:ok, s2} = Images.update_caption(s2, "Synonym's caption", scope)
     s4 = import_photo(source, observation, scope, o4)
 
-    %{source: source, target: target, t1: t1, t2: t2, s2: s2, s3: s3, s4: s4}
+    %{json: json, source: source, target: target, t1: t1, t2: t2, s2: s2, s3: s3, s4: s4}
   end
 
   defp ready_photo(species, observation, scope, photo) do
@@ -103,6 +103,30 @@ defmodule Oaks.Species.MergePhotosTest do
     assert %Image{status: "ready", species_id: target_id} = reload(ctx.s4)
     assert target_id == ctx.target.id
     assert ctx.s4.id in Enum.map(Images.list_for_species(ctx.target), & &1.id)
+  end
+
+  test "a failed import moves to the target, where a retry publishes it", ctx do
+    stub_inat(ctx.json, photo_status: %{ctx.s4.inat_photo_id => 404})
+    {:cancel, _} = perform_job(ImportWorker, %{attempt_id: ctx.s4.current_attempt_id})
+    [old_cleanup] = cleanups_for(ctx.s4)
+
+    {:ok, _} = Merge.execute_merge(ctx.source.scientific_name, ctx.target.scientific_name)
+
+    assert %Image{status: "failed", species_id: target_id} = reload(ctx.s4)
+    assert target_id == ctx.target.id
+
+    stub_inat(ctx.json)
+
+    assert {:ok, %Image{current_attempt_id: attempt_id}} =
+             Images.retry_import(ctx.target, ctx.s4.id, editor_scope())
+
+    assert attempt_id != ctx.s4.current_attempt_id
+    assert :ok = perform_job(ImportWorker, %{attempt_id: attempt_id})
+    :ok = perform_job(CleanupWorker, %{cleanup_id: old_cleanup.id})
+
+    assert %Image{status: "ready", path: path} = reload(ctx.s4)
+    assert ctx.s4.id in Enum.map(Images.list_for_species(ctx.target), & &1.id)
+    for p <- Oaks.Storage.Images.all_paths(path), do: assert(p in stored_paths())
   end
 
   test "a duplicate's import cut off by the merge never publishes", ctx do

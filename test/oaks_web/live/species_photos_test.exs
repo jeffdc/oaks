@@ -345,6 +345,64 @@ defmodule OaksWeb.SpeciesPhotosTest do
       refute has_element?(view, "#add-photos")
       refute has_element?(view, "#manage-photos")
     end
+
+    # The dialogs mount only for editors, so a visitor's events can't reach
+    # them; their handlers still refuse a socket with no scope, since
+    # Images.reorder/2 and Images.delete/1 take none.
+    test "events sent to the dialogs with no scope write nothing", ctx do
+      json = observation_json(%{photos: [inat_photo_json(), inat_photo_json()]})
+      [bad, _] = json |> get_in(["results", Access.at(0), "photos"]) |> Enum.map(& &1["id"])
+      stub_inat(json, photo_status: %{bad => 404})
+      observation = observation(json)
+
+      [failed, ready] =
+        for photo <- observation.photos,
+            do: import_photo(ctx.species, observation, ctx.scope, photo)
+
+      {:cancel, _} = run_import(failed)
+      :ok = run_import(ready)
+      stub_inat(json)
+      before = Images.list_for_editor(ctx.species)
+      jobs = Repo.aggregate(Oban.Job, :count)
+
+      manage = %Phoenix.LiveView.Socket{
+        assigns: %{
+          __changed__: %{},
+          species: ctx.species,
+          current_scope: nil,
+          images: before,
+          caption_errors: %{},
+          confirm_delete: ready
+        }
+      }
+
+      for {event, params} <- [
+            {"save_caption", %{"image_id" => "#{ready.id}", "caption" => "Mine now"}},
+            {"reorder", %{"order" => ["#{ready.id}", "#{failed.id}"]}},
+            {"retry", %{"id" => "#{failed.id}"}},
+            {"request_delete_photo", %{"id" => "#{ready.id}"}},
+            {"delete_photo", %{}}
+          ],
+          do: {:noreply, _} = OaksWeb.SpeciesPhotos.ManagePhotos.handle_event(event, params, manage)
+
+      add = %Phoenix.LiveView.Socket{
+        assigns: %{
+          __changed__: %{},
+          species: ctx.species,
+          current_scope: nil,
+          observation: observation,
+          selected: MapSet.new(Enum.map(observation.photos, & &1.id)),
+          permission: true
+        }
+      }
+
+      for {event, params} <- [{"add", %{}}, {"retry", %{"id" => "#{failed.id}"}}],
+          do: {:noreply, _} = OaksWeb.SpeciesPhotos.AddPhotos.handle_event(event, params, add)
+
+      assert Images.list_for_editor(ctx.species) == before
+      assert Repo.aggregate(Oban.Job, :count) == jobs
+      assert cleanups_for(ready) == []
+    end
   end
 
   defp count(text, pattern), do: length(String.split(text, pattern)) - 1
