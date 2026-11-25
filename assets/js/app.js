@@ -32,6 +32,60 @@ for (const key of ["oak:api_key", "oak:session_timestamp", "oak:session_timeout_
 
 const Hooks = {
   ...colocatedHooks,
+  // Photo list (DesignComponents.photo_list): drag a row by its handle,
+  // or press Up or Down on the handle, to move it; the new order (each
+  // row's data-photo-id) goes to the component the list is in when it
+  // changed. Ported from gallformers' sortable_images.js, as a list.
+  SortablePhotos: {
+    mounted() {
+      this.el.addEventListener("dragstart", e => this.start(e))
+      this.el.addEventListener("dragover", e => this.over(e))
+      this.el.addEventListener("drop", e => e.preventDefault())
+      this.el.addEventListener("dragend", () => this.end())
+      this.el.addEventListener("keydown", e => this.key(e))
+    },
+    rows() { return [...this.el.querySelectorAll(":scope > [data-photo-id]")] },
+    order() { return this.rows().map(row => row.dataset.photoId) },
+    start(e) {
+      const row = e.target.closest("[data-grip]")?.closest("[data-photo-id]")
+      if (!row) return
+      this.dragging = row
+      this.before = this.order().join()
+      row.dataset.dragging = ""
+      e.dataTransfer.effectAllowed = "move"
+      e.dataTransfer.setData("text/plain", row.dataset.photoId)
+      e.dataTransfer.setDragImage(row, 24, 24)
+    },
+    over(e) {
+      if (!this.dragging) return
+      e.preventDefault()
+      e.dataTransfer.dropEffect = "move"
+      const row = e.target.closest("[data-photo-id]")
+      if (!row || row === this.dragging || row.parentElement !== this.el) return
+      const box = row.getBoundingClientRect()
+      this.el.insertBefore(this.dragging, e.clientY < box.top + box.height / 2 ? row : row.nextSibling)
+    },
+    end() {
+      if (!this.dragging) return
+      delete this.dragging.dataset.dragging
+      this.dragging = null
+      this.push()
+    },
+    key(e) {
+      const grip = e.target.closest("[data-grip]")
+      if (!grip || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return
+      e.preventDefault()
+      const row = grip.closest("[data-photo-id]")
+      this.before = this.order().join()
+      if (e.key === "ArrowUp" && row.previousElementSibling) this.el.insertBefore(row, row.previousElementSibling)
+      if (e.key === "ArrowDown" && row.nextElementSibling) this.el.insertBefore(row.nextElementSibling, row)
+      grip.focus()
+      this.push()
+    },
+    push() {
+      if (this.order().join() !== this.before) this.pushEventTo(this.el, this.el.dataset.event, {order: this.order()})
+    }
+  },
   // Taxonomy band (DesignComponents.taxonomy_band): the path is one line.
   // When it is too long for the band, mark it (data-overflow) and keep the
   // current taxon, at its end, in view; while anything is scrolled off to

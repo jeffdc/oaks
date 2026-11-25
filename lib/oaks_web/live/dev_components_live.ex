@@ -235,6 +235,10 @@ defmodule OaksWeb.DevComponentsLive do
                 <:action><.button type="submit">Load</.button></:action>
               </.input>
               <.photo_picker id="gallery-photo-picker">
+                <:meta>
+                  janedoe · Blue Ridge, VA · 2026-05-04 ·
+                  <.sci_name name="Quercus shumardii" genus={nil} weight="regular" />
+                </:meta>
                 <.photo_tile label="Photo 1, CC-BY-NC" name="photo_ids[]" value="1" checked>
                   CC-BY-NC
                 </.photo_tile>
@@ -506,6 +510,7 @@ defmodule OaksWeb.DevComponentsLive do
                 <.edit_menu id="gallery-edit-menu">
                   <:item click="noop">Edit species</:item>
                   <:item click="noop">Make synonym of…</:item>
+                  <:item click="noop" note="1 failed">Manage photos…</:item>
                   <:item click="noop">Delete species</:item>
                 </.edit_menu>
               </:actions>

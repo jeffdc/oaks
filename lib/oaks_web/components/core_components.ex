@@ -451,6 +451,7 @@ defmodule OaksWeb.CoreComponents do
       <.edit_menu id="species-edit-menu">
         <:item navigate={~p"/species/shumardii/edit"} id="edit-species-btn">Edit species</:item>
         <:item click="show_merge_picker">Make synonym of…</:item>
+        <:item click="open_manage_photos" note="1 failed">Manage photos…</:item>
         <:item click="request_delete_taxon" values={%{id: 12}}>Delete taxon</:item>
       </.edit_menu>
 
@@ -471,6 +472,7 @@ defmodule OaksWeb.CoreComponents do
     attr :method, :string
     attr :click, :string, doc: "the event the item's button sends"
     attr :values, :map, doc: "phx-value-* params sent with `click`"
+    attr :note, :string, doc: "a short note after the label, such as \"1 failed\""
   end
 
   def edit_menu(assigns) do
@@ -490,7 +492,7 @@ defmodule OaksWeb.CoreComponents do
       <ul class="oc-edit-menu-list">
         <li :for={item <- @item}>
           <.link :if={item[:navigate]} id={item[:id]} navigate={item[:navigate]}>
-            {render_slot(item)}
+            {render_slot(item)}<.menu_note note={item[:note]} />
           </.link>
           <.link
             :if={!item[:navigate] && item[:href]}
@@ -498,7 +500,7 @@ defmodule OaksWeb.CoreComponents do
             href={item[:href]}
             method={item[:method] || "get"}
           >
-            {render_slot(item)}
+            {render_slot(item)}<.menu_note note={item[:note]} />
           </.link>
           <button
             :if={!item[:navigate] && !item[:href]}
@@ -507,11 +509,19 @@ defmodule OaksWeb.CoreComponents do
             phx-click={JS.push_focus(to: "##{@id} > summary") |> JS.push(item[:click])}
             {phx_values(item[:values])}
           >
-            {render_slot(item)}
+            {render_slot(item)}<.menu_note note={item[:note]} />
           </button>
         </li>
       </ul>
     </details>
+    """
+  end
+
+  attr :note, :string, default: nil
+
+  defp menu_note(assigns) do
+    ~H"""
+    <span :if={@note} class="oc-edit-menu-note">{@note}</span>
     """
   end
 

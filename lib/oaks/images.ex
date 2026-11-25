@@ -237,36 +237,41 @@ defmodule Oaks.Images do
   defp inat_attrs(photo, observation, editor, opts) do
     license = INaturalist.map_license(photo.license_code)
 
-    attrs = %{
-      creator:
-        observation.observer_login &&
-          INaturalist.format_creator(observation.observer_login, observation.observer_name),
-      license: license,
-      licenselink: Licenses.url(license),
-      sourcelink: observation.url,
-      inat_observation_id: observation.id,
-      inat_photo_id: photo.id,
-      permission_confirmed_by: nil,
-      permission_confirmed_at: nil
-    }
+    with {:ok, permission} <- permission(license, editor, opts) do
+      attrs =
+        Map.merge(permission, %{
+          creator:
+            observation.observer_login &&
+              INaturalist.format_creator(observation.observer_login, observation.observer_name),
+          license: license,
+          licenselink: Licenses.url(license),
+          sourcelink: observation.url,
+          inat_observation_id: observation.id,
+          inat_photo_id: photo.id
+        })
 
-    permission? = Licenses.needs_permission?(license)
-    confirmed? = Keyword.get(opts, :permission_confirmed) == true
+      cond do
+        not Attribution.attributed?(attrs) -> {:error, :missing_attribution}
+        not is_integer(observation.id) -> {:error, :missing_attribution}
+        not is_integer(photo.id) -> {:error, :missing_attribution}
+        true -> {:ok, attrs}
+      end
+    end
+  end
 
-    attrs =
-      if permission? and confirmed?,
-        do: %{
-          attrs
-          | permission_confirmed_by: editor,
-            permission_confirmed_at: DateTime.utc_now(:second)
-        },
-        else: attrs
-
+  # Who confirmed the creator's permission and when, for a photo that needs
+  # it: only ever the signed-in editor, and only when they confirmed it.
+  defp permission(license, editor, opts) do
     cond do
-      permission? and not confirmed? -> {:error, :permission_required}
-      not Attribution.attributed?(attrs) -> {:error, :missing_attribution}
-      not is_integer(observation.id) or not is_integer(photo.id) -> {:error, :missing_attribution}
-      true -> {:ok, attrs}
+      not Licenses.needs_permission?(license) ->
+        {:ok, %{permission_confirmed_by: nil, permission_confirmed_at: nil}}
+
+      Keyword.get(opts, :permission_confirmed) == true ->
+        {:ok,
+         %{permission_confirmed_by: editor, permission_confirmed_at: DateTime.utc_now(:second)}}
+
+      true ->
+        {:error, :permission_required}
     end
   end
 

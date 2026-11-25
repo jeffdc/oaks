@@ -6,6 +6,11 @@ defmodule OaksWeb.SpeciesDetailLive do
   and per-source descriptive data with tab-based source selection.
   A synonym's address redirects to its species; an unknown name raises
   `OaksWeb.NotFoundError`, a real 404 (the not-found page).
+
+  Editors add photos from iNaturalist and manage them in two dialogs
+  (`OaksWeb.SpeciesPhotos.AddPhotos` and `OaksWeb.SpeciesPhotos.ManagePhotos`),
+  opened from the Edit menu; while a page is open to an editor it follows
+  the species' photo changes (`Oaks.Images.subscribe/1`).
   """
 
   use OaksWeb, :live_view
@@ -16,6 +21,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   alias Oaks.Species
   alias OaksWeb.Params
   alias OaksWeb.SpeciesName
+  alias OaksWeb.SpeciesPhotos
   alias OaksWeb.TaxonPath
 
   @impl true
@@ -41,7 +47,10 @@ defmodule OaksWeb.SpeciesDetailLive do
        delete_source_target: nil,
        show_merge_picker: false,
        merge_search_query: "",
-       merge_search_results: []
+       merge_search_results: [],
+       photo_dialog: nil,
+       photo_counts: %{},
+       subscribed_species_id: nil
      )}
   end
 
@@ -64,6 +73,19 @@ defmodule OaksWeb.SpeciesDetailLive do
       nil -> {:noreply, socket}
       selected -> {:noreply, assign(socket, selected_source: selected)}
     end
+  end
+
+  def handle_event("open_photo_dialog", %{"dialog" => dialog}, socket)
+      when dialog in ["add", "manage"] do
+    if socket.assigns[:current_scope] do
+      {:noreply, assign(socket, photo_dialog: String.to_existing_atom(dialog))}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("close_photo_dialog", _params, socket) do
+    {:noreply, socket |> assign(photo_dialog: nil) |> assign_photo_counts()}
   end
 
   def handle_event("request_delete", _params, socket) do
@@ -190,6 +212,7 @@ defmodule OaksWeb.SpeciesDetailLive do
           species={@species}
           editor={@current_scope != nil}
           can_add_source={@can_add_source}
+          failed_photos={Map.get(@photo_counts, "failed", 0)}
         />
       </:head>
 
@@ -257,6 +280,22 @@ defmodule OaksWeb.SpeciesDetailLive do
         species={@species}
         target={@delete_source_target}
       />
+
+      <.live_component
+        :if={@species && @current_scope && @photo_dialog == :add}
+        module={SpeciesPhotos.AddPhotos}
+        id={photo_dialog_id(:add)}
+        species={@species}
+        current_scope={@current_scope}
+      />
+
+      <.live_component
+        :if={@species && @current_scope && @photo_dialog == :manage}
+        module={SpeciesPhotos.ManagePhotos}
+        id={photo_dialog_id(:manage)}
+        species={@species}
+        current_scope={@current_scope}
+      />
     </.page>
     """
   end
@@ -266,6 +305,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   attr :species, :any, required: true
   attr :editor, :boolean, default: false
   attr :can_add_source, :boolean, default: false
+  attr :failed_photos, :integer, default: 0
 
   defp species_title(assigns) do
     ~H"""
@@ -291,6 +331,17 @@ defmodule OaksWeb.SpeciesDetailLive do
             id="add-source-btn"
           >
             Add source data
+          </:item>
+          <:item click="open_photo_dialog" values={%{dialog: "add"}} id="add-photos-btn">
+            Add photos from iNaturalist…
+          </:item>
+          <:item
+            click="open_photo_dialog"
+            values={%{dialog: "manage"}}
+            id="manage-photos-btn"
+            note={if @failed_photos > 0, do: "#{@failed_photos} failed"}
+          >
+            Manage photos…
           </:item>
           <:item click="show_merge_picker" id="merge-species-btn">Make synonym of…</:item>
           <:item click="request_delete" id="delete-species-btn">
@@ -735,8 +786,48 @@ defmodule OaksWeb.SpeciesDetailLive do
        can_add_source: Sources.available_sources_for_species(species.id) != [],
        selected_source: selected_source,
        page_title: SpeciesName.full_name(species.scientific_name, species.is_hybrid)
-     )}
+     )
+     |> follow_photos()}
   end
+
+  @impl true
+  def handle_info({:species_images_changed, species_id}, socket) do
+    if socket.assigns.species && socket.assigns.species.id == species_id do
+      for {dialog, module} <- [add: SpeciesPhotos.AddPhotos, manage: SpeciesPhotos.ManagePhotos],
+          socket.assigns.photo_dialog == dialog do
+        send_update(module, id: photo_dialog_id(dialog), refresh: true)
+      end
+
+      {:noreply, assign_photo_counts(socket)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  defp photo_dialog_id(:add), do: "add-photos"
+  defp photo_dialog_id(:manage), do: "manage-photos"
+
+  # An editor's page follows the species' photos: it counts the failed
+  # imports for the Edit menu and refreshes an open photo dialog.
+  defp follow_photos(socket) do
+    species = socket.assigns.species
+
+    if socket.assigns[:current_scope] && connected?(socket) &&
+         socket.assigns.subscribed_species_id != species.id do
+      :ok = Images.subscribe(species)
+      socket |> assign(subscribed_species_id: species.id) |> assign_photo_counts()
+    else
+      assign_photo_counts(socket)
+    end
+  end
+
+  defp assign_photo_counts(%{assigns: %{species: %{} = species}} = socket) do
+    if socket.assigns[:current_scope],
+      do: assign(socket, photo_counts: Images.count_by_status(species)),
+      else: socket
+  end
+
+  defp assign_photo_counts(socket), do: socket
 
   defp handle_not_found(socket, name) do
     case Species.find_synonym(name) do

@@ -1119,6 +1119,7 @@ defmodule OaksWeb.DesignComponents do
   ## Examples
 
       <.photo_picker id="inat-photos">
+        <:meta>janedoe · Blue Ridge, VA · 2026-05-04</:meta>
         <.photo_tile src={photo.thumbnail_url} label="Photo 1, CC-BY-NC" name="photo_ids[]" value={1}>
           CC-BY-NC
         </.photo_tile>
@@ -1127,11 +1128,15 @@ defmodule OaksWeb.DesignComponents do
   attr :id, :string, required: true
   attr :class, :any, default: nil
   attr :rest, :global
+  slot :meta, doc: "a line above the photos: the observation's observer, place, date and taxon"
   slot :inner_block, required: true
 
   def photo_picker(assigns) do
     ~H"""
-    <ul id={@id} class={["oc-photo-pick", @class]} {@rest}>{render_slot(@inner_block)}</ul>
+    <div class={["oc-photo-pick", @class]}>
+      <p :for={meta <- @meta} class="oc-photo-pick-meta">{render_slot(meta)}</p>
+      <ul id={@id} {@rest}>{render_slot(@inner_block)}</ul>
+    </div>
     """
   end
 
@@ -1292,8 +1297,9 @@ defmodule OaksWeb.DesignComponents do
   the Manage photos dialog. Dragging a row's handle, or pressing Up or Down
   on it, moves the row, and the list sends `on_reorder` with
   `%{"order" => ids}` (each row's `photo_id`, as strings, in their new
-  order) to the LiveView or LiveComponent it is rendered in. The server's
-  next render settles the order.
+  order) to the LiveView or LiveComponent it is rendered in (`target`) by
+  the SortablePhotos hook in assets/js/app.js. The server's next render
+  settles the order.
 
   ## Examples
 
@@ -1305,68 +1311,20 @@ defmodule OaksWeb.DesignComponents do
   """
   attr :id, :string, required: true
   attr :on_reorder, :string, required: true, doc: "the event sent with the new order"
+  attr :target, :any, default: nil, doc: "the LiveComponent it is rendered in (`@myself`)"
   slot :inner_block, required: true
 
   def photo_list(assigns) do
     ~H"""
-    <ul id={@id} class="oc-photo-list" phx-hook=".SortablePhotos" data-event={@on_reorder}>
+    <ul
+      id={@id}
+      class="oc-photo-list"
+      phx-hook="SortablePhotos"
+      phx-target={@target}
+      data-event={@on_reorder}
+    >
       {render_slot(@inner_block)}
     </ul>
-    <script :type={Phoenix.LiveView.ColocatedHook} name=".SortablePhotos">
-      // Drag a row by its handle, or press Up or Down on the handle, to move
-      // it; the new order (each row's data-photo-id) goes to the server when
-      // it changed. Ported from gallformers' sortable_images.js, as a list.
-      export default {
-        mounted() {
-          this.el.addEventListener("dragstart", e => this.start(e))
-          this.el.addEventListener("dragover", e => this.over(e))
-          this.el.addEventListener("drop", e => e.preventDefault())
-          this.el.addEventListener("dragend", () => this.end())
-          this.el.addEventListener("keydown", e => this.key(e))
-        },
-        rows() { return [...this.el.querySelectorAll(":scope > [data-photo-id]")] },
-        order() { return this.rows().map(row => row.dataset.photoId) },
-        start(e) {
-          const row = e.target.closest("[data-grip]")?.closest("[data-photo-id]")
-          if (!row) return
-          this.dragging = row
-          this.before = this.order().join()
-          row.dataset.dragging = ""
-          e.dataTransfer.effectAllowed = "move"
-          e.dataTransfer.setData("text/plain", row.dataset.photoId)
-          e.dataTransfer.setDragImage(row, 24, 24)
-        },
-        over(e) {
-          if (!this.dragging) return
-          e.preventDefault()
-          e.dataTransfer.dropEffect = "move"
-          const row = e.target.closest("[data-photo-id]")
-          if (!row || row === this.dragging || row.parentElement !== this.el) return
-          const box = row.getBoundingClientRect()
-          this.el.insertBefore(this.dragging, e.clientY < box.top + box.height / 2 ? row : row.nextSibling)
-        },
-        end() {
-          if (!this.dragging) return
-          delete this.dragging.dataset.dragging
-          this.dragging = null
-          this.push()
-        },
-        key(e) {
-          const grip = e.target.closest("[data-grip]")
-          if (!grip || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return
-          e.preventDefault()
-          const row = grip.closest("[data-photo-id]")
-          this.before = this.order().join()
-          if (e.key === "ArrowUp" && row.previousElementSibling) this.el.insertBefore(row, row.previousElementSibling)
-          if (e.key === "ArrowDown" && row.nextElementSibling) this.el.insertBefore(row.nextElementSibling, row)
-          grip.focus()
-          this.push()
-        },
-        push() {
-          if (this.order().join() !== this.before) this.pushEventTo(this.el, this.el.dataset.event, {order: this.order()})
-        }
-      }
-    </script>
     """
   end
 

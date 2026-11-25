@@ -514,6 +514,11 @@
   }
   .oc-edit-menu-list a:hover,
   .oc-edit-menu-list button:hover { background: var(--color-paper-2); }
+  .oc-edit-menu-note {
+    margin-left: var(--spacing-s2);
+    font-weight: 500;
+    color: var(--color-ink-3);
+  }
   .oc-edit-menu-list :focus-visible {
     outline-color: var(--color-pencil);
     outline-offset: -3px;
@@ -1614,7 +1619,7 @@
      thumbnails on the paper-2 ground, a picked photo inked round, notes in
      the frame face; nothing coloured but the ink.
      --------------------------------------------------------------------- */
-  .oc-photo-pick {
+  .oc-photo-pick > ul {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--spacing-s3);
@@ -1622,6 +1627,12 @@
     padding: 0;
     list-style: none;
   }
+  .oc-photo-pick-meta {
+    margin: 0 0 var(--spacing-s3);
+    font: 600 14px/1.45 var(--font-frame);
+    color: var(--color-ink-2);
+  }
+  .oc-photo-pick-meta .oc-sci { color: var(--color-ink); }
   .oc-photo-tile {
     font: 500 12.5px/1.35 var(--font-frame);
     color: var(--color-ink-2);
@@ -1660,7 +1671,7 @@
     overflow-wrap: anywhere;
   }
   .oc-photo-tile-note .oc-status {
-    font-size: 10.5px;
+    font-size: 11px;
     letter-spacing: 0.02em;
     text-transform: uppercase;
     padding: 3px 5px;
@@ -1668,7 +1679,7 @@
   .oc-photo-tile-off { color: var(--color-ink-3); }
   .oc-photo-tile-off .oc-photo-tile-image { opacity: 0.5; }
   @media (max-width: 480px) {
-    .oc-photo-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .oc-photo-pick > ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   .oc-photo-status {
@@ -1691,9 +1702,11 @@
     flex-wrap: wrap;
     gap: 0 var(--spacing-s2);
   }
-  .oc-photo-credit > * + *::before {
+  /* The separator ends the item before it, so a wrapped line never starts
+     with one. */
+  .oc-photo-credit > :not(:last-child)::after {
     content: "·";
-    margin-right: var(--spacing-s2);
+    margin-left: var(--spacing-s2);
     font-weight: 500;
   }
   .oc-photo-credit strong { font-weight: 700; color: var(--color-ink); }
