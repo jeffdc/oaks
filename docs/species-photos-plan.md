@@ -176,6 +176,8 @@ Done when an editor can import, retry, reorder, caption and delete photos from t
 
 Done when the component shows imported photos with credit and license, and the keyboard, swipe, lightbox and details dialog all work.
 
+**Status: done.** Jeff approved the viewer in `/dev/components` on 2026-11-25. The shared component is `OaksWeb.PhotoViewer.photo_viewer/1` (hook `assets/js/photo_viewer.js`, `pv-` block in `assets/css/system/components.css`); pages use `<.species_photos>` (DesignComponents), which shows a species' ready photos (medium on the stage, small in the rail, large full size) and themes the viewer with `.oc-photos`. Moves wrap at both ends. The details dialog lists caption, creator, license and source; the uploader and last-changed-by fields hold editors' emails, so Oaks never passes them. The hook was verified in a browser with Playwright (keys, steps and count, mouse and touch swipe, lightbox, details dialog, focus return); there is no JS test runner.
+
 ## Phase 7: Species page rebuild
 
 - Rebuild `species_detail_live.ex` on the Phase 4 design (`design/prototype/species-today.html` and the Phase 4 decisions): two columns, the photo viewer in the left column, and every section the scope table marks built or kept. The prototype is the visual reference; the build uses the component library, per AGENTS.md.
