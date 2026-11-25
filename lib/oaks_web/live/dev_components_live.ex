@@ -219,6 +219,107 @@ defmodule OaksWeb.DevComponentsLive do
         </div>
 
         <section class="mt-s8">
+          <.section_heading id="photo-editing">
+            Photo editing
+            <:note>the species page's Add photos and Manage photos dialogs</:note>
+          </.section_heading>
+          <div class="grid gap-s7 lg:grid-cols-2">
+            <form id="gallery-photo-pick" phx-change="noop" phx-submit="noop" class="max-w-[34rem]">
+              <.input
+                id="gallery-observation"
+                name="observation"
+                label="iNaturalist observation"
+                value="inaturalist.org/observations/190127456"
+                placeholder="Observation URL or number"
+              >
+                <:action><.button type="submit">Load</.button></:action>
+              </.input>
+              <.photo_picker id="gallery-photo-picker">
+                <.photo_tile label="Photo 1, CC-BY-NC" name="photo_ids[]" value="1" checked>
+                  CC-BY-NC
+                </.photo_tile>
+                <.photo_tile label="Photo 2, CC-BY" name="photo_ids[]" value="2">CC-BY</.photo_tile>
+                <.photo_tile label="Photo 3, All rights reserved" name="photo_ids[]" value="3" checked>
+                  <.status_tag>All rights reserved</.status_tag>
+                </.photo_tile>
+                <.photo_tile label="Photo 4, No license given" name="photo_ids[]" value="4">
+                  <.status_tag>No license given</.status_tag>
+                </.photo_tile>
+                <.photo_tile label="Photo 5" off><.photo_status status="exists" /></.photo_tile>
+                <.photo_tile label="Photo 6"><.photo_status status="added" /></.photo_tile>
+                <.photo_tile label="Photo 7"><.photo_status status="adding" /></.photo_tile>
+                <.photo_tile label="Photo 8">
+                  <.photo_status status="failed" error="iNaturalist no longer has this photo.">
+                    <:action><.button type="button" size="compact">Retry</.button></:action>
+                  </.photo_status>
+                </.photo_tile>
+              </.photo_picker>
+              <.ruled_notice id="gallery-permission" class="mt-s4">
+                <p>
+                  <strong>Photo 3 is All rights reserved.</strong>
+                  Its creator keeps every right to it. Add it only if the creator has given the
+                  Oak Compendium permission. The page will say it is used with the creator's
+                  permission.
+                </p>
+                <:confirm>
+                  <.input
+                    type="checkbox"
+                    name="permission"
+                    label="The creator has given permission to use this photo."
+                  />
+                </:confirm>
+              </.ruled_notice>
+            </form>
+
+            <div class="max-w-[34rem]">
+              <.photo_list id="gallery-photo-list" on_reorder="noop">
+                <.photo_row
+                  :for={
+                    {id, caption, state} <- [
+                      {1, "Terminal buds in winter", :ready},
+                      {2, "", :reserved},
+                      {3, "", :adding},
+                      {4, "", :failed}
+                    ]
+                  }
+                  id={"gallery-photo-#{id}"}
+                  photo_id={id}
+                  label={"Photo #{id}"}
+                  muted={state in [:adding, :failed]}
+                  on_delete={JS.push("noop")}
+                >
+                  <.input
+                    id={"gallery-caption-#{id}"}
+                    name="caption"
+                    value={caption}
+                    placeholder="Caption"
+                    aria-label="Caption"
+                    disabled={state in [:adding, :failed]}
+                  />
+                  <:meta>
+                    <.photo_credit :if={state == :ready} creator="janedoe" license="CC-BY-NC" />
+                    <.photo_credit
+                      :if={state == :reserved}
+                      creator="janedoe"
+                      license="All rights reserved, used with the creator's permission"
+                      reserved
+                    />
+                    <.photo_status :if={state == :adding} status="adding" />
+                    <.photo_status
+                      :if={state == :failed}
+                      status="failed"
+                      error="The photo couldn't be read as an image."
+                    >
+                      <:action><.button type="button" size="compact">Retry</.button></:action>
+                    </.photo_status>
+                  </:meta>
+                </.photo_row>
+              </.photo_list>
+            </div>
+          </div>
+        </section>
+
+        <section class="mt-s8">
           <.section_heading id="names">
             Scientific names<:note>sci_name</:note>
           </.section_heading>

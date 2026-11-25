@@ -1596,6 +1596,186 @@
   }
 
   /* ---------------------------------------------------------------------
+     A text field with its button (CoreComponents.input's :action): the
+     field takes the line, the button keeps its size at the right.
+     --------------------------------------------------------------------- */
+  .oc-input-row {
+    display: flex;
+    gap: var(--spacing-s2);
+    align-items: stretch;
+  }
+  .oc-input-row > .oc-input { flex: 1; min-width: 0; }
+  .oc-input-row > .oc-btn { flex: none; }
+
+  /* ---------------------------------------------------------------------
+     Photo editing (DesignComponents.photo_picker and photo_tile,
+     photo_status, photo_credit, ruled_notice, photo_list and photo_row):
+     the species page's Add photos and Manage photos dialogs. Square
+     thumbnails on the paper-2 ground, a picked photo inked round, notes in
+     the frame face; nothing coloured but the ink.
+     --------------------------------------------------------------------- */
+  .oc-photo-pick {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-s3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .oc-photo-tile {
+    font: 500 12.5px/1.35 var(--font-frame);
+    color: var(--color-ink-2);
+  }
+  .oc-photo-tile label { display: block; cursor: pointer; }
+  .oc-photo-tile-image {
+    position: relative;
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--color-paper-2);
+    border: 1px solid var(--color-rule);
+  }
+  .oc-photo-tile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .oc-photo-tile-image input {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: var(--color-ink);
+    cursor: pointer;
+  }
+  .oc-photo-tile label:has(input:checked) .oc-photo-tile-image {
+    outline: 2px solid var(--color-ink);
+    outline-offset: -2px;
+  }
+  .oc-photo-tile-note {
+    display: block;
+    margin-top: var(--spacing-s1);
+    overflow-wrap: anywhere;
+  }
+  .oc-photo-tile-note .oc-status {
+    font-size: 10.5px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 3px 5px;
+  }
+  .oc-photo-tile-off { color: var(--color-ink-3); }
+  .oc-photo-tile-off .oc-photo-tile-image { opacity: 0.5; }
+  @media (max-width: 480px) {
+    .oc-photo-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  .oc-photo-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    font: 600 12.5px/1.35 var(--font-frame);
+    color: var(--color-ink);
+  }
+  .oc-photo-status .oc-mk { font: inherit; color: inherit; }
+  .oc-photo-status-error {
+    font-weight: 500;
+    color: var(--color-ink-2);
+  }
+  .oc-photo-status-action { margin-top: var(--spacing-s1); }
+
+  .oc-photo-credit {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0 var(--spacing-s2);
+  }
+  .oc-photo-credit > * + *::before {
+    content: "·";
+    margin-right: var(--spacing-s2);
+    font-weight: 500;
+  }
+  .oc-photo-credit strong { font-weight: 700; color: var(--color-ink); }
+
+  .oc-ruled-notice {
+    padding: var(--spacing-s3) 0;
+    border-top: 2px solid var(--color-ink);
+    border-bottom: 2px solid var(--color-ink);
+    font: 500 14px/1.5 var(--font-frame);
+    color: var(--color-ink);
+  }
+  .oc-ruled-notice p { margin: 0 0 var(--spacing-s2); }
+  .oc-ruled-notice strong { font-weight: 800; }
+  .oc-ruled-notice-confirm .oc-field { margin: 0; }
+  .oc-ruled-notice-confirm .oc-check { font-weight: 700; align-items: flex-start; }
+  .oc-ruled-notice-confirm .oc-check input { margin-top: 1px; }
+
+  .oc-photo-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-rule);
+  }
+  .oc-photo-row {
+    display: grid;
+    grid-template-columns: 14px 56px minmax(0, 1fr);
+    gap: var(--spacing-s3);
+    align-items: start;
+    padding: var(--spacing-s3) 0;
+    border-bottom: 1px solid var(--color-rule);
+    background: var(--color-paper);
+  }
+  .oc-photo-row[data-dragging] { opacity: 0.5; }
+  .oc-photo-row-grip {
+    width: 14px;
+    height: 26px;
+    margin-top: 14px;
+    padding: 0;
+    border: 0;
+    cursor: grab;
+    background: radial-gradient(circle, var(--color-ink-3) 1.4px, transparent 1.6px) 2px 2px / 5px 5px;
+  }
+  .oc-photo-row-grip:hover {
+    background-image: radial-gradient(circle, var(--color-ink) 1.4px, transparent 1.6px);
+  }
+  .oc-photo-row-grip:active { cursor: grabbing; }
+  .oc-photo-row-thumb {
+    display: block;
+    width: 56px;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--color-paper-2);
+    border: 1px solid var(--color-rule);
+  }
+  .oc-photo-row-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .oc-photo-row-muted .oc-photo-row-thumb { opacity: 0.5; }
+  .oc-photo-row-body { min-width: 0; }
+  .oc-photo-row-body .oc-field { margin: 0; }
+  .oc-photo-row-body .oc-input { padding: 7px 9px; font-size: 14px; min-height: 0; }
+  .oc-photo-row-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--spacing-s1) var(--spacing-s3);
+    margin-top: 6px;
+    font: 500 12.5px/1.35 var(--font-frame);
+    color: var(--color-ink-2);
+  }
+  .oc-photo-row-delete {
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: 600 13px/1.35 var(--font-frame);
+    color: var(--color-ink-3);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .oc-photo-row-delete:hover { color: var(--color-ink); }
+
+  /* ---------------------------------------------------------------------
      Figures. The font shorthand above resets font-variant-numeric, so the
      Two Figures Rule is restated last: lining tabular figures for table
      cells, list values, inputs and counts; oldstyle proportional figures
@@ -1609,6 +1789,8 @@
   .oc-input,
   .oc-tags-input,
   .oc-status,
+  .oc-photo-tile,
+  .oc-photo-row-meta,
   .oc-title-meta,
   .oc-band ol {
     font-variant-numeric: lining-nums tabular-nums;

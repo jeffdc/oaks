@@ -1106,4 +1106,328 @@ defmodule OaksWeb.DesignComponents do
     </.error_notice>
     """
   end
+
+  # -- Photo editing (the species page's Add photos and Manage photos
+  # dialogs; docs/species-photos-plan.md, Phase 5) --
+
+  @doc """
+  Renders a grid of photos to pick from, three to a row, each a
+  `photo_tile/1`: an iNaturalist observation's photos in the Add photos
+  dialog. Pass `aria-live="polite"` while imports run, so their progress
+  is read out.
+
+  ## Examples
+
+      <.photo_picker id="inat-photos">
+        <.photo_tile src={photo.thumbnail_url} label="Photo 1, CC-BY-NC" name="photo_ids[]" value={1}>
+          CC-BY-NC
+        </.photo_tile>
+      </.photo_picker>
+  """
+  attr :id, :string, required: true
+  attr :class, :any, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def photo_picker(assigns) do
+    ~H"""
+    <ul id={@id} class={["oc-photo-pick", @class]} {@rest}>{render_slot(@inner_block)}</ul>
+    """
+  end
+
+  @doc """
+  Renders one photo of a `photo_picker/1`: a square thumbnail and, under
+  it, its note (the license, a `status_tag/1` stamp, or a `photo_status/1`).
+
+  With `name`, the tile is a checkbox labelled `label`, inked round when
+  picked. Without it, the tile only shows the photo, `off` dims it (a photo
+  already added) and its note may hold a button (Retry).
+
+  ## Examples
+
+      <.photo_tile src={url} label="Photo 4, All rights reserved" name="photo_ids[]" value={4}>
+        <.status_tag>All rights reserved</.status_tag>
+      </.photo_tile>
+
+      <.photo_tile src={url} label="Photo 5" off>
+        <.photo_status status="exists" />
+      </.photo_tile>
+  """
+  attr :src, :string, default: nil, doc: "the thumbnail's URL; none draws an empty tile"
+  attr :label, :string, required: true, doc: "names the photo, for the checkbox or the image"
+  attr :name, :string, default: nil, doc: "the checkbox's name: the photo can be picked"
+  attr :value, :any, default: nil
+  attr :checked, :boolean, default: false
+  attr :off, :boolean, default: false, doc: "dimmed: the photo can't be picked"
+  attr :rest, :global, doc: "attributes for the checkbox"
+  slot :inner_block, doc: "the note under the photo"
+
+  def photo_tile(%{name: name} = assigns) when is_binary(name) do
+    ~H"""
+    <li class={["oc-photo-tile", @off && "oc-photo-tile-off"]}>
+      <label>
+        <span class="oc-photo-tile-image">
+          <img :if={@src} src={@src} alt="" loading="lazy" />
+          <input
+            type="checkbox"
+            name={@name}
+            value={@value}
+            checked={@checked}
+            aria-label={@label}
+            {@rest}
+          />
+        </span>
+        <span :if={@inner_block != []} class="oc-photo-tile-note">{render_slot(@inner_block)}</span>
+      </label>
+    </li>
+    """
+  end
+
+  def photo_tile(assigns) do
+    ~H"""
+    <li class={["oc-photo-tile", @off && "oc-photo-tile-off"]}>
+      <span class="oc-photo-tile-image">
+        <img :if={@src} src={@src} alt={@label} loading="lazy" />
+        <span :if={!@src} class="sr-only">{@label}</span>
+      </span>
+      <div :if={@inner_block != []} class="oc-photo-tile-note">{render_slot(@inner_block)}</div>
+    </li>
+    """
+  end
+
+  @photo_statuses %{
+    "added" => {"agree", "Added"},
+    "exists" => {"agree", "Already added"},
+    "adding" => {"open", "Adding…"},
+    "failed" => {"differs", "Failed"}
+  }
+
+  @doc """
+  Renders where a photo's import stands, as a `standing_mark/1` and its
+  word: `added` (Added), `exists` (Already added), `adding` (Adding…) or
+  `failed` (Failed). `error` says what went wrong, on its own line; the
+  `:action` slot holds its one button (Retry).
+
+  ## Examples
+
+      <.photo_status status="adding" />
+
+      <.photo_status status="failed" error="iNaturalist no longer has this photo (HTTP 404).">
+        <:action><.button size="compact" phx-click="retry">Retry</.button></:action>
+      </.photo_status>
+  """
+  attr :status, :string, required: true, values: Map.keys(@photo_statuses)
+  attr :error, :string, default: nil
+  slot :action, doc: "one button, such as Retry"
+
+  def photo_status(assigns) do
+    {standing, word} = Map.fetch!(@photo_statuses, assigns.status)
+    assigns = assign(assigns, standing: standing, word: word)
+
+    ~H"""
+    <span class="oc-photo-status">
+      <.standing_mark standing={@standing}>{@word}</.standing_mark>
+      <span :if={@error} class="oc-photo-status-error">{@error}</span>
+      <span :for={action <- @action} class="oc-photo-status-action">{render_slot(action)}</span>
+    </span>
+    """
+  end
+
+  @doc """
+  Renders a photo's credit: its creator and its license, as a dialog lists
+  it. A `reserved` photo (All Rights Reserved, used with the creator's
+  permission) is marked © and its license set in bold.
+
+  ## Examples
+
+      <.photo_credit creator="janedoe - Jane Doe" license="CC-BY-NC" />
+      <.photo_credit creator="janedoe" license="All rights reserved, used with the creator's permission" reserved />
+  """
+  attr :creator, :string, default: nil
+  attr :license, :string, default: nil
+  attr :reserved, :boolean, default: false
+
+  def photo_credit(assigns) do
+    ~H"""
+    <span class="oc-photo-credit">
+      <span :if={@creator}>{if @reserved, do: "© "}{@creator}</span>
+      <strong :if={@license && @reserved}>{@license}</strong>
+      <span :if={@license && !@reserved}>{@license}</span>
+    </span>
+    """
+  end
+
+  @doc """
+  Renders a notice set between two 2px ink rules: a consequence inside a
+  dialog that the editor must read, and confirm with the `:confirm` slot's
+  checkbox, before the dialog's action is enabled (a photo whose creator
+  keeps every right).
+
+  ## Examples
+
+      <.ruled_notice id="permission-notice">
+        <p><strong>Photo 4 is All rights reserved.</strong> Its creator keeps every right to it.</p>
+        <:confirm>
+          <.input type="checkbox" name="permission" label="The creator has given permission to use this photo." />
+        </:confirm>
+      </.ruled_notice>
+  """
+  attr :id, :string, default: nil
+  attr :class, :any, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+  slot :confirm, doc: "the checkbox the editor ticks to confirm"
+
+  def ruled_notice(assigns) do
+    ~H"""
+    <div id={@id} class={["oc-ruled-notice", @class]} {@rest}>
+      {render_slot(@inner_block)}
+      <div :for={confirm <- @confirm} class="oc-ruled-notice-confirm">{render_slot(confirm)}</div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a list of photos an editor puts in order, each a `photo_row/1`:
+  the Manage photos dialog. Dragging a row's handle, or pressing Up or Down
+  on it, moves the row, and the list sends `on_reorder` with
+  `%{"order" => ids}` (each row's `photo_id`, as strings, in their new
+  order) to the LiveView or LiveComponent it is rendered in. The server's
+  next render settles the order.
+
+  ## Examples
+
+      <.photo_list id="manage-photos" on_reorder="reorder_photos">
+        <.photo_row :for={image <- @images} id={"photo-\#{image.id}"} photo_id={image.id} ...>
+          ...
+        </.photo_row>
+      </.photo_list>
+  """
+  attr :id, :string, required: true
+  attr :on_reorder, :string, required: true, doc: "the event sent with the new order"
+  slot :inner_block, required: true
+
+  def photo_list(assigns) do
+    ~H"""
+    <ul id={@id} class="oc-photo-list" phx-hook=".SortablePhotos" data-event={@on_reorder}>
+      {render_slot(@inner_block)}
+    </ul>
+    <script :type={Phoenix.LiveView.ColocatedHook} name=".SortablePhotos">
+      // Drag a row by its handle, or press Up or Down on the handle, to move
+      // it; the new order (each row's data-photo-id) goes to the server when
+      // it changed. Ported from gallformers' sortable_images.js, as a list.
+      export default {
+        mounted() {
+          this.el.addEventListener("dragstart", e => this.start(e))
+          this.el.addEventListener("dragover", e => this.over(e))
+          this.el.addEventListener("drop", e => e.preventDefault())
+          this.el.addEventListener("dragend", () => this.end())
+          this.el.addEventListener("keydown", e => this.key(e))
+        },
+        rows() { return [...this.el.querySelectorAll(":scope > [data-photo-id]")] },
+        order() { return this.rows().map(row => row.dataset.photoId) },
+        start(e) {
+          const row = e.target.closest("[data-grip]")?.closest("[data-photo-id]")
+          if (!row) return
+          this.dragging = row
+          this.before = this.order().join()
+          row.dataset.dragging = ""
+          e.dataTransfer.effectAllowed = "move"
+          e.dataTransfer.setData("text/plain", row.dataset.photoId)
+          e.dataTransfer.setDragImage(row, 24, 24)
+        },
+        over(e) {
+          if (!this.dragging) return
+          e.preventDefault()
+          e.dataTransfer.dropEffect = "move"
+          const row = e.target.closest("[data-photo-id]")
+          if (!row || row === this.dragging || row.parentElement !== this.el) return
+          const box = row.getBoundingClientRect()
+          this.el.insertBefore(this.dragging, e.clientY < box.top + box.height / 2 ? row : row.nextSibling)
+        },
+        end() {
+          if (!this.dragging) return
+          delete this.dragging.dataset.dragging
+          this.dragging = null
+          this.push()
+        },
+        key(e) {
+          const grip = e.target.closest("[data-grip]")
+          if (!grip || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return
+          e.preventDefault()
+          const row = grip.closest("[data-photo-id]")
+          this.before = this.order().join()
+          if (e.key === "ArrowUp" && row.previousElementSibling) this.el.insertBefore(row, row.previousElementSibling)
+          if (e.key === "ArrowDown" && row.nextElementSibling) this.el.insertBefore(row.nextElementSibling, row)
+          grip.focus()
+          this.push()
+        },
+        push() {
+          if (this.order().join() !== this.before) this.pushEventTo(this.el, this.el.dataset.event, {order: this.order()})
+        }
+      }
+    </script>
+    """
+  end
+
+  @doc """
+  Renders one photo of a `photo_list/1`: its drag handle, a square
+  thumbnail, its caption field (the inner block) and, under that, its meta
+  line (`:meta`: a `photo_credit/1` or a `photo_status/1`) ending in its
+  Delete button, which runs `on_delete`. A `muted` row (an import still
+  adding or failed) dims its thumbnail.
+
+  ## Examples
+
+      <.photo_row
+        id="photo-12"
+        photo_id={12}
+        src={Image.url(image, :small)}
+        label="Photo 1"
+        on_delete={JS.push("request_delete_photo", value: %{id: 12})}
+      >
+        <form phx-change="save_caption">...</form>
+        <:meta><.photo_credit creator="janedoe" license="CC-BY-NC" /></:meta>
+      </.photo_row>
+  """
+  attr :id, :string, required: true
+  attr :photo_id, :any, required: true
+  attr :label, :string, required: true, doc: "names the photo, as in \"Photo 2\""
+  attr :src, :string, default: nil, doc: "the thumbnail's URL; none draws an empty tile"
+  attr :muted, :boolean, default: false
+  attr :on_delete, :any, required: true, doc: "the Delete button's phx-click"
+  slot :inner_block, doc: "the caption field"
+  slot :meta, doc: "the credit, or the import's status"
+
+  def photo_row(assigns) do
+    ~H"""
+    <li id={@id} data-photo-id={@photo_id} class={["oc-photo-row", @muted && "oc-photo-row-muted"]}>
+      <button
+        type="button"
+        class="oc-photo-row-grip"
+        data-grip
+        draggable="true"
+        aria-label={"Move #{@label}: Up and Down arrow keys"}
+        title="Drag to reorder"
+      />
+      <span class="oc-photo-row-thumb">
+        <img :if={@src} src={@src} alt={@label} loading="lazy" />
+      </span>
+      <div class="oc-photo-row-body">
+        {render_slot(@inner_block)}
+        <div class="oc-photo-row-meta">
+          {render_slot(@meta)}
+          <button
+            type="button"
+            class="oc-photo-row-delete"
+            phx-click={@on_delete}
+            aria-label={"Delete #{@label}"}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </li>
+    """
+  end
 end

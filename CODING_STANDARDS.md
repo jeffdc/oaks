@@ -411,7 +411,8 @@ Every page is built from the shared library: `OaksWeb.CoreComponents`, `OaksWeb.
 | A centred page's parts: title page, chapter headings, contents list, a featured taxon, a closing list | `<.title_page>` (in the page's `:bleed`), `<.chapter_heading>`, `<.contents>`, `<.specimen>`, `<.colophon>` |
 | A work's title with a scientific name in it (a source's name) | `<.work_title>` |
 | Tables and ruled lists | `<.table>`, `<.list>` |
-| Form fields | `<.input>` |
+| Form fields | `<.input>`; a text field's one button on its line (Load beside an observation field) goes in its `:action` slot |
+| Picking, ordering and captioning photos (the species page's Add photos and Manage photos dialogs) | `<.photo_picker>` of `<.photo_tile>`s (a checkbox tile with its license or `<.status_tag>` stamp under it), `<.photo_status>` for an import's state (Added, Already added, Adding…, Failed with its error and Retry), `<.photo_credit>`, `<.ruled_notice>` for a consequence the editor confirms with a checkbox before acting, and `<.photo_list>` of `<.photo_row>`s (drag handle, also Up/Down keys; thumbnail; caption field; credit or status; Delete) (DesignComponents). Never a page's own photo grid, drag handle or status line |
 | Back links | `<.back>` |
 | Not found and error pages | A LiveView that finds nothing at its address raises `OaksWeb.NotFoundError` (`kind: :species \| :taxon \| :source \| :article`, optional `query` for the search), never renders a not-found state of its own: Phoenix then sends the real 404, `OaksWeb.ErrorHTML`'s page, which is `<.not_found>` (DesignComponents) in the site's masthead and footer. Redirects (a synonym's address) stay redirects. The 403 and 500 are `<.error_notice>` |
 | Sources and standing marks | `<.source_mark>`, `<.standing_mark>` |

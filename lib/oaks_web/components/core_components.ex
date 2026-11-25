@@ -152,6 +152,17 @@ defmodule OaksWeb.CoreComponents do
   <.input name="my-input" errors={["oh no!"]} />
   ```
 
+  ## A button beside the field
+
+  A text field's `:action` is its one button, on the field's line at the
+  right, such as Load beside an observation's address.
+
+  ```heex
+  <.input name="observation" label="iNaturalist observation" value={@query}>
+    <:action><.button type="submit">Load</.button></:action>
+  </.input>
+  ```
+
   ## Select type
 
   When using `type="select"`, you must pass the `options` and optionally
@@ -188,6 +199,9 @@ defmodule OaksWeb.CoreComponents do
   attr :rest, :global,
     include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
                 multiple pattern placeholder readonly required rows size step)
+
+  slot :action,
+    doc: "a text field's one button, on its line at the right (Load beside an observation field)"
 
   def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
     errors = if Phoenix.Component.used_input?(field), do: field.errors, else: []
@@ -274,6 +288,31 @@ defmodule OaksWeb.CoreComponents do
           {@rest}
         >{HtmlForm.normalize_value("textarea", @value)}</textarea>
       </label>
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
+    """
+  end
+
+  # A text field with its button on the same line: the label is its own
+  # element, so the button isn't part of it.
+  def input(%{action: [_ | _]} = assigns) do
+    assigns = assign_new(assigns, :id, fn -> nil end)
+
+    ~H"""
+    <div class="oc-field">
+      <label :if={@label} for={@id} class="oc-label">{@label}</label>
+      <div class="oc-input-row">
+        <input
+          type={@type}
+          name={@name}
+          id={@id}
+          value={HtmlForm.normalize_value(@type, @value)}
+          class={[@class || "oc-input", @errors != [] && @error_class]}
+          aria-invalid={@errors != [] && "true"}
+          {@rest}
+        />
+        {render_slot(@action)}
+      </div>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
