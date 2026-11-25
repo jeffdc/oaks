@@ -118,6 +118,29 @@ const Hooks = {
     },
     mark() { this.el.toggleAttribute("data-scrolled", this.el.scrollLeft > 0) }
   },
+  // Source tabs (DesignComponents.source_tabs): Left and Right (Home and
+  // End) on a focused tab open the one beside it (the first, the last) and
+  // keep the focus on it once the server has opened it.
+  Tablist: {
+    mounted() {
+      this.el.addEventListener("keydown", e => {
+        const tabs = [...this.el.querySelectorAll('[role="tab"]')]
+        const i = tabs.indexOf(e.target)
+        if (i < 0) return
+        const next = {ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1}[e.key]
+        if (next === undefined) return
+        e.preventDefault()
+        const tab = tabs[(next + tabs.length) % tabs.length]
+        this.focusId = tab.id
+        tab.focus()
+        tab.click()
+      })
+    },
+    updated() {
+      if (this.focusId) document.getElementById(this.focusId)?.focus()
+      this.focusId = null
+    }
+  },
   TagInput: {
     mounted() {
       this.el.addEventListener("keydown", (e) => {

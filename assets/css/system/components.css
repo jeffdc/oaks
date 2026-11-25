@@ -2159,6 +2159,268 @@
   }
 
   /* ---------------------------------------------------------------------
+     The species page's parts (docs/species-photos-plan.md, Phase 7):
+     photo_columns, source_tabs, ruled_rows and hybrid_rows, comma_list,
+     not_covered_notice and cite_line (DesignComponents), and the title
+     row's common name (CoreComponents.header).
+     --------------------------------------------------------------------- */
+
+  /* Photo columns: the photos left (300px, 240px under 1180px), sticky,
+     the text right. On phones one column: the text, then the photos. */
+  .oc-photo-cols {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: var(--spacing-s7);
+    align-items: start;
+  }
+  .oc-photo-cols-photos {
+    grid-column: 1;
+    grid-row: 1;
+    position: sticky;
+    top: var(--spacing-s4);
+    min-width: 0;
+  }
+  .oc-photo-cols-text {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+  @media (max-width: 1180px) {
+    .oc-photo-cols {
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: var(--spacing-s6);
+    }
+  }
+  @media (max-width: 760px) {
+    .oc-photo-cols {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--spacing-s5);
+    }
+    .oc-photo-cols-photos,
+    .oc-photo-cols-text { grid-column: 1; grid-row: auto; }
+    .oc-photo-cols-photos { position: static; }
+  }
+
+  /* Source tabs: the strip stands on the 2px ink rule and the open tab
+     carries the 3px ochre underline along it, as the masthead's current
+     nav item does. Its one icon link sits beside it, off the rule. */
+  /* Wrapped in reverse: when the tabs and the actions don't fit one line,
+     the actions go above, so the tabs stay on the rule. */
+  .oc-tabs-strip {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    align-items: flex-start;
+    gap: 0 var(--spacing-s5);
+    border-bottom: 2px solid var(--color-rule-strong);
+  }
+  /* Tabs that don't fit scroll sideways, fading out at the right edge. */
+  .oc-tabs-list {
+    display: flex;
+    gap: 0 var(--spacing-s5);
+    min-width: 0;
+    max-width: 100%;
+    padding-right: var(--spacing-s6);
+    overflow-x: auto;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, var(--color-ink) calc(100% - var(--spacing-s6)), transparent);
+  }
+  .oc-tabs-list::-webkit-scrollbar { display: none; }
+  .oc-tab {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .oc-tab > [role="tab"] {
+    padding: 12px 0 9px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: none;
+    font: 700 15px/1.2 var(--font-frame);
+    color: var(--color-ink-2);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .oc-tab > [role="tab"]:hover:not([aria-selected="true"]) {
+    color: var(--color-ink);
+    border-bottom-color: color-mix(in srgb, var(--color-ink) 25%, transparent);
+  }
+  .oc-tab > [role="tab"][aria-selected="true"] {
+    color: var(--color-ink);
+    border-bottom-color: var(--color-ochre);
+  }
+  .oc-tab-link {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    color: var(--color-ink-3);
+    text-decoration: none;
+  }
+  .oc-tab-link:hover { color: var(--color-pencil); }
+  .oc-tab-icon { width: 15px; height: 15px; }
+  .oc-tabs-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-s4);
+    margin-left: auto;
+    margin-bottom: var(--spacing-s2);
+    white-space: nowrap;
+  }
+
+  /* The open source's text: each field a label beside its text on a
+     hairline, set as that source's prose. */
+  .oc-tabs-field {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: var(--spacing-s5);
+    padding: var(--spacing-s4) 0;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .oc-tabs-field h3 {
+    margin: 0;
+    padding-top: 3px;
+    font: 700 15px/1.3 var(--font-frame);
+    color: var(--color-ink);
+  }
+  .oc-tabs-value {
+    min-width: 0;
+    max-width: 70ch;
+    font: 400 17px/1.6 var(--font-serif);
+    color: var(--color-ink);
+    font-variant-numeric: oldstyle-nums proportional-nums;
+  }
+  .oc-tabs-value .oc-prose { max-width: none; }
+  .oc-tabs-empty {
+    margin: 0;
+    padding: var(--spacing-s4) 0;
+    border-bottom: 1px solid var(--color-rule);
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--color-ink-3);
+  }
+
+  /* On a phone the tabs keep one row on the rule and scroll sideways, as
+     the band does, fading out at the right edge (the rule under them
+     doesn't); the actions go on the row under it, and each field's label
+     stacks above its text. */
+  @media (max-width: 760px) {
+    .oc-tabs-strip {
+      flex-wrap: wrap;
+      align-items: flex-end;
+      border-bottom: 0;
+    }
+    .oc-tabs-list {
+      flex-basis: 100%;
+      border-bottom: 2px solid var(--color-rule-strong);
+      mask-image:
+        linear-gradient(to right, var(--color-ink) calc(100% - var(--spacing-s6)), transparent),
+        linear-gradient(var(--color-ink), var(--color-ink));
+      mask-size: 100% calc(100% - 2px), 100% 2px;
+      mask-position: top, bottom;
+      mask-repeat: no-repeat;
+    }
+    .oc-tabs-actions { margin: var(--spacing-s3) 0 0; }
+    .oc-tabs-field {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--spacing-s1);
+    }
+  }
+
+  /* Ruled rows: names, links and works under a taxon, on hairlines, in
+     three columns (two under 1180px, one on phones). */
+  .oc-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .oc-rows-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--spacing-s7);
+  }
+  .oc-rows > li,
+  .oc-rows-link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px var(--spacing-s3);
+  }
+  .oc-rows > li {
+    min-width: 0;
+    padding: var(--spacing-s2) 0;
+    border-bottom: 1px solid var(--color-rule);
+    font: 600 15px/1.3 var(--font-frame);
+    color: var(--color-ink);
+  }
+  .oc-rows a:not(.oc-src) {
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .oc-rows-link:hover .oc-rows-text {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .oc-rows-note {
+    font: 500 13px/1.3 var(--font-frame);
+    color: var(--color-ink-3);
+  }
+  .oc-rows-with {
+    font: 500 14px/1.4 var(--font-frame);
+    color: var(--color-ink-2);
+  }
+  @media (max-width: 1180px) {
+    .oc-rows-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 760px) {
+    .oc-rows-3 { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  /* A run of names in the serif. The comma ends the item before it, so a
+     wrapped line never starts with one. */
+  .oc-comma-list {
+    margin: 0;
+    font: 400 17px/1.7 var(--font-serif);
+    color: var(--color-ink);
+  }
+  .oc-comma-list > span:not(:last-child)::after { content: ", "; }
+
+  /* The not-covered notice: the ruled notice at page size, under the
+     title row. */
+  .oc-ruled-notice-page {
+    margin-bottom: var(--spacing-s6);
+    padding: var(--spacing-s4) 0;
+    font: 500 16px/1.55 var(--font-frame);
+  }
+  .oc-ruled-notice-page p { margin: 0; max-width: 80ch; }
+
+  /* The cite line, on a 2px rule. */
+  .oc-cite {
+    margin: 0;
+    padding-top: var(--spacing-s4);
+    border-top: 2px solid var(--color-rule-strong);
+    font: 400 15px/1.6 var(--font-serif);
+    color: var(--color-ink-2);
+    overflow-wrap: anywhere;
+  }
+  .oc-cite-label {
+    margin-right: var(--spacing-s3);
+    font: 800 13px/1 var(--font-frame);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+
+  /* The title row's common name, with its source mark; the subtitle's
+     links (a hybrid's parents) in ink. */
+  .oc-title-cn {
+    font: 700 21px/1.2 var(--font-frame);
+    color: var(--color-ink);
+  }
+  .oc-title-sub a { color: var(--color-ink); }
+
+  /* ---------------------------------------------------------------------
      Figures. The font shorthand above resets font-variant-numeric, so the
      Two Figures Rule is restated last: lining tabular figures for table
      cells, list values, inputs and counts; oldstyle proportional figures

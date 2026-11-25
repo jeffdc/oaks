@@ -367,7 +367,11 @@ defmodule OaksWeb.CoreComponents do
       stamps (`<.status_tag>`, `<.iucn_status>`), links. It wraps under
       the title only when the line has no room for it. Each entry is one
       item, so `:if` works per entry.
-    * `:subtitle` is a sentence describing the page, under the title line.
+    * `:common_name` is a taxon's common name, in Archivo 700 21px after
+      its name (and authority), followed by the `<.source_mark>` of the
+      source it comes from; the meta follows it.
+    * `:subtitle` is a sentence describing the page, under the title line
+      (a hybrid's parents, linked).
     * `:actions` holds the page's `<.edit_menu>`, editor-only, at the
       right on the title's first baseline. It never wraps: the title and
       meta take the rest of the row, and with no actions (logged out) the
@@ -402,6 +406,9 @@ defmodule OaksWeb.CoreComponents do
   slot :meta,
     doc: "one item on the title's line, after the title: a kind word, count, byline or stamp"
 
+  slot :common_name,
+    doc: "a taxon's common name, after its name, with the `<.source_mark>` of its source"
+
   slot :subtitle, doc: "a sentence describing the page, under the title line"
   slot :actions, doc: "the page's `<.edit_menu>`, at the right on the title's first baseline"
 
@@ -411,6 +418,9 @@ defmodule OaksWeb.CoreComponents do
       <div class="oc-title-text">
         <div class="oc-title-line">
           <h1>{render_slot(@inner_block)}</h1>
+          <span :for={common_name <- @common_name} class="oc-title-cn">
+            {render_slot(common_name)}
+          </span>
           <div :if={@meta != []} class="oc-title-meta">
             <span :for={meta <- @meta}>{render_slot(meta)}</span>
           </div>

@@ -235,7 +235,7 @@ defmodule OaksWeb.SpeciesDetailLive do
           <.synonyms_section :if={@synonyms != []} synonyms={@synonyms} />
 
           <section class="source-container full-width" aria-label="Source data">
-            <.source_tabs
+            <.tab_strip
               :if={@species_sources != []}
               sources={@species_sources}
               selected={@selected_source}
@@ -462,7 +462,7 @@ defmodule OaksWeb.SpeciesDetailLive do
   attr :selected, :any, required: true
   attr :species_name, :string, required: true
 
-  defp source_tabs(assigns) do
+  defp tab_strip(assigns) do
     ~H"""
     <div class="source-tabs-strip">
       <div class="source-tabs-list" role="tablist" aria-label="Sources">

@@ -26,7 +26,7 @@ defmodule OaksWeb.DesignComponents do
   use Phoenix.Component
   use OaksWeb, :verified_routes
 
-  import OaksWeb.CoreComponents, only: [button: 1, header: 1]
+  import OaksWeb.CoreComponents, only: [button: 1, header: 1, icon: 1]
   import OaksWeb.PhotoViewer, only: [photo_viewer: 1]
 
   alias Oaks.Images.Attribution
@@ -429,21 +429,25 @@ defmodule OaksWeb.DesignComponents do
 
   @doc """
   Renders a source mark: the pencil-blue link that follows every Oak
-  Compendium quote and every sourced value. Without `href` or `navigate` it renders
-  as plain text in the same style, for a source with no page yet.
+  Compendium quote and every sourced value. Without `href`, `navigate` or
+  `patch` it renders as plain text in the same style, for a source with no
+  page yet. `patch` stays on the page: the species title's common name
+  opens its source's tab.
 
   ## Examples
 
       <q>buds looks glabrous and pretty small.</q>
       <.source_mark href="https://www.inaturalist.org/observations/190127456">i465271504</.source_mark>
+      <.source_mark patch={~p"/species/shumardii?source=2"}>Oaks of the World</.source_mark>
   """
   attr :href, :string, default: nil
   attr :navigate, :string, default: nil
+  attr :patch, :string, default: nil
   attr :title, :string, default: nil
   attr :class, :any, default: nil
   slot :inner_block, required: true
 
-  def source_mark(%{href: nil, navigate: nil} = assigns) do
+  def source_mark(%{href: nil, navigate: nil, patch: nil} = assigns) do
     ~H"""
     <span class={["oc-src", @class]} title={@title}>{render_slot(@inner_block)}</span>
     """
@@ -451,7 +455,13 @@ defmodule OaksWeb.DesignComponents do
 
   def source_mark(assigns) do
     ~H"""
-    <.link class={["oc-src", @class]} href={@href} navigate={@navigate} title={@title}>
+    <.link
+      class={["oc-src", @class]}
+      href={@href}
+      navigate={@navigate}
+      patch={@patch}
+      title={@title}
+    >
       {render_slot(@inner_block)}
     </.link>
     """
@@ -1442,4 +1452,321 @@ defmodule OaksWeb.DesignComponents do
   end
 
   defp viewer_photo(_image), do: []
+
+  # -- The species page (docs/species-photos-plan.md, Phase 7) --
+
+  @doc """
+  Sets a taxon's photos beside its text, in the page's frame: the photos
+  in a 300px column on the left (240px under 1180px), sticky while the
+  text scrolls past, the text in the rest. On phones it is one column,
+  the text first and the photos under it.
+
+  ## Examples
+
+      <.photo_columns>
+        <:photos><.species_photos id="species-photos" images={@images} name={@name} /></:photos>
+        <.source_tabs ...>...</.source_tabs>
+      </.photo_columns>
+  """
+  attr :id, :string, default: nil
+  attr :label, :string, default: "Photos", doc: "the photo column's accessible name"
+  slot :photos, required: true, doc: "the photos: a `species_photos/1`"
+  slot :inner_block, required: true, doc: "the text"
+
+  def photo_columns(assigns) do
+    ~H"""
+    <div id={@id} class="oc-photo-cols">
+      <div class="oc-photo-cols-text">{render_slot(@inner_block)}</div>
+      <aside class="oc-photo-cols-photos" aria-label={@label}>{render_slot(@photos)}</aside>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders text by source in tabs: one tab per source, in the order given,
+  on a 2px rule, the open tab underlined in ochre; then the open source's
+  text, each field a label beside its text on a hairline (stacked on
+  phones), set as that source's prose. The tab head attributes it, so the
+  text takes no quotation marks and no source mark.
+
+  The open tab carries one small icon link: `original` (the source's own
+  page for this taxon, an external link) when it has one, otherwise
+  `about` (the source's page on the site). A click on a tab, or Left and
+  Right on a focused tab, sends `on_select` with `%{"id" => tab id}`; the
+  page opens that tab. With no `:field` the open tab reads "No text from
+  {source} yet."
+
+  The `:action` slots stand at the strip's right end, in order: the
+  editor's quiet `edit_menu/1` for the open source, then the Compare
+  button. On phones the tabs scroll sideways on their rule, fading at the
+  right edge, and the actions go on the row under them.
+
+  ## Examples
+
+      <.source_tabs id="source-tabs" selected={3} on_select="select_source">
+        <:tab id={3} name="Oak Compendium" about={~p"/sources/3"} />
+        <:tab id={2} name="Oaks of the World" original="https://oaksoftheworld.fr/quercus_shumardii.htm" />
+        <:action><.compare_button navigate={~p"/species/shumardii/compare"}>Compare sources</.compare_button></:action>
+        <:field label="Leaves"><div class="oc-prose">...</div></:field>
+      </.source_tabs>
+  """
+  attr :id, :string, required: true
+  attr :label, :string, default: "Sources", doc: "the tab list's accessible name"
+  attr :selected, :any, required: true, doc: "the open tab's id"
+  attr :on_select, :string, required: true, doc: "the event a tab sends, with its id"
+
+  slot :tab, required: true, doc: "one source, in order" do
+    attr :id, :any, required: true
+    attr :name, :string, required: true, doc: "the source's name, set as `work_title/1`"
+    attr :original, :string, doc: "the source's own page for this taxon"
+    attr :about, :string, doc: "the source's page on the site, when there is no original"
+  end
+
+  slot :action, doc: "at the strip's right end: the quiet edit menu, then Compare"
+
+  slot :field, doc: "one field of the open source's text" do
+    attr :label, :string, required: true
+  end
+
+  def source_tabs(assigns) do
+    assigns = assign(assigns, :open, Enum.find(assigns.tab, &(&1.id == assigns.selected)))
+
+    ~H"""
+    <section id={@id} class="oc-tabs" aria-label={@label}>
+      <div class="oc-tabs-strip">
+        <div
+          id={"#{@id}-list"}
+          class="oc-tabs-list"
+          role="tablist"
+          aria-label={@label}
+          phx-hook="Tablist"
+        >
+          <span :for={tab <- @tab} class="oc-tab">
+            <button
+              type="button"
+              role="tab"
+              id={"#{@id}-tab-#{tab.id}"}
+              aria-selected={to_string(tab.id == @selected)}
+              aria-controls={"#{@id}-panel"}
+              tabindex={if tab.id == @selected, do: "0", else: "-1"}
+              phx-click={@on_select}
+              phx-value-id={tab.id}
+            >
+              <.work_title title={tab.name} />
+            </button>
+            <.tab_link :if={tab.id == @selected} tab={tab} />
+          </span>
+        </div>
+        <div :if={@action != []} class="oc-tabs-actions">
+          <span :for={action <- @action}>{render_slot(action)}</span>
+        </div>
+      </div>
+      <div
+        id={"#{@id}-panel"}
+        class="oc-tabs-panel"
+        role="tabpanel"
+        aria-labelledby={@open && "#{@id}-tab-#{@open.id}"}
+      >
+        <div :for={field <- @field} class="oc-tabs-field">
+          <h3>{field.label}</h3>
+          <div class="oc-tabs-value">{render_slot(field)}</div>
+        </div>
+        <p :if={@field == [] && @open} class="oc-tabs-empty">
+          No text from <.work_title title={@open.name} /> yet.
+        </p>
+      </div>
+    </section>
+    """
+  end
+
+  attr :tab, :map, required: true
+
+  defp tab_link(%{tab: %{original: url}} = assigns) when is_binary(url) and url != "" do
+    ~H"""
+    <a
+      href={@tab.original}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="oc-tab-link"
+      title={"Original page at #{@tab.name}"}
+      aria-label={"Original page at #{@tab.name}"}
+    >
+      <.icon name="hero-arrow-top-right-on-square-mini" class="oc-tab-icon" />
+    </a>
+    """
+  end
+
+  defp tab_link(%{tab: %{about: path}} = assigns) when is_binary(path) do
+    ~H"""
+    <.link
+      navigate={@tab.about}
+      class="oc-tab-link"
+      title={"About #{@tab.name}"}
+      aria-label={"About #{@tab.name}"}
+    >
+      <.icon name="hero-information-circle-mini" class="oc-tab-icon" />
+    </.link>
+    """
+  end
+
+  defp tab_link(assigns), do: ~H""
+
+  @doc """
+  Renders rows on hairlines in three columns (two under 1180px, one on
+  phones), or in one with `columns={1}`: the names, links and works listed
+  under a taxon (its varieties, external links, sources). Each `:row` is a
+  line of Archivo 15px; a name in it is `sci_name/1` at `size="title"`.
+
+  With `href` (an external link, opening in a new tab) or `navigate`, the
+  row is one link. `note` follows in ink-3, inside the link: a link's
+  site.
+
+  ## Examples
+
+      <.ruled_rows id="species-subspecies-list">
+        <:row :for={name <- @varieties}><.sci_name name={name} abbreviate size="title" /></:row>
+      </.ruled_rows>
+
+      <.ruled_rows id="species-external-links-list">
+        <:row href="https://floranorthamerica.org/Quercus_shumardii" note="floranorthamerica.org">
+          Flora of North America
+        </:row>
+      </.ruled_rows>
+  """
+  attr :id, :string, default: nil
+  attr :columns, :integer, values: [1, 3], default: 3
+
+  slot :row, required: true do
+    attr :href, :string, doc: "an external link: the whole row"
+    attr :navigate, :string, doc: "a link on the site: the whole row"
+    attr :note, :string, doc: "a short note after the row's text, such as a link's site"
+  end
+
+  def ruled_rows(assigns) do
+    ~H"""
+    <ul id={@id} class={["oc-rows", @columns == 3 && "oc-rows-3"]}>
+      <li :for={row <- @row}>
+        <a
+          :if={row[:href]}
+          href={row[:href]}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="oc-rows-link"
+        >
+          <span class="oc-rows-text">{render_slot(row)}</span>
+          <span :if={row[:note]} class="oc-rows-note">{row[:note]}</span>
+        </a>
+        <.link :if={!row[:href] && row[:navigate]} navigate={row[:navigate]} class="oc-rows-link">
+          <span class="oc-rows-text">{render_slot(row)}</span>
+          <span :if={row[:note]} class="oc-rows-note">{row[:note]}</span>
+        </.link>
+        <%= if !row[:href] && !row[:navigate] do %>
+          {render_slot(row)}
+          <span :if={row[:note]} class="oc-rows-note">{row[:note]}</span>
+        <% end %>
+      </li>
+    </ul>
+    """
+  end
+
+  @doc """
+  Renders a taxon's hybrids as `ruled_rows/1`: each hybrid's name
+  (Q. × name, linked to its page) and, after it, "with" its other parent
+  (linked, no genus), when that is known.
+
+  ## Examples
+
+      <.hybrid_rows id="species-hybrids-list" hybrids={[%{name: "× riparia", other: "rubra"}]} />
+  """
+  attr :id, :string, default: nil
+  attr :hybrids, :list, required: true, doc: "maps with `name` and `other` (nil when unknown)"
+
+  def hybrid_rows(assigns) do
+    ~H"""
+    <.ruled_rows id={@id}>
+      <:row :for={hybrid <- @hybrids}>
+        <.link navigate={~p"/species/#{hybrid.name}"} class="oc-rows-name">
+          <.sci_name name={hybrid.name} hybrid abbreviate size="title" />
+        </.link>
+        <span :if={hybrid.other} class="oc-rows-with">
+          with
+          <.link navigate={~p"/species/#{hybrid.other}"}>
+            <.sci_name name={hybrid.other} genus={nil} weight="regular" />
+          </.link>
+        </span>
+      </:row>
+    </.ruled_rows>
+    """
+  end
+
+  @doc """
+  Renders a run of names in the reading serif, separated by commas: a
+  taxon's synonyms, each a `sci_name/1` with its authority. The comma ends
+  the item before it, so a wrapped line never starts with one.
+
+  ## Examples
+
+      <.comma_list id="species-synonyms-list">
+        <:item><.sci_name name="schneckii" abbreviate /></:item>
+        <:item><.sci_name name="texana Auctores" abbreviate /></:item>
+      </.comma_list>
+  """
+  attr :id, :string, default: nil
+  slot :item, required: true
+
+  def comma_list(assigns) do
+    ~H"""
+    <p id={@id} class="oc-comma-list"><span :for={item <- @item}>{render_slot(item)}</span></p>
+    """
+  end
+
+  @doc """
+  Renders the not-covered notice (DESIGN.md): on a taxon the Oak
+  Compendium doesn't cover yet, under the title row, a paragraph between
+  two 2px ink rules opening with the bold statement that it has no account
+  of this oak yet; the inner block follows it. It adds to the page and
+  never replaces any of it.
+
+  ## Examples
+
+      <.not_covered_notice id="not-covered">
+        Everything on this page comes from the sources listed, shown as they wrote it.
+      </.not_covered_notice>
+  """
+  attr :id, :string, default: nil
+  slot :inner_block
+
+  def not_covered_notice(assigns) do
+    ~H"""
+    <.ruled_notice id={@id} class="oc-ruled-notice-page">
+      <p>
+        <strong>The Oak Compendium has no account of this oak yet.</strong>
+        {render_slot(@inner_block)}
+      </p>
+    </.ruled_notice>
+    """
+  end
+
+  @doc """
+  Renders the cite-this-page line: "Cite" in the section label's voice,
+  then the citation in the serif, standing on a 2px rule. The site names
+  itself, never a person (Phase 4 decisions).
+
+  ## Examples
+
+      <.cite_line id="cite">
+        Oak Compendium. <.sci_name name="shumardii" author="Buckley" />.
+        https://oakcompendium.org/species/shumardii (accessed 2026-11-25).
+      </.cite_line>
+  """
+  attr :id, :string, default: nil
+  slot :inner_block, required: true
+
+  def cite_line(assigns) do
+    ~H"""
+    <p id={@id} class="oc-cite">
+      <span class="oc-cite-label">Cite</span> {render_slot(@inner_block)}
+    </p>
+    """
+  end
 end
