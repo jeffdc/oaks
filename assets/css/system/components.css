@@ -2384,7 +2384,14 @@
     font: 400 17px/1.7 var(--font-serif);
     color: var(--color-ink);
   }
-  .oc-comma-list > span:not(:last-child)::after { content: ", "; }
+  /* Each item is an inline flex box, so the template's whitespace around
+     a name never sets a space before its comma. */
+  .oc-comma-list > span {
+    display: inline-flex;
+    align-items: baseline;
+  }
+  .oc-comma-list > span:not(:last-child) { margin-right: 0.3em; }
+  .oc-comma-list > span:not(:last-child)::after { content: ","; }
 
   /* The not-covered notice: the ruled notice at page size, under the
      title row. */

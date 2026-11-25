@@ -336,6 +336,170 @@ defmodule Oaks.Species do
     end
   end
 
+  # -- Source text: the data display contract (docs/species-photos-plan.md, Phase 4) --
+
+  @oak_compendium 3
+  @oaks_of_the_world 2
+
+  @text_fields ~w(range growth_habit leaves flowers fruits bark twigs buds hardiness_habitat miscellaneous)a
+
+  @doc """
+  Returns a species' source rows in the source order: the row marked
+  preferred, then Oak Compendium, then Oaks of the World, then the rest by
+  the source's name (ties by id, so the order is stable). Each row needs
+  its `source` preloaded, as `get_species_full/1` does.
+
+  The species page shows its tabs in this order and opens the first with
+  any text (`default_source/1`); the title's common name is the first
+  nonempty one in it (`common_name/1`). "Preferred" only decides the order;
+  it is never shown.
+  """
+  @spec ordered_sources([SpeciesSource.t()]) :: [SpeciesSource.t()]
+  def ordered_sources(species_sources) do
+    Enum.sort_by(species_sources, fn ss ->
+      rank =
+        cond do
+          ss.is_preferred -> 0
+          ss.source_id == @oak_compendium -> 1
+          ss.source_id == @oaks_of_the_world -> 2
+          true -> 3
+        end
+
+      {rank, String.downcase(ss.source.name), ss.source_id}
+    end)
+  end
+
+  @doc """
+  Returns the row a species page opens on: the first in `rows` (already in
+  the source order) with any text, or the first row when none has any; nil
+  for no rows.
+  """
+  @spec default_source([SpeciesSource.t()]) :: SpeciesSource.t() | nil
+  def default_source(rows), do: Enum.find(rows, &has_text?/1) || List.first(rows)
+
+  @doc """
+  Whether a source row has any text: a common name or a nonempty field.
+  Blank and whitespace-only values don't count.
+  """
+  @spec has_text?(SpeciesSource.t()) :: boolean()
+  def has_text?(%SpeciesSource{} = ss) do
+    common_names(ss) != [] or Enum.any?(@text_fields, &present?(Map.get(ss, &1)))
+  end
+
+  @doc """
+  Returns a source row's common names: its stored list, without blank
+  entries, trimmed.
+  """
+  @spec common_names(SpeciesSource.t()) :: [String.t()]
+  def common_names(%SpeciesSource{local_names: names}) do
+    names |> parse_name_list() |> Enum.map(&String.trim/1) |> Enum.reject(&(&1 == ""))
+  end
+
+  @doc """
+  Returns the common name for a species' title, with the row that supplies
+  it: the first name of the first row in `rows` (already in the source
+  order) that has one; nil when none does.
+  """
+  @spec common_name([SpeciesSource.t()]) :: {String.t(), SpeciesSource.t()} | nil
+  def common_name(rows) do
+    Enum.find_value(rows, fn ss ->
+      case common_names(ss) do
+        [name | _] -> {name, ss}
+        [] -> nil
+      end
+    end)
+  end
+
+  @doc """
+  Whether the Oak Compendium covers a species: its Oak Compendium row has
+  any text. A taxon it doesn't cover gets the not-covered notice.
+  """
+  @spec covered?([SpeciesSource.t()]) :: boolean()
+  def covered?(species_sources) do
+    Enum.any?(species_sources, &(&1.source_id == @oak_compendium and has_text?(&1)))
+  end
+
+  defp present?(value) when is_binary(value), do: String.trim(value) != ""
+  defp present?(_value), do: false
+
+  @doc """
+  Returns a species' hybrids, each with its other parent: maps with
+  `name` and `other` (the hybrid's parent that isn't this species, without
+  its genus or sign; nil when it isn't recorded), in the stored order.
+  """
+  @spec hybrids_with_other_parent(Species.t()) :: [%{name: String.t(), other: String.t() | nil}]
+  def hybrids_with_other_parent(%Species{} = species) do
+    current = bare_name(species.scientific_name)
+
+    species.hybrids
+    |> parse_name_list()
+    |> get_hybrids_with_parents()
+    |> Enum.map(fn hybrid ->
+      other =
+        [hybrid.parent1, hybrid.parent2]
+        |> Enum.map(&bare_name/1)
+        |> Enum.find(&(&1 != "" and String.downcase(&1) != String.downcase(current)))
+
+      %{name: hybrid.name, other: other}
+    end)
+  end
+
+  defp bare_name(name) do
+    (name || "")
+    |> String.replace(~r/^Quercus\s+/, "")
+    |> String.replace(~r/^×\s*/, "")
+    |> String.trim()
+  end
+
+  @doc """
+  Returns the taxa beside a species in its group, for the siblings menu of
+  the taxonomy band: `%{level: level, name: name, names: names}`, where the
+  group is the last entry of `placement/1` and `names` are, for a rank
+  (subgenus to complex), the species stored at it (not hybrids, varieties
+  or subspecies) and, for a variety's species, that species' varieties and
+  subspecies; sorted by name. The species itself is among them unless it
+  is a hybrid. Nil when it has no group, or nothing else is in it.
+  """
+  @spec siblings(Species.t()) ::
+          %{level: String.t(), name: String.t(), names: [String.t()]} | nil
+  def siblings(%Species{} = species) do
+    case List.last(placement(species)) do
+      nil ->
+        nil
+
+      %{level: level, name: name} ->
+        names = sibling_names(level, name)
+
+        if Enum.any?(names, &(&1 != species.scientific_name)),
+          do: %{level: level, name: name, names: names},
+          else: nil
+    end
+  end
+
+  defp sibling_names("species", name) do
+    pattern = escape_like(name) <> " %"
+
+    from(s in Species,
+      where: fragment("? LIKE ? ESCAPE '\\'", s.scientific_name, ^pattern),
+      where: s.is_hybrid == false and not like(s.scientific_name, "%×%"),
+      order_by: s.scientific_name,
+      select: s.scientific_name
+    )
+    |> Repo.all()
+  end
+
+  defp sibling_names(level, name) do
+    field = String.to_existing_atom(level)
+
+    from(s in Species,
+      where: field(s, ^field) == ^name,
+      where: s.is_hybrid == false and not like(s.scientific_name, "% %"),
+      order_by: s.scientific_name,
+      select: s.scientific_name
+    )
+    |> Repo.all()
+  end
+
   # -- Write operations --
 
   @doc """

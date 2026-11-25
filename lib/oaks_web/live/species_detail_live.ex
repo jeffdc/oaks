@@ -1,9 +1,18 @@
 defmodule OaksWeb.SpeciesDetailLive do
   @moduledoc """
-  LiveView for displaying detailed information about a single species.
+  LiveView for a species' page: the species page for today's data
+  (docs/species-photos-plan.md, Phase 4 decisions; design/prototype/
+  species-today.html).
 
-  Shows species taxonomy, relationships (hybrids, related species, synonyms),
-  and per-source descriptive data with tab-based source selection.
+  The taxonomy band with the siblings menu; the title row with the common
+  name the source order picks (`Oaks.Species.common_name/1`) and, for a
+  hybrid, its parents; the not-covered notice when the Oak Compendium has no
+  text for it; then its photos beside its text by source, in tabs in the
+  source order (`Oaks.Species.ordered_sources/1`), opening on the first
+  with any text unless the address names one (`?source=<source id>`); then its
+  synonyms, subspecies and varieties, hybrids, external links, sources and
+  the cite line, each only when it has data.
+
   A synonym's address redirects to its species; an unknown name raises
   `OaksWeb.NotFoundError`, a real 404 (the not-found page).
 
@@ -24,6 +33,10 @@ defmodule OaksWeb.SpeciesDetailLive do
   alias OaksWeb.SpeciesPhotos
   alias OaksWeb.TaxonPath
 
+  # The siblings menu lists this many, around the species, and links to
+  # the rest.
+  @siblings_shown 12
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
@@ -31,13 +44,15 @@ defmodule OaksWeb.SpeciesDetailLive do
        page_title: "Species",
        species: nil,
        band_ranks: [],
+       siblings: nil,
+       images: [],
        hybrids: [],
-       closely_related: [],
        subspecies_varieties: [],
        synonyms: [],
        external_links: [],
-       computed_external_links: [],
-       species_sources: [],
+       sources: [],
+       common_name: nil,
+       covered: false,
        can_add_source: false,
        selected_source: nil,
        show_delete_confirm: false,
@@ -55,23 +70,27 @@ defmodule OaksWeb.SpeciesDetailLive do
   end
 
   @impl true
-  def handle_params(%{"name" => name}, _uri, socket) do
-    case Species.get_species_full(name) do
-      nil ->
-        handle_not_found(socket, name)
+  def handle_params(%{"name" => name} = params, _uri, socket) do
+    case socket.assigns.species do
+      %{scientific_name: ^name} ->
+        {:noreply, select_source(socket, params["source"])}
 
-      species ->
-        load_species(socket, species)
+      _ ->
+        case Species.get_species_full(name) do
+          nil ->
+            handle_not_found(socket, name)
+
+          species ->
+            {:noreply, socket |> load_species(species) |> select_source(params["source"])}
+        end
     end
   end
 
   @impl true
-  def handle_event("select_source", %{"id" => id_str}, socket) do
-    source_id = Params.int(id_str)
-
-    case Enum.find(socket.assigns.species_sources, &(&1.source.id == source_id)) do
+  def handle_event("select_source", %{"id" => id}, socket) do
+    case find_source(socket.assigns.sources, id) do
       nil -> {:noreply, socket}
-      selected -> {:noreply, assign(socket, selected_source: selected)}
+      ss -> {:noreply, push_patch(socket, to: source_path(socket.assigns.species, ss))}
     end
   end
 
@@ -165,7 +184,7 @@ defmodule OaksWeb.SpeciesDetailLive do
 
     target =
       socket.assigns[:current_scope] &&
-        Enum.find(socket.assigns.species_sources, &(&1.id == source_id))
+        Enum.find(socket.assigns.sources, &(&1.id == source_id))
 
     if target do
       {:noreply, assign(socket, show_delete_source_confirm: true, delete_source_target: target)}
@@ -203,13 +222,33 @@ defmodule OaksWeb.SpeciesDetailLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page class="species-detail">
+    <.page width="frame">
       <:bleed :if={@species}>
-        <.taxonomy_band ranks={@band_ranks} current={TaxonPath.current(@species)} />
+        <.taxonomy_band ranks={@band_ranks} current={TaxonPath.current(@species)}>
+          <:siblings :if={@siblings} label={@siblings.label}>
+            <li :for={name <- @siblings.shown}>
+              <span :if={name == @species.scientific_name} aria-current="page">
+                <.sci_name name={name} abbreviate />
+              </span>
+              <.link :if={name != @species.scientific_name} navigate={~p"/species/#{name}"}>
+                <.sci_name name={name} abbreviate />
+              </.link>
+            </li>
+            <li :if={@siblings.all_path}>
+              <.link navigate={@siblings.all_path}>
+                All {@siblings.total} in
+                <.sci_name name={@siblings.group} level={@siblings.level} />{if @siblings.level ==
+                                                                                  "complex",
+                                                                                do: " complex"}
+              </.link>
+            </li>
+          </:siblings>
+        </.taxonomy_band>
       </:bleed>
       <:head :if={@species}>
         <.species_title
           species={@species}
+          common_name={@common_name}
           editor={@current_scope != nil}
           can_add_source={@can_add_source}
           failed_photos={Map.get(@photo_counts, "failed", 0)}
@@ -217,53 +256,145 @@ defmodule OaksWeb.SpeciesDetailLive do
       </:head>
 
       <div :if={@species}>
-        <div class="content-grid">
-          <.parent_species_section
-            :if={@species.is_hybrid && (@species.parent1 || @species.parent2)}
-            species={@species}
-          />
-          <.hybrids_section
-            :if={@hybrids != []}
-            hybrids={@hybrids}
-            species_name={@species.scientific_name}
-          />
-          <.related_section :if={@closely_related != []} related={@closely_related} />
-          <.subspecies_section
-            :if={@subspecies_varieties != []}
-            items={@subspecies_varieties}
-          />
-          <.synonyms_section :if={@synonyms != []} synonyms={@synonyms} />
+        <.not_covered_notice :if={!@covered} id="not-covered">
+          {if @sources != [],
+            do: "Everything on this page comes from the sources listed, shown as they wrote it."}
+        </.not_covered_notice>
 
-          <section class="source-container full-width" aria-label="Source data">
-            <.tab_strip
-              :if={@species_sources != []}
-              sources={@species_sources}
-              selected={@selected_source}
-              species_name={@species.scientific_name}
+        <.photo_columns id="species-main">
+          <:photos>
+            <.species_photos id="species-photos" images={@images} name={@page_title} />
+          </:photos>
+          <.source_tabs
+            :if={@selected_source}
+            id="source-tabs"
+            selected={@selected_source.source_id}
+            on_select="select_source"
+          >
+            <:tab
+              :for={ss <- @sources}
+              id={ss.source_id}
+              name={ss.source.name}
+              original={ss.url}
+              about={~p"/sources/#{ss.source.id}"}
             />
-            <.source_content
-              :if={@selected_source}
-              source={@selected_source}
-              editor={@current_scope != nil}
-              species_name={@species.scientific_name}
-            />
-            <.section_heading :if={@species_sources == []}>Source data</.section_heading>
-            <p :if={@species_sources == []} class="oc-empty">
-              No source data available for this species.
-            </p>
+            <:action :if={@current_scope}>
+              <.edit_menu
+                id="source-data-menu"
+                quiet
+                aria_label={"Edit the data from #{@selected_source.source.name}"}
+              >
+                <:item
+                  navigate={
+                    ~p"/species/#{@species.scientific_name}/sources/#{@selected_source.source.id}/edit"
+                  }
+                  id="edit-source-data-btn"
+                >
+                  Edit {@selected_source.source.name} data
+                </:item>
+                <:item
+                  click="request_delete_source"
+                  values={%{id: @selected_source.id}}
+                  id="delete-source-data-btn"
+                >
+                  Delete {@selected_source.source.name} data
+                </:item>
+              </.edit_menu>
+            </:action>
+            <:action :if={length(@sources) > 1}>
+              <.compare_button
+                navigate={~p"/species/#{@species.scientific_name}/compare"}
+                id="compare-sources-link"
+              >
+                Compare sources
+              </.compare_button>
+            </:action>
+            <:field
+              :for={{label, value} <- source_fields(@selected_source)}
+              label={label}
+            >
+              <%= case value do %>
+                <% {:names, names} -> %>
+                  {Enum.join(names, ", ")}
+                <% text -> %>
+                  <div class="oc-prose">{raw(Markdown.render_html(text))}</div>
+              <% end %>
+            </:field>
+          </.source_tabs>
+          <section :if={@sources == []} id="source-tabs" aria-label="Source data">
+            <.section_heading>Source data</.section_heading>
+            <p class="oc-empty">No source data for this oak yet.</p>
+          </section>
+        </.photo_columns>
+
+        <div class="mt-s8 grid gap-s7">
+          <section :if={@synonyms != []} id="species-synonyms">
+            <.section_heading>
+              Synonyms<:note>{count_label(length(@synonyms), "name")}</:note>
+            </.section_heading>
+            <.comma_list>
+              <:item :for={{name, author} <- @synonyms}>
+                <.sci_name
+                  name={name}
+                  author={author}
+                  abbreviate
+                />
+              </:item>
+            </.comma_list>
           </section>
 
-          <.external_links_section
-            :if={@computed_external_links != []}
-            links={@computed_external_links}
-          />
+          <section :if={@subspecies_varieties != []} id="species-subspecies">
+            <.section_heading>Subspecies and varieties</.section_heading>
+            <.ruled_rows>
+              <:row :for={{name, author} <- @subspecies_varieties}>
+                <.sci_name name={name} author={author} abbreviate size="title" />
+              </:row>
+            </.ruled_rows>
+          </section>
+
+          <section :if={@hybrids != []} id="species-hybrids">
+            <.section_heading>
+              Hybrids<:note>{length(@hybrids)} known</:note>
+            </.section_heading>
+            <.hybrid_rows hybrids={@hybrids} />
+          </section>
+
+          <section id="species-external-links">
+            <.section_heading>External links</.section_heading>
+            <.ruled_rows>
+              <:row :for={link <- @external_links} href={link.url} note={link_host(link.url)}>
+                {link.name}
+              </:row>
+            </.ruled_rows>
+          </section>
+
+          <section :if={@sources != []} id="species-sources">
+            <.section_heading>Sources</.section_heading>
+            <.ruled_rows columns={1}>
+              <:row :for={ss <- @sources}>
+                <.link navigate={~p"/sources/#{ss.source.id}"}>
+                  <.work_title title={ss.source.name} />
+                </.link>
+                <.source_mark :if={present?(ss.url)} href={ss.url}>original page</.source_mark>
+              </:row>
+            </.ruled_rows>
+          </section>
+
+          <.cite_line id="species-cite">
+            Oak Compendium.
+            <.sci_name
+              name={@species.scientific_name}
+              hybrid={@species.is_hybrid}
+              author={@species.author}
+            />. {cite_url(@species)} (accessed {Date.utc_today()}).
+          </.cite_line>
         </div>
       </div>
 
       <.delete_confirm_modal
         :if={@show_delete_confirm}
         species={@species}
-        source_count={length(@species_sources)}
+        source_count={length(@sources)}
         photo_count={@delete_photo_count}
         references={@delete_references}
       />
@@ -303,11 +434,17 @@ defmodule OaksWeb.SpeciesDetailLive do
   # -- Title row --
 
   attr :species, :any, required: true
+  attr :common_name, :any, default: nil
   attr :editor, :boolean, default: false
   attr :can_add_source, :boolean, default: false
   attr :failed_photos, :integer, default: 0
 
   defp species_title(assigns) do
+    assigns =
+      assign(assigns,
+        parents: Enum.reject([assigns.species.parent1, assigns.species.parent2], &blank?/1)
+      )
+
     ~H"""
     <.header id="species-title">
       <.sci_name
@@ -316,10 +453,32 @@ defmodule OaksWeb.SpeciesDetailLive do
         author={@species.author}
         size="display"
       />
+      <:common_name :if={@common_name}>
+        {elem(@common_name, 0)}
+        <.source_mark
+          patch={source_path(@species, elem(@common_name, 1))}
+          title={"Open #{elem(@common_name, 1).source.name}"}
+        >
+          <.work_title title={elem(@common_name, 1).source.name} />
+        </.source_mark>
+      </:common_name>
       <:meta>{kind_word(@species)}</:meta>
       <:meta :if={@species.conservation_status}>
         <.iucn_status code={@species.conservation_status} />
       </:meta>
+      <:subtitle :if={@species.is_hybrid}>
+        <span id="species-parents">
+          Hybrid of
+          <%= case @parents do %>
+            <% [p1, p2] -> %>
+              <.parent_link name={p1} /> and <.parent_link name={p2} />
+            <% [p] -> %>
+              <.parent_link name={p} /> and an unrecorded parent
+            <% [] -> %>
+              unrecorded parents
+          <% end %>
+        </span>
+      </:subtitle>
       <:actions :if={@editor}>
         <.edit_menu id="species-edit-menu">
           <:item navigate={~p"/species/#{@species.scientific_name}/edit"} id="edit-species-btn">
@@ -353,244 +512,47 @@ defmodule OaksWeb.SpeciesDetailLive do
     """
   end
 
+  attr :name, :string, required: true
+
+  defp parent_link(assigns) do
+    ~H"""
+    <.link navigate={~p"/species/#{@name}"}><.sci_name
+      name={@name}
+      abbreviate
+      weight="regular"
+    /></.link>
+    """
+  end
+
   defp kind_word(%{is_hybrid: true}), do: "Hybrid"
   defp kind_word(_species), do: "Species"
 
-  # -- Relationship sections: names on hairlines --
+  # The open source's nonempty fields, in today's order and labels.
+  @field_labels [
+    range: "Geographic range",
+    growth_habit: "Growth habit",
+    leaves: "Leaves",
+    flowers: "Flowers",
+    fruits: "Fruits",
+    bark: "Bark",
+    twigs: "Twigs",
+    buds: "Buds",
+    hardiness_habitat: "Hardiness and habitat",
+    miscellaneous: "Additional information"
+  ]
 
-  attr :species, :any, required: true
+  defp source_fields(ss) do
+    names =
+      case Species.common_names(ss) do
+        [] -> []
+        names -> [{"Common names", {:names, names}}]
+      end
 
-  defp parent_species_section(assigns) do
-    ~H"""
-    <section class="detail-section full-width" id="species-parents">
-      <.section_heading>Parent Species</.section_heading>
-      <ul class="species-rows">
-        <li :for={parent <- Enum.reject([@species.parent1, @species.parent2], &is_nil/1)}>
-          <.link navigate={~p"/species/#{parent}"} class="species-row-link">
-            <.sci_name name={parent} abbreviate size="title" />
-          </.link>
-        </li>
-      </ul>
-    </section>
-    """
-  end
-
-  attr :hybrids, :list, required: true
-  attr :species_name, :string, required: true
-
-  defp hybrids_section(assigns) do
-    ~H"""
-    <section class="detail-section full-width" id="species-hybrids">
-      <.section_heading>
-        Known Hybrids<:note>{length(@hybrids)} known</:note>
-      </.section_heading>
-      <ul class="species-rows hybrid-list">
-        <li :for={hybrid <- @hybrids} class="hybrid-item">
-          <.link navigate={~p"/species/#{hybrid.name}"} class="hybrid-name">
-            <.sci_name name={hybrid.name} hybrid abbreviate size="title" />
-          </.link>
-          <span :if={other = get_other_parent(hybrid, @species_name)} class="hybrid-with">
-            with
-            <.link navigate={~p"/species/#{other}"}>
-              <.sci_name name={other} genus={nil} weight="regular" />
-            </.link>
-          </span>
-        </li>
-      </ul>
-    </section>
-    """
-  end
-
-  attr :related, :list, required: true
-
-  defp related_section(assigns) do
-    ~H"""
-    <section class="detail-section full-width" id="species-related">
-      <.section_heading>Closely Related</.section_heading>
-      <ul class="species-rows">
-        <li :for={name <- @related}>
-          <.link navigate={~p"/species/#{name}"} class="species-row-link">
-            <.sci_name name={name} abbreviate size="title" />
-          </.link>
-        </li>
-      </ul>
-    </section>
-    """
-  end
-
-  attr :items, :list, required: true
-
-  defp subspecies_section(assigns) do
-    ~H"""
-    <section class="detail-section full-width" id="species-subspecies">
-      <.section_heading>Subspecies &amp; Varieties</.section_heading>
-      <ul class="species-rows">
-        <li :for={{name, author} <- Enum.map(@items, &name_and_authority/1)}>
-          <span class="species-row-name">
-            <.sci_name name={name} author={author} abbreviate size="title" />
-          </span>
-        </li>
-      </ul>
-    </section>
-    """
-  end
-
-  attr :synonyms, :list, required: true
-
-  defp synonyms_section(assigns) do
-    ~H"""
-    <section class="detail-section full-width" id="species-synonyms">
-      <.section_heading>
-        Synonyms<:note>{count_label(length(@synonyms), "name")}</:note>
-      </.section_heading>
-      <p class="species-synonyms">
-        <span
-          :for={
-            {{name, author}, i} <- @synonyms |> Enum.map(&name_and_authority/1) |> Enum.with_index(1)
-          }
-          class="species-synonym"
-        ><.sci_name name={name} author={author} abbreviate />{if i < length(@synonyms),
-          do: ", "}</span>
-      </p>
-    </section>
-    """
-  end
-
-  # -- Source tabs and content --
-
-  attr :sources, :list, required: true
-  attr :selected, :any, required: true
-  attr :species_name, :string, required: true
-
-  defp tab_strip(assigns) do
-    ~H"""
-    <div class="source-tabs-strip">
-      <div class="source-tabs-list" role="tablist" aria-label="Sources">
-        <div
-          :for={ss <- @sources}
-          class={["source-tab", selected_tab?(ss, @selected) && "active"]}
-          role="presentation"
-        >
-          <button
-            type="button"
-            phx-click="select_source"
-            phx-value-id={ss.source.id}
-            role="tab"
-            aria-selected={to_string(selected_tab?(ss, @selected))}
-          >
-            <span class="source-tab-name">{ss.source.name}</span>
-            <span :if={ss.is_preferred} class="source-tab-note">preferred</span>
-          </button>
-          <.link
-            navigate={~p"/sources/#{ss.source.id}"}
-            class="source-tab-link"
-            title="View source details"
-            aria-label={"About #{ss.source.name}"}
-          >
-            <.icon name="hero-information-circle" class="size-4" />
-          </.link>
-        </div>
-      </div>
-      <.compare_button
-        :if={length(@sources) > 1}
-        navigate={~p"/species/#{@species_name}/compare"}
-        class="compare-sources-link"
-        title="Compare all sources side-by-side"
-      >
-        Compare sources
-      </.compare_button>
-    </div>
-    """
-  end
-
-  attr :source, :any, required: true
-  attr :editor, :boolean, default: false
-  attr :species_name, :string, required: true
-
-  defp source_content(assigns) do
-    local_names = Species.parse_name_list(assigns.source.local_names)
-    assigns = assign(assigns, :local_names, local_names)
-
-    ~H"""
-    <div class="source-content">
-      <div class="source-content-header">
-        <h2 class="source-content-title">
-          Data from {@source.source.name}
-        </h2>
-        <.edit_menu
-          :if={@editor}
-          id="source-data-menu"
-          quiet
-          aria_label={"Edit the data from #{@source.source.name}"}
-        >
-          <:item
-            navigate={~p"/species/#{@species_name}/sources/#{@source.source.id}/edit"}
-            id="edit-source-data-btn"
-          >
-            Edit source data
-          </:item>
-          <:item click="request_delete_source" values={%{id: @source.id}} id="delete-source-data-btn">
-            Delete source data
-          </:item>
-        </.edit_menu>
-      </div>
-
-      <.source_field label="Geographic Range" value={@source.range} />
-      <.source_field label="Growth Habit" value={@source.growth_habit} />
-      <.source_field label="Leaves" value={@source.leaves} />
-      <.source_field label="Flowers" value={@source.flowers} />
-      <.source_field label="Fruits" value={@source.fruits} />
-      <.source_field label="Bark" value={@source.bark} />
-      <.source_field label="Twigs" value={@source.twigs} />
-      <.source_field label="Buds" value={@source.buds} />
-
-      <section :if={@local_names != []} class="source-field">
-        <h3 class="source-field-label">Common Names</h3>
-        <p class="source-names">{Enum.join(@local_names, ", ")}</p>
-      </section>
-
-      <.source_field label="Hardiness & Habitat" value={@source.hardiness_habitat} />
-      <.source_field label="Additional Information" value={@source.miscellaneous} />
-
-      <p :if={@source.url} class="source-original">
-        <a href={@source.url} target="_blank" rel="noopener noreferrer" class="oc-src">
-          View original source
-        </a>
-      </p>
-    </div>
-    """
-  end
-
-  attr :label, :string, required: true
-  attr :value, :string, default: nil
-
-  defp source_field(assigns) do
-    ~H"""
-    <section :if={@value && @value != ""} class="source-field">
-      <h3 class="source-field-label">{@label}</h3>
-      <div class="oc-prose">{raw(Markdown.render_html(@value))}</div>
-    </section>
-    """
-  end
-
-  # -- External links --
-
-  attr :links, :list, required: true
-
-  defp external_links_section(assigns) do
-    ~H"""
-    <section class="detail-section full-width" id="species-external-links">
-      <.section_heading>External Links</.section_heading>
-      <ul class="external-links">
-        <li :for={link <- @links}>
-          <a href={link.url} target="_blank" rel="noopener noreferrer" class="external-link">
-            <span class="external-link-name">{link.name}</span>
-            <span :if={host = link_host(link.url)} class="external-link-host">{host}</span>
-          </a>
-        </li>
-      </ul>
-    </section>
-    """
+    names ++
+      for {field, label} <- @field_labels,
+          value = Map.get(ss, field),
+          present?(value),
+          do: {label, value}
   end
 
   # -- Delete confirmation modal --
@@ -706,7 +668,7 @@ defmodule OaksWeb.SpeciesDetailLive do
         will become a synonym of. You'll see the merge before anything changes.
       </p>
 
-      <form phx-change="merge_search" phx-submit="merge_search">
+      <form id="merge-search-form" phx-change="merge_search" phx-submit="merge_search">
         <input
           type="text"
           name="query"
@@ -759,35 +721,85 @@ defmodule OaksWeb.SpeciesDetailLive do
   # -- Data loading --
 
   defp load_species(socket, species) do
-    hybrids =
-      species.hybrids
-      |> Species.parse_name_list()
-      |> Species.get_hybrids_with_parents()
+    sources = Species.ordered_sources(species.species_sources)
+    band_ranks = species |> Species.placement() |> TaxonPath.ranks()
 
-    closely_related = Species.parse_name_list(species.closely_related_to)
-    subspecies_varieties = Species.parse_name_list(species.subspecies_varieties)
-    synonyms = Species.parse_json_array(species.synonyms)
-    external_links = Species.parse_json_array(species.external_links)
-    computed_external_links = build_external_links(species.scientific_name, external_links)
-    species_sources = species.species_sources
-    selected_source = List.first(species_sources)
+    socket
+    |> assign(
+      species: species,
+      band_ranks: band_ranks,
+      siblings: siblings_menu(species, band_ranks),
+      images: Images.list_for_species(species),
+      hybrids: Species.hybrids_with_other_parent(species),
+      subspecies_varieties:
+        species.subspecies_varieties
+        |> Species.parse_name_list()
+        |> Enum.map(&name_and_authority/1),
+      synonyms: species.synonyms |> Species.parse_json_array() |> Enum.map(&name_and_authority/1),
+      external_links: external_links(species),
+      sources: sources,
+      common_name: Species.common_name(sources),
+      covered: Species.covered?(sources),
+      can_add_source: Sources.available_sources_for_species(species.id) != [],
+      page_title: SpeciesName.full_name(species.scientific_name, species.is_hybrid)
+    )
+    |> follow_photos()
+  end
 
-    {:noreply,
-     assign(socket,
-       species: species,
-       band_ranks: species |> Species.placement() |> TaxonPath.ranks(),
-       hybrids: hybrids,
-       closely_related: closely_related,
-       subspecies_varieties: subspecies_varieties,
-       synonyms: synonyms,
-       external_links: external_links,
-       computed_external_links: computed_external_links,
-       species_sources: species_sources,
-       can_add_source: Sources.available_sources_for_species(species.id) != [],
-       selected_source: selected_source,
-       page_title: SpeciesName.full_name(species.scientific_name, species.is_hybrid)
-     )
-     |> follow_photos()}
+  # The tab the address names (?source=<source id>), else the first with
+  # any text.
+  defp select_source(socket, source_id) do
+    sources = socket.assigns.sources
+
+    assign(socket,
+      selected_source: find_source(sources, source_id) || Species.default_source(sources)
+    )
+  end
+
+  defp find_source(_sources, nil), do: nil
+
+  defp find_source(sources, id) do
+    id = Params.int(id)
+    Enum.find(sources, &(&1.source_id == id))
+  end
+
+  defp source_path(species, ss),
+    do: ~p"/species/#{species.scientific_name}?source=#{ss.source_id}"
+
+  # The siblings menu: up to @siblings_shown names around the species, and
+  # a link to its group's page when there are more.
+  defp siblings_menu(species, band_ranks) do
+    case Species.siblings(species) do
+      nil ->
+        nil
+
+      %{level: level, name: group, names: names} ->
+        total = length(names)
+        shown = window(names, species.scientific_name, @siblings_shown)
+        more? = total > length(shown) and level != "species"
+
+        %{
+          label: siblings_label(level, group, total),
+          shown: shown,
+          all_path: more? && List.last(band_ranks).path,
+          total: total,
+          group: group,
+          level: level
+        }
+    end
+  end
+
+  defp siblings_label("complex", group, total),
+    do: "#{group} complex · #{count_label(total, "species")}"
+
+  defp siblings_label("species", group, total), do: "#{group} · #{count_label(total, "taxon")}"
+  defp siblings_label(_level, group, total), do: "#{group} · #{count_label(total, "species")}"
+
+  # `count` names from `names` that include `current` when it is among them.
+  defp window(names, current, count) do
+    index = Enum.find_index(names, &(&1 == current)) || 0
+    start = index |> Kernel.-(div(count, 2)) |> max(0) |> min(max(length(names) - count, 0))
+    Enum.slice(names, start, count)
   end
 
   @impl true
@@ -798,7 +810,10 @@ defmodule OaksWeb.SpeciesDetailLive do
         send_update(module, id: photo_dialog_id(dialog), refresh: true)
       end
 
-      {:noreply, assign_photo_counts(socket)}
+      {:noreply,
+       socket
+       |> assign(images: Images.list_for_species(socket.assigns.species))
+       |> assign_photo_counts()}
     else
       {:noreply, socket}
     end
@@ -808,7 +823,8 @@ defmodule OaksWeb.SpeciesDetailLive do
   defp photo_dialog_id(:manage), do: "manage-photos"
 
   # An editor's page follows the species' photos: it counts the failed
-  # imports for the Edit menu and refreshes an open photo dialog.
+  # imports for the Edit menu, refreshes an open photo dialog and the
+  # photos column.
   defp follow_photos(socket) do
     species = socket.assigns.species
 
@@ -841,48 +857,33 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   # -- Helpers --
 
-  defp get_other_parent(%{parent1: p1, parent2: p2}, current_name) do
-    clean = fn name ->
-      (name || "")
-      |> String.replace(~r/^Quercus\s+/, "")
-      |> String.replace(~r/^×\s*/, "")
-      |> String.trim()
-    end
+  # The species' stored links, then iNaturalist and Wikipedia, by name.
+  defp external_links(species) do
+    stored =
+      species.external_links
+      |> Species.parse_json_array()
+      |> Enum.flat_map(fn
+        %{"name" => name, "url" => url} when is_binary(name) and is_binary(url) ->
+          [%{name: name, url: url}]
 
-    current = current_name |> clean.() |> String.downcase()
-    c1 = if p1, do: clean.(p1), else: nil
-    c2 = if p2, do: clean.(p2), else: nil
-
-    cond do
-      c1 && String.downcase(c1) != current -> c1
-      c2 && String.downcase(c2) != current -> c2
-      true -> nil
-    end
-  end
-
-  defp build_external_links(species_name, db_links) do
-    custom =
-      Enum.flat_map(db_links, fn
-        %{"name" => name, "url" => url, "logo" => logo} -> [%{name: name, url: url, logo: logo}]
-        %{"name" => name, "url" => url} -> [%{name: name, url: url, logo: nil}]
-        _ -> []
+        _ ->
+          []
       end)
 
     auto = [
       %{
         name: "iNaturalist",
-        url: "https://www.inaturalist.org/search?q=#{URI.encode("Quercus #{species_name}")}",
-        logo: "inaturalist"
+        url:
+          "https://www.inaturalist.org/search?q=#{URI.encode("Quercus #{species.scientific_name}")}"
       },
       %{
         name: "Wikipedia",
-        url: "https://en.wikipedia.org/wiki/Quercus_#{String.replace(species_name, " ", "_")}",
-        logo: "wikipedia"
+        url:
+          "https://en.wikipedia.org/wiki/Quercus_#{String.replace(species.scientific_name, " ", "_")}"
       }
     ]
 
-    # Sort all links alphabetically by name (case-insensitive, matching V1 localeCompare)
-    (custom ++ auto) |> Enum.sort_by(&String.downcase(&1.name))
+    Enum.sort_by(stored ++ auto, &String.downcase(&1.name))
   end
 
   # A synonym or variety is {name, authority}. Stored as a string, it keeps
@@ -906,10 +907,16 @@ defmodule OaksWeb.SpeciesDetailLive do
     end
   end
 
-  defp count_label(1, noun), do: "1 #{noun}"
-  defp count_label(n, noun), do: "#{n} #{noun}s"
+  # The page's address as a reader would copy it: only spaces encoded, so
+  # a hybrid's sign stays legible (…/species/×%20fontana).
+  defp cite_url(species),
+    do: url(~p"/species") <> "/" <> String.replace(species.scientific_name, " ", "%20")
 
-  defp selected_tab?(source, selected) do
-    selected && source.id == selected.id
-  end
+  defp present?(value), do: is_binary(value) and String.trim(value) != ""
+  defp blank?(value), do: not present?(value)
+
+  defp count_label(1, noun), do: "1 #{noun}"
+  defp count_label(n, "species"), do: "#{n} species"
+  defp count_label(n, "taxon"), do: "#{n} taxa"
+  defp count_label(n, noun), do: "#{n} #{noun}s"
 end

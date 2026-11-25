@@ -144,13 +144,19 @@ defmodule OaksWeb.SpeciesSourceFormLiveTest do
   describe "delete source from species detail" do
     test "delete source flow with confirmation", %{conn: conn} do
       velutina = species_fixture()
-      species_source_fixture(velutina, source_fixture(), range: "Temporary data")
+      source = source_fixture()
+      species_source_fixture(velutina, source, range: "Temporary data")
 
       {:ok, view, _html} =
         conn |> authenticated_conn() |> live(~p"/species/#{velutina.scientific_name}")
 
       # Request delete from the source's quiet Edit menu
-      assert has_element?(view, "#source-data-menu #edit-source-data-btn", "Edit source data")
+      assert has_element?(
+               view,
+               "#source-data-menu #edit-source-data-btn",
+               "Edit #{source.name} data"
+             )
+
       view |> element("#delete-source-data-btn") |> render_click()
       assert has_element?(view, "#delete-source-confirm-modal h2", "Delete source data")
       assert has_element?(view, "#confirm-delete-source-btn.oc-btn-danger")

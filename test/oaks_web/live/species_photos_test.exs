@@ -65,6 +65,7 @@ defmodule OaksWeb.SpeciesPhotosTest do
       [first, second] = photo_ids(observation)
 
       {:ok, view, _html} = open_page(ctx.conn, ctx.species)
+      assert has_element?(view, "#species-photos .pv-empty", "No photos yet.")
       open_add(view)
       html = load(view, "https://www.inaturalist.org/observations/#{observation.id}")
 
@@ -88,6 +89,10 @@ defmodule OaksWeb.SpeciesPhotosTest do
       refute render(view) =~ "Adding…"
       assert view |> element("#add-photos-progress") |> render() =~ "Added"
       assert length(Images.list_for_species(ctx.species)) == 2
+
+      # The page's photo column follows: both photos, in the viewer.
+      assert has_element?(view, "#species-photos .pv-count", "1 / 2")
+      refute has_element?(view, "#species-photos .pv-empty")
     end
 
     test "reopened, shows each photo as it stands: added, adding or failed with Retry", ctx do

@@ -59,7 +59,8 @@ defmodule OaksWeb.DesignComponents do
   The optional `:siblings` slot adds the menu at the band's right end; its
   `label` reads like "Coccineae · 7 species" and its content is `<li>`
   items, the current taxon as `<span aria-current="page">`. A click
-  outside or Esc closes it. No page uses it yet.
+  outside or Esc closes it. The species page fills it from
+  `Oaks.Species.siblings/1`.
 
   With `inline`, the band is an ochre plate the width of its path rather
   than a full-width field, and it wraps rather than scrolls: for showing
