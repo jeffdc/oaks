@@ -164,6 +164,8 @@ Data fix, applied to production 2026-11-25 through the import endpoint (`import_
 
 Done when an editor can import, retry, reorder, caption and delete photos from the species page in dev, partial failures are understandable, and unauthorized or forged events cannot write or enqueue work.
 
+**Status: done.** Jeff approved the Add photos and Manage photos dialogs in dev on 2026-11-25.
+
 ## Phase 6: Carousel
 
 - Build the photo viewer designed in Phase 4 (`design/prototype/photo-viewer.css` and `photo-viewer.js`): the stage with caption, credit, license and iNaturalist link, and a thumbnail rail that shows five at a time (six on phones) with step buttons that page through the rest, a count, and Left/Right keys. Many species will have a dozen or more photos.

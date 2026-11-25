@@ -908,7 +908,15 @@ defmodule OaksWeb.CoreComponents do
       time: 150,
       transition: {"transition-opacity ease-out duration-150", "opacity-0", "opacity-100"}
     )
-    |> show("##{id}-wrap")
+    # The panel is a flex column (.oc-modal-panel): shown as a block, its
+    # body wouldn't scroll and a tall dialog's actions would fall off the
+    # window.
+    |> JS.show(
+      to: "##{id}-wrap",
+      display: "flex",
+      time: 150,
+      transition: {"transition-opacity ease-out duration-150", "opacity-0", "opacity-100"}
+    )
     |> JS.add_class("overflow-hidden", to: "body")
     |> JS.focus_first(to: "##{id}-wrap")
   end
