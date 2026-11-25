@@ -142,7 +142,7 @@ components:
 
 The world takes a pocket dendrology key's printed materials and leaves its structure behind. Ink black on bright white stock, one committed ochre field, a pencil blue for the marks that lead to sources, a heavy grotesk for the frame and a sturdy text serif for reading. The pages are dense in the way a good field guide is dense: statements stand on rules, never in boxes, and the eye moves down ruled lists and aligned columns rather than across stacked cards.
 
-The page answers "is it this, or that?" before anything else. Where the taxon sits is shown in the same ochre band on every taxon page; the traits that set it apart come first; look-alikes and hybrids sit one step away; a side-by-side comparison aligns two taxa trait by trait. Jeff's words are always quoted and always carry a source mark. What the system derives from his words is set in the frame face, so a reader never mistakes a summary for his voice. Other sources sit behind his, as they wrote it.
+The page answers "is it this, or that?" before anything else. Where the taxon sits is shown in the same ochre band on every taxon page; the traits that set it apart come first; look-alikes and hybrids sit one step away; a side-by-side comparison aligns two taxa trait by trait. Oak Compendium's own text is always quoted and always carries a source mark. What the system derives from that text is set in the frame face, so a reader never mistakes a summary for the Compendium's own words. Other sources sit behind it, as they wrote it.
 
 The key's printed materials are kept; its apparatus is not. There are no couplets, no key numbering, no dotted leaders, no key path and no life-size callouts.
 
@@ -201,21 +201,21 @@ The colours mean the Red List category and nothing else: they never mark standin
 **Body Font:** Source Serif 4 (with Georgia, Times New Roman)
 **Frame Font:** Archivo (with Helvetica Neue, Arial); Archivo Narrow for the taxonomy band only
 
-**Character:** A heavy, plain grotesk builds the frame (headings, labels, trait names, derived values, buttons, source marks) while a sturdy text serif carries everything meant to be read, and every scientific name. The contrast between the two faces is how the page separates Jeff's voice from the apparatus around it.
+**Character:** A heavy, plain grotesk builds the frame (headings, labels, trait names, derived values, buttons, source marks) while a sturdy text serif carries everything meant to be read, and every scientific name. The contrast between the two faces is how the page separates Oak Compendium's own text from the apparatus around it.
 
 ### Hierarchy
 - **Display** (Source Serif 4 600, clamp(34px, 4vw, 50px), 1.05): every page title (Components, Title Row), roman; a taxon name there is italic, genus at weight 400, epithet at 600. Followed by the authority in 22px roman serif at ink-3 and the common name in 21px Archivo 700.
 - **Headline** (Source Serif 4 italic 600, 26px to 28px, 1.1): taxon names heading comparison columns and the parents strip on hybrid pages.
 - **Title** (Source Serif 4 italic 600, 18px, 1.25): a taxon name that is itself a list entry: the species list, search results, look-alikes, hybrids, relatives and a taxon's species, all at 18px (the authority 15px).
 - **Body** (Source Serif 4 400, 17px, 1.6; 16px under 760px): running text with oldstyle proportional figures. Prose pages hold it to the 720px reading measure; reading text inside a wider page holds at 68ch to 70ch.
-- **Quote** (Source Serif 4 400, 18px, 1.6, ink): Jeff's statements in the distinguishing-traits list; 16px in tables and comparisons.
+- **Quote** (Source Serif 4 400, 18px, 1.6, ink): Oak Compendium's own statements in the distinguishing-traits list; 16px in tables and comparisons.
 - **Frame** (Archivo 700, 15px, 1.45): trait names and derived values; Archivo 400 to 600 at 13px to 14px for "why" notes, captions and metadata.
 - **Section label** (Archivo 800, 15px, 0.06em, uppercase): section headings standing on a 2px ink rule, with an optional right-aligned 13px Archivo 500 note at ink-3. Table heads and range country headings use the same voice at 13px.
 - **Breadcrumb** (Archivo Narrow 600, 15px, 0.01em): the taxonomy band; rank words at weight 500, names in Source Serif 4 italic at 16px, the current taxon's epithets at 700.
 - **Source mark** (Archivo 500, 12.5px): source links after a quote or value.
 
 ### Named Rules
-**The Verbatim Rule.** Jeff's words always appear in quotation marks (curly quotes) and are always followed by a source mark. Anything derived from his words, a summary value, a count, a label, is set in the frame face with a small Archivo tag ("summary", "from counts") and never in quotation marks.
+**The Verbatim Rule.** Oak Compendium's own text always appears in quotation marks (curly quotes) and is always followed by a source mark. Anything derived from it, a summary value, a count, a label, is set in the frame face with a small Archivo tag ("summary", "from counts") and never in quotation marks.
 
 **The Botanical Italic Rule.** Scientific names are italic per botanical convention, in the serif, everywhere: titles, lists, breadcrumbs, tables, prose. Rank words (subg., sect., subsect., complex), authorities and the hybrid sign stay roman, the sign spaced and held to its neighbours (*Quercus* × *bebbiana*). The genus is set at 400 and the epithets at 600, or all at 400 in running text; the authority follows in roman ink-3. Every name is one component, `sci_name`, so the same name looks the same everywhere at a given size.
 
@@ -239,7 +239,7 @@ Every page takes one of four named widths (`<.page>`), chosen by what the page i
 ### Named Rules
 **The Centred Column Rule.** A single-column page sits in one centred 960px column, and its title row and 2px rule run the column's width, not the window's (decision a0ac). Prose and forms sit in a narrower centred column at their reading (720px) or form (760px) measure, the title row and its rule at that measure too, so the title and the text under it share one centred edge (Jeff, 2026-11-22, item a44d); a row's name and its details never sit 1300px apart on a wide screen. The 1400px frame is only for pages whose content stands in columns side by side.
 
-**The One Template Rule.** Every taxon page uses the same template. A section appears because its data exists, never because Jeff has or hasn't covered the taxon: the source comparison appears whenever there are two or more sources (never with only one), and look-alikes, hybrids and range appear when their data exists. A taxon Jeff hasn't covered gets the same full page plus the not-covered notice, never a poorer stub layout.
+**The One Template Rule.** Every taxon page uses the same template. A section appears because its data exists, never because the Oak Compendium does or doesn't cover the taxon: the source comparison appears whenever there are two or more sources (never with only one), and look-alikes, hybrids and range appear when their data exists. A taxon the Oak Compendium doesn't cover yet gets the same full page plus the not-covered notice, never a poorer stub layout.
 
 ## Elevation & Depth
 
@@ -280,7 +280,7 @@ Every page's title is one component, `header`, on one rule (item 7838): the titl
 - **Meta:** Archivo 600 14px ink-2 with lining tabular figures, items 16px apart with no separators. It holds what kind of thing the page is and its short facts, in this order: the kind word (Species, Hybrid, Subgenus) or the record a form edits (its name at 14px), counts (497 species), a byline and date, stamps (the status tag, the IUCN status, a dashed Draft), then links such as an article's tags.
 - **Subtitle:** a sentence describing the page, Archivo 600 16px ink-2 at most 70ch, under the title line.
 - **Edit menu:** an editor's actions for the page (Edit, Make synonym of…, Delete, Create taxon, New species…) sit in one small disclosure, `edit_menu`: a compact "Edit" button with a drawn chevron at the right end of the row, on the title's first baseline, reversed to paper on ink while open. Its list opens under it on its right edge, on paper in a 1.5px ink border, Archivo 600 14px items on paper-2 when hovered; Esc, a click outside or choosing an item closes it, and a destructive item opens its confirmation dialog. It never wraps: the title and meta take the rest of the row. Logged out there is no menu and no space kept for one.
-- **Quiet edit menu:** an editor's actions on one part of a page (a source's data on a species page, a sub-taxon or a source in a list) are the same menu with a quiet trigger: "Edit" and the chevron in Archivo 600 13px ink-3, no outline, ink and underlined on hover, reversed while open, held to the line it sits on so a row is the same height for Jeff as for a reader. Editing never shapes the reader's layout (item 7838): no editor buttons in tab strips, rows or empty states; a page-wide action such as Add source data goes in the title row's menu.
+- **Quiet edit menu:** an editor's actions on one part of a page (a source's data on a species page, a sub-taxon or a source in a list) are the same menu with a quiet trigger: "Edit" and the chevron in Archivo 600 13px ink-3, no outline, ink and underlined on hover, reversed while open, held to the line it sits on so a row is the same height for an editor as for a reader. Editing never shapes the reader's layout (item 7838): no editor buttons in tab strips, rows or empty states; a page-wide action such as Add source data goes in the title row's menu.
 - **Back link:** above the row, 16px over the title, in the page's head with it.
 
 ### Status Tag
@@ -301,19 +301,19 @@ A 14px drawn mark plus an Archivo 600 12.5px ink-2 label: agree (ticked open cir
 - **Taxonomy band:** the ochre band with every rank linked (genus, subgenus, section, subsection, complex, taxon), separated by drawn chevrons, in the same place on every taxon page including hybrids, varieties and the comparison view. One crumb format everywhere: rank words (subg., sect., subsect.) roman before the name and "complex" after it; names in the serif italic at 16px, bare from genus to subsection, *Q.* for a complex and a species, the current taxon's epithets at 700. The path is one line at a fixed height (48px, 42px on phones) on every page and at every width, so the band never grows. A variety sits under its species (*Q. acutissima* › *Q. acutissima kingii*). A hybrid sits at its own stored ranks; one with none stored sits where both its parents do, down to the last rank they share (*Q.* × *alentejana* under sect. *Quercus*), and under the genus alone when its parents part at the subgenus. On the source comparison the species stays the current taxon. At its right end a siblings menu (Archivo Narrow 600 14px, 1.5px ink outline, label like "Coccineae · 7 species") opens a list of the other taxa at that rank, the current one on an ochre ground; open, the button reverses to ochre on ink. Long groups list a few and link to all. On phones the band is 42px tall and its path starts at the 16px gutter. At any width a path longer than the line scrolls, scrolled to the current taxon; while steps are scrolled off to the left it fades at its left edge, and with a mouse a thin ink scrollbar along its foot leads back to them.
 
 ### Ruled Lists
-Look-alikes, hybrids, distinguishing traits and field marks are all rows on hairlines. A look-alike row holds the italic name, a one-line Archivo "why" note and a Compare button; a hybrid row holds the name and "with" its other parent. A distinguishing trait row is a 132px Archivo trait name beside the derived value, Jeff's quote with its source mark, and its standing mark.
+Look-alikes, hybrids, distinguishing traits and field marks are all rows on hairlines. A look-alike row holds the italic name, a one-line Archivo "why" note and a Compare button; a hybrid row holds the name and "with" its other parent. A distinguishing trait row is a 132px Archivo trait name beside the derived value, the Oak Compendium quote with its source mark, and its standing mark.
 
 ### Field Marks Table
-Trait, Jeff Clark, Other sources. Jeff's column is serif; empty cells read "No statement yet" in italic ink-3. Other sources sit behind a disclosure whose summary is a standing mark, opening to each source's text as they wrote it with its attribution.
+Trait, Oak Compendium, Other sources. The Oak Compendium column is serif; empty cells read "No statement yet" in italic ink-3. Other sources sit behind a disclosure whose summary is a standing mark, opening to each source's text as they wrote it with its attribution.
 
 ### Comparison (signature)
 Two taxa (or two parents around a hybrid) aligned trait by trait in columns, each row headed by a standing mark and trait name; rows where they differ carry the 3px ochre underline. A switcher row of italic taxon names picks the other taxon, the current one underlined in ochre. The second column slides in once (420ms, cubic-bezier(0.16, 1, 0.3, 1), a clip reveal with a 12px shift), and does not animate under reduced motion. The comparison is a mode of the taxon page, not a separate page: the URL gains ?vs=<taxon> (deep-linkable), the page keeps its masthead, band and title, the distinguishing-traits area becomes the side-by-side, the rest of the page continues below, and "Close comparison" returns to the plain page. In the comparison, a key difference is marked with a star (ochre fill, ink outline) and the legend reads "key difference".
 
 ### ID Tip
-The comparison's closing row: one of Jeff's verbatim statements that settles the pair, spanning both taxon columns in serif 23px with its source mark. Its label is a reversed plate in the trait column: ochre Archivo 800 17px capitals on ink with a drawn magnifier, the same ink-and-ochre pairing as an open band menu. The row stands between a 2px ink rule above and a 5px ochre rule below. Label wording: "ID tip".
+The comparison's closing row: one of Oak Compendium's verbatim statements that settles the pair, spanning both taxon columns in serif 23px with its source mark. Its label is a reversed plate in the trait column: ochre Archivo 800 17px capitals on ink with a drawn magnifier, the same ink-and-ochre pairing as an open band menu. The row stands between a 2px ink rule above and a 5px ochre rule below. Label wording: "ID tip".
 
-### Jeff's Write-up (fragment and reader)
-The gallformers ID Notes pattern, and a candidate for a component shared with gallformers. Jeff's general write-up of the taxon sits directly under the title row, above the distinguishing traits: the most important content on the page, and it never dominates it. On the page: a row between a 2px ink rule and a hairline, a 132px label column ("Jeff's write-up" in Archivo 800 13px capitals, a meta line under it) beside a two-line fragment of the main description in Source Serif 17px ink-2, clamped with an ellipsis, then "Read ›" in Archivo 800 13px on a 3px ochre underline. The whole fragment is one button; it tints paper-2 on hover. It opens the reader: a centred modal dialog (880px, 88vh; full screen on phones) with the taxon name in serif italic, "Jeff Clark's description", a Close button with an Esc hint, a meta line with A−/A+ text-size buttons (16 to 23px), the main description only (no notes, no topic index) under ruled uppercase subheads at a 66ch measure, and a footer with "Copy link" and Close. Esc, a click outside and Close all close it; ?read=description opens it directly and the URL follows it. On phones the label stacks above the fragment.
+### Description (fragment and reader)
+The gallformers ID Notes pattern, and a candidate for a component shared with gallformers. Oak Compendium's general description of the taxon sits directly under the title row, above the distinguishing traits: the most important content on the page, and it never dominates it. On the page: a row between a 2px ink rule and a hairline, a 132px label column ("Description" in Archivo 800 13px capitals, a meta line under it) beside a two-line fragment of the main description in Source Serif 17px ink-2, clamped with an ellipsis, then "Read ›" in Archivo 800 13px on a 3px ochre underline. The whole fragment is one button; it tints paper-2 on hover. It opens the reader: a centred modal dialog (880px, 88vh; full screen on phones) with the taxon name in serif italic, "Description", a Close button with an Esc hint, a meta line with A−/A+ text-size buttons (16 to 23px), the main description only (no notes, no topic index) under ruled uppercase subheads at a 66ch measure, and a footer with "Copy link" and Close. Esc, a click outside and Close all close it; ?read=description opens it directly and the URL follows it. On phones the label stacks above the fragment.
 
 ### ID Tool Workbench
 The Identify area (Trait filter, Hybrid helper, ID mode) is one Workbench: tabs in the ochre band (current tab reversed ink on ochre) with the place at the band's right; three panes under it. Left: "Your tree", place first, then traits by organ (leaves, acorns, buds, bark, habit), the pane sticky and self-scrolling on desktop. Middle: the result. Right: the selected taxon, the known hybrid, or the comment. Below 760px the panes stack. A separate phone view is planned, not built.
@@ -325,30 +325,30 @@ Matching rules shown in the UI: an observed range is consistent with any taxon r
 Hybrid helper uses the comparison component: parent | their hybrids (tinted column) | parent, the user's value under each trait name, marks in the row heads, one block per trait on phones. ID mode puts the iNat observation (URL, photos, meta) at the top of the left pane and a comment builder on the right: the comment lists what the identifier ticked in their own hedged terms ("bristle or mucro tips (can't tell which)") plus the Compendium link, with Copy comment and an optional Save.
 
 ### Authoring Editor
-Jeff only, behind login, desk-first. The masthead marks Editor and Jeff; the ochre band holds the taxon (serif italic), the Entry / Facts / Conflicts tabs (current reversed), a "This taxon / This section across taxa" switch, save state, Preview and "Publish written sections". Two columns: the work on the left, material or context on the right.
+Editors only, behind login, desk-first. The masthead marks Editor and the editor's name; the ochre band holds the taxon (serif italic), the Entry / Facts / Conflicts tabs (current reversed), a "This taxon / This section across taxa" switch, save state, Preview and "Publish written sections". Two columns: the work on the left, material or context on the right.
 
 Entry: section blocks on 2px ink rules, one per section of the shared entry structure (Key sentence, Account, Historical context, more to come). Each block header has the section name, its stated purpose and a state: Draft (dashed outline), Review (ochre with the ≠ mark), Written (ink fill with the agree mark), Empty (dashed open mark). The focused block carries a 4px ochre top rule. Text fields are white with a 1.5px border (the one sanctioned box: an editable field needs a boundary) and an ink caret. The Key sentence block shows a check row (one sentence, length against the two-line fragment, a prompt to say what the oak is first) and a preview cut at the taxon page's real fragment. Each block footer: word count, provenance summary, Versions, and Mark written (dashed and disabled while agent wording remains).
 
-Provenance marks inside the text: Jeff's inserted passages are tinted pencil-blue with a pencil source mark; a trimmed insert says "trimmed" (trimming adds no words). Agent wording (pre-existing text not in Jeff's words) is italic ink-2 with a light underline, sentence by sentence, until Jeff retypes it; a section can't be adopted wholesale.
+Provenance marks inside the text: inserted passages from the editor's own material are tinted pencil-blue with a pencil source mark; a trimmed insert says "trimmed" (trimming adds no words). Agent wording (pre-existing text not in the editor's own words) is italic ink-2 with a light underline, sentence by sentence, until the editor retypes it; a section can't be adopted wholesale.
 
 Material column: tabs (Your material, Other sources, Set aside), a search field, passages as quotes in serif with a source mark, folded-duplicate counts, Set aside and an ochre Insert; passages already used say where ("in Account").
 
-Facts and Conflicts are queues of rows on 2px rules: trait (and sub-trait) left; the proposed value and Jeff's exact supporting sentence (cut with "…") or the side-by-side values (Jeff's cell tinted paper-2) in the middle; actions stacked right (ochre primary). Decided rows show the verdict with who and date, and Undo. The row in focus carries the ochre top rule. Keyboard hints (kbd) sit on the actions.
+Facts and Conflicts are queues of rows on 2px rules: trait (and sub-trait) left; the proposed value and its exact supporting sentence from Oak Compendium's own text (cut with "…") or the side-by-side values (the Oak Compendium cell tinted paper-2) in the middle; actions stacked right (ochre primary). Decided rows show the verdict with who and date, and Undo. The row in focus carries the ochre top rule. Keyboard hints (kbd) sit on the actions.
 
 ### Hybrid Parents Strip
 The hybrid's two parents left and right in headline italics with common name and a key trait below, the hybrid name between them set off by hairlines, all standing on a 2px rule.
 
 ### Not-Covered Notice
-On any taxon Jeff hasn't covered, placed under the title row of the full template: a paragraph between two 2px ink rules in Archivo 500 16px, opening with a bold statement that the Compendium doesn't yet hold Jeff's own data on the taxon. It adds to the page; it never replaces sections with a reduced layout.
+On any taxon the Oak Compendium doesn't cover yet, placed under the title row of the full template: a paragraph between two 2px ink rules in Archivo 500 16px, opening with a bold statement that the Oak Compendium has no account of this oak yet. It adds to the page; it never replaces sections with a reduced layout.
 
 ## Do's and Don'ts
 
 ### Do:
 - **Do** put the taxonomy breadcrumb in the ochre band, in the same place on every taxon page, every rank linked.
 - **Do** lead with the distinguishing traits, and keep look-alikes (each with Compare) and hybrids (each with its other parent) one step away.
-- **Do** set Jeff's words in curly quotation marks followed by a pencil-blue source mark, every time.
+- **Do** set Oak Compendium's own text in curly quotation marks followed by a pencil-blue source mark, every time.
 - **Do** set derived values (summaries, counts) in Archivo, tagged with how they were derived, and never in quotation marks.
-- **Do** show other sources behind Jeff's, as they wrote it, each with its attribution.
+- **Do** show other sources behind Oak Compendium's own, as they wrote it, each with its attribution.
 - **Do** use the same taxon template everywhere, showing a section whenever its data exists (the source comparison only with two or more sources).
 - **Do** mark agree, differs and unreviewed with the drawn marks, labelled in words.
 - **Do** italicize scientific names in the serif; keep ranks, authorities and the hybrid sign roman.
@@ -361,6 +361,6 @@ On any taxon Jeff hasn't covered, placed under the title row of the full templat
 - **Don't** put statements in boxes, cards, tinted panels or shadows.
 - **Don't** add a second saturated colour or use ochre as text on paper. The IUCN status fills are the one exception, and only for the Red List category.
 - **Don't** round corners.
-- **Don't** set anything that is not Jeff's verbatim wording in quotation marks or in a way that reads as his voice.
+- **Don't** set anything that is not Oak Compendium's verbatim wording in quotation marks or in a way that reads as its own text. Never label Oak Compendium's text with a person's name.
 - **Don't** hide conflicts between sources behind tabs; mark them in place.
-- **Don't** give a taxon Jeff hasn't covered a poorer stub layout; it gets the full page plus the not-covered notice.
+- **Don't** give a taxon the Oak Compendium doesn't cover yet a poorer stub layout; it gets the full page plus the not-covered notice.

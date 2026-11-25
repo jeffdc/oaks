@@ -487,7 +487,7 @@ defmodule OaksWeb.CoreComponents do
 
     * `row_header` makes the column's cells row headers (`<th scope="row">`),
       as for the trait column of a field-marks table.
-    * `voice` sets the column in the reading serif, for Jeff's words.
+    * `voice` sets the column in the reading serif, for Oak Compendium's own text.
 
   With `stack`, each row becomes one block on phones, every cell labelled
   with its column's label; without it the table scrolls sideways.
@@ -501,7 +501,7 @@ defmodule OaksWeb.CoreComponents do
 
       <.table id="field-marks" rows={@traits} stack>
         <:col :let={t} label="Trait" row_header>{t.name}</:col>
-        <:col :let={t} label="Jeff Clark" voice>...</:col>
+        <:col :let={t} label="Oak Compendium" voice>...</:col>
         <:col :let={t} label="Other sources">...</:col>
       </.table>
   """

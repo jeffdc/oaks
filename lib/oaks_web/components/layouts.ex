@@ -108,7 +108,7 @@ defmodule OaksWeb.Layouts do
   end
 
   @doc """
-  The site footer: the licensing line (Jeff's text, the facts, other
+  The site footer: the licensing line (Oak Compendium's prose, the facts, other
   sources) and the pages that have no place in the main nav.
   """
   attr :current_scope, :any, default: nil, doc: "the `Oaks.Accounts.Scope`, or nil"

@@ -46,7 +46,7 @@
     font-variant-numeric: lining-nums tabular-nums;
   }
 
-  /* The Verbatim Rule: Jeff's words sit in curly quotes. */
+  /* The Verbatim Rule: Oak Compendium's own text sits in curly quotes. */
   q {
     quotes: "\201C" "\201D" "\2018" "\2019";
   }

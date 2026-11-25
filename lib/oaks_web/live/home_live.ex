@@ -19,7 +19,7 @@ defmodule OaksWeb.HomeLive do
 
   # iNaturalist is the taxonomic backbone, not a source the home page lists.
   @inaturalist_id 1
-  # Jeff's own observations: the primary source, listed first.
+  # Oak Compendium: the primary source, listed first.
   @primary_source_id 3
 
   @impl true

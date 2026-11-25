@@ -22,7 +22,7 @@ Identifiers arriving cold (from iNat, a search engine, a link) and returning rea
 5. An oak at random (a non-hybrid species, with "Show another"), its name in display type, where it sits, its hybrids with their other parents.
 6. The sources, primary first.
 
-No byline, no identification-count claim, no quoted prose of Jeff's until his material is in the database (no hand-picked or hard-coded quotes).
+No byline, no identification-count claim, no quoted Oak Compendium prose until it is in the database (no hand-picked or hard-coded quotes).
 
 ## Anti-goals
 

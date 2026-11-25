@@ -17,7 +17,7 @@ defmodule OaksWeb.DevComponentsLive do
   @traits [
     %{
       trait: "Habit",
-      jeff: nil,
+      oak_compendium: nil,
       standing: "open",
       summary: "2 sources, not reviewed",
       others: [
@@ -27,7 +27,7 @@ defmodule OaksWeb.DevComponentsLive do
     },
     %{
       trait: "Buds",
-      jeff:
+      oak_compendium:
         {"buds looks glabrous and pretty small.", "i465271504",
          "https://www.inaturalist.org/observations/190127456"},
       standing: "differs",
@@ -36,7 +36,7 @@ defmodule OaksWeb.DevComponentsLive do
     },
     %{
       trait: "Leaves",
-      jeff:
+      oak_compendium:
         {"Glabrous angled (in cross-section) buds and lobey leaves with an overall round shape with very tight sinuses (vs the wider ones of Q coccinea).",
          "c23423264", "https://www.inaturalist.org/observations/403156034"},
       standing: "differs",
@@ -156,13 +156,13 @@ defmodule OaksWeb.DevComponentsLive do
         <section class="mt-s8">
           <.section_heading id="field-marks">
             Field marks
-            <:note>Jeff first, other sources behind</:note>
+            <:note>Oak Compendium first, other sources behind</:note>
           </.section_heading>
           <.table id="field-marks-table" rows={@traits} row_id={&"trait-#{&1.trait}"} stack>
             <:col :let={t} label="Trait" row_header>{t.trait}</:col>
-            <:col :let={t} label="Jeff Clark" voice>
-              <%= if t.jeff do %>
-                <% {quote, mark, href} = t.jeff %>
+            <:col :let={t} label="Oak Compendium" voice>
+              <%= if t.oak_compendium do %>
+                <% {quote, mark, href} = t.oak_compendium %>
                 <q>{quote}</q>
                 <.source_mark href={href}>{mark}</.source_mark>
               <% else %>

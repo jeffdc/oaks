@@ -27,7 +27,7 @@ Identifiers at a desk beside an iNat tab, or on a phone under a tree, narrowing 
 
 THESIS: Narrowing is a ranking with reasons, not elimination: every candidate stays, grouped by how consistent it is with what you saw, and every conflict is named in both values. It refuses the checkbox key that strikes taxa out on one doubtful trait.
 
-OWN-WORLD: Inherited from DESIGN.md: ink masthead, the ochre band (here holding the tool's tabs and the place), ink on bright white, Archivo for the frame and Source Serif for names and Jeff's words, rules not boxes, agree/differs/open as drawn marks, tabular figures for counts.
+OWN-WORLD: Inherited from DESIGN.md: ink masthead, the ochre band (here holding the tool's tabs and the place), ink on bright white, Archivo for the frame and Source Serif for names and Oak Compendium's own text, rules not boxes, agree/differs/open as drawn marks, tabular figures for counts.
 
 STORY: The identifier sets the place, then adds what they can see, hedging where unsure; the middle pane re-groups the candidates live with each conflict spelled out; they open the best candidate on the right, compare it with the next, and (in ID mode) copy the comment.
 

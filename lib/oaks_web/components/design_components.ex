@@ -17,7 +17,7 @@ defmodule OaksWeb.DesignComponents do
 
     * Scientific names are italic in the serif; rank words, authorities and
       the hybrid sign stay roman. Every name goes through `sci_name/1`.
-    * Jeff's words appear in curly quotes and are followed by a
+    * Oak Compendium's own text appears in curly quotes and is followed by a
       `source_mark/1`, every time.
     * Agree, differs and unreviewed are drawn marks (`standing_mark/1`),
       never colours. IUCN status (`iucn_status/1`) is the one categorical
@@ -424,8 +424,8 @@ defmodule OaksWeb.DesignComponents do
   end
 
   @doc """
-  Renders a source mark: the pencil-blue link that follows every quote of
-  Jeff's and every sourced value. Without `href` or `navigate` it renders
+  Renders a source mark: the pencil-blue link that follows every Oak
+  Compendium quote and every sourced value. Without `href` or `navigate` it renders
   as plain text in the same style, for a source with no page yet.
 
   ## Examples
