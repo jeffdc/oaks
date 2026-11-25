@@ -58,10 +58,19 @@
               pkgs.sqlite
               # tofu: manages the AWS resources in infra/ (infra/README.md).
               pkgs.opentofu
+              pkgs.pkg-config
             ]
             ++ lib.optionals stdenv.hostPlatform.isLinux [ pkgs.inotify-tools ];
 
+            # vix (the image library's libvips binding) compiles against this
+            # libvips through pkg-config. Same as gallformers.
+            buildInputs = [ pkgs.vips ];
+
             env = {
+              # OTP >= 28.5.0.6 httpc rejects GitHub's release redirects (headers over
+              # 10240 bytes), which breaks vix's download of its precompiled libvips.
+              # Build it against the libvips above instead (as the Dockerfile does).
+              VIX_COMPILATION_MODE = "PLATFORM_PROVIDED_LIBVIPS";
               # Hand the tailwind package the pinned, hashed binary above, so dev and CI
               # never run its own unverified download (same as gallformers).
               MIX_TAILWIND_PATH = "${tailwind}/bin/tailwindcss";

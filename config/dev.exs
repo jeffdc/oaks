@@ -50,6 +50,16 @@ config :oaks, OaksWeb.Endpoint,
 # Enable dev routes
 config :oaks, dev_routes: true
 
+# Species photos on the local disk, served by the endpoint at /dev-images
+# (Oaks.Storage.Local); no AWS keys needed. To try the real bucket instead,
+# start with IMAGES_STORAGE=s3 and the upload keys (config/runtime.exs).
+config :oaks, :images,
+  adapter: Oaks.Storage.Local,
+  local_root: Path.expand("../tmp/images", __DIR__),
+  cdn_url: "/dev-images"
+
+config :oaks, serve_local_images: true
+
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"
 

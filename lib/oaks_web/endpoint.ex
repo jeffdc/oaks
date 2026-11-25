@@ -43,6 +43,12 @@ defmodule OaksWeb.Endpoint do
     only_matching: ~w(favicon robots site),
     raise_on_missing_only: code_reloading?
 
+  # Species photos stored by Oaks.Storage.Local (dev only; production serves
+  # them from the CDN).
+  if Application.compile_env(:oaks, :serve_local_images, false) do
+    plug Plug.Static, at: "/dev-images", from: {Oaks.Storage.Local, :root, []}
+  end
+
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do

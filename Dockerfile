@@ -8,7 +8,12 @@
 FROM hexpm/elixir:1.19.6-erlang-28.5.0.8-alpine-3.24.3 AS builder
 
 # Install build dependencies
-RUN apk add --no-cache build-base git
+# vix (the image library's libvips binding) is compiled against Alpine's
+# libvips instead of downloading precompiled binaries from GitHub: OTP >=
+# 28.5.0.6 httpc rejects GitHub's release redirects (headers > 10240 bytes).
+# Needs vips-dev + pkgconf here and vips at runtime (flake.nix does the same).
+RUN apk add --no-cache build-base git pkgconf vips-dev
+ENV VIX_COMPILATION_MODE=PLATFORM_PROVIDED_LIBVIPS
 
 WORKDIR /app
 
@@ -65,8 +70,8 @@ RUN mix release
 # Stage 2: Runtime
 FROM alpine:3.24.3 AS runtime
 
-# Runtime dependencies
-RUN apk add --no-cache libstdc++ openssl ncurses-libs sqlite su-exec
+# Runtime dependencies (vips: resizing species photos into their variants)
+RUN apk add --no-cache libstdc++ openssl ncurses-libs sqlite su-exec vips
 
 # Install Litestream for continuous SQLite replication, verifying the
 # download against the release's published SHA-256 digests.

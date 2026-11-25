@@ -60,6 +60,23 @@ config :tailwind,
     cd: Path.expand("..", __DIR__)
   ]
 
+# Species photo storage (Oaks.Storage.Images): the private oaks-images bucket,
+# served by CloudFront on images.oakcompendium.org (infra/). The upload user's
+# keys come from the environment (config/runtime.exs). dev.exs and test.exs
+# swap the adapter.
+config :oaks, :images,
+  adapter: Oaks.Storage.S3,
+  bucket: "oaks-images",
+  cdn_url: "https://images.oakcompendium.org",
+  distribution_id: "E1GM6FGGDJPT7E"
+
+# ex_aws (Oaks.Storage.S3) on Req, the app's one HTTP client. Credentials are
+# passed per request, never read from here.
+config :ex_aws,
+  http_client: ExAws.Request.Req,
+  json_codec: Jason,
+  region: "us-east-1"
+
 # Configure Elixir's Logger
 config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",

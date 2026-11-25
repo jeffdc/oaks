@@ -43,6 +43,7 @@ defmodule Oaks.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.2"},
       {:lazy_html, ">= 0.1.0", only: :test},
+      {:mox, "~> 1.2", only: :test},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.5", runtime: Mix.env() == :dev},
       {:heroicons,
@@ -62,10 +63,17 @@ defmodule Oaks.MixProject do
       {:nimble_totp, "~> 1.0"},
       {:eqrcode, "~> 0.2"},
       {:hammer, "~> 7.0"},
+      # Species photos: S3 storage (ex_aws over Req), CloudFront invalidation
+      # (Req's SigV4 signing), and resizing into variants (libvips; see
+      # flake.nix and the Dockerfile). Req is also the iNaturalist client.
+      {:ex_aws, "~> 2.8"},
+      {:ex_aws_s3, "~> 2.5"},
+      {:sweet_xml, "~> 0.7"},
+      {:req, "~> 0.5"},
+      {:image, "~> 0.74"},
       # API Documentation
       {:open_api_spex, "~> 3.18"},
       # Dev/Test tools
-      {:req, "~> 0.5", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       # Security
@@ -147,7 +155,7 @@ defmodule Oaks.MixProject do
     [
       plt_core_path: "priv/plts/core.plt",
       plt_local_path: "priv/plts/project.plt",
-      plt_add_apps: [:mix, :ex_unit, :req],
+      plt_add_apps: [:mix, :ex_unit],
       ignore_warnings: ".dialyzer_ignore.exs",
       flags: [
         :error_handling,
