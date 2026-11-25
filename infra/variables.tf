@@ -9,3 +9,9 @@ variable "s3_bucket_name" {
   type        = string
   default     = "oaks-db-backups"
 }
+
+variable "images_domain" {
+  description = "Custom domain the images distribution serves (CNAME at Porkbun)"
+  type        = string
+  default     = "images.oakcompendium.org"
+}
