@@ -64,6 +64,13 @@ config :oaks, :images,
 
 config :ex_aws, :retries, max_attempts: 1
 
+# Jobs are inserted but never run on their own: tests perform them
+# (Oban.Testing), as a restart would find them.
+config :oaks, Oban, testing: :manual
+
+# iNaturalist is a Req.Test stub (Oaks.INaturalistFixtures), with no retries.
+config :oaks, Oaks.INaturalist, req_options: [plug: {Req.Test, Oaks.INaturalist}, retry: false]
+
 # Record page views inline so no analytics insert outlives its test.
 config :oaks, :analytics_async, false
 

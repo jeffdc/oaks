@@ -40,6 +40,14 @@ defmodule Oaks.Storage.Images do
   def sizes, do: @sizes
 
   @doc """
+  Whether photos of file type `extension` (with or without a leading dot,
+  any case) can be stored: `jpg`, `jpeg`, `png` or `webp`.
+  """
+  @spec supported_extension?(String.t()) :: boolean()
+  def supported_extension?(extension) when is_binary(extension),
+    do: Map.has_key?(@content_types, normalize_extension(extension))
+
+  @doc """
   A new, unique path for the original of a photo imported to the species.
 
   `extension` is the original's file type (`jpg`, `jpeg`, `png` or `webp`,
@@ -47,7 +55,7 @@ defmodule Oaks.Storage.Images do
   """
   @spec original_path(pos_integer(), String.t()) :: {:ok, String.t()} | {:error, term()}
   def original_path(species_id, extension) when is_integer(species_id) and species_id > 0 do
-    ext = extension |> String.trim_leading(".") |> String.downcase()
+    ext = normalize_extension(extension)
 
     if Map.has_key?(@content_types, ext) do
       timestamp = System.system_time(:millisecond)
@@ -58,6 +66,9 @@ defmodule Oaks.Storage.Images do
       {:error, {:unsupported_extension, extension}}
     end
   end
+
+  defp normalize_extension(extension),
+    do: extension |> String.trim_leading(".") |> String.downcase()
 
   @doc """
   The path of one size of a photo, from its original's path.

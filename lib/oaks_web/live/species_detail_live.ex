@@ -10,6 +10,7 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   use OaksWeb, :live_view
 
+  alias Oaks.Images
   alias Oaks.Markdown
   alias Oaks.Sources
   alias Oaks.Species
@@ -35,6 +36,7 @@ defmodule OaksWeb.SpeciesDetailLive do
        selected_source: nil,
        show_delete_confirm: false,
        delete_references: [],
+       delete_photo_count: 0,
        show_delete_source_confirm: false,
        delete_source_target: nil,
        show_merge_picker: false,
@@ -69,7 +71,9 @@ defmodule OaksWeb.SpeciesDetailLive do
       {:noreply,
        assign(socket,
          show_delete_confirm: true,
-         delete_references: Species.references_to(socket.assigns.species)
+         delete_references: Species.references_to(socket.assigns.species),
+         delete_photo_count:
+           socket.assigns.species |> Images.count_by_status() |> Map.values() |> Enum.sum()
        )}
     else
       {:noreply, socket}
@@ -237,6 +241,7 @@ defmodule OaksWeb.SpeciesDetailLive do
         :if={@show_delete_confirm}
         species={@species}
         source_count={length(@species_sources)}
+        photo_count={@delete_photo_count}
         references={@delete_references}
       />
 
@@ -541,6 +546,7 @@ defmodule OaksWeb.SpeciesDetailLive do
 
   attr :species, :any, required: true
   attr :source_count, :integer, default: 0
+  attr :photo_count, :integer, default: 0
   attr :references, :list, default: []
 
   defp delete_confirm_modal(assigns) do
@@ -556,6 +562,9 @@ defmodule OaksWeb.SpeciesDetailLive do
       </p>
       <:note :if={@source_count > 0}>
         Its data from {count_label(@source_count, "source")} goes with it.
+      </:note>
+      <:note :if={@photo_count > 0}>
+        {photos_note(@photo_count)}
       </:note>
       <:note :if={@references != []}>
         <div id="delete-references">
@@ -586,6 +595,11 @@ defmodule OaksWeb.SpeciesDetailLive do
     </.modal>
     """
   end
+
+  defp photos_note(1), do: "Its photo goes with it, and its files are removed from storage."
+
+  defp photos_note(n),
+    do: "Its #{n} photos go with it, and their files are removed from storage."
 
   defp references_lead(1), do: "1 other species names it; deleting takes it out of:"
   defp references_lead(n), do: "#{n} other species name it; deleting takes it out of:"

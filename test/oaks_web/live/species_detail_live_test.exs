@@ -267,6 +267,20 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert has_element?(view, "#delete-references", bebbiana_epithet)
       assert has_element?(view, "#delete-references", "parent")
     end
+
+    test "says the species' photos go with it", %{conn: conn, velutina: velutina} do
+      scope = Oaks.ImagesFixtures.editor_scope()
+      observation = Oaks.ImagesFixtures.observation()
+      species = Oaks.Species.get_species_by_name(velutina)
+
+      for photo <- observation.photos,
+          do: Oaks.ImagesFixtures.import_photo(species, observation, scope, photo)
+
+      {:ok, view, _html} = conn |> log_in_user(user_fixture()) |> live(~p"/species/#{velutina}")
+      render_click(view, "request_delete")
+
+      assert has_element?(view, "#delete-confirm-modal", "Its 2 photos go with it")
+    end
   end
 
   describe "malformed stored lists" do

@@ -8,6 +8,7 @@ defmodule Oaks.Species.Merge do
   """
 
   alias Ecto.Multi
+  alias Oaks.Images
   alias Oaks.Repo
   alias Oaks.Sources.SpeciesSource
   alias Oaks.Species
@@ -28,6 +29,9 @@ defmodule Oaks.Species.Merge do
   - Hybrids whose two parents are the synonym and the target
   - Names and links the synonym's lists add to the target
   - Synonyms that would be added
+  - Photos that move to the target, and duplicates of the target's photos
+    (the same iNat photo) that are dropped, with their discarded captions
+    (`Oaks.Images.merge_preview/2`)
 
   Returns `{:ok, preview}` or `{:error, reason}`.
   """
@@ -55,8 +59,10 @@ defmodule Oaks.Species.Merge do
   - `"include_sources"` - list of source_ids to transfer from synonym to target
 
   The target gains the source's name and synonyms, its name lists (hybrids,
-  closely related, subspecies & varieties) and external links, and the
-  selected sources. Every other species' mention of the source is pointed at
+  closely related, subspecies & varieties) and external links, the selected
+  sources, and its photos after the target's own (duplicates of the target's
+  are dropped, and their files cleaned up once the merge commits; see
+  `Oaks.Images.merge_species_images/3`). Every other species' mention of the source is pointed at
   the target, and the source is deleted. All operations run in a single
   transaction via `Ecto.Multi`; on failure, all changes are rolled back.
 
@@ -78,6 +84,7 @@ defmodule Oaks.Species.Merge do
       |> References.rewrite(source.scientific_name, target.scientific_name,
         except: [source.id, target.id]
       )
+      |> Images.merge_species_images(source, target)
       |> Multi.delete(:delete_source, source)
       |> Repo.transaction()
       |> handle_transaction_result(target_name)
@@ -129,7 +136,8 @@ defmodule Oaks.Species.Merge do
       self_reference_issues: detect_self_references(target, source.scientific_name),
       same_parent_hybrids: same_parent_hybrids(references, target),
       list_additions: list_additions(source, target),
-      synonyms_to_add: compute_synonyms_to_add(source, target)
+      synonyms_to_add: compute_synonyms_to_add(source, target),
+      photos: Images.merge_preview(source, target)
     }
   end
 

@@ -9,6 +9,7 @@ defmodule Oaks.Species do
   import Ecto.Query
 
   alias Ecto.Multi
+  alias Oaks.Images
   alias Oaks.Repo
   alias Oaks.Sources.{Source, SpeciesSource}
   alias Oaks.Species.References
@@ -422,12 +423,15 @@ defmodule Oaks.Species do
   mentions it, in one transaction.
 
   Species_sources records are deleted via ON DELETE CASCADE in the database.
+  Its photos are removed by `Oaks.Images.delete_species_images/2` in the same
+  transaction, which records their files for cleanup after it commits.
   Returns `{:ok, species}` on success, `{:error, changeset}` on failure.
   """
   @spec delete_species(Species.t()) :: {:ok, Species.t()} | {:error, Ecto.Changeset.t()}
   def delete_species(%Species{} = species) do
     Multi.new()
     |> References.rewrite(species.scientific_name, nil, except: [species.id])
+    |> Images.delete_species_images(species)
     |> Multi.delete(:species, species)
     |> Repo.transaction()
     |> case do

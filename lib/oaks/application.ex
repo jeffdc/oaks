@@ -12,6 +12,8 @@ defmodule Oaks.Application do
       Oaks.Repo,
       {DNSCluster, query: Application.get_env(:oaks, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Oaks.PubSub},
+      # Durable background work: species photo imports and cleanup
+      {Oban, Application.fetch_env!(:oaks, Oban)},
       # Task supervisor for fire-and-forget background work (analytics inserts, etc.)
       {Task.Supervisor, name: Oaks.TaskSupervisor},
       # Login attempt counters

@@ -71,6 +71,9 @@ defmodule Oaks.MixProject do
       {:sweet_xml, "~> 0.7"},
       {:req, "~> 0.5"},
       {:image, "~> 0.74"},
+      # Durable background work: species photo imports and storage cleanup
+      # (Oaks.Images), on SQLite with Oban's Lite engine.
+      {:oban, "~> 2.21"},
       # API Documentation
       {:open_api_spex, "~> 3.18"},
       # Dev/Test tools
