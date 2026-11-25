@@ -17,7 +17,8 @@ kill_timeout = "30s"
 
 [env]
   DATABASE_PATH = "/data/oaks.db"
-  PHX_HOST = "oaks.fly.dev"
+  # The public address: absolute URLs (the cite line, setup links) use it.
+  PHX_HOST = "oakcompendium.org"
   PORT = "4000"
 
 [http_service]
