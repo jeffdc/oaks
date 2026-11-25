@@ -39,7 +39,23 @@ Photos are stored in a private bucket and served only through CloudFront on `htt
 
 DNS for `oakcompendium.org` is at Porkbun, outside tofu. It holds two records for photos: the certificate's validation CNAME (`tofu output images_cert_validation`) and `images` CNAME to the distribution (`tofu output images_distribution_domain`). Keep both.
 
-The upload user's access key is not managed by tofu, so its secret never enters state. To issue one, create it with `aws iam create-access-key --user-name oaks-images-upload` and send it straight into Fly secrets as `IMAGES_AWS_ACCESS_KEY_ID` and `IMAGES_AWS_SECRET_ACCESS_KEY` (read by `config/runtime.exs`) without saving or printing it; delete the old key once the app runs on the new one.
+The upload user's access key is not managed by tofu, so its secret never enters state. It is kept in 1Password, in the Private vault, as the item "Oaks images upload key (AWS)" (fields `username`: the key ID, `credential`: the secret) and from there set in Fly secrets as `IMAGES_AWS_ACCESS_KEY_ID` and `IMAGES_AWS_SECRET_ACCESS_KEY` (read by `config/runtime.exs`), never printed or saved to disk. To issue one, with the 1Password CLI (`op`) signed in:
+
+```bash
+aws iam create-access-key --user-name oaks-images-upload --output json \
+  | jq '{title: "Oaks images upload key (AWS)", category: "API_CREDENTIAL",
+         fields: [{id: "username", type: "STRING", label: "username", value: .AccessKey.AccessKeyId},
+                  {id: "credential", type: "CONCEALED", label: "credential", value: .AccessKey.SecretAccessKey}]}' \
+  | op item create --vault Private
+
+# A secret reference can't hold the title's parentheses, so use the item's ID.
+item="op://Private/$(op item get "Oaks images upload key (AWS)" --vault Private --format json | jq -r .id)"
+printf 'IMAGES_AWS_ACCESS_KEY_ID=%s\nIMAGES_AWS_SECRET_ACCESS_KEY=%s\n' \
+  "$(op read "$item/username")" "$(op read "$item/credential")" \
+  | fly secrets import --stage --app oaks
+```
+
+`--stage` leaves the running machines alone; the secrets apply at the next deploy (`fly secrets deploy --app oaks` applies them sooner). When replacing a key, rename the old 1Password item first, and delete the old AWS key once the app runs on the new one.
 
 #### Smoke test (2026-11-24)
 

@@ -33,6 +33,8 @@ The plan also rebuilds the species page as an intermediate step towards the rede
 
 Done when `tofu plan` shows no changes. Jeff runs steps 2 and 4 against AWS, or OKs Claude running them.
 
+**Status: done.** OpenTofu comes from the flake; state is in `oaks-terraform-state` (made by hand: versioned, SSE-S3, public access blocked) with `use_lockfile`, on AWS provider 6.x. The Fly provider, app, volume and `secret_key_base` are gone. The Litestream bucket, its versioning, lifecycle and public access block, and its IAM user, policy, attachment and key were imported (3f7b9b6). `infra/README.md` lists every resource. `tofu plan` showed no changes on 2026-11-25.
+
 ## Phase 1: Images infra
 
 New files, split as gallformers does:
@@ -44,6 +46,8 @@ New files, split as gallformers does:
 
 Done when an object put with the upload key is served from `https://images.oakcompendium.org/...`, deletion plus completed invalidation stops a fresh request serving it, and the plan includes the 30-day noncurrent-version lifecycle without expiring live images.
 
+**Status: done.** Applied 2026-11-24 (028102d); the distribution is `E1GM6FGGDJPT7E`. Jeff added the certificate's validation CNAME and the `images` CNAME at Porkbun. The upload user's access key is made outside tofu, so its secret never enters state. The AWS smoke checks passed; their results are under Production smoke checks, below the acceptance checks.
+
 ## Phase 2: Storage layer
 
 - Deps: `ex_aws`, `ex_aws_s3`, `sweet_xml`, `hackney` and `image` (libvips, which the flake and the Dockerfile need), plus a CloudFront API client for invalidation. Make `req` a runtime dep.
@@ -54,6 +58,8 @@ Done when an object put with the upload key is served from `https://images.oakco
 - Variants: adapt `generate_size_variants/2` to process original bytes with `Image` and return the generated variants only after all sizes succeed. The Phase 3 worker stores the original and variants. Do not port gallformers' CDN re-download, fixed sleep or fire-and-forget resize tasks: none establishes readiness, and a dev URL is not a storage read API.
 
 Done when dev and prod can both store an image, make its variants and serve it, real resizing is tested through Local, and storage/invalidation failures can be injected through the mock.
+
+**Status: done.** Built in faf72f6. `Oaks.Storage.Images` sits in front of the `Oaks.Storage.Adapter` contract: `S3` in prod (ex_aws on Req, with CloudFront invalidation signed by Req's SigV4, so there is no separate CloudFront client), `Local` in dev and a Mox mock in tests. hackney isn't used: ex_aws 2.8 needs hackney 4, and Req is already the app's client. libvips comes from the flake and Alpine, with vix compiled against it. The bucket, `cdn_url` and distribution ID are in `config/config.exs`; only the upload key comes from the environment (`config/runtime.exs`). The S3 adapter was smoke-tested from dev against the real bucket and CDN on 2026-11-24.
 
 ## Phase 3: iNat client and data
 
@@ -81,6 +87,8 @@ Done when dev and prod can both store an image, make its variants and serve it, 
 - S3 retains the deleted versions for the agreed 30-day lifecycle period; Local removes its files without version retention. Retries and re-imports use new paths and cannot be affected by cleanup of an earlier import.
 
 Done when an observation becomes ready images with full attribution, the import/recovery and merge/removal contracts pass the acceptance checks below, and no failed or interrupted operation leaves untracked storage work.
+
+**Status: done.** Built in 5b8ca89; All Rights Reserved photos with recorded permission came with Phase 5 (59a7312). Durable work runs on Oban (Lite engine, in the app's SQLite database): `Oaks.Images.ImportWorker`, `CleanupWorker`, and `RecoveryWorker`, which re-enqueues unfinished work at boot and every 15 minutes. The images' species FK restricts deletes, so photos can't vanish without a cleanup; cleanup rows keep no FK and outlive their image and species. Every acceptance row is covered by a test or a recorded check (PR #15 lists them).
 
 ## Phase 4: Species page design for today's data
 
@@ -207,3 +215,15 @@ Use `Req.Test` for iNat, a failure-capable storage/invalidation mock, and real f
 | Production wiring | Private origin and custom-domain delivery; live object survives lifecycle rules; deletion plus completed invalidation stops fresh delivery; 30-day noncurrent expiration configured |
 
 Run `make done-checks` inside the Nix dev shell before handing implementation over. Record the AWS smoke checks separately; mocks do not establish production permissions or cache behavior.
+
+### Production smoke checks
+
+Run against AWS, apart from the mock-based tests above. Details are in `infra/README.md`.
+
+- **Private origin and custom-domain delivery** (2026-11-24, with a throwaway upload key, deleted afterwards): an object put with the upload key is served from `https://images.oakcompendium.org` (a Miss, then a Hit). The same object straight from S3 is a 403, plain HTTP is a 403, and the domain's root lists nothing. The upload key can't read objects.
+- **Deletion plus completed invalidation stops fresh delivery** (2026-11-24): after deletion the CDN kept serving the object until an invalidation of its path, made with the upload key, completed; then a fresh request was a 403. The app's `Oaks.Storage.S3`, run from dev, did the same for an original and its four variants. Repeated deletes succeeded, and a repeated invalidation with the same caller reference returned the same ID.
+- **Lifecycle** (2026-11-24): the bucket's lifecycle has three rules: expire noncurrent versions 30 days after they become noncurrent, remove expired delete markers, abort multipart uploads after 7 days. No rule expires current objects, so live images survive; that is a check of the configuration, since expiry can't be watched in less than 30 days. Versioning is on and all public access is blocked.
+- **Infrastructure matches its code** (2026-11-25): `tofu plan` reports no changes for every resource, the images bucket, lifecycle, policy, distribution and upload user included.
+- **Upload key in Fly** (2026-11-25): a new key for `oaks-images-upload`, the user's only one, is kept in 1Password (`infra/README.md`) and staged in Fly secrets as `IMAGES_AWS_ACCESS_KEY_ID` and `IMAGES_AWS_SECRET_ACCESS_KEY`. They take effect at the deploy that follows the merge to main.
+- **Design:** an Impeccable finish review of the rebuilt species page was run; its notes weren't kept (Jeff, 2026-11-25).
+- **After the merge to main deploys:** import a photo on a species page in production, check that its files are served from `images.oakcompendium.org`, then delete it and check that its cleanup finishes and the files are a 403.
