@@ -188,6 +188,8 @@ Done when the component shows imported photos with credit and license, and the k
 
 Done when the species page matches the approved design at desktop, tablet and phone widths, the sections that wait for the facts model are listed in this plan, and `make done-checks` passes.
 
+**Status: done.** Jeff approved the library pieces in `/dev/components` and the page in dev on 2026-11-25. The library gained `photo_columns`, `source_tabs` (with the `Tablist` hook), `ruled_rows`, `hybrid_rows`, `comma_list`, `not_covered_notice` and `cite_line` (DesignComponents), the title row's `:common_name` slot and `patch` on `source_mark`. Tabs that don't fit scroll sideways with a fade and the actions wrap above them, so the ochre underline sits just above the rule (Jeff, 2026-11-25). The source order, default tab, common name, coverage, hybrids' other parents and the band's siblings live in `Oaks.Species`. The open tab is in the address as `?source=<source id>`, which the common name's source mark uses. The siblings menu lists the non-hybrid species at the taxon's last rank (a variety's: its species' varieties), twelve around the current one, with a link to the group's page. A hybrid with no recorded parent reads "Hybrid of unrecorded parents", as in the prototype. The sections that wait are in the scope table and under the Phase 4 decisions.
+
 ## Acceptance checks
 
 Use `Req.Test` for iNat, a failure-capable storage/invalidation mock, and real fixture bytes with the Local adapter for resizing. Tests assert outcomes, not task timing; simulate restarts from persisted work and synchronize on completion.
