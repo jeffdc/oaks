@@ -366,6 +366,55 @@ defmodule OaksWeb.DesignComponentsTest do
       assert html =~ ~s(<p class="oc-specimen-author">Nutt.</p>)
       assert html =~ ~s(<p class="oc-specimen-about">Hybrids</p>)
       refute html =~ "oc-specimen-band"
+      refute html =~ "oc-specimen-photo"
+    end
+
+    test "sets a ready photo beside the text, linked, with its credit" do
+      assigns = %{
+        photo: %Oaks.Images.Image{
+          id: 1,
+          species_id: 1,
+          path: "species/1/1_7_ab_original.jpg",
+          status: "ready",
+          creator: "janedoe - Jane Doe",
+          license: "CC-BY",
+          sourcelink: "https://www.inaturalist.org/observations/9"
+        }
+      }
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.specimen
+          id="s"
+          heading="An oak at random"
+          photo={@photo}
+          photo_label="Quercus michauxii"
+          photo_navigate="/species/michauxii"
+        >
+          <:name>michauxii</:name>
+        </DesignComponents.specimen>
+        """)
+
+      assert html =~ ~s(class="oc-specimen oc-specimen-plate")
+      assert html =~ ~r{<a href="/species/michauxii"[^>]*>\s*<img src="[^"]*1_7_ab_medium\.jpg"}
+      assert html =~ ~r{srcset="[^"]*_medium\.jpg 800w, [^"]*_large\.jpg 1200w"}
+      assert html =~ ~s(alt="Photo of Quercus michauxii")
+      assert html =~ "janedoe - Jane Doe"
+      assert html =~ ~s(href="https://www.inaturalist.org/observations/9")
+    end
+
+    test "leaves out a photo that isn't ready" do
+      assigns = %{photo: %Oaks.Images.Image{status: "pending", path: nil}}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.specimen id="s" heading="An oak at random" photo={@photo}>
+          <:name>michauxii</:name>
+        </DesignComponents.specimen>
+        """)
+
+      assert html =~ ~s(class="oc-specimen")
+      refute html =~ "oc-specimen-photo"
     end
   end
 

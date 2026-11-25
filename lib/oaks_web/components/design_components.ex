@@ -871,6 +871,12 @@ defmodule OaksWeb.DesignComponents do
   then the authority, where it sits (`:band`, an inline `taxonomy_band/1`),
   a line about it (`:about`, such as its hybrids) and the actions.
 
+  With a ready `photo` (an `Oaks.Images.Image`, such as
+  `Oaks.Images.first_for_species/1`), the photo takes the left 40% and
+  the text, set left, the rest; on phones the photo goes above the text.
+  The photo links to `photo_navigate` when given, and carries its credit
+  under it: the creator, the license and the iNaturalist observation.
+
   ## Examples
 
       <.specimen id="oak-at-random" heading="An oak at random">
@@ -880,9 +886,17 @@ defmodule OaksWeb.DesignComponents do
         <:about>Hybrids ...</:about>
         <:actions><.button phx-click="shuffle">Show another</.button></:actions>
       </.specimen>
+
+      <.specimen id="oak-at-random" heading="An oak at random" photo={@photo}
+        photo_label="Quercus michauxii" photo_navigate={~p"/species/michauxii"}>
+        ...
+      </.specimen>
   """
   attr :id, :string, required: true
   attr :heading, :string, required: true
+  attr :photo, Image, default: nil, doc: "a ready photo of the taxon, set beside the text"
+  attr :photo_label, :string, default: nil, doc: "the taxon's name as plain text, for alt text"
+  attr :photo_navigate, :string, default: nil, doc: "where the photo links"
   attr :rest, :global
   slot :name, required: true
   slot :author
@@ -891,17 +905,65 @@ defmodule OaksWeb.DesignComponents do
   slot :actions
 
   def specimen(assigns) do
+    assigns = assign(assigns, :plate, specimen_photo(assigns.photo))
+
     ~H"""
-    <section id={@id} class="oc-specimen" aria-labelledby={"#{@id}-heading"} {@rest}>
+    <section
+      id={@id}
+      class={if @plate, do: "oc-specimen oc-specimen-plate", else: "oc-specimen"}
+      aria-labelledby={"#{@id}-heading"}
+      {@rest}
+    >
       <.chapter_heading id={"#{@id}-heading"}>{@heading}</.chapter_heading>
-      <p class="oc-specimen-name">{render_slot(@name)}</p>
-      <p :if={@author != []} class="oc-specimen-author">{render_slot(@author)}</p>
-      <div :if={@band != []} class="oc-specimen-band">{render_slot(@band)}</div>
-      <p :if={@about != []} class="oc-specimen-about">{render_slot(@about)}</p>
-      <div :if={@actions != []} class="oc-specimen-actions">{render_slot(@actions)}</div>
+      <div class="oc-specimen-body">
+        <figure :if={@plate} class="oc-specimen-photo">
+          <.link :if={@photo_navigate} navigate={@photo_navigate} tabindex="-1">
+            <.specimen_image plate={@plate} label={@photo_label} />
+          </.link>
+          <.specimen_image :if={!@photo_navigate} plate={@plate} label={@photo_label} />
+          <figcaption>
+            <.photo_credit
+              creator={@plate.creator}
+              license={@plate.license}
+              reserved={@plate.reserved}
+            />
+            <span :if={@plate.sourcelink} class="oc-specimen-source">
+              <a href={@plate.sourcelink} target="_blank" rel="noopener noreferrer">
+                iNaturalist observation
+              </a>
+            </span>
+          </figcaption>
+        </figure>
+        <div class="oc-specimen-text">
+          <p class="oc-specimen-name">{render_slot(@name)}</p>
+          <p :if={@author != []} class="oc-specimen-author">{render_slot(@author)}</p>
+          <div :if={@band != []} class="oc-specimen-band">{render_slot(@band)}</div>
+          <p :if={@about != []} class="oc-specimen-about">{render_slot(@about)}</p>
+          <div :if={@actions != []} class="oc-specimen-actions">{render_slot(@actions)}</div>
+        </div>
+      </div>
     </section>
     """
   end
+
+  attr :plate, :map, required: true
+  attr :label, :string, default: nil
+
+  defp specimen_image(assigns) do
+    ~H"""
+    <img
+      src={@plate.src}
+      srcset={"#{@plate.src} 800w, #{@plate.full} 1200w"}
+      sizes="(max-width: 760px) 100vw, 560px"
+      alt={if @label, do: "Photo of #{@label}", else: "Photo"}
+    />
+    """
+  end
+
+  defp specimen_photo(%Image{status: "ready"} = image),
+    do: image |> viewer_photo() |> List.first()
+
+  defp specimen_photo(_photo), do: nil
 
   @doc """
   Renders a colophon: a short centred list closing a centred page, such
