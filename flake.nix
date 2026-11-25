@@ -56,6 +56,8 @@
               beam.elixir_1_19
               # sqlite3 CLI: loads test seeds (make test-db, CI) and inspects oaks.db.
               pkgs.sqlite
+              # tofu: manages the AWS resources in infra/ (infra/README.md).
+              pkgs.opentofu
             ]
             ++ lib.optionals stdenv.hostPlatform.isLinux [ pkgs.inotify-tools ];
 
