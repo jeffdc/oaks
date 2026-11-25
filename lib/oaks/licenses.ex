@@ -2,9 +2,11 @@ defmodule Oaks.Licenses do
   @moduledoc """
   The licenses a species photo can carry, with their canonical URLs.
 
-  Only photos whose license lets the site show them are imported
-  (`importable?/1`): All Rights Reserved, which is also what a missing or
-  unknown license maps to (`Oaks.INaturalist.map_license/1`), is not.
+  A photo with an open license (`importable?/1`) can be imported as it is.
+  An All Rights Reserved one, which is also what an unknown license maps to
+  (`Oaks.INaturalist.map_license/1`), can be imported only with an editor's
+  recorded confirmation that its creator has given permission
+  (`needs_permission?/1`; Jeff, 2026-11-25).
 
   Ported from gallformers' `Gallformers.Licenses`.
   """
@@ -38,11 +40,18 @@ defmodule Oaks.Licenses do
   def valid?(license), do: is_binary(license) and Map.has_key?(@urls, license)
 
   @doc """
-  Whether a photo with `license` may be imported: a valid license other than
-  All Rights Reserved.
+  Whether a photo with `license` may be imported without the creator's
+  permission: a valid license other than All Rights Reserved.
   """
   @spec importable?(term()) :: boolean()
   def importable?(license), do: valid?(license) and license != @all_rights_reserved
+
+  @doc """
+  Whether a photo with `license` may be imported only with the creator's
+  permission: All Rights Reserved.
+  """
+  @spec needs_permission?(term()) :: boolean()
+  def needs_permission?(license), do: license == @all_rights_reserved
 
   @doc """
   The canonical URL of `license`, or nil when it has none.

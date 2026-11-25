@@ -111,7 +111,7 @@ defmodule Oaks.ImagesTest do
       assert Images.list_for_editor(ctx.species) == []
     end
 
-    test "refuses All Rights Reserved, missing and unknown licenses, whatever the photo claims",
+    test "refuses All Rights Reserved, missing and unknown licenses without the confirmation, whatever the photo claims",
          ctx do
       photos =
         for code <- [nil, "gpl", "all-rights-reserved"],
@@ -119,18 +119,54 @@ defmodule Oaks.ImagesTest do
 
       observation = observation(observation_json(%{photos: photos}))
 
-      for photo <- observation.photos do
-        assert Images.import_inat_photo(photo, observation, ctx.species, ctx.scope) ==
-                 {:error, :all_rights_reserved}
+      for photo <- observation.photos,
+          opts <- [[], [permission_confirmed: false], [permission_confirmed: "true"]] do
+        assert Images.import_inat_photo(photo, observation, ctx.species, ctx.scope, opts) ==
+                 {:error, :permission_required}
 
         # A struct claiming a license iNat didn't give it is mapped again.
-        forged = %{photo | mapped_license: "CC-BY", all_rights_reserved?: false}
+        forged = %{photo | mapped_license: "CC-BY", needs_permission?: false}
 
-        assert Images.import_inat_photo(forged, observation, ctx.species, ctx.scope) ==
-                 {:error, :all_rights_reserved}
+        assert Images.import_inat_photo(forged, observation, ctx.species, ctx.scope, opts) ==
+                 {:error, :permission_required}
       end
 
       assert Images.list_for_editor(ctx.species) == []
+    end
+
+    test "imports All Rights Reserved and unknown licenses with the confirmation, recording who gave it",
+         ctx do
+      photos = for code <- [nil, "gpl"], do: inat_photo_json(%{license_code: code})
+      observation = observation(observation_json(%{photos: photos}))
+      ids = Enum.map(observation.photos, & &1.id)
+
+      assert {:ok, [{_, {:ok, {:queued, one}}}, {_, {:ok, {:queued, two}}}]} =
+               Images.import_inat_photos(ctx.species, observation, ids, ctx.scope,
+                 permission_confirmed: true
+               )
+
+      for image <- [one, two] do
+        assert image.license == "All Rights Reserved"
+        assert image.licenselink == nil
+        assert image.permission_confirmed_by == ctx.scope.user.email
+        assert %DateTime{} = image.permission_confirmed_at
+        assert reload(image).permission_confirmed_by == ctx.scope.user.email
+      end
+    end
+
+    test "records no permission for an openly licensed photo, even when confirmed", ctx do
+      assert {:ok, {:queued, image}} =
+               Images.import_inat_photo(
+                 hd(ctx.observation.photos),
+                 ctx.observation,
+                 ctx.species,
+                 ctx.scope,
+                 permission_confirmed: true
+               )
+
+      assert image.license == "CC-BY-NC"
+      assert image.permission_confirmed_by == nil
+      assert image.permission_confirmed_at == nil
     end
 
     test "refuses photos with no observer to credit, or not on iNaturalist's hosts", ctx do
@@ -194,8 +230,33 @@ defmodule Oaks.ImagesTest do
       observation = observation(observation_json(%{photos: photos}))
       [ok, refused] = observation.photos
 
-      assert {:ok, [{_, {:ok, {:queued, _}}}, {_, {:error, :all_rights_reserved}}]} =
+      assert {:ok, [{_, {:ok, {:queued, _}}}, {_, {:error, :permission_required}}]} =
                Images.import_inat_photos(ctx.species, observation, [ok.id, refused.id], ctx.scope)
+    end
+  end
+
+  describe "subscribe/1" do
+    test "tells the species' subscribers when a photo is imported, published or fails", ctx do
+      [first, second] = ctx.observation.photos
+      stub_inat(ctx.json, photo_status: %{second.id => 404})
+      id = ctx.species.id
+      :ok = Images.subscribe(ctx.species)
+
+      one = import_photo(ctx.species, ctx.observation, ctx.scope, first)
+      two = import_photo(ctx.species, ctx.observation, ctx.scope, second)
+      assert_received {:species_images_changed, ^id}
+      assert_received {:species_images_changed, ^id}
+
+      assert :ok = run_import(one)
+      assert_received {:species_images_changed, ^id}
+
+      assert {:cancel, _} = run_import(two)
+      assert_received {:species_images_changed, ^id}
+      refute_received {:species_images_changed, _}
+
+      other = species_fixture()
+      import_photo(other, ctx.observation, ctx.scope)
+      refute_received {:species_images_changed, _}
     end
   end
 

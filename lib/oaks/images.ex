@@ -15,6 +15,9 @@ defmodule Oaks.Images do
   invalidates their CDN paths after the transaction commits. Readers stop
   seeing a photo when its removal commits.
 
+  Changes to a species' photos are broadcast on its topic (`subscribe/1`),
+  so an editor's open page sees imports finish.
+
   Ported in part from gallformers' `Gallformers.Images`
   (docs/species-photos-plan.md, Phase 3).
   """
@@ -35,6 +38,46 @@ defmodule Oaks.Images do
   @max_caption 2000
 
   @typedoc """
+  Import options: `permission_confirmed: true` is the editor's confirmation
+  that the creator of an All Rights Reserved photo has given permission to
+  use it. It is never inferred; without it such photos are refused.
+  """
+  @type import_opts :: [permission_confirmed: boolean()]
+
+  # -- Changes --
+
+  @doc """
+  Subscribes the caller to changes in `species`' photos: it is sent
+  `{:species_images_changed, species_id}` when one is imported, finishes or
+  fails importing, or is edited or deleted.
+  """
+  @spec subscribe(Species.t() | integer()) :: :ok | {:error, term()}
+  def subscribe(species), do: Phoenix.PubSub.subscribe(Oaks.PubSub, topic(species_id(species)))
+
+  @doc false
+  # Tells subscribers a species' photos changed (after the change commits).
+  @spec broadcast_changed(Species.t() | integer()) :: :ok
+  def broadcast_changed(species) do
+    id = species_id(species)
+    Phoenix.PubSub.broadcast(Oaks.PubSub, topic(id), {:species_images_changed, id})
+  end
+
+  @doc false
+  # Tells the subscribers of the species that has photo `image_id` now, if
+  # the photo still exists.
+  @spec broadcast_image_changed(integer() | nil) :: :ok
+  def broadcast_image_changed(image_id) when is_integer(image_id) do
+    case Repo.one(from(i in Image, where: i.id == ^image_id, select: i.species_id)) do
+      nil -> :ok
+      species_id -> broadcast_changed(species_id)
+    end
+  end
+
+  def broadcast_image_changed(_image_id), do: :ok
+
+  defp topic(species_id), do: "species_images:#{species_id}"
+
+  @typedoc """
   What an import did with a photo: reserved it (`:queued`), found it already
   imported or importing (`:exists`, with its current state), or retried a
   failed import of it (`:retrying`).
@@ -45,7 +88,7 @@ defmodule Oaks.Images do
   @type import_error ::
           :unauthorized
           | :not_in_observation
-          | :all_rights_reserved
+          | :permission_required
           | :missing_attribution
           | :invalid_photo_url
           | :unsupported_format
@@ -115,30 +158,39 @@ defmodule Oaks.Images do
   @doc """
   Imports the photos with `photo_ids` from `observation` (as
   `Oaks.INaturalist.fetch_observation/1` fetched it) to `species`, as the
-  scope's editor. Each photo is imported on its own (`import_inat_photo/4`):
+  scope's editor. Each photo is imported on its own (`import_inat_photo/5`):
   one failing doesn't stop the others. IDs not among the observation's
   photos are refused, so a client can only pick photos the server fetched.
+  `opts` apply to every photo (`t:import_opts/0`).
 
   Returns each requested photo ID with its result, in the order given.
   """
-  @spec import_inat_photos(Species.t(), Observation.t(), [term()], Scope.t() | nil) ::
+  @spec import_inat_photos(Species.t(), Observation.t(), [term()], Scope.t() | nil, import_opts()) ::
           {:ok, [{term(), import_result()}]} | {:error, :unauthorized}
-  def import_inat_photos(%Species{} = species, %Observation{} = observation, photo_ids, scope)
+  def import_inat_photos(
+        %Species{} = species,
+        %Observation{} = observation,
+        photo_ids,
+        scope,
+        opts \\ []
+      )
       when is_list(photo_ids) do
     with {:ok, _editor} <- editor(scope) do
       photos = Map.new(observation.photos, &{&1.id, &1})
 
-      {:ok,
-       for requested <- Enum.uniq(photo_ids) do
-         {requested, import_requested(requested, photos, observation, species, scope)}
-       end}
+      results =
+        for requested <- Enum.uniq(photo_ids) do
+          {requested, import_requested(requested, photos, observation, species, scope, opts)}
+        end
+
+      {:ok, results}
     end
   end
 
-  defp import_requested(requested, photos, observation, species, scope) do
+  defp import_requested(requested, photos, observation, species, scope, opts) do
     with {:ok, id} <- to_id(requested),
          {:ok, photo} <- Map.fetch(photos, id) do
-      import_inat_photo(photo, observation, species, scope)
+      import_inat_photo(photo, observation, species, scope, opts)
     else
       :error -> {:error, :not_in_observation}
     end
@@ -151,27 +203,38 @@ defmodule Oaks.Images do
   photo's license (mapped again from iNat's code, so a photo struct can't
   claim a license iNat didn't give it) and the observation's URL. All Rights
   Reserved photos, which include any with no license or one not in
-  `Oaks.Licenses`, are refused.
+  `Oaks.Licenses`, are refused (`:permission_required`) unless `opts` carry
+  the editor's confirmation that the creator gave permission
+  (`permission_confirmed: true`), which the photo then records with the
+  editor and the time.
 
   A photo the species already has, ready or pending, is left as it is
   (`:exists`); a failed one is retried through the same photo (`:retrying`).
   """
-  @spec import_inat_photo(Photo.t(), Observation.t(), Species.t(), Scope.t() | nil) ::
-          import_result()
+  @spec import_inat_photo(
+          Photo.t(),
+          Observation.t(),
+          Species.t(),
+          Scope.t() | nil,
+          import_opts()
+        ) :: import_result()
   def import_inat_photo(
         %Photo{} = photo,
         %Observation{} = observation,
         %Species{} = species,
-        scope
+        scope,
+        opts \\ []
       ) do
     with {:ok, editor} <- editor(scope),
-         {:ok, attrs} <- inat_attrs(photo, observation),
-         {:ok, extension} <- photo_extension(photo.original_url) do
-      reserve(species, attrs, photo.original_url, extension, editor)
+         {:ok, attrs} <- inat_attrs(photo, observation, editor, opts),
+         {:ok, extension} <- photo_extension(photo.original_url),
+         {:ok, result} <- reserve(species, attrs, photo.original_url, extension, editor) do
+      broadcast_changed(species)
+      {:ok, result}
     end
   end
 
-  defp inat_attrs(photo, observation) do
+  defp inat_attrs(photo, observation, editor, opts) do
     license = INaturalist.map_license(photo.license_code)
 
     attrs = %{
@@ -182,11 +245,25 @@ defmodule Oaks.Images do
       licenselink: Licenses.url(license),
       sourcelink: observation.url,
       inat_observation_id: observation.id,
-      inat_photo_id: photo.id
+      inat_photo_id: photo.id,
+      permission_confirmed_by: nil,
+      permission_confirmed_at: nil
     }
 
+    permission? = Licenses.needs_permission?(license)
+    confirmed? = Keyword.get(opts, :permission_confirmed) == true
+
+    attrs =
+      if permission? and confirmed?,
+        do: %{
+          attrs
+          | permission_confirmed_by: editor,
+            permission_confirmed_at: DateTime.utc_now(:second)
+        },
+        else: attrs
+
     cond do
-      not Licenses.importable?(license) -> {:error, :all_rights_reserved}
+      permission? and not confirmed? -> {:error, :permission_required}
       not Attribution.attributed?(attrs) -> {:error, :missing_attribution}
       not is_integer(observation.id) or not is_integer(photo.id) -> {:error, :missing_attribution}
       true -> {:ok, attrs}
@@ -295,8 +372,11 @@ defmodule Oaks.Images do
   @spec retry_import(Species.t() | integer(), term(), Scope.t() | nil) ::
           {:ok, Image.t()} | {:error, :unauthorized | :not_found | :not_failed}
   def retry_import(species, image_id, scope) do
-    with {:ok, editor} <- editor(scope) do
-      Repo.transaction(fn -> retry!(get_species_image(species, image_id), editor) end)
+    with {:ok, editor} <- editor(scope),
+         {:ok, image} <-
+           Repo.transaction(fn -> retry!(get_species_image(species, image_id), editor) end) do
+      broadcast_changed(image.species_id)
+      {:ok, image}
     end
   end
 
@@ -327,6 +407,7 @@ defmodule Oaks.Images do
       Repo.transaction(fn ->
         image.species_id |> get_species_image(image.id) |> save_caption(caption, editor)
       end)
+      |> tap(&if(match?({:ok, _}, &1), do: broadcast_changed(image.species_id)))
     end
   end
 
@@ -368,8 +449,12 @@ defmodule Oaks.Images do
       end
     end)
     |> case do
-      {:ok, _} -> :ok
-      {:error, reason} -> {:error, reason}
+      {:ok, _} ->
+        broadcast_changed(species)
+        :ok
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -413,6 +498,7 @@ defmodule Oaks.Images do
           current
       end
     end)
+    |> tap(&if(match?({:ok, _}, &1), do: broadcast_changed(image.species_id)))
   end
 
   @doc """

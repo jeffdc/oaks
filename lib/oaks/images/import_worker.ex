@@ -208,8 +208,12 @@ defmodule Oaks.Images.ImportWorker do
       end
     end)
     |> case do
-      {:ok, :published} -> :ok
-      {:error, reason} -> {:error, reason}
+      {:ok, :published} ->
+        Images.broadcast_image_changed(attempt.image_id)
+        :ok
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -264,6 +268,8 @@ defmodule Oaks.Images.ImportWorker do
         |> Repo.update_all(set: [last_error: message, updated_at: DateTime.utc_now(:second)])
       end
     end)
+
+    Images.broadcast_image_changed(image_id)
   end
 
   @doc false
@@ -276,7 +282,7 @@ defmodule Oaks.Images.ImportWorker do
     {:ok, :ok} =
       Repo.transaction(fn -> fail_unfinished!(Repo.get!(ImportAttempt, id), message) end)
 
-    :ok
+    Images.broadcast_image_changed(Repo.get!(ImportAttempt, id).image_id)
   end
 
   defp fail_unfinished!(%ImportAttempt{state: state} = attempt, message)

@@ -21,6 +21,15 @@ defmodule Oaks.INaturalistTest do
       assert INaturalist.map_license("CC-BY-NC-ND") == "CC-BY-NC-ND"
     end
 
+    test "tells a code it doesn't know from the missing code that means All Rights Reserved" do
+      assert INaturalist.unrecognized_license?("gpl")
+      assert INaturalist.unrecognized_license?("all-rights-reserved")
+      refute INaturalist.unrecognized_license?(nil)
+      refute INaturalist.unrecognized_license?("")
+      refute INaturalist.unrecognized_license?(" ")
+      refute INaturalist.unrecognized_license?("CC-BY-NC")
+    end
+
     test "maps no license, or one it doesn't know, to All Rights Reserved" do
       assert INaturalist.map_license(nil) == "All Rights Reserved"
       assert INaturalist.map_license("gpl") == "All Rights Reserved"
@@ -85,11 +94,13 @@ defmodule Oaks.INaturalistTest do
       assert [%Photo{} = open, %Photo{} = reserved] = observation.photos
       assert open.id == cc["id"]
       assert open.mapped_license == "CC-BY"
-      refute open.all_rights_reserved?
+      refute open.needs_permission?
+      refute open.unrecognized_license?
       assert open.thumbnail_url =~ ~r"/photos/#{cc["id"]}/medium\.jpg\z"
       assert open.original_url =~ ~r"/photos/#{cc["id"]}/original\.jpg\z"
       assert reserved.mapped_license == "All Rights Reserved"
-      assert reserved.all_rights_reserved?
+      assert reserved.needs_permission?
+      refute reserved.unrecognized_license?
     end
 
     test "sends the app's user agent, naming no person" do

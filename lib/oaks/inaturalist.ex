@@ -38,15 +38,28 @@ defmodule Oaks.INaturalist do
   @photo_hosts ["inaturalist-open-data.s3.amazonaws.com", "static.inaturalist.org"]
 
   @doc """
-  The license an image stores for an iNat `license_code`. No code, or one
-  this list doesn't know, is All Rights Reserved: such photos can't be
-  imported (`Oaks.Licenses.importable?/1`).
+  The license an image stores for an iNat `license_code`. No code is iNat's
+  way of saying All Rights Reserved; a code this list doesn't know is stored
+  as All Rights Reserved too (no license we know of was given). Either can be
+  imported only with the creator's permission (`Oaks.Licenses`).
   """
   @spec map_license(String.t() | nil) :: String.t()
   def map_license(code) when is_binary(code),
     do: Map.get(@license_map, String.downcase(code), Licenses.all_rights_reserved())
 
   def map_license(_code), do: Licenses.all_rights_reserved()
+
+  @doc """
+  Whether an iNat `license_code` is one this client doesn't know: not a
+  Creative Commons code and not the missing (or blank) code that means All
+  Rights Reserved. The editor sees such a photo as "No license given"
+  (Jeff, 2026-11-25).
+  """
+  @spec unrecognized_license?(String.t() | nil) :: boolean()
+  def unrecognized_license?(code) when is_binary(code),
+    do: String.trim(code) != "" and not Map.has_key?(@license_map, String.downcase(code))
+
+  def unrecognized_license?(_code), do: false
 
   @doc """
   The observation ID in an iNaturalist observation URL or a bare ID.
@@ -148,7 +161,8 @@ defmodule Oaks.INaturalist do
       original_url: photo_size_url(raw["url"], "original"),
       license_code: raw["license_code"],
       mapped_license: license,
-      all_rights_reserved?: not Licenses.importable?(license)
+      needs_permission?: Licenses.needs_permission?(license),
+      unrecognized_license?: unrecognized_license?(raw["license_code"])
     }
   end
 

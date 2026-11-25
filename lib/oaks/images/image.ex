@@ -10,7 +10,9 @@ defmodule Oaks.Images.Image do
 
   Attribution (`creator`, `license`, `licenselink`, `sourcelink`) comes from
   the observation the server fetched, and `uploader` and `lastchangedby`
-  from the signed-in editor; none is cast from user input.
+  from the signed-in editor; none is cast from user input. An All Rights
+  Reserved photo also records the editor who confirmed its creator gave
+  permission, and when (`permission_confirmed_by`, `permission_confirmed_at`).
   """
   use Ecto.Schema
 
@@ -37,6 +39,8 @@ defmodule Oaks.Images.Image do
           status: status(),
           last_error: String.t() | nil,
           current_attempt_id: integer() | nil,
+          permission_confirmed_by: String.t() | nil,
+          permission_confirmed_at: DateTime.t() | nil,
           inserted_at: DateTime.t() | nil,
           updated_at: DateTime.t() | nil
         }
@@ -57,6 +61,8 @@ defmodule Oaks.Images.Image do
     field :status, :string, default: "pending"
     field :last_error, :string
     field :current_attempt_id, :integer
+    field :permission_confirmed_by, :string
+    field :permission_confirmed_at, :utc_datetime
 
     timestamps(type: :utc_datetime)
   end
