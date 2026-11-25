@@ -634,7 +634,8 @@ defmodule OaksWeb.SpeciesMergeLive do
 
     has_warnings =
       unchecked_sources != [] || self_ref_issues != [] || shared_sources != [] ||
-        assigns.preview.same_parent_hybrids != [] || assigns.preview.list_additions != %{}
+        assigns.preview.same_parent_hybrids != [] || assigns.preview.list_additions != %{} ||
+        assigns.preview.photos.duplicates != []
 
     assigns =
       assign(assigns,
@@ -683,6 +684,14 @@ defmodule OaksWeb.SpeciesMergeLive do
           weight="regular"
         />.
       </.merge_notice>
+      <.merge_notice
+        :if={@preview.photos.duplicates != []}
+        id="photo-duplicates-notice"
+        title="Photos both species have"
+        items={photo_duplicate_items(@preview.photos.duplicates)}
+      >
+        These are the same iNaturalist photos as ones the target has. The target keeps its photo, caption and position; the synonym's copies are deleted.
+      </.merge_notice>
       <.self_reference_warning :if={@self_ref_issues != []} issues={@self_ref_issues} />
     </div>
     """
@@ -728,6 +737,15 @@ defmodule OaksWeb.SpeciesMergeLive do
       </ul>
     </div>
     """
+  end
+
+  defp photo_duplicate_items(duplicates) do
+    for %{source: image, discarded_caption: caption} <- duplicates do
+      text =
+        if caption, do: "caption \u201C#{caption}\u201D is discarded", else: "no caption lost"
+
+      {"iNaturalist photo #{image.inat_photo_id}", text, false}
+    end
   end
 
   defp list_addition_items(additions) do
@@ -833,6 +851,8 @@ defmodule OaksWeb.SpeciesMergeLive do
         synonyms_count: synonyms_count,
         ref_count: ref_count,
         sources_to_transfer: sources_to_transfer,
+        photos_to_move: length(assigns.preview.photos.transfer),
+        duplicate_photos: length(assigns.preview.photos.duplicates),
         confirming: !assigns.merge_error && !assigns.merging
       )
 
@@ -895,6 +915,12 @@ defmodule OaksWeb.SpeciesMergeLive do
       </:note>
       <:note :if={@confirming && @sources_to_transfer > 0}>
         Transfers {count_noun(@sources_to_transfer, "source record", "source records")}.
+      </:note>
+      <:note :if={@confirming && @photos_to_move > 0}>
+        Moves {count_noun(@photos_to_move, "photo", "photos")} after the target's own.
+      </:note>
+      <:note :if={@confirming && @duplicate_photos > 0}>
+        Deletes {count_noun(@duplicate_photos, "duplicate photo", "duplicate photos")} the target already has.
       </:note>
       <:note :if={@confirming && @ref_count > 0}>
         Updates {count_noun(@ref_count, "other species", "other species")} that name

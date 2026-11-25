@@ -1,34 +1,8 @@
-# Oaks V2 Infrastructure
+# Oaks infrastructure on AWS. Resources made by hand before OpenTofu managed
+# them were brought in with `tofu import` (README.md). Fly is not managed here:
+# the app is configured by fly.toml and its secrets by `fly secrets`.
 #
-# This file documents all infrastructure provisioned for the Phoenix V2 app.
-# Resources were initially created manually (2026-02-07) and are captured here
-# for documentation. To bring under OpenTofu management, run `tofu import`.
-#
-# Existing V1 app (oak-compendium-api) is NOT managed here — do not modify it.
-
-# -----------------------------------------------------------------------------
-# Fly.io — App + Volume
-# -----------------------------------------------------------------------------
-
-resource "fly_app" "oaks" {
-  name = var.fly_app_name
-  org  = "personal"
-}
-
-resource "fly_volume" "data" {
-  app    = fly_app.oaks.name
-  name   = "oaks_data"
-  region = var.fly_region
-  size   = var.fly_volume_size_gb
-}
-
-# Fly.io secrets are set via CLI since the provider doesn't manage them:
-#   flyctl secrets set LITESTREAM_ACCESS_KEY_ID=<key> --app oaks
-#   flyctl secrets set LITESTREAM_SECRET_ACCESS_KEY=<secret> --app oaks
-#   flyctl secrets set SECRET_KEY_BASE=<base64> --app oaks
-#
-# The machine configuration (vm size, mounts, http_service) is defined in
-# fly.toml and applied at deploy time, not managed here.
+# The V1 app (oak-compendium-api) is NOT managed here; do not modify it.
 
 # -----------------------------------------------------------------------------
 # AWS — S3 bucket for Litestream backups
@@ -36,18 +10,15 @@ resource "fly_volume" "data" {
 
 resource "aws_s3_bucket" "litestream_backups" {
   bucket = var.s3_bucket_name
-
-  tags = {
-    Project = "oaks"
-    Purpose = "litestream-replication"
-  }
 }
 
+# Never versioned: Litestream keeps its own generations. "Disabled" is only
+# valid for a bucket that has never had versioning on.
 resource "aws_s3_bucket_versioning" "litestream_backups" {
   bucket = aws_s3_bucket.litestream_backups.id
 
   versioning_configuration {
-    status = "Suspended"
+    status = "Disabled"
   }
 }
 

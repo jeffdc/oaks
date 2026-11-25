@@ -514,6 +514,11 @@
   }
   .oc-edit-menu-list a:hover,
   .oc-edit-menu-list button:hover { background: var(--color-paper-2); }
+  .oc-edit-menu-note {
+    margin-left: var(--spacing-s2);
+    font-weight: 500;
+    color: var(--color-ink-3);
+  }
   .oc-edit-menu-list :focus-visible {
     outline-color: var(--color-pencil);
     outline-offset: -3px;
@@ -524,7 +529,7 @@
   /* ---------------------------------------------------------------------
      Ruled table (CoreComponents.table): rows on hairlines under a 2px
      head rule, Archivo with lining tabular figures. The voice column
-     (Jeff's words) is serif. With stack, each row becomes a block on
+     (Oak Compendium's own text) is serif. With stack, each row becomes a block on
      phones with every cell labelled.
      --------------------------------------------------------------------- */
   .oc-table-wrap { overflow-x: auto; }
@@ -1596,6 +1601,833 @@
   }
 
   /* ---------------------------------------------------------------------
+     A text field with its button (CoreComponents.input's :action): the
+     field takes the line, the button keeps its size at the right.
+     --------------------------------------------------------------------- */
+  .oc-input-row {
+    display: flex;
+    gap: var(--spacing-s2);
+    align-items: stretch;
+  }
+  .oc-input-row > .oc-input { flex: 1; min-width: 0; }
+  .oc-input-row > .oc-btn { flex: none; }
+
+  /* ---------------------------------------------------------------------
+     Photo editing (DesignComponents.photo_picker and photo_tile,
+     photo_status, photo_credit, ruled_notice, photo_list and photo_row):
+     the species page's Add photos and Manage photos dialogs. Square
+     thumbnails on the paper-2 ground, a picked photo inked round, notes in
+     the frame face; nothing coloured but the ink.
+     --------------------------------------------------------------------- */
+  .oc-photo-pick > ul {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-s3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .oc-photo-pick-meta {
+    margin: 0 0 var(--spacing-s3);
+    font: 600 14px/1.45 var(--font-frame);
+    color: var(--color-ink-2);
+  }
+  .oc-photo-pick-meta .oc-sci { color: var(--color-ink); }
+  .oc-photo-tile {
+    font: 500 12.5px/1.35 var(--font-frame);
+    color: var(--color-ink-2);
+  }
+  .oc-photo-tile label { display: block; cursor: pointer; }
+  .oc-photo-tile-image {
+    position: relative;
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--color-paper-2);
+    border: 1px solid var(--color-rule);
+  }
+  .oc-photo-tile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .oc-photo-tile-image input {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: var(--color-ink);
+    cursor: pointer;
+  }
+  .oc-photo-tile label:has(input:checked) .oc-photo-tile-image {
+    outline: 2px solid var(--color-ink);
+    outline-offset: -2px;
+  }
+  .oc-photo-tile-note {
+    display: block;
+    margin-top: var(--spacing-s1);
+    overflow-wrap: anywhere;
+  }
+  .oc-photo-tile-note .oc-status {
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 3px 5px;
+  }
+  .oc-photo-tile-off { color: var(--color-ink-3); }
+  .oc-photo-tile-off .oc-photo-tile-image { opacity: 0.5; }
+  @media (max-width: 480px) {
+    .oc-photo-pick > ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  .oc-photo-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    font: 600 12.5px/1.35 var(--font-frame);
+    color: var(--color-ink);
+  }
+  .oc-photo-status .oc-mk { font: inherit; color: inherit; }
+  .oc-photo-status-error {
+    font-weight: 500;
+    color: var(--color-ink-2);
+  }
+  .oc-photo-status-action { margin-top: var(--spacing-s1); }
+
+  .oc-photo-credit {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0 var(--spacing-s2);
+  }
+  /* The separator ends the item before it, so a wrapped line never starts
+     with one. */
+  .oc-photo-credit > :not(:last-child)::after {
+    content: "·";
+    margin-left: var(--spacing-s2);
+    font-weight: 500;
+  }
+  .oc-photo-credit strong { font-weight: 700; color: var(--color-ink); }
+
+  .oc-ruled-notice {
+    padding: var(--spacing-s3) 0;
+    border-top: 2px solid var(--color-ink);
+    border-bottom: 2px solid var(--color-ink);
+    font: 500 14px/1.5 var(--font-frame);
+    color: var(--color-ink);
+  }
+  .oc-ruled-notice p { margin: 0 0 var(--spacing-s2); }
+  .oc-ruled-notice strong { font-weight: 800; }
+  .oc-ruled-notice-confirm .oc-field { margin: 0; }
+  .oc-ruled-notice-confirm .oc-check { font-weight: 700; align-items: flex-start; }
+  .oc-ruled-notice-confirm .oc-check input { margin-top: 1px; }
+
+  .oc-photo-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-rule);
+  }
+  .oc-photo-row {
+    display: grid;
+    grid-template-columns: 14px 56px minmax(0, 1fr);
+    gap: var(--spacing-s3);
+    align-items: start;
+    padding: var(--spacing-s3) 0;
+    border-bottom: 1px solid var(--color-rule);
+    background: var(--color-paper);
+  }
+  .oc-photo-row[data-dragging] { opacity: 0.5; }
+  .oc-photo-row-grip {
+    width: 14px;
+    height: 26px;
+    margin-top: 14px;
+    padding: 0;
+    border: 0;
+    cursor: grab;
+    background: radial-gradient(circle, var(--color-ink-3) 1.4px, transparent 1.6px) 2px 2px / 5px 5px;
+  }
+  .oc-photo-row-grip:hover {
+    background-image: radial-gradient(circle, var(--color-ink) 1.4px, transparent 1.6px);
+  }
+  .oc-photo-row-grip:active { cursor: grabbing; }
+  .oc-photo-row-thumb {
+    display: block;
+    width: 56px;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--color-paper-2);
+    border: 1px solid var(--color-rule);
+  }
+  .oc-photo-row-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .oc-photo-row-muted .oc-photo-row-thumb { opacity: 0.5; }
+  .oc-photo-row-body { min-width: 0; }
+  .oc-photo-row-body .oc-field { margin: 0; }
+  .oc-photo-row-body .oc-input { padding: 7px 9px; font-size: 14px; min-height: 0; }
+  .oc-photo-row-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--spacing-s1) var(--spacing-s3);
+    margin-top: 6px;
+    font: 500 12.5px/1.35 var(--font-frame);
+    color: var(--color-ink-2);
+  }
+  .oc-photo-row-delete {
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: 600 13px/1.35 var(--font-frame);
+    color: var(--color-ink-3);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .oc-photo-row-delete:hover { color: var(--color-ink); }
+
+  /* ---------------------------------------------------------------------
+     Photo viewer (OaksWeb.PhotoViewer): a shared component, built to move
+     back to gallformers (docs/species-photos-plan.md, Phase 6), so this
+     block uses only its own pv- classes and --pv-* custom properties, each
+     with its default here, never the site's tokens; the block after it
+     themes it for Oak Compendium. A stage photo with caption and credit,
+     then a rail of thumbnails that shows --pv-visible at a time (5, or
+     --pv-visible-narrow, 6, on phones) and steps through the rest; a
+     full-size view and a details dialog. Design:
+     design/prototype/photo-viewer.css.
+     --------------------------------------------------------------------- */
+  .pv {
+    --_visible: var(--pv-visible, 5);
+    --_ratio: var(--pv-stage-ratio, 4 / 5);
+    --_gap: var(--pv-gap, 6px);
+    --_frame-font: var(--pv-frame-font, system-ui, sans-serif);
+    --_read-font: var(--pv-read-font, Georgia, serif);
+    color: var(--pv-ink, #161616);
+  }
+  .pv [hidden] { display: none !important; }
+  .pv :focus-visible {
+    outline: 3px solid var(--pv-focus, #2f5fb3);
+    outline-offset: 2px;
+  }
+  .pv a {
+    color: var(--pv-link, inherit);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .pv a:hover { text-decoration-thickness: 2px; }
+
+  .pv-empty {
+    margin: 0;
+    padding: 12px 0;
+    border-top: 1px solid var(--pv-rule, #16161626);
+    border-bottom: 1px solid var(--pv-rule, #16161626);
+    font: 500 14px/1.4 var(--_frame-font);
+    color: var(--pv-ink-3, #5c5c57);
+  }
+
+  .pv-stage { margin: 0; }
+  .pv-frame {
+    display: block;
+    width: 100%;
+    aspect-ratio: var(--_ratio);
+    padding: 0;
+    overflow: hidden;
+    background: var(--pv-ground, #f1f0e8);
+    border: 1px solid var(--pv-rule, #16161626);
+    cursor: zoom-in;
+    touch-action: pan-y pinch-zoom;
+  }
+  .pv-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: var(--pv-fit, cover);
+  }
+  .pv-cap {
+    margin: 8px 0 0;
+    font: 400 15px/1.45 var(--_read-font);
+  }
+  .pv-credit {
+    margin: 2px 0 0;
+    font: 500 13px/1.45 var(--_frame-font);
+    color: var(--pv-ink-2, #3d3d3a);
+  }
+  .pv-credit b { font-weight: 700; color: var(--pv-ink, #161616); }
+  .pv-credit a { white-space: nowrap; }
+  /* The separator ends the item before it, so a wrapped line never starts
+     with one. */
+  .pv-credit > span:not(:last-of-type)::after { content: " ·"; }
+  .pv-reserved {
+    display: block;
+    font-weight: 700;
+    color: var(--pv-ink, #161616);
+  }
+
+  /* The rail: step buttons either side of a strip that scrolls by whole
+     pages. */
+  .pv-rail {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) 24px;
+    gap: 4px;
+    align-items: center;
+    margin-top: 12px;
+  }
+  .pv-rail[data-fits] { grid-template-columns: minmax(0, 1fr); }
+  .pv-rail[data-fits] .pv-step { display: none; }
+  .pv-thumbs {
+    position: relative;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - (var(--_visible) - 1) * var(--_gap)) / var(--_visible));
+    gap: var(--_gap);
+    margin: 0;
+    padding: 2px;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .pv-thumbs::-webkit-scrollbar { display: none; }
+  .pv-thumbs li { scroll-snap-align: start; }
+  .pv-thumb {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    padding: 0;
+    overflow: hidden;
+    background: var(--pv-ground, #f1f0e8);
+    border: 1px solid var(--pv-rule, #16161626);
+    cursor: pointer;
+  }
+  .pv-thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .pv-thumb[aria-current="true"] {
+    outline: 2px solid var(--pv-ink, #161616);
+    outline-offset: 1px;
+  }
+  .pv .pv-thumb:focus-visible { outline-width: 3px; }
+  .pv-step {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--pv-ink, #161616);
+    cursor: pointer;
+  }
+  .pv-step:disabled { color: var(--pv-rule, #16161626); cursor: default; }
+  .pv-step:not(:disabled):hover { background: var(--pv-ground, #f1f0e8); }
+  /* Drawn chevrons, for the rail's steps and the full-size view's arrows. */
+  .pv-step-prev::before,
+  .pv-step-next::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+  }
+  .pv-step-prev::before { transform: rotate(-135deg); margin-left: 4px; }
+  .pv-step-next::before { transform: rotate(45deg); margin-right: 4px; }
+
+  .pv-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    margin-top: 8px;
+  }
+  .pv-count {
+    font: 600 13px/1.35 var(--_frame-font);
+    font-variant-numeric: lining-nums tabular-nums;
+    color: var(--pv-ink-3, #5c5c57);
+  }
+  .pv-link {
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: 600 13px/1.35 var(--_frame-font);
+    color: var(--pv-ink-3, #5c5c57);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .pv-link:hover { color: var(--pv-ink, #161616); }
+
+  /* Dialogs: the full-size view and the details. Scrolling the page
+     behind one is held. */
+  :root:has(.pv dialog[open]) { overflow: hidden; }
+  .pv dialog::backdrop { background: var(--pv-backdrop, rgb(22 22 22 / 0.65)); }
+  .pv-close {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+  }
+  .pv-close::before,
+  .pv-close::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 2px;
+    background: currentColor;
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  .pv-close::after { transform: translate(-50%, -50%) rotate(-45deg); }
+
+  .pv-lightbox {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--pv-lightbox, #161616);
+    color: var(--pv-lightbox-ink, #fbfbf7);
+  }
+  .pv-lightbox[open] { display: flex; flex-direction: column; }
+  .pv-lightbox .pv-cap,
+  .pv-lightbox .pv-credit,
+  .pv-lightbox .pv-credit b,
+  .pv-lightbox .pv-reserved,
+  .pv-lightbox .pv-count { color: inherit; }
+  .pv-lightbox a { color: inherit; }
+  .pv-lb-bar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 8px 8px 16px;
+  }
+  .pv-lb-stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    padding: 0 16px 16px;
+    touch-action: pan-y pinch-zoom;
+  }
+  .pv-lb-figure {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .pv-lb-figure img {
+    flex: 1;
+    min-height: 0;
+    height: 0;
+    width: 100%;
+    object-fit: contain;
+  }
+  .pv-lb-figure figcaption { max-width: 45rem; text-align: center; }
+  .pv-lb-figure .pv-cap { margin: 0; }
+  .pv-lb-step {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 64px;
+    padding: 0;
+    border: 0;
+    background: color-mix(in srgb, var(--pv-lightbox, #161616) 60%, transparent);
+    color: inherit;
+    cursor: pointer;
+    transform: translateY(-50%);
+  }
+  .pv-lb-step:hover { background: var(--pv-lightbox, #161616); }
+  .pv-lb-step.pv-step-prev { left: 8px; }
+  .pv-lb-step.pv-step-next { right: 8px; }
+  .pv-lb-step::before { width: 12px; height: 12px; }
+
+  .pv-details {
+    width: min(34rem, calc(100% - 32px));
+    max-width: none;
+    max-height: calc(100% - 32px);
+    margin: auto;
+    padding: 0;
+    background: var(--pv-paper, #fbfbf7);
+    color: var(--pv-ink, #161616);
+    border: 2px solid var(--pv-ink, #161616);
+  }
+  .pv-details[open] { display: flex; flex-direction: column; }
+  .pv-details-title {
+    flex: none;
+    margin: 0 32px;
+    padding: 24px 0 12px;
+    font: 600 26px/1.15 var(--pv-title-font, var(--_read-font));
+    border-bottom: 2px solid var(--pv-rule-strong, #161616);
+  }
+  .pv-details-body {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 4px 32px 16px;
+  }
+  .pv-details dl {
+    margin: 0;
+    font: 14px/1.45 var(--_frame-font);
+  }
+  .pv-details dl > div {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 4px 24px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--pv-rule, #16161626);
+  }
+  .pv-details dt { font-weight: 700; }
+  .pv-details dd {
+    margin: 0;
+    font: 400 16px/1.5 var(--_read-font);
+    overflow-wrap: anywhere;
+  }
+  .pv-details-actions {
+    flex: none;
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 32px;
+    padding: 16px 0 24px;
+  }
+  .pv-button {
+    padding: 10px 13px;
+    background: transparent;
+    border: 1.5px solid currentColor;
+    font: 700 14px/1 var(--_frame-font);
+    color: var(--pv-ink, #161616);
+    cursor: pointer;
+  }
+  .pv-button:hover {
+    background: var(--pv-ink, #161616);
+    color: var(--pv-paper, #fbfbf7);
+  }
+
+  @media (max-width: 760px) {
+    .pv {
+      --_visible: var(--pv-visible-narrow, 6);
+      --_ratio: var(--pv-stage-ratio-narrow, 4 / 3);
+    }
+    .pv-empty { display: none; }
+    .pv-details-title,
+    .pv-details-actions { margin-left: 16px; margin-right: 16px; }
+    .pv-details-body { padding-left: 16px; padding-right: 16px; }
+    .pv-details dl > div { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  /* The photo viewer in Oak Compendium's system
+     (DesignComponents.species_photos). */
+  .oc-photos {
+    --pv-ink: var(--color-ink);
+    --pv-ink-2: var(--color-ink-2);
+    --pv-ink-3: var(--color-ink-3);
+    --pv-ground: var(--color-paper-2);
+    --pv-paper: var(--color-paper);
+    --pv-rule: var(--color-rule);
+    --pv-rule-strong: var(--color-rule-strong);
+    --pv-focus: var(--color-pencil);
+    --pv-link: var(--color-pencil);
+    --pv-frame-font: var(--font-frame);
+    --pv-read-font: var(--font-serif);
+    --pv-lightbox: var(--color-ink);
+    --pv-lightbox-ink: var(--color-paper);
+    --pv-backdrop: color-mix(in srgb, var(--color-ink) 65%, transparent);
+  }
+
+  /* ---------------------------------------------------------------------
+     The species page's parts (docs/species-photos-plan.md, Phase 7):
+     photo_columns, source_tabs, ruled_rows and hybrid_rows, comma_list,
+     not_covered_notice and cite_line (DesignComponents), and the title
+     row's common name (CoreComponents.header).
+     --------------------------------------------------------------------- */
+
+  /* Photo columns: the photos left (300px, 240px under 1180px), sticky,
+     the text right. On phones one column: the text, then the photos. */
+  .oc-photo-cols {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: var(--spacing-s7);
+    align-items: start;
+  }
+  .oc-photo-cols-photos {
+    grid-column: 1;
+    grid-row: 1;
+    position: sticky;
+    top: var(--spacing-s4);
+    min-width: 0;
+  }
+  .oc-photo-cols-text {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+  @media (max-width: 1180px) {
+    .oc-photo-cols {
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: var(--spacing-s6);
+    }
+  }
+  @media (max-width: 760px) {
+    .oc-photo-cols {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--spacing-s5);
+    }
+    .oc-photo-cols-photos,
+    .oc-photo-cols-text { grid-column: 1; grid-row: auto; }
+    .oc-photo-cols-photos { position: static; }
+  }
+
+  /* Source tabs: the strip stands on the 2px ink rule and the open tab
+     carries the 3px ochre underline along it, as the masthead's current
+     nav item does. Its one icon link sits beside it, off the rule. */
+  /* Wrapped in reverse: when the tabs and the actions don't fit one line,
+     the actions go above, so the tabs stay on the rule. */
+  .oc-tabs-strip {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    align-items: flex-start;
+    gap: 0 var(--spacing-s5);
+    border-bottom: 2px solid var(--color-rule-strong);
+  }
+  /* Tabs that don't fit scroll sideways, fading out at the right edge. */
+  .oc-tabs-list {
+    display: flex;
+    gap: 0 var(--spacing-s5);
+    min-width: 0;
+    max-width: 100%;
+    padding-right: var(--spacing-s6);
+    overflow-x: auto;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, var(--color-ink) calc(100% - var(--spacing-s6)), transparent);
+  }
+  .oc-tabs-list::-webkit-scrollbar { display: none; }
+  .oc-tab {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .oc-tab > [role="tab"] {
+    padding: 12px 0 9px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: none;
+    font: 700 15px/1.2 var(--font-frame);
+    color: var(--color-ink-2);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .oc-tab > [role="tab"]:hover:not([aria-selected="true"]) {
+    color: var(--color-ink);
+    border-bottom-color: color-mix(in srgb, var(--color-ink) 25%, transparent);
+  }
+  .oc-tab > [role="tab"][aria-selected="true"] {
+    color: var(--color-ink);
+    border-bottom-color: var(--color-ochre);
+  }
+  .oc-tab-link {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    color: var(--color-ink-3);
+    text-decoration: none;
+  }
+  .oc-tab-link:hover { color: var(--color-pencil); }
+  .oc-tab-icon { width: 15px; height: 15px; }
+  .oc-tabs-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-s4);
+    margin-left: auto;
+    margin-bottom: var(--spacing-s2);
+    white-space: nowrap;
+  }
+
+  /* The open source's text: each field a label beside its text on a
+     hairline, set as that source's prose. */
+  .oc-tabs-field {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: var(--spacing-s5);
+    padding: var(--spacing-s4) 0;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .oc-tabs-field h3 {
+    margin: 0;
+    padding-top: 3px;
+    font: 700 15px/1.3 var(--font-frame);
+    color: var(--color-ink);
+  }
+  .oc-tabs-value {
+    min-width: 0;
+    max-width: 70ch;
+    font: 400 17px/1.6 var(--font-serif);
+    color: var(--color-ink);
+    font-variant-numeric: oldstyle-nums proportional-nums;
+  }
+  .oc-tabs-value .oc-prose { max-width: none; }
+  .oc-tabs-empty {
+    margin: 0;
+    padding: var(--spacing-s4) 0;
+    border-bottom: 1px solid var(--color-rule);
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--color-ink-3);
+  }
+
+  /* On a phone the tabs keep one row on the rule and scroll sideways, as
+     the band does, fading out at the right edge (the rule under them
+     doesn't); the actions go on the row under it, and each field's label
+     stacks above its text. */
+  @media (max-width: 760px) {
+    .oc-tabs-strip {
+      flex-wrap: wrap;
+      align-items: flex-end;
+      border-bottom: 0;
+    }
+    .oc-tabs-list {
+      flex-basis: 100%;
+      border-bottom: 2px solid var(--color-rule-strong);
+      mask-image:
+        linear-gradient(to right, var(--color-ink) calc(100% - var(--spacing-s6)), transparent),
+        linear-gradient(var(--color-ink), var(--color-ink));
+      mask-size: 100% calc(100% - 2px), 100% 2px;
+      mask-position: top, bottom;
+      mask-repeat: no-repeat;
+    }
+    .oc-tabs-actions { margin: var(--spacing-s3) 0 0; }
+    .oc-tabs-field {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--spacing-s1);
+    }
+  }
+
+  /* Ruled rows: names, links and works under a taxon, on hairlines, in
+     three columns (two under 1180px, one on phones). */
+  .oc-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .oc-rows-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--spacing-s7);
+  }
+  .oc-rows > li,
+  .oc-rows-link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px var(--spacing-s3);
+  }
+  .oc-rows > li {
+    min-width: 0;
+    padding: var(--spacing-s2) 0;
+    border-bottom: 1px solid var(--color-rule);
+    font: 600 15px/1.3 var(--font-frame);
+    color: var(--color-ink);
+  }
+  .oc-rows a:not(.oc-src) {
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .oc-rows-link:hover .oc-rows-text {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .oc-rows-note {
+    font: 500 13px/1.3 var(--font-frame);
+    color: var(--color-ink-3);
+  }
+  .oc-rows-with {
+    font: 500 14px/1.4 var(--font-frame);
+    color: var(--color-ink-2);
+  }
+  @media (max-width: 1180px) {
+    .oc-rows-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 760px) {
+    .oc-rows-3 { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  /* A run of names in the serif. The comma ends the item before it, so a
+     wrapped line never starts with one. */
+  .oc-comma-list {
+    margin: 0;
+    font: 400 17px/1.7 var(--font-serif);
+    color: var(--color-ink);
+  }
+  /* Each item is an inline flex box, so the template's whitespace around
+     a name never sets a space before its comma. */
+  .oc-comma-list > span {
+    display: inline-flex;
+    align-items: baseline;
+  }
+  .oc-comma-list > span:not(:last-child) { margin-right: 0.3em; }
+  .oc-comma-list > span:not(:last-child)::after { content: ","; }
+
+  /* The not-covered notice: the ruled notice at page size, under the
+     title row. */
+  .oc-ruled-notice-page {
+    margin-bottom: var(--spacing-s6);
+    padding: var(--spacing-s4) 0;
+    font: 500 16px/1.55 var(--font-frame);
+  }
+  .oc-ruled-notice-page p { margin: 0; max-width: 80ch; }
+
+  /* The cite line, on a 2px rule. */
+  .oc-cite {
+    margin: 0;
+    padding-top: var(--spacing-s4);
+    border-top: 2px solid var(--color-rule-strong);
+    font: 400 15px/1.6 var(--font-serif);
+    color: var(--color-ink-2);
+    overflow-wrap: anywhere;
+  }
+  .oc-cite-label {
+    margin-right: var(--spacing-s3);
+    font: 800 13px/1 var(--font-frame);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+
+  /* The title row's common name, with its source mark; the subtitle's
+     links (a hybrid's parents) in ink. */
+  .oc-title-cn {
+    font: 700 21px/1.2 var(--font-frame);
+    color: var(--color-ink);
+  }
+  .oc-title-sub a { color: var(--color-ink); }
+
+  /* ---------------------------------------------------------------------
      Figures. The font shorthand above resets font-variant-numeric, so the
      Two Figures Rule is restated last: lining tabular figures for table
      cells, list values, inputs and counts; oldstyle proportional figures
@@ -1609,6 +2441,8 @@
   .oc-input,
   .oc-tags-input,
   .oc-status,
+  .oc-photo-tile,
+  .oc-photo-row-meta,
   .oc-title-meta,
   .oc-band ol {
     font-variant-numeric: lining-nums tabular-nums;

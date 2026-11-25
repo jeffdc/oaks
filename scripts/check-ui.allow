@@ -4,4 +4,4 @@
 # (scripts/check-ui --baseline lowers it and never raises anything). A new or raised
 # entry is a hand edit that needs Jeff's approval; give its reason in the note column.
 style	lib/oaks_web/live/species_compare_live.ex	1
-app-css	assets/css/app.css	2065
+app-css	assets/css/app.css	1757

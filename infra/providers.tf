@@ -1,23 +1,24 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.10.0"
 
   required_providers {
-    fly = {
-      source  = "fly-apps/fly"
-      version = "~> 0.1"
-    }
-
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = ">= 6.0.0, < 7.0.0"
     }
+  }
+
+  # The state bucket was made by hand (versioned, encrypted, public access
+  # blocked); see README.md. use_lockfile locks state with an S3 object.
+  backend "s3" {
+    bucket       = "oaks-terraform-state"
+    key          = "infra/terraform.tfstate"
+    region       = "us-east-1"
+    encrypt      = true
+    use_lockfile = true
   }
 }
 
-provider "fly" {
-  # Authenticates via FLY_API_TOKEN environment variable
-}
-
 provider "aws" {
-  region = "us-east-1"
+  region = var.aws_region
 }

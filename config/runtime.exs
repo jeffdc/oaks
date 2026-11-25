@@ -44,6 +44,37 @@ if config_env() == :prod do
   end
 end
 
+# Species photo storage (Oaks.Storage.Images). The oaks-images-upload user's
+# keys (infra/README.md), set with:
+#   fly secrets set IMAGES_AWS_ACCESS_KEY_ID=... IMAGES_AWS_SECRET_ACCESS_KEY=... --app oaks
+# - prod: if they are missing, log a loud warning: the site still serves
+#   photos (from the CDN), but importing and removing them fail.
+# - dev: Local storage, unless IMAGES_STORAGE=s3 with the keys, which uses the
+#   real bucket and CDN (to smoke-test Oaks.Storage.S3).
+# - test: fixed in test.exs.
+if config_env() != :test do
+  key_id = System.get_env("IMAGES_AWS_ACCESS_KEY_ID", "")
+  secret = System.get_env("IMAGES_AWS_SECRET_ACCESS_KEY", "")
+
+  if key_id != "" and secret != "" do
+    config :oaks, :images, access_key_id: key_id, secret_access_key: secret
+  else
+    if config_env() == :prod do
+      IO.puts(
+        :stderr,
+        "WARNING: IMAGES_AWS_ACCESS_KEY_ID or IMAGES_AWS_SECRET_ACCESS_KEY is missing. " <>
+          "Importing and removing species photos will fail. See infra/README.md."
+      )
+    end
+  end
+
+  if config_env() == :dev and System.get_env("IMAGES_STORAGE") == "s3" do
+    config :oaks, :images,
+      adapter: Oaks.Storage.S3,
+      cdn_url: "https://images.oakcompendium.org"
+  end
+end
+
 # Only override port if PORT env var is explicitly set (don't interfere with test config)
 if port = System.get_env("PORT") do
   config :oaks, OaksWeb.Endpoint, http: [port: String.to_integer(port)]

@@ -139,11 +139,11 @@
       },
       "quote": {
         "displayName": "Quote",
-        "purpose": "Jeff's verbatim statements, always in quotation marks with a source mark."
+        "purpose": "Oak Compendium's verbatim statements, always in quotation marks with a source mark."
       },
       "frame": {
         "displayName": "Frame",
-        "purpose": "Trait names and derived values; never Jeff's voice."
+        "purpose": "Trait names and derived values; never Oak Compendium's own text."
       },
       "section-label": {
         "displayName": "Section Label",
@@ -216,7 +216,7 @@
       "name": "Source Mark",
       "kind": "chip",
       "refersTo": "source-mark",
-      "description": "Pencil-blue link that follows every quote of Jeff's and every sourced value.",
+      "description": "Pencil-blue link that follows every Oak Compendium quote and every sourced value.",
       "html": "<p class=\"ds-q\"><q>buds looks glabrous and pretty small.</q><a class=\"ds-src\" href=\"#\">iNat i465271504 · 2024</a></p>",
       "css": ":host{--ink:#161616;--ink-2:#3d3d3a;--ink-3:#5c5c57;--paper:#fbfbf7;--paper-2:#f1f0e8;--ochre:#d9a21b;--pencil:#2f5fb3;--rule:#16161626;--rule-strong:#161616;--frame:\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--frame-narrow:\"Archivo Narrow\",\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--read:\"Source Serif 4\",Georgia,\"Times New Roman\",serif;}.ds-q{font:400 18px/1.6 var(--read);color:var(--ink);margin:0;}.ds-q q{quotes:'“' '”';}.ds-src{font:500 12.5px/1.3 var(--frame);color:var(--pencil);white-space:nowrap;text-decoration:none;border-bottom:1px solid #2f5fb366;margin-left:4px;}.ds-src:hover{border-bottom-color:var(--pencil);} .ds-src:focus-visible{outline:3px solid var(--pencil);outline-offset:2px;border-radius:1px;}"
     },
@@ -239,8 +239,8 @@
       "name": "Distinguishing Trait Row",
       "kind": "card",
       "refersTo": "section-heading",
-      "description": "Section heading on a 2px rule over a ruled trait row: Archivo trait name, derived value tagged in the frame face, Jeff's quote with source mark, standing mark.",
-      "html": "<section class=\"ds-dist\"><h2>What sets it apart <small>ranked by Jeff</small></h2><div class=\"ds-row\"><span class=\"t\">Terminal buds</span><div><p class=\"v\">Glabrous, small <span class=\"dv\">summary</span></p><blockquote><q>buds looks glabrous and pretty small.</q><a class=\"ds-src\" href=\"#\">iNat i465271504 · 2024</a></blockquote><span class=\"ds-mk\"><svg viewBox=\"0 0 14 14\" width=\"14\" height=\"14\" aria-hidden=\"true\"><rect x=\"0.75\" y=\"0.75\" width=\"12.5\" height=\"12.5\" fill=\"currentColor\"/><path d=\"M3.6 5.4h6.8M3.6 8.6h6.8\" stroke=\"#fbfbf7\" stroke-width=\"1.5\"/><path d=\"M9.2 2.9 4.8 11.1\" stroke=\"#fbfbf7\" stroke-width=\"1.6\" stroke-linecap=\"square\"/></svg>Differs: Sibley gives buds as large</span></div></div></section>",
+      "description": "Section heading on a 2px rule over a ruled trait row: Archivo trait name, derived value tagged in the frame face, the Oak Compendium quote with source mark, standing mark.",
+      "html": "<section class=\"ds-dist\"><h2>What sets it apart <small>ranked</small></h2><div class=\"ds-row\"><span class=\"t\">Terminal buds</span><div><p class=\"v\">Glabrous, small <span class=\"dv\">summary</span></p><blockquote><q>buds looks glabrous and pretty small.</q><a class=\"ds-src\" href=\"#\">iNat i465271504 · 2024</a></blockquote><span class=\"ds-mk\"><svg viewBox=\"0 0 14 14\" width=\"14\" height=\"14\" aria-hidden=\"true\"><rect x=\"0.75\" y=\"0.75\" width=\"12.5\" height=\"12.5\" fill=\"currentColor\"/><path d=\"M3.6 5.4h6.8M3.6 8.6h6.8\" stroke=\"#fbfbf7\" stroke-width=\"1.5\"/><path d=\"M9.2 2.9 4.8 11.1\" stroke=\"#fbfbf7\" stroke-width=\"1.6\" stroke-linecap=\"square\"/></svg>Differs: Sibley gives buds as large</span></div></div></section>",
       "css": ":host{--ink:#161616;--ink-2:#3d3d3a;--ink-3:#5c5c57;--paper:#fbfbf7;--paper-2:#f1f0e8;--ochre:#d9a21b;--pencil:#2f5fb3;--rule:#16161626;--rule-strong:#161616;--frame:\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--frame-narrow:\"Archivo Narrow\",\"Archivo\",\"Helvetica Neue\",Arial,sans-serif;--read:\"Source Serif 4\",Georgia,\"Times New Roman\",serif;}.ds-dist{max-width:640px;font:17px/1.6 var(--read);color:var(--ink);}.ds-dist h2{font:800 15px/1.2 var(--frame);letter-spacing:0.06em;text-transform:uppercase;margin:0;padding-bottom:8px;border-bottom:2px solid var(--rule-strong);display:flex;justify-content:space-between;align-items:baseline;}.ds-dist h2 small{font:500 13px/1.2 var(--frame);letter-spacing:0;text-transform:none;color:var(--ink-3);}.ds-row{display:grid;grid-template-columns:132px minmax(0,1fr);gap:4px 24px;padding:16px 0;border-bottom:1px solid var(--rule);}.ds-row .t{font:700 15px/1.45 var(--frame);padding-top:3px;}.ds-row .v{font:700 15px/1.4 var(--frame);margin:0 0 4px;}.ds-row .dv{font:500 12px/1 var(--frame);color:var(--ink-3);margin-left:8px;letter-spacing:0.02em;}.ds-row blockquote{margin:0 0 8px;font:400 18px/1.6 var(--read);}.ds-src{font:500 12.5px/1.3 var(--frame);color:var(--pencil);text-decoration:none;border-bottom:1px solid #2f5fb366;margin-left:4px;}.ds-src:hover{border-bottom-color:var(--pencil);}.ds-mk{display:inline-flex;align-items:center;gap:5px;font:600 12.5px/1 var(--frame);color:var(--ink-2);}"
     },
     {
@@ -253,7 +253,7 @@
   ],
   "narrative": {
     "northStar": "The Twig Key, Unbound",
-    "overview": "The world takes a pocket dendrology key's printed materials and leaves its structure behind. Ink black on bright white stock, one committed ochre field, a pencil blue for the marks that lead to sources, a heavy grotesk for the frame and a sturdy text serif for reading. The pages are dense in the way a good field guide is dense: statements stand on rules, never in boxes, and the eye moves down ruled lists and aligned columns rather than across stacked cards.\n\nThe page answers \"is it this, or that?\" before anything else. Where the taxon sits is shown in the same ochre band on every taxon page; the traits that set it apart come first; look-alikes and hybrids sit one step away; a side-by-side comparison aligns two taxa trait by trait. Jeff's words are always quoted and always carry a source mark. What the system derives from his words is set in the frame face, so a reader never mistakes a summary for his voice. Other sources sit behind his, as they wrote it.\n\nThe key's printed materials are kept; its apparatus is not. There are no couplets, no key numbering, no dotted leaders, no key path and no life-size callouts.",
+    "overview": "The world takes a pocket dendrology key's printed materials and leaves its structure behind. Ink black on bright white stock, one committed ochre field, a pencil blue for the marks that lead to sources, a heavy grotesk for the frame and a sturdy text serif for reading. The pages are dense in the way a good field guide is dense: statements stand on rules, never in boxes, and the eye moves down ruled lists and aligned columns rather than across stacked cards.\n\nThe page answers \"is it this, or that?\" before anything else. Where the taxon sits is shown in the same ochre band on every taxon page; the traits that set it apart come first; look-alikes and hybrids sit one step away; a side-by-side comparison aligns two taxa trait by trait. Oak Compendium's own text is always quoted and always carries a source mark. What the system derives from that text is set in the frame face, so a reader never mistakes a summary for the Compendium's own words. Other sources sit behind it, as they wrote it.\n\nThe key's printed materials are kept; its apparatus is not. There are no couplets, no key numbering, no dotted leaders, no key path and no life-size callouts.",
     "keyCharacteristics": [
       "Ink on bright stock, one ochre field, pencil-blue source marks.",
       "Archivo frames and labels; Source Serif 4 carries reading text and every scientific name.",
@@ -280,7 +280,7 @@
       },
       {
         "name": "The Verbatim Rule",
-        "body": "Jeff's words always appear in quotation marks (curly quotes) and are always followed by a source mark. Anything derived from his words, a summary value, a count, a label, is set in the frame face with a small Archivo tag (\"summary\", \"from counts\") and never in quotation marks.",
+        "body": "Oak Compendium's own text always appears in quotation marks (curly quotes) and is always followed by a source mark. Anything derived from it, a summary value, a count, a label, is set in the frame face with a small Archivo tag (\"summary\", \"from counts\") and never in quotation marks.",
         "section": "typography"
       },
       {
@@ -295,7 +295,7 @@
       },
       {
         "name": "The One Template Rule",
-        "body": "Every taxon page uses the same template. A section appears because its data exists, never because Jeff has or hasn't covered the taxon: the source comparison appears whenever there are two or more sources (never with only one), and look-alikes, hybrids and range appear when their data exists. A taxon Jeff hasn't covered gets the same full page plus the not-covered notice, never a poorer stub layout.",
+        "body": "Every taxon page uses the same template. A section appears because its data exists, never because the Oak Compendium does or doesn't cover the taxon: the source comparison appears whenever there are two or more sources (never with only one), and look-alikes, hybrids and range appear when their data exists. A taxon the Oak Compendium doesn't cover yet gets the same full page plus the not-covered notice, never a poorer stub layout.",
         "section": "layout"
       },
       {
@@ -307,9 +307,9 @@
     "dos": [
       "**Do** put the taxonomy breadcrumb in the ochre band, in the same place on every taxon page, every rank linked.",
       "**Do** lead with the distinguishing traits, and keep look-alikes (each with Compare) and hybrids (each with its other parent) one step away.",
-      "**Do** set Jeff's words in curly quotation marks followed by a pencil-blue source mark, every time.",
+      "**Do** set Oak Compendium's own text in curly quotation marks followed by a pencil-blue source mark, every time.",
       "**Do** set derived values (summaries, counts) in Archivo, tagged with how they were derived, and never in quotation marks.",
-      "**Do** show other sources behind Jeff's, as they wrote it, each with its attribution.",
+      "**Do** show other sources behind Oak Compendium's own, as they wrote it, each with its attribution.",
       "**Do** use the same taxon template everywhere, showing a section whenever its data exists (the source comparison only with two or more sources).",
       "**Do** mark agree, differs and unreviewed with the drawn marks, labelled in words.",
       "**Do** italicize scientific names in the serif; keep ranks, authorities and the hybrid sign roman.",
@@ -322,9 +322,9 @@
       "**Don't** put statements in boxes, cards, tinted panels or shadows.",
       "**Don't** add a second saturated colour or use ochre as text on paper.",
       "**Don't** round corners.",
-      "**Don't** set anything that is not Jeff's verbatim wording in quotation marks or in a way that reads as his voice.",
+      "**Don't** set anything that is not Oak Compendium's verbatim wording in quotation marks or in a way that reads as its own text. Never label Oak Compendium's text with a person's name.",
       "**Don't** hide conflicts between sources behind tabs; mark them in place.",
-      "**Don't** give a taxon Jeff hasn't covered a poorer stub layout; it gets the full page plus the not-covered notice."
+      "**Don't** give a taxon the Oak Compendium doesn't cover yet a poorer stub layout; it gets the full page plus the not-covered notice."
     ]
   }
 }

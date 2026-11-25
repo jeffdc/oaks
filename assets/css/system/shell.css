@@ -101,7 +101,7 @@
 
   /* Editor marks: the Editor menu (a nav-voiced disclosure holding the
      editor's tools) and the editor's name in ochre (DESIGN.md, Authoring
-     Editor: "The masthead marks Editor and Jeff"). */
+     Editor: "The masthead marks Editor and the editor's name"). */
   .oc-mast-editor {
     align-self: stretch;
     display: flex;

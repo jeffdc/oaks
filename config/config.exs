@@ -60,6 +60,41 @@ config :tailwind,
     cd: Path.expand("..", __DIR__)
   ]
 
+# Species photo storage (Oaks.Storage.Images): the private oaks-images bucket,
+# served by CloudFront on images.oakcompendium.org (infra/). The upload user's
+# keys come from the environment (config/runtime.exs). dev.exs and test.exs
+# swap the adapter.
+config :oaks, :images,
+  adapter: Oaks.Storage.S3,
+  bucket: "oaks-images",
+  cdn_url: "https://images.oakcompendium.org",
+  distribution_id: "E1GM6FGGDJPT7E"
+
+# Durable background work in the app's SQLite database: species photo
+# imports and storage cleanup (Oaks.Images). Imports stop at 5 minutes
+# (Oaks.Images.ImportWorker), so Lifeline only rescues runs a restart
+# orphaned; the recovery sweep re-enqueues any unfinished work at boot and
+# every 15 minutes.
+config :oaks, Oban,
+  engine: Oban.Engines.Lite,
+  repo: Oaks.Repo,
+  queues: [images: 2],
+  pruner: [max_age: 7 * 24 * 60 * 60],
+  lifeline: [rescue_after: {10, :minutes}],
+  cron: [
+    crontab: [
+      {"@reboot", Oaks.Images.RecoveryWorker},
+      {"*/15 * * * *", Oaks.Images.RecoveryWorker}
+    ]
+  ]
+
+# ex_aws (Oaks.Storage.S3) on Req, the app's one HTTP client. Credentials are
+# passed per request, never read from here.
+config :ex_aws,
+  http_client: ExAws.Request.Req,
+  json_codec: Jason,
+  region: "us-east-1"
+
 # Configure Elixir's Logger
 config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",

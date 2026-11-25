@@ -658,4 +658,98 @@ defmodule OaksWeb.DesignComponentsTest do
       assert html =~ "There’s no article at this address."
     end
   end
+
+  describe "source_tabs/1" do
+    test "marks the open tab, gives it the one icon link and its fields" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.source_tabs id="t" selected={2} on_select="pick">
+          <:tab id={3} name="Oak Compendium" about="/sources/3" />
+          <:tab id={2} name="Oaks of the World" original="https://example.org/x" about="/sources/2" />
+          <:action><span id="act">Compare</span></:action>
+          <:field label="Leaves">Lobed.</:field>
+        </DesignComponents.source_tabs>
+        """)
+
+      assert html =~ ~s(id="t-tab-2" aria-selected="true")
+      assert html =~ ~s(id="t-tab-3" aria-selected="false")
+      assert html =~ ~s(phx-click="pick" phx-value-id="3")
+      assert html =~ ~s(href="https://example.org/x")
+      refute html =~ ~s(href="/sources/3")
+      assert html =~ ~r{<h3>Leaves</h3>\s*<div class="oc-tabs-value">\s*Lobed.}
+      assert html =~ ~s(<span id="act">Compare</span>)
+    end
+
+    test "an open tab with no fields says so, naming the work" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.source_tabs id="t" selected={5} on_select="pick">
+          <:tab id={5} name="Notes on North American Trees. I. Quercus" about="/sources/5" />
+        </DesignComponents.source_tabs>
+        """)
+
+      assert html =~ "No text from"
+      assert html =~ ~s(<i class="oc-sci-e">Quercus</i>)
+      assert html =~ ~s(href="/sources/5")
+    end
+  end
+
+  describe "ruled_rows/1 and hybrid_rows/1" do
+    test "a row with href is one external link with its note" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.ruled_rows id="r">
+          <:row href="https://example.org" note="example.org">Example</:row>
+          <:row>Plain</:row>
+        </DesignComponents.ruled_rows>
+        """)
+
+      assert html =~ ~s(class="oc-rows oc-rows-3")
+
+      assert html =~
+               ~r{<a href="https://example.org" target="_blank" rel="noopener noreferrer" class="oc-rows-link">}
+
+      assert html =~ ~s(<span class="oc-rows-note">example.org</span>)
+      assert html =~ "Plain"
+    end
+
+    test "each hybrid links to its page and, when known, its other parent" do
+      assigns = %{hybrids: [%{name: "× riparia", other: "rubra"}, %{name: "× lone", other: nil}]}
+
+      html = rendered_to_string(~H"<DesignComponents.hybrid_rows hybrids={@hybrids} />")
+
+      assert html =~ ~s(href="/species/%C3%97%20riparia")
+      assert html =~ ~s(href="/species/rubra")
+      assert length(String.split(html, "oc-rows-with")) == 2
+    end
+  end
+
+  describe "comma_list/1, not_covered_notice/1 and cite_line/1" do
+    test "render their parts" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <DesignComponents.comma_list id="c">
+          <:item>one</:item>
+          <:item>two</:item>
+        </DesignComponents.comma_list>
+        <DesignComponents.not_covered_notice id="n">
+          From the sources.
+        </DesignComponents.not_covered_notice>
+        <DesignComponents.cite_line id="cite">Oak Compendium.</DesignComponents.cite_line>
+        """)
+
+      assert html =~ ~s(<p id="c" class="oc-comma-list"><span>one</span><span>two</span></p>)
+      assert html =~ "The Oak Compendium has no account of this oak yet."
+      assert html =~ "From the sources."
+      assert html =~ ~s(<span class="oc-cite-label">Cite</span>)
+    end
+  end
 end

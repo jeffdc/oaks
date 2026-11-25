@@ -369,4 +369,148 @@ defmodule Oaks.SpeciesTest do
     |> Ecto.Changeset.change(synonyms: Jason.encode!(synonyms))
     |> Oaks.Repo.update!()
   end
+
+  # -- The data display contract (docs/species-photos-plan.md, Phase 4) --
+
+  # A source row as get_species_full/1 preloads it, without the database.
+  defp row(source_id, name, attrs \\ []) do
+    struct(
+      %Oaks.Sources.SpeciesSource{
+        id: System.unique_integer([:positive]),
+        source_id: source_id,
+        source: %Oaks.Sources.Source{id: source_id, name: name}
+      },
+      attrs
+    )
+  end
+
+  defp names(rows), do: Enum.map(rows, & &1.source.name)
+
+  describe "ordered_sources/1" do
+    test "puts the preferred row first, then Oak Compendium, Oaks of the World and the rest by name" do
+      rows = [
+        row(10, "zeta"),
+        row(2, "Oaks of the World"),
+        row(11, "Alpha"),
+        row(3, "Oak Compendium"),
+        row(12, "beta", is_preferred: true)
+      ]
+
+      assert names(Species.ordered_sources(rows)) ==
+               ["beta", "Oak Compendium", "Oaks of the World", "Alpha", "zeta"]
+    end
+
+    test "keeps Oak Compendium ahead of Oaks of the World when neither is preferred, and is stable on ties" do
+      rows = [
+        row(21, "Same"),
+        row(2, "Oaks of the World"),
+        row(20, "Same"),
+        row(3, "Oak Compendium")
+      ]
+
+      ordered = Species.ordered_sources(rows)
+
+      assert names(ordered) == ["Oak Compendium", "Oaks of the World", "Same", "Same"]
+      assert Enum.map(ordered, & &1.source_id) |> Enum.take(-2) == [20, 21]
+      assert Species.ordered_sources(Enum.reverse(rows)) == ordered
+    end
+  end
+
+  describe "default_source/1 and has_text?/1" do
+    test "opens on the first row with any text, skipping blank and whitespace-only values" do
+      blank = row(3, "Oak Compendium", leaves: "  ", local_names: ~s(["", " "]))
+      texty = row(2, "Oaks of the World", range: "Missouri;")
+
+      refute Species.has_text?(blank)
+      assert Species.has_text?(texty)
+      assert Species.default_source([blank, texty]) == texty
+    end
+
+    test "counts a common name alone as text" do
+      assert Species.has_text?(row(4, "Sibley", local_names: ~s(["Shumard Oak"])))
+    end
+
+    test "falls back to the first row when none has text, and nil for none" do
+      first = row(3, "Oak Compendium")
+      assert Species.default_source([first, row(2, "Oaks of the World")]) == first
+      assert Species.default_source([]) == nil
+    end
+  end
+
+  describe "common_name/1" do
+    test "takes the first nonempty name of the first row in order that has one" do
+      oc = row(3, "Oak Compendium", local_names: ~s(["  "]))
+      ootw = row(2, "Oaks of the World", local_names: ~s(["", "Shumard's oak", "Other"]))
+      sibley = row(4, "Sibley", local_names: ~s(["Shumard Oak"]))
+
+      assert Species.common_name([oc, ootw, sibley]) == {"Shumard's oak", ootw}
+      assert Species.common_names(ootw) == ["Shumard's oak", "Other"]
+    end
+
+    test "is nil when no row has a name" do
+      assert Species.common_name([row(3, "Oak Compendium"), row(2, "Oaks of the World")]) == nil
+    end
+  end
+
+  describe "covered?/1" do
+    test "is true only when the Oak Compendium row has text" do
+      refute Species.covered?([
+               row(3, "Oak Compendium", miscellaneous: " "),
+               row(2, "Oaks of the World", leaves: "x")
+             ])
+
+      refute Species.covered?([row(2, "Oaks of the World", leaves: "x")])
+      assert Species.covered?([row(3, "Oak Compendium", twigs: "green")])
+    end
+  end
+
+  describe "hybrids_with_other_parent/1" do
+    test "pairs each hybrid with its parent that isn't this species" do
+      parent = species_fixture()
+      named = hybrid_fixture(parent1: "Quercus " <> parent.scientific_name, parent2: "rubra")
+      lone = hybrid_fixture(parent1: parent.scientific_name)
+      unknown = unique("× nowhere")
+
+      parent =
+        parent
+        |> Ecto.Changeset.change(
+          hybrids: Jason.encode!([named.scientific_name, lone.scientific_name, unknown])
+        )
+        |> Oaks.Repo.update!()
+
+      assert Species.hybrids_with_other_parent(parent) == [
+               %{name: named.scientific_name, other: "rubra"},
+               %{name: lone.scientific_name, other: nil},
+               %{name: unknown, other: nil}
+             ]
+    end
+  end
+
+  describe "siblings/1" do
+    test "lists the species stored at its last rank, without hybrids or varieties" do
+      complex = unique("complex")
+      a = species_fixture(scientific_name: unique("a"), complex: complex)
+      b = species_fixture(scientific_name: unique("b"), complex: complex)
+      _variety = species_fixture(scientific_name: a.scientific_name <> " minor", complex: complex)
+      hybrid = hybrid_fixture(complex: complex)
+
+      assert %{level: "complex", name: ^complex, names: names} = Species.siblings(a)
+      assert names == Enum.sort([a.scientific_name, b.scientific_name])
+      assert Species.siblings(hybrid).names == names
+    end
+
+    test "lists a variety's sister varieties under its species" do
+      species = species_fixture()
+      v1 = species_fixture(scientific_name: species.scientific_name <> " one")
+      v2 = species_fixture(scientific_name: species.scientific_name <> " two")
+
+      assert %{level: "species", names: names} = Species.siblings(v1)
+      assert names == [v1.scientific_name, v2.scientific_name]
+    end
+
+    test "is nil with no group or no one else in it" do
+      assert Species.siblings(species_fixture()) == nil
+      assert Species.siblings(species_fixture(complex: unique("alone"))) == nil
+    end
+  end
 end

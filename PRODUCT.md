@@ -32,7 +32,7 @@ One field identifier's tested knowledge (5+ years, about 29,000 iNaturalist oak 
 
 - iNaturalist is the taxonomic backbone. Departures from iNat are Jeff's own sourced decisions.
 - Scope: North America first for structured traits and identification. The rest of the world's oaks stay a reference catalog until later.
-- Jeff's facts and prose lead. Other sources (Oaks of the World, Sibley, FNA, the literature in his research workbook) back them, and disagreements between sources are surfaced for him, not hidden.
+- Oak Compendium's own facts and prose lead. Other sources (Oaks of the World, Sibley, FNA, the literature in his research workbook) back them, and disagreements between sources are surfaced for him, not hidden.
 - Two iNat workflows feed the database:
   - ID mode: pull in an observation, select the features that match (using the ID tool as needed), and produce a comment, at first a list of matching features with a link back to the taxon on the Compendium, which Jeff pastes into iNat with his ID. Bringing the comment back into the database is optional.
   - Capture mode: import a single comment Jeff wrote or found, or an exemplary observation. An imported observation can be a photo example on a taxon page, evidence for a fact, material for prose, and an illustration of a trait value.
@@ -53,7 +53,8 @@ One field identifier's tested knowledge (5+ years, about 29,000 iNaturalist oak 
 
 - Name: the Oak Compendium (oakcompendium.org and oakcompendium.com). Sister project to Gallformers, by the same author.
 - Voice: Oak Compendium prose is 100% Jeff's own words. Agents never write, paraphrase, summarize, condense or merge his prose; they only find and assemble his words verbatim, with sources, for him to edit.
-- Copyright: facts can't be copyrighted, so anyone may use them. Jeff's prose and the structure of his entries are copyrighted (his prose goes into the book). Other authors' text stays as it is today: the Sibley entries are extracted facts, and the Oaks of the World text is fine to show; it must stay visibly distinct from Jeff's.
+- Attribution: the site never labels content with Jeff's name. Oak Compendium's own text is attributed to "Oak Compendium", or carries no label where the context makes the source clear; citations name the site, not a person (Jeff, 2026-11-25). The About page's author section is the exception.
+- Copyright: facts can't be copyrighted, so anyone may use them. Jeff's prose and the structure of his entries are copyrighted (his prose goes into the book). Other authors' text stays as it is today: the Sibley entries are extracted facts, and the Oaks of the World text is fine to show; it must stay visibly distinct from Oak Compendium's own text.
 
 ## Evidence on Hand
 
@@ -64,8 +65,8 @@ One field identifier's tested knowledge (5+ years, about 29,000 iNaturalist oak 
 
 ## Product Principles
 
-- Jeff's words by construction: text shown as his is his exact wording, traceable to where he wrote it. Voice is preserved by the tooling, not by prompting.
+- Oak Compendium's words by construction: text shown as Oak Compendium's own is Jeff's exact wording, traceable to where he wrote it, and is labelled "Oak Compendium", never with his name. Voice is preserved by the tooling, not by prompting.
 - Every fact has a source a reader can see and follow.
 - Identification first: every taxon answers "is it this, or that?", hybrids included.
-- Jeff leads, sources back: conflicts between sources are shown and resolved by Jeff, not hidden behind tabs.
+- Oak Compendium leads, sources back: conflicts between sources are shown and resolved by the editor, not hidden behind tabs.
 - Missing is empty: a one-off remark never becomes a general fact; when there is no general statement, the field stays empty.

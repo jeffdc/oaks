@@ -14,10 +14,13 @@ defmodule OaksWeb.DevComponentsLive do
   """
   use OaksWeb, :live_view
 
+  import Ecto.Query, only: [from: 2]
+  import OaksWeb.PhotoViewer, only: [photo_viewer: 1]
+
   @traits [
     %{
       trait: "Habit",
-      jeff: nil,
+      oak_compendium: nil,
       standing: "open",
       summary: "2 sources, not reviewed",
       others: [
@@ -27,7 +30,7 @@ defmodule OaksWeb.DevComponentsLive do
     },
     %{
       trait: "Buds",
-      jeff:
+      oak_compendium:
         {"buds looks glabrous and pretty small.", "i465271504",
          "https://www.inaturalist.org/observations/190127456"},
       standing: "differs",
@@ -36,7 +39,7 @@ defmodule OaksWeb.DevComponentsLive do
     },
     %{
       trait: "Leaves",
-      jeff:
+      oak_compendium:
         {"Glabrous angled (in cross-section) buds and lobey leaves with an overall round shape with very tight sinuses (vs the wider ones of Q coccinea).",
          "c23423264", "https://www.inaturalist.org/observations/403156034"},
       standing: "differs",
@@ -48,10 +51,78 @@ defmodule OaksWeb.DevComponentsLive do
     }
   ]
 
+  # Q. shumardii's text by source, from the database (as in
+  # design/prototype/species-today.html), in the species page's order, and
+  # Q. × riparia's empty Oak Compendium row.
+  @source_texts [
+    %{
+      id: 3,
+      name: "Oak Compendium",
+      about: "/sources/3",
+      fields: [
+        {"Leaves", "Lobes per side: usually 3–4, rarely as few as 2."},
+        {"Fruits",
+         "The cap is saucer shaped like Q. rubra rather than turbinate. Acorns can get pretty big and look a lot like the classic \"fat man in a beret\" acorns of Q. rubra, so you have to be careful with acorns."},
+        {"Twigs",
+         "My rough conclusion, from one area and some iNat data, is that new stems are always green, vs sometimes red with Q. palustris."}
+      ]
+    },
+    %{
+      id: 2,
+      name: "Oaks of the World",
+      original: "https://oaksoftheworld.fr/quercus_shumardii.htm",
+      fields: [
+        {"Common names", "Shumard's oak"},
+        {"Geographic range",
+         "South Ontario; Eastern and Central USA; introduced in Europe in 1908;"},
+        {"Growth habit", "15-30 m tall and more; rounded open crown;"},
+        {"Leaves",
+         "8-18 x 6-13 cm; leathery; obovate to broad-elliptic; 3-5 pairs of lobulate, bristle-tipped, toothed lobes with deep sinuses; apex acute; base obtuse to acute; lustrous dark green, hairless above; paler, glabrous beneath except large axillary tufts of rusty hairs; red at fall; petiole hairless 3-6 cm long;"},
+        {"Flowers", "spring"},
+        {"Hardiness and habitat",
+         "hardy; all types of soils, but prefers moist and rich ones; rather fast-growing;"}
+      ]
+    },
+    %{
+      id: 4,
+      name: "The Sibley Guide to Trees",
+      about: "/sources/4",
+      fields: [
+        {"Common names", "Shumard Oak, Leopard Oak, Spotted Oak"},
+        {"Growth habit", "Deciduous. Medium to large tree often 90'."},
+        {"Leaves",
+         "- 6 1/2\"\n- squarish lobes end in multiple bristles\n- shiny green above and below\n- usually orange, felty hairs in vein junctures of underleaf"},
+        {"Buds", "large, grayish or straw-colored, and hairless"}
+      ]
+    },
+    %{id: 5, name: "Notes on North American Trees. I. Quercus", about: "/sources/5", fields: []}
+  ]
+
+  @gallery_hybrids [
+    %{name: "× discreta", other: "velutina"},
+    %{name: "× egglestonii", other: "imbricaria"},
+    %{name: "× hastingsii", other: "marilandica"},
+    %{name: "× joorii", other: "falcata"},
+    %{name: "× moultonensis", other: "phellos"},
+    %{name: "× mutabilis", other: "palustris"},
+    %{name: "× neopalmeri", other: "nigra"},
+    %{name: "× riparia", other: "rubra"},
+    %{name: "× sternbergii", other: nil}
+  ]
+
   @impl true
   def mount(_params, _session, socket) do
     if Application.get_env(:oaks, :dev_routes) do
-      {:ok, assign(socket, page_title: "Components", traits: @traits), layout: false}
+      {:ok,
+       assign(socket,
+         page_title: "Components",
+         traits: @traits,
+         sample_photos: sample_photos(),
+         db_photos: db_photos(),
+         source_texts: @source_texts,
+         gallery_hybrids: @gallery_hybrids,
+         gallery_tab: 3
+       ), layout: false}
     else
       raise OaksWeb.DevComponentsLive.NotAvailable
     end
@@ -156,13 +227,13 @@ defmodule OaksWeb.DevComponentsLive do
         <section class="mt-s8">
           <.section_heading id="field-marks">
             Field marks
-            <:note>Jeff first, other sources behind</:note>
+            <:note>Oak Compendium first, other sources behind</:note>
           </.section_heading>
           <.table id="field-marks-table" rows={@traits} row_id={&"trait-#{&1.trait}"} stack>
             <:col :let={t} label="Trait" row_header>{t.trait}</:col>
-            <:col :let={t} label="Jeff Clark" voice>
-              <%= if t.jeff do %>
-                <% {quote, mark, href} = t.jeff %>
+            <:col :let={t} label="Oak Compendium" voice>
+              <%= if t.oak_compendium do %>
+                <% {quote, mark, href} = t.oak_compendium %>
                 <q>{quote}</q>
                 <.source_mark href={href}>{mark}</.source_mark>
               <% else %>
@@ -217,6 +288,148 @@ defmodule OaksWeb.DevComponentsLive do
             </div>
           </section>
         </div>
+
+        <section class="mt-s8">
+          <.section_heading id="photo-editing">
+            Photo editing
+            <:note>the species page's Add photos and Manage photos dialogs</:note>
+          </.section_heading>
+          <div class="grid gap-s7 lg:grid-cols-2">
+            <form id="gallery-photo-pick" phx-change="noop" phx-submit="noop" class="max-w-[34rem]">
+              <.input
+                id="gallery-observation"
+                name="observation"
+                label="iNaturalist observation"
+                value="inaturalist.org/observations/190127456"
+                placeholder="Observation URL or number"
+              >
+                <:action><.button type="submit">Load</.button></:action>
+              </.input>
+              <.photo_picker id="gallery-photo-picker">
+                <:meta>
+                  janedoe · Blue Ridge, VA · 2026-05-04 ·
+                  <.sci_name name="Quercus shumardii" genus={nil} weight="regular" />
+                </:meta>
+                <.photo_tile label="Photo 1, CC-BY-NC" name="photo_ids[]" value="1" checked>
+                  CC-BY-NC
+                </.photo_tile>
+                <.photo_tile label="Photo 2, CC-BY" name="photo_ids[]" value="2">CC-BY</.photo_tile>
+                <.photo_tile label="Photo 3, All rights reserved" name="photo_ids[]" value="3" checked>
+                  <.status_tag>All rights reserved</.status_tag>
+                </.photo_tile>
+                <.photo_tile label="Photo 4, No license given" name="photo_ids[]" value="4">
+                  <.status_tag>No license given</.status_tag>
+                </.photo_tile>
+                <.photo_tile label="Photo 5" off><.photo_status status="exists" /></.photo_tile>
+                <.photo_tile label="Photo 6"><.photo_status status="added" /></.photo_tile>
+                <.photo_tile label="Photo 7"><.photo_status status="adding" /></.photo_tile>
+                <.photo_tile label="Photo 8">
+                  <.photo_status status="failed" error="iNaturalist no longer has this photo.">
+                    <:action><.button type="button" size="compact">Retry</.button></:action>
+                  </.photo_status>
+                </.photo_tile>
+              </.photo_picker>
+              <.ruled_notice id="gallery-permission" class="mt-s4">
+                <p>
+                  <strong>Photo 3 is All rights reserved.</strong>
+                  Its creator keeps every right to it. Add it only if the creator has given the
+                  Oak Compendium permission. The page will say it is used with the creator's
+                  permission.
+                </p>
+                <:confirm>
+                  <.input
+                    type="checkbox"
+                    name="permission"
+                    label="The creator has given permission to use this photo."
+                  />
+                </:confirm>
+              </.ruled_notice>
+            </form>
+
+            <div class="max-w-[34rem]">
+              <.photo_list id="gallery-photo-list" on_reorder="noop">
+                <.photo_row
+                  :for={
+                    {id, caption, state} <- [
+                      {1, "Terminal buds in winter", :ready},
+                      {2, "", :reserved},
+                      {3, "", :adding},
+                      {4, "", :failed}
+                    ]
+                  }
+                  id={"gallery-photo-#{id}"}
+                  photo_id={id}
+                  label={"Photo #{id}"}
+                  muted={state in [:adding, :failed]}
+                  on_delete={JS.push("noop")}
+                >
+                  <.input
+                    id={"gallery-caption-#{id}"}
+                    name="caption"
+                    value={caption}
+                    placeholder="Caption"
+                    aria-label="Caption"
+                    disabled={state in [:adding, :failed]}
+                  />
+                  <:meta>
+                    <.photo_credit :if={state == :ready} creator="janedoe" license="CC-BY-NC" />
+                    <.photo_credit
+                      :if={state == :reserved}
+                      creator="janedoe"
+                      license="All rights reserved, used with the creator's permission"
+                      reserved
+                    />
+                    <.photo_status :if={state == :adding} status="adding" />
+                    <.photo_status
+                      :if={state == :failed}
+                      status="failed"
+                      error="The photo couldn't be read as an image."
+                    >
+                      <:action><.button type="button" size="compact">Retry</.button></:action>
+                    </.photo_status>
+                  </:meta>
+                </.photo_row>
+              </.photo_list>
+            </div>
+          </div>
+        </section>
+
+        <section class="mt-s8">
+          <.section_heading id="photos">
+            Photos
+            <:note>photo_viewer, themed as species_photos shows it: many, one and none</:note>
+          </.section_heading>
+          <div class="grid gap-s7 md:grid-cols-[300px_240px_300px]">
+            <.photo_viewer
+              id="gallery-photos-many"
+              label="Quercus shumardii"
+              photos={@sample_photos}
+              class="oc-photos"
+            />
+            <.photo_viewer
+              id="gallery-photos-one"
+              label="Quercus shumardii"
+              photos={Enum.take(@sample_photos, 1)}
+              class="oc-photos"
+            />
+            <.photo_viewer
+              id="gallery-photos-none"
+              label="Quercus shumardii"
+              photos={[]}
+              class="oc-photos"
+            />
+          </div>
+          <div :if={@db_photos} class="mt-s7 grid gap-s7 md:grid-cols-[300px_minmax(0,1fr)]">
+            <.species_photos
+              id="gallery-species-photos"
+              images={@db_photos.images}
+              name={@db_photos.name}
+            />
+            <p class="text-ink-3">
+              <.sci_name name={@db_photos.name} />: this database's photos, through species_photos.
+            </p>
+          </div>
+        </section>
 
         <section class="mt-s8">
           <.section_heading id="names">
@@ -384,6 +597,169 @@ defmodule OaksWeb.DevComponentsLive do
         </section>
 
         <section class="mt-s8">
+          <.section_heading id="species-page">
+            Species page<:note>
+              photo_columns, source_tabs, ruled_rows, hybrid_rows, comma_list, not_covered_notice,
+              cite_line
+            </:note>
+          </.section_heading>
+          <p class="max-w-[68ch]">
+            The parts of the species page for today's data (design/prototype/species-today.html).
+            The title row names the common name the source order picks, with its source's mark,
+            which opens that source's tab; a hybrid's parents are its subtitle. The not-covered
+            notice goes under it when the Oak Compendium has no text for the taxon. Then the photos
+            beside the source tabs: one tab per source, the open one with its one icon link (the
+            original page, else the source's page here), the editor's quiet Edit menu and Compare at
+            the right. Below: the sections, each a section heading over its rows, and the cite line.
+          </p>
+          <div class="mt-s6 grid gap-s7">
+            <.header id="gallery-species-title">
+              <.sci_name name="Quercus shumardii" author="Buckley" size="display" />
+              <:common_name>
+                Shumard's oak<.source_mark patch={~p"/dev/components"}>
+                  Oaks of the World
+                </.source_mark>
+              </:common_name>
+              <:meta>Species</:meta>
+              <:meta><.iucn_status code="LC" /></:meta>
+              <:actions>
+                <.edit_menu id="gallery-species-menu">
+                  <:item click="noop">Edit species</:item>
+                  <:item click="noop">Add source data</:item>
+                  <:item click="noop">Add photos from iNaturalist…</:item>
+                  <:item click="noop" note="1 failed">Manage photos…</:item>
+                  <:item click="noop">Make synonym of…</:item>
+                  <:item click="noop">Delete species</:item>
+                </.edit_menu>
+              </:actions>
+            </.header>
+            <div>
+              <.header id="gallery-hybrid-title">
+                <.sci_name name="Quercus × riparia" author="Laughlin" size="display" />
+                <:meta>Hybrid</:meta>
+                <:subtitle>
+                  Hybrid of
+                  <.link navigate={~p"/species/rubra"}>
+                    <.sci_name name="rubra" abbreviate weight="regular" />
+                  </.link>
+                  and
+                  <.link navigate={~p"/species/shumardii"}>
+                    <.sci_name name="shumardii" abbreviate weight="regular" />
+                  </.link>
+                </:subtitle>
+              </.header>
+              <.not_covered_notice id="gallery-not-covered">
+                Everything on this page comes from the sources listed, shown as they wrote it.
+              </.not_covered_notice>
+            </div>
+
+            <.photo_columns id="gallery-photo-columns">
+              <:photos>
+                <.photo_viewer
+                  id="gallery-columns-photos"
+                  label="Quercus shumardii"
+                  photos={@sample_photos}
+                  class="oc-photos"
+                />
+              </:photos>
+              <.source_tabs
+                id="gallery-source-tabs"
+                selected={@gallery_tab}
+                on_select="gallery_select_tab"
+              >
+                <:tab
+                  :for={source <- @source_texts}
+                  id={source.id}
+                  name={source.name}
+                  original={source[:original]}
+                  about={source[:about]}
+                />
+                <:action>
+                  <.edit_menu
+                    id="gallery-source-menu"
+                    quiet
+                    aria_label={"Edit the data from #{gallery_source(@gallery_tab).name}"}
+                  >
+                    <:item click="noop">Edit {gallery_source(@gallery_tab).name} data</:item>
+                    <:item click="noop">Delete {gallery_source(@gallery_tab).name} data</:item>
+                  </.edit_menu>
+                </:action>
+                <:action>
+                  <.compare_button navigate={~p"/species/shumardii/compare"}>
+                    Compare sources
+                  </.compare_button>
+                </:action>
+                <:field :for={{label, text} <- gallery_source(@gallery_tab).fields} label={label}>
+                  <div class="oc-prose">{raw(Oaks.Markdown.render_html(text))}</div>
+                </:field>
+              </.source_tabs>
+            </.photo_columns>
+
+            <section>
+              <.section_heading>
+                Synonyms<:note>2 names</:note>
+              </.section_heading>
+              <.comma_list id="gallery-synonyms">
+                <:item><.sci_name name="schneckii" abbreviate /></:item>
+                <:item><.sci_name name="texana Auctores" abbreviate /></:item>
+              </.comma_list>
+            </section>
+            <section>
+              <.section_heading>Subspecies and varieties</.section_heading>
+              <.ruled_rows id="gallery-varieties">
+                <:row :for={name <- ["shumardii acerifolia", "shumardii schneckii"]}>
+                  <.sci_name name={name} abbreviate size="title" />
+                </:row>
+              </.ruled_rows>
+            </section>
+            <section>
+              <.section_heading>
+                Hybrids<:note>9 known</:note>
+              </.section_heading>
+              <.hybrid_rows id="gallery-hybrids" hybrids={@gallery_hybrids} />
+            </section>
+            <section>
+              <.section_heading>External links</.section_heading>
+              <.ruled_rows id="gallery-links">
+                <:row
+                  :for={
+                    {name, url} <- [
+                      {"Fire Effects Information System",
+                       "https://www.fs.usda.gov/database/feis/plants/tree/queshu/all.html"},
+                      {"Flora of North America", "https://floranorthamerica.org/Quercus_shumardii"},
+                      {"iNaturalist", "https://www.inaturalist.org/search?q=Quercus%20shumardii"},
+                      {"USDA Plants Database", "https://plants.usda.gov/plant-profile/QUSH"},
+                      {"Wikipedia", "https://en.wikipedia.org/wiki/Quercus_shumardii"}
+                    ]
+                  }
+                  href={url}
+                  note={URI.parse(url).host |> String.replace_prefix("www.", "")}
+                >
+                  {name}
+                </:row>
+              </.ruled_rows>
+            </section>
+            <section>
+              <.section_heading>Sources</.section_heading>
+              <.ruled_rows id="gallery-sources" columns={1}>
+                <:row :for={source <- @source_texts}>
+                  <.link navigate={source[:about] || ~p"/sources/2"}>
+                    <.work_title title={source.name} />
+                  </.link>
+                  <.source_mark :if={source[:original]} href={source[:original]}>
+                    original page
+                  </.source_mark>
+                </:row>
+              </.ruled_rows>
+            </section>
+            <.cite_line id="gallery-cite">
+              Oak Compendium. <.sci_name name="Quercus shumardii" author="Buckley" />.
+              https://oakcompendium.org/species/shumardii (accessed 2026-11-25).
+            </.cite_line>
+          </div>
+        </section>
+
+        <section class="mt-s8">
           <.section_heading id="title-row">
             Title row<:note>title and meta on one line, the edit menu at the right</:note>
           </.section_heading>
@@ -405,6 +781,7 @@ defmodule OaksWeb.DevComponentsLive do
                 <.edit_menu id="gallery-edit-menu">
                   <:item click="noop">Edit species</:item>
                   <:item click="noop">Make synonym of…</:item>
+                  <:item click="noop" note="1 failed">Manage photos…</:item>
                   <:item click="noop">Delete species</:item>
                 </.edit_menu>
               </:actions>
@@ -584,6 +961,87 @@ defmodule OaksWeb.DevComponentsLive do
 
   @impl true
   def handle_event("noop", _params, socket), do: {:noreply, socket}
+
+  def handle_event("gallery_select_tab", %{"id" => id}, socket) do
+    id = OaksWeb.Params.int(id)
+
+    if Enum.any?(@source_texts, &(&1.id == id)),
+      do: {:noreply, assign(socket, gallery_tab: id)},
+      else: {:noreply, socket}
+  end
+
+  defp gallery_source(id), do: Enum.find(@source_texts, &(&1.id == id))
+
+  @sample_captions [
+    "Terminal buds in winter",
+    nil,
+    "Leaf underside, axillary tufts",
+    nil,
+    "Acorn and cap",
+    "Bark of a mature tree"
+  ]
+  @sample_licenses ["CC-BY-NC", "CC-BY", "Public Domain / CC0", :reserved, "CC-BY-SA"]
+
+  # Fourteen placeholder photos for the viewer, as species_photos passes
+  # them: drawn tiles, landscape and portrait, with captions, credits and
+  # licenses (one All Rights Reserved).
+  defp sample_photos do
+    for n <- 1..14 do
+      license = Enum.at(@sample_licenses, rem(n - 1, length(@sample_licenses)))
+      src = sample_image(n)
+
+      %{
+        src: src,
+        thumb: src,
+        full: src,
+        caption: Enum.at(@sample_captions, rem(n - 1, length(@sample_captions))),
+        creator: "janedoe - Jane Doe",
+        license:
+          if(license == :reserved,
+            do: "All rights reserved, used with the creator's permission",
+            else: license
+          ),
+        licenselink: license != :reserved && "https://creativecommons.org/licenses/",
+        reserved: license == :reserved,
+        sourcelink: "https://www.inaturalist.org/observations/190127456",
+        source_label: "iNaturalist observation"
+      }
+    end
+  end
+
+  # The ready photos of the first species in this database that has any,
+  # to show species_photos with real images (nil when there are none).
+  defp db_photos do
+    species_id =
+      Oaks.Repo.one(
+        from(i in Oaks.Images.Image,
+          where: i.status == "ready",
+          select: i.species_id,
+          order_by: i.species_id,
+          limit: 1
+        )
+      )
+
+    if species_id do
+      species = Oaks.Repo.get!(Oaks.Species.Species, species_id)
+      %{name: species.scientific_name, images: Oaks.Images.list_for_species(species_id)}
+    end
+  end
+
+  defp sample_image(n) do
+    {w, h} = if rem(n, 3) == 0, do: {600, 800}, else: {800, 600}
+    hue = rem(n * 47, 360)
+
+    svg = """
+    <svg xmlns="http://www.w3.org/2000/svg" width="#{w}" height="#{h}" viewBox="0 0 #{w} #{h}">\
+    <rect width="100%" height="100%" fill="hsl(#{hue} 28% 52%)"/>\
+    <rect x="24" y="24" width="#{w - 48}" height="#{h - 48}" fill="none" stroke="#fbfbf7" stroke-width="4"/>\
+    <text x="50%" y="50%" fill="#fbfbf7" font-family="sans-serif" font-size="120" font-weight="700" \
+    text-anchor="middle" dominant-baseline="central">#{n}</text></svg>
+    """
+
+    "data:image/svg+xml;base64," <> Base.encode64(svg)
+  end
 
   # The band's examples: where each kind of taxon page's band starts from
   # (as Oaks.Species.placement/1 gives it) and its current step.

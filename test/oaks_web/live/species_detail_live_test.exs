@@ -1,6 +1,8 @@
 defmodule OaksWeb.SpeciesDetailLiveTest do
   @moduledoc """
-  Tests for the SpeciesDetailLive LiveView.
+  Tests for the SpeciesDetailLive LiveView: the species page for today's
+  data (docs/species-photos-plan.md, Phase 4 decisions and Phase 7), and
+  the page regression checks of the plan's acceptance table.
   """
   use OaksWeb.ConnCase
 
@@ -9,9 +11,13 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
   import Oaks.SourcesFixtures
   import Oaks.SpeciesFixtures
 
+  alias Oaks.Repo
+  alias Oaks.Sources.Source
+
   # alba has two sources (the preferred one with full data) and lists
-  # ×bebbiana, stellata, a synonym and a variety; ×bebbiana's parents are
-  # alba × macrocarpa; velutina has no sources.
+  # ×bebbiana, stellata as closely related, a synonym, a variety and a
+  # stored external link; ×bebbiana's parents are alba × macrocarpa;
+  # velutina has no sources.
   setup do
     n = System.unique_integer([:positive])
     alba = "alba#{n}"
@@ -30,7 +36,11 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
         hybrids: [bebbiana],
         closely_related_to: [stellata],
         synonyms: ["#{alba} var. repanda"],
-        subspecies_varieties: ["#{alba} var. latiloba"]
+        subspecies_varieties: ["#{alba} var. latiloba"],
+        external_links:
+          Jason.encode!([
+            %{name: "Flora of North America", url: "https://floranorthamerica.org/x"}
+          ])
       )
 
     ootw = source_fixture(name: "Oaks of the World #{n}")
@@ -38,6 +48,7 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
 
     species_source_fixture(alba_species, ootw,
       is_preferred: true,
+      url: "https://oaksoftheworld.fr/quercus_alba.htm",
       local_names: ["white oak", "eastern white oak"],
       range: "Eastern North America; 0 to 1600 m",
       growth_habit: "Reaches 25 m high",
@@ -48,6 +59,7 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
 
     %{
       alba: alba,
+      alba_species: alba_species,
       bebbiana: bebbiana,
       stellata: stellata,
       velutina: species_fixture(scientific_name: "velutina#{n}").scientific_name,
@@ -56,43 +68,95 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
     }
   end
 
-  describe "GET /species/:name" do
-    test "renders species detail page", %{conn: conn, alba: alba} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
-      assert html =~ alba
-      assert html =~ "L. 1753"
-    end
+  # The source the display contract treats by its id (3 is Oak Compendium,
+  # 2 Oaks of the World): created when the test database has none.
+  defp source_with_id(id) do
+    Repo.insert!(%Source{id: id, name: "Source #{id}", source_type: "website"},
+      on_conflict: :nothing
+    )
 
-    test "shows species header with name and author", %{conn: conn, alba: alba} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
-      assert html =~ "Quercus"
-      assert html =~ alba
-      assert html =~ "L. 1753"
-    end
+    Repo.get!(Source, id)
+  end
 
-    test "shows Species badge for non-hybrids", %{conn: conn, alba: alba} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
-      assert html =~ "Species"
-    end
+  # The tabs' names, in order.
+  defp tab_names(view) do
+    html = view |> element("#source-tabs [role=tablist]") |> render()
 
-    test "shows conservation status badge", %{conn: conn, alba: alba} do
+    ~r{role="tab".*?>\s*(.*?)\s*</button>}s
+    |> Regex.scan(html, capture: :all_but_first)
+    |> Enum.map(&hd/1)
+  end
+
+  describe "the title row and the band" do
+    test "shows the name, author, kind word and IUCN stamp", %{conn: conn, alba: alba} do
       {:ok, view, html} = live(conn, ~p"/species/#{alba}")
+      assert has_element?(view, "#species-title h1 .oc-sci-display .oc-sci-g", "Quercus")
+      assert has_element?(view, "#species-title h1 .oc-sci-display .oc-sci-e", alba)
+      assert has_element?(view, "#species-title h1", "L. 1753")
+      assert has_element?(view, "#species-title .oc-title-meta", "Species")
       assert has_element?(view, "#species-title .oc-title-meta .oc-iucn-lc", "IUCN LC")
       assert html =~ "Least Concern"
+    end
+
+    test "names the common name the source order picks, with a mark that opens its tab", %{
+      conn: conn,
+      alba: alba,
+      ootw: ootw
+    } do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
+
+      assert has_element?(view, "#species-title .oc-title-cn", "white oak")
+      refute has_element?(view, "#species-title .oc-title-cn", "eastern white oak")
+
+      assert has_element?(
+               view,
+               ~s(#species-title .oc-title-cn a.oc-src[href="/species/#{alba}?source=#{ootw.id}"]),
+               ootw.name
+             )
     end
 
     test "shows the taxonomy band above the title row, ending on the species", %{
       conn: conn,
       alba: alba
     } do
-      {:ok, view, html} = live(conn, ~p"/species/#{alba}")
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
       assert has_element?(view, ".oc-pg-bleed #taxonomy-band")
       assert has_element?(view, ".oc-pg-head #species-title")
       assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy"]), "Quercus")
-      assert has_element?(view, "#taxonomy-band a .oc-band-rk", "subg.")
       assert has_element?(view, "#taxonomy-band a .oc-band-rk", "sect.")
       assert has_element?(view, "#taxonomy-band [aria-current]", alba)
-      refute html =~ "taxonomy-nav"
+    end
+
+    test "the band's siblings menu lists the species beside it, the species marked", %{
+      conn: conn
+    } do
+      complex = "complex#{System.unique_integer([:positive])}"
+      a = species_fixture(complex: complex)
+      b = species_fixture(complex: complex)
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{a.scientific_name}")
+
+      assert has_element?(
+               view,
+               "#taxonomy-band-siblings summary",
+               "#{complex} complex · 2 species"
+             )
+
+      assert has_element?(
+               view,
+               "#taxonomy-band-siblings [aria-current=page]",
+               a.scientific_name
+             )
+
+      assert has_element?(
+               view,
+               ~s(#taxonomy-band-siblings a[href="/species/#{b.scientific_name}"])
+             )
+    end
+
+    test "a species alone in its group has no siblings menu", %{conn: conn, velutina: velutina} do
+      {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
+      refute has_element?(view, "#taxonomy-band-siblings")
     end
 
     test "places a hybrid with no ranks of its own in the band where its parents sit", %{
@@ -114,110 +178,450 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert has_element?(view, ~s(#taxonomy-band a[href="/species/#{alba}"]), alba)
       assert has_element?(view, "#taxonomy-band [aria-current]", "latiloba")
     end
+  end
 
-    test "shows source data from preferred source", %{conn: conn, alba: alba, ootw: ootw} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
-      assert html =~ ootw.name
-      assert html =~ "Eastern North America"
-      assert html =~ "Reaches 25 m high"
-      assert html =~ "8-20 cm long, obovate"
+  describe "a hybrid's title row" do
+    test "says its parents, linked, as the subtitle", %{
+      conn: conn,
+      bebbiana: bebbiana,
+      alba: alba
+    } do
+      {:ok, view, _html} = live(conn, ~p"/species/#{bebbiana}")
+      assert has_element?(view, "#species-title .oc-title-meta", "Hybrid")
+      assert has_element?(view, "#species-title h1 .oc-sci-x", "×")
+      assert has_element?(view, "#species-parents", "Hybrid of")
+      assert has_element?(view, ~s(#species-parents a[href="/species/#{alba}"]))
+      assert has_element?(view, ~s(#species-parents a[href="/species/macrocarpa"]))
+      refute has_element?(view, "#species-parents", "unrecorded")
     end
 
-    test "shows common names from preferred source", %{conn: conn, alba: alba} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
-      assert html =~ "white oak"
-      assert html =~ "eastern white oak"
+    test "names an unrecorded parent when only one is known", %{conn: conn, alba: alba} do
+      hybrid = hybrid_fixture(parent1: alba)
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{hybrid.scientific_name}")
+      assert has_element?(view, ~s(#species-parents a[href="/species/#{alba}"]))
+      assert has_element?(view, "#species-parents", "and an unrecorded parent")
     end
 
-    test "shows source tabs", %{conn: conn, alba: alba, ootw: ootw, inat: inat} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{alba}")
-      assert html =~ ootw.name
-      assert html =~ inat.name
-    end
-
-    test "marks the preferred source's tab", %{conn: conn, alba: alba} do
+    test "a species has no parents line", %{conn: conn, alba: alba} do
       {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
-      assert has_element?(view, ".source-tab .source-tab-note", "preferred")
+      refute has_element?(view, "#species-parents")
+    end
+  end
+
+  describe "source tabs" do
+    test "one tab per source, the preferred first, opening on it with all its text", %{
+      conn: conn,
+      alba: alba,
+      ootw: ootw,
+      inat: inat
+    } do
+      {:ok, view, html} = live(conn, ~p"/species/#{alba}")
+
+      assert tab_names(view) == [ootw.name, inat.name]
+      assert has_element?(view, "#source-tabs-tab-#{ootw.id}[aria-selected=true]")
+
+      for {label, text} <- [
+            {"Common names", "white oak, eastern white oak"},
+            {"Geographic range", "Eastern North America; 0 to 1600 m"},
+            {"Growth habit", "Reaches 25 m high"},
+            {"Leaves", "8-20 cm long, obovate"}
+          ] do
+        assert has_element?(view, "#source-tabs-panel .oc-tabs-field h3", label)
+        assert has_element?(view, "#source-tabs-panel .oc-tabs-value", text)
+      end
+
+      refute has_element?(view, "#source-tabs-panel h3", "Flowers")
+      refute html =~ "preferred"
+      refute html =~ "Data from"
     end
 
-    test "shows relationship sections", %{conn: conn} = ctx do
+    test "the open tab's one icon link goes to the original page, or the source's page", %{
+      conn: conn,
+      alba: alba,
+      inat: inat
+    } do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
+
+      assert has_element?(
+               view,
+               ~s(#source-tabs a.oc-tab-link[href="https://oaksoftheworld.fr/quercus_alba.htm"])
+             )
+
+      assert view |> element("#source-tabs") |> render() |> count("oc-tab-link") == 1
+
+      view |> element("#source-tabs-tab-#{inat.id}") |> render_click()
+
+      assert has_element?(view, ~s(#source-tabs a.oc-tab-link[href="/sources/#{inat.id}"]))
+      assert view |> element("#source-tabs") |> render() |> count("oc-tab-link") == 1
+    end
+
+    test "clicking a tab opens it at its own address; an empty one says so", %{
+      conn: conn,
+      alba: alba,
+      inat: inat
+    } do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
+
+      view |> element("#source-tabs-tab-#{inat.id}") |> render_click()
+
+      assert_patch(view, ~p"/species/#{alba}?source=#{inat.id}")
+      assert has_element?(view, "#source-tabs-tab-#{inat.id}[aria-selected=true]")
+      assert has_element?(view, "#source-tabs-panel", "No text from #{inat.name} yet.")
+      refute has_element?(view, "#source-tabs-panel", "Eastern North America")
+    end
+
+    test "the address opens a tab; an unknown source falls back to the default", %{
+      conn: conn,
+      alba: alba,
+      ootw: ootw,
+      inat: inat
+    } do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}?source=#{inat.id}")
+      assert has_element?(view, "#source-tabs-tab-#{inat.id}[aria-selected=true]")
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}?source=999999999")
+      assert has_element?(view, "#source-tabs-tab-#{ootw.id}[aria-selected=true]")
+    end
+
+    test "opens on the first source with text when the preferred one has none", %{conn: conn} do
+      species = species_fixture()
+      empty = source_fixture(name: "Aaa empty")
+      full = source_fixture(name: "Zzz full")
+      species_source_fixture(species, empty, is_preferred: true, leaves: "   ")
+      species_source_fixture(species, full, bark: "Furrowed.")
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{species.scientific_name}")
+
+      assert tab_names(view) == ["Aaa empty", "Zzz full"]
+      assert has_element?(view, "#source-tabs-tab-#{full.id}[aria-selected=true]")
+      assert has_element?(view, "#source-tabs-panel", "Furrowed.")
+    end
+
+    test "keeps a source's full text and Markdown", %{conn: conn} do
+      species = species_fixture()
+      long = String.duplicate("Lobes deep and narrow. ", 200) <> "The end of the text."
+      species_source_fixture(species, source_fixture(), leaves: long <> "\n\n- first\n- second")
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{species.scientific_name}")
+      assert has_element?(view, "#source-tabs-panel .oc-prose", "The end of the text.")
+      assert has_element?(view, "#source-tabs-panel .oc-prose li", "second")
+    end
+
+    test "Compare sources shows with two or more sources only", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
+
+      assert has_element?(
+               view,
+               ~s(#source-tabs a[href="/species/#{alba}/compare"]),
+               "Compare sources"
+             )
+
+      one = species_fixture()
+      species_source_fixture(one, source_fixture(), leaves: "x")
+      {:ok, view, _html} = live(conn, ~p"/species/#{one.scientific_name}")
+      refute has_element?(view, "#source-tabs", "Compare sources")
+    end
+
+    test "a species with no sources says so where the tabs would be", %{
+      conn: conn,
+      velutina: velutina
+    } do
+      {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
+      assert has_element?(view, "#source-tabs", "No source data for this oak yet.")
+      refute has_element?(view, "#source-tabs [role=tablist]")
+      refute has_element?(view, "#species-sources")
+    end
+  end
+
+  describe "per-field fallback and Oak Compendium" do
+    setup %{alba_species: species} do
+      oc = source_with_id(3)
+      ootw = source_with_id(2)
+      %{species: species, oc: oc, ootw2: ootw}
+    end
+
+    test "blank Oak Compendium data: the notice shows and nothing is attributed to it", %{
+      conn: conn,
+      oc: oc,
+      ootw2: ootw
+    } do
+      species = species_fixture()
+      species_source_fixture(species, oc, leaves: "  ", local_names: [" "])
+      species_source_fixture(species, ootw, leaves: "Lobed.", local_names: ["Their oak"])
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{species.scientific_name}")
+
+      assert has_element?(view, "#not-covered", "no account of this oak yet")
+      assert has_element?(view, "#not-covered", "Everything on this page comes from the sources")
+      assert tab_names(view) == [oc.name, ootw.name]
+      assert has_element?(view, "#source-tabs-tab-#{ootw.id}[aria-selected=true]")
+      assert has_element?(view, "#species-title .oc-title-cn", "Their oak")
+      assert has_element?(view, "#species-title .oc-title-cn .oc-src", ootw.name)
+      refute has_element?(view, "#species-title .oc-title-cn .oc-src", oc.name)
+
+      view |> element("#source-tabs-tab-#{oc.id}") |> render_click()
+      assert has_element?(view, "#source-tabs-panel", "No text from #{oc.name} yet.")
+      refute has_element?(view, "#source-tabs-panel", "Lobed.")
+    end
+
+    test "absent Oak Compendium data: Oaks of the World leads, ahead of the rest by name", %{
+      conn: conn,
+      ootw2: ootw
+    } do
+      species = species_fixture()
+      species_source_fixture(species, source_fixture(name: "Aardvark"), leaves: "A.")
+      species_source_fixture(species, ootw, leaves: "O.")
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{species.scientific_name}")
+
+      assert has_element?(view, "#not-covered")
+      assert tab_names(view) == [ootw.name, "Aardvark"]
+      assert has_element?(view, "#source-tabs-tab-#{ootw.id}[aria-selected=true]")
+    end
+
+    test "Oak Compendium text: no notice, its tab opens first", %{
+      conn: conn,
+      oc: oc,
+      ootw2: ootw
+    } do
+      species = species_fixture()
+      species_source_fixture(species, ootw, leaves: "O.", local_names: ["Theirs"])
+      species_source_fixture(species, oc, twigs: "Green.", local_names: ["Ours"])
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{species.scientific_name}")
+
+      refute has_element?(view, "#not-covered")
+      assert tab_names(view) == [oc.name, ootw.name]
+      assert has_element?(view, "#source-tabs-tab-#{oc.id}[aria-selected=true]")
+      assert has_element?(view, "#species-title .oc-title-cn", "Ours")
+    end
+
+    test "a species with no sources gets the notice without the sources line", %{
+      conn: conn,
+      velutina: velutina
+    } do
+      {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
+      assert has_element?(view, "#not-covered", "no account of this oak yet")
+      refute has_element?(view, "#not-covered", "Everything on this page")
+    end
+  end
+
+  describe "the sections below" do
+    test "follow the main content in order, each only with data", %{conn: conn} = ctx do
       {:ok, view, html} = live(conn, ~p"/species/#{ctx.alba}")
-      "×" <> bebbiana_epithet = ctx.bebbiana
-      assert html =~ "Known Hybrids"
-      assert html =~ bebbiana_epithet
-      assert html =~ "Closely Related"
-      assert html =~ ctx.stellata
-      assert has_element?(view, "#species-synonyms .oc-sci-e", "repanda")
-      assert has_element?(view, "#species-subspecies .oc-sci-e", "latiloba")
+
+      ids = ~w(species-synonyms species-subspecies species-hybrids species-external-links
+               species-sources species-cite)
+
+      positions = Enum.map(ids, &(:binary.match(html, ~s(id="#{&1}")) |> elem(0)))
+      assert positions == Enum.sort(positions)
+      assert hd(positions) > elem(:binary.match(html, ~s(id="source-tabs")), 0)
+
+      {:ok, view2, _html} = live(conn, ~p"/species/#{ctx.velutina}")
+
+      for id <- ~w(species-synonyms species-subspecies species-hybrids species-sources),
+          do: refute(has_element?(view2, "##{id}"))
+
+      assert has_element?(view, "#species-cite")
     end
 
-    test "sets every name through sci_name, by its role", %{conn: conn} = ctx do
+    test "synonyms, varieties and hybrids set every name through sci_name", %{conn: conn} = ctx do
       {:ok, view, _html} = live(conn, ~p"/species/#{ctx.alba}")
       "×" <> bebbiana_epithet = ctx.bebbiana
 
-      # The title row: the full genus at display size.
-      assert has_element?(view, "#species-title h1 .oc-sci-display .oc-sci-g", "Quercus")
-      assert has_element?(view, "#species-title h1 .oc-sci-display .oc-sci-e", ctx.alba)
-
-      # Synonyms: names under the species, Q. abbreviated; rank words roman.
+      assert has_element?(view, "#species-synonyms", "1 name")
       assert has_element?(view, "#species-synonyms .oc-sci-g", "Q.")
-      assert has_element?(view, "#species-synonyms .oc-sci-e", ctx.alba)
+      assert has_element?(view, "#species-synonyms .oc-sci-e", "repanda")
       assert has_element?(view, "#species-synonyms .oc-sci-r", "var.")
 
-      # Hybrids and varieties: list entries under the species, Q. abbreviated.
-      assert has_element?(view, "#species-hybrids .oc-sci-title .oc-sci-g", "Q.")
-      assert has_element?(view, "#species-hybrids .oc-sci-x", "×")
-      assert has_element?(view, "#species-hybrids .oc-sci-e", bebbiana_epithet)
       assert has_element?(view, "#species-subspecies .oc-sci-title .oc-sci-g", "Q.")
-      assert has_element?(view, "#species-related .oc-sci-title .oc-sci-g", "Q.")
+      assert has_element?(view, "#species-subspecies .oc-sci-e", "latiloba")
+
+      assert has_element?(view, "#species-hybrids", "1 known")
+      assert has_element?(view, "#species-hybrids .oc-sci-title .oc-sci-x", "×")
+      assert has_element?(view, "#species-hybrids .oc-sci-e", bebbiana_epithet)
+
+      assert has_element?(
+               view,
+               ~s(#species-hybrids a[href="#{~p"/species/#{ctx.bebbiana}"}"]),
+               bebbiana_epithet
+             )
+
+      assert has_element?(view, "#species-hybrids .oc-rows-with", "with")
+      assert has_element?(view, ~s(#species-hybrids a[href="/species/macrocarpa"]))
     end
 
-    test "relationship links point to detail pages", %{conn: conn} = ctx do
+    test "closely related names are no longer shown", %{conn: conn} = ctx do
       {:ok, _view, html} = live(conn, ~p"/species/#{ctx.alba}")
-      # URL-encoded × in href
-      assert html =~ ~s(href="#{~p"/species/#{ctx.bebbiana}"}")
-      assert html =~ ~s(href="/species/#{ctx.stellata}")
-    end
-  end
-
-  describe "hybrid species" do
-    test "shows Hybrid badge", %{conn: conn, bebbiana: bebbiana} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{bebbiana}")
-      assert html =~ "Hybrid"
+      refute html =~ ctx.stellata
+      refute html =~ "Closely"
     end
 
-    test "shows hybrid multiply symbol", %{conn: conn, bebbiana: bebbiana} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{bebbiana}")
-      # &times; renders as Unicode ×
-      assert html =~ "×"
+    test "external links: the stored ones and iNaturalist and Wikipedia, by name", %{
+      conn: conn,
+      alba: alba
+    } do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
+
+      section = view |> element("#species-external-links") |> render()
+
+      names =
+        ~r{class="oc-rows-text">\s*(.*?)\s*</span>}s
+        |> Regex.scan(section, capture: :all_but_first)
+        |> Enum.map(&hd/1)
+
+      assert names == ["Flora of North America", "iNaturalist", "Wikipedia"]
+
+      assert has_element?(
+               view,
+               ~s(#species-external-links a[href="https://floranorthamerica.org/x"][target=_blank]),
+               "floranorthamerica.org"
+             )
+
+      assert has_element?(
+               view,
+               ~s(#species-external-links a[href="https://en.wikipedia.org/wiki/Quercus_#{alba}"])
+             )
     end
 
-    test "shows parent species section", %{conn: conn, bebbiana: bebbiana, alba: alba} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{bebbiana}")
-      assert html =~ "Parent Species"
-      assert html =~ alba
-      assert html =~ "macrocarpa"
-    end
-
-    test "parent links point to detail pages", %{conn: conn, bebbiana: bebbiana, alba: alba} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{bebbiana}")
-      assert html =~ ~s(href="/species/#{alba}")
-      assert html =~ ~s(href="/species/macrocarpa")
-    end
-  end
-
-  describe "source tab switching" do
-    test "clicking a source tab shows that source's data", %{conn: conn} = ctx do
+    test "sources: each linked to its page, with its original page", %{conn: conn} = ctx do
       {:ok, view, _html} = live(conn, ~p"/species/#{ctx.alba}")
 
-      # Initially shows the preferred source
-      assert render(view) =~ "Data from #{ctx.ootw.name}"
+      assert has_element?(
+               view,
+               ~s(#species-sources a[href="/sources/#{ctx.ootw.id}"]),
+               ctx.ootw.name
+             )
 
-      view
-      |> element("button[phx-value-id='#{ctx.inat.id}']")
-      |> render_click()
+      assert has_element?(
+               view,
+               ~s(#species-sources a[href="/sources/#{ctx.inat.id}"]),
+               ctx.inat.name
+             )
 
-      assert render(view) =~ "Data from #{ctx.inat.name}"
+      assert has_element?(
+               view,
+               ~s(#species-sources a.oc-src[href="https://oaksoftheworld.fr/quercus_alba.htm"]),
+               "original page"
+             )
+    end
+
+    test "the cite line never doubles the full stop after an authority", %{conn: conn} do
+      for {author, expected} <- [
+            {"Torr.", "Torr. http"},
+            {"Buckley", "Buckley. http"},
+            {nil, ". http"}
+          ] do
+        species = species_fixture(author: author)
+        {:ok, view, _html} = live(conn, ~p"/species/#{species.scientific_name}")
+
+        text =
+          view |> element("#species-cite") |> render() |> String.replace(~r/<[^>]+>/, "")
+
+        text = String.replace(text, ~r/\s+/, " ")
+
+        assert text =~ expected
+        refute text =~ ".."
+      end
+    end
+
+    test "the cite line names the site and the page, never a person", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
+
+      assert has_element?(view, "#species-cite", "Oak Compendium.")
+      assert has_element?(view, "#species-cite .oc-sci-e", alba)
+
+      assert has_element?(
+               view,
+               "#species-cite",
+               "/species/#{alba} (accessed #{Date.utc_today()})"
+             )
+    end
+  end
+
+  describe "photos" do
+    test "the photo column says there are none yet", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
+      assert has_element?(view, "#species-main aside #species-photos", "No photos yet.")
+    end
+  end
+
+  describe "editor actions" do
+    test "a visitor sees no Edit menus", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
+      refute has_element?(view, "#species-edit-menu")
+      refute has_element?(view, "#source-data-menu")
+    end
+
+    test "the title row's Edit menu holds every species action", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = conn |> log_in_user(user_fixture()) |> live(~p"/species/#{alba}")
+
+      assert has_element?(
+               view,
+               ~s(#edit-species-btn[href="/species/#{alba}/edit"]),
+               "Edit species"
+             )
+
+      assert has_element?(view, "#add-photos-btn", "Add photos from iNaturalist…")
+      assert has_element?(view, "#manage-photos-btn", "Manage photos…")
+      assert has_element?(view, "#merge-species-btn", "Make synonym of…")
+      assert has_element?(view, "#delete-species-btn", "Delete species")
+    end
+
+    test "the quiet Edit menu beside the tabs edits and deletes the open source's data",
+         %{
+           conn: conn
+         } = ctx do
+      {:ok, view, _html} = conn |> log_in_user(user_fixture()) |> live(~p"/species/#{ctx.alba}")
+
+      assert has_element?(
+               view,
+               ~s(#source-tabs #source-data-menu #edit-source-data-btn[href="/species/#{ctx.alba}/sources/#{ctx.ootw.id}/edit"]),
+               "Edit #{ctx.ootw.name} data"
+             )
+
+      view |> element("#source-tabs-tab-#{ctx.inat.id}") |> render_click()
+      assert has_element?(view, "#delete-source-data-btn", "Delete #{ctx.inat.name} data")
+
+      view |> element("#delete-source-data-btn") |> render_click()
+      assert has_element?(view, "#delete-source-confirm-modal", ctx.inat.name)
+
+      view |> element("#confirm-delete-source-btn") |> render_click()
+      assert_redirect(view, ~p"/species/#{ctx.alba}")
+      assert Oaks.Species.get_species_full(ctx.alba).species_sources |> length() == 1
+    end
+
+    test "a visitor's forged delete-source event writes nothing", %{conn: conn} = ctx do
+      {:ok, view, _html} = live(conn, ~p"/species/#{ctx.alba}")
+      [ss | _] = Oaks.Species.get_species_full(ctx.alba).species_sources
+
+      render_click(view, "request_delete_source", %{"id" => "#{ss.id}"})
+      render_click(view, "confirm_delete_source", %{})
+
+      assert Oaks.Species.get_species_full(ctx.alba).species_sources |> length() == 2
+    end
+
+    test "Make synonym of… opens the picker", %{conn: conn, alba: alba} do
+      {:ok, view, _html} = conn |> log_in_user(user_fixture()) |> live(~p"/species/#{alba}")
+      view |> element("#merge-species-btn") |> render_click()
+      assert has_element?(view, "#merge-picker-dialog")
+    end
+
+    test "Add source data is offered only while a source is left to add", %{
+      conn: conn,
+      velutina: velutina
+    } do
+      {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
+      refute has_element?(view, "#add-source-btn")
+
+      {:ok, view, _html} = conn |> log_in_user(user_fixture()) |> live(~p"/species/#{velutina}")
+
+      assert has_element?(
+               view,
+               ~s|#species-edit-menu #add-source-btn[href="/species/#{velutina}/sources/new"]|,
+               "Add source data"
+             )
     end
   end
 
@@ -240,7 +644,6 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
 
   describe "synonym redirect" do
     test "redirects to canonical species when synonym is found", %{conn: conn, alba: alba} do
-      # push_navigate causes a live_redirect which we must follow
       path = "/species/#{alba}"
 
       assert {:error, {:live_redirect, %{to: ^path}}} =
@@ -267,6 +670,40 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert has_element?(view, "#delete-references", bebbiana_epithet)
       assert has_element?(view, "#delete-references", "parent")
     end
+
+    test "says the species' photos go with it", %{conn: conn, velutina: velutina} do
+      scope = Oaks.ImagesFixtures.editor_scope()
+      observation = Oaks.ImagesFixtures.observation()
+      species = Oaks.Species.get_species_by_name(velutina)
+
+      for photo <- observation.photos,
+          do: Oaks.ImagesFixtures.import_photo(species, observation, scope, photo)
+
+      {:ok, view, _html} = conn |> log_in_user(user_fixture()) |> live(~p"/species/#{velutina}")
+      render_click(view, "request_delete")
+
+      assert has_element?(view, "#delete-confirm-modal", "Its 2 photos go with it")
+    end
+
+    test "a visitor's forged delete events keep the species and its photos", %{
+      conn: conn,
+      velutina: velutina
+    } do
+      observation = Oaks.ImagesFixtures.observation()
+      species = Oaks.Species.get_species_by_name(velutina)
+
+      image =
+        Oaks.ImagesFixtures.import_photo(species, observation, Oaks.ImagesFixtures.editor_scope())
+
+      {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
+      render_click(view, "request_delete")
+      refute has_element?(view, "#delete-confirm-modal")
+      render_click(view, "confirm_delete")
+
+      assert Oaks.Species.get_species_by_name(velutina)
+      assert Oaks.ImagesFixtures.reload(image)
+      assert Oaks.ImagesFixtures.cleanups_for(image) == []
+    end
   end
 
   describe "malformed stored lists" do
@@ -275,40 +712,17 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       |> Ecto.Changeset.change(
         hybrids: ~s([1, "#{ctx.bebbiana}"]),
         closely_related_to: ~s([{"name": "x"}, "#{ctx.stellata}"]),
-        subspecies_varieties: ~s([null])
+        subspecies_varieties: ~s([null]),
+        external_links: ~s([{"name": 1}, "x"])
       )
       |> Oaks.Repo.update!()
 
       "×" <> bebbiana_epithet = ctx.bebbiana
       {:ok, _view, html} = live(conn, ~p"/species/#{ctx.alba}")
       assert html =~ bebbiana_epithet
-      assert html =~ ctx.stellata
+      assert html =~ "Wikipedia"
     end
   end
 
-  describe "species without sources" do
-    test "shows no source data message", %{conn: conn, velutina: velutina} do
-      {:ok, _view, html} = live(conn, ~p"/species/#{velutina}")
-      assert html =~ "No source data available"
-    end
-
-    test "hides Add source data when unauthenticated", %{conn: conn, velutina: velutina} do
-      {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
-      refute has_element?(view, "#add-source-btn")
-    end
-
-    test "the Edit menu holds Add source data when authenticated", %{
-      conn: conn,
-      velutina: velutina
-    } do
-      conn = log_in_user(conn, user_fixture())
-      {:ok, view, _html} = live(conn, ~p"/species/#{velutina}")
-
-      assert has_element?(
-               view,
-               ~s|#species-edit-menu #add-source-btn[href="/species/#{velutina}/sources/new"]|,
-               "Add source data"
-             )
-    end
-  end
+  defp count(html, needle), do: html |> String.split(needle) |> length() |> Kernel.-(1)
 end

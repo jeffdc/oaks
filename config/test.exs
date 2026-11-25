@@ -50,6 +50,27 @@ config :oaks, :api_token_rate_limits, per_token: 1_000, failures_per_ip: 1_000
 # Compile the dev-only routes (the one-click dev login) so they can be tested.
 config :oaks, dev_routes: true
 
+# Species photo storage is a Mox mock (Oaks.Storage.MockAdapter, test_helper.exs):
+# tests stub it with Oaks.Storage.Local for real files under local_root, or
+# expect failures. Oaks.Storage.S3's own tests reach S3 and CloudFront through
+# Req.Test with fake keys, with no retries.
+config :oaks, :images,
+  adapter: Oaks.Storage.MockAdapter,
+  local_root: Path.expand("../tmp/test-images", __DIR__),
+  cdn_url: "https://images.test",
+  access_key_id: "AKIATEST",
+  secret_access_key: "test-secret",
+  req_options: [plug: {Req.Test, Oaks.Storage.S3}, retry: false]
+
+config :ex_aws, :retries, max_attempts: 1
+
+# Jobs are inserted but never run on their own: tests perform them
+# (Oban.Testing), as a restart would find them.
+config :oaks, Oban, testing: :manual
+
+# iNaturalist is a Req.Test stub (Oaks.INaturalistFixtures), with no retries.
+config :oaks, Oaks.INaturalist, req_options: [plug: {Req.Test, Oaks.INaturalist}, retry: false]
+
 # Record page views inline so no analytics insert outlives its test.
 config :oaks, :analytics_async, false
 

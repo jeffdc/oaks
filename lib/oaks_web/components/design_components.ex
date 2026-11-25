@@ -17,7 +17,7 @@ defmodule OaksWeb.DesignComponents do
 
     * Scientific names are italic in the serif; rank words, authorities and
       the hybrid sign stay roman. Every name goes through `sci_name/1`.
-    * Jeff's words appear in curly quotes and are followed by a
+    * Oak Compendium's own text appears in curly quotes and is followed by a
       `source_mark/1`, every time.
     * Agree, differs and unreviewed are drawn marks (`standing_mark/1`),
       never colours. IUCN status (`iucn_status/1`) is the one categorical
@@ -26,8 +26,12 @@ defmodule OaksWeb.DesignComponents do
   use Phoenix.Component
   use OaksWeb, :verified_routes
 
-  import OaksWeb.CoreComponents, only: [button: 1, header: 1]
+  import OaksWeb.CoreComponents, only: [button: 1, header: 1, icon: 1]
+  import OaksWeb.PhotoViewer, only: [photo_viewer: 1]
 
+  alias Oaks.Images.Attribution
+  alias Oaks.Images.Image
+  alias Oaks.Licenses
   alias Phoenix.LiveView.JS
 
   @doc """
@@ -55,7 +59,8 @@ defmodule OaksWeb.DesignComponents do
   The optional `:siblings` slot adds the menu at the band's right end; its
   `label` reads like "Coccineae · 7 species" and its content is `<li>`
   items, the current taxon as `<span aria-current="page">`. A click
-  outside or Esc closes it. No page uses it yet.
+  outside or Esc closes it. The species page fills it from
+  `Oaks.Species.siblings/1`.
 
   With `inline`, the band is an ochre plate the width of its path rather
   than a full-width field, and it wraps rather than scrolls: for showing
@@ -424,22 +429,26 @@ defmodule OaksWeb.DesignComponents do
   end
 
   @doc """
-  Renders a source mark: the pencil-blue link that follows every quote of
-  Jeff's and every sourced value. Without `href` or `navigate` it renders
-  as plain text in the same style, for a source with no page yet.
+  Renders a source mark: the pencil-blue link that follows every Oak
+  Compendium quote and every sourced value. Without `href`, `navigate` or
+  `patch` it renders as plain text in the same style, for a source with no
+  page yet. `patch` stays on the page: the species title's common name
+  opens its source's tab.
 
   ## Examples
 
       <q>buds looks glabrous and pretty small.</q>
       <.source_mark href="https://www.inaturalist.org/observations/190127456">i465271504</.source_mark>
+      <.source_mark patch={~p"/species/shumardii?source=2"}>Oaks of the World</.source_mark>
   """
   attr :href, :string, default: nil
   attr :navigate, :string, default: nil
+  attr :patch, :string, default: nil
   attr :title, :string, default: nil
   attr :class, :any, default: nil
   slot :inner_block, required: true
 
-  def source_mark(%{href: nil, navigate: nil} = assigns) do
+  def source_mark(%{href: nil, navigate: nil, patch: nil} = assigns) do
     ~H"""
     <span class={["oc-src", @class]} title={@title}>{render_slot(@inner_block)}</span>
     """
@@ -447,7 +456,13 @@ defmodule OaksWeb.DesignComponents do
 
   def source_mark(assigns) do
     ~H"""
-    <.link class={["oc-src", @class]} href={@href} navigate={@navigate} title={@title}>
+    <.link
+      class={["oc-src", @class]}
+      href={@href}
+      navigate={@navigate}
+      patch={@patch}
+      title={@title}
+    >
       {render_slot(@inner_block)}
     </.link>
     """
@@ -1104,6 +1119,655 @@ defmodule OaksWeb.DesignComponents do
         <.button href={~p"/"}>Home</.button>
       </:actions>
     </.error_notice>
+    """
+  end
+
+  # -- Photo editing (the species page's Add photos and Manage photos
+  # dialogs; docs/species-photos-plan.md, Phase 5) --
+
+  @doc """
+  Renders a grid of photos to pick from, three to a row, each a
+  `photo_tile/1`: an iNaturalist observation's photos in the Add photos
+  dialog. Pass `aria-live="polite"` while imports run, so their progress
+  is read out.
+
+  ## Examples
+
+      <.photo_picker id="inat-photos">
+        <:meta>janedoe · Blue Ridge, VA · 2026-05-04</:meta>
+        <.photo_tile src={photo.thumbnail_url} label="Photo 1, CC-BY-NC" name="photo_ids[]" value={1}>
+          CC-BY-NC
+        </.photo_tile>
+      </.photo_picker>
+  """
+  attr :id, :string, required: true
+  attr :class, :any, default: nil
+  attr :rest, :global
+  slot :meta, doc: "a line above the photos: the observation's observer, place, date and taxon"
+  slot :inner_block, required: true
+
+  def photo_picker(assigns) do
+    ~H"""
+    <div class={["oc-photo-pick", @class]}>
+      <p :for={meta <- @meta} class="oc-photo-pick-meta">{render_slot(meta)}</p>
+      <ul id={@id} {@rest}>{render_slot(@inner_block)}</ul>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders one photo of a `photo_picker/1`: a square thumbnail and, under
+  it, its note (the license, a `status_tag/1` stamp, or a `photo_status/1`).
+
+  With `name`, the tile is a checkbox labelled `label`, inked round when
+  picked. Without it, the tile only shows the photo, `off` dims it (a photo
+  already added) and its note may hold a button (Retry).
+
+  ## Examples
+
+      <.photo_tile src={url} label="Photo 4, All rights reserved" name="photo_ids[]" value={4}>
+        <.status_tag>All rights reserved</.status_tag>
+      </.photo_tile>
+
+      <.photo_tile src={url} label="Photo 5" off>
+        <.photo_status status="exists" />
+      </.photo_tile>
+  """
+  attr :src, :string, default: nil, doc: "the thumbnail's URL; none draws an empty tile"
+  attr :label, :string, required: true, doc: "names the photo, for the checkbox or the image"
+  attr :name, :string, default: nil, doc: "the checkbox's name: the photo can be picked"
+  attr :value, :any, default: nil
+  attr :checked, :boolean, default: false
+  attr :off, :boolean, default: false, doc: "dimmed: the photo can't be picked"
+  attr :rest, :global, doc: "attributes for the checkbox"
+  slot :inner_block, doc: "the note under the photo"
+
+  def photo_tile(%{name: name} = assigns) when is_binary(name) do
+    ~H"""
+    <li class={["oc-photo-tile", @off && "oc-photo-tile-off"]}>
+      <label>
+        <span class="oc-photo-tile-image">
+          <img :if={@src} src={@src} alt="" loading="lazy" />
+          <input
+            type="checkbox"
+            name={@name}
+            value={@value}
+            checked={@checked}
+            aria-label={@label}
+            {@rest}
+          />
+        </span>
+        <span :if={@inner_block != []} class="oc-photo-tile-note">{render_slot(@inner_block)}</span>
+      </label>
+    </li>
+    """
+  end
+
+  def photo_tile(assigns) do
+    ~H"""
+    <li class={["oc-photo-tile", @off && "oc-photo-tile-off"]}>
+      <span class="oc-photo-tile-image">
+        <img :if={@src} src={@src} alt={@label} loading="lazy" />
+        <span :if={!@src} class="sr-only">{@label}</span>
+      </span>
+      <div :if={@inner_block != []} class="oc-photo-tile-note">{render_slot(@inner_block)}</div>
+    </li>
+    """
+  end
+
+  @photo_statuses %{
+    "added" => {"agree", "Added"},
+    "exists" => {"agree", "Already added"},
+    "adding" => {"open", "Adding…"},
+    "failed" => {"differs", "Failed"}
+  }
+
+  @doc """
+  Renders where a photo's import stands, as a `standing_mark/1` and its
+  word: `added` (Added), `exists` (Already added), `adding` (Adding…) or
+  `failed` (Failed). `error` says what went wrong, on its own line; the
+  `:action` slot holds its one button (Retry).
+
+  ## Examples
+
+      <.photo_status status="adding" />
+
+      <.photo_status status="failed" error="iNaturalist no longer has this photo (HTTP 404).">
+        <:action><.button size="compact" phx-click="retry">Retry</.button></:action>
+      </.photo_status>
+  """
+  attr :status, :string, required: true, values: Map.keys(@photo_statuses)
+  attr :error, :string, default: nil
+  slot :action, doc: "one button, such as Retry"
+
+  def photo_status(assigns) do
+    {standing, word} = Map.fetch!(@photo_statuses, assigns.status)
+    assigns = assign(assigns, standing: standing, word: word)
+
+    ~H"""
+    <span class="oc-photo-status">
+      <.standing_mark standing={@standing}>{@word}</.standing_mark>
+      <span :if={@error} class="oc-photo-status-error">{@error}</span>
+      <span :for={action <- @action} class="oc-photo-status-action">{render_slot(action)}</span>
+    </span>
+    """
+  end
+
+  @doc """
+  Renders a photo's credit: its creator and its license, as a dialog lists
+  it. A `reserved` photo (All Rights Reserved, used with the creator's
+  permission) is marked © and its license set in bold.
+
+  ## Examples
+
+      <.photo_credit creator="janedoe - Jane Doe" license="CC-BY-NC" />
+      <.photo_credit creator="janedoe" license="All rights reserved, used with the creator's permission" reserved />
+  """
+  attr :creator, :string, default: nil
+  attr :license, :string, default: nil
+  attr :reserved, :boolean, default: false
+
+  def photo_credit(assigns) do
+    ~H"""
+    <span class="oc-photo-credit">
+      <span :if={@creator}>{if @reserved, do: "© "}{@creator}</span>
+      <strong :if={@license && @reserved}>{@license}</strong>
+      <span :if={@license && !@reserved}>{@license}</span>
+    </span>
+    """
+  end
+
+  @doc """
+  Renders a notice set between two 2px ink rules: a consequence inside a
+  dialog that the editor must read, and confirm with the `:confirm` slot's
+  checkbox, before the dialog's action is enabled (a photo whose creator
+  keeps every right).
+
+  ## Examples
+
+      <.ruled_notice id="permission-notice">
+        <p><strong>Photo 4 is All rights reserved.</strong> Its creator keeps every right to it.</p>
+        <:confirm>
+          <.input type="checkbox" name="permission" label="The creator has given permission to use this photo." />
+        </:confirm>
+      </.ruled_notice>
+  """
+  attr :id, :string, default: nil
+  attr :class, :any, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+  slot :confirm, doc: "the checkbox the editor ticks to confirm"
+
+  def ruled_notice(assigns) do
+    ~H"""
+    <div id={@id} class={["oc-ruled-notice", @class]} {@rest}>
+      {render_slot(@inner_block)}
+      <div :for={confirm <- @confirm} class="oc-ruled-notice-confirm">{render_slot(confirm)}</div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a list of photos an editor puts in order, each a `photo_row/1`:
+  the Manage photos dialog. Dragging a row's handle, or pressing Up or Down
+  on it, moves the row, and the list sends `on_reorder` with
+  `%{"order" => ids}` (each row's `photo_id`, as strings, in their new
+  order) to the LiveView or LiveComponent it is rendered in (`target`) by
+  the SortablePhotos hook in assets/js/app.js. The server's next render
+  settles the order.
+
+  ## Examples
+
+      <.photo_list id="manage-photos" on_reorder="reorder_photos">
+        <.photo_row :for={image <- @images} id={"photo-\#{image.id}"} photo_id={image.id} ...>
+          ...
+        </.photo_row>
+      </.photo_list>
+  """
+  attr :id, :string, required: true
+  attr :on_reorder, :string, required: true, doc: "the event sent with the new order"
+  attr :target, :any, default: nil, doc: "the LiveComponent it is rendered in (`@myself`)"
+  slot :inner_block, required: true
+
+  def photo_list(assigns) do
+    ~H"""
+    <ul
+      id={@id}
+      class="oc-photo-list"
+      phx-hook="SortablePhotos"
+      phx-target={@target}
+      data-event={@on_reorder}
+    >
+      {render_slot(@inner_block)}
+    </ul>
+    """
+  end
+
+  @doc """
+  Renders one photo of a `photo_list/1`: its drag handle, a square
+  thumbnail, its caption field (the inner block) and, under that, its meta
+  line (`:meta`: a `photo_credit/1` or a `photo_status/1`) ending in its
+  Delete button, which runs `on_delete`. A `muted` row (an import still
+  adding or failed) dims its thumbnail.
+
+  ## Examples
+
+      <.photo_row
+        id="photo-12"
+        photo_id={12}
+        src={Image.url(image, :small)}
+        label="Photo 1"
+        on_delete={JS.push("request_delete_photo", value: %{id: 12})}
+      >
+        <form phx-change="save_caption">...</form>
+        <:meta><.photo_credit creator="janedoe" license="CC-BY-NC" /></:meta>
+      </.photo_row>
+  """
+  attr :id, :string, required: true
+  attr :photo_id, :any, required: true
+  attr :label, :string, required: true, doc: "names the photo, as in \"Photo 2\""
+  attr :src, :string, default: nil, doc: "the thumbnail's URL; none draws an empty tile"
+  attr :muted, :boolean, default: false
+  attr :on_delete, :any, required: true, doc: "the Delete button's phx-click"
+  slot :inner_block, doc: "the caption field"
+  slot :meta, doc: "the credit, or the import's status"
+
+  def photo_row(assigns) do
+    ~H"""
+    <li id={@id} data-photo-id={@photo_id} class={["oc-photo-row", @muted && "oc-photo-row-muted"]}>
+      <button
+        type="button"
+        class="oc-photo-row-grip"
+        data-grip
+        draggable="true"
+        aria-label={"Move #{@label}: Up and Down arrow keys"}
+        title="Drag to reorder"
+      />
+      <span class="oc-photo-row-thumb">
+        <img :if={@src} src={@src} alt={@label} loading="lazy" />
+      </span>
+      <div class="oc-photo-row-body">
+        {render_slot(@inner_block)}
+        <div class="oc-photo-row-meta">
+          {render_slot(@meta)}
+          <button
+            type="button"
+            class="oc-photo-row-delete"
+            phx-click={@on_delete}
+            aria-label={"Delete #{@label}"}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </li>
+    """
+  end
+
+  # -- Species photos (docs/species-photos-plan.md, Phase 6) --
+
+  @doc """
+  Renders a species' photos in the photo viewer (`OaksWeb.PhotoViewer`,
+  the component shared with gallformers), in this system's colours and
+  type: each ready photo's medium size on the stage and small size in the
+  rail, opening full size at large; its caption; and its credit: the
+  creator, the license (`Oaks.Images.Attribution.license_label/1`, so an
+  All Rights Reserved photo reads "All rights reserved, used with the
+  creator's permission") and a link to the iNaturalist observation.
+
+  Pass `Oaks.Images.list_for_species/1`; any photo that isn't ready is
+  left out. With none, it reads "No photos yet." (hidden on phones).
+
+  ## Examples
+
+      <.species_photos id="species-photos" images={@images} name="Quercus shumardii" />
+  """
+  attr :id, :string, required: true
+  attr :images, :list, required: true, doc: "`Oaks.Images.Image`s, in order"
+  attr :name, :string, required: true, doc: "the species' name as plain text, for labels"
+  attr :class, :any, default: nil, doc: "layout only"
+
+  def species_photos(assigns) do
+    assigns = assign(assigns, photos: Enum.flat_map(assigns.images, &viewer_photo/1))
+
+    ~H"""
+    <.photo_viewer id={@id} photos={@photos} label={@name} class={["oc-photos", @class]} />
+    """
+  end
+
+  defp viewer_photo(%Image{status: "ready"} = image) do
+    [
+      %{
+        src: Image.url(image, :medium),
+        thumb: Image.url(image, :small),
+        full: Image.url(image, :large),
+        caption: image.caption,
+        creator: image.creator,
+        license: Attribution.license_label(image),
+        licenselink: image.licenselink,
+        reserved: Licenses.needs_permission?(image.license),
+        sourcelink: image.sourcelink,
+        source_label: "iNaturalist observation"
+      }
+    ]
+  end
+
+  defp viewer_photo(_image), do: []
+
+  # -- The species page (docs/species-photos-plan.md, Phase 7) --
+
+  @doc """
+  Sets a taxon's photos beside its text, in the page's frame: the photos
+  in a 300px column on the left (240px under 1180px), sticky while the
+  text scrolls past, the text in the rest. On phones it is one column,
+  the text first and the photos under it.
+
+  ## Examples
+
+      <.photo_columns>
+        <:photos><.species_photos id="species-photos" images={@images} name={@name} /></:photos>
+        <.source_tabs ...>...</.source_tabs>
+      </.photo_columns>
+  """
+  attr :id, :string, default: nil
+  attr :label, :string, default: "Photos", doc: "the photo column's accessible name"
+  slot :photos, required: true, doc: "the photos: a `species_photos/1`"
+  slot :inner_block, required: true, doc: "the text"
+
+  def photo_columns(assigns) do
+    ~H"""
+    <div id={@id} class="oc-photo-cols">
+      <div class="oc-photo-cols-text">{render_slot(@inner_block)}</div>
+      <aside class="oc-photo-cols-photos" aria-label={@label}>{render_slot(@photos)}</aside>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders text by source in tabs: one tab per source, in the order given,
+  on a 2px rule, the open tab underlined in ochre; then the open source's
+  text, each field a label beside its text on a hairline (stacked on
+  phones), set as that source's prose. The tab head attributes it, so the
+  text takes no quotation marks and no source mark.
+
+  The open tab carries one small icon link: `original` (the source's own
+  page for this taxon, an external link) when it has one, otherwise
+  `about` (the source's page on the site). A click on a tab, or Left and
+  Right on a focused tab, sends `on_select` with `%{"id" => tab id}`; the
+  page opens that tab. With no `:field` the open tab reads "No text from
+  {source} yet."
+
+  The `:action` slots stand at the strip's right end, in order: the
+  editor's quiet `edit_menu/1` for the open source, then the Compare
+  button. On phones the tabs scroll sideways on their rule, fading at the
+  right edge, and the actions go on the row under them.
+
+  ## Examples
+
+      <.source_tabs id="source-tabs" selected={3} on_select="select_source">
+        <:tab id={3} name="Oak Compendium" about={~p"/sources/3"} />
+        <:tab id={2} name="Oaks of the World" original="https://oaksoftheworld.fr/quercus_shumardii.htm" />
+        <:action><.compare_button navigate={~p"/species/shumardii/compare"}>Compare sources</.compare_button></:action>
+        <:field label="Leaves"><div class="oc-prose">...</div></:field>
+      </.source_tabs>
+  """
+  attr :id, :string, required: true
+  attr :label, :string, default: "Sources", doc: "the tab list's accessible name"
+  attr :selected, :any, required: true, doc: "the open tab's id"
+  attr :on_select, :string, required: true, doc: "the event a tab sends, with its id"
+
+  slot :tab, required: true, doc: "one source, in order" do
+    attr :id, :any, required: true
+    attr :name, :string, required: true, doc: "the source's name, set as `work_title/1`"
+    attr :original, :string, doc: "the source's own page for this taxon"
+    attr :about, :string, doc: "the source's page on the site, when there is no original"
+  end
+
+  slot :action, doc: "at the strip's right end: the quiet edit menu, then Compare"
+
+  slot :field, doc: "one field of the open source's text" do
+    attr :label, :string, required: true
+  end
+
+  def source_tabs(assigns) do
+    assigns = assign(assigns, :open, Enum.find(assigns.tab, &(&1.id == assigns.selected)))
+
+    ~H"""
+    <section id={@id} class="oc-tabs" aria-label={@label}>
+      <div class="oc-tabs-strip">
+        <div
+          id={"#{@id}-list"}
+          class="oc-tabs-list"
+          role="tablist"
+          aria-label={@label}
+          phx-hook="Tablist"
+        >
+          <span :for={tab <- @tab} class="oc-tab">
+            <button
+              type="button"
+              role="tab"
+              id={"#{@id}-tab-#{tab.id}"}
+              aria-selected={to_string(tab.id == @selected)}
+              aria-controls={"#{@id}-panel"}
+              tabindex={if tab.id == @selected, do: "0", else: "-1"}
+              phx-click={@on_select}
+              phx-value-id={tab.id}
+            >
+              <.work_title title={tab.name} />
+            </button>
+            <.tab_link :if={tab.id == @selected} tab={tab} />
+          </span>
+        </div>
+        <div :if={@action != []} class="oc-tabs-actions">
+          <span :for={action <- @action}>{render_slot(action)}</span>
+        </div>
+      </div>
+      <div
+        id={"#{@id}-panel"}
+        class="oc-tabs-panel"
+        role="tabpanel"
+        aria-labelledby={@open && "#{@id}-tab-#{@open.id}"}
+      >
+        <div :for={field <- @field} class="oc-tabs-field">
+          <h3>{field.label}</h3>
+          <div class="oc-tabs-value">{render_slot(field)}</div>
+        </div>
+        <p :if={@field == [] && @open} class="oc-tabs-empty">
+          No text from <.work_title title={@open.name} /> yet.
+        </p>
+      </div>
+    </section>
+    """
+  end
+
+  attr :tab, :map, required: true
+
+  defp tab_link(%{tab: %{original: url}} = assigns) when is_binary(url) and url != "" do
+    ~H"""
+    <a
+      href={@tab.original}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="oc-tab-link"
+      title={"Original page at #{@tab.name}"}
+      aria-label={"Original page at #{@tab.name}"}
+    >
+      <.icon name="hero-arrow-top-right-on-square-mini" class="oc-tab-icon" />
+    </a>
+    """
+  end
+
+  defp tab_link(%{tab: %{about: path}} = assigns) when is_binary(path) do
+    ~H"""
+    <.link
+      navigate={@tab.about}
+      class="oc-tab-link"
+      title={"About #{@tab.name}"}
+      aria-label={"About #{@tab.name}"}
+    >
+      <.icon name="hero-information-circle-mini" class="oc-tab-icon" />
+    </.link>
+    """
+  end
+
+  defp tab_link(assigns), do: ~H""
+
+  @doc """
+  Renders rows on hairlines in three columns (two under 1180px, one on
+  phones), or in one with `columns={1}`: the names, links and works listed
+  under a taxon (its varieties, external links, sources). Each `:row` is a
+  line of Archivo 15px; a name in it is `sci_name/1` at `size="title"`.
+
+  With `href` (an external link, opening in a new tab) or `navigate`, the
+  row is one link. `note` follows in ink-3, inside the link: a link's
+  site.
+
+  ## Examples
+
+      <.ruled_rows id="species-subspecies-list">
+        <:row :for={name <- @varieties}><.sci_name name={name} abbreviate size="title" /></:row>
+      </.ruled_rows>
+
+      <.ruled_rows id="species-external-links-list">
+        <:row href="https://floranorthamerica.org/Quercus_shumardii" note="floranorthamerica.org">
+          Flora of North America
+        </:row>
+      </.ruled_rows>
+  """
+  attr :id, :string, default: nil
+  attr :columns, :integer, values: [1, 3], default: 3
+
+  slot :row, required: true do
+    attr :href, :string, doc: "an external link: the whole row"
+    attr :navigate, :string, doc: "a link on the site: the whole row"
+    attr :note, :string, doc: "a short note after the row's text, such as a link's site"
+  end
+
+  def ruled_rows(assigns) do
+    ~H"""
+    <ul id={@id} class={["oc-rows", @columns == 3 && "oc-rows-3"]}>
+      <li :for={row <- @row}>
+        <a
+          :if={row[:href]}
+          href={row[:href]}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="oc-rows-link"
+        >
+          <span class="oc-rows-text">{render_slot(row)}</span>
+          <span :if={row[:note]} class="oc-rows-note">{row[:note]}</span>
+        </a>
+        <.link :if={!row[:href] && row[:navigate]} navigate={row[:navigate]} class="oc-rows-link">
+          <span class="oc-rows-text">{render_slot(row)}</span>
+          <span :if={row[:note]} class="oc-rows-note">{row[:note]}</span>
+        </.link>
+        <%= if !row[:href] && !row[:navigate] do %>
+          {render_slot(row)}
+          <span :if={row[:note]} class="oc-rows-note">{row[:note]}</span>
+        <% end %>
+      </li>
+    </ul>
+    """
+  end
+
+  @doc """
+  Renders a taxon's hybrids as `ruled_rows/1`: each hybrid's name
+  (Q. × name, linked to its page) and, after it, "with" its other parent
+  (linked, no genus), when that is known.
+
+  ## Examples
+
+      <.hybrid_rows id="species-hybrids-list" hybrids={[%{name: "× riparia", other: "rubra"}]} />
+  """
+  attr :id, :string, default: nil
+  attr :hybrids, :list, required: true, doc: "maps with `name` and `other` (nil when unknown)"
+
+  def hybrid_rows(assigns) do
+    ~H"""
+    <.ruled_rows id={@id}>
+      <:row :for={hybrid <- @hybrids}>
+        <.link navigate={~p"/species/#{hybrid.name}"} class="oc-rows-name">
+          <.sci_name name={hybrid.name} hybrid abbreviate size="title" />
+        </.link>
+        <span :if={hybrid.other} class="oc-rows-with">
+          with
+          <.link navigate={~p"/species/#{hybrid.other}"}>
+            <.sci_name name={hybrid.other} genus={nil} weight="regular" />
+          </.link>
+        </span>
+      </:row>
+    </.ruled_rows>
+    """
+  end
+
+  @doc """
+  Renders a run of names in the reading serif, separated by commas: a
+  taxon's synonyms, each a `sci_name/1` with its authority. The comma ends
+  the item before it, so a wrapped line never starts with one.
+
+  ## Examples
+
+      <.comma_list id="species-synonyms-list">
+        <:item><.sci_name name="schneckii" abbreviate /></:item>
+        <:item><.sci_name name="texana Auctores" abbreviate /></:item>
+      </.comma_list>
+  """
+  attr :id, :string, default: nil
+  slot :item, required: true
+
+  def comma_list(assigns) do
+    ~H"""
+    <p id={@id} class="oc-comma-list"><span :for={item <- @item}>{render_slot(item)}</span></p>
+    """
+  end
+
+  @doc """
+  Renders the not-covered notice (DESIGN.md): on a taxon the Oak
+  Compendium doesn't cover yet, under the title row, a paragraph between
+  two 2px ink rules opening with the bold statement that it has no account
+  of this oak yet; the inner block follows it. It adds to the page and
+  never replaces any of it.
+
+  ## Examples
+
+      <.not_covered_notice id="not-covered">
+        Everything on this page comes from the sources listed, shown as they wrote it.
+      </.not_covered_notice>
+  """
+  attr :id, :string, default: nil
+  slot :inner_block
+
+  def not_covered_notice(assigns) do
+    ~H"""
+    <.ruled_notice id={@id} class="oc-ruled-notice-page">
+      <p>
+        <strong>The Oak Compendium has no account of this oak yet.</strong>
+        {render_slot(@inner_block)}
+      </p>
+    </.ruled_notice>
+    """
+  end
+
+  @doc """
+  Renders the cite-this-page line: "Cite" in the section label's voice,
+  then the citation in the serif, standing on a 2px rule. The site names
+  itself, never a person (Phase 4 decisions).
+
+  ## Examples
+
+      <.cite_line id="cite">
+        Oak Compendium. <.sci_name name="shumardii" author="Buckley" />.
+        https://oakcompendium.org/species/shumardii (accessed 2026-11-25).
+      </.cite_line>
+  """
+  attr :id, :string, default: nil
+  slot :inner_block, required: true
+
+  def cite_line(assigns) do
+    ~H"""
+    <p id={@id} class="oc-cite">
+      <span class="oc-cite-label">Cite</span> {render_slot(@inner_block)}
+    </p>
     """
   end
 end

@@ -112,6 +112,34 @@ defmodule OaksWeb.SpeciesMergeLiveTest do
     end
   end
 
+  describe "photos" do
+    setup %{velutina: velutina, rubra: rubra} do
+      scope = Oaks.ImagesFixtures.editor_scope()
+      observation = Oaks.ImagesFixtures.observation()
+      [shared, own] = observation.photos
+      source = Species.get_species_by_name(velutina)
+      target = Species.get_species_by_name(rubra)
+
+      dup = Oaks.ImagesFixtures.import_photo(source, observation, scope, shared)
+      {:ok, _} = Oaks.Images.update_caption(dup, "Galls on twig", scope)
+      Oaks.ImagesFixtures.import_photo(source, observation, scope, own)
+      Oaks.ImagesFixtures.import_photo(target, observation, scope, shared)
+      %{shared: shared}
+    end
+
+    test "the preview warns of duplicate photos and the captions they lose", ctx do
+      {:ok, view, _html} =
+        ctx.conn |> authenticated_conn() |> live(~p"/species/#{ctx.velutina}/merge/#{ctx.rubra}")
+
+      assert has_element?(view, "#photo-duplicates-notice", "iNaturalist photo #{ctx.shared.id}")
+      assert has_element?(view, "#photo-duplicates-notice", "Galls on twig")
+
+      render_click(view, "show_confirm")
+      assert has_element?(view, "#merge-confirm-modal", "Moves 1 photo after the target")
+      assert has_element?(view, "#merge-confirm-modal", "Deletes 1 duplicate photo")
+    end
+  end
+
   describe "merge execution" do
     test "executes merge and redirects to target", %{conn: conn, velutina: velutina, rubra: rubra} do
       {:ok, view, _html} =

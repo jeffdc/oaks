@@ -153,13 +153,13 @@ defmodule OaksWeb.CoreComponentsTest do
 
   describe "table/1" do
     test "renders a ruled table with row headers, a voice column and stacking labels" do
-      assigns = %{rows: [%{trait: "Buds", jeff: "buds looks glabrous"}]}
+      assigns = %{rows: [%{trait: "Buds", oak_compendium: "buds looks glabrous"}]}
 
       html =
         rendered_to_string(~H"""
         <CoreComponents.table id="marks" rows={@rows} stack>
           <:col :let={row} label="Trait" row_header>{row.trait}</:col>
-          <:col :let={row} label="Jeff Clark" voice>{row.jeff}</:col>
+          <:col :let={row} label="Oak Compendium" voice>{row.oak_compendium}</:col>
         </CoreComponents.table>
         """)
 
@@ -167,7 +167,9 @@ defmodule OaksWeb.CoreComponentsTest do
       assert html =~ ~s(<table class="oc-table">)
       assert html =~ ~s(<th scope="col">Trait</th>)
       assert html =~ ~r{<th scope="row"[^>]*>\s*Buds\s*</th>}
-      assert html =~ ~r{<td data-label="Jeff Clark" class="oc-voice\s*">\s*buds looks glabrous}
+
+      assert html =~
+               ~r{<td data-label="Oak Compendium" class="oc-voice\s*">\s*buds looks glabrous}
     end
 
     test "without stack the table only scrolls" do

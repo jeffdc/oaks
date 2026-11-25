@@ -152,6 +152,17 @@ defmodule OaksWeb.CoreComponents do
   <.input name="my-input" errors={["oh no!"]} />
   ```
 
+  ## A button beside the field
+
+  A text field's `:action` is its one button, on the field's line at the
+  right, such as Load beside an observation's address.
+
+  ```heex
+  <.input name="observation" label="iNaturalist observation" value={@query}>
+    <:action><.button type="submit">Load</.button></:action>
+  </.input>
+  ```
+
   ## Select type
 
   When using `type="select"`, you must pass the `options` and optionally
@@ -188,6 +199,9 @@ defmodule OaksWeb.CoreComponents do
   attr :rest, :global,
     include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
                 multiple pattern placeholder readonly required rows size step)
+
+  slot :action,
+    doc: "a text field's one button, on its line at the right (Load beside an observation field)"
 
   def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
     errors = if Phoenix.Component.used_input?(field), do: field.errors, else: []
@@ -279,6 +293,31 @@ defmodule OaksWeb.CoreComponents do
     """
   end
 
+  # A text field with its button on the same line: the label is its own
+  # element, so the button isn't part of it.
+  def input(%{action: [_ | _]} = assigns) do
+    assigns = assign_new(assigns, :id, fn -> nil end)
+
+    ~H"""
+    <div class="oc-field">
+      <label :if={@label} for={@id} class="oc-label">{@label}</label>
+      <div class="oc-input-row">
+        <input
+          type={@type}
+          name={@name}
+          id={@id}
+          value={HtmlForm.normalize_value(@type, @value)}
+          class={[@class || "oc-input", @errors != [] && @error_class]}
+          aria-invalid={@errors != [] && "true"}
+          {@rest}
+        />
+        {render_slot(@action)}
+      </div>
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
+    """
+  end
+
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
@@ -328,7 +367,11 @@ defmodule OaksWeb.CoreComponents do
       stamps (`<.status_tag>`, `<.iucn_status>`), links. It wraps under
       the title only when the line has no room for it. Each entry is one
       item, so `:if` works per entry.
-    * `:subtitle` is a sentence describing the page, under the title line.
+    * `:common_name` is a taxon's common name, in Archivo 700 21px after
+      its name (and authority), followed by the `<.source_mark>` of the
+      source it comes from; the meta follows it.
+    * `:subtitle` is a sentence describing the page, under the title line
+      (a hybrid's parents, linked).
     * `:actions` holds the page's `<.edit_menu>`, editor-only, at the
       right on the title's first baseline. It never wraps: the title and
       meta take the rest of the row, and with no actions (logged out) the
@@ -363,6 +406,9 @@ defmodule OaksWeb.CoreComponents do
   slot :meta,
     doc: "one item on the title's line, after the title: a kind word, count, byline or stamp"
 
+  slot :common_name,
+    doc: "a taxon's common name, after its name, with the `<.source_mark>` of its source"
+
   slot :subtitle, doc: "a sentence describing the page, under the title line"
   slot :actions, doc: "the page's `<.edit_menu>`, at the right on the title's first baseline"
 
@@ -372,6 +418,9 @@ defmodule OaksWeb.CoreComponents do
       <div class="oc-title-text">
         <div class="oc-title-line">
           <h1>{render_slot(@inner_block)}</h1>
+          <span :for={common_name <- @common_name} class="oc-title-cn">
+            {render_slot(common_name)}
+          </span>
           <div :if={@meta != []} class="oc-title-meta">
             <span :for={meta <- @meta}>{render_slot(meta)}</span>
           </div>
@@ -412,6 +461,7 @@ defmodule OaksWeb.CoreComponents do
       <.edit_menu id="species-edit-menu">
         <:item navigate={~p"/species/shumardii/edit"} id="edit-species-btn">Edit species</:item>
         <:item click="show_merge_picker">Make synonym of…</:item>
+        <:item click="open_manage_photos" note="1 failed">Manage photos…</:item>
         <:item click="request_delete_taxon" values={%{id: 12}}>Delete taxon</:item>
       </.edit_menu>
 
@@ -432,6 +482,7 @@ defmodule OaksWeb.CoreComponents do
     attr :method, :string
     attr :click, :string, doc: "the event the item's button sends"
     attr :values, :map, doc: "phx-value-* params sent with `click`"
+    attr :note, :string, doc: "a short note after the label, such as \"1 failed\""
   end
 
   def edit_menu(assigns) do
@@ -451,7 +502,7 @@ defmodule OaksWeb.CoreComponents do
       <ul class="oc-edit-menu-list">
         <li :for={item <- @item}>
           <.link :if={item[:navigate]} id={item[:id]} navigate={item[:navigate]}>
-            {render_slot(item)}
+            {render_slot(item)}<.menu_note note={item[:note]} />
           </.link>
           <.link
             :if={!item[:navigate] && item[:href]}
@@ -459,7 +510,7 @@ defmodule OaksWeb.CoreComponents do
             href={item[:href]}
             method={item[:method] || "get"}
           >
-            {render_slot(item)}
+            {render_slot(item)}<.menu_note note={item[:note]} />
           </.link>
           <button
             :if={!item[:navigate] && !item[:href]}
@@ -468,11 +519,19 @@ defmodule OaksWeb.CoreComponents do
             phx-click={JS.push_focus(to: "##{@id} > summary") |> JS.push(item[:click])}
             {phx_values(item[:values])}
           >
-            {render_slot(item)}
+            {render_slot(item)}<.menu_note note={item[:note]} />
           </button>
         </li>
       </ul>
     </details>
+    """
+  end
+
+  attr :note, :string, default: nil
+
+  defp menu_note(assigns) do
+    ~H"""
+    <span :if={@note} class="oc-edit-menu-note">{@note}</span>
     """
   end
 
@@ -487,7 +546,7 @@ defmodule OaksWeb.CoreComponents do
 
     * `row_header` makes the column's cells row headers (`<th scope="row">`),
       as for the trait column of a field-marks table.
-    * `voice` sets the column in the reading serif, for Jeff's words.
+    * `voice` sets the column in the reading serif, for Oak Compendium's own text.
 
   With `stack`, each row becomes one block on phones, every cell labelled
   with its column's label; without it the table scrolls sideways.
@@ -501,7 +560,7 @@ defmodule OaksWeb.CoreComponents do
 
       <.table id="field-marks" rows={@traits} stack>
         <:col :let={t} label="Trait" row_header>{t.name}</:col>
-        <:col :let={t} label="Jeff Clark" voice>...</:col>
+        <:col :let={t} label="Oak Compendium" voice>...</:col>
         <:col :let={t} label="Other sources">...</:col>
       </.table>
   """
@@ -859,7 +918,15 @@ defmodule OaksWeb.CoreComponents do
       time: 150,
       transition: {"transition-opacity ease-out duration-150", "opacity-0", "opacity-100"}
     )
-    |> show("##{id}-wrap")
+    # The panel is a flex column (.oc-modal-panel): shown as a block, its
+    # body wouldn't scroll and a tall dialog's actions would fall off the
+    # window.
+    |> JS.show(
+      to: "##{id}-wrap",
+      display: "flex",
+      time: 150,
+      transition: {"transition-opacity ease-out duration-150", "opacity-0", "opacity-100"}
+    )
     |> JS.add_class("overflow-hidden", to: "body")
     |> JS.focus_first(to: "##{id}-wrap")
   end

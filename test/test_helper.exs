@@ -2,4 +2,7 @@
 # (max_cases: 1) so concurrent test cases never race on the shared sandbox
 # connection. Per-file async is independently blocked by DataCase.
 ExUnit.start(max_cases: 1)
+
+# The species photo store in tests (config/test.exs).
+Mox.defmock(Oaks.Storage.MockAdapter, for: Oaks.Storage.Adapter)
 Ecto.Adapters.SQL.Sandbox.mode(Oaks.Repo, :manual)
