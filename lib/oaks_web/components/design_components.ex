@@ -1471,8 +1471,8 @@ defmodule OaksWeb.DesignComponents do
   @doc """
   Renders a species' photos in the photo viewer (`OaksWeb.PhotoViewer`,
   the component shared with gallformers), in this system's colours and
-  type: each ready photo's medium size on the stage and small size in the
-  rail, opening full size at large; its caption; and its credit: the
+  type: each ready photo's medium size on the stage, whole and uncropped
+  on the ground, and small size in the rail, opening full size at large; its caption; and its credit: the
   creator, the license (`Oaks.Images.Attribution.license_label/1`, so an
   All Rights Reserved photo reads "All rights reserved, used with the
   creator's permission") and a link to the iNaturalist observation.

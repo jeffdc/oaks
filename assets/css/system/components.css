@@ -2187,6 +2187,8 @@
     --pv-ink-2: var(--color-ink-2);
     --pv-ink-3: var(--color-ink-3);
     --pv-ground: var(--color-paper-2);
+    /* The whole photo on the stage, on the ground, never cropped. */
+    --pv-fit: contain;
     --pv-paper: var(--color-paper);
     --pv-rule: var(--color-rule);
     --pv-rule-strong: var(--color-rule-strong);
