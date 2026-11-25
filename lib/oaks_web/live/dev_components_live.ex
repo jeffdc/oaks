@@ -14,6 +14,9 @@ defmodule OaksWeb.DevComponentsLive do
   """
   use OaksWeb, :live_view
 
+  import Ecto.Query, only: [from: 2]
+  import OaksWeb.PhotoViewer, only: [photo_viewer: 1]
+
   @traits [
     %{
       trait: "Habit",
@@ -51,7 +54,13 @@ defmodule OaksWeb.DevComponentsLive do
   @impl true
   def mount(_params, _session, socket) do
     if Application.get_env(:oaks, :dev_routes) do
-      {:ok, assign(socket, page_title: "Components", traits: @traits), layout: false}
+      {:ok,
+       assign(socket,
+         page_title: "Components",
+         traits: @traits,
+         sample_photos: sample_photos(),
+         db_photos: db_photos()
+       ), layout: false}
     else
       raise OaksWeb.DevComponentsLive.NotAvailable
     end
@@ -320,6 +329,43 @@ defmodule OaksWeb.DevComponentsLive do
                 </.photo_row>
               </.photo_list>
             </div>
+          </div>
+        </section>
+
+        <section class="mt-s8">
+          <.section_heading id="photos">
+            Photos
+            <:note>photo_viewer, themed as species_photos shows it: many, one and none</:note>
+          </.section_heading>
+          <div class="grid gap-s7 md:grid-cols-[300px_240px_300px]">
+            <.photo_viewer
+              id="gallery-photos-many"
+              label="Quercus shumardii"
+              photos={@sample_photos}
+              class="oc-photos"
+            />
+            <.photo_viewer
+              id="gallery-photos-one"
+              label="Quercus shumardii"
+              photos={Enum.take(@sample_photos, 1)}
+              class="oc-photos"
+            />
+            <.photo_viewer
+              id="gallery-photos-none"
+              label="Quercus shumardii"
+              photos={[]}
+              class="oc-photos"
+            />
+          </div>
+          <div :if={@db_photos} class="mt-s7 grid gap-s7 md:grid-cols-[300px_minmax(0,1fr)]">
+            <.species_photos
+              id="gallery-species-photos"
+              images={@db_photos.images}
+              name={@db_photos.name}
+            />
+            <p class="text-ink-3">
+              <.sci_name name={@db_photos.name} />: this database's photos, through species_photos.
+            </p>
           </div>
         </section>
 
@@ -690,6 +736,77 @@ defmodule OaksWeb.DevComponentsLive do
 
   @impl true
   def handle_event("noop", _params, socket), do: {:noreply, socket}
+
+  @sample_captions [
+    "Terminal buds in winter",
+    nil,
+    "Leaf underside, axillary tufts",
+    nil,
+    "Acorn and cap",
+    "Bark of a mature tree"
+  ]
+  @sample_licenses ["CC-BY-NC", "CC-BY", "Public Domain / CC0", :reserved, "CC-BY-SA"]
+
+  # Fourteen placeholder photos for the viewer, as species_photos passes
+  # them: drawn tiles, landscape and portrait, with captions, credits and
+  # licenses (one All Rights Reserved).
+  defp sample_photos do
+    for n <- 1..14 do
+      license = Enum.at(@sample_licenses, rem(n - 1, length(@sample_licenses)))
+      src = sample_image(n)
+
+      %{
+        src: src,
+        thumb: src,
+        full: src,
+        caption: Enum.at(@sample_captions, rem(n - 1, length(@sample_captions))),
+        creator: "janedoe - Jane Doe",
+        license:
+          if(license == :reserved,
+            do: "All rights reserved, used with the creator's permission",
+            else: license
+          ),
+        licenselink: license != :reserved && "https://creativecommons.org/licenses/",
+        reserved: license == :reserved,
+        sourcelink: "https://www.inaturalist.org/observations/190127456",
+        source_label: "iNaturalist observation"
+      }
+    end
+  end
+
+  # The ready photos of the first species in this database that has any,
+  # to show species_photos with real images (nil when there are none).
+  defp db_photos do
+    species_id =
+      Oaks.Repo.one(
+        from(i in Oaks.Images.Image,
+          where: i.status == "ready",
+          select: i.species_id,
+          order_by: i.species_id,
+          limit: 1
+        )
+      )
+
+    if species_id do
+      species = Oaks.Repo.get!(Oaks.Species.Species, species_id)
+      %{name: species.scientific_name, images: Oaks.Images.list_for_species(species_id)}
+    end
+  end
+
+  defp sample_image(n) do
+    {w, h} = if rem(n, 3) == 0, do: {600, 800}, else: {800, 600}
+    hue = rem(n * 47, 360)
+
+    svg = """
+    <svg xmlns="http://www.w3.org/2000/svg" width="#{w}" height="#{h}" viewBox="0 0 #{w} #{h}">\
+    <rect width="100%" height="100%" fill="hsl(#{hue} 28% 52%)"/>\
+    <rect x="24" y="24" width="#{w - 48}" height="#{h - 48}" fill="none" stroke="#fbfbf7" stroke-width="4"/>\
+    <text x="50%" y="50%" fill="#fbfbf7" font-family="sans-serif" font-size="120" font-weight="700" \
+    text-anchor="middle" dominant-baseline="central">#{n}</text></svg>
+    """
+
+    "data:image/svg+xml;base64," <> Base.encode64(svg)
+  end
 
   # The band's examples: where each kind of taxon page's band starts from
   # (as Oaks.Species.placement/1 gives it) and its current step.

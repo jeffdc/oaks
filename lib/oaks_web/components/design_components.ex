@@ -27,7 +27,11 @@ defmodule OaksWeb.DesignComponents do
   use OaksWeb, :verified_routes
 
   import OaksWeb.CoreComponents, only: [button: 1, header: 1]
+  import OaksWeb.PhotoViewer, only: [photo_viewer: 1]
 
+  alias Oaks.Images.Attribution
+  alias Oaks.Images.Image
+  alias Oaks.Licenses
   alias Phoenix.LiveView.JS
 
   @doc """
@@ -1388,4 +1392,54 @@ defmodule OaksWeb.DesignComponents do
     </li>
     """
   end
+
+  # -- Species photos (docs/species-photos-plan.md, Phase 6) --
+
+  @doc """
+  Renders a species' photos in the photo viewer (`OaksWeb.PhotoViewer`,
+  the component shared with gallformers), in this system's colours and
+  type: each ready photo's medium size on the stage and small size in the
+  rail, opening full size at large; its caption; and its credit: the
+  creator, the license (`Oaks.Images.Attribution.license_label/1`, so an
+  All Rights Reserved photo reads "All rights reserved, used with the
+  creator's permission") and a link to the iNaturalist observation.
+
+  Pass `Oaks.Images.list_for_species/1`; any photo that isn't ready is
+  left out. With none, it reads "No photos yet." (hidden on phones).
+
+  ## Examples
+
+      <.species_photos id="species-photos" images={@images} name="Quercus shumardii" />
+  """
+  attr :id, :string, required: true
+  attr :images, :list, required: true, doc: "`Oaks.Images.Image`s, in order"
+  attr :name, :string, required: true, doc: "the species' name as plain text, for labels"
+  attr :class, :any, default: nil, doc: "layout only"
+
+  def species_photos(assigns) do
+    assigns = assign(assigns, photos: Enum.flat_map(assigns.images, &viewer_photo/1))
+
+    ~H"""
+    <.photo_viewer id={@id} photos={@photos} label={@name} class={["oc-photos", @class]} />
+    """
+  end
+
+  defp viewer_photo(%Image{status: "ready"} = image) do
+    [
+      %{
+        src: Image.url(image, :medium),
+        thumb: Image.url(image, :small),
+        full: Image.url(image, :large),
+        caption: image.caption,
+        creator: image.creator,
+        license: Attribution.license_label(image),
+        licenselink: image.licenselink,
+        reserved: Licenses.needs_permission?(image.license),
+        sourcelink: image.sourcelink,
+        source_label: "iNaturalist observation"
+      }
+    ]
+  end
+
+  defp viewer_photo(_image), do: []
 end
