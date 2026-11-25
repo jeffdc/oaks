@@ -507,6 +507,25 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
              )
     end
 
+    test "the cite line never doubles the full stop after an authority", %{conn: conn} do
+      for {author, expected} <- [
+            {"Torr.", "Torr. http"},
+            {"Buckley", "Buckley. http"},
+            {nil, ". http"}
+          ] do
+        species = species_fixture(author: author)
+        {:ok, view, _html} = live(conn, ~p"/species/#{species.scientific_name}")
+
+        text =
+          view |> element("#species-cite") |> render() |> String.replace(~r/<[^>]+>/, "")
+
+        text = String.replace(text, ~r/\s+/, " ")
+
+        assert text =~ expected
+        refute text =~ ".."
+      end
+    end
+
     test "the cite line names the site and the page, never a person", %{conn: conn, alba: alba} do
       {:ok, view, _html} = live(conn, ~p"/species/#{alba}")
 

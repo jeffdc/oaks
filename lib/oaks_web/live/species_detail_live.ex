@@ -386,7 +386,7 @@ defmodule OaksWeb.SpeciesDetailLive do
               name={@species.scientific_name}
               hybrid={@species.is_hybrid}
               author={@species.author}
-            />. {cite_url(@species)} (accessed {Date.utc_today()}).
+            />{cite_stop(@species)} {cite_url(@species)} (accessed {Date.utc_today()}).
           </.cite_line>
         </div>
       </div>
@@ -911,6 +911,13 @@ defmodule OaksWeb.SpeciesDetailLive do
   # a hybrid's sign stays legible (…/species/×%20fontana).
   defp cite_url(species),
     do: url(~p"/species") <> "/" <> String.replace(species.scientific_name, " ", "%20")
+
+  # The full stop after the name, unless its authority already ends in one
+  # ("emoryi Torr." is never "Torr..").
+  defp cite_stop(species) do
+    shown = if present?(species.author), do: species.author, else: species.scientific_name
+    if String.ends_with?(String.trim(shown), "."), do: "", else: "."
+  end
 
   defp present?(value), do: is_binary(value) and String.trim(value) != ""
   defp blank?(value), do: not present?(value)
