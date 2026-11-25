@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Species page for today's data · Oak Compendium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Archivo+Narrow:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600;1,8..60,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="oc.css">
+<link rel="stylesheet" href="photo-viewer.css">
+<style>
+/* Species page for today's data (species-photos plan, Phase 4). Everything here
+   is page-local prototype CSS on top of oc.css. */
+
+/* Prototype state switcher: not part of the design. */
+.states { background: var(--paper-2); border-bottom: 1px solid var(--rule); font: 500 13px/1.4 var(--frame); color: var(--ink-2); }
+.states .in { max-width: 1400px; margin: 0 auto; padding: var(--s2) var(--s6); display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); align-items: center; }
+.states fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.states legend { float: left; font-weight: 700; color: var(--ink); margin-right: 6px; }
+.states button { font: 600 12.5px/1 var(--frame); border: 1px solid #16161659; background: var(--paper); color: var(--ink); padding: 5px 8px; cursor: pointer; }
+.states button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* Title row additions */
+.title .meta { margin-left: 0; }
+.title .iucn { font: 700 13px/1 var(--frame); letter-spacing: 0.04em; border: 1.5px solid var(--ink); padding: 4px 7px; color: var(--ink); }
+.title .iucn-EX { background: #161616; color: #fbfbf7; }
+.title .iucn-EW { background: #542344; color: #fbfbf7; }
+.title .iucn-CR { background: #d81e05; color: #fbfbf7; }
+.title .iucn-EN { background: #fc7f3f; }
+.title .iucn-VU { background: #f9e814; }
+.title .iucn-NT { background: #cce226; }
+.title .iucn-LC { background: #60c659; }
+.title .iucn-DD { background: #d1d1c6; }
+.title .edit { margin-left: auto; }
+.title .sub { flex-basis: 100%; order: 10; margin: 0; font: 600 16px/1.4 var(--frame); color: var(--ink-2); max-width: 70ch; }
+.sub a, .lower a.nm, .lower .with a { color: var(--ink); }
+.sub i { font: italic 400 17px/1 var(--read); }
+
+/* Edit menu (edit_menu) */
+.edit { position: relative; font: 600 14px/1.3 var(--frame); align-self: center; }
+.edit summary { list-style: none; cursor: pointer; display: flex; gap: 8px; align-items: center; font: 700 14px/1 var(--frame); border: 1.5px solid var(--ink); padding: 7px 10px; }
+.edit summary::-webkit-details-marker { display: none; }
+.edit summary::after { content: ""; width: 6px; height: 6px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); margin-top: -3px; }
+.edit[open] summary { background: var(--ink); color: var(--paper); }
+.edit ul { position: absolute; right: 0; top: calc(100% + 6px); z-index: 6; list-style: none; margin: 0; padding: 6px 0; min-width: 260px; background: var(--paper); border: 1.5px solid var(--ink); }
+.edit li button { display: block; width: 100%; text-align: left; font: 600 14px/1.3 var(--frame); color: var(--ink); background: none; border: 0; padding: 8px 16px; cursor: pointer; }
+.edit li button:hover { background: var(--paper-2); }
+.edit li small { font: 500 12.5px/1 var(--frame); color: var(--ink-3); margin-left: 6px; }
+.edit.quiet summary { border: 0; padding: 2px 0; font: 600 13px/1 var(--frame); color: var(--ink-3); }
+.edit.quiet summary:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.edit.quiet[open] summary { background: var(--ink); color: var(--paper); padding: 2px 6px; }
+
+/* Layout: photos column beside the tabbed text */
+.sp-grid { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: var(--s7); margin-top: var(--s6); align-items: start; }
+.photos { position: sticky; top: var(--s4); }
+.nophoto { margin: 0; padding: var(--s3) 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); font: 500 14px/1.4 var(--frame); color: var(--ink-3); }
+
+/* Source tabs, as today's species page */
+.tabs { display: flex; align-items: flex-end; gap: 0 var(--s5); border-bottom: 2px solid var(--rule-strong); }
+.tabs [role="tablist"] { display: flex; gap: 0 var(--s5); min-width: 0; }
+.tabs [role="tab"] { font: 700 15px/1.2 var(--frame); color: var(--ink-2); background: none; border: 0; border-bottom: 3px solid transparent; margin-bottom: -2px; padding: 12px 0 9px; cursor: pointer; white-space: nowrap; display: inline-flex; gap: var(--s2); align-items: baseline; }
+.tabs [role="tab"]:hover:not([aria-selected="true"]) { color: var(--ink); border-bottom-color: #16161640; }
+.tabs [role="tab"][aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ochre); }
+.tabs [role="tab"] small { font: 500 12.5px/1 var(--frame); color: var(--ink-3); }
+.tabs .cmp { margin-left: auto; margin-bottom: var(--s2); grid-row: auto; grid-column: auto; white-space: nowrap; }
+.tabs .tab { display: inline-flex; align-items: center; gap: 6px; }
+.tabs .srclink { display: inline-grid; place-items: center; width: 22px; height: 22px; color: var(--ink-3); border-bottom: 0; }
+.tabs .srclink:hover { color: var(--pencil); }
+.tabs .srclink svg { width: 15px; height: 15px; }
+.tabs .edit.quiet { margin-left: auto; margin-bottom: var(--s2); }
+.tabs .edit.quiet + .cmp { margin-left: var(--s4); }
+.fr { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: var(--s5); padding: var(--s4) 0; border-bottom: 1px solid var(--rule); }
+.fr h3 { margin: 0; padding-top: 3px; font: 700 15px/1.3 var(--frame); }
+.fr .v { max-width: 70ch; }
+.fr .v p { margin: 0; }
+.fr .v p + p, .fr .v p + ul, .fr .v ul + p { margin-top: var(--s2); }
+.fr .v ul { margin: 0; padding-left: 1.1em; }
+.fr .names { font: 400 17px/1.6 var(--read); }
+.panel-empty, .nodata { margin: 0; padding: var(--s4) 0; border-bottom: 1px solid var(--rule); font-style: italic; color: var(--ink-3); }
+.notice { max-width: none; margin-top: var(--s5); }
+
+/* Below the main content: synonyms, relatives, hybrids, links, sources, cite */
+.lower { margin-top: var(--s8); }
+.lower > section + section { margin-top: var(--s7); }
+.lower ul { list-style: none; margin: 0; padding: 0; }
+.rows3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--s7); }
+.rows3 li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--s3); padding: var(--s2) 0; border-bottom: 1px solid var(--rule); }
+.lower .nm { font: italic 600 18px/1.3 var(--read); text-decoration: none; }
+.lower .nm:hover { text-decoration: underline; }
+.nm .g { font-weight: 400; }
+.nm .x, .nm .a { font-style: normal; font-weight: 400; }
+.nm .a { color: var(--ink-3); font-size: 15px; }
+.with { font: 500 14px/1.4 var(--frame); color: var(--ink-2); }
+.with i { font: italic 400 15px/1 var(--read); color: var(--ink); }
+.synline { margin: 0; font: 400 17px/1.7 var(--read); }
+.synline i { font-style: italic; }
+.synline .a { color: var(--ink-3); }
+.links li a { display: flex; gap: var(--s3); align-items: baseline; text-decoration: none; color: var(--ink); font: 600 15px/1.3 var(--frame); }
+.links li a:hover .lk { text-decoration: underline; }
+.links .host { font: 500 13px/1.3 var(--frame); color: var(--ink-3); }
+.srcs li { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); align-items: baseline; padding: var(--s2) 0; border-bottom: 1px solid var(--rule); font: 600 15px/1.3 var(--frame); }
+.srcs a { color: var(--ink); }
+
+/* Dialogs (modal) */
+dialog.m { width: min(34rem, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); display: none; flex-direction: column; }
+dialog.m[open] { display: flex; }
+dialog.m::backdrop { background: #161616a6; }
+.m-head { padding: var(--s5) var(--s5) 0; }
+.m-head h2 { font: 600 26px/1.15 var(--read); letter-spacing: 0; text-transform: none; margin: 0; padding-bottom: var(--s3); }
+.m-body { padding: var(--s4) var(--s5); overflow-y: auto; }
+.m-body > p { margin: 0 0 var(--s3); }
+.m-note { font: 600 14px/1.45 var(--frame); color: var(--ink-2); margin: var(--s2) 0 0; }
+.m-note.strong { font-weight: 700; color: var(--ink); }
+.m-acts { display: flex; justify-content: flex-end; gap: var(--s3); padding: var(--s3) var(--s5); border-top: 1px solid var(--rule); }
+.btn-g, .btn-p, .btn-d { font: 700 14px/1 var(--frame); border: 1.5px solid var(--ink); padding: 10px 13px; cursor: pointer; }
+.btn-g { background: var(--paper); color: var(--ink); }
+.btn-g:hover { background: var(--ink); color: var(--paper); }
+.btn-p { background: var(--ochre); color: var(--ink); }
+.btn-p:hover { background: var(--ink); color: var(--ochre); }
+.btn-d { background: var(--ink); color: var(--paper); }
+.btn-d:hover { background: var(--ink-2); }
+.btn-s { font: 700 13px/1 var(--frame); border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); padding: 6px 9px; cursor: pointer; }
+.btn-s:hover { background: var(--ink); color: var(--paper); }
+.fld label { display: block; font: 700 14px/1.3 var(--frame); margin-bottom: 6px; }
+.fld .row { display: flex; gap: var(--s2); }
+.fld input { flex: 1; min-width: 0; font: 500 15px/1.3 var(--frame); font-variant-numeric: lining-nums tabular-nums; background: #fff; color: var(--ink); border: 1.5px solid #16161666; padding: 9px 11px; border-radius: 0; }
+.fld input:focus { border-color: var(--ink); outline: none; }
+.fld .hint { font: 500 13px/1.4 var(--frame); color: var(--ink-3); margin: 6px 0 0; }
+.obs-meta { margin: var(--s4) 0 var(--s3); padding-top: var(--s3); border-top: 1px solid var(--rule); font: 600 14px/1.45 var(--frame); color: var(--ink-2); }
+.obs-meta i { font: italic 600 15px/1 var(--read); color: var(--ink); }
+.pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); list-style: none; margin: 0; padding: 0; }
+.pick li { font: 500 12.5px/1.35 var(--frame); color: var(--ink-2); }
+.pick label { display: block; cursor: pointer; }
+.pick .t { position: relative; aspect-ratio: 1; background: var(--paper-2); border: 1px solid var(--rule); display: grid; place-items: center; font: 600 12px/1 var(--frame); color: var(--ink-3); }
+.pick input { position: absolute; top: 6px; left: 6px; width: 20px; height: 20px; margin: 0; accent-color: var(--ink); }
+.pick input:checked + .t, .pick label:has(input:checked) .t { outline: 2px solid var(--ink); outline-offset: -2px; }
+.pick .lic { display: block; margin-top: 4px; }
+.pick li.off { color: var(--ink-3); }
+.stamp { display: inline-block; white-space: nowrap; font: 700 10.5px/1 var(--frame); letter-spacing: 0.02em; text-transform: uppercase; border: 1.5px solid var(--ink); padding: 3px 5px; color: var(--ink); margin-top: 4px; }
+.arr-warn { margin-top: var(--s4); padding: var(--s3) 0; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); font: 500 14px/1.5 var(--frame); }
+.arr-warn p { margin: 0 0 var(--s2); }
+.arr-warn b { font-weight: 800; }
+.arr-warn label { display: flex; gap: var(--s2); align-items: flex-start; font-weight: 700; cursor: pointer; }
+.arr-warn input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--ink); flex: none; }
+.btn-p:disabled { background: var(--paper-2); color: var(--ink-3); border-color: #16161659; cursor: not-allowed; }
+.pick li.off .t { opacity: 0.5; }
+.pick .st { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-weight: 600; color: var(--ink); }
+.pick .st svg, .mrow .st svg { width: 14px; height: 14px; flex: none; }
+.pick .err, .mrow .err { display: block; color: var(--ink-2); font-weight: 500; }
+.mlist { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.mrow { display: grid; grid-template-columns: 14px 56px minmax(0, 1fr); gap: var(--s3); padding: var(--s3) 0; border-bottom: 1px solid var(--rule); align-items: start; }
+.mrow .grip { width: 10px; height: 22px; margin-top: 16px; cursor: grab; background: radial-gradient(circle, var(--ink-3) 1.4px, transparent 1.6px) 0 0 / 5px 5px; }
+.mrow .t { width: 56px; aspect-ratio: 1; background: var(--paper-2); border: 1px solid var(--rule); }
+.mrow .fld input { padding: 7px 9px; font-size: 14px; }
+.mrow .meta { display: flex; flex-wrap: wrap; gap: 4px var(--s3); align-items: center; margin-top: 6px; font: 500 12.5px/1.35 var(--frame); color: var(--ink-2); }
+.mrow .meta .del { margin-left: auto; font: 600 13px/1 var(--frame); color: var(--ink-3); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.mrow .meta .del:hover { color: var(--ink); }
+.mrow .st { display: flex; align-items: center; gap: 6px; font: 600 12.5px/1.35 var(--frame); color: var(--ink); }
+.mrow.pending .t, .mrow.failed .t { opacity: 0.5; }
+
+@media (max-width: 1180px) {
+  .sp-grid { grid-template-columns: 240px minmax(0, 1fr); gap: var(--s6); }
+  .rows3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .states .in { padding: var(--s2) var(--s4); }
+  .title .edit { margin-left: 0; }
+  .sp-grid { grid-template-columns: minmax(0, 1fr); gap: var(--s5); margin-top: var(--s5); }
+  .photos { position: static; }
+  .photos .pv { --pv-stage-ratio: 4 / 3; --pv-visible: 6; }
+  .nophoto { display: none; }
+  .tabs { flex-wrap: wrap; border-bottom: 0; }
+  .tabs [role="tablist"] { flex-basis: 100%; overflow-x: auto; scrollbar-width: none; border-bottom: 2px solid var(--rule-strong); padding-right: var(--s6); }
+  .tabs .cmp { margin: var(--s3) 0 0; }
+  .fr { grid-template-columns: minmax(0, 1fr); gap: var(--s1); }
+  .rows3 { grid-template-columns: minmax(0, 1fr); }
+  .lower { margin-top: var(--s7); }
+  .pick { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="m-agree" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 7.2 6.1 9.3 10 4.9" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="m-differ" viewBox="0 0 14 14"><rect x="0.75" y="0.75" width="12.5" height="12.5" fill="currentColor"/><path d="M3.6 5.4h6.8M3.6 8.6h6.8" stroke="#fbfbf7" stroke-width="1.5"/><path d="M9.2 2.9 4.8 11.1" stroke="#fbfbf7" stroke-width="1.6" stroke-linecap="square"/></symbol>
+  <symbol id="m-open" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.2 1.8"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 16 16"><path d="M7 3H3v10h10V9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 2.5h4v4M13.3 2.7 7.5 8.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.7"/><circle cx="8" cy="4.7" r="1" fill="currentColor"/></symbol>
+  <symbol id="acorn" viewBox="0 0 24 24"><path d="M5 9.5C5 6 8 4 12 4s7 2 7 5.5H5Z" fill="#d9a21b"/><path d="M6.5 10.5h11c0 5-2.5 9-5.5 9.5-3-.5-5.5-4.5-5.5-9.5Z" fill="#fbfbf7"/><path d="M12 1.5v2.5" stroke="#fbfbf7" stroke-width="1.6"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<div class="proto"><b>Prototype.</b> The species page for today's data: real taxa and text from the database. Photos, observers and the observation in the dialogs are placeholders. The grey bar below switches states; it is not part of the design.</div>
+<div class="states"><div class="in" id="states"></div></div>
+<header class="mast"><div class="in">
+  <a class="mark" href="#"><svg aria-hidden="true"><use href="#acorn"/></svg>Oak Compendium</a>
+  <nav class="nav" aria-label="Main"><a href="#" aria-current="page">Species</a><a href="#">Taxonomy</a><a href="#">Identify</a><a href="#">Sources</a><a href="#">About</a></nav>
+  <label class="search"><span class="skip">Search</span><input type="search" placeholder="Name, common name or trait"><kbd>/</kbd></label>
+</div></header>
+<nav class="band" aria-label="Taxonomy"><div class="in2" id="band"></div></nav>
+<main id="main" class="page"></main>
+<footer class="site"><div class="in"><span>Oak Compendium’s prose is © all rights reserved</span><span>All facts are free to use</span><span>Other sources are under their own terms</span></div></footer>
+
+<dialog class="m" id="dlg" aria-labelledby="dlg-h"></dialog>
+
+<script src="photo-viewer.js"></script>
+<script>
+/* Exported from oaks.db for the six example taxa. */
+const TAXA = {
+ "shumardii": {
+  "scientific_name": "shumardii",
+  "author": "Buckley",
+  "is_hybrid": 0,
+  "conservation_status": "LC",
+  "subgenus": "Quercus",
+  "section": "Lobatae",
+  "subsection": "Coccineae",
+  "complex": "shumardii",
+  "parent1": null,
+  "parent2": null,
+  "sources": [
+   {
+    "id": 2,
+    "name": "Oaks of the World",
+    "preferred": false,
+    "url": "https://oaksoftheworld.fr/quercus_shumardii.htm",
+    "local_names": [
+     "Shumard's oak"
+    ],
+    "range": "South Ontario; Eastern and Central USA; introduced in Europe in 1908;",
+    "growth_habit": "15-30 m tall and more; rounded open crown;",
+    "leaves": "8-18 x 6-13 cm; leathery; obovate to broad-elliptic; 3-5 pairs of lobulate, bristle-tipped, toothed lobes with deep sinuses; apex acute; base obtuse to acute; lustrous dark green, hairless above; paler, glabrous beneath except large axillary tufts of rusty hairs; red at fall; petiole hairless 3-6 cm long;",
+    "flowers": "spring",
+    "fruits": "acorn 1.8-2.8 cm long, with dark brown streaks; short-stalked; usually solitary; enclosed 1/4 by cup; cup 1.8-30 mm in diameter, with greyish pubescent, pointed, appressed scales; maturing in 2 years;",
+    "bark": null,
+    "twigs": null,
+    "buds": null,
+    "hardiness_habitat": "hardy; all types of soils, but prefers moist and rich ones; rather fast-growing;",
+    "miscellaneous": "-- A. Camus : n° 426; -- Sub-genus Quercus, section Lobatae, Series Coccineae; -- Resembles Q.velutina ; -- Benjamin F. Shumard (1820-1869) : geologist in Texas ; -- Numerous hybrids, mainly with Q.falcata (= x joori ), Q.imbricaria (= x egglestoni ), Q.palustris ( = x mutabilis ), Q.phellos (= x moultonensis ), Q.velutina (= x discreta ), Q.marilandica (= x hastingsii ), Q.nigra (= x neopalmeri) ; -- Allied to Q. rubra and Q. coccinea , from which it differs in having pale buds, large axillary tufts on the leaf-undersides, and the shape of acorns;"
+   },
+   {
+    "id": 3,
+    "name": "Oak Compendium",
+    "preferred": true,
+    "url": null,
+    "local_names": [],
+    "range": null,
+    "growth_habit": null,
+    "leaves": "Lobes per side: usually 3–4, rarely as few as 2.",
+    "flowers": null,
+    "fruits": "The cap is saucer shaped like Q. rubra rather than turbinate. Acorns can get pretty big and look a lot like the classic \"fat man in a beret\" acorns of Q. rubra, so you have to be careful with acorns.",
+    "bark": null,
+    "twigs": "My rough conclusion, from one area and some iNat data, is that new stems are always green, vs sometimes red with Q. palustris.",
+    "buds": null,
+    "hardiness_habitat": null,
+    "miscellaneous": null
+   },
+   {
+    "id": 4,
+    "name": "The Sibley Guide to Trees",
+    "preferred": false,
+    "url": null,
+    "local_names": [
+     "Shumard Oak",
+     "Leopard Oak",
+     "Spotted Oak"
+    ],
+    "range": null,
+    "growth_habit": "Deciduous. Medium to large tree often 90'.",
+    "leaves": "- 6 1/2\"\n= squarish lobes end in multiple bristles\n- shiny green above and below\n- usually orange, felty hairs in vein junctures of underleaf",
+    "flowers": null,
+    "fruits": "- 1\" \n- cup shallow gray",
+    "bark": null,
+    "twigs": "gray to light brown",
+    "buds": "large, grayish or straw-colored, and hairless",
+    "hardiness_habitat": "Fairly common in well-drained mesic soils or on poorly drained uplands\nGenerally uncommon in cultivation\nZones 5-9",
+    "miscellaneous": null
+   }
+  ],
+  "hybrids": [
+   {
+    "name": "× discreta",
+    "other": "velutina",
+    "exists": true
+   },
+   {
+    "name": "× egglestonii",
+    "other": "imbricaria",
+    "exists": true
+   },
+   {
+    "name": "× hastingsii",
+    "other": "marilandica",
+    "exists": true
+   },
+   {
+    "name": "× moultonensis",
+    "other": "phellos",
+    "exists": true
+   },
+   {
+    "name": "× joorii",
+    "other": "falcata",
+    "exists": true
+   },
+   {
+    "name": "× mutabilis",
+    "other": "palustris",
+    "exists": true
+   },
+   {
+    "name": "× neopalmeri",
+    "other": "nigra",
+    "exists": true
+   },
+   {
+    "name": "× riparia",
+    "other": "rubra",
+    "exists": true
+   },
+   {
+    "name": "× sternbergii",
+    "other": "buckleyi",
+    "exists": true
+   }
+  ],
+  "related": [],
+  "varieties": [],
+  "synonyms": [
+   "schneckii",
+   "texana Auctores"
+  ],
+  "links": [
+   {
+    "name": "Flora of North America",
+    "source": "FNA",
+    "url": "https://floranorthamerica.org/Quercus_shumardii"
+   },
+   {
+    "name": "Fire Effects Information System",
+    "source": "FEIS",
+    "url": "https://www.fs.usda.gov/database/feis/plants/tree/queshu/all.html"
+   },
+   {
+    "logo": "usda",
+    "name": "USDA Plants Database",
+    "url": "https://plants.usda.gov/plant-profile/QUSH"
+   }
+  ],
+  "siblings": [
+   "acerifolia",
+   "buckleyi",
+   "rubra",
+   "shumardii"
+  ],
+  "sib_label": [
+   "complex",
+   "shumardii"
+  ]
+ },
+ "emoryi": {
+  "scientific_name": "emoryi",
+  "author": "Torr.",
+  "is_hybrid": 0,
+  "conservation_status": "LC",
+  "subgenus": "Quercus",
+  "section": "Lobatae",
+  "subsection": null,
+  "complex": null,
+  "parent1": null,
+  "parent2": null,
+  "sources": [
+   {
+    "id": 2,
+    "name": "Oaks of the World",
+    "preferred": false,
+    "url": "https://oaksoftheworld.fr/quercus_emoryi.htm",
+    "local_names": [
+     "Emory's oak",
+     "black-jack oak",
+     "encino prieto",
+     "bellota"
+    ],
+    "range": "West Texas to Central Arizona; Mexico (Baja California, Chihuahua, Coahuila, Durango, Nuevo Leon, San Luis Potosi, Sonora, Tamaulipas); 1200-2000 m;",
+    "growth_habit": "2-5 m high, but may reach sometimes 15 m on favourable soils;",
+    "leaves": "2.5-6 x 1-2 cm; subpersistent; thick, stiff; leathery; narrowly oblong, sometimes oboval or oval; apex acute or obtuse, aristate; base subcordate to truncate, less often obtuse, seldom rounded asymmetrical; margin flat, entire or with 1-5 pairs of small aristate teeth; lustrous above, glabrous or with sometimes some sessile fascicled trichomes, essentially at the base of the midrib; less lustrous beneath, hairless or with axil tufts of stipitate fascicled hairs and glandular trichomes somewhat golden; 4-8 vein pairs, not evident; tertiary veins prominent; epidermis slightly bullate and white papillose; petiole pubescent, 3-7 mm long;",
+    "flowers": "flowers appear in April-May; male catkins 1-3 cm long, with 1-2 flowers 4-staminate; female inflorescence pubescent, very short, with a lonely flower;",
+    "fruits": "acorn 1.2-1.9 cm, narrow; solitary; cup sessile (or with a very short peduncle to 2 mm), enclosing 1/3 of nut, pubescent inside, with thin, smooth, appressed scales; edible since a little bitter; maturing first year in June - September;",
+    "bark": null,
+    "twigs": null,
+    "buds": null,
+    "hardiness_habitat": "hardy zone 6; all types of soils if dry rocky ones; slow growing;",
+    "miscellaneous": "-- A. Camus : n° 388; -- Sub-genus Quercus, section Lobatae, Series Erythromexicanae, Group Vimineae; -- Discovered by William H. Emory (U.S.A. 1811-1887 ) -- Hybridizes with Q.graciliformis (= Q.x tharpii C.H.Muller), Q. hypoleucoides , and with Q.gravesii (= Q.x robusta );"
+   },
+   {
+    "id": 4,
+    "name": "The Sibley Guide to Trees",
+    "preferred": false,
+    "url": null,
+    "local_names": [
+     "Emory Oak",
+     "Black Oak",
+     "Blackjack Oak",
+     "Bellota"
+    ],
+    "range": null,
+    "growth_habit": "Evergreen, small tree often to 45'\nCharacteristic oak of Mexican border in AZ and NM",
+    "leaves": "- 3\"\n- long, narrow, pointed, glossy green\n- holly like but usually only weakly prickly\n- fairly pointed and rigid along twig",
+    "flowers": null,
+    "fruits": "- 3/4\"\n- long, ripe in single growing season (unusual among red oaks)",
+    "bark": null,
+    "twigs": null,
+    "buds": null,
+    "hardiness_habitat": "Common in foothills and slopes\nRarely cultivated",
+    "miscellaneous": null
+   }
+  ],
+  "hybrids": [
+   {
+    "name": "× inconstans",
+    "other": "hypoleucoides",
+    "exists": true
+   },
+   {
+    "name": "× tharpii",
+    "other": "graciliformis",
+    "exists": true
+   }
+  ],
+  "related": [],
+  "varieties": [],
+  "synonyms": [
+   "balsequillana",
+   "duraznillo",
+   "hastata"
+  ],
+  "links": [
+   {
+    "name": "Flora of North America",
+    "source": "FNA",
+    "url": "https://floranorthamerica.org/Quercus_emoryi"
+   },
+   {
+    "name": "Fire Effects Information System",
+    "source": "FEIS",
+    "url": "https://www.fs.usda.gov/database/feis/plants/tree/queemo/all.html"
+   },
+   {
+    "logo": "usda",
+    "name": "USDA Plants Database",
+    "url": "https://plants.usda.gov/plant-profile/QUEM"
+   }
+  ],
+  "siblings": [
+   "acatenangensis",
+   "acerifolia",
+   "acherdophylla",
+   "acutangula",
+   "acutifolia",
+   "aerea",
+   "affinis",
+   "agrifolia",
+   "albocincta",
+   "aristata",
+   "arkansana",
+   "benthamii",
+   "breedloveana",
+   "brenesii",
+   "buckleyi",
+   "calophylla",
+   "canbyi",
+   "castanea",
+   "charcasana",
+   "coahuilensis",
+   "coccinea",
+   "coffeicolor",
+   "confertifolia",
+   "conspersa",
+   "cortesii",
+   "costaricensis",
+   "crassifolia",
+   "crassipes",
+   "crispifolia",
+   "crispipilis",
+   "cualensis",
+   "cupreata",
+   "delgadoana",
+   "depressa",
+   "devia",
+   "duratifolia",
+   "durifolia",
+   "eduardi",
+   "ellipsoidalis",
+   "elliptica",
+   "emoryi",
+   "eugeniifolia",
+   "falcata",
+   "floccosa",
+   "flocculenta",
+   "frutex",
+   "fulva",
+   "furfuracea",
+   "galeanensis",
+   "georgiana",
+   "ghiesbreghtii",
+   "glabrescens",
+   "graciliformis",
+   "graciliramis",
+   "grahamii",
+   "gravesii",
+   "gulielmi-treleasei",
+   "hemisphaerica",
+   "hintonii",
+   "hintoniorum",
+   "hirtifolia",
+   "huicholensis",
+   "humboldtii",
+   "hypoleucoides",
+   "hypoxantha",
+   "ignaciensis",
+   "ilicifolia",
+   "iltisii",
+   "imbricaria",
+   "incana",
+   "inopina",
+   "jonesii",
+   "kelloggii",
+   "laevis",
+   "lancifolia",
+   "laurifolia",
+   "laurina",
+   "marilandica",
+   "martinezii",
+   "mcvaughii",
+   "meavei",
+   "mexiae",
+   "mexicana",
+   "miquihuanensis",
+   "mulleri",
+   "myrtifolia",
+   "nigra",
+   "nixoniana",
+   "obtusanthera",
+   "ocoteifolia",
+   "oocarpa",
+   "pagoda",
+   "palustris",
+   "panamandinaea",
+   "parvula",
+   "paxtalensis",
+   "peninsularis",
+   "pennivenia",
+   "phellos",
+   "pinnativenulosa",
+   "planipocula",
+   "potosina",
+   "praineana",
+   "pumila",
+   "radiata",
+   "robusta",
+   "rubra",
+   "rubramenta",
+   "runcinatifolia",
+   "rysophylla",
+   "salicifolia",
+   "saltillensis",
+   "sapotifolia",
+   "sarahmariae",
+   "sartorii",
+   "schultzei",
+   "scytophylla",
+   "seemannii",
+   "shumardii",
+   "sideroxyla",
+   "skinneri",
+   "subspathulata",
+   "tardifolia",
+   "tenuiloba",
+   "texana",
+   "tonduzii",
+   "tuberculata",
+   "tuitensis",
+   "urbani",
+   "uxoris",
+   "velutina",
+   "viminea",
+   "wislizeni",
+   "xalapensis"
+  ],
+  "sib_label": [
+   "section",
+   "Lobatae"
+  ]
+ },
+ "× riparia": {
+  "scientific_name": "× riparia",
+  "author": "Laughlin",
+  "is_hybrid": 1,
+  "conservation_status": null,
+  "subgenus": "Quercus",
+  "section": "Lobatae",
+  "subsection": "Coccineae",
+  "complex": "shumardii",
+  "parent1": "rubra",
+  "parent2": "shumardii",
+  "sources": [
+   {
+    "id": 2,
+    "name": "Oaks of the World",
+    "preferred": false,
+    "url": "https://oaksoftheworld.fr/quercus_riparia.htm",
+    "local_names": [],
+    "range": "Missouri;",
+    "growth_habit": null,
+    "leaves": null,
+    "flowers": null,
+    "fruits": null,
+    "bark": null,
+    "twigs": null,
+    "buds": null,
+    "hardiness_habitat": null,
+    "miscellaneous": null
+   },
+   {
+    "id": 3,
+    "name": "Oak Compendium",
+    "preferred": true,
+    "url": null,
+    "local_names": [],
+    "range": null,
+    "growth_habit": null,
+    "leaves": null,
+    "flowers": null,
+    "fruits": null,
+    "bark": null,
+    "twigs": null,
+    "buds": null,
+    "hardiness_habitat": null,
+    "miscellaneous": null
+   }
+  ],
+  "hybrids": [],
+  "related": [],
+  "varieties": [],
+  "synonyms": [
+   "rubra x shumardii"
+  ],
+  "links": [],
+  "siblings": [
+   "acerifolia",
+   "buckleyi",
+   "rubra",
+   "shumardii"
+  ],
+  "sib_label": [
+   "complex",
+   "shumardii"
+  ]
+ },
+ "acutissima kingii": {
+  "scientific_name": "acutissima kingii",
+  "author": null,
+  "is_hybrid": 0,
+  "conservation_status": null,
+  "subgenus": "Cerris",
+  "section": "Cerris",
+  "subsection": "Campylolepides",
+  "complex": null,
+  "parent1": null,
+  "parent2": null,
+  "sources": [],
+  "hybrids": [],
+  "related": [],
+  "varieties": [],
+  "synonyms": [],
+  "links": [],
+  "siblings": [
+   "acutissima acutissima",
+   "acutissima kingii"
+  ],
+  "sib_label": [
+   "var.",
+   "acutissima"
+  ]
+ },
+ "aerea": {
+  "scientific_name": "aerea",
+  "author": null,
+  "is_hybrid": 0,
+  "conservation_status": "DD",
+  "subgenus": "Quercus",
+  "section": "Lobatae",
+  "subsection": null,
+  "complex": null,
+  "parent1": null,
+  "parent2": null,
+  "sources": [],
+  "hybrids": [],
+  "related": [],
+  "varieties": [],
+  "synonyms": [],
+  "links": [],
+  "siblings": [
+   "acatenangensis",
+   "acerifolia",
+   "acherdophylla",
+   "acutangula",
+   "acutifolia",
+   "aerea",
+   "affinis",
+   "agrifolia",
+   "albocincta",
+   "aristata",
+   "arkansana",
+   "benthamii",
+   "breedloveana",
+   "brenesii",
+   "buckleyi",
+   "calophylla",
+   "canbyi",
+   "castanea",
+   "charcasana",
+   "coahuilensis",
+   "coccinea",
+   "coffeicolor",
+   "confertifolia",
+   "conspersa",
+   "cortesii",
+   "costaricensis",
+   "crassifolia",
+   "crassipes",
+   "crispifolia",
+   "crispipilis",
+   "cualensis",
+   "cupreata",
+   "delgadoana",
+   "depressa",
+   "devia",
+   "duratifolia",
+   "durifolia",
+   "eduardi",
+   "ellipsoidalis",
+   "elliptica",
+   "emoryi",
+   "eugeniifolia",
+   "falcata",
+   "floccosa",
+   "flocculenta",
+   "frutex",
+   "fulva",
+   "furfuracea",
+   "galeanensis",
+   "georgiana",
+   "ghiesbreghtii",
+   "glabrescens",
+   "graciliformis",
+   "graciliramis",
+   "grahamii",
+   "gravesii",
+   "gulielmi-treleasei",
+   "hemisphaerica",
+   "hintonii",
+   "hintoniorum",
+   "hirtifolia",
+   "huicholensis",
+   "humboldtii",
+   "hypoleucoides",
+   "hypoxantha",
+   "ignaciensis",
+   "ilicifolia",
+   "iltisii",
+   "imbricaria",
+   "incana",
+   "inopina",
+   "jonesii",
+   "kelloggii",
+   "laevis",
+   "lancifolia",
+   "laurifolia",
+   "laurina",
+   "marilandica",
+   "martinezii",
+   "mcvaughii",
+   "meavei",
+   "mexiae",
+   "mexicana",
+   "miquihuanensis",
+   "mulleri",
+   "myrtifolia",
+   "nigra",
+   "nixoniana",
+   "obtusanthera",
+   "ocoteifolia",
+   "oocarpa",
+   "pagoda",
+   "palustris",
+   "panamandinaea",
+   "parvula",
+   "paxtalensis",
+   "peninsularis",
+   "pennivenia",
+   "phellos",
+   "pinnativenulosa",
+   "planipocula",
+   "potosina",
+   "praineana",
+   "pumila",
+   "radiata",
+   "robusta",
+   "rubra",
+   "rubramenta",
+   "runcinatifolia",
+   "rysophylla",
+   "salicifolia",
+   "saltillensis",
+   "sapotifolia",
+   "sarahmariae",
+   "sartorii",
+   "schultzei",
+   "scytophylla",
+   "seemannii",
+   "shumardii",
+   "sideroxyla",
+   "skinneri",
+   "subspathulata",
+   "tardifolia",
+   "tenuiloba",
+   "texana",
+   "tonduzii",
+   "tuberculata",
+   "tuitensis",
+   "urbani",
+   "uxoris",
+   "velutina",
+   "viminea",
+   "wislizeni",
+   "xalapensis"
+  ],
+  "sib_label": [
+   "section",
+   "Lobatae"
+  ]
+ },
+ "margaretiae": {
+  "scientific_name": "margaretiae",
+  "author": null,
+  "is_hybrid": 0,
+  "conservation_status": null,
+  "subgenus": "Quercus",
+  "section": "Quercus",
+  "subsection": "Stellatae",
+  "complex": "austrina",
+  "parent1": null,
+  "parent2": null,
+  "sources": [
+   {
+    "id": 3,
+    "name": "Oak Compendium",
+    "preferred": true,
+    "url": null,
+    "local_names": [
+     "Sand Post Oak"
+    ],
+    "range": "SE US \nSouth to FL, Polk and Hillsborough Counties\nNorth to SE VA\nWest to Eastern TX",
+    "growth_habit": "Most often a small tree and not a canopy species, typically in the understory of xeric pine forests, tending towards the edges or openings.",
+    "leaves": "Lobes per side: usually 3–5.\n\nThick and leathery. 1 1/2 to 3\" long and 3/4 to 1 1/2\" wide. Central and terminal lobes larger than other. Typically not more than 5 lobes but can be more. Often lobing is not symmetrical per side and this variation in lobing is a useful tool in separating from Q. stellata. Lobing is often more rounded than Q. stellata.\n\nUnderside can be densely pubescent, can look nearly white in bright light. It also can be nearly glabrous.\n\nUpper surface is dark-green and smooth, not scabrous as in Q. stellata.\n\nNew growth (in particular) can show fairly pronounced mucros at the tips of the lobes. This is an uncommon feature in all but fresh leaves. \n\nSeedlings can be superficially confused with Q nigra, but will never have awns like Q nigra. The underside vestiture will always be useful for separating them.",
+    "flowers": null,
+    "fruits": null,
+    "bark": "Blockier, like Q. stellata. The linear nature of the bark can be a useful tell but not 100%.",
+    "twigs": "Grayish sometimes reddish. Usually glabrous at maturity but may have a few scattered branched (non-stellate) hairs. ",
+    "buds": "Small, rounded and brown.",
+    "hardiness_habitat": null,
+    "miscellaneous": null
+   },
+   {
+    "id": 4,
+    "name": "The Sibley Guide to Trees",
+    "preferred": false,
+    "url": null,
+    "local_names": [
+     "Dwarf Post Oak",
+     "Sand Post Oak",
+     "Runner Oak",
+     "Scrubby Post Oak"
+    ],
+    "range": "SE USA",
+    "growth_habit": "Deciduous. Shrub or sometimes a small scrubby tee to 25' (max 40') in thickets.",
+    "leaves": "3 1/2\" smaller than Q. stellata and less regularly cross-like. Underside light-green, velvety hairy.",
+    "flowers": null,
+    "fruits": "5/8\" average smaller than Q. stellata",
+    "bark": null,
+    "twigs": "Hairless, reddish-brown (vs hairy in Q. stellata)",
+    "buds": null,
+    "hardiness_habitat": "Well-drained or sandy soils; in dry pine-oak scrub or understory of dry woods",
+    "miscellaneous": null
+   }
+  ],
+  "hybrids": [
+   {
+    "name": "× drummondii",
+    "other": "stellata",
+    "exists": true
+   }
+  ],
+  "related": [
+   "stellata",
+   "austrina"
+  ],
+  "varieties": [],
+  "synonyms": [],
+  "links": [
+   {
+    "name": "Flora of North America",
+    "source": "FNA",
+    "url": "https://floranorthamerica.org/Quercus_margaretta"
+   }
+  ],
+  "siblings": [
+   "austrina",
+   "margaretiae"
+  ],
+  "sib_label": [
+   "complex",
+   "austrina"
+  ]
+ }
+};
+</script>
+<script>
+(function () {
+  const FIELDS = [
+    ["local_names", "Common names"], ["range", "Geographic range"], ["growth_habit", "Growth habit"],
+    ["leaves", "Leaves"], ["flowers", "Flowers"], ["fruits", "Fruits"], ["bark", "Bark"],
+    ["twigs", "Twigs"], ["buds", "Buds"], ["hardiness_habitat", "Hardiness and habitat"],
+    ["miscellaneous", "Additional information"]
+  ];
+  const OC = 3;
+  const STATES = {
+    taxon: [["shumardii", "Full: Q. shumardii"], ["emoryi", "Other sources only: Q. emoryi"], ["× riparia", "Hybrid: Q. × riparia"],
+            ["acutissima kingii", "Variety, no data: Q. acutissima kingii"], ["aerea", "No source data: Q. aerea"], ["margaretiae", "Oak Compendium and Sibley: Q. margaretiae"]],
+    photos: [["0", "None"], ["1", "One"], ["3", "Three"], ["14", "Many (14)"]],
+    view: [["reader", "Reader"], ["editor", "Editor"]],
+    dialog: [["none", "None"], ["add", "Add photos: empty"], ["loaded", "Add photos: loaded"], ["importing", "Add photos: importing"], ["manage", "Manage photos"], ["delete", "Delete photo"]]
+  };
+  const q = new URLSearchParams(location.search);
+  const st = { taxon: q.get("taxon") || "shumardii", photos: q.get("photos") || "3", view: q.get("view") || "reader", dialog: q.get("dialog") || "none", tab: q.get("tab") };
+  if (!TAXA[st.taxon]) st.taxon = "shumardii";
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const blank = v => v == null || (Array.isArray(v) ? v.length === 0 : !String(v).trim());
+  const hasText = s => FIELDS.some(([k]) => !blank(s[k]));
+
+  // Sources in display order (Jeff, 2026-11-25): the preferred source, then Oak
+  // Compendium, then Oaks of the World, then the rest alphabetically.
+  const OOTW = 2;
+  function ordered(srcs) {
+    const rank = s => (s.preferred ? 0 : s.id === OC ? 1 : s.id === OOTW ? 2 : 3);
+    return [...srcs].sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name));
+  }
+  // The tab that opens first: the first source in that order with any text.
+  function defaultSource(srcs) { return ordered(srcs).find(hasText) || ordered(srcs)[0]; }
+  // One value where one is needed: the first source in that order with a nonempty value.
+  function pick(srcs, key) {
+    for (const s of ordered(srcs)) {
+      const v = key === "local_names" ? (s[key] || []).find(n => String(n).trim()) : s[key];
+      if (!blank(v)) return { value: v, source: s };
+    }
+    return null;
+  }
+
+  // Scientific names (sci_name): genus 400, epithets 600, rank words, authors and × roman.
+  function epithets(name) {
+    return esc(name).replace(/×/g, '<span class="x">×</span>');
+  }
+  function sci(name, { genus = "Q.", author } = {}) {
+    const g = genus ? `<span class="g">${genus}</span> ` : "";
+    return `${g}${epithets(name)}${author ? ` <span class="a">${esc(author)}</span>` : ""}`;
+  }
+  function splitAuthor(raw) {
+    const m = String(raw).match(/^(\S+(?:\s+(?:×\s*)?[a-z-]+)?)\s+(.*)$/);
+    if (m && /[A-Z(]/.test(m[2][0])) return [m[1], m[2]];
+    return [raw, null];
+  }
+
+  // Source text: lines starting "- " or "= " become a list, other lines paragraphs.
+  function prose(text) {
+    const lines = String(text).split(/\n/).map(l => l.trim()).filter(Boolean);
+    let html = "", list = [];
+    const flush = () => { if (list.length) { html += "<ul>" + list.map(l => `<li>${esc(l)}</li>`).join("") + "</ul>"; list = []; } };
+    for (const l of lines) {
+      if (/^[-=]\s/.test(l)) list.push(l.replace(/^[-=]\s*/, ""));
+      else { flush(); html += `<p>${esc(l)}</p>`; }
+    }
+    flush();
+    return html;
+  }
+
+  function editMenu(id, items, quiet, label) {
+    return `<details class="edit${quiet ? " quiet" : ""}" id="${id}"><summary aria-label="${esc(label)}">Edit</summary><ul>${
+      items.map(([t, d, note]) => `<li><button type="button" data-dialog="${d || ""}">${t}${note ? ` <small>${note}</small>` : ""}</button></li>`).join("")}</ul></details>`;
+  }
+
+  // -- Band --
+  function band(t) {
+    const steps = [`<li><a href="#"><i>Quercus</i></a></li>`];
+    if (t.subgenus) steps.push(`<li><a href="#"><span class="rk">subg.</span><i>${esc(t.subgenus)}</i></a></li>`);
+    if (t.section) steps.push(`<li><a href="#"><span class="rk">sect.</span><i>${esc(t.section)}</i></a></li>`);
+    if (t.subsection) steps.push(`<li><a href="#"><span class="rk">subsect.</span><i>${esc(t.subsection)}</i></a></li>`);
+    if (t.complex) steps.push(`<li><a href="#"><i>Q. ${esc(t.complex)}</i> <span class="rk">complex</span></a></li>`);
+    const variety = t.sib_label[0] === "var.";
+    if (variety) steps.push(`<li><a href="#"><i>Q. ${esc(t.sib_label[1])}</i></a></li>`);
+    steps.push(`<li><span aria-current="page">Q. ${epithets(t.scientific_name)}</span></li>`);
+    const [rank, group] = t.sib_label;
+    const label = variety ? `Q. ${group} · ${t.siblings.length} taxa` : rank === "complex" ? `${group} complex · ${t.siblings.length} species` : `${group} · ${t.siblings.length} species`;
+    const shown = t.siblings.slice(0, 12);
+    const sib = shown.map(n => n === t.scientific_name ? `<li><span aria-current="page">Q. ${esc(n)}</span></li>` : `<li><a href="#">Q. ${esc(n)}</a></li>`).join("")
+      + (t.siblings.length > shown.length ? `<li><a class="all" href="#">All ${t.siblings.length} in ${esc(group)}</a></li>` : "");
+    return `<ol>${steps.join("")}</ol>${t.siblings.length > 1 ? `<details><summary>${label}</summary><ul class="sib">${sib}</ul></details>` : ""}`;
+  }
+
+  // -- Title row --
+  function title(t, editor, nPhotos) {
+    const kind = t.is_hybrid ? "Hybrid" : "Species";
+    const cn = pick(t.sources, "local_names");
+    const items = [
+      [`Edit ${kind.toLowerCase()}`], ["Add source data"], ["Add photos from iNaturalist…", "add"],
+      ["Manage photos…", "manage", nPhotos ? "1 failed" : ""], ["Make synonym of…"], [`Delete ${kind.toLowerCase()}`]
+    ];
+    let sub = "";
+    if (t.is_hybrid) {
+      const ps = [t.parent1, t.parent2].filter(Boolean);
+      const link = p => `<a href="#"><i>Q. ${esc(p)}</i></a>`;
+      sub = `<p class="sub">Hybrid of ${ps.length === 2 ? `${link(ps[0])} and ${link(ps[1])}` : ps.length === 1 ? `${link(ps[0])} and an unrecorded parent` : "unrecorded parents"}</p>`;
+    }
+    return `<div class="title">
+      <h1><span class="gen">Quercus</span> ${epithets(t.scientific_name)}</h1>
+      ${t.author ? `<span class="auth">${esc(t.author)}</span>` : ""}
+      ${cn ? `<span class="cn">${esc(cn.value)}</span><a class="src" href="#" data-tab="${cn.source.id}" title="Open ${esc(cn.source.name)}">${esc(cn.source.name)}</a>` : ""}
+      <span class="meta"><span>${kind}</span>${t.conservation_status ? `<span class="iucn iucn-${esc(t.conservation_status)}" title="IUCN Red List">IUCN ${esc(t.conservation_status)}</span>` : ""}</span>
+      ${editor ? editMenu("species-edit-menu", items, false, "Edit this " + kind.toLowerCase()) : ""}
+      ${sub}
+    </div>`;
+  }
+
+  // -- Photos column --
+  const LICENSES = ["CC BY-NC", "CC BY", "CC0", "ARR", "CC BY-SA"];
+  const CAPTIONS = ["Terminal buds in winter", "", "Leaf underside, axillary tufts", "", "Acorn and cap", "Bark of a mature tree"];
+  function credit(i) {
+    const lic = LICENSES[i % LICENSES.length];
+    return lic === "ARR"
+      ? `© <b>Observer name</b> · <a href="#">iNaturalist observation</a><span class="pv-arr">All rights reserved, used with the creator's permission</span>`
+      : `<b>Observer name</b> · ${lic} · <a href="#">iNaturalist observation</a>`;
+  }
+  function photos(n) {
+    if (!n) return `<aside class="photos" aria-label="Photos"><p class="nophoto">No photos yet.</p></aside>`;
+    const thumbs = Array.from({ length: n }, (_, i) => `<li><button type="button" class="pv-thumb" data-pv-photo data-alt="Photo ${i + 1}" data-caption="${esc(CAPTIONS[i % CAPTIONS.length])}" data-credit-html="${esc(credit(i))}" aria-label="Photo ${i + 1}">${i + 1}</button></li>`).join("");
+    return `<aside class="photos" aria-label="Photos"><div class="pv" data-photo-viewer>
+      <figure class="pv-stage"><div class="pv-frame" data-pv-frame></div><figcaption><p class="pv-cap" data-pv-cap></p><p class="pv-credit" data-pv-credit></p></figcaption></figure>
+      <div class="pv-rail"><button type="button" class="pv-step" data-pv-prev aria-label="Earlier photos"></button><ol class="pv-thumbs" data-pv-thumbs>${thumbs}</ol><button type="button" class="pv-step" data-pv-next aria-label="Later photos"></button></div>
+      <p class="pv-count" data-pv-count></p></div></aside>`;
+  }
+
+  // -- Source tabs and text --
+  function tabs(t, editor) {
+    const srcs = ordered(t.sources);
+    if (!srcs.length) return `<section aria-label="Source data"><h2>Source data</h2><p class="nodata">No source data for this oak yet.</p></section>`;
+    const sel = srcs.find(s => String(s.id) === st.tab) || defaultSource(t.sources);
+    const link = s => s.url
+      ? `<a class="srclink" href="${esc(s.url)}" rel="noopener" title="Original page at ${esc(s.name)}" aria-label="Original page at ${esc(s.name)}"><svg aria-hidden="true"><use href="#i-ext"/></svg></a>`
+      : `<a class="srclink" href="#" title="About ${esc(s.name)}" aria-label="About ${esc(s.name)}"><svg aria-hidden="true"><use href="#i-info"/></svg></a>`;
+    const tablist = srcs.map(s => `<span class="tab"><button type="button" role="tab" id="tab-${s.id}" aria-controls="source-panel" aria-selected="${s === sel}" data-tab="${s.id}">${esc(s.name)}</button>${s === sel ? link(s) : ""}</span>`).join("");
+    const rows = FIELDS.filter(([k]) => !blank(sel[k])).map(([k, label]) =>
+      `<div class="fr"><h3>${label}</h3><div class="v">${k === "local_names" ? `<p class="names">${sel[k].map(esc).join(", ")}</p>` : prose(sel[k])}</div></div>`).join("");
+    const menu = editor ? editMenu("source-data-menu", [[`Edit ${esc(sel.name)} data`], [`Delete ${esc(sel.name)} data`]], true, `Edit the data from ${sel.name}`) : "";
+    return `<section aria-label="Source data">
+      <div class="tabs"><div role="tablist" aria-label="Sources">${tablist}</div>${menu}${srcs.length > 1 ? `<a class="cmp" href="#">Compare sources</a>` : ""}</div>
+      <div id="source-panel" role="tabpanel" aria-labelledby="tab-${sel.id}">
+        ${rows || `<p class="panel-empty">No text from ${esc(sel.name)} yet.</p>`}
+      </div></section>`;
+  }
+
+  // -- Below the main content --
+  function links(t) {
+    const stored = (t.links || []).filter(l => l && l.name && l.url).map(l => ({ name: l.name, url: l.url }));
+    const full = "Quercus " + t.scientific_name;
+    const auto = [{ name: "iNaturalist", url: "https://www.inaturalist.org/search?q=" + encodeURIComponent(full) },
+                  { name: "Wikipedia", url: "https://en.wikipedia.org/wiki/" + full.replace(/ /g, "_") }];
+    return [...stored, ...auto].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+  }
+  function lower(t) {
+    const out = [];
+    if (t.synonyms.length) {
+      const names = t.synonyms.map(s => typeof s === "string" ? splitAuthor(s) : [s.name, s.author]);
+      out.push(`<section id="species-synonyms"><h2>Synonyms<small>${names.length} name${names.length === 1 ? "" : "s"}</small></h2>
+        <p class="synline">${names.map(([n, a]) => `<i>Q. ${epithets(n)}</i>${a ? ` <span class="a">${esc(a)}</span>` : ""}`).join(", ")}</p></section>`);
+    }
+    if (t.varieties.length) out.push(`<section id="species-subspecies"><h2>Subspecies and varieties</h2><ul class="rows3">${t.varieties.map(n => `<li><span class="nm">${sci(n)}</span></li>`).join("")}</ul></section>`);
+    if (t.hybrids.length) out.push(`<section id="species-hybrids"><h2>Hybrids<small>${t.hybrids.length} known</small></h2><ul class="rows3">${
+      t.hybrids.map(h => `<li><a class="nm" href="#">${sci(h.name)}</a>${h.other ? `<span class="with">with <a href="#"><i>${esc(h.other)}</i></a></span>` : ""}</li>`).join("")}</ul></section>`);
+    const ls = links(t);
+    out.push(`<section id="species-external-links"><h2>External links</h2><ul class="rows3 links">${ls.map(l => `<li><a href="${esc(l.url)}" rel="noopener"><span class="lk">${esc(l.name)}</span><span class="host">${esc(new URL(l.url).host.replace(/^www\./, ""))}</span></a></li>`).join("")}</ul></section>`);
+    if (t.sources.length) out.push(`<section id="sources"><h2>Sources</h2><ul class="srcs">${ordered(t.sources).map(s => `<li><a href="#">${esc(s.name)}</a>${s.url ? `<a class="src" href="${esc(s.url)}" rel="noopener">original page</a>` : ""}</li>`).join("")}</ul></section>`);
+    const today = new Date().toISOString().slice(0, 10);
+    const slug = t.scientific_name.replace(/ /g, "%20");
+    out.push(`<p class="cite"><b>Cite</b>Oak Compendium. <i>Quercus ${esc(t.scientific_name)}</i>${t.author ? " " + esc(t.author) : ""}. https://oakcompendium.org/species/${esc(slug)} (accessed ${today}).</p>`);
+    return `<div class="lower">${out.join("")}</div>`;
+  }
+
+  // -- Dialogs --
+  const MARK = id => `<svg aria-hidden="true"><use href="#${id}"/></svg>`;
+  function dialogHTML(kind, t) {
+    const name = `<i>Quercus ${esc(t.scientific_name)}</i>`;
+    const field = (val) => `<div class="fld"><label for="obs">iNaturalist observation</label><div class="row"><input id="obs" value="${val}" placeholder="Observation URL or number" autocomplete="off"><button type="button" class="btn-g">Load</button></div></div>`;
+    const tiles = [
+      ["CC BY-NC", true, ""], ["CC BY", true, ""], ["CC0", false, ""],
+      ["ARR", true, "arr"], ["CC BY-NC", false, "done"], ["CC BY-SA", false, ""]
+    ];
+    if (kind === "add") return `<div class="m-head"><h2 id="dlg-h">Add photos from iNaturalist</h2></div>
+      <div class="m-body"><p>Load an observation, then choose the photos to add to ${name}.</p>${field("")}</div>
+      <div class="m-acts"><button type="button" class="btn-g" data-close>Cancel</button></div>`;
+    if (kind === "loaded") return `<div class="m-head"><h2 id="dlg-h">Add photos from iNaturalist</h2></div>
+      <div class="m-body">${field("inaturalist.org/observations/000000000")}
+        <p class="obs-meta">Observer name · Fairfax Co., Virginia · 2025-10-14 · <i>Quercus shumardii</i></p>
+        <ul class="pick">${tiles.map(([lic, on, s], i) => s === "arr"
+          ? `<li><label><span class="t"><input type="checkbox" checked data-arr aria-label="Photo ${i + 1}, All rights reserved">Photo ${i + 1}</span><span class="stamp">All rights reserved</span></label></li>`
+          : s === "done" ? `<li class="off"><div class="t">Photo ${i + 1}</div><span class="st">${MARK("m-agree")}Already added</span></li>`
+          : `<li><label><span class="t"><input type="checkbox" ${on ? "checked" : ""} aria-label="Photo ${i + 1}, ${lic}">Photo ${i + 1}</span><span class="lic">${lic}</span></label></li>`).join("")}</ul>
+        <div class="arr-warn" id="arr-warn"><p><b>Photo 4 is All rights reserved.</b> Its creator keeps every right to it. Add it only if the creator has given the Oak Compendium permission. The page will say it is used with the creator's permission.</p>
+          <label><input type="checkbox" id="arr-ok">The creator has given permission to use this photo.</label></div></div>
+      <div class="m-acts"><button type="button" class="btn-g" data-close>Cancel</button><button type="button" class="btn-p" id="add-btn" data-dialog="importing" disabled>Add 3 photos</button></div>`;
+    if (kind === "importing") return `<div class="m-head"><h2 id="dlg-h">Add photos from iNaturalist</h2></div>
+      <div class="m-body"><p class="obs-meta" style="margin-top:0;border-top:0;padding-top:0">Observer name · Fairfax Co., Virginia · 2025-10-14 · <i>Quercus shumardii</i></p>
+        <ul class="pick">
+          <li><div class="t">Photo 1</div><span class="st">${MARK("m-agree")}Added</span></li>
+          <li><div class="t">Photo 2</div><span class="st">${MARK("m-differ")}Failed</span><span class="err">iNaturalist didn't send the photo.</span><button type="button" class="btn-s" style="margin-top:6px">Retry</button></li>
+          <li><div class="t">Photo 3</div><span class="st">${MARK("m-open")}Adding…</span></li>
+        </ul>
+        <p class="m-note">Closing this doesn't stop the import. Photos appear on the page when they're ready; Manage photos shows any that failed.</p></div>
+      <div class="m-acts"><button type="button" class="btn-g" data-close>Close</button></div>`;
+    if (kind === "manage") {
+      const rows = [
+        ["ready", "Terminal buds in winter", "Observer name · CC BY-NC"], ["ready", "", "© Observer name · <b>All rights reserved, used with the creator's permission</b>"],
+        ["pending", "", "Observer name · CC0"], ["failed", "", "Observer name · CC BY-NC"]
+      ];
+      return `<div class="m-head"><h2 id="dlg-h">Manage photos</h2></div>
+      <div class="m-body"><p>Drag to reorder. The first photo leads the page.</p><ul class="mlist">${rows.map(([s, cap, cr], i) => `<li class="mrow ${s}">
+        <span class="grip" aria-label="Drag to reorder" role="img"></span><span class="t"></span>
+        <div><div class="fld"><label class="skip" for="cap-${i}">Caption</label><div class="row"><input id="cap-${i}" value="${esc(cap)}" placeholder="Caption" ${s !== "ready" ? "disabled" : ""}></div></div>
+          <div class="meta">${s === "ready" ? `<span>${cr}</span>` : s === "pending" ? `<span class="st">${MARK("m-open")}Adding…</span>` : `<span class="st">${MARK("m-differ")}Failed</span><span class="err">The photo couldn't be resized.</span><button type="button" class="btn-s">Retry</button>`}
+            <button type="button" class="del" data-dialog="delete">Delete</button></div></div></li>`).join("")}</ul></div>
+      <div class="m-acts"><button type="button" class="btn-g" data-close>Close</button></div>`;
+    }
+    if (kind === "delete") return `<div class="m-head"><h2 id="dlg-h">Delete photo</h2></div>
+      <div class="m-body"><p>Delete this photo from ${name}?</p><p class="m-note">Its files are removed from storage.</p><p class="m-note strong">This can't be undone.</p></div>
+      <div class="m-acts"><button type="button" class="btn-g" data-dialog="manage">Cancel</button><button type="button" class="btn-d" data-close>Delete photo</button></div>`;
+    return "";
+  }
+
+  // -- State switcher (prototype only) --
+  function switcher() {
+    const labels = { taxon: "Taxon", photos: "Photos", view: "View", dialog: "Dialog" };
+    return Object.entries(STATES).map(([k, opts]) => `<fieldset><legend>${labels[k]}</legend>${
+      opts.map(([v, l]) => `<button type="button" data-k="${k}" data-v="${esc(v)}" aria-pressed="${st[k] === v}">${esc(l)}</button>`).join("")}</fieldset>`).join("");
+  }
+
+  function render() {
+    const t = TAXA[st.taxon];
+    const editor = st.view === "editor";
+    const n = Number(st.photos);
+    document.title = `Quercus ${t.scientific_name} · Oak Compendium`;
+    document.getElementById("states").innerHTML = switcher();
+    document.getElementById("band").innerHTML = band(t);
+    const covered = t.sources.some(s => s.id === OC && hasText(s));
+    document.getElementById("main").innerHTML = title(t, editor, n)
+      + (covered ? "" : `<p class="notice"><b>The Oak Compendium has no account of this oak yet.</b> ${t.sources.length ? "Everything on this page comes from the sources listed, shown as they wrote it." : ""}</p>`)
+      + `<div class="sp-grid">${photos(n)}${tabs(t, editor)}</div>` + lower(t);
+    PhotoViewer.mountAll(document.getElementById("main"));
+    const dlg = document.getElementById("dlg");
+    if (dlg.open) dlg.close();
+    if (st.dialog !== "none" && editor) { dlg.innerHTML = dialogHTML(st.dialog, t); dlg.showModal(); }
+    const u = new URL(location);
+    ["taxon", "photos", "view", "dialog", "tab"].forEach(k => st[k] && st[k] !== "none" ? u.searchParams.set(k, st[k]) : u.searchParams.delete(k));
+    history.replaceState(null, "", u);
+  }
+
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-k]");
+    if (b) { st[b.dataset.k] = b.dataset.v; if (b.dataset.k === "taxon") st.tab = null; if (b.dataset.k === "dialog" && b.dataset.v !== "none") st.view = "editor"; render(); return; }
+    const tab = e.target.closest("[data-tab]");
+    if (tab) { st.tab = tab.dataset.tab; render(); document.getElementById("tab-" + st.tab).focus(); return; }
+    const d = e.target.closest("[data-dialog]");
+    if (d && d.dataset.dialog) { st.dialog = d.dataset.dialog; render(); return; }
+    if (e.target.closest("[data-close]")) { st.dialog = "none"; render(); return; }
+    const dlg = document.getElementById("dlg");
+    if (e.target === dlg) { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) { st.dialog = "none"; render(); } }
+    document.querySelectorAll("details.edit[open]").forEach(m => { if (!m.contains(e.target)) m.open = false; });
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") document.querySelectorAll("details[open]").forEach(m => (m.open = false));
+    const tab = e.target.closest && e.target.closest('[role="tab"]');
+    if (tab && (e.key === "ArrowRight" || e.key === "ArrowLeft")) {
+      const all = [...document.querySelectorAll('[role="tab"]')];
+      const next = all[(all.indexOf(tab) + (e.key === "ArrowRight" ? 1 : all.length - 1)) % all.length];
+      st.tab = next.dataset.tab; render(); document.getElementById("tab-" + st.tab).focus();
+    }
+  });
+  // Add photos: an All rights reserved pick needs the permission box before adding.
+  document.addEventListener("change", e => {
+    if (!e.target.closest("#dlg")) return;
+    const arr = document.querySelector("#dlg [data-arr]"), ok = document.getElementById("arr-ok"), add = document.getElementById("add-btn");
+    if (!arr || !add) return;
+    document.getElementById("arr-warn").hidden = !arr.checked;
+    const n = document.querySelectorAll('#dlg .pick input[type="checkbox"]:checked').length;
+    add.textContent = `Add ${n} photo${n === 1 ? "" : "s"}`;
+    add.disabled = n === 0 || (arr.checked && !ok.checked);
+  });
+  document.getElementById("dlg").addEventListener("cancel", e => { e.preventDefault(); st.dialog = "none"; render(); });
+  render();
+})();
+</script>
+<script>document.querySelectorAll(".band ol").forEach(o => { o.scrollLeft = o.scrollWidth; });</script>
+</body>
+</html>

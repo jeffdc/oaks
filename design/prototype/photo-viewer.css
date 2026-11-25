@@ -1,0 +1,45 @@
+/* Photo viewer: a shared component (Oak Compendium, later Gallformers).
+   A stage with caption and credit, then a rail of thumbnails that shows a few
+   at a time and steps through the rest. Theme it with the custom properties;
+   nothing here depends on the page around it. */
+.pv {
+  --pv-ink: #161616;
+  --pv-ink-2: #3d3d3a;
+  --pv-ink-3: #5c5c57;
+  --pv-ground: #f1f0e8;
+  --pv-rule: #16161626;
+  --pv-focus: #2f5fb3;
+  --pv-frame-font: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --pv-read-font: "Source Serif 4", Georgia, serif;
+  --pv-visible: 5;          /* thumbnails in view at once */
+  --pv-gap: 6px;
+  --pv-stage-ratio: 4 / 5;
+  color: var(--pv-ink);
+}
+.pv-stage { margin: 0; }
+.pv-frame { aspect-ratio: var(--pv-stage-ratio); background: var(--pv-ground); border: 1px solid var(--pv-rule); display: grid; place-items: center; overflow: hidden; font: 600 13px/1.4 var(--pv-frame-font); color: var(--pv-ink-3); }
+.pv-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pv-cap { margin: 8px 0 0; font: 400 15px/1.45 var(--pv-read-font); }
+.pv-cap:empty { display: none; }
+.pv-credit { margin: 2px 0 0; font: 500 13px/1.45 var(--pv-frame-font); color: var(--pv-ink-2); }
+.pv-credit b { color: var(--pv-ink); font-weight: 700; }
+.pv-credit .pv-arr { display: block; font-weight: 700; color: var(--pv-ink); }
+
+/* The rail: step buttons either side of a strip that scrolls by whole pages. */
+.pv-rail { display: grid; grid-template-columns: 24px minmax(0, 1fr) 24px; gap: 4px; align-items: center; margin-top: 12px; }
+.pv-rail[data-fits] { grid-template-columns: minmax(0, 1fr); }
+.pv-rail[data-fits] .pv-step { display: none; }
+.pv-thumbs { list-style: none; margin: 0; padding: 2px; display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - (var(--pv-visible) - 1) * var(--pv-gap)) / var(--pv-visible)); gap: var(--pv-gap); overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; overscroll-behavior-x: contain; }
+.pv-thumbs::-webkit-scrollbar { display: none; }
+.pv-thumbs li { scroll-snap-align: start; }
+.pv-thumb { display: grid; place-items: center; width: 100%; aspect-ratio: 1; padding: 0; background: var(--pv-ground); border: 1px solid var(--pv-rule); font: 600 11px/1 var(--pv-frame-font); color: var(--pv-ink-3); cursor: pointer; overflow: hidden; }
+.pv-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pv-thumb[aria-current="true"] { outline: 2px solid var(--pv-ink); outline-offset: 1px; color: var(--pv-ink); }
+.pv-thumb:focus-visible, .pv-step:focus-visible { outline: 3px solid var(--pv-focus); outline-offset: 2px; }
+.pv-step { width: 24px; height: 44px; display: grid; place-items: center; padding: 0; background: none; border: 0; cursor: pointer; color: var(--pv-ink); }
+.pv-step::before { content: ""; width: 8px; height: 8px; border-top: 2px solid currentColor; border-right: 2px solid currentColor; }
+.pv-step[data-pv-prev]::before { transform: rotate(-135deg); margin-left: 4px; }
+.pv-step[data-pv-next]::before { transform: rotate(45deg); margin-right: 4px; }
+.pv-step:disabled { color: var(--pv-rule); cursor: default; }
+.pv-step:not(:disabled):hover { background: var(--pv-ground); }
+.pv-count { margin: 8px 0 0; font: 600 13px/1 var(--pv-frame-font); color: var(--pv-ink-3); font-variant-numeric: lining-nums tabular-nums; }
