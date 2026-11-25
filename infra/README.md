@@ -39,7 +39,7 @@ Photos are stored in a private bucket and served only through CloudFront on `htt
 
 DNS for `oakcompendium.org` is at Porkbun, outside tofu. It holds two records for photos: the certificate's validation CNAME (`tofu output images_cert_validation`) and `images` CNAME to the distribution (`tofu output images_distribution_domain`). Keep both.
 
-The upload user's access key is not managed by tofu, so its secret never enters state. To issue one, create it with `aws iam create-access-key --user-name oaks-images-upload` and send it straight into Fly secrets without saving or printing it; delete the old key once the app runs on the new one.
+The upload user's access key is not managed by tofu, so its secret never enters state. To issue one, create it with `aws iam create-access-key --user-name oaks-images-upload` and send it straight into Fly secrets as `IMAGES_AWS_ACCESS_KEY_ID` and `IMAGES_AWS_SECRET_ACCESS_KEY` (read by `config/runtime.exs`) without saving or printing it; delete the old key once the app runs on the new one.
 
 #### Smoke test (2026-11-24)
 
@@ -70,3 +70,13 @@ tofu apply     # review the plan it prints before answering yes
 `.terraform.lock.hcl` is committed and pins the AWS provider with hashes for macOS (arm64) and Linux (amd64). After changing the provider version, run `tofu init -upgrade`, then `tofu providers lock -platform=darwin_arm64 -platform=linux_amd64` and commit the lock file.
 
 To bring an existing resource under management, add an `import` block for it, check with `tofu plan` that it imports with no changes, apply, then delete the block.
+
+#### App storage smoke test (2026-11-24)
+
+The app's S3 adapter (`Oaks.Storage.S3`), run from dev with `IMAGES_STORAGE=s3` and a throwaway key for `oaks-images-upload`, deleted afterwards:
+
+- Stored a JPEG original and its four variants (`Oaks.Storage.Variants`) under `species/999999/`, and listed all five back.
+- Each file from `https://images.oakcompendium.org`: 200, `image/jpeg`, `Cache-Control: public, max-age=31536000, immutable`.
+- Deleted the five files twice; both passes succeeded and the listing was empty. The CDN still served the original (a Hit) until invalidation.
+- Invalidated the five paths twice with the same caller reference: CloudFront returned the same invalidation ID both times. It completed in about 30 seconds, after which every path was a 403.
+- A key made seconds earlier is refused (`InvalidAccessKeyId`) until IAM has propagated it; the retry a few seconds later worked.
