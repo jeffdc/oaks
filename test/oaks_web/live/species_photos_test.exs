@@ -15,6 +15,7 @@ defmodule OaksWeb.SpeciesPhotosTest do
   alias Oaks.Images
   alias Oaks.Images.{Image, ImportWorker}
   alias Oaks.Repo
+  alias OaksWeb.SpeciesPhotos.{AddPhotos, ManagePhotos}
 
   @moduletag :tmp_dir
   @moduletag :capture_log
@@ -383,7 +384,7 @@ defmodule OaksWeb.SpeciesPhotosTest do
             {"request_delete_photo", %{"id" => "#{ready.id}"}},
             {"delete_photo", %{}}
           ],
-          do: {:noreply, _} = OaksWeb.SpeciesPhotos.ManagePhotos.handle_event(event, params, manage)
+          do: {:noreply, _} = ManagePhotos.handle_event(event, params, manage)
 
       add = %Phoenix.LiveView.Socket{
         assigns: %{
@@ -397,7 +398,7 @@ defmodule OaksWeb.SpeciesPhotosTest do
       }
 
       for {event, params} <- [{"add", %{}}, {"retry", %{"id" => "#{failed.id}"}}],
-          do: {:noreply, _} = OaksWeb.SpeciesPhotos.AddPhotos.handle_event(event, params, add)
+          do: {:noreply, _} = AddPhotos.handle_event(event, params, add)
 
       assert Images.list_for_editor(ctx.species) == before
       assert Repo.aggregate(Oban.Job, :count) == jobs
