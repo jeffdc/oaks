@@ -107,4 +107,4 @@ The index of questions that cut across phases; each phase doc lists its own.
 
 ## Other plans
 
-Separate from this one, each in its own doc: [gallformers parity](../gallformers-parity-plan.md) (one port), [search](../search-plan.md) (shaping; after Taxon pages) and the [November 2026 audit](../audit-2026-11-plan.md) (one check left). Work that belongs to no plan is in the [backlog](../backlog.md).
+Separate from this one, each in its own doc: [gallformers parity](../gallformers-parity-plan.md) (done), [search](../search-plan.md) (shaping; after Taxon pages) and the [November 2026 audit](../audit-2026-11-plan.md) (done). Work that belongs to no plan is in the [backlog](../backlog.md).
