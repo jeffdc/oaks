@@ -62,6 +62,7 @@ defmodule Oaks.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
+      {:logger_json, "~> 7.0"},
       {:mdex, "~> 0.2"},
       {:dns_cluster, "~> 0.3"},
       {:bandit, "~> 1.5"},

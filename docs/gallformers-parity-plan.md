@@ -17,4 +17,4 @@ Fly.io's log aggregation is wasted on raw text. Switch prod logging to structure
 
 Done when prod logs on Fly are JSON lines carrying the request ID.
 
-**Status:** not started (checked 2026-11-26: no `logger_json` in `mix.exs`).
+**Status:** done (2026-11-27). `logger_json` 7.0 with `LoggerJSON.Formatters.Basic.new(metadata: :all)` in `config/runtime.exs`'s prod block. A local prod-mode server logged JSON lines with `request_id` on every request line; confirm on Fly after the deploy.
