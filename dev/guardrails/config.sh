@@ -15,7 +15,7 @@ HEARTWOOD_PROSE="docs/ README.md CONTRIBUTING.md RELEASING.md"
 # paths above skips the jobs that test code (heartwood's actions/changes, in
 # ci.yml and security.yml). The commit gate still reviews them. Only files no
 # code, test or build step reads.
-HEARTWOOD_CI_PROSE="AGENTS.md CLAUDE.md CODING_STANDARDS.md DESIGN.md PRODUCT.md LICENSE DATA_LICENSE"
+HEARTWOOD_CI_PROSE="AGENTS.md CLAUDE.md DESIGN.md PRODUCT.md LICENSE DATA_LICENSE"
 
 # Where a new file needs the reviewer's justification.
 HEARTWOOD_LIB="lib/"
