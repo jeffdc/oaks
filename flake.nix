@@ -15,15 +15,15 @@
 
       # Tailwind is pinned to the version in config/config.exs (nixpkgs has a newer one).
       # Same release the Dockerfile downloads; keep all three in sync.
-      tailwindVersion = "4.1.12";
+      tailwindVersion = "4.3.5";
       tailwindAssets = {
         aarch64-darwin = {
           name = "tailwindcss-macos-arm64";
-          hash = "sha256-fWm+F3a76KSeFXFNmHPQiVnDIK/w8HFNjY5tnQDZtUM=";
+          hash = "sha256-8/T10XJ+K2k7jxyaFJK13YcAjIbqKGvuFYnLRY5iNfw=";
         };
         x86_64-linux = {
           name = "tailwindcss-linux-x64";
-          hash = "sha256-Xu7mbqI36umhYPozFP0M92q5k1Uamfr7Fvodtsa5Aok=";
+          hash = "sha256-5HaVzuPw2QYjqR85ObCL3uYQ61rZk0Ct/51BRbKE1sw=";
         };
       };
     in

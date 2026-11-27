@@ -56,9 +56,9 @@ RUN mix compile
 # unchecked binary. Keep the
 # version, in the URL and in the path, in sync with `config :tailwind` in
 # config/config.exs (heartwood's check-toolchain checks both).
-ENV MIX_TAILWIND_PATH=/usr/local/bin/tailwindcss-4.1.12
-ADD https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.12/tailwindcss-linux-x64-musl ${MIX_TAILWIND_PATH}
-RUN echo "a8a1926a2951a5da0684c568d612bc0a590600334d3a85d0e63ea90ac7ced2e5  ${MIX_TAILWIND_PATH}" | sha256sum -c - && \
+ENV MIX_TAILWIND_PATH=/usr/local/bin/tailwindcss-4.3.5
+ADD https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.5/tailwindcss-linux-x64-musl ${MIX_TAILWIND_PATH}
+RUN echo "bb050edd13f15006d872a9bb1772b908618a8df6806d30bf095cba26a09e640b  ${MIX_TAILWIND_PATH}" | sha256sum -c - && \
     chmod +x "${MIX_TAILWIND_PATH}"
 
 # Build assets (esbuild is installed via mix from npm; tailwind is placed above)
