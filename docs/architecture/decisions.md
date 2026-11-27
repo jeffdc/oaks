@@ -14,12 +14,6 @@ Template:
 - **Source:** commit, PR or plan doc
 ```
 
-## 2026-11-27: Ship heartwood_ui's hooks and CSS as LiveView colocated assets, tested with Playwright in heartwood
-
-- **Why:** heartwood is fetched with `sparse:` (checked out at `deps/heartwood_ui/ui/`) or as a `path:` override (nothing under `deps/`), so plain JS imported through `NODE_PATH` from `deps/` couldn't find it. LiveView 1.2 extracts colocated hooks and CSS into `_build/$MIX_ENV/phoenix-colocated/heartwood_ui/` either way; a spike on 2026-11-27 proved it in oaks, through `HEARTWOOD_PATH` and through a git dependency.
-- **Changes:** `heartwood_ui`'s hooks are colocated hooks and its CSS is colocated CSS (through `Heartwood.UI.ColocatedCSS`). An app imports the hooks from `phoenix-colocated/heartwood_ui` in `app.js` and `phoenix-colocated/heartwood_ui/colocated.css` in `app.css`, which needs Tailwind 4.2.3 or later with `NODE_PATH` in its tailwind config. Heartwood tests the JS with Playwright against its own `mix dev` preview, instead of vitest; the apps still need no npm. Shared components take all their wording through a `labels` map. The shared photo viewer's design (a whole-photo stage, a filmstrip without step buttons, wrapping moves, a pan-and-zoom full view, container queries) is in [Architecture groundwork](../facts-expansion/architecture-groundwork.md#3-sharing-with-gallformers). Supersedes, in the 2026-11-26 heartwood entry, plain JS with a `package.json` imported through `NODE_PATH` and tested with vitest.
-- **Source:** Jeff, 2026-11-27; oaks PR #36 (Tailwind 4.3.5 and `NODE_PATH`).
-
 ## 2026-11-26: CI parity across oaks, gallformers and heartwood
 
 - **Why:** CI enforced less than the local hard checks (no check-ui, no Dialyzer), the rules of the three repos had drifted apart, and CodeQL flagged a cache-poisoning risk in the deploy workflow (rated high).
@@ -35,9 +29,9 @@ Template:
   - Shared components keep the 2026-11-25 shape, which stands: their own class prefix and custom properties with neutral defaults, no Tailwind utilities in their markup, `class` for layout only, and one adapter block per app mapping its tokens (`.oc-photos` in oaks).
   - Changes flow through heartwood: tagged releases with a `CHANGELOG.md` entry whose "Upgrade:" steps say what an app must do; the change is done when the app that needed it is bumped and the other app has a backlog entry; `mix heartwood.status` shows each app's pinned tag against the latest, for information only. Apps never edit `deps/heartwood_*`.
   - Gallformers' pure modules are copied into oaks with an origin line (repo, path, commit, what was adapted); each app owns its copy. `Taxa.Ancestry` is rewritten for SQLite. CI workflows aren't shared.
+  - `heartwood_ui`'s hooks and CSS are LiveView 1.2 colocated assets (Jeff, 2026-11-27), which LiveView extracts into `_build/$MIX_ENV/phoenix-colocated/heartwood_ui/` however heartwood is fetched; a `NODE_PATH` import from `deps/` couldn't find a `sparse:` or `path:` package. An app imports the hooks in `app.js` and the CSS in `app.css`, which needs Tailwind 4.2.3 or later with `NODE_PATH` in its tailwind config (oaks PR #36). Heartwood tests the JS with Playwright against its own `mix dev` preview, so the apps need no npm. Shared components take all their wording through a `labels` map. Proven by a spike in oaks on 2026-11-27.
   - Rule U8 changes: shared code lives in heartwood, which cannot depend on either app.
-- **Source:** Jeff, 2026-11-26; [Architecture groundwork](../facts-expansion/architecture-groundwork.md#3-sharing-with-gallformers).
-- **Superseded in part by:** 2026-11-27, colocated assets (how `heartwood_ui`'s hooks and CSS reach an app, and how they're tested).
+- **Source:** Jeff, 2026-11-26 and 2026-11-27; [Architecture groundwork](../facts-expansion/architecture-groundwork.md#3-sharing-with-gallformers).
 
 ## 2026-11-26: Enforce rules with conformance tests, as gallformers does
 
