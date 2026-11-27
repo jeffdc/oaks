@@ -50,7 +50,7 @@ Baselines as of the [2026-11-26 first periodic review](reviews.md#2026-11-26-fir
 | U5 | Colours come from the tokens; ochre is the only saturated fill; IUCN colours appear only on Red List stamps. | DESIGN.md | Manual | Hex values outside `tokens.css`: 3 in `app.css` (`#fff`), 45 in `components.css` (IUCN fills, masks, photo viewer defaults). 0 Tailwind palette colour classes. |
 | U6 | Square corners; no shadows. | DESIGN.md | Manual | 2 radii (`.merge-spinner`; the focus outline's 1px, `system/base.css:75`), 1 shadow (`.species-row:hover`). 0 `rounded-*` or `shadow-*` classes. |
 | U7 | No `@apply`; no external scripts, stylesheets or fonts. | CODING_STANDARDS.md, Phoenix 1.8 Patterns | Manual | 0 |
-| U8 | Code shared with gallformers lives in heartwood and has no app-specific dependencies in its markup, script or styles; each app themes it through one adapter block of its own. | docs/species-photos-plan.md, Phase 6; [decisions.md](decisions.md), 2026-11-26 heartwood | Manual while the photo viewer is still in oaks (`OaksWeb.PhotoViewer`); once in heartwood, by construction, since heartwood can't depend on either app | 0 |
+| U8 | Code shared with gallformers lives in heartwood and has no app-specific dependencies in its markup, script or styles; each app themes it through one adapter block of its own. | docs/species-photos-plan.md, Phase 6; [decisions.md](decisions.md), 2026-11-26 heartwood | By construction: the photo viewer is in heartwood (`Heartwood.UI.PhotoViewer`, since v0.2.0), which can't depend on either app | 0 |
 
 ## Delivery
 
