@@ -2,6 +2,8 @@
 
 One entry per periodic review of the code against [README.md](README.md) and [rules.md](rules.md), newest first. A review records what it checked and what it found. Each finding ends in one of: **fix** (work to do, with where it's tracked), **accept** (an exception, with the reason, noted in rules.md), **new rule** (added to rules.md with its check, and a decision in [decisions.md](decisions.md)), or **open** (waiting for Jeff).
 
+A review runs with heartwood's architecture reviewer: `MIX_ENV=test mix heartwood.architecture` writes the packet (the commits since this file last changed, the context graph from `mix xref`, every ratchet against its baseline, heartwood's version, oaks' questions in `dev/guardrails/architecture.md`, and these docs), and Jeff gives it to several models. Each records its report in `.git/oaks-architecture/<run>/<model>.md`; Jeff combines them into one entry here, where a finding several models raise carries more weight. Committing the entry starts the next review's range.
+
 ## 2026-11-26: Baseline
 
 The first review: the whole system was mapped (contexts and their dependencies from `mix xref`, the web layer, runtime and infrastructure, and every existing check) to write README.md and set each rule's baseline. Main at 8539e38.
