@@ -20,8 +20,9 @@ jobs:
   deploy:
     name: Deploy to Fly.io
     runs-on: ubuntu-latest
-    # Only deploy if CI succeeded (or manual trigger)
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    # Only deploy main: after CI succeeds on it, or a manual run started from main
+    # (a manual run from any other branch would put that branch in production).
+    if: ${{ (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || github.event.workflow_run.conclusion == 'success' }}
     steps:
       # Check out the exact commit CI tested, not whatever main is now.
       - uses: actions/checkout@v7
@@ -56,8 +57,10 @@ jobs:
         shell: bash
         run: nix build --no-link .#devShells.x86_64-linux.default
 
+      # Restore only: a deploy run never saves the cache, so nothing it checks out can
+      # poison the cache that CI and later deploys restore (CodeQL cache-poisoning).
       - name: Restore dependencies cache
-        uses: actions/cache@v6
+        uses: actions/cache/restore@v6
         with:
           path: |
             deps
