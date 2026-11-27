@@ -17,6 +17,10 @@ defmodule OaksWeb.DevComponentsLive do
   import Ecto.Query, only: [from: 2]
   import Heartwood.UI.PhotoViewer, only: [photo_viewer: 1]
 
+  # The gallery's own path, as a plain string: ~p can't verify it in a prod
+  # compile, where the /dev routes don't exist, so it would warn there.
+  @gallery_path "/dev/components"
+
   @traits [
     %{
       trait: "Habit",
@@ -116,6 +120,7 @@ defmodule OaksWeb.DevComponentsLive do
       {:ok,
        assign(socket,
          page_title: "Components",
+         gallery_path: @gallery_path,
          traits: @traits,
          sample_photos: sample_photos(),
          db_photos: db_photos(),
@@ -634,7 +639,7 @@ defmodule OaksWeb.DevComponentsLive do
             <.header id="gallery-species-title">
               <.sci_name name="Quercus shumardii" author="Buckley" size="display" />
               <:common_name>
-                Shumard's oak<.source_mark patch={~p"/dev/components"}>
+                Shumard's oak<.source_mark patch={@gallery_path}>
                   Oaks of the World
                 </.source_mark>
               </:common_name>
@@ -936,7 +941,7 @@ defmodule OaksWeb.DevComponentsLive do
                 kind={:species}
                 path="/species/shumardi-typo"
                 query="shumardi-typo"
-                back={~p"/dev/components"}
+                back={@gallery_path}
               />
             </.page>
           </div>

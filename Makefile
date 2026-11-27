@@ -88,6 +88,7 @@ precommit:
 done-checks: test-db
 	$(HEARTWOOD)/bin/check-toolchain
 	mix precommit
+	MIX_ENV=prod mix compile --warnings-as-errors
 	mix dialyzer
 	mix hex.audit
 	mix deps.audit

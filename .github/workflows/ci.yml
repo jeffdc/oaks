@@ -138,6 +138,12 @@ jobs:
       - name: Compile (generates colocated hooks)
         run: mix compile
 
+      # The other jobs compile in dev and test, where the /dev routes exist; a
+      # warning only a prod compile shows (a ~p to a dev route, say) would
+      # otherwise reach the release, whose build doesn't fail on warnings.
+      - name: Compile for production with warnings as errors
+        run: MIX_ENV=prod mix compile --warnings-as-errors
+
       - name: Build assets
         run: mix assets.deploy
 
