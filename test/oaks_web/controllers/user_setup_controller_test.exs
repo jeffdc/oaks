@@ -1,6 +1,7 @@
 defmodule OaksWeb.UserSetupControllerTest do
   use OaksWeb.ConnCase
 
+  import ExUnit.CaptureLog
   import Oaks.AccountsFixtures
 
   alias Oaks.Accounts
@@ -96,5 +97,30 @@ defmodule OaksWeb.UserSetupControllerTest do
     conn |> finish(setup_secret(conn)) |> html_response(200)
 
     refute Accounts.get_user_by_session_token(other_session)
+  end
+
+  describe "request logs, at production's :info level" do
+    # Tests log at :warning; a process level can't go below the primary one.
+    # Safe to change here: SQLite tests never run async.
+    setup do
+      level = Logger.level()
+      Logger.configure(level: :info)
+      on_exit(fn -> Logger.configure(level: level) end)
+    end
+
+    test "never carry a setup link's token", %{conn: conn} do
+      {_user, token} = pending_user_fixture()
+
+      log =
+        capture_log([level: :info], fn ->
+          conn = get(conn, ~p"/users/setup/#{token}")
+          assert redirected_to(conn) == ~p"/users/setup"
+          conn |> recycle() |> get(~p"/users/setup") |> html_response(200)
+        end)
+
+      # The setup form's request is logged, so the log was captured.
+      assert log =~ "GET /users/setup\n"
+      refute log =~ token
+    end
   end
 end

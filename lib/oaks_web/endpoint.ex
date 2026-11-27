@@ -59,7 +59,7 @@ defmodule OaksWeb.Endpoint do
   end
 
   plug Plug.RequestId
-  plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
+  plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint], log: {__MODULE__, :log_level, []}
 
   # The CSP and other browser security headers on every error response,
   # including error pages no router pipeline reaches (an unmatched route, a
@@ -85,4 +85,14 @@ defmodule OaksWeb.Endpoint do
   plug OaksWeb.Plugs.Analytics
   plug OaksWeb.Plugs.ApiHost
   plug OaksWeb.Router
+
+  @doc """
+  The level Phoenix logs a request at (`Plug.Telemetry`'s `:log`), or
+  `false` for none. A setup link carries its token in the path, which
+  Phoenix logs as it is (`filter_parameters` covers only params), and the
+  token stays valid until setup is finished, so its requests aren't logged.
+  """
+  @spec log_level(Plug.Conn.t()) :: Logger.level() | false
+  def log_level(%Plug.Conn{path_info: ["users", "setup", _token]}), do: false
+  def log_level(_conn), do: :info
 end

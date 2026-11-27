@@ -148,7 +148,7 @@ Species and Sources depend on each other (associations both ways, and each queri
 
 ## Observability and data safety
 
-- **Logs**: plain text with the request ID to stdout; Fly's log stream is the only sink. Passwords, tokens, API keys and codes are filtered from params.
+- **Logs**: plain text with the request ID to stdout; Fly's log stream is the only sink. Passwords, tokens, API keys and codes are filtered from params, and requests for a setup link (`/users/setup/<token>`) aren't logged, since Phoenix logs paths unfiltered (`OaksWeb.Endpoint.log_level/1`).
 - **Metrics**: Telemetry metrics are defined, but no reporter is attached and no dashboard is mounted.
 - **Health**: `GET /health` runs `SELECT 1`. Nothing alerts on disk use, replication lag or errors.
 - **Backups**: Litestream streams the database to S3 every 5 seconds (objects expire after 30 days); pre-migration copies on the volume; photos' deleted versions kept 30 days by S3 versioning. `make download-db` restores a local copy from the Litestream replica.
