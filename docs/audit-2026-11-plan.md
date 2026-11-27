@@ -12,4 +12,4 @@ The `:browser` pipeline sends a CSP (`lib/oaks_web/plugs/security_headers.ex`): 
 
 Done when every page above loads with no CSP violation, or each violation found is fixed.
 
-**Status:** not done.
+**Status:** done (2026-11-27). No violations. The public pages were checked on oakcompendium.org: the header matches the plug, and the species page's photo viewer, lightbox and details dialog, compare, taxonomy, analytics, search and sources all loaded with LiveView connected. The logged-in pages were checked on a local dev server (same CSP) against a copy of the database, because prod logins weren't used: every editor form and dialog, the photo dialogs, the merge picker and merge page, a new article and its public page, and the settings pages. A violation listener installed before page scripts caught a deliberately injected inline script both times, so the empty results are real.
