@@ -1,6 +1,6 @@
 # AI Agent Instructions
 
-The instructions for every agent working in this project. Elixir and Phoenix conventions are in [CODING_STANDARDS.md](CODING_STANDARDS.md); every agent follows them.
+The instructions for every agent working in this project. The component library is in [docs/COMPONENTS.md](docs/COMPONENTS.md), and the rules the code must follow are in [docs/architecture/rules.md](docs/architecture/rules.md); every agent follows them.
 
 ## Work Quality Standards
 
@@ -23,7 +23,7 @@ If you're unsure about scope, ASK. Examples:
 
 ## Working rules
 
-**UI work uses the shared component library, always.** Before touching any page, read the Components section of [CODING_STANDARDS.md](CODING_STANDARDS.md): it says which component to use for each need. Never build a page-local version of a name, width, title row, button, dialog, stamp or anything else the library covers. If the component you need is missing or doesn't fit, stop: add it to the library as its own change for Jeff's review in `/dev/components`, or ask Jeff. An agent that briefs other agents on UI work names the components they must use.
+**UI work uses the shared component library, always.** Before touching any page, read [docs/COMPONENTS.md](docs/COMPONENTS.md): it says which component to use for each need. Never build a page-local version of a name, width, title row, button, dialog, stamp or anything else the library covers. If the component you need is missing or doesn't fit, stop: add it to the library as its own change for Jeff's review in `/dev/components`, or ask Jeff. An agent that briefs other agents on UI work names the components they must use.
 
 **Dev servers: start them as background tasks and stop them with your stop tool, never with `kill`.** Run `PORT=<port> mix phx.server` (inside the Nix shell) through your shell tool's background option and stop it with the tool that stops background tasks (TaskStop in Claude Code), so stopping needs no approval. For a server left running, `scripts/stop-dev-server <port>` is the one pre-approved fallback: it stops only a Phoenix server on that port. Never touch Jeff's servers on 4444 (his `make dev`) and 4460 (the integration preview); the script refuses them.
 
@@ -37,7 +37,7 @@ If you're unsure about scope, ASK. Examples:
 ## Before handing work over
 
 - **Hard checks:** `make done-checks`. It rebuilds the checkout's test database, then runs heartwood's `check-toolchain`, `mix precommit` (whose tests include the guardrails), `mix dialyzer` and the security audits (`mix hex.audit`, `mix deps.audit`, `mix sobelow`): everything CI requires. Run it inside the Nix dev shell (direnv, or `nix develop -c make done-checks`). Don't call work finished until it passes.
-- **Guardrails** (`Oaks.GuardrailsTest`, in `mix test`): the UI rules (`OaksWeb.Conformance`; CODING_STANDARDS.md, Components), copied code (Credo's `DuplicatedCode`; `mix credo --config-name duplicates` shows each block) and retirements (`test/support/retirements.exs`: a change that replaces a module adds its entry first, as its failing test, and deletes the old module in the same change). Their baselines in `test/support/` only shrink: after a fix, `mix heartwood.baseline <ratchet>` lowers one; never write one to let something new pass. Their code is heartwood's (`heartwood_guardrails`, from `~/dev/heartwood`): a bug in it is fixed there, with oaks pointed at the checkout (`HEARTWOOD_PATH=~/dev/heartwood`), never in `deps/`.
+- **Guardrails** (`Oaks.GuardrailsTest`, in `mix test`): the UI rules (`OaksWeb.Conformance`; docs/COMPONENTS.md), copied code (Credo's `DuplicatedCode`; `mix credo --config-name duplicates` shows each block) and retirements (`test/support/retirements.exs`: a change that replaces a module adds its entry first, as its failing test, and deletes the old module in the same change). Their baselines in `test/support/` only shrink: after a fix, `mix heartwood.baseline <ratchet>` lowers one; never write one to let something new pass. Their code is heartwood's (`heartwood_guardrails`, from `~/dev/heartwood`): a bug in it is fixed there, with oaks pointed at the checkout (`HEARTWOOD_PATH=~/dev/heartwood`), never in `deps/`.
 - **Plans** are markdown docs in `docs/` (for example `docs/species-photos-plan.md`), written with Jeff. Don't change a plan's scope or decisions unless Jeff asks.
 
 ## Project Overview
@@ -104,7 +104,32 @@ Tests use a **separate test database** (`priv/oaks_test.sqlite`) that is:
 - **Rebuilt with**: `make test-db` (drops the file, runs `ecto.create` + `ecto.migrate`, then loads the seeds with `sqlite3`)
 - **Copied per run**: `priv/oaks_test.sqlite` is a template no test run opens. Each `mix test` runs on its own copy at `_build/test/test_dbs/oaks_test-<pid>.sqlite`, taken at start and deleted at exit (`isolate_test_db/1` in `mix.exs`), so concurrent runs in one checkout, `mix test --partitions`, and `make test-db` during a run don't collide. A run started before `make test-db` keeps its old copy. Don't run two `make test-db` at once in one checkout.
 
-**Important**: The `mix test` alias runs `ecto.migrate` (so new migrations apply automatically) but never reloads seeds. After modifying `test_seeds.sql`, run `make test-db`. Tests never read the seeded rows: each test builds its own data with the fixture modules in `test/support/fixtures/` and asserts only on rows it created (see CODING_STANDARDS.md, Fixtures), so changing the seeds needs no test change.
+**Important**: The `mix test` alias runs `ecto.migrate` (so new migrations apply automatically) but never reloads seeds. After modifying `test_seeds.sql`, run `make test-db`. Tests never read the seeded rows: each test builds its own data with the fixture modules in `test/support/fixtures/` and asserts only on rows it created (Fixtures, below), so changing the seeds needs no test change.
+
+### Fixtures
+
+Test fixtures live in `test/support/fixtures/`, one module per context: `Oaks.AccountsFixtures`, `Oaks.AnalyticsFixtures`, `Oaks.ArticlesFixtures`, `Oaks.SourcesFixtures`, `Oaks.SpeciesFixtures` and `Oaks.TaxonomyFixtures`. `DataCase` and `ConnCase` don't import them; each test file imports the ones it uses:
+
+```elixir
+import Oaks.SourcesFixtures
+import Oaks.SpeciesFixtures
+```
+
+A fixture merges the attrs it's given over defaults with a unique name (`System.unique_integer([:positive])`) and inserts through the context's create function, so it runs the same changeset production does:
+
+```elixir
+defmodule Oaks.SpeciesFixtures do
+  def species_fixture(attrs \\ %{}) do
+    defaults = %{scientific_name: "species#{System.unique_integer([:positive])}", is_hybrid: false}
+    {:ok, species} = defaults |> Map.merge(Map.new(attrs)) |> Oaks.Species.create_species()
+    species
+  end
+end
+```
+
+Call fixtures in `setup` or in the test body, never in `setup_all` or a module attribute, so the rows stay inside the test's sandbox transaction. Each test file builds the small world it needs; there is no shared scenario fixture (`taxon_tree_fixture/1` builds a subgenus, section and subsection).
+
+Tests never read the rows in `priv/repo/test_seeds.sql`. Assert only on rows the test created: check membership, compare whole-table numbers with the context's count function (`Species.count()`, `Sources.count()`) or a before/after difference, and use exact counts only within a filter value the test made unique.
 
 ### Running Tests
 
@@ -146,10 +171,6 @@ where: ilike(s.name, ^search_term)
 search_term = "%#{String.downcase(query)}%"
 where: fragment("lower(?) LIKE ?", s.name, ^search_term)
 ```
-
-## Coding Standards
-
-See **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** for comprehensive Elixir/Phoenix conventions. All agents must follow these standards.
 
 ## Authentication
 

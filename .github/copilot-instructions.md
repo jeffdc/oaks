@@ -7,8 +7,8 @@ tool for oak (*Quercus*) species and their hybrids. Live at
 [oakcompendium.org](https://oakcompendium.org/).
 
 The application is an Elixir/Phoenix LiveView app deployed to Fly.io. The
-canonical project guide is `CLAUDE.md`; the conventions reference is
-`CODING_STANDARDS.md`. Read those first.
+canonical project guide is `CLAUDE.md` (which is `AGENTS.md`); the component
+library is `docs/COMPONENTS.md`. Read those first.
 
 ## Tech Stack
 
@@ -34,7 +34,8 @@ canonical project guide is `CLAUDE.md`; the conventions reference is
 
 ## Coding Guidelines
 
-- Follow `CODING_STANDARDS.md` for Elixir/Phoenix conventions
+- Follow the rules in `docs/architecture/rules.md`, and build pages from the
+  component library (`docs/COMPONENTS.md`)
 - Always compile with `--warnings-as-errors`
 - Run `mix precommit` before committing (format, compile, credo, tests)
 - SQLite is the database — do not use PostgreSQL-only constructs (`ilike`,
@@ -51,5 +52,6 @@ canonical project guide is `CLAUDE.md`; the conventions reference is
 ## Key Documentation
 
 - **CLAUDE.md** — Project guide (architecture, workflows, conventions)
-- **CODING_STANDARDS.md** — Elixir/Phoenix conventions
+- **docs/COMPONENTS.md** — The component library: which component covers each need
+- **docs/architecture/rules.md** — The rules the code must follow
 - **CONTRIBUTING.md** — How to set up the project and submit a PR

@@ -24,7 +24,7 @@ Open an issue with:
 ### Pull Requests
 
 1. **Fork the repository** and create a branch from `main`
-2. **Make your changes** following the conventions in `CODING_STANDARDS.md`
+2. **Make your changes** following the rules in `docs/architecture/rules.md`, building pages from the component library (`docs/COMPONENTS.md`)
 3. **Run the quality gate** before pushing:
    ```bash
    mix precommit
@@ -54,7 +54,7 @@ mix phx.server
 
 - Run `mix format` before committing
 - Run `mix credo --strict` and `mix dialyzer` and address findings
-- Follow Elixir/Phoenix conventions documented in `CODING_STANDARDS.md`
+- Build pages from the component library (`docs/COMPONENTS.md`) and follow the rules in `docs/architecture/rules.md`
 - Keep functions small and focused
 - Use the database via Ecto; remember the project uses **SQLite**, not
   PostgreSQL — see `CLAUDE.md` for the SQLite-compatible query patterns
@@ -69,7 +69,7 @@ mix test test/path/to/test.exs:42  # Run a specific test
 
 The test suite uses a separate `priv/oaks_test.sqlite` database built by running the migrations in `priv/repo/migrations` and then loading `priv/repo/test_seeds.sql`. Run `make test-db` to rebuild it after changing the seeds. Each `mix test` runs on its own copy of it, so concurrent runs in one checkout don't collide.
 
-Tests don't read the seeded rows. Each test builds the species, sources, taxa and articles it needs with the fixture modules in `test/support/fixtures/` (imported per file, e.g. `import Oaks.SpeciesFixtures`) and asserts only on what it created, so the seeds can change without breaking tests. See the Fixtures section of `CODING_STANDARDS.md`.
+Tests don't read the seeded rows. Each test builds the species, sources, taxa and articles it needs with the fixture modules in `test/support/fixtures/` (imported per file, e.g. `import Oaks.SpeciesFixtures`) and asserts only on what it created, so the seeds can change without breaking tests. See the Fixtures section of `AGENTS.md`.
 
 ## Commit Message Guidelines
 

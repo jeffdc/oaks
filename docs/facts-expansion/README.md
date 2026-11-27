@@ -73,7 +73,7 @@ Foundations first: nothing else should write data until Jeff logs in properly an
 - DESIGN.md (and `.impeccable/design.json`): the visual world and every settled component.
 - `design/prototype/`: the taxon page set (`shumardii.html`, `compare.html`, `x-riparia.html`, `hypoleucoides.html`, `acutissima.html`, `shumardii-sources.html`), the ID tool (`id-filter.html`, `id-hybrid.html`, `id-mode.html`, `id-intro-this-or-that.html`) and the editor (`ed-entry.html`, `ed-facts.html`, `ed-conflicts.html`). Their data is illustrative. `species-today.html` is the intermediate species page built by the species photos plan.
 - `.impeccable/surfaces/`: the surface briefs with Jeff's rules for each page (one-template rule, range overlap, no eastern bias, structured entries, key sentence as fragment).
-- All UI work uses the impeccable skill, sized as AGENTS.md says, and the component library (CODING_STANDARDS.md, Components).
+- All UI work uses the impeccable skill, sized as AGENTS.md says, and the component library (docs/COMPONENTS.md).
 
 ## Model sketch
 
