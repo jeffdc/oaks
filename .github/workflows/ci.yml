@@ -23,24 +23,6 @@ on:
       - '.github/workflows/deploy.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'lib/**'
-      - 'config/**'
-      - 'assets/**'
-      - 'priv/**'
-      - 'test/**'
-      - 'mix.exs'
-      - 'mix.lock'
-      - 'Dockerfile'
-      - 'fly.toml'
-      - 'docker-entrypoint.sh'
-      - 'litestream.yml'
-      - 'rel/**'
-      - 'flake.nix'
-      - 'flake.lock'
-      - 'scripts/**'
-      - '.github/workflows/ci.yml'
-      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 concurrency:
