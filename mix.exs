@@ -1,7 +1,7 @@
 defmodule Oaks.MixProject do
   use Mix.Project
 
-  @heartwood_tag "v0.2.0"
+  @heartwood_tag "v0.2.1"
 
   def project do
     [
