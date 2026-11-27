@@ -13,9 +13,11 @@ HEARTWOOD_PROSE="docs/ README.md CONTRIBUTING.md RELEASING.md"
 
 # Prose to CI only: a pull request that changes nothing but these and the
 # paths above skips the jobs that test code (heartwood's actions/changes, in
-# ci.yml and security.yml). The commit gate still reviews them. Only files no
-# code, test or build step reads.
-HEARTWOOD_CI_PROSE="AGENTS.md CLAUDE.md DESIGN.md PRODUCT.md LICENSE DATA_LICENSE"
+# ci.yml and security.yml). The commit gate still reviews them. *.md is every
+# Markdown file, anywhere (* matches across /): no code, test or build step
+# reads Markdown. One that does (content, a prompt, a fixture) goes in
+# HEARTWOOD_CI_CODE, or a change to it alone would skip the tests.
+HEARTWOOD_CI_PROSE="*.md LICENSE DATA_LICENSE"
 
 # Where a new file needs the reviewer's justification.
 HEARTWOOD_LIB="lib/"
