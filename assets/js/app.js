@@ -23,8 +23,8 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/oaks"
+import {hooks as heartwoodHooks} from "phoenix-colocated/heartwood_ui"
 import topbar from "../vendor/topbar"
-import PhotoViewer from "./photo_viewer"
 
 // The API key login is gone (item 0249): drop what it left in this browser.
 for (const key of ["oak:api_key", "oak:session_timestamp", "oak:session_timeout_hours", "oak:settings_notice"]) {
@@ -33,8 +33,8 @@ for (const key of ["oak:api_key", "oak:session_timestamp", "oak:session_timeout_
 
 const Hooks = {
   ...colocatedHooks,
-  // Photo viewer (OaksWeb.PhotoViewer): a shared component, in its own file.
-  PhotoViewer,
+  // heartwood_ui's components (the photo viewer), shared with gallformers.
+  ...heartwoodHooks,
   // Photo list (DesignComponents.photo_list): drag a row by its handle,
   // or press Up or Down on the handle, to move it; the new order (each
   // row's data-photo-id) goes to the component the list is in when it

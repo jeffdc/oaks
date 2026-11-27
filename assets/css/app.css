@@ -19,6 +19,7 @@
 @import "./system/fonts.css";
 @import "./system/base.css";
 @import "./system/components.css";
+@import "phoenix-colocated/heartwood_ui/colocated.css";
 @import "./system/shell.css";
 
 @plugin "../vendor/heroicons";

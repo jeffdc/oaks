@@ -92,7 +92,7 @@ defmodule OaksWeb.SpeciesPhotosTest do
       assert length(Images.list_for_species(ctx.species)) == 2
 
       # The page's photo column follows: both photos, in the viewer.
-      assert has_element?(view, "#species-photos .pv-count", "1 / 2")
+      assert has_element?(view, "#species-photos .pv-badge", "1 / 2")
       refute has_element?(view, "#species-photos .pv-empty")
     end
 

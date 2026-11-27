@@ -84,7 +84,7 @@ Code shared with gallformers lives in heartwood (`jeffdc/heartwood`). Decision: 
 2. **The photo viewer from `heartwood_ui`:**
    - **2a.** Tailwind 4.3.5 with `NODE_PATH` in the tailwind config (PR #36).
    - **2b.** Heartwood v0.2.0 ships the photo viewer.
-   - **2c.** Oaks on `heartwood_ui` v0.2.0: the dependency and the two imports. Oaks keeps `<.species_photos>` and `.oc-photos`, with `.oc-photos` mapped to v0.2.0's custom properties. The viewer's filmstrip replaces oaks' paged rail and its step buttons; the 4/5 and 4/3 ratios stay as `.oc-photos` settings. Deleted: `OaksWeb.PhotoViewer`, `assets/js/photo_viewer.js`, the `pv-` block in `components.css` and the tests that moved to heartwood. The dev components page and the docs are updated to match.
+   - **2c.** Done 2026-11-27 (PR #38). Oaks on `heartwood_ui` v0.2.0: the dependency and the two imports. Oaks keeps `<.species_photos>` and `.oc-photos`, with `.oc-photos` mapped to v0.2.0's custom properties. The viewer's filmstrip replaces oaks' paged rail and its step buttons; the 4/5 and 4/3 ratios stay as `.oc-photos` settings. Deleted: `OaksWeb.PhotoViewer`, `assets/js/photo_viewer.js`, the `pv-` block in `components.css` and the tests that moved to heartwood. The dev components page and the docs are updated to match.
 3. **The fragment-and-reader** is built in `heartwood_ui` ([Taxon pages](taxon-pages.md)).
 
 ## 4. The production toolchain

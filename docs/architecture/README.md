@@ -133,10 +133,10 @@ Species and Sources depend on each other (associations both ways, and each queri
 
 ## Front end and design system
 
-- **Rendering**: server-rendered LiveView. One JS bundle (`assets/js/app.js`, esbuild): LiveView, the topbar, and hooks (`PhotoViewer`, `SortablePhotos`, `PinCurrentTaxon`, `Tablist`, `TagInput`, `SearchSync`). No npm, no external scripts or fonts: fonts are self-hosted.
+- **Rendering**: server-rendered LiveView. One JS bundle (`assets/js/app.js`, esbuild): LiveView, the topbar, and hooks (heartwood_ui's photo viewer, `SortablePhotos`, `PinCurrentTaxon`, `Tablist`, `TagInput`, `SearchSync`). No npm, no external scripts or fonts: fonts are self-hosted.
 - **CSS**: Tailwind v4 (pinned binary). `assets/css/system/` holds the design system: `tokens.css` (the `@theme` tokens, kept by hand to match DESIGN.md's frontmatter), `fonts.css`, `base.css`, `components.css` (one `oc-` block per component, plus the photo viewer's `pv-` block) and `shell.css` (masthead and footer). `assets/css/app.css` holds the remaining page CSS, under a line budget that only shrinks.
-- **Component library**: `CoreComponents` (buttons, inputs, header, edit menu, modal, page widths, …), `DesignComponents` (taxonomy band, scientific names, marks and stamps, source tabs, title-page parts, photos, ruled rows, notices, …), `FormComponents`, `AuthComponents`, `Layouts`, and `PhotoViewer`. Every page is built from them; a page never builds its own version of something the library covers, and a missing component is added to the library first (CODING_STANDARDS.md, Components). `/dev/components` shows every component for review.
-- **Shared with gallformers**: the photo viewer is built to move between the two apps: a function component, one self-contained hook and its own CSS, themed by custom properties, with no app-specific dependencies.
+- **Component library**: `CoreComponents` (buttons, inputs, header, edit menu, modal, page widths, …), `DesignComponents` (taxonomy band, scientific names, marks and stamps, source tabs, title-page parts, photos, ruled rows, notices, …), `FormComponents`, `AuthComponents` and `Layouts`, and heartwood_ui's photo viewer (through `<.species_photos>`). Every page is built from them; a page never builds its own version of something the library covers, and a missing component is added to the library first (CODING_STANDARDS.md, Components). `/dev/components` shows every component for review.
+- **Shared with gallformers**: the photo viewer, `Heartwood.UI.PhotoViewer` from heartwood_ui: a function component with its hook and CSS as colocated assets, themed by custom properties, with no app-specific dependencies. Oaks themes it with `.oc-photos`.
 
 ## Delivery
 

@@ -15,7 +15,7 @@ defmodule OaksWeb.DevComponentsLive do
   use OaksWeb, :live_view
 
   import Ecto.Query, only: [from: 2]
-  import OaksWeb.PhotoViewer, only: [photo_viewer: 1]
+  import Heartwood.UI.PhotoViewer, only: [photo_viewer: 1]
 
   @traits [
     %{
@@ -397,7 +397,9 @@ defmodule OaksWeb.DevComponentsLive do
         <section class="mt-s8">
           <.section_heading id="photos">
             Photos
-            <:note>photo_viewer, themed as species_photos shows it: many, one and none</:note>
+            <:note>
+              heartwood_ui's photo_viewer, themed by .oc-photos as species_photos shows it: many, one and none
+            </:note>
           </.section_heading>
           <div class="grid gap-s7 md:grid-cols-[300px_240px_300px]">
             <.photo_viewer
