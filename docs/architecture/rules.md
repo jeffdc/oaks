@@ -92,3 +92,4 @@ Every automated check today, and the rules it holds.
 | `dev/githooks/pre-commit` (heartwood's commit gate: a passing reuse review by a reviewer with fresh context; AGENTS.md, Before you commit) | local commit | reuse (no rule yet) |
 | `mix smoke_test` | after each deploy | the production site answers |
 | Impeccable's detector | agent sessions (plugin hook) | design anti-patterns, advisory |
+| The architecture review (`MIX_ENV=test mix heartwood.architecture`, several models) | Jeff, periodically | the manual rules that need judgement (`dev/guardrails/architecture.md`); proposes new rules and checks |

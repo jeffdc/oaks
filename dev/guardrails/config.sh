@@ -5,10 +5,6 @@
 # override (OAKS_PUSH_MAIN=1).
 HEARTWOOD_APP=oaks
 
-# Where heartwood_guardrails is, from the repository's root: Mix checks a
-# sparse git dependency out into its folder's own directory.
-HEARTWOOD_HOME=deps/heartwood_guardrails/guardrails
-
 # Paths a commit may touch without a reuse review: a directory ends in /,
 # anything else is one file. AGENTS.md and CLAUDE.md are always reviewed, and
 # so are CODING_STANDARDS.md and DESIGN.md, which hold rules too.
@@ -17,5 +13,10 @@ HEARTWOOD_PROSE="docs/ README.md CONTRIBUTING.md RELEASING.md"
 # Where a new file needs the reviewer's justification.
 HEARTWOOD_LIB="lib/"
 
-# Oaks' questions for the reviewer, added to the packet.
+# Oaks' questions for the reuse reviewer, added to its packet.
 HEARTWOOD_CHECKLIST=dev/guardrails/checklist.md
+
+# The architecture review (MIX_ENV=test mix heartwood.architecture) uses the
+# defaults: the docs in docs/architecture/, oaks' questions in
+# dev/guardrails/architecture.md, and contexts named by three path segments
+# (lib/oaks/species).

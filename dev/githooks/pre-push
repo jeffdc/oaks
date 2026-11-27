@@ -14,7 +14,7 @@ name=$(basename "$0")
 if [ -n "${HEARTWOOD_PATH:-}" ]; then
   home="$HEARTWOOD_PATH/guardrails"
 else
-  home="$top/${HEARTWOOD_HOME:-deps/heartwood_guardrails}"
+  home="$top/${HEARTWOOD_HOME:-deps/heartwood_guardrails/guardrails}"
 fi
 
 hook="$home/hooks/$name"

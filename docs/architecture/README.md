@@ -9,7 +9,7 @@ Visual design is governed by [DESIGN.md](../../DESIGN.md) and product truth by [
 - **[README.md](README.md)** (this file): the current state. It changes in the same commit as the code that changes the architecture.
 - **[rules.md](rules.md)**: the architectural rules, each with its fitness function (the automated check that enforces it) or "manual", and its baseline of known violations.
 - **[decisions.md](decisions.md)**: Jeff's decisions that shape the architecture, newest first. A new decision is added there, and this file and rules.md are updated to match, in the same commit.
-- **[reviews.md](reviews.md)**: one entry per periodic review of the code against this doc. A review lists what it found; each violation becomes a fix, an accepted exception with a reason, or a new rule with a check.
+- **[reviews.md](reviews.md)**: one entry per periodic review of the code against this doc. A review lists what it found; each violation becomes a fix, an accepted exception with a reason, or a new rule with a check. Jeff runs the review with heartwood's architecture reviewer: `MIX_ENV=test mix heartwood.architecture` writes the packet, he gives it to several models, and he combines their reports (kept in `.git/oaks-architecture/<run>/`) into one entry.
 
 A rule's check starts at its baseline: today's count of violations is recorded, the check fails when the count grows, and the baseline is lowered as violations are fixed (the pattern `OaksWeb.Conformance` already uses, on heartwood's ratchet). A rule with no check is reviewed by hand until it has one.
 
