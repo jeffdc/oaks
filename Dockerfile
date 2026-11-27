@@ -3,7 +3,7 @@
 
 # Stage 1: Build Elixir release
 # Keep Elixir/OTP identical to CI and the dev toolchain (flake.nix; checked by
-# scripts/check-toolchain), and the Alpine version identical to the runtime
+# heartwood's check-toolchain), and the Alpine version identical to the runtime
 # stage below: the release links against that Alpine's OpenSSL and musl.
 FROM hexpm/elixir:1.19.6-erlang-28.5.0.8-alpine-3.24.3 AS builder
 
@@ -55,7 +55,7 @@ RUN mix compile
 # platform (arm64) fails at `mix tailwind` rather than fetching a different,
 # unchecked binary. Keep the
 # version, in the URL and in the path, in sync with `config :tailwind` in
-# config/config.exs (scripts/check-toolchain checks both).
+# config/config.exs (heartwood's check-toolchain checks both).
 ENV MIX_TAILWIND_PATH=/usr/local/bin/tailwindcss-4.1.12
 ADD https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.12/tailwindcss-linux-x64-musl ${MIX_TAILWIND_PATH}
 RUN echo "a8a1926a2951a5da0684c568d612bc0a590600334d3a85d0e63ea90ac7ced2e5  ${MIX_TAILWIND_PATH}" | sha256sum -c - && \

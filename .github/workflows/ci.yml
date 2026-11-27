@@ -20,6 +20,8 @@ on:
       - 'flake.nix'
       - 'flake.lock'
       - 'scripts/**'
+      - 'dev/**'
+      - '.credo.exs'
       - '.github/workflows/ci.yml'
       - '.github/workflows/deploy.yml'
   pull_request:
@@ -65,14 +67,11 @@ jobs:
           key: ${{ runner.os }}-mix-${{ hashFiles('flake.lock') }}-${{ hashFiles('mix.lock') }}
           restore-keys: ${{ runner.os }}-mix-${{ hashFiles('flake.lock') }}-
 
-      - name: Check Dockerfile matches the flake toolchain
-        run: scripts/check-toolchain
-
-      - name: Check UI rules (scripts/check-ui)
-        run: scripts/check-ui
-
       - name: Install dependencies
         run: mix deps.get
+
+      - name: Check Dockerfile matches the flake toolchain
+        run: deps/heartwood_guardrails/guardrails/bin/check-toolchain
 
       - name: Setup test database
         run: |
@@ -81,6 +80,8 @@ jobs:
           MIX_ENV=test mix ecto.migrate --quiet
           sqlite3 priv/oaks_test.sqlite < priv/repo/test_seeds.sql
 
+      # The tests include the guardrails: the UI rules (OaksWeb.Conformance),
+      # copied code and retirements (Oaks.GuardrailsTest).
       - name: Run precommit checks (format, compile, credo, tests)
         run: mix precommit
 

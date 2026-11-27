@@ -25,13 +25,22 @@ dev-phx: dev
 # Setup & Dependencies
 # =============================================================================
 
-# Full setup: deps + assets + verify database exists, and the push guard
-setup: hooks
+# Full setup: deps + assets + verify database exists, then the git hooks
+# (they come with the deps)
+setup:
 	mix setup
+	$(MAKE) hooks
 
-# Install the git push guard (blocks force pushes and pushes to main)
+# heartwood_guardrails (the hooks, the reuse review, check-toolchain), or the
+# local checkout HEARTWOOD_PATH points at.
+HEARTWOOD := $(if $(HEARTWOOD_PATH),$(HEARTWOOD_PATH)/guardrails,deps/heartwood_guardrails/guardrails)
+
+# Install the git hooks (dev/githooks/): the commit gate, which needs a
+# passing reuse review (AGENTS.md, Before you commit), and the push guard (no
+# force pushes, no pushes to main)
 hooks:
-	scripts/githooks/install.sh
+	@test -x $(HEARTWOOD)/hooks/install || { echo "$(HEARTWOOD) is missing: run mix deps.get"; exit 1; }
+	$(HEARTWOOD)/hooks/install
 
 # Install Elixir dependencies
 deps:
@@ -75,9 +84,9 @@ precommit:
 # The hard checks to pass before handing work over (AGENTS.md).
 # Rebuilds this checkout's test database first: a worktree has its own, and
 # `mix test` only migrates its per-run copy of it (no seeds).
+# The UI rules (OaksWeb.Conformance) and the other guardrails run in mix test.
 done-checks: test-db
-	scripts/check-toolchain
-	scripts/check-ui
+	$(HEARTWOOD)/bin/check-toolchain
 	mix precommit
 	mix dialyzer
 	mix hex.audit
@@ -188,13 +197,13 @@ help:
 	@echo "  make dev        Start Phoenix dev server (:4444)"
 	@echo "  make dev BRANCH=<name> PORT=<port>  Same, for a branch in another worktree"
 	@echo "  make setup      Full setup (deps + assets + db check + git hooks)"
-	@echo "  make hooks      Install the git push guard (no force pushes, no pushes to main)"
+	@echo "  make hooks      Install the git hooks (commit gate, push guard)"
 	@echo "  make test       Run Phoenix tests (rebuilds test DB)"
 	@echo "  make test-db    Rebuild test database from migrations + seeds"
 	@echo "  make format     Format Elixir code"
 	@echo "  make lint       Run Credo linter"
 	@echo "  make precommit  Run all pre-commit checks"
-	@echo "  make done-checks  Hard checks before handing work over (test DB + toolchain + UI + precommit + dialyzer)"
+	@echo "  make done-checks  Hard checks before handing work over (test DB + toolchain + precommit + dialyzer + audits)"
 	@echo "  make ci         Run full CI checks (precommit + assets + dialyzer)"
 	@echo "  make build      Build production release"
 	@echo ""

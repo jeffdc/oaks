@@ -26,7 +26,7 @@ their hybrids.
 
 The toolchain (Elixir, Erlang/OTP, SQLite, Tailwind) comes from a Nix flake, pinned
 in `flake.lock` and shared with CI and the gallformers project. The Dockerfile uses the
-same versions; CI checks that with `scripts/check-toolchain`.
+same versions; CI checks that with heartwood's `check-toolchain`.
 
 Prerequisites:
 
