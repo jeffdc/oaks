@@ -6,8 +6,9 @@
 HEARTWOOD_APP=oaks
 
 # Paths a commit may touch without a reuse review: a directory ends in /,
-# anything else is one file. AGENTS.md and CLAUDE.md are always reviewed, and
-# so are CODING_STANDARDS.md and DESIGN.md, which hold rules too.
+# anything else is one file. AGENTS.md, CLAUDE.md and DESIGN.md, which hold
+# rules, are always reviewed. docs/ holds rules too (docs/COMPONENTS.md,
+# docs/architecture/rules.md), but a change that touches only those is prose.
 HEARTWOOD_PROSE="docs/ README.md CONTRIBUTING.md RELEASING.md"
 
 # Where a new file needs the reviewer's justification.

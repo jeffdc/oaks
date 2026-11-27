@@ -1,4 +1,4 @@
-Oak Compendium's rules are in `docs/architecture/rules.md`; CODING_STANDARDS.md, DESIGN.md and AGENTS.md are their sources. These rules need judgement, so no check holds them yet (the first triage, in `docs/facts-expansion/architecture-groundwork.md`, section 5). For each, report violations beyond its baseline, and say whether a check could now hold it.
+Oak Compendium's rules are in `docs/architecture/rules.md`; docs/COMPONENTS.md, DESIGN.md and AGENTS.md are their sources. These rules need judgement, so no check holds them yet (the first triage, in `docs/facts-expansion/architecture-groundwork.md`, section 5). For each, report violations beyond its baseline, and say whether a check could now hold it.
 
 1. **Contexts and their tables (S1, S2).** Has any module started reading or writing another context's tables, or the web layer reaching `Oaks.Repo` or `Ecto.Query`, beyond the exceptions rules.md lists? Is a recorded exception still needed?
 2. **Raw SQL (D2).** Is there raw SQL beyond the four recorded exceptions, and does each still need it?

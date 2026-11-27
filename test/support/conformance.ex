@@ -1,7 +1,7 @@
 defmodule OaksWeb.Conformance do
   @moduledoc """
   Page code that builds its own version of something the component library
-  covers (CODING_STANDARDS.md, Components), as a ratchet held to
+  covers (docs/COMPONENTS.md), as a ratchet held to
   `test/support/conformance_baseline.json` by `Oaks.GuardrailsTest`.
 
   Scans every .ex and .heex file under lib/oaks_web, line by line. Elixir `#`
@@ -58,7 +58,7 @@ defmodule OaksWeb.Conformance do
   def intro,
     do:
       "New page code builds its own version of something the component library covers " <>
-        "(CODING_STANDARDS.md, Components)."
+        "(docs/COMPONENTS.md)."
 
   @impl Heartwood.Guardrails.Patterns
   def outro,
