@@ -81,6 +81,12 @@ if port = System.get_env("PORT") do
 end
 
 if config_env() == :prod do
+  # JSON log lines for Fly's log aggregation, with the request ID and the other
+  # metadata. Dev and test keep the text format from config.exs. It must be set
+  # here, not in prod.exs: LoggerJSON has to be compiled before its formatter
+  # function can be called.
+  config :logger, :default_handler, formatter: LoggerJSON.Formatters.Basic.new(metadata: :all)
+
   database_path =
     System.get_env("DATABASE_PATH") ||
       raise """
