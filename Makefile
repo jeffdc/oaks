@@ -80,6 +80,9 @@ done-checks: test-db
 	scripts/check-ui
 	mix precommit
 	mix dialyzer
+	mix hex.audit
+	mix deps.audit
+	mix sobelow --exit high --private
 
 # Full CI checks (precommit + assets + dialyzer)
 ci:
