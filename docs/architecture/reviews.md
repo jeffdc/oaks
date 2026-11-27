@@ -22,7 +22,7 @@ Each is counted in its rule's baseline in rules.md. All open: Jeff decides fix o
 
 Rules that are stated but held by nothing, or held only locally. Open.
 
-1. **CI runs neither `scripts/check-ui` nor `mix dialyzer`** (O2), so a PR that skips `make done-checks` can break U1–U4 or types and still pass.
+1. **CI runs neither `scripts/check-ui` nor `mix dialyzer`** (O2), so a PR that skips `make done-checks` can break U1–U4 or types and still pass. **Fixed** 2026-11-26 in PR #19 (CI parity).
 2. **`mix deps.unlock --unused` in `precommit` can't fail**: it rewrites `mix.lock`. `--check-unused` is the checking form.
 3. **Rules at zero that a one-line grep would lock in**: D1 (no `ilike`; LIKE with ESCAPE), W7's `String.to_atom`, W8 (no LLM client), U6's `rounded-*` and `shadow-*` classes, U7, S3, T2, and U5's Tailwind palette colours.
 4. **Rules with small baselines that a ratchet like check-ui's would hold**: S2 (4), D2 (4), U2's `.oc-` restyles (8), O4 (3).
@@ -30,7 +30,7 @@ Rules that are stated but held by nothing, or held only locally. Open.
 6. **The architecture tests use hard-coded lists.** The forged-event tests (W1) and the analytics route audit cover named pages, so a new page or a new writing event isn't caught. No test walks the router to check that `/api/v1` is GET only (W2), that private routes need a token and are absent from the OpenAPI spec (W3), or that editor routes are gated.
 7. **The check scripts have no tests.** `CHECK_UI_ROOT` and `CHECK_TOOLCHAIN_ROOT` exist for testing, but nothing uses them, so a broken pattern in check-ui would pass silently.
 8. **Sobelow fails only on high-confidence findings,** with its CSP, HTTPS and CSRF-route checks ignored. The CSP test covers the CSP.
-9. **The pre-push hook is installed per clone** and nothing checks it is; GitHub's branch protection isn't visible from the repo.
+9. **The pre-push hook is installed per clone** and nothing checks it is; GitHub's branch protection isn't visible from the repo. **Fixed** 2026-11-26: GitHub's `main-no-push` ruleset blocks direct pushes, deletion and force pushes and requires the five CI checks (O3). The hook's own test comes with heartwood (Architecture groundwork, section 3).
 
 ### Proposed rules
 

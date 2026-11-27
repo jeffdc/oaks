@@ -14,6 +14,12 @@ Template:
 - **Source:** commit, PR or plan doc
 ```
 
+## 2026-11-26: CI parity across oaks, gallformers and heartwood
+
+- **Why:** CI enforced less than the local hard checks (no check-ui, no Dialyzer), the rules of the three repos had drifted apart, and CodeQL flagged a cache-poisoning risk in the deploy workflow (rated high).
+- **Changes:** the three repos share one CI shape: `mix precommit`, a Dialyzer job, the security audit (hex.audit, deps.audit, Sobelow) on every PR, main and weekly, Dependabot, CodeQL, read-only workflow tokens, and a ruleset on main requiring every check. Oaks adds check-ui to CI and an API Version Check (rule W9: a public API change bumps `API_VERSION`); `make done-checks` runs the audits too (rule O2). In gallformers the security audit runs but isn't yet required, until Earmark and its other vulnerable dependencies are fixed. Deploys: a deploy run restores the dependency cache without saving it, and a manual deploy runs only from main.
+- **Source:** Jeff, 2026-11-26; oaks PRs #19 and #26.
+
 ## 2026-11-26: Share UI components and guardrails with gallformers through heartwood; copy domain modules
 
 - **Why:** the photo viewer already exists twice, and the copies have drifted: gallformers wrote it first and oaks forked it with rail paging, backdrop close and a configurable event. The guardrails (the conformance ratchet, the duplicate-code ratchet, retirements, the git hooks and their tests, `check-toolchain`) are about 1,200 lines that are the same in both apps except for each app's rules and baselines. Pure domain modules are different: oaks adapts them on purpose (the lead rule in place of newest-wins; SQLite, where gallformers runs Postgres), so sharing them would mean constant overrides.
