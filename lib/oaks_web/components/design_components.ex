@@ -27,7 +27,7 @@ defmodule OaksWeb.DesignComponents do
   use OaksWeb, :verified_routes
 
   import OaksWeb.CoreComponents, only: [button: 1, header: 1, icon: 1]
-  import OaksWeb.PhotoViewer, only: [photo_viewer: 1]
+  import Heartwood.UI.PhotoViewer, only: [photo_viewer: 1]
 
   alias Oaks.Images.Attribution
   alias Oaks.Images.Image
@@ -1469,16 +1469,18 @@ defmodule OaksWeb.DesignComponents do
   # -- Species photos (docs/species-photos-plan.md, Phase 6) --
 
   @doc """
-  Renders a species' photos in the photo viewer (`OaksWeb.PhotoViewer`,
-  the component shared with gallformers), in this system's colours and
-  type: each ready photo's medium size on the stage, whole and uncropped
-  on the ground, and small size in the rail, opening full size at large; its caption; and its credit: the
-  creator, the license (`Oaks.Images.Attribution.license_label/1`, so an
-  All Rights Reserved photo reads "All rights reserved, used with the
-  creator's permission") and a link to the iNaturalist observation.
+  Renders a species' photos in the photo viewer
+  (`Heartwood.UI.PhotoViewer`, shared with gallformers through
+  heartwood_ui), themed in this system's colours and type by
+  `.oc-photos`: each ready photo's medium size on the stage, whole and
+  uncropped on the ground, and small size in the filmstrip, opening full
+  size at large; its caption; and its credit: the creator, the license
+  (`Oaks.Images.Attribution.license_label/1`, so an All Rights Reserved
+  photo reads "All rights reserved, used with the creator's permission")
+  and a link to the iNaturalist observation.
 
   Pass `Oaks.Images.list_for_species/1`; any photo that isn't ready is
-  left out. With none, it reads "No photos yet." (hidden on phones).
+  left out. With none, it reads "No photos yet."
 
   ## Examples
 

@@ -4,6 +4,7 @@ defmodule OaksWeb.DesignComponentsTest do
   import Phoenix.Component
   import Phoenix.LiveViewTest
 
+  alias Oaks.Images.Image
   alias OaksWeb.DesignComponents
 
   describe "taxonomy_band/1" do
@@ -799,6 +800,104 @@ defmodule OaksWeb.DesignComponentsTest do
       assert html =~ "The Oak Compendium has no account of this oak yet."
       assert html =~ "From the sources."
       assert html =~ ~s(<span class="oc-cite-label">Cite</span>)
+    end
+  end
+
+  describe "species_photos/1" do
+    defp image(id, attrs \\ %{}) do
+      struct!(
+        %Image{
+          id: id,
+          species_id: 1,
+          path: "species/1/1_#{id}_ab_original.jpg",
+          status: "ready",
+          creator: "janedoe - Jane Doe",
+          license: "CC-BY",
+          licenselink: "https://creativecommons.org/licenses/by/4.0/",
+          sourcelink: "https://www.inaturalist.org/observations/9"
+        },
+        attrs
+      )
+    end
+
+    defp species_photos(images) do
+      assigns = %{images: images}
+
+      ~H"""
+      <DesignComponents.species_photos id="species-photos" images={@images} name="Quercus alba" />
+      """
+      |> rendered_to_string()
+      |> LazyHTML.from_fragment()
+    end
+
+    defp count(doc, selector), do: doc |> LazyHTML.query(selector) |> Enum.count()
+
+    defp text(doc, selector),
+      do: doc |> LazyHTML.query(selector) |> LazyHTML.text() |> String.trim()
+
+    test "shows only ready photos, medium on the stage and small in the filmstrip" do
+      doc =
+        species_photos([
+          image(1),
+          image(2, %{status: "pending"}),
+          image(3, %{status: "failed"}),
+          image(4)
+        ])
+
+      assert count(doc, ".oc-photos.pv") == 1
+      assert count(doc, "[phx-hook='Heartwood.UI.PhotoViewer.PhotoViewer'][data-count='2']") == 1
+      assert count(doc, "[data-slide='0'] img[src$='/species/1/1_1_ab_medium.jpg']") == 1
+
+      assert count(doc, "[data-thumbs] [data-go='1'] img[src$='/species/1/1_4_ab_small.jpg']") ==
+               1
+
+      assert count(doc, "[data-full='0'] img[data-src$='/species/1/1_1_ab_large.jpg']") == 1
+      refute LazyHTML.to_html(doc) =~ "1_2_ab"
+      refute LazyHTML.to_html(doc) =~ "1_3_ab"
+    end
+
+    test "credits the creator, the license and the iNaturalist observation, under the photo and in the full view" do
+      doc = species_photos([image(1)])
+
+      for selector <- ["[data-caption='0'] .pv-credit", "[data-full='0'] figcaption .pv-credit"] do
+        credit = LazyHTML.query(doc, selector)
+
+        assert text(credit, "b") == "janedoe - Jane Doe"
+        assert text(credit, "a[href='https://creativecommons.org/licenses/by/4.0/']") == "CC-BY"
+
+        assert text(credit, "a[href='https://www.inaturalist.org/observations/9']") =~
+                 "iNaturalist observation"
+      end
+    end
+
+    test "says an All Rights Reserved photo is used with the creator's permission" do
+      doc =
+        species_photos([
+          image(1, %{
+            license: "All Rights Reserved",
+            licenselink: nil,
+            permission_confirmed_by: "dev@localhost"
+          })
+        ])
+
+      assert text(doc, "[data-caption='0'] .pv-reserved") ==
+               "All rights reserved, used with the creator's permission"
+
+      assert text(doc, "[data-caption='0'] .pv-credit") =~ "© janedoe - Jane Doe"
+    end
+
+    test "never shows who uploaded or last changed a photo" do
+      doc =
+        species_photos([image(1, %{uploader: "ed@example.com", lastchangedby: "ed@example.com"})])
+
+      refute LazyHTML.to_html(doc) =~ "ed@example.com"
+    end
+
+    test "with no ready photos reads No photos yet." do
+      doc = species_photos([image(1, %{status: "pending"})])
+
+      assert text(doc, ".pv-empty") == "No photos yet."
+      assert count(doc, "[phx-hook]") == 0
     end
   end
 end

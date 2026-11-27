@@ -1,7 +1,7 @@
 defmodule Oaks.MixProject do
   use Mix.Project
 
-  @heartwood_tag "v0.1.1"
+  @heartwood_tag "v0.2.0"
 
   def project do
     [
@@ -82,6 +82,8 @@ defmodule Oaks.MixProject do
       {:oban, "~> 2.21"},
       # API Documentation
       {:open_api_spex, "~> 3.18"},
+      # Shared UI components (the photo viewer), from heartwood
+      heartwood(:heartwood_ui, "ui", []),
       # Dev/Test tools
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       heartwood(:heartwood_guardrails, "guardrails", only: [:dev, :test], runtime: false),
