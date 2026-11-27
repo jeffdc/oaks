@@ -5,19 +5,15 @@
 # override (OAKS_PUSH_MAIN=1).
 HEARTWOOD_APP=oaks
 
-# Paths a commit may touch without a reuse review: a directory ends in /,
-# anything else is one file. AGENTS.md, CLAUDE.md and DESIGN.md, which hold
-# rules, are always reviewed. docs/ holds rules too (docs/COMPONENTS.md,
-# docs/architecture/rules.md), but a change that touches only those is prose.
-HEARTWOOD_PROSE="docs/ README.md CONTRIBUTING.md RELEASING.md"
-
-# Prose to CI only: a pull request that changes nothing but these and the
-# paths above skips the jobs that test code (heartwood's actions/changes, in
-# ci.yml and security.yml). The commit gate still reviews them. *.md is every
-# Markdown file, anywhere (* matches across /): no code, test or build step
-# reads Markdown. One that does (content, a prompt, a fixture) goes in
-# HEARTWOOD_CI_CODE, or a change to it alone would skip the tests.
-HEARTWOOD_CI_PROSE="*.md LICENSE DATA_LICENSE"
+# Prose: a commit that touches only these needs no reuse review, and a pull
+# request that changes only these skips the jobs that test code (heartwood's
+# actions/changes, in ci.yml and security.yml). A directory ends in /; an entry
+# with *, ? or [...] is a pattern, where * matches across /, so *.md is every
+# Markdown file, anywhere, AGENTS.md, CLAUDE.md and DESIGN.md included (Jeff,
+# 2026-11-27: doc-only commits skip review). No code, test or build step reads
+# Markdown. One that does (content, a prompt, a fixture) goes in
+# HEARTWOOD_CODE, or a change to it alone would skip both.
+HEARTWOOD_PROSE="docs/ *.md LICENSE DATA_LICENSE"
 
 # Where a new file needs the reviewer's justification.
 HEARTWOOD_LIB="lib/"

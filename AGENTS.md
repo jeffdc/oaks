@@ -85,7 +85,7 @@ mix smoke_test <url>       # Run smoke tests against a deployment
 
 Run `mix precommit` (format, compile with warnings as errors, Credo, tests) and don't commit until it passes.
 
-The pre-commit hook (`dev/githooks/`, installed by `make hooks`) then blocks a commit without a passing reuse review. A commit touching only prose (`HEARTWOOD_PROSE` in `dev/guardrails/config.sh`: `docs/`, README.md, CONTRIBUTING.md, RELEASING.md) needs none.
+The pre-commit hook (`dev/githooks/`, installed by `make hooks`) then blocks a commit without a passing reuse review. A commit touching only prose (`HEARTWOOD_PROSE` in `dev/guardrails/config.sh`: `docs/`, every Markdown file, LICENSE and DATA_LICENSE) needs none, and a pull request that changes only prose skips CI's code jobs.
 
 1. Stage files by name, then run `deps/heartwood_guardrails/guardrails/bin/review-packet`.
 2. A reviewer with fresh context, not yours (a different model is better), follows the packet it prints and records its verdict with the packet's `record-review` command.
