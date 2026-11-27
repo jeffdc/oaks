@@ -1,6 +1,8 @@
 defmodule Oaks.MixProject do
   use Mix.Project
 
+  @heartwood_tag "v0.1.0"
+
   def project do
     [
       app: :oaks,
@@ -26,7 +28,7 @@ defmodule Oaks.MixProject do
 
   def cli do
     [
-      preferred_envs: [precommit: :test]
+      preferred_envs: [precommit: :test, "heartwood.baseline": :test]
     ]
   end
 
@@ -78,11 +80,24 @@ defmodule Oaks.MixProject do
       {:open_api_spex, "~> 3.18"},
       # Dev/Test tools
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      heartwood(:heartwood_guardrails, "guardrails", only: [:dev, :test], runtime: false),
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       # Security
       {:sobelow, "~> 0.18", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false}
     ]
+  end
+
+  # Code shared with gallformers (~/dev/heartwood), pinned by tag;
+  # HEARTWOOD_PATH=~/dev/heartwood uses that checkout instead.
+  defp heartwood(package, folder, opts) do
+    source =
+      case System.get_env("HEARTWOOD_PATH") do
+        nil -> [github: "jeffdc/heartwood", sparse: folder, tag: @heartwood_tag]
+        path -> [path: Path.join(path, folder)]
+      end
+
+    {package, source ++ opts}
   end
 
   defp aliases do

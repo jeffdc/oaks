@@ -28,7 +28,7 @@ If you're unsure about scope, ASK. Examples:
 **Dev servers: start them as background tasks and stop them with your stop tool, never with `kill`.** Run `PORT=<port> mix phx.server` (inside the Nix shell) through your shell tool's background option and stop it with the tool that stops background tasks (TaskStop in Claude Code), so stopping needs no approval. For a server left running, `scripts/stop-dev-server <port>` is the one pre-approved fallback: it stops only a Phoenix server on that port. Never touch Jeff's servers on 4444 (his `make dev`) and 4460 (the integration preview); the script refuses them.
 
 **Size the work before starting it** (Jeff, 2026-11-22). Small changes must not take half an hour.
-- **Small** (one width, one wording, one component tweak, a few files): make it directly in the integration worktree, where Jeff's preview already runs. Check with `mix precommit`, `scripts/check-ui`, and a look at 2 widths on 2 or 3 pages. No worktree setup, no separate reviewer.
+- **Small** (one width, one wording, one component tweak, a few files): make it directly in the integration worktree, where Jeff's preview already runs. Check with `mix precommit` (its tests include the UI rules) and a look at 2 widths on 2 or 3 pages. No worktree setup, no separate reviewer.
 - **Medium** (a component rolled out across a few pages): one agent in its own worktree. Impeccable's detector and one look across the affected pages at 2 widths; no separate finish-reviewer agent.
 - **Large** (a new page, a redesign, a new visual direction): the full process, including Impeccable's decision page and finish review.
 - Don't re-run the hard checks on a fast-forward merge: it is the exact commit that already passed them.
@@ -36,7 +36,8 @@ If you're unsure about scope, ASK. Examples:
 
 ## Before handing work over
 
-- **Hard checks:** `make done-checks`. It rebuilds the checkout's test database, then runs `scripts/check-toolchain`, `scripts/check-ui`, `mix precommit`, `mix dialyzer` and the security audits (`mix hex.audit`, `mix deps.audit`, `mix sobelow`): everything CI requires. Run it inside the Nix dev shell (direnv, or `nix develop -c make done-checks`). Don't call work finished until it passes.
+- **Hard checks:** `make done-checks`. It rebuilds the checkout's test database, then runs heartwood's `check-toolchain`, `mix precommit` (whose tests include the guardrails), `mix dialyzer` and the security audits (`mix hex.audit`, `mix deps.audit`, `mix sobelow`): everything CI requires. Run it inside the Nix dev shell (direnv, or `nix develop -c make done-checks`). Don't call work finished until it passes.
+- **Guardrails** (`Oaks.GuardrailsTest`, in `mix test`): the UI rules (`OaksWeb.Conformance`; CODING_STANDARDS.md, Components), copied code (Credo's `DuplicatedCode`; `mix credo --config-name duplicates` shows each block) and retirements (`test/support/retirements.exs`: a change that replaces a module adds its entry first, as its failing test, and deletes the old module in the same change). Their baselines in `test/support/` only shrink: after a fix, `mix heartwood.baseline <ratchet>` lowers one; never write one to let something new pass. Their code is heartwood's (`heartwood_guardrails`, from `~/dev/heartwood`): a bug in it is fixed there, with oaks pointed at the checkout (`HEARTWOOD_PATH=~/dev/heartwood`), never in `deps/`.
 - **Plans** are markdown docs in `docs/` (for example `docs/species-photos-plan.md`), written with Jeff. Don't change a plan's scope or decisions unless Jeff asks.
 
 ## Project Overview
@@ -62,7 +63,7 @@ The Quercus Database is a comprehensive database and query tool for oak (Quercus
 - **Styling**: Tailwind v4
 - **Quality**: Credo, Dialyxir, mix format
 - **Deployment**: Fly.io with Litestream (S3 replication)
-- **Toolchain**: Nix flake (`flake.nix`, pinned by `flake.lock`, loaded by direnv via `.envrc`) — Elixir/OTP, SQLite, and a pinned Tailwind. CI runs in the same shell and the Dockerfile builder image must match it (`scripts/check-toolchain`). Mirrors gallformers.
+- **Toolchain**: Nix flake (`flake.nix`, pinned by `flake.lock`, loaded by direnv via `.envrc`) — Elixir/OTP, SQLite, and a pinned Tailwind. CI runs in the same shell and the Dockerfile builder image must match it (heartwood's `check-toolchain`). Mirrors gallformers.
 
 ## Development Commands
 
@@ -80,15 +81,18 @@ mix smoke_test <url>       # Run smoke tests against a deployment
 
 **CRITICAL: Always compile with `--warnings-as-errors`**. When verifying code changes, NEVER use plain `mix compile` - always use `mix compile --warnings-as-errors` or run `mix precommit`.
 
-## Before Committing
+## Before you commit
 
-Always run before committing:
+Run `mix precommit` (format, compile with warnings as errors, Credo, tests) and don't commit until it passes.
 
-```bash
-mix precommit    # Runs format, credo, and tests
-```
+The pre-commit hook (`dev/githooks/`, installed by `make hooks`) then blocks a commit without a passing reuse review. A commit touching only prose (`HEARTWOOD_PROSE` in `dev/guardrails/config.sh`: `docs/`, README.md, CONTRIBUTING.md, RELEASING.md) needs none.
 
-Do not commit until precommit passes.
+1. Stage files by name, then run `deps/heartwood_guardrails/guardrails/bin/review-packet`.
+2. A reviewer with fresh context, not yours (a different model is better), follows the packet it prints and records its verdict with the packet's `record-review` command.
+3. On block: fix, restage, review again. Never re-run the review for a different answer; disputes go to Jeff.
+4. Commit once it passes.
+
+The hook also blocks a staged `mix.lock` without heartwood's entries, as `HEARTWOOD_PATH` leaves it: unset it, run `mix deps.get`, and restage `mix.lock`.
 
 ## Testing
 
@@ -169,7 +173,7 @@ See **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** for comprehensive Elixir/Ph
 
 **Pull requests:** main changes only through pull requests, as in gallformers. Work goes on a branch, the branch is pushed (with Jeff's OK), a PR is opened, and Jeff merges it on GitHub. Don't merge into local main.
 
-**Push guard:** `make hooks` (also run by `make setup`) installs `scripts/githooks/pre-push`, which blocks force pushes and pushes to main or master from anyone. Jeff can push main for a one-off with `OAKS_PUSH_MAIN=1 git push ...`; agents never set it.
+**Push guard:** `make hooks` (also run by `make setup`) installs `dev/githooks/pre-push`, heartwood's push guard, which blocks force pushes and pushes to main or master from anyone. Jeff can push main for a one-off with `OAKS_PUSH_MAIN=1 git push ...`; agents never set it.
 
 **Commit messages:** Present tense, imperative mood.
 

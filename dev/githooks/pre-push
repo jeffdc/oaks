@@ -1,0 +1,25 @@
+#!/bin/sh
+# Runs heartwood's git hook of the same name as this file (pre-commit or
+# pre-push). Copied into the repository as dev/githooks/pre-commit and
+# dev/githooks/pre-push from heartwood_guardrails' hooks/app-shim; heartwood's
+# hooks/install makes git run them.
+#
+# It fails closed: when heartwood isn't there (run mix deps.get), the hook
+# blocks rather than letting the commit or push through unchecked.
+top=$(git rev-parse --show-toplevel) || exit 1
+name=$(basename "$0")
+# shellcheck source=/dev/null
+. "$top/dev/guardrails/config.sh" || exit 1
+
+if [ -n "${HEARTWOOD_PATH:-}" ]; then
+  home="$HEARTWOOD_PATH/guardrails"
+else
+  home="$top/${HEARTWOOD_HOME:-deps/heartwood_guardrails}"
+fi
+
+hook="$home/hooks/$name"
+if [ ! -x "$hook" ]; then
+  echo "$name: $hook is missing, so this is blocked. Run mix deps.get to fetch heartwood_guardrails." >&2
+  exit 1
+fi
+exec "$hook" "$@"

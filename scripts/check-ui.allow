@@ -1,7 +1,0 @@
-# scripts/check-ui allowlist: violations allowed today, per rule and file.
-# rule<TAB>path<TAB>count[<TAB>note]; the app-css line is the budget for its line count.
-# This list only shrinks. The check fails when a count falls until it is lowered here
-# (scripts/check-ui --baseline lowers it and never raises anything). A new or raised
-# entry is a hand edit that needs Jeff's approval; give its reason in the note column.
-style	lib/oaks_web/live/species_compare_live.ex	1
-app-css	assets/css/app.css	1757

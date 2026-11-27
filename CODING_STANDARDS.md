@@ -427,7 +427,7 @@ Every page is built from the shared library: `OaksWeb.CoreComponents`, `OaksWeb.
 
 **When the library doesn't have what you need:** stop. Don't build it into the page. Either add it to the library as its own change, shown in `/dev/components` and reviewed by Jeff before any page uses it, or ask Jeff and work on something else. A component that almost fits is extended in the library, never overridden on the page.
 
-**Enforced:** `scripts/check-ui` runs in `make done-checks` and in CI, and fails on page-width wrappers, inline styles, daisyUI cards and badges, hand-rolled scientific names, and any growth in `app.css`. Exceptions go in its allowlist, `scripts/check-ui.allow`, with Jeff's approval. The list only shrinks: when a file improves, lower its count in the same change (`scripts/check-ui --baseline`).
+**Enforced:** `OaksWeb.Conformance` (`test/support/conformance.ex`) runs in `mix test`, so in `make done-checks` and in CI, and fails on page-width wrappers, inline styles, daisyUI cards and badges, hand-rolled scientific names, and any growth in `app.css`. Exceptions go in its baseline, `test/support/conformance_baseline.json`, with Jeff's approval. The baseline only shrinks: when a file improves, the test fails until its count is lowered in the same change (`mix heartwood.baseline OaksWeb.Conformance`). Never write the baseline to make a new violation pass.
 
 **Wording:** sentence case for page titles, buttons, menu items and dialog titles ("Species list", "Save changes"); back links read "Back to <place>" in lower case ("Back to sources"); create actions read "New <thing>" in menus and titles, and the form's submit button names the act ("Create source", "Save changes").
 
