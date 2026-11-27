@@ -43,10 +43,10 @@ Baselines as of the [2026-11-26 review](reviews.md#2026-11-26-baseline).
 
 | ID | Rule | Source | Check | Baseline |
 |---|---|---|---|---|
-| U1 | Pages use the component library and never build their own version of something it covers; a missing component is added to the library first. | AGENTS.md, Working rules; CODING_STANDARDS.md, Components | `scripts/check-ui` (page widths, inline styles, daisyUI classes, hand-rolled scientific names): both | `check-ui.allow`: 1 inline style (`species_compare_live.ex`). Not covered by check-ui: 6 raw `<button>`s for option and toggle controls the library has no component for (`analytics_live.ex`, `species_compare_live.ex`, `species_detail_live.ex`, `species_merge_live.ex` ×2), 3 `<table>`s in `analytics_live.ex`. |
-| U2 | Page CSS never restyles a library component, and `app.css` only shrinks. | CODING_STANDARDS.md, Components | `scripts/check-ui` line budget for `app.css`: both. Restyling: manual. | `app.css` 1757 lines, at its budget. 8 selectors in `app.css` restyle `.oc-` classes. |
-| U3 | Every page sets its width with `<.page>` and its title row with `<.header>`. | CODING_STANDARDS.md, Components; DESIGN.md | `scripts/check-ui` width rule (page-made widths): both. Use of `<.page>`/`<.header>`: manual. | 0 pages without `<.page>`. The home page has no `<.header>` (its title page stands in). |
-| U4 | Scientific names are set only through `<.sci_name>` (Botanical Italic Rule). | DESIGN.md; CODING_STANDARDS.md, Components | `scripts/check-ui` sci-name rule: both | 0 |
+| U1 | Pages use the component library and never build their own version of something it covers; a missing component is added to the library first. | AGENTS.md, Working rules; CODING_STANDARDS.md, Components | `OaksWeb.Conformance` (page widths, inline styles, daisyUI classes, hand-rolled scientific names), in `mix test`: both | `test/support/conformance_baseline.json`: 1 inline style (`species_compare_live.ex`). Not covered by the conformance test: 6 raw `<button>`s for option and toggle controls the library has no component for (`analytics_live.ex`, `species_compare_live.ex`, `species_detail_live.ex`, `species_merge_live.ex` ×2), 3 `<table>`s in `analytics_live.ex`. |
+| U2 | Page CSS never restyles a library component, and `app.css` only shrinks. | CODING_STANDARDS.md, Components | `OaksWeb.Conformance` line budget for `app.css`, in `mix test`: both. Restyling: manual. | `app.css` 1757 lines, at its budget. 8 selectors in `app.css` restyle `.oc-` classes. |
+| U3 | Every page sets its width with `<.page>` and its title row with `<.header>`. | CODING_STANDARDS.md, Components; DESIGN.md | `OaksWeb.Conformance` width rule (page-made widths), in `mix test`: both. Use of `<.page>`/`<.header>`: manual. | 0 pages without `<.page>`. The home page has no `<.header>` (its title page stands in). |
+| U4 | Scientific names are set only through `<.sci_name>` (Botanical Italic Rule). | DESIGN.md; CODING_STANDARDS.md, Components | `OaksWeb.Conformance` sci-name rule, in `mix test`: both | 0 |
 | U5 | Colours come from the tokens; ochre is the only saturated fill; IUCN colours appear only on Red List stamps. | DESIGN.md | Manual | Hex values outside `tokens.css`: 3 in `app.css` (`#fff`), 45 in `components.css` (IUCN fills, masks, photo viewer defaults). 0 Tailwind palette colour classes. |
 | U6 | Square corners; no shadows. | DESIGN.md | Manual | 1 radius (`.merge-spinner`), 1 shadow (`.species-row:hover`). 0 `rounded-*` or `shadow-*` classes. |
 | U7 | No `@apply`; no external scripts, stylesheets or fonts. | CODING_STANDARDS.md, Phoenix 1.8 Patterns | Manual | 0 |
@@ -56,9 +56,9 @@ Baselines as of the [2026-11-26 review](reviews.md#2026-11-26-baseline).
 
 | ID | Rule | Source | Check | Baseline |
 |---|---|---|---|---|
-| O1 | One toolchain: the Nix flake, which the Dockerfile and CI match. | AGENTS.md, Tech Stack | `scripts/check-toolchain`: both | 0 |
+| O1 | One toolchain: the Nix flake, which the Dockerfile and CI match. | AGENTS.md, Tech Stack | heartwood's `check-toolchain` (`heartwood_guardrails`; in CI after `mix deps.get`): both | 0 |
 | O2 | Work is finished only when the hard checks pass (`make done-checks`), and CI requires the same checks before a PR can merge. | AGENTS.md, Before handing work over; [decisions.md](decisions.md), 2026-11-26 CI parity | `make done-checks` locally; in CI the Phoenix, Assets, Dialyzer, Elixir Security Audit and API Version Check jobs, all required by the `main-no-push` ruleset | 0 |
-| O3 | Main changes only through pull requests; no force pushes. | AGENTS.md, Git Workflow | GitHub's `main-no-push` ruleset (no direct pushes, deletion or force pushes; the five CI checks required): on GitHub. `scripts/githooks/pre-push`: local, per clone (`make hooks`). | 0 |
+| O3 | Main changes only through pull requests; no force pushes. | AGENTS.md, Git Workflow | GitHub's `main-no-push` ruleset (no direct pushes, deletion or force pushes; the five CI checks required): on GitHub. `dev/githooks/pre-push`, heartwood's push guard: local, per clone (`make hooks`). | 0 |
 | O4 | Environment variables are read only in `config/runtime.exs`. | CODING_STANDARDS.md, Configuration | Manual | 3: `config/dev.exs` (2), `config/config.exs` (`MIX_TAILWIND_PATH`). |
 
 ## Tests
@@ -76,16 +76,19 @@ Every automated check today, and the rules it holds.
 |---|---|---|
 | `mix format --check-formatted` | local, CI | formatting |
 | `mix compile --warnings-as-errors` | local, CI | no warnings (Ecto also rejects interpolated `fragment` strings) |
-| `mix credo --strict` (defaults, no config file) | local, CI | style |
-| `mix test` | local, CI | behaviour; the tests named under W1, W3–W6 and D3 |
+| `mix credo --strict` (defaults; `.credo.exs` holds only the `duplicates` config) | local, CI | style |
+| `mix test` | local, CI | behaviour; the tests named under W1, W3–W6 and D3; the guardrails below |
 | `mix dialyzer` | local, CI (Dialyzer job) | types |
-| `scripts/check-ui` (allowlist only shrinks) | local, CI | U1–U4 |
-| `scripts/check-toolchain` | local, CI | O1 |
+| `OaksWeb.Conformance`, in `mix test` (`Oaks.GuardrailsTest`; its baseline only shrinks) | local, CI | U1–U4 |
+| Copied code (`Heartwood.Guardrails.DuplicateCode`: Credo's `DuplicatedCode`, mass 40), in `mix test`; baseline 0 | local, CI | no new copied code (no rule yet) |
+| Retirements (`test/support/retirements.exs`, empty), in `mix test` | local, CI | a replaced module is deleted in the same change (no rule yet) |
+| heartwood's `check-toolchain` | local, CI | O1 |
 | `mix assets.deploy` | CI | the bundles build |
 | `hex.audit`, `deps.audit`, Sobelow (`--exit high`) | local, CI (every PR, main, weekly) | dependencies; W7 in part |
 | API Version Check | CI, on PRs | W9 |
 | `main-no-push` ruleset | GitHub | O2, O3: the five CI checks required; no direct pushes, deletion or force pushes |
 | Dependabot (mix, GitHub Actions) and CodeQL (actions, JavaScript, Python) | GitHub | vulnerable dependencies; code scanning alerts |
-| `scripts/githooks/pre-push` | local push | O3 |
+| `dev/githooks/pre-push` (heartwood's push guard) | local push | O3 |
+| `dev/githooks/pre-commit` (heartwood's commit gate: a passing reuse review by a reviewer with fresh context; AGENTS.md, Before you commit) | local commit | reuse (no rule yet) |
 | `mix smoke_test` | after each deploy | the production site answers |
 | Impeccable's detector | agent sessions (plugin hook) | design anti-patterns, advisory |
