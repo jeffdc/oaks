@@ -22,15 +22,13 @@ Template:
 
 ## 2026-11-26: Share UI components and guardrails with gallformers through heartwood; copy domain modules
 
-- **Why:** the photo viewer already exists twice, and the copies have drifted: gallformers wrote it first and oaks forked it with rail paging, backdrop close and a configurable event. The guardrails (the conformance ratchet, the duplicate-code ratchet, retirements, the git hooks and their tests, `check-toolchain`) are about 1,200 lines that are the same in both apps except for each app's rules and baselines. Pure domain modules are different: oaks adapts them on purpose (the lead rule in place of newest-wins; SQLite, where gallformers runs Postgres), so sharing them would mean constant overrides.
+- **Why:** oaks and gallformers each kept their own copy of the photo viewer and the guardrails, and the copies drifted.
 - **Changes:**
-  - A third repo, `heartwood`, holds two Mix packages, each a git dependency pinned by tag and pulled with `sparse:`: `heartwood_ui` (runtime: the photo viewer, then the fragment-and-reader) and `heartwood_guardrails` (`only: [:dev, :test], runtime: false`: the ratchet framework, the duplicate-code ratchet, retirements, the hooks, the reuse review's packet and record scripts, the superset `check-toolchain`, and their tests). Each app keeps its own rules, baselines, `.credo.exs` duplicates config, retirements list, prose paths for the commit gate and reviewer checklist.
-  - Oaks aligns with gallformers' guardrails as far as makes sense: it adopts the duplicate-code ratchet, retirements, the pre-push hook test and the reuse review with its commit gate, in gallformers' layout (`dev/githooks/`, `dev/guardrails/`, baselines in `test/support/`).
-  - Shared components keep the 2026-11-25 shape, which stands: their own class prefix and custom properties with neutral defaults, no Tailwind utilities in their markup, `class` for layout only, and one adapter block per app mapping its tokens (`.oc-photos` in oaks).
-  - Changes flow through heartwood: tagged releases with a `CHANGELOG.md` entry whose "Upgrade:" steps say what an app must do; the change is done when the app that needed it is bumped and the other app has a backlog entry; `mix heartwood.status` shows each app's pinned tag against the latest, for information only. Apps never edit `deps/heartwood_*`.
-  - Gallformers' pure modules are copied into oaks with an origin line (repo, path, commit, what was adapted); each app owns its copy. `Taxa.Ancestry` is rewritten for SQLite. CI workflows aren't shared.
-  - `heartwood_ui` ships its hooks and CSS as LiveView colocated assets, which an app imports from `phoenix-colocated/heartwood_ui` (needs Tailwind 4.2.3 or later). Heartwood tests them with Playwright; the apps need no npm. Shared components take their wording through a `labels` map.
-  - Rule U8 changes: shared code lives in heartwood, which cannot depend on either app.
+  - Oaks depends on heartwood (`jeffdc/heartwood`), pinned by tag: `heartwood_guardrails` in dev and test, and `heartwood_ui` at runtime, whose hooks and CSS oaks imports from `phoenix-colocated/heartwood_ui`.
+  - Oaks keeps its own rules, baselines and settings, and themes a shared component through one adapter block (`.oc-photos`).
+  - Oaks never edits `deps/heartwood_*`; fixes go into heartwood.
+  - Gallformers' pure domain modules are copied into oaks with an origin line, not shared.
+  - Rule U8: shared code lives in heartwood, which cannot depend on either app.
 - **Source:** Jeff, 2026-11-26 and 2026-11-27; [Architecture groundwork](../facts-expansion/architecture-groundwork.md#3-sharing-with-gallformers).
 
 ## 2026-11-26: Enforce rules with conformance tests, as gallformers does

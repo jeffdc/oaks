@@ -8,7 +8,7 @@ Order (Jeff, 2026-11-26): the JSON columns and links by key first; sharing with 
 
 - Species point at their taxa, taxa at their parent, and species at their parents by foreign key. No code rewrites names to keep links intact. API v1 responses are unchanged.
 - The JSON-in-TEXT columns are changed as decided in section 2, and rule D4 has no violations.
-- Heartwood exists, and oaks runs on `heartwood_guardrails` and on `heartwood_ui`'s photo viewer (section 3, steps 1 and 2); gallformers' move onto them is in its backlog (step 3).
+- Oaks runs on `heartwood_guardrails` and on `heartwood_ui`'s photo viewer (section 3, steps 1 and 2).
 - Every rule in rules.md is automated, covered by the reviewer prompt, or retired; the reviewer prompt exists and has produced a review entry.
 - The architecture doc describes the result, and `make done-checks` passes.
 
@@ -65,58 +65,27 @@ Jeff: links by name are not good and need fixing.
 
 ## 3. Sharing with gallformers
 
-Decided in its own discussion (Jeff, 2026-11-26), with the tooling questions section 5 handed over. Decision: [decisions.md](../architecture/decisions.md).
-
-**Known (2026-11-26):**
-
-- Both apps run Elixir 1.19, OTP 28 and Phoenix LiveView with the same Dockerfile pattern and a Nix flake each, but not the same database: gallformers runs Postgres 17 (main and taxogall), oaks SQLite. Shared code can't touch the database.
-- The photo viewer exists in both, and the copies have drifted. Gallformers wrote it first (`photo_viewer/1` in `domain_components.ex`, a 126-line hook, with admin edit links built in); oaks forked it (`OaksWeb.PhotoViewer`, a 187-line hook) and added rail paging, backdrop close and a configurable event. Oaks' version is the app-free one: it depends only on `Phoenix.Component`, and its CSS reads only its own `--pv-*` properties, which `.oc-photos` maps to oaks' tokens.
-- Gallformers already has the parts of the fragment-and-reader: `source_entry` and `source_quote` (`domain_components.ex`), `review_reader` (`review_components.ex`) and the ID Notes reader in `gall_live.ex`.
-- Of the pure modules the plans port: `PartialDate` (45 lines), `QuoteLocator` (170) and `NameNormalizer` (76) are pure; `Standing` (315) is pure but oaks replaces its newest-wins rule with the lead rule; `Taxa.Ancestry` is an Ecto schema over a Postgres closure table, not pure.
-- Gallformers' guardrails are about 1,200 lines that are the same for any app except for their rules, globs and baselines: the conformance ratchet (`conformance.ex`, about half framework and half gallformers' rules), the duplicate-code ratchet (Credo's `DuplicatedCode` against a baseline), retirements, the pre-commit and pre-push hooks, the reuse review's packet and record scripts, and tests for each. Oaks' `scripts/githooks/pre-push` is a copy of gallformers' with no test.
-- Both apps' esbuild configs put `deps/` on `NODE_PATH`, both pin Tailwind 4.1.12, both builder images have git, and both repos are public, so a public git dependency needs no credentials in CI or on Fly's builder.
+Code shared with gallformers lives in heartwood (`jeffdc/heartwood`). Decision: [decisions.md](../architecture/decisions.md).
 
 **Decided (Jeff, 2026-11-26):**
 
-- **Heartwood**, a third repo, holds two Mix packages. Each app depends on them as git dependencies pinned by tag, with `sparse:`:
-  - `heartwood_ui`, a runtime dependency: the photo viewer, then the fragment-and-reader, as LiveView colocated hooks and CSS. An app imports the hooks from `phoenix-colocated/heartwood_ui` in `app.js` and `phoenix-colocated/heartwood_ui/colocated.css` in `app.css`, and needs Tailwind 4.2.3 or later with `NODE_PATH` in its tailwind config.
-  - `heartwood_guardrails`, `only: [:dev, :test], runtime: false`: the ratchet framework (scan, tally per file and rule, a sorted JSON baseline, failure both ways with hints, a test helper and one baseline mix task), the duplicate-code ratchet, retirements, the pre-commit and pre-push hooks, the reuse review's packet and record scripts, the superset `check-toolchain`, and their tests.
-- **Each app keeps its own rules:** its conformance rules module (oaks: `OaksWeb.Conformance`, with check-ui's rules and the automated rules from [rules.md](../architecture/rules.md)), its baselines in `test/support/`, its `.credo.exs` duplicates config, its retirements list, the paths the commit gate treats as prose, and its reviewer checklist (heartwood holds the general reviewer text). Each app's hooks are thin scripts that run heartwood's and fail closed, telling you to run `mix deps.get` when `deps/` is missing; `core.hooksPath` never points into `deps/`. The push-main override is one env var name, set per app.
-- **Oaks aligns with gallformers' guardrails as far as makes sense:** it adopts the duplicate-code ratchet, retirements, the pre-push hook test and the reuse review with its commit gate, in gallformers' layout (`dev/githooks/`, `dev/guardrails/`). CI runs `check-toolchain` after `mix deps.get`. Gallformers' npm setup and Boundary are not part of this; Boundary is in section 5, and Dialyzer has run in oaks' CI since PR #19.
-- **Shared components take each app's design system** as the photo viewer does: their own class prefix (`pv-`, and one for the reader) in plain CSS in `@layer components`, reading only their own custom properties, each with a neutral default; no Tailwind utilities in their markup; `class` for layout only; all wording through a `labels` map with English defaults. Each app imports heartwood's colocated CSS and writes one adapter block mapping its tokens (`.oc-photos` in oaks, a `.gf-` block in gallformers, which then gets its dark mode and density for free). App-specific parts stay in each app's wrapper, as `<.species_photos>` does today.
-- **Changes flow through heartwood:**
-  - Releases are tags, `v0.y.z`, one series for both packages. While it's 0.x, a minor version needs action from an app and a patch is a drop-in. Each app moves to a new tag when it chooses.
-  - `sparse:` fetches only a package's folder, so each package carries its own README and `CHANGELOG.md`. Every tag has an entry in the changelog of each package it changes; an entry that needs action has "Upgrade:" steps (rename a custom property in the adapter, pass a new required attribute, rerun the baseline task). Each package's README lists the contract a change has to name if it breaks it: each component's attributes, the events it pushes, the `data-*` attributes its hook reads, its custom properties, the ratchet framework's API and the scripts' flags.
-  - Heartwood's AGENTS.md holds the rule: a change is done when it's tagged with its changelog entry, the app that needed it is bumped and its checks pass, and the other app has a backlog entry ("Upgrade heartwood to v0.4: <steps>") or is bumped too.
-  - `mix heartwood.status`, in `heartwood_guardrails`, prints the pinned tag, the latest tag (from `git ls-remote`) and a link to the changelog on GitHub. Oaks' architecture reviewer packet (section 5) includes it; gallformers shows it in `done-checks`. It never fails a check.
-  - A bug found in an app is fixed in heartwood (the app pointed at a local checkout through a `path:` override set by an env var), then tagged and bumped. Apps never edit `deps/heartwood_*`.
-- **Pure domain modules are copied,** as [Sources and facts core](sources-and-facts.md) and [Taxonomy](taxonomy.md) plan: each copy starts with an origin line (gallformers, the path, the commit, what was adapted), and each app owns its copy after that. A bug fixed in one adds a backlog entry in the other. A module moves into heartwood only if it's still the same in both after a while. `Taxa.Ancestry` and the tree validator are rewritten for SQLite with gallformers' as reference.
-- **Not shared:** CI workflows (gallformers' jobs need Postgres, npm and the preview app).
-- **Heartwood itself** is the public repo `jeffdc/heartwood`, licensed Apache 2.0 (most of its code comes from gallformers, which is Apache 2.0; all of it is Jeff's). It runs its own pre-push hook and commit gate, installed from its source tree, and has its own Nix flake and CI.
+- Oaks depends on two heartwood packages, as git dependencies pinned by tag:
+  - `heartwood_guardrails` (dev and test only): the ratchet framework behind `OaksWeb.Conformance`, the duplicate-code ratchet, retirements, the git hooks and commit gate, the reuse review, and `check-toolchain`.
+  - `heartwood_ui` (runtime): the photo viewer, then the fragment-and-reader, as LiveView colocated hooks and CSS. Oaks imports the hooks from `phoenix-colocated/heartwood_ui` in `app.js` and `phoenix-colocated/heartwood_ui/colocated.css` in `app.css`, which needs Tailwind 4.2.3 or later with `NODE_PATH` in its tailwind config.
+- Oaks keeps its own rules and settings: `OaksWeb.Conformance`, its baselines in `test/support/`, the `duplicates` config in `.credo.exs`, its retirements list, and the commit gate's prose paths and reviewer checklist in `dev/guardrails/`.
+- Oaks themes a shared component with one adapter block that maps its tokens onto the component's custom properties (`.oc-photos`); anything oaks-specific stays in its own wrapper (`<.species_photos>`).
+- Oaks moves to a new heartwood tag when it chooses, following the changelog's "Upgrade:" steps. A bug in a heartwood piece is fixed in heartwood (with `HEARTWOOD_PATH` pointing oaks at a local checkout), never in `deps/`.
+- Gallformers' pure domain modules are copied, not shared: each copy starts with an origin line (repo, path, commit, what was adapted), and oaks owns it after that. `Taxa.Ancestry` and the tree validator are rewritten for SQLite.
+- CI workflows aren't shared.
 
-**Steps, in order:**
+**Steps:**
 
-1. **Heartwood's guardrails, and oaks on them.**
-   - **1a. Heartwood, tagged `v0.1.0`.** Done 2026-11-26 (heartwood PR #1, tag `v0.1.0`). The repo, created on GitHub with its license and README so that its first code arrives by PR: a flake (Elixir 1.19, OTP 28, Node), CI running format, compile with warnings as errors, Credo and tests per package, a root README and AGENTS.md, and `heartwood_guardrails` in `guardrails/` with its README and CHANGELOG.md. In it:
-     - `Heartwood.Guardrails.Ratchet`, the framework half of gallformers' `conformance.ex`. The app passes its rules, globs, exempt files, CSS-only rules and baseline path. A rule is a pattern with a hint and an optional filter (gallformers' "#123 is an issue number, not a colour"), or a counting function for counts that aren't pattern matches (check-ui's `app.css` line budget). With it come a test helper that generates the two-way test, and `mix heartwood.baseline`. Gallformers' rules are its test fixture.
-     - The duplicate-code ratchet and retirements, with their paths set by the app. The package depends on Credo `~> 1.7`, as both apps do.
-     - The pre-commit and pre-push hooks, the reuse review's packet and record scripts and the general reviewer text. Set by the app: the review folder's name, the paths that count as prose, the push-main env var and the app's reviewer checklist. The commit gate refuses while `HEARTWOOD_PATH` is set, since the local `path:` dependency drops heartwood's entry from `mix.lock`. Gallformers' commit-gate and pre-push tests come with them.
-     - The superset `check-toolchain`: every Dockerfile that exists, Typst when the flake provides it, and oaks' `MIX_TAILWIND_PATH` check, with tests.
-     - `mix heartwood.status`.
-   - **1b. Oaks on `heartwood_guardrails`, one PR.** Done 2026-11-26 (oaks PR #31), and on heartwood v0.1.1 since the next oaks PR. Found on the way: Mix checks a `sparse:` dependency out into its folder, so the package is at `deps/heartwood_guardrails/guardrails`, not at `deps/heartwood_guardrails` as v0.1.0's shim default and README said; v0.1.1 fixed both (heartwood PR #5), and oaks no longer sets `HEARTWOOD_HOME`. A `:count` rule's failure lists no lines, so the sci-name rule's hint names `OaksWeb.Conformance.sci_name_lines/1`.
-     - `heartwood_guardrails` as a git dependency at `v0.1.0`, or a `path:` dependency when `HEARTWOOD_PATH` is set; `preferred_envs` for `heartwood.baseline`.
-     - `OaksWeb.Conformance` with check-ui's rules (page widths, inline styles, daisyUI classes, hand-rolled scientific names, the `app.css` line budget) and a JSON baseline at `check-ui.allow`'s counts. It runs in `mix test`, so in CI.
-     - A `.credo.exs` with the `duplicates` config, the duplicate-code baseline, and an empty retirements list.
-     - The hooks in `dev/githooks/` and the reviewer checklist in `dev/guardrails/`, the "Before you commit" routine in AGENTS.md, the Makefile's `done-checks` and `hooks` targets, and CI running `check-toolchain` after `mix deps.get`. The commit gate is installed last, so this PR isn't blocked by it.
-     - [rules.md](../architecture/rules.md) (U1–U4's checks, O1) and the architecture README's Delivery section change in the same PR.
-     - Deletes: `scripts/check-ui`, `scripts/check-ui.allow`, `scripts/check-toolchain`, `scripts/githooks/`.
-   - Section 5's rule work builds on this.
-2. **The photo viewer in `heartwood_ui`, and oaks on it**, as a sequence of PRs:
-   - **2a. Oaks' Tailwind bump** to 4.3.5, with `NODE_PATH` in the tailwind config (oaks PR #36).
-   - **2b. Heartwood v0.2.0** ships the photo viewer in `heartwood_ui`.
-   - **2c. Oaks on `heartwood_ui` v0.2.0:** the dependency and the two imports. Oaks keeps `<.species_photos>` and `.oc-photos`, with `.oc-photos` mapped to v0.2.0's custom properties. The viewer's filmstrip replaces oaks' paged rail and its step buttons; the 4/5 and 4/3 ratios stay as `.oc-photos` settings. Deleted: `OaksWeb.PhotoViewer`, `assets/js/photo_viewer.js`, the `pv-` block in `components.css` and the tests that moved to heartwood. The dev components page and the docs are updated to match.
-3. Gallformers moves onto both packages, described in a backlog entry in gallformers' `docs/backlog.md` (taxogall).
-4. The fragment-and-reader is built in `heartwood_ui` from the start, with gallformers' ID Notes reader as its design source ([Taxon pages](taxon-pages.md)).
+1. **Oaks on `heartwood_guardrails`.** Done 2026-11-26 (PR #31); on v0.1.1 since.
+2. **The photo viewer from `heartwood_ui`:**
+   - **2a.** Tailwind 4.3.5 with `NODE_PATH` in the tailwind config (PR #36).
+   - **2b.** Heartwood v0.2.0 ships the photo viewer.
+   - **2c.** Oaks on `heartwood_ui` v0.2.0: the dependency and the two imports. Oaks keeps `<.species_photos>` and `.oc-photos`, with `.oc-photos` mapped to v0.2.0's custom properties. The viewer's filmstrip replaces oaks' paged rail and its step buttons; the 4/5 and 4/3 ratios stay as `.oc-photos` settings. Deleted: `OaksWeb.PhotoViewer`, `assets/js/photo_viewer.js`, the `pv-` block in `components.css` and the tests that moved to heartwood. The dev components page and the docs are updated to match.
+3. **The fragment-and-reader** is built in `heartwood_ui` ([Taxon pages](taxon-pages.md)).
 
 ## 4. The production toolchain
 
@@ -124,7 +93,7 @@ Decided in its own discussion (Jeff, 2026-11-26), with the tooling questions sec
 
 ## 5. The manual rules
 
-After sections 1 and 2 (Jeff, 2026-11-26), and on top of section 3's step 1, which brings in `heartwood_guardrails` and turns check-ui's rules into `OaksWeb.Conformance`.
+After sections 1 and 2 (Jeff, 2026-11-26), and on top of section 3's step 1 (oaks on `heartwood_guardrails`).
 
 **Decided (Jeff, 2026-11-26):**
 
