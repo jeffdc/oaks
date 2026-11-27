@@ -50,14 +50,17 @@ config :esbuild,
 # binary; when it is unset the tailwind package downloads one to its default
 # location under _build (see flake.nix, Dockerfile).
 config :tailwind,
-  version: "4.1.12",
+  version: "4.3.5",
   path: System.get_env("MIX_TAILWIND_PATH"),
   oaks: [
     args: ~w(
       --input=assets/css/app.css
       --output=priv/static/assets/css/app.css
     ),
-    cd: Path.expand("..", __DIR__)
+    cd: Path.expand("..", __DIR__),
+    env: %{
+      "NODE_PATH" => Enum.join([Path.expand("../deps", __DIR__), Mix.Project.build_path()], ":")
+    }
   ]
 
 # Species photo storage (Oaks.Storage.Images): the private oaks-images bucket,
