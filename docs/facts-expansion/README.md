@@ -26,7 +26,7 @@ Done when:
 |---|---|---|---|---|
 | 1 | Foundations | | Done | below |
 | 2 | Site shell and design system | 1 | Done | below |
-| 3 | Polish | 2 | Fixes in main; waiting for Jeff's sign-off | [polish.md](polish.md) |
+| 3 | Polish | 2 | Done | [polish.md](polish.md) |
 | 4 | Architecture groundwork | 1 | Next; before any other new work | [architecture-groundwork.md](architecture-groundwork.md) |
 | 5 | Sources and facts core | 4 | Not started | [sources-and-facts.md](sources-and-facts.md) |
 | 6 | Taxonomy | 5 | Not started | [taxonomy.md](taxonomy.md) |
@@ -104,8 +104,7 @@ The index of questions that cut across phases; each phase doc lists its own.
 
 - **Entry sections** (Authoring editor): the full section list after key sentence, account and historical context. Default: those three for now, more added as Jeff needs them.
 - **Publishing** (Authoring editor): does marking a section written publish it, or do sections wait for a Publish? Default: marking it written publishes it.
-- **The home page's Hybrids link** (Polish): there is no hybrids list for it to go to.
 
 ## Other plans
 
-Separate from this one, each in its own doc: [gallformers parity](../gallformers-parity-plan.md) (two ports), [search](../search-plan.md) (shaping; after Taxon pages) and the [November 2026 audit](../audit-2026-11-plan.md) (one check left). Work that belongs to no plan is in the [backlog](../backlog.md).
+Separate from this one, each in its own doc: [gallformers parity](../gallformers-parity-plan.md) (one port), [search](../search-plan.md) (shaping; after Taxon pages) and the [November 2026 audit](../audit-2026-11-plan.md) (one check left). Work that belongs to no plan is in the [backlog](../backlog.md).

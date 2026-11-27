@@ -12,7 +12,7 @@ How the work went: collect the problems in one place (Jeff's list and one Impecc
 
 ## Status
 
-All the fixes are in main (checked 2026-11-26). The last ones Jeff hasn't yet signed off:
+**Done.** Jeff signed the phase off on 2026-11-26. Every fix is in main:
 
 | Fix | Commit |
 |---|---|
@@ -28,16 +28,6 @@ All the fixes are in main (checked 2026-11-26). The last ones Jeff hasn't yet si
 | Settings back links, Analytics in the footer, About's statistics | 388b3e6 |
 | The merge dialog's "Merging species…" state shows | 6e3d02e |
 
-Signing these off also approves five choices the agents made in them:
+The sign-off also approved five choices the agents made in them: species list rows are 48px, on a subgrid; long authorities end in an ellipsis; compare's column heads link to the source's page; About's statistics read as a sentence; only the three settings sub-pages get Back to settings.
 
-- Species list rows are 48px, on a subgrid.
-- Long authorities end in an ellipsis.
-- Compare's column heads link to the source's page.
-- About's statistics read as a sentence.
-- Only the three settings sub-pages get Back to settings.
-
-## Left
-
-- Jeff judges the site against the done-when above; then this phase is done.
-- Two fixes to Jeff's article "How to Document an Oak", made by Jeff in the article editor because it's his text: a `- ` before "vestiture", whose list item has no bullet, and `*…*` around its scientific names (*Q. palustris*, *Q. montana* and others), which are set roman against the Botanical Italic Rule.
-- The home page's Contents links Hybrids to `/species` (`lib/oaks_web/live/home_live.ex:173`). Jeff asked for it to link to the hybrid pages, but there is no hybrids list: add a hybrids filter on the species list, a hybrids page, or drop the entry.
+The fixes to the article "How to Document an Oak" are dropped: Jeff is rewriting it.

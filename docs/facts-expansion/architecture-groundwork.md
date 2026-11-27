@@ -140,4 +140,3 @@ After sections 1 and 2 (Jeff, 2026-11-26), and on top of section 3's step 1, whi
 
 - Where the reviewer prompt and packet script live, and where local reports go (gitignored).
 - What "the last review" is for the packet's commit range (the date of the last `reviews.md` entry, or a recorded commit).
-- Whether the reviewer prompt and gallformers' code-review port ([gallformers parity](../gallformers-parity-plan.md)) share anything.
