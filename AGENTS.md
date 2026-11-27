@@ -36,7 +36,7 @@ If you're unsure about scope, ASK. Examples:
 
 ## Before handing work over
 
-- **Hard checks:** `make done-checks`. It rebuilds the checkout's test database, then runs `scripts/check-toolchain`, `scripts/check-ui`, `mix precommit` and `mix dialyzer`. Run it inside the Nix dev shell (direnv, or `nix develop -c make done-checks`). Don't call work finished until it passes.
+- **Hard checks:** `make done-checks`. It rebuilds the checkout's test database, then runs `scripts/check-toolchain`, `scripts/check-ui`, `mix precommit`, `mix dialyzer` and the security audits (`mix hex.audit`, `mix deps.audit`, `mix sobelow`): everything CI requires. Run it inside the Nix dev shell (direnv, or `nix develop -c make done-checks`). Don't call work finished until it passes.
 - **Plans** are markdown docs in `docs/` (for example `docs/species-photos-plan.md`), written with Jeff. Don't change a plan's scope or decisions unless Jeff asks.
 
 ## Project Overview

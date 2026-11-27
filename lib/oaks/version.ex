@@ -6,8 +6,10 @@ defmodule Oaks.Version do
     time. Production images are compiled fresh on every deploy, so in
     production this is the date the running release was deployed. It matches
     the CalVer tags of GitHub releases.
-  - **API version**: SemVer of the public REST API, also used by the OpenAPI
-    spec (`OaksWeb.ApiSpec`).
+  - **API version**: SemVer of the public REST API, read from the API_VERSION
+    file at compile time, and also used by the OpenAPI spec (`OaksWeb.ApiSpec`).
+    CI's API version check fails a pull request that changes the API without
+    bumping it.
 
   Mirrors `Gallformers.Version`.
   """
@@ -17,7 +19,13 @@ defmodule Oaks.Version do
                  "#{date.year}.#{date.month}.#{date.day}"
                )
 
-  @api_version "1.0.0"
+  # Recompile this module when API_VERSION changes.
+  @external_resource api_version_path = Path.expand("../../API_VERSION", __DIR__)
+
+  @api_version (case File.read(api_version_path) do
+                  {:ok, content} -> String.trim(content)
+                  {:error, _} -> "unknown"
+                end)
 
   @doc """
   Returns the application version in CalVer format, e.g. `"2026.11.2"`.
