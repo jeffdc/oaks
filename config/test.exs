@@ -5,6 +5,10 @@ config :argon2_elixir, t_cost: 1, m_cost: 8
 
 config :oaks, env: :test
 
+# The ratchets `mix heartwood.baseline` writes and the architecture review's
+# packet shows (both run in the test environment).
+config :heartwood_guardrails, ratchets: [OaksWeb.Conformance, Heartwood.Guardrails.DuplicateCode]
+
 # Configure your database
 # Use a separate test database (no production data)
 config :oaks, Oaks.Repo,

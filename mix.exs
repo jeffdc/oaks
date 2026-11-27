@@ -1,7 +1,7 @@
 defmodule Oaks.MixProject do
   use Mix.Project
 
-  @heartwood_tag "v0.1.0"
+  @heartwood_tag "v0.1.1"
 
   def project do
     [
@@ -28,7 +28,11 @@ defmodule Oaks.MixProject do
 
   def cli do
     [
-      preferred_envs: [precommit: :test, "heartwood.baseline": :test]
+      preferred_envs: [
+        precommit: :test,
+        "heartwood.baseline": :test,
+        "heartwood.architecture": :test
+      ]
     ]
   end
 

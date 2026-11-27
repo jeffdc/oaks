@@ -19,8 +19,12 @@ defmodule Oaks.GuardrailsTest do
     end
 
     # With HEARTWOOD_PATH set, the hooks use that checkout instead.
-    test "HEARTWOOD_HOME in dev/guardrails/config.sh is where the package is" do
-      [_, home] = Regex.run(~r/^HEARTWOOD_HOME=(\S+)$/m, File.read!("dev/guardrails/config.sh"))
+    test "the hooks find the package: HEARTWOOD_HOME, when set, or the shim's default" do
+      home =
+        case Regex.run(~r/^HEARTWOOD_HOME=(\S+)$/m, File.read!("dev/guardrails/config.sh")) do
+          [_, home] -> home
+          nil -> "deps/heartwood_guardrails/guardrails"
+        end
 
       if System.get_env("HEARTWOOD_PATH") == nil do
         assert Path.expand(home) == Path.expand(Mix.Project.deps_paths()[:heartwood_guardrails])
