@@ -460,7 +460,6 @@ defmodule OaksWeb.CoreComponents do
 
       <.edit_menu id="species-edit-menu">
         <:item navigate={~p"/species/shumardii/edit"} id="edit-species-btn">Edit species</:item>
-        <:item click="show_merge_picker">Make synonym of…</:item>
         <:item click="open_manage_photos" note="1 failed">Manage photos…</:item>
         <:item click="request_delete_taxon" values={%{id: 12}}>Delete taxon</:item>
       </.edit_menu>
@@ -824,7 +823,7 @@ defmodule OaksWeb.CoreComponents do
       that create or edit something, and the account pages (log in,
       setup, settings).
     * `frame`: the 1400px frame, only for pages that set columns side by
-      side: the source comparison, a merge.
+      side: the source comparison.
 
   All four have 32px gutters (16px under 760px). The `:head` slot (a back
   link and the title row) spans the page's width, so its 2px rule runs

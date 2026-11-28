@@ -6,8 +6,8 @@ defmodule Oaks.Images.ImportWorker do
   A run claims the attempt (a lease no other run or cleanup will cross),
   downloads the photo from iNaturalist, makes its four variants, and stores
   the original and the variants. Before each write it checks that it still
-  holds the claim and the attempt is still wanted, so a photo deleted or
-  merged away mid-import gets no more files. Once all five are stored it
+  holds the claim and the attempt is still wanted, so a photo deleted
+  mid-import gets no more files. Once all five are stored it
   marks the attempt stored, then publishes the photo, only if the attempt is
   still the photo's current one. No transaction is held open during network
   or image work.
@@ -183,7 +183,7 @@ defmodule Oaks.Images.ImportWorker do
 
   # Publishes the photo, in one transaction, if this run still holds the
   # attempt and the attempt is still the photo's current one. Whoever
-  # superseded it (a deletion, a merge) recorded the cleanup of its files.
+  # superseded it (a deletion) recorded the cleanup of its files.
   defp publish(attempt) do
     Repo.transaction(fn ->
       if held?(attempt) do

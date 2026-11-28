@@ -9,7 +9,7 @@ defmodule Oaks.Images do
   then marks it `ready`. Only ready photos are public (`list_for_species/1`);
   editors also see pending and failed ones (`list_for_editor/1`).
 
-  Removing photos (`delete/1`, a species' deletion or a merge's duplicates)
+  Removing photos (`delete/1` or a species' deletion)
   deletes their rows and records a `Oaks.Images.Cleanup` of all their files
   in the same transaction; `Oaks.Images.CleanupWorker` deletes the files and
   invalidates their CDN paths after the transaction commits. Readers stop
@@ -531,71 +531,6 @@ defmodule Oaks.Images do
       remove_images!(images, "species_deleted")
       {:ok, length(images)}
     end)
-  end
-
-  @doc """
-  What merging `source`'s photos into `target`'s would do: the photos that
-  move (in the order they'll follow the target's), and the duplicates (an
-  iNat photo both have), each with the target's photo that wins and the
-  source caption that would be discarded (nil when the source has none, or
-  the same one).
-  """
-  @spec merge_preview(Species.t() | integer(), Species.t() | integer()) :: %{
-          transfer: [Image.t()],
-          duplicates: [
-            %{source: Image.t(), target: Image.t(), discarded_caption: String.t() | nil}
-          ]
-        }
-  def merge_preview(source, target) do
-    {duplicates, transfer} = split_merge(source, target)
-    %{transfer: transfer, duplicates: duplicates}
-  end
-
-  @doc """
-  Adds to `multi` the merge of `source`'s photos into `target`'s, before
-  `source` is deleted: photos the target lacks follow the target's own, in
-  the source's order; duplicates of target photos are removed (the target's
-  photo, caption and position win). Pending and failed imports move too.
-  Stored files never move: a photo's path records where it was imported,
-  not who owns it.
-  """
-  @spec merge_species_images(Multi.t(), Species.t(), Species.t()) :: Multi.t()
-  def merge_species_images(%Multi{} = multi, %Species{} = source, %Species{} = target) do
-    Multi.run(multi, :merge_images, fn _repo, _changes ->
-      {duplicates, transfer} = split_merge(source, target)
-      remove_images!(Enum.map(duplicates, & &1.source), "merge_duplicate")
-
-      last =
-        from(i in Image, where: i.species_id == ^target.id, select: max(i.sort_order))
-        |> Repo.one()
-
-      transfer
-      |> Enum.with_index((last || -1) + 1)
-      |> Enum.each(fn {image, sort_order} ->
-        from(i in Image, where: i.id == ^image.id)
-        |> Repo.update_all(set: [species_id: target.id, sort_order: sort_order])
-      end)
-
-      {:ok, %{moved: length(transfer), removed: length(duplicates)}}
-    end)
-  end
-
-  defp split_merge(source, target) do
-    target_photos = Map.new(list_for_editor(target), &{&1.inat_photo_id, &1})
-
-    {duplicates, transfer} =
-      source
-      |> list_for_editor()
-      |> Enum.split_with(&Map.has_key?(target_photos, &1.inat_photo_id))
-
-    duplicates =
-      for image <- duplicates do
-        kept = Map.fetch!(target_photos, image.inat_photo_id)
-        discarded = if image.caption not in [nil, kept.caption], do: image.caption
-        %{source: image, target: kept, discarded_caption: discarded}
-      end
-
-    {duplicates, transfer}
   end
 
   # Deletes the photos' rows, cancels their unfinished attempts (a worker

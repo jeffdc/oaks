@@ -14,6 +14,12 @@ Template:
 - **Source:** commit, PR or plan doc
 ```
 
+## 2026-11-27: Merge leaves the app until Taxonomy
+
+- **Why:** merge rewrites name links everywhere, and Taxonomy brings synonymy back properly.
+- **Changes:** merge leaves end to end: `Oaks.Species.Merge`, `SpeciesMergeLive` and its route, the species page's "Make synonym of…" item and picker, `Oaks.Images.merge_preview/2` and `merge_species_images/3`, the merge page's CSS, its dev-gallery examples, and its docs and baselines. Rename still records the old name as a synonym, and delete keeps its references dialog until PR 3 makes a hybrid's parent undeletable by key; `Oaks.Species.References` stays for both. Rules W1, U1, U2 and U6 lower their baselines.
+- **Source:** Jeff, 2026-11-27; [Architecture groundwork](../facts-expansion/architecture-groundwork.md#pr-2-merge-removed).
+
 ## 2026-11-27: The public API is off the air while the Facts expansion lands
 
 - **Why:** so nothing has to keep `/api/v1`'s JSON still while the model changes underneath it. It comes back, as v2 or a reshaped v1, when the model is done.

@@ -4,8 +4,8 @@ defmodule Oaks.Species.References do
 
   Species point at each other by scientific name, not by id: `parent1` and
   `parent2`, and the JSON name lists `hybrids`, `closely_related_to`, and
-  `subspecies_varieties`. Renaming, deleting, or merging a species has to
-  update those mentions in other species, or their links break. This module
+  `subspecies_varieties`. Renaming or deleting a species has to update
+  those mentions in other species, or their links break. This module
   is the single place that knows where those mentions live.
 
   Names are compared ignoring case, surrounding and repeated whitespace, and
@@ -48,7 +48,7 @@ defmodule Oaks.Species.References do
   or remove the mentions when `new_name` is nil.
 
   Species whose ids are in `:except` are skipped (e.g. the species being
-  renamed or merged, which the caller updates itself). A species never ends
+  renamed, which the caller updates itself). A species never ends
   up listing itself, and duplicate list entries are dropped.
   """
   @spec rewrite(Multi.t(), String.t(), String.t() | nil, keyword()) :: Multi.t()

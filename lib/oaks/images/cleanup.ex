@@ -2,7 +2,7 @@ defmodule Oaks.Images.Cleanup do
   @moduledoc """
   Stored files to remove: every path of the attempts in `attempt_ids`,
   recorded in the same transaction that stopped needing them (a photo or
-  species deleted, a merge duplicate dropped, an import failed or retried).
+  species deleted, an import failed or retried).
   It keeps no foreign keys, so it outlives the image, species and attempts.
 
   `deleting` until every path is deleted, then `invalidating` until the CDN
@@ -12,7 +12,7 @@ defmodule Oaks.Images.Cleanup do
   """
   use Ecto.Schema
 
-  @reasons ~w(photo_deleted species_deleted merge_duplicate import_failed)
+  @reasons ~w(photo_deleted species_deleted import_failed)
 
   @type t :: %__MODULE__{
           id: integer() | nil,

@@ -183,7 +183,7 @@ defmodule OaksWeb.SpeciesFormLiveTest do
       assert html =~ "edit-species-btn"
       assert html =~ "delete-species-btn"
 
-      for id <- ~w(edit-species-btn merge-species-btn delete-species-btn) do
+      for id <- ~w(edit-species-btn delete-species-btn) do
         assert has_element?(view, "#species-title .oc-title-actions #species-edit-menu ##{id}")
       end
     end
