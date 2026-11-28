@@ -6,7 +6,7 @@ defmodule Oaks.Images.ImportAttempt do
 
   States: `queued` (waiting for a worker), `running` (a worker has claimed
   it), `published`, `failed` (gave up; its files are being cleaned up) and
-  `cancelled` (its photo was deleted or merged away; it may not publish or
+  `cancelled` (its photo was deleted; it may not publish or
   write again). `stored_at` is set once all five files are written, so a
   resumed attempt only has to publish. While `lease_until` is in the future
   the worker holding `lease_token` may write, and cleanup of the attempt's

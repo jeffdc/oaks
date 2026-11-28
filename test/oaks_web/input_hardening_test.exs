@@ -99,14 +99,5 @@ defmodule OaksWeb.InputHardeningTest do
       assert {:error, {:live_redirect, %{to: ^path}}} =
                conn |> authenticated_conn() |> live("/species/#{alba}/sources/abc/edit")
     end
-
-    test "merge ignores unknown fields", %{conn: conn, alba: alba, rubra: rubra} do
-      {:ok, view, _html} =
-        conn |> authenticated_conn() |> live("/species/#{rubra}/merge/#{alba}")
-
-      assert render_click(view, "copy_field", %{"field" => "not_a_field"})
-      assert render_click(view, "update_field", %{"field" => "scientific_name", "value" => "x"})
-      assert render_click(view, "toggle_source", %{"source-id" => "abc"})
-    end
   end
 end

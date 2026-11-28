@@ -56,7 +56,6 @@ defmodule OaksWeb.Router do
       live "/species/new", SpeciesFormLive, :new
       live "/species/:name/edit", SpeciesFormLive, :edit
       live "/species/:name", SpeciesDetailLive
-      live "/species/:name/merge/:target", SpeciesMergeLive
       live "/species/:name/compare", SpeciesCompareLive
       live "/species/:name/sources/new", SpeciesSourceFormLive, :new
       live "/species/:name/sources/:source_id/edit", SpeciesSourceFormLive, :edit

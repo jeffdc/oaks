@@ -565,7 +565,6 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
 
       assert has_element?(view, "#add-photos-btn", "Add photos from iNaturalist…")
       assert has_element?(view, "#manage-photos-btn", "Manage photos…")
-      assert has_element?(view, "#merge-species-btn", "Make synonym of…")
       assert has_element?(view, "#delete-species-btn", "Delete species")
     end
 
@@ -600,12 +599,6 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       render_click(view, "confirm_delete_source", %{})
 
       assert Oaks.Species.get_species_full(ctx.alba).species_sources |> length() == 2
-    end
-
-    test "Make synonym of… opens the picker", %{conn: conn, alba: alba} do
-      {:ok, view, _html} = conn |> log_in_user(user_fixture()) |> live(~p"/species/#{alba}")
-      view |> element("#merge-species-btn") |> render_click()
-      assert has_element?(view, "#merge-picker-dialog")
     end
 
     test "Add source data is offered only while a source is left to add", %{

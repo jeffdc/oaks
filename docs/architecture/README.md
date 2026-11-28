@@ -68,11 +68,11 @@ A Phoenix monolith: business logic in `lib/oaks/` as contexts, the web layer in 
 | Context | Responsibility | Owns (tables) |
 |---|---|---|
 | `Oaks.Accounts` | Users, password and TOTP or recovery-code login, session and setup tokens, agent API tokens | `users`, `users_tokens`, `users_recovery_codes`, `api_tokens` |
-| `Oaks.Species` (+ `Merge`, `References`) | Species, hybrids, the per-field source display rules, API maps, merging species, name-reference rewrites | `species` |
+| `Oaks.Species` (+ `References`) | Species, hybrids, the per-field source display rules, API maps, name-reference rewrites | `species` |
 | `Oaks.Sources` | Sources and each species' per-source text | `sources`, `species_sources` |
 | `Oaks.Taxonomy` | Higher taxa (subgenus to complex); renaming a taxon renames it on species | `taxa` |
 | `Oaks.Articles` | Articles and guides | `articles` |
-| `Oaks.Images` (+ workers) | Species photos from iNat: durable import, caption, order, delete, merge, cleanup | `images`, `image_import_attempts`, `image_cleanups` |
+| `Oaks.Images` (+ workers) | Species photos from iNat: durable import, caption, order, delete, cleanup | `images`, `image_import_attempts`, `image_cleanups` |
 | `Oaks.Import` (+ `Body`, `Runner`, `Tables`) | The bulk import behind the private API: dry run, then apply in one transaction | `applied_imports`; `import_metadata` (`Import.Metadata`, left from the port and unused) |
 | `Oaks.Analytics` (+ `Rollup`) | Anonymized page views and their daily rollups | `page_views`, `daily_stats`, `daily_page_stats`, `daily_referrer_stats`, `daily_error_stats` |
 | `Oaks.Search` | Unified search across species, taxa and sources | none |
@@ -127,7 +127,7 @@ Species and Sources depend on each other (associations both ways, and each queri
 - **CSP**: `script-src 'self'` (no inline scripts or handlers), `style-src 'self' 'unsafe-inline'`, `img-src 'self' data: https:`. The API docs page has no CSP.
 - **Authentication**: `OaksWeb.UserAuth` sets `@current_scope` on every request and LiveView (nil when logged out), with a remember-me cookie and a 14-day session token renewed after 7 days. Login is password then TOTP or a recovery code, rate limited in memory per IP and per account.
 - **Authorization**: every LiveView, public and editor, is in one live session. Editor LiveViews check the scope in mount or handle_params and redirect when logged out, and every writing `handle_event` re-checks it. The `/settings` LiveView gates itself in mount; the `/users/settings/*` pages use plug-level `require_authenticated_user` and sudo mode. Agent tokens are checked by `OaksWeb.Plugs.ApiToken` (rate limited per token and per failing IP), and routes needing a scope use `require_api_scope/2`.
-- **Pages**: public reading LiveViews (home, species list, species page, source comparison, taxonomy, articles, sources, search, about, privacy, Markdown help, analytics); editor LiveViews for species, merge, species source data, taxa, articles and sources, plus the species page's photo dialogs (LiveComponents); controllers for login, setup and settings; dev-only `/dev/log-in` and `/dev/components`, compiled only with `dev_routes`.
+- **Pages**: public reading LiveViews (home, species list, species page, source comparison, taxonomy, articles, sources, search, about, privacy, Markdown help, analytics); editor LiveViews for species, species source data, taxa, articles and sources, plus the species page's photo dialogs (LiveComponents); controllers for login, setup and settings; dev-only `/dev/log-in` and `/dev/components`, compiled only with `dev_routes`.
 - **Public API** (`/api/v1`): off the air while the Facts expansion lands, answering 410. Its code stays: GET only, OpenAPI specs declared on the controllers (`OpenApiSpex`), JSON built by the contexts' `to_map` functions. A synonym's species URL answers 301 to the accepted name.
 - **Private API** (`/api/private/v1`): `GET /token` (who am I) and `POST /import` (needs `packages:submit`). An import is two calls: a dry run returns a report and a token bound to the body's hash, the agent token and the plan; the apply must send the same bytes with that token ([docs/import.md](../import.md)).
 

@@ -60,9 +60,6 @@ defmodule OaksWeb.SpeciesDetailLive do
        delete_photo_count: 0,
        show_delete_source_confirm: false,
        delete_source_target: nil,
-       show_merge_picker: false,
-       merge_search_query: "",
-       merge_search_results: [],
        photo_dialog: nil,
        photo_counts: %{},
        subscribed_species_id: nil
@@ -145,38 +142,6 @@ defmodule OaksWeb.SpeciesDetailLive do
     else
       {:noreply, socket}
     end
-  end
-
-  def handle_event("show_merge_picker", _params, socket) do
-    {:noreply,
-     assign(socket, show_merge_picker: true, merge_search_query: "", merge_search_results: [])}
-  end
-
-  def handle_event("close_merge_picker", _params, socket) do
-    {:noreply, assign(socket, show_merge_picker: false)}
-  end
-
-  def handle_event("merge_search", %{"query" => query}, socket) do
-    query = Params.string(query)
-
-    results =
-      if String.length(String.trim(query)) >= 2 do
-        Species.search_species(query, 20)
-        |> Enum.reject(&(&1.scientific_name == socket.assigns.species.scientific_name))
-      else
-        []
-      end
-
-    {:noreply, assign(socket, merge_search_query: query, merge_search_results: results)}
-  end
-
-  def handle_event("select_merge_target", %{"name" => target_name}, socket) do
-    source_name = socket.assigns.species.scientific_name
-
-    {:noreply,
-     socket
-     |> assign(show_merge_picker: false)
-     |> push_navigate(to: ~p"/species/#{source_name}/merge/#{target_name}")}
   end
 
   def handle_event("request_delete_source", %{"id" => id_str}, socket) do
@@ -399,13 +364,6 @@ defmodule OaksWeb.SpeciesDetailLive do
         references={@delete_references}
       />
 
-      <.merge_picker_dialog
-        :if={@show_merge_picker}
-        species={@species}
-        query={@merge_search_query}
-        results={@merge_search_results}
-      />
-
       <.delete_source_confirm_modal
         :if={@show_delete_source_confirm && @delete_source_target}
         species={@species}
@@ -502,7 +460,6 @@ defmodule OaksWeb.SpeciesDetailLive do
           >
             Manage photos…
           </:item>
-          <:item click="show_merge_picker" id="merge-species-btn">Make synonym of…</:item>
           <:item click="request_delete" id="delete-species-btn">
             Delete {String.downcase(kind_word(@species))}
           </:item>
@@ -648,72 +605,6 @@ defmodule OaksWeb.SpeciesDetailLive do
           Delete source data
         </.button>
       </:actions>
-    </.modal>
-    """
-  end
-
-  # -- Merge picker dialog --
-
-  attr :species, :any, required: true
-  attr :query, :string, required: true
-  attr :results, :list, required: true
-
-  defp merge_picker_dialog(assigns) do
-    ~H"""
-    <.modal id="merge-picker-dialog" show on_cancel={JS.push("close_merge_picker")}>
-      <:title>Make synonym of…</:title>
-      <p>
-        Choose the species
-        <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} weight="regular" />
-        will become a synonym of. You'll see the merge before anything changes.
-      </p>
-
-      <form id="merge-search-form" phx-change="merge_search" phx-submit="merge_search">
-        <input
-          type="text"
-          name="query"
-          value={@query}
-          placeholder="Search for a species"
-          aria-label="Search for a species"
-          autocomplete="off"
-          phx-debounce="300"
-          class="oc-input"
-        />
-      </form>
-
-      <div class="h-[min(300px,40dvh)] overflow-y-auto">
-        <p :if={String.length(String.trim(@query)) < 2} class="oc-empty py-s4">
-          Type at least 2 letters of a name.
-        </p>
-
-        <p
-          :if={String.length(String.trim(@query)) >= 2 && @results == []}
-          class="oc-empty py-s4"
-        >
-          No species found matching “{@query}”.
-        </p>
-
-        <ul :if={@results != []} class="merge-results">
-          <li :for={species <- @results}>
-            <button
-              type="button"
-              phx-click="select_merge_target"
-              phx-value-name={species.scientific_name}
-              class="merge-target-option"
-            >
-              <.sci_name
-                name={species.scientific_name}
-                hybrid={species.is_hybrid}
-                author={species.author}
-                size="title"
-              />
-              <span :if={species.section} class="merge-target-meta">
-                <.sci_name name={species.section} rank="sect." size="meta" />
-              </span>
-            </button>
-          </li>
-        </ul>
-      </div>
     </.modal>
     """
   end

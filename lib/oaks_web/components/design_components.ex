@@ -209,15 +209,15 @@ defmodule OaksWeb.DesignComponents do
     * `abbreviate` (Q.): after the full name has been given on the same
       page or passage; in lists of names under a taxon or record named
       above them (a species' parents, hybrids, relatives and varieties, a
-      source's species, the references on the merge page); in comparison
+      source's species); in comparison
       column heads; for the current species in the taxonomy band; and for
       a complex, which is named for its species (Q. coccinea); and for a
       species' synonyms (`Q. candida Steud.`, a synonym in another genus
       in full: `Cyclobalanopsis glauca (Thunb.) Oerst.`), on the species
-      page and the merge page's synonyms to add.
+      page.
     * `genus={nil}` (none): names above species (subgenus, section,
       subsection); a hybrid's other parent after "with"; a stored value
-      shown as entered (the merge page's field values).
+      shown as entered.
 
   A name in a link underlines its name words, not its author, on hover.
 
