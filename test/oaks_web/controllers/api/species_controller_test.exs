@@ -3,31 +3,34 @@ defmodule OaksWeb.API.SpeciesControllerTest do
 
   import Oaks.SourcesFixtures
   import Oaks.SpeciesFixtures
+  import Oaks.TaxonomyFixtures
 
   alias Oaks.Species
 
   setup do
     n = System.unique_integer([:positive])
-    subgenus = "Subgenus#{n}"
+    subgenus = taxon_fixture(name: "Subgenus#{n}", level: "subgenus")
+    section = taxon_fixture(name: "Section#{n}", level: "section", parent_id: subgenus.id)
 
     alba =
       species_fixture(
         scientific_name: "alba#{n}",
         author: "L. 1753",
-        subgenus: subgenus,
-        hybrids: ["×bebbiana#{n}"],
+        taxon_id: section.id,
         synonyms: ["alba var. repanda"]
       )
+
+    macrocarpa = species_fixture(scientific_name: "macrocarpa#{n}")
 
     bebbiana =
       hybrid_fixture(
         scientific_name: "×bebbiana#{n}",
-        parent1: alba.scientific_name,
-        parent2: "macrocarpa",
-        subgenus: subgenus
+        parent1_id: alba.id,
+        parent2_id: macrocarpa.id,
+        taxon_id: section.id
       )
 
-    rubra = species_fixture(scientific_name: "rubra#{n}", subgenus: subgenus)
+    rubra = species_fixture(scientific_name: "rubra#{n}", taxon_id: subgenus.id)
 
     species_source_fixture(alba, source_fixture(name: "Oaks of the World #{n}"),
       is_preferred: true,
@@ -37,7 +40,14 @@ defmodule OaksWeb.API.SpeciesControllerTest do
 
     species_source_fixture(alba, source_fixture())
 
-    %{subgenus: subgenus, alba: alba, bebbiana: bebbiana, rubra: rubra, n: n}
+    %{
+      subgenus: subgenus.name,
+      alba: alba,
+      bebbiana: bebbiana,
+      macrocarpa: macrocarpa,
+      rubra: rubra,
+      n: n
+    }
   end
 
   describe "GET /api/v1/species" do
@@ -59,8 +69,9 @@ defmodule OaksWeb.API.SpeciesControllerTest do
       assert Map.has_key?(species, "id")
       assert Map.has_key?(species, "scientific_name")
       assert Map.has_key?(species, "is_hybrid")
-      assert Map.has_key?(species, "subgenus")
-      assert Map.has_key?(species, "section")
+      assert Map.has_key?(species, "taxon_id")
+      assert Map.has_key?(species, "parent1_id")
+      assert Map.has_key?(species, "parent2_id")
     end
 
     test "respects limit parameter", %{conn: conn} do
@@ -77,11 +88,17 @@ defmodule OaksWeb.API.SpeciesControllerTest do
       assert count == 3
     end
 
-    test "filters by subgenus", %{conn: conn, subgenus: subgenus} do
+    test "filters by subgenus, including the species in its child taxa", %{
+      conn: conn,
+      subgenus: subgenus,
+      alba: alba,
+      bebbiana: bebbiana,
+      rubra: rubra
+    } do
       conn = get(conn, "/api/v1/species?subgenus=#{subgenus}")
       %{"data" => data, "count" => count} = json_response(conn, 200)
       assert count == 3
-      assert Enum.all?(data, fn s -> s["subgenus"] == subgenus end)
+      assert Enum.sort(Enum.map(data, & &1["id"])) == Enum.sort([alba.id, bebbiana.id, rubra.id])
     end
 
     test "filters by hybrid status", %{conn: conn, bebbiana: bebbiana} do
@@ -94,13 +111,13 @@ defmodule OaksWeb.API.SpeciesControllerTest do
   end
 
   describe "GET /api/v1/species/:name" do
-    test "returns a species by name", %{conn: conn, alba: alba, subgenus: subgenus} do
+    test "returns a species by name", %{conn: conn, alba: alba} do
       conn = get(conn, ~p"/api/v1/species/#{alba.scientific_name}")
       species = json_response(conn, 200)
       assert species["scientific_name"] == alba.scientific_name
       assert species["author"] == "L. 1753"
       assert species["is_hybrid"] == false
-      assert species["subgenus"] == subgenus
+      assert species["taxon_id"] == alba.taxon_id
     end
 
     test "returns 404 for unknown species", %{conn: conn} do
@@ -117,20 +134,25 @@ defmodule OaksWeb.API.SpeciesControllerTest do
       assert get_resp_header(conn, "location") == ["/api/v1/species/#{name}"]
     end
 
-    test "returns hybrid species", %{conn: conn, alba: alba, bebbiana: bebbiana} do
+    test "returns hybrid species", %{
+      conn: conn,
+      alba: alba,
+      bebbiana: bebbiana,
+      macrocarpa: macrocarpa
+    } do
       conn = get(conn, ~p"/api/v1/species/#{bebbiana.scientific_name}")
       species = json_response(conn, 200)
       assert species["scientific_name"] == bebbiana.scientific_name
       assert species["is_hybrid"] == true
-      assert species["parent1"] == alba.scientific_name
-      assert species["parent2"] == "macrocarpa"
+      assert species["parent1_id"] == alba.id
+      assert species["parent2_id"] == macrocarpa.id
     end
 
     test "JSON array fields are returned as arrays", %{conn: conn, alba: alba} do
       conn = get(conn, ~p"/api/v1/species/#{alba.scientific_name}")
       species = json_response(conn, 200)
-      assert is_list(species["hybrids"])
       assert is_list(species["synonyms"])
+      assert is_list(species["external_links"])
     end
   end
 

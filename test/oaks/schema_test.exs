@@ -16,28 +16,30 @@ defmodule Oaks.SchemaTest do
   alias Oaks.Sources.Source
   alias Oaks.Sources.SpeciesSource
   alias Oaks.Species.Species
+  alias Oaks.Taxonomy
   alias Oaks.Taxonomy.Taxon
 
   describe "Species schema" do
     test "reads back a species by scientific name" do
-      created =
-        species_fixture(author: "L. 1753", subgenus: "Quercus", section: "Quercus")
+      section = taxon_fixture(level: "section", parent_id: taxon_fixture(level: "subgenus").id)
+      created = species_fixture(author: "L. 1753", taxon_id: section.id)
 
       loaded = Repo.get_by!(Species, scientific_name: created.scientific_name)
       assert loaded.id == created.id
       assert loaded.author == "L. 1753"
       assert loaded.is_hybrid == false
-      assert loaded.subgenus == "Quercus"
-      assert loaded.section == "Quercus"
+      assert loaded.taxon_id == section.id
     end
 
     test "reads back a hybrid with its parents" do
-      created = hybrid_fixture(parent1: "alba", parent2: "macrocarpa")
+      alba = species_fixture()
+      macrocarpa = species_fixture()
+      created = hybrid_fixture(parent1_id: alba.id, parent2_id: macrocarpa.id)
 
-      hybrid = Repo.get!(Species, created.id)
+      hybrid = Repo.get!(Species, created.id) |> Repo.preload([:parent1, :parent2])
       assert hybrid.is_hybrid == true
-      assert hybrid.parent1 == "alba"
-      assert hybrid.parent2 == "macrocarpa"
+      assert hybrid.parent1.scientific_name == alba.scientific_name
+      assert hybrid.parent2.scientific_name == macrocarpa.scientific_name
     end
 
     test "preloads species_sources association" do
@@ -57,13 +59,13 @@ defmodule Oaks.SchemaTest do
       subgenus = Repo.get_by!(Taxon, name: created.name, level: "subgenus")
       assert subgenus.id == created.id
       assert subgenus.author == "(L.) Oerst."
-      assert is_nil(subgenus.parent)
+      assert subgenus.parent_id == Taxonomy.get_genus().id
     end
 
     test "reads back a child taxon with its parent" do
       %{subgenus: subgenus, section: section} = taxon_tree_fixture()
 
-      assert Repo.get_by!(Taxon, name: section.name, level: "section").parent == subgenus.name
+      assert Repo.get_by!(Taxon, name: section.name, level: "section").parent_id == subgenus.id
     end
   end
 

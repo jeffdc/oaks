@@ -12,21 +12,17 @@ defmodule OaksWeb.SpeciesFormLive do
   alias Oaks.Species.Species, as: SpeciesSchema
   alias Oaks.Taxonomy
   alias OaksWeb.SpeciesName
+  alias OaksWeb.TaxonomyOptions
 
   @impl true
   def mount(_params, _session, socket) do
     # Auth check happens in handle_params
-    subgenera = taxonomy_names("subgenus")
-    sections = taxonomy_names("section")
-    subsections = taxonomy_names("subsection")
-    complexes = taxonomy_names("complex")
+    genus = Taxonomy.get_genus()
 
     {:ok,
      assign(socket,
-       subgenera: subgenera,
-       sections: sections,
-       subsections: subsections,
-       complexes: complexes,
+       placements: TaxonomyOptions.all(),
+       genus_id: genus && genus.id,
        species: nil,
        form: nil
      )}
@@ -46,7 +42,8 @@ defmodule OaksWeb.SpeciesFormLive do
 
   defp apply_action(socket, :new, _params) do
     species = %SpeciesSchema{}
-    changeset = Species.change_species(species)
+    attrs = if socket.assigns.genus_id, do: %{taxon_id: socket.assigns.genus_id}, else: %{}
+    changeset = Species.change_species(species, attrs)
 
     socket
     |> assign(
@@ -57,7 +54,7 @@ defmodule OaksWeb.SpeciesFormLive do
   end
 
   defp apply_action(socket, :edit, %{"name" => name}) do
-    case Species.get_species_by_name(name) do
+    case Species.get_species_with_parents(name) do
       nil ->
         socket
         |> put_flash(:error, "Species not found.")
@@ -162,7 +159,7 @@ defmodule OaksWeb.SpeciesFormLive do
                     phx-debounce="300"
                   />
                   <p :if={@live_action == :edit} class="oc-hint species-form-note">
-                    Renaming updates every species that mentions this name and keeps the old name as a synonym.
+                    Renaming keeps the old name as a synonym.
                   </p>
                 </div>
                 <div>
@@ -189,46 +186,17 @@ defmodule OaksWeb.SpeciesFormLive do
               </div>
             </section>
 
-            <%!-- Taxonomy fields --%>
+            <%!-- Placement --%>
             <section>
               <.section_heading>Taxonomy</.section_heading>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <.input
-                    field={@form[:subgenus]}
-                    type="select"
-                    label="Subgenus"
-                    options={taxon_options(@subgenera, @form[:subgenus].value)}
-                    prompt="Select subgenus..."
-                  />
-                </div>
-                <div>
-                  <.input
-                    field={@form[:section]}
-                    type="select"
-                    label="Section"
-                    options={taxon_options(@sections, @form[:section].value)}
-                    prompt="Select section..."
-                  />
-                </div>
-                <div>
-                  <.input
-                    field={@form[:subsection]}
-                    type="select"
-                    label="Subsection"
-                    options={taxon_options(@subsections, @form[:subsection].value)}
-                    prompt="Select subsection..."
-                  />
-                </div>
-                <div>
-                  <.input
-                    field={@form[:complex]}
-                    type="select"
-                    label="Complex"
-                    options={taxon_options(@complexes, @form[:complex].value)}
-                    prompt="Select complex..."
-                  />
-                </div>
+              <div class="grid grid-cols-1 gap-4">
+                <.input
+                  field={@form[:taxon_id]}
+                  type="select"
+                  label="Placement"
+                  options={@placements}
+                  prompt="Select placement..."
+                />
               </div>
             </section>
 
@@ -241,7 +209,7 @@ defmodule OaksWeb.SpeciesFormLive do
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <.input
-                    field={@form[:parent1]}
+                    field={@form[:parent1_name]}
                     type="text"
                     label="Parent 1"
                     placeholder="e.g. alba"
@@ -250,7 +218,7 @@ defmodule OaksWeb.SpeciesFormLive do
                 </div>
                 <div>
                   <.input
-                    field={@form[:parent2]}
+                    field={@form[:parent2_name]}
                     type="text"
                     label="Parent 2"
                     placeholder="e.g. macrocarpa"
@@ -267,27 +235,6 @@ defmodule OaksWeb.SpeciesFormLive do
                 Enter names separated by commas. JSON arrays are also accepted.
               </p>
               <div class="species-form-stack">
-                <.input
-                  field={@form[:hybrids]}
-                  type="text"
-                  label="Known Hybrids"
-                  placeholder={~s(e.g. ["×bebbiana","×jackiana"])}
-                  phx-debounce="300"
-                />
-                <.input
-                  field={@form[:closely_related_to]}
-                  type="text"
-                  label="Closely Related To"
-                  placeholder={~s(e.g. ["stellata","macrocarpa"])}
-                  phx-debounce="300"
-                />
-                <.input
-                  field={@form[:subspecies_varieties]}
-                  type="text"
-                  label="Subspecies & Varieties"
-                  placeholder={~s(e.g. ["alba var. latiloba"])}
-                  phx-debounce="300"
-                />
                 <.input
                   field={@form[:synonyms]}
                   type="text"
@@ -318,22 +265,6 @@ defmodule OaksWeb.SpeciesFormLive do
 
   defp cancel_path(:edit, species) do
     ~p"/species/#{species.scientific_name}"
-  end
-
-  # Keeps a stored value selectable when it has no taxa row; otherwise the
-  # select falls back to the prompt and saving silently clears the field.
-  defp taxon_options(names, current) when is_binary(current) and current != "" do
-    if current in names, do: names, else: [{"#{current} (not in taxonomy)", current} | names]
-  end
-
-  defp taxon_options(names, _current), do: names
-
-  defp taxonomy_names(level) do
-    level
-    |> Taxonomy.list_taxa_by_level()
-    |> Enum.map(& &1.name)
-    |> Enum.uniq()
-    |> Enum.sort()
   end
 
   defp conservation_options do

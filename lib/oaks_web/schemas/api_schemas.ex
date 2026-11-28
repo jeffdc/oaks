@@ -37,15 +37,9 @@ defmodule OaksWeb.Schemas do
         author: %Schema{type: :string, nullable: true},
         is_hybrid: %Schema{type: :boolean},
         conservation_status: %Schema{type: :string, nullable: true},
-        subgenus: %Schema{type: :string, nullable: true},
-        section: %Schema{type: :string, nullable: true},
-        subsection: %Schema{type: :string, nullable: true},
-        complex: %Schema{type: :string, nullable: true},
-        parent1: %Schema{type: :string, nullable: true},
-        parent2: %Schema{type: :string, nullable: true},
-        hybrids: %Schema{type: :array, items: %Schema{type: :string}},
-        closely_related_to: %Schema{type: :array, items: %Schema{type: :string}},
-        subspecies_varieties: %Schema{type: :array, items: %Schema{type: :string}},
+        taxon_id: %Schema{type: :integer, nullable: true},
+        parent1_id: %Schema{type: :integer, nullable: true},
+        parent2_id: %Schema{type: :integer, nullable: true},
         synonyms: %Schema{type: :array, items: %Schema{type: :string}},
         external_links: %Schema{type: :array, items: %Schema{type: :string}}
       },
@@ -97,15 +91,9 @@ defmodule OaksWeb.Schemas do
         author: %Schema{type: :string, nullable: true},
         is_hybrid: %Schema{type: :boolean},
         conservation_status: %Schema{type: :string, nullable: true},
-        subgenus: %Schema{type: :string, nullable: true},
-        section: %Schema{type: :string, nullable: true},
-        subsection: %Schema{type: :string, nullable: true},
-        complex: %Schema{type: :string, nullable: true},
-        parent1: %Schema{type: :string, nullable: true},
-        parent2: %Schema{type: :string, nullable: true},
-        hybrids: %Schema{type: :array, items: %Schema{type: :string}},
-        closely_related_to: %Schema{type: :array, items: %Schema{type: :string}},
-        subspecies_varieties: %Schema{type: :array, items: %Schema{type: :string}},
+        taxon_id: %Schema{type: :integer, nullable: true},
+        parent1_id: %Schema{type: :integer, nullable: true},
+        parent2_id: %Schema{type: :integer, nullable: true},
         synonyms: %Schema{type: :array, items: %Schema{type: :string}},
         external_links: %Schema{type: :array, items: %Schema{type: :string}},
         sources: %Schema{
@@ -142,16 +130,16 @@ defmodule OaksWeb.Schemas do
 
     OpenApiSpex.schema(%{
       title: "Taxon",
-      description: "A taxonomic rank (subgenus, section, subsection, complex)",
+      description: "A taxonomic rank (genus, subgenus, section, subsection, complex)",
       type: :object,
       properties: %{
         id: %Schema{type: :integer},
         name: %Schema{type: :string},
         level: %Schema{
           type: :string,
-          enum: ["subgenus", "section", "subsection", "complex"]
+          enum: ["genus", "subgenus", "section", "subsection", "complex"]
         },
-        parent: %Schema{type: :string, nullable: true},
+        parent_id: %Schema{type: :integer, nullable: true},
         author: %Schema{type: :string, nullable: true},
         content: %Schema{type: :string, nullable: true},
         content_updated_at: %Schema{type: :string, nullable: true},

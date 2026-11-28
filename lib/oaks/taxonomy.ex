@@ -2,8 +2,9 @@ defmodule Oaks.Taxonomy do
   @moduledoc """
   The Taxonomy context.
 
-  Provides functions for querying the taxonomic hierarchy
-  (subgenus, section, subsection, complex).
+  Provides functions for querying and managing the taxonomic hierarchy
+  (genus, subgenus, section, subsection, complex). A taxon's `parent_id`
+  points at the rank above it; only the genus (*Quercus*) has no parent.
   """
 
   import Ecto.Query
@@ -12,20 +13,9 @@ defmodule Oaks.Taxonomy do
   alias Oaks.Species.Species, as: SpeciesSchema
   alias Oaks.Taxonomy.Taxon
 
-  @valid_levels ~w(subgenus section subsection complex)
-
-  @level_fields %{
-    "subgenus" => :subgenus,
-    "section" => :section,
-    "subsection" => :subsection,
-    "complex" => :complex
-  }
-
-  @species_count_sql "(SELECT COUNT(*) FROM species sp WHERE " <>
-                       "(? = 'subgenus' AND sp.subgenus = ?) OR " <>
-                       "(? = 'section' AND sp.section = ?) OR " <>
-                       "(? = 'subsection' AND sp.subsection = ?) OR " <>
-                       "(? = 'complex' AND sp.complex = ?))"
+  @levels ~w(genus subgenus section subsection complex)
+  @valid_levels @levels
+  @genus_level "genus"
 
   # -- List --
 
@@ -34,13 +24,13 @@ defmodule Oaks.Taxonomy do
 
   ## Options
     * `"level"` - filter by taxonomic level
-    * `"parent"` - filter by parent taxon name
+    * `"parent_id"` - filter by the parent taxon's id
   """
   @spec list_taxa(map()) :: [Taxon.t()]
   def list_taxa(params \\ %{}) do
     Taxon
     |> maybe_filter_level(params["level"])
-    |> maybe_filter_parent(params["parent"])
+    |> maybe_filter_parent(params["parent_id"])
     |> order_by([t], asc: t.level, asc: t.name)
     |> Repo.all()
   end
@@ -54,42 +44,74 @@ defmodule Oaks.Taxonomy do
   end
 
   @doc """
-  Returns taxa with species counts, optionally filtered by level and/or parent.
+  Returns every taxon in tree order (the genus, then each child's subtree,
+  siblings by name), each with its ancestors, outermost first.
+  """
+  @spec list_taxa_with_ancestors() :: [%{taxon: Taxon.t(), ancestors: [Taxon.t()]}]
+  def list_taxa_with_ancestors do
+    children = Taxon |> order_by(asc: :name) |> Repo.all() |> Enum.group_by(& &1.parent_id)
+    roots = Map.get(children, nil, [])
 
-  Each returned taxon has its virtual `species_count` field populated
-  with the count of species matching that taxon's level and name.
+    Enum.flat_map(roots, &[%{taxon: &1, ancestors: []} | subtree(children, &1, [&1])])
+  end
+
+  defp subtree(children, parent, ancestors) do
+    children
+    |> Map.get(parent.id, [])
+    |> Enum.flat_map(fn child ->
+      [%{taxon: child, ancestors: ancestors} | subtree(children, child, ancestors ++ [child])]
+    end)
+  end
+
+  @doc """
+  Returns taxa with species counts, optionally filtered by level and/or
+  parent.
+
+  Each returned taxon's virtual `species_count` is the number of species in
+  its subtree: those placed at the taxon or at any taxon below it.
 
   ## Options
     * `"level"` - filter by taxonomic level
-    * `"parent"` - filter by parent taxon name
+    * `"parent_id"` - filter by the parent taxon's id
   """
   @spec list_taxa_with_counts(map()) :: [Taxon.t()]
   def list_taxa_with_counts(params \\ %{}) do
     Taxon
     |> maybe_filter_level(params["level"])
-    |> maybe_filter_parent(params["parent"])
+    |> maybe_filter_parent(params["parent_id"])
     |> order_by([t], asc: t.name)
+    |> Repo.all()
     |> with_species_counts()
   end
 
-  defp with_species_counts(query) do
-    from(t in query,
-      select_merge: %{
-        species_count:
-          fragment(
-            @species_count_sql,
-            t.level,
-            t.name,
-            t.level,
-            t.name,
-            t.level,
-            t.name,
-            t.level,
-            t.name
-          )
-      }
-    )
-    |> Repo.all()
+  defp with_species_counts(taxa) do
+    counts = subtree_species_counts()
+    Enum.map(taxa, &%{&1 | species_count: Map.get(counts, &1.id, 0)})
+  end
+
+  # The number of species in each taxon's subtree, from one query for the
+  # species at each taxon and one pass over the tree.
+  defp subtree_species_counts do
+    all = Repo.all(Taxon)
+    children = Enum.group_by(all, & &1.parent_id)
+
+    direct =
+      from(s in SpeciesSchema,
+        where: not is_nil(s.taxon_id),
+        group_by: s.taxon_id,
+        select: {s.taxon_id, count(s.id)}
+      )
+      |> Repo.all()
+      |> Map.new()
+
+    Map.new(all, fn taxon ->
+      {taxon.id, count_subtree(children, direct, taxon.id)}
+    end)
+  end
+
+  defp count_subtree(children, direct, id) do
+    Map.get(direct, id, 0) +
+      Enum.sum(Enum.map(Map.get(children, id, []), &count_subtree(children, direct, &1.id)))
   end
 
   # -- Get --
@@ -112,45 +134,127 @@ defmodule Oaks.Taxonomy do
     Repo.get(Taxon, id)
   end
 
+  @doc """
+  Returns the genus row (*Quercus*), the root of the taxonomy.
+  """
+  @spec get_genus() :: Taxon.t() | nil
+  def get_genus do
+    Repo.get_by(Taxon, level: @genus_level)
+  end
+
+  @doc """
+  Returns the taxa from the genus down to `taxon`, inclusive.
+  """
+  @spec ancestors(Taxon.t()) :: [Taxon.t()]
+  def ancestors(%Taxon{} = taxon) do
+    case taxon.parent_id do
+      nil -> [taxon]
+      parent_id -> ancestors(get_taxon_by_id(parent_id)) ++ [taxon]
+    end
+  end
+
+  @doc """
+  Returns the taxa from the genus down to the taxon with `id`, inclusive;
+  an empty list for nil or an unknown id.
+  """
+  @spec ancestry(integer() | nil) :: [Taxon.t()]
+  def ancestry(nil), do: []
+
+  def ancestry(id) do
+    case get_taxon_by_id(id) do
+      nil -> []
+      taxon -> ancestors(taxon)
+    end
+  end
+
+  @doc """
+  Returns the ids of `taxon` and every taxon below it.
+  """
+  @spec subtree_ids(Taxon.t()) :: [integer()]
+  def subtree_ids(%Taxon{} = taxon) do
+    [taxon.id | Enum.flat_map(children(taxon), &subtree_ids/1)]
+  end
+
+  # -- Levels --
+
+  @doc """
+  Returns every taxonomic level, outermost first.
+  """
+  @spec levels() :: [String.t()]
+  def levels, do: @levels
+
+  @doc """
+  Returns the list of valid taxonomic levels.
+  """
+  @spec valid_levels() :: [String.t()]
+  def valid_levels, do: @valid_levels
+
+  @doc """
+  Returns a level's depth in the hierarchy (the genus is 0), or nil for an
+  unknown level.
+  """
+  @spec level_rank(String.t()) :: non_neg_integer() | nil
+  def level_rank(level), do: Enum.find_index(@levels, &(&1 == level))
+
+  @doc """
+  Returns the levels ranked above `level`, outermost first.
+  """
+  @spec levels_above(String.t()) :: [String.t()]
+  def levels_above(level) do
+    case level_rank(level) do
+      nil -> []
+      rank -> Enum.take(@levels, rank)
+    end
+  end
+
   # -- Children --
 
   @doc """
   Returns child taxa of a given taxon, with species counts populated.
 
-  Subgenera contain sections, sections contain subsections and complexes
-  placed directly under them, subsections contain complexes, and complexes
-  have no children.
+  A section's children are its subsections and any complexes placed directly
+  under it; the subsections come first.
   """
   @spec get_children(Taxon.t()) :: [Taxon.t()]
   def get_children(%Taxon{} = taxon) do
     taxon
-    |> child_taxa_query()
-    |> order_by([t], desc: t.level == "subsection", asc: t.name)
+    |> children()
+    |> Enum.sort_by(&{&1.level != "subsection", &1.name})
     |> with_species_counts()
+  end
+
+  defp children(%Taxon{id: id}) do
+    Repo.all(from(t in Taxon, where: t.parent_id == ^id))
   end
 
   @doc """
   Resolves a browse path of taxon names (e.g. `["Quercus", "Quercus", "robur"]`)
-  into the taxa it names, walking from subgenus down through each taxon's
+  into the taxa it names, walking from the genus down through each taxon's
   children. Returns `:error` if any segment isn't a child of the one before.
   """
   @spec resolve_path([String.t()]) :: {:ok, [Taxon.t()]} | :error
   def resolve_path([]), do: {:ok, []}
 
-  def resolve_path([subgenus | rest]) do
-    case get_taxon("subgenus", subgenus) do
-      nil -> :error
-      taxon -> resolve_children(rest, [taxon])
+  def resolve_path([first | rest]) do
+    with %Taxon{} = genus <- get_genus(),
+         %Taxon{} = first_taxon <- child_named(genus, first) do
+      resolve_children(rest, first_taxon, [first_taxon])
+    else
+      _ -> :error
     end
   end
 
-  defp resolve_children([], resolved), do: {:ok, Enum.reverse(resolved)}
+  defp resolve_children([], _parent, resolved), do: {:ok, Enum.reverse(resolved)}
 
-  defp resolve_children([name | rest], [parent | _] = resolved) do
-    case parent |> child_taxa_query() |> where([t], t.name == ^name) |> Repo.all() do
-      [taxon | _] -> resolve_children(rest, [taxon | resolved])
-      [] -> :error
+  defp resolve_children([name | rest], parent, resolved) do
+    case child_named(parent, name) do
+      nil -> :error
+      child -> resolve_children(rest, child, [child | resolved])
     end
+  end
+
+  defp child_named(parent, name) do
+    Repo.get_by(Taxon, parent_id: parent.id, name: name)
   end
 
   # -- Species in taxon --
@@ -161,66 +265,40 @@ defmodule Oaks.Taxonomy do
 
   The path is a list of taxon names encoding the hierarchy, e.g.
   `["Quercus", "Quercus"]` for section Quercus within subgenus Quercus
-  (see `resolve_path/1`). An empty path returns species with no subgenus.
-  Unknown paths return an empty list.
+  (see `resolve_path/1`). An empty path returns the species placed directly
+  in the genus or with no taxon at all. Unknown paths return an empty list.
   """
   @spec get_species_in_taxon([String.t()]) :: [SpeciesSchema.t()]
   def get_species_in_taxon([]) do
-    from(s in SpeciesSchema,
-      where: is_nil(s.subgenus) or s.subgenus == "",
-      order_by: [asc: s.scientific_name]
-    )
-    |> Repo.all()
+    case get_genus() do
+      nil ->
+        []
+
+      genus ->
+        from(s in SpeciesSchema,
+          where: s.taxon_id == ^genus.id or is_nil(s.taxon_id),
+          order_by: [asc: s.scientific_name]
+        )
+        |> Repo.all()
+    end
   end
 
   def get_species_in_taxon(path) when is_list(path) do
     case resolve_path(path) do
-      {:ok, taxa} -> species_directly_in(taxa)
+      {:ok, taxa} -> species_directly_in(List.last(taxa))
       :error -> []
     end
   end
 
-  defp species_directly_in(taxa) do
-    base = from(s in SpeciesSchema, order_by: [asc: s.scientific_name])
-    query = Enum.reduce(taxa, base, &filter_by_taxon/2)
+  defp species_directly_in(nil), do: []
 
-    taxa
-    |> List.last()
-    |> exclude_child_species(query)
+  defp species_directly_in(%Taxon{id: id}) do
+    from(s in SpeciesSchema,
+      where: s.taxon_id == ^id,
+      order_by: [asc: s.scientific_name]
+    )
     |> Repo.all()
   end
-
-  defp filter_by_taxon(taxon, query) do
-    field = Map.fetch!(@level_fields, taxon.level)
-    where(query, [s], field(s, ^field) == ^taxon.name)
-  end
-
-  # Species assigned to one of the taxon's child taxa belong to that child.
-  defp exclude_child_species(%Taxon{level: "subgenus"}, query) do
-    where(query, [s], is_nil(s.section) or s.section == "")
-  end
-
-  defp exclude_child_species(%Taxon{level: "section"} = taxon, query) do
-    direct_complexes =
-      taxon
-      |> child_taxa_query()
-      |> where([t], t.level == "complex")
-      |> select([t], t.name)
-      |> Repo.all()
-
-    where(
-      query,
-      [s],
-      (is_nil(s.subsection) or s.subsection == "") and
-        (is_nil(s.complex) or s.complex == "" or s.complex not in ^direct_complexes)
-    )
-  end
-
-  defp exclude_child_species(%Taxon{level: "subsection"}, query) do
-    where(query, [s], is_nil(s.complex) or s.complex == "")
-  end
-
-  defp exclude_child_species(%Taxon{}, query), do: query
 
   # -- Counts --
 
@@ -231,12 +309,6 @@ defmodule Oaks.Taxonomy do
   def count do
     Repo.aggregate(Taxon, :count)
   end
-
-  @doc """
-  Returns the list of valid taxonomic levels.
-  """
-  @spec valid_levels() :: [String.t()]
-  def valid_levels, do: @valid_levels
 
   # -- Changesets --
 
@@ -252,49 +324,72 @@ defmodule Oaks.Taxonomy do
 
   @doc """
   Creates a new taxon with the given attributes.
+
+  Every taxon but the genus needs a parent that ranks above it.
   """
   @spec create_taxon(map()) :: {:ok, Taxon.t()} | {:error, Ecto.Changeset.t()}
   def create_taxon(attrs) do
     %Taxon{}
     |> Taxon.changeset(attrs)
+    |> validate_parent_rank()
     |> Repo.insert()
   end
 
   @doc """
   Updates a taxon with the given attributes.
 
-  The level can't change after creation. Species and child taxa refer to a
-  taxon by name, so a rename also updates those references in the same
-  transaction. Changing the content stamps `content_updated_at` with today's date.
+  The level can't change after creation, and links to a taxon are keys, so a
+  rename changes only this row. Changing the content stamps
+  `content_updated_at` with today's date.
   """
   @spec update_taxon(Taxon.t(), map()) :: {:ok, Taxon.t()} | {:error, Ecto.Changeset.t()}
   def update_taxon(%Taxon{} = taxon, attrs) do
-    changeset =
-      taxon
-      |> Taxon.changeset(Map.drop(attrs, ["level", :level]))
-      |> stamp_content_updated()
+    taxon
+    |> Taxon.changeset(Map.drop(attrs, ["level", :level]))
+    |> validate_parent_rank()
+    |> stamp_content_updated()
+    |> Repo.update()
+  end
 
-    case Ecto.Changeset.fetch_change(changeset, :name) do
-      {:ok, new_name} -> rename_taxon(taxon, changeset, new_name)
-      :error -> Repo.update(changeset)
+  @doc """
+  Checks the rank rule on a taxon changeset: only the genus has no parent,
+  and every other taxon's parent ranks above it.
+
+  `Oaks.Taxonomy` applies it on create and update, and the import's taxa
+  hook applies it too.
+  """
+  @spec validate_parent_rank(Ecto.Changeset.t()) :: Ecto.Changeset.t()
+  def validate_parent_rank(changeset) do
+    level = Ecto.Changeset.get_field(changeset, :level)
+    parent_id = Ecto.Changeset.get_field(changeset, :parent_id)
+
+    cond do
+      level == @genus_level and is_nil(parent_id) ->
+        changeset
+
+      level == @genus_level ->
+        Ecto.Changeset.add_error(changeset, :parent_id, "the genus has no parent")
+
+      is_nil(parent_id) ->
+        Ecto.Changeset.add_error(changeset, :parent_id, "is required for a #{level}")
+
+      true ->
+        check_parent_rank(changeset, parent_id, level)
     end
   end
 
-  defp rename_taxon(taxon, changeset, new_name) do
-    field = Map.fetch!(@level_fields, taxon.level)
+  defp check_parent_rank(changeset, parent_id, level) do
+    case get_taxon_by_id(parent_id) do
+      nil -> Ecto.Changeset.add_error(changeset, :parent_id, "does not exist")
+      parent -> require_rank_above(changeset, parent, level)
+    end
+  end
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:taxon, changeset)
-    |> Ecto.Multi.update_all(
-      :species,
-      from(s in SpeciesSchema, where: field(s, ^field) == ^taxon.name),
-      set: [{field, new_name}]
-    )
-    |> Ecto.Multi.update_all(:children, child_taxa_query(taxon), set: [parent: new_name])
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{taxon: updated}} -> {:ok, updated}
-      {:error, :taxon, changeset, _} -> {:error, changeset}
+  defp require_rank_above(changeset, parent, level) do
+    if level_rank(parent.level) < level_rank(level) do
+      changeset
+    else
+      Ecto.Changeset.add_error(changeset, :parent_id, "must rank above #{level}")
     end
   end
 
@@ -307,16 +402,15 @@ defmodule Oaks.Taxonomy do
   end
 
   @doc """
-  Returns how many species and direct child taxa refer to the taxon.
+  Returns how many species and direct child taxa are in the taxon's subtree.
   """
   @spec taxon_usage(Taxon.t()) :: %{species: non_neg_integer(), children: non_neg_integer()}
   def taxon_usage(%Taxon{} = taxon) do
-    field = Map.fetch!(@level_fields, taxon.level)
+    ids = subtree_ids(taxon)
 
     %{
-      species:
-        Repo.aggregate(from(s in SpeciesSchema, where: field(s, ^field) == ^taxon.name), :count),
-      children: Repo.aggregate(child_taxa_query(taxon), :count)
+      species: Repo.aggregate(from(s in SpeciesSchema, where: s.taxon_id in ^ids), :count),
+      children: Repo.aggregate(from(t in Taxon, where: t.parent_id == ^taxon.id), :count)
     }
   end
 
@@ -341,29 +435,6 @@ defmodule Oaks.Taxonomy do
     end
   end
 
-  # Direct children of a taxon. Children store only the parent's name, so the
-  # parent's level is implied by the child's level. A complex can sit directly
-  # under a section; when a subsection shares the section's name, complexes
-  # with that parent name belong to the subsection.
-  defp child_taxa_query(%Taxon{level: "subgenus", name: name}) do
-    from(t in Taxon, where: t.level == "section" and t.parent == ^name)
-  end
-
-  defp child_taxa_query(%Taxon{level: "section", name: name}) do
-    levels =
-      if Repo.exists?(from(t in Taxon, where: t.level == "subsection" and t.name == ^name)),
-        do: ["subsection"],
-        else: ["subsection", "complex"]
-
-    from(t in Taxon, where: t.level in ^levels and t.parent == ^name)
-  end
-
-  defp child_taxa_query(%Taxon{level: "subsection", name: name}) do
-    from(t in Taxon, where: t.level == "complex" and t.parent == ^name)
-  end
-
-  defp child_taxa_query(%Taxon{}), do: from(t in Taxon, where: false)
-
   # -- Serialization --
 
   @doc """
@@ -377,7 +448,7 @@ defmodule Oaks.Taxonomy do
       id: taxon.id,
       name: taxon.name,
       level: taxon.level,
-      parent: taxon.parent,
+      parent_id: taxon.parent_id,
       author: taxon.author,
       content: taxon.content,
       content_updated_at: taxon.content_updated_at,
@@ -400,7 +471,19 @@ defmodule Oaks.Taxonomy do
 
   defp maybe_filter_parent(query, nil), do: query
   defp maybe_filter_parent(query, ""), do: query
-  defp maybe_filter_parent(query, parent), do: where(query, [t], t.parent == ^parent)
+
+  defp maybe_filter_parent(query, parent_id) when is_integer(parent_id) do
+    where(query, [t], t.parent_id == ^parent_id)
+  end
+
+  defp maybe_filter_parent(query, parent_id) when is_binary(parent_id) do
+    case Integer.parse(parent_id) do
+      {id, ""} -> where(query, [t], t.parent_id == ^id)
+      _ -> query
+    end
+  end
+
+  defp maybe_filter_parent(query, _parent_id), do: query
 
   defp parse_json(nil), do: nil
   defp parse_json(""), do: nil

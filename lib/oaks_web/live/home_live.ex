@@ -117,10 +117,9 @@ defmodule OaksWeb.HomeLive do
 
   defp feature(socket, featured) do
     hybrids =
-      featured.hybrids
-      |> Species.parse_name_list()
-      |> Species.get_hybrids_with_parents()
-      |> Enum.map(&Map.put(&1, :other, other_parent(&1, featured.scientific_name)))
+      featured
+      |> Species.hybrids_with_other_parent()
+      |> Enum.map(&Map.put(&1, :other, other_parent(&1)))
 
     ranks =
       case Species.placement(featured) do
@@ -137,13 +136,9 @@ defmodule OaksWeb.HomeLive do
   end
 
   # A formula name ("agrifolia × parvula") already names both parents.
-  defp other_parent(%{name: hybrid} = parents, name) do
-    if OaksWeb.SpeciesName.hybrid_sign?(hybrid, true), do: other_of(parents, name)
+  defp other_parent(%{name: hybrid} = parents) do
+    if OaksWeb.SpeciesName.hybrid_sign?(hybrid, true), do: parents.other
   end
-
-  defp other_of(%{parent1: name, parent2: other}, name), do: other
-  defp other_of(%{parent1: other, parent2: name}, name), do: other
-  defp other_of(_hybrid, _name), do: nil
 
   # The joining words of a run of hybrids: "a, b and c".
   defp list_joint(index, count) when index == count - 2, do: " and"

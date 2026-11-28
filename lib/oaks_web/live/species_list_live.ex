@@ -10,19 +10,18 @@ defmodule OaksWeb.SpeciesListLive do
   use OaksWeb, :live_view
 
   alias Oaks.Species
+  alias Oaks.Taxonomy
   alias OaksWeb.Params
 
   @impl true
   def mount(_params, _session, socket) do
-    subgenera = Species.distinct_subgenera()
-    sections = Species.distinct_sections()
-
     {:ok,
      socket
      |> assign(
        page_title: "Species list",
-       subgenera: subgenera,
-       sections: sections,
+       subgenera: taxon_names("subgenus"),
+       sections: taxon_names("section"),
+       ancestry: ancestry(),
        query: "",
        subgenus: "",
        section: "",
@@ -55,7 +54,8 @@ defmodule OaksWeb.SpeciesListLive do
        subgenus: subgenus,
        section: section,
        species_count: species_count,
-       hybrid_count: hybrid_count
+       hybrid_count: hybrid_count,
+       ancestry: ancestry()
      )
      |> stream(:species, species, reset: true)}
   end
@@ -131,7 +131,12 @@ defmodule OaksWeb.SpeciesListLive do
         phx-update="stream"
         class="species-rows species-index"
       >
-        <.species_row :for={{dom_id, species} <- @streams.species} id={dom_id} species={species} />
+        <.species_row
+          :for={{dom_id, species} <- @streams.species}
+          id={dom_id}
+          species={species}
+          ancestry={@ancestry}
+        />
       </div>
     </.page>
     """
@@ -141,8 +146,15 @@ defmodule OaksWeb.SpeciesListLive do
 
   attr :id, :string, required: true
   attr :species, :any, required: true
+  attr :ancestry, :map, required: true
 
   defp species_row(assigns) do
+    assigns =
+      assign(assigns,
+        subgenus: ancestor_name(assigns.ancestry, assigns.species.taxon_id, "subgenus"),
+        section: ancestor_name(assigns.ancestry, assigns.species.taxon_id, "section")
+      )
+
     ~H"""
     <.link
       id={@id}
@@ -159,10 +171,10 @@ defmodule OaksWeb.SpeciesListLive do
       </span>
       <span class="species-row-meta">
         <span class="hidden sm:block">
-          <.sci_name :if={@species.subgenus} name={@species.subgenus} rank="subg." size="meta" />
+          <.sci_name :if={@subgenus} name={@subgenus} rank="subg." size="meta" />
         </span>
         <span class="hidden md:block">
-          <.sci_name :if={@species.section} name={@species.section} rank="sect." size="meta" />
+          <.sci_name :if={@section} name={@section} rank="sect." size="meta" />
         </span>
         <span class="species-row-status">
           <.iucn_status
@@ -177,6 +189,28 @@ defmodule OaksWeb.SpeciesListLive do
   end
 
   # -- Helpers --
+
+  defp taxon_names(level) do
+    level
+    |> Taxonomy.list_taxa_by_level()
+    |> Enum.map(& &1.name)
+    |> Enum.sort()
+  end
+
+  # Each taxon's ancestry (the genus down to itself), from the taxonomy
+  # context rather than a walk of its own.
+  defp ancestry do
+    Taxonomy.list_taxa_with_ancestors()
+    |> Map.new(fn %{taxon: taxon, ancestors: ancestors} -> {taxon.id, ancestors ++ [taxon]} end)
+  end
+
+  defp ancestor_name(_ancestry, nil, _level), do: nil
+
+  defp ancestor_name(ancestry, id, level) do
+    ancestry
+    |> Map.get(id, [])
+    |> Enum.find_value(fn taxon -> taxon.level == level && taxon.name end)
+  end
 
   defp list_path(query, subgenus, section) do
     params =

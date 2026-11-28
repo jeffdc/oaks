@@ -228,6 +228,8 @@ defmodule OaksWeb.SearchLive do
   defp search_path(""), do: ~p"/search"
   defp search_path(query), do: ~p"/search?#{%{q: query}}"
 
+  defp taxonomy_path(%{level: "genus"}), do: "/taxonomy"
+
   defp taxonomy_path(%{path: path}) when is_list(path) and path != [] do
     "/taxonomy/" <> Enum.join(path, "/")
   end

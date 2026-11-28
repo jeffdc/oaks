@@ -9,11 +9,17 @@ defmodule OaksWeb.DesignComponentsTest do
 
   describe "taxonomy_band/1" do
     defp band_ranks do
-      OaksWeb.TaxonPath.ranks([
-        %{level: "subgenus", name: "Quercus", hybrid: false},
-        %{level: "section", name: "Lobatae", hybrid: false},
-        %{level: "complex", name: "shumardii", hybrid: false}
-      ])
+      [
+        %{level: "genus", name: "Quercus", hybrid: false, path: "/taxonomy"},
+        %{level: "subgenus", name: "Quercus", hybrid: false, path: "/taxonomy/Quercus"},
+        %{level: "section", name: "Lobatae", hybrid: false, path: "/taxonomy/Quercus/Lobatae"},
+        %{
+          level: "complex",
+          name: "shumardii",
+          hybrid: false,
+          path: "/taxonomy/Quercus/Lobatae/shumardii"
+        }
+      ]
     end
 
     test "links every rank, sets rank words roman and marks the current taxon" do
@@ -61,7 +67,10 @@ defmodule OaksWeb.DesignComponentsTest do
 
     test "links a variety's species to its species page" do
       assigns = %{
-        ranks: OaksWeb.TaxonPath.ranks([%{level: "species", name: "acutissima", hybrid: false}])
+        ranks: [
+          %{level: "genus", name: "Quercus", hybrid: false, path: "/taxonomy"},
+          %{level: "species", name: "acutissima", hybrid: false, path: "/species/acutissima"}
+        ]
       }
 
       html =
@@ -332,7 +341,10 @@ defmodule OaksWeb.DesignComponentsTest do
   describe "taxonomy_band/1 inline" do
     test "is a wrapping plate with no current taxon and no pinning hook" do
       assigns = %{
-        ranks: OaksWeb.TaxonPath.ranks([%{level: "subgenus", name: "Quercus", hybrid: false}])
+        ranks: [
+          %{level: "genus", name: "Quercus", hybrid: false, path: "/taxonomy"},
+          %{level: "subgenus", name: "Quercus", hybrid: false, path: "/taxonomy/Quercus"}
+        ]
       }
 
       html =

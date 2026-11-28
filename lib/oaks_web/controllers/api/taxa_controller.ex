@@ -17,9 +17,9 @@ defmodule OaksWeb.API.TaxaController do
       level: [
         in: :query,
         type: :string,
-        description: "Filter by level (subgenus, section, subsection, complex)"
+        description: "Filter by level (genus, subgenus, section, subsection, complex)"
       ],
-      parent: [in: :query, type: :string, description: "Filter by parent taxon name"]
+      parent_id: [in: :query, type: :integer, description: "Filter by the parent taxon's id"]
     ],
     responses: [
       ok:

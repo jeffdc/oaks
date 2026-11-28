@@ -23,6 +23,7 @@ defmodule Oaks.Import.Tables do
   alias Oaks.Sources.Source
   alias Oaks.Sources.SpeciesSource
   alias Oaks.Species.Species
+  alias Oaks.Taxonomy
   alias Oaks.Taxonomy.Taxon
 
   @type action :: :create | :update
@@ -49,20 +50,20 @@ defmodule Oaks.Import.Tables do
         prepare: nil
       },
       %{
-        name: "species",
-        schema: Species,
-        changeset: &Species.changeset/2,
-        refs: %{},
-        immutable_on_update: [:scientific_name],
-        prepare: nil
-      },
-      %{
         name: "taxa",
         schema: Taxon,
         changeset: &Taxon.changeset/2,
-        refs: %{},
+        refs: %{parent_id: "taxa"},
         immutable_on_update: [:name, :level],
-        prepare: &stamp_taxon_content/2
+        prepare: &prepare_taxon/2
+      },
+      %{
+        name: "species",
+        schema: Species,
+        changeset: &Species.changeset/2,
+        refs: %{taxon_id: "taxa", parent1_id: "species", parent2_id: "species"},
+        immutable_on_update: [:scientific_name],
+        prepare: nil
       },
       %{
         name: "species_sources",
@@ -83,10 +84,17 @@ defmodule Oaks.Import.Tables do
   The fields a record of `table` may set: the schema's fields except `id`.
   """
   @spec fields(t()) :: [atom()]
-  def fields(table), do: table.schema.__schema__(:fields) -- [:id]
+  def fields(table), do: table.schema.__schema__(:query_fields) -- [:id]
 
-  # As Oaks.Taxonomy.update_taxon/2 does: an update that changes the content
-  # stamps content_updated_at with today's date.
+  # What Oaks.Taxonomy adds on top of the changeset: the rank rule on create
+  # and update, and an update that changes the content stamps
+  # content_updated_at with today's date.
+  defp prepare_taxon(changeset, action) do
+    changeset
+    |> Taxonomy.validate_parent_rank()
+    |> stamp_taxon_content(action)
+  end
+
   defp stamp_taxon_content(changeset, :update) do
     if Ecto.Changeset.changed?(changeset, :content) do
       Ecto.Changeset.put_change(changeset, :content_updated_at, Date.to_iso8601(Date.utc_today()))

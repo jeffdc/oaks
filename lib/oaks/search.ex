@@ -7,6 +7,10 @@ defmodule Oaks.Search do
   species are searched by scientific_name, author, synonyms, and
   common names (local_names via species_sources); taxa by name;
   sources by name and author.
+
+  Species and taxa carry their place in the taxonomy, read from the keys:
+  a species' subgenus and section, a taxon's species count and the path of
+  names from the subgenus down.
   """
 
   import Ecto.Query
@@ -14,17 +18,11 @@ defmodule Oaks.Search do
   alias Oaks.Repo
   alias Oaks.Sources.{Source, SpeciesSource}
   alias Oaks.Species.Species
+  alias Oaks.Taxonomy
   alias Oaks.Taxonomy.Taxon
 
   @default_limit 50
   @max_limit 500
-
-  @level_hierarchy %{
-    "complex" => "subsection",
-    "subsection" => "section",
-    "section" => "subgenus",
-    "subgenus" => nil
-  }
 
   @doc """
   Searches across species, taxa, and sources. Returns results grouped by type
@@ -144,20 +142,32 @@ defmodule Oaks.Search do
         select: s.id
       )
 
-    from(s in Species,
-      where: s.id in subquery(matching_ids),
-      order_by: [asc: s.scientific_name],
-      limit: ^limit,
-      select: %{
-        id: s.id,
-        scientific_name: s.scientific_name,
-        author: s.author,
-        is_hybrid: s.is_hybrid,
-        subgenus: s.subgenus,
-        section: s.section
-      }
-    )
-    |> Repo.all()
+    species =
+      from(s in Species,
+        where: s.id in subquery(matching_ids),
+        order_by: [asc: s.scientific_name],
+        limit: ^limit,
+        select: %{
+          id: s.id,
+          scientific_name: s.scientific_name,
+          author: s.author,
+          is_hybrid: s.is_hybrid,
+          taxon_id: s.taxon_id
+        }
+      )
+      |> Repo.all()
+
+    index = ancestry_index()
+    Enum.map(species, &put_ancestor_names(&1, index))
+  end
+
+  defp put_ancestor_names(species, index) do
+    ranks = ranks_for(species.taxon_id, index)
+
+    Map.merge(species, %{
+      subgenus: name_at(ranks, "subgenus"),
+      section: name_at(ranks, "section")
+    })
   end
 
   defp search_taxa(term, limit) do
@@ -170,15 +180,23 @@ defmodule Oaks.Search do
           id: t.id,
           name: t.name,
           level: t.level,
-          parent: t.parent,
+          parent_id: t.parent_id,
           author: t.author
         }
       )
       |> Repo.all()
 
-    taxa
-    |> add_species_counts()
-    |> add_ancestry_paths()
+    counts =
+      Taxonomy.list_taxa_with_counts()
+      |> Map.new(&{&1.id, &1.species_count})
+
+    index = ancestry_index()
+
+    Enum.map(taxa, fn taxon ->
+      taxon
+      |> Map.put(:species_count, Map.get(counts, taxon.id, 0))
+      |> Map.put(:path, Enum.map(ranks_for(taxon.id, index), & &1.name))
+    end)
   end
 
   defp search_sources(term, limit) do
@@ -200,76 +218,20 @@ defmodule Oaks.Search do
     |> Repo.all()
   end
 
-  defp add_species_counts(taxa) do
-    Enum.map(taxa, fn taxon ->
-      count = species_count_for_taxon(taxon.level, taxon.name)
-      Map.put(taxon, :species_count, count)
-    end)
+  # Each taxon's ancestry (the genus down to itself), from one taxonomy
+  # call rather than a walk of its own.
+  defp ancestry_index do
+    Taxonomy.list_taxa_with_ancestors()
+    |> Map.new(fn %{taxon: taxon, ancestors: ancestors} -> {taxon.id, ancestors ++ [taxon]} end)
   end
 
-  defp species_count_for_taxon(level, name) do
-    field_atom = level_to_species_field(level)
+  # The ranks from the subgenus down to the taxon; the genus is left out
+  # (its page is the taxonomy index).
+  defp ranks_for(nil, _index), do: []
+  defp ranks_for(id, index), do: index |> Map.get(id, []) |> Enum.reject(&(&1.level == "genus"))
 
-    if field_atom do
-      from(s in Species, where: field(s, ^field_atom) == ^name)
-      |> Repo.aggregate(:count)
-    else
-      0
-    end
-  end
-
-  defp level_to_species_field("subgenus"), do: :subgenus
-  defp level_to_species_field("section"), do: :section
-  defp level_to_species_field("subsection"), do: :subsection
-  defp level_to_species_field("complex"), do: :complex
-  defp level_to_species_field(_), do: nil
-
-  defp add_ancestry_paths(taxa) do
-    # Build lookup map of all taxa for walking parent chains
-    all_taxa =
-      from(t in Taxon, select: %{name: t.name, level: t.level, parent: t.parent})
-      |> Repo.all()
-
-    taxa_map =
-      Map.new(all_taxa, fn t -> {{t.name, t.level}, t.parent} end)
-
-    Enum.map(taxa, fn taxon ->
-      path = compute_path(taxon.name, taxon.level, taxa_map, MapSet.new())
-      Map.put(taxon, :path, path)
-    end)
-  end
-
-  @spec compute_path(String.t(), String.t(), map(), MapSet.t()) :: [String.t()]
-  @dialyzer {:no_opaque, compute_path: 4}
-  defp compute_path(name, level, taxa_map, visited) do
-    key = {name, level}
-
-    if MapSet.member?(visited, key) do
-      [name]
-    else
-      visited = MapSet.put(visited, key)
-      walk_parent(name, level, taxa_map, visited)
-    end
-  end
-
-  # A complex sits under a subsection, or directly under a section when no
-  # subsection has its parent's name (see Oaks.Taxonomy.get_children/1).
-  defp parent_level("complex", parent_name, taxa_map) do
-    if Map.has_key?(taxa_map, {parent_name, "subsection"}), do: "subsection", else: "section"
-  end
-
-  defp parent_level(level, _parent_name, _taxa_map), do: Map.get(@level_hierarchy, level)
-
-  @spec walk_parent(String.t(), String.t(), map(), MapSet.t()) :: [String.t()]
-  defp walk_parent(name, level, taxa_map, visited) do
-    parent_name = Map.get(taxa_map, {name, level})
-    parent_level = parent_level(level, parent_name, taxa_map)
-
-    if parent_name && parent_level do
-      compute_path(parent_name, parent_level, taxa_map, visited) ++ [name]
-    else
-      [name]
-    end
+  defp name_at(ranks, level) do
+    Enum.find_value(ranks, fn taxon -> taxon.level == level && taxon.name end)
   end
 
   defp sanitize_like(str) do

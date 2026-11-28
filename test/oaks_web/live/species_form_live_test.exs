@@ -7,13 +7,15 @@ defmodule OaksWeb.SpeciesFormLiveTest do
   import Phoenix.LiveViewTest
   import Oaks.AccountsFixtures
   import Oaks.SpeciesFixtures
+  import Oaks.TaxonomyFixtures
 
   alias Oaks.Species
+  alias Oaks.Taxonomy
 
   setup do
-    stellata = species_fixture()
-    alba = species_fixture(closely_related_to: [stellata.scientific_name])
-    %{alba: alba.scientific_name, stellata: stellata.scientific_name}
+    tree = taxon_tree_fixture()
+    alba = species_fixture(taxon_id: tree.section.id)
+    %{alba: alba.scientific_name, alba_species: alba, tree: tree}
   end
 
   defp authenticated_conn(conn) do
@@ -104,45 +106,63 @@ defmodule OaksWeb.SpeciesFormLiveTest do
       assert html =~ "Species updated"
     end
 
-    test "saves comma-separated relationship names as a list", %{conn: conn, alba: alba} do
-      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/#{alba}/edit")
+    test "the placement select lists every taxon in tree order and saves a key", %{
+      conn: conn,
+      alba: alba,
+      tree: tree
+    } do
+      {:ok, view, html} = conn |> authenticated_conn() |> live(~p"/species/#{alba}/edit")
+
+      assert html =~ "Genus Quercus"
+      assert html =~ "Subgenus #{tree.subgenus.name}"
+      assert html =~ "Subsection #{tree.subsection.name}"
 
       view
-      |> form("#species-form", species: %{hybrids: "×bebbiana, ×jackiana"})
+      |> form("#species-form", species: %{taxon_id: tree.subsection.id})
       |> render_submit()
 
-      assert Oaks.Species.get_species_by_name(alba).hybrids == ~s(["×bebbiana","×jackiana"])
+      assert Oaks.Species.get_species_by_name(alba).taxon_id == tree.subsection.id
     end
 
-    test "shows an error instead of saving an invalid list", %{conn: conn} = ctx do
-      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/#{ctx.alba}/edit")
+    test "a new species defaults to the genus", %{conn: conn} do
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/new")
+      genus = Taxonomy.get_genus()
+
+      assert has_element?(
+               view,
+               ~s(#species-form select[name="species[taxon_id]"] option[selected][value="#{genus.id}"])
+             )
+    end
+
+    test "an unknown parent name is a field error, not a silent blank", %{
+      conn: conn,
+      alba: alba
+    } do
+      {:ok, view, _html} = conn |> authenticated_conn() |> live(~p"/species/#{alba}/edit")
 
       html =
         view
-        |> form("#species-form", species: %{closely_related_to: "[1, 2]"})
+        |> form("#species-form", species: %{parent1_name: "nowhere at all"})
         |> render_submit()
 
-      assert html =~ "must contain only names"
-
-      assert Oaks.Species.get_species_by_name(ctx.alba).closely_related_to ==
-               Jason.encode!([ctx.stellata])
+      assert html =~ "does not match any species"
+      assert Oaks.Species.get_species_by_name(alba).parent1_id == nil
     end
 
-    test "keeps a taxonomy value that has no taxa row when saving", %{conn: conn, alba: alba} do
-      subsection = "Erythromexicanae#{System.unique_integer([:positive])}"
+    test "stores the key of a typed parent name", %{conn: conn, alba: _alba} do
+      parent = species_fixture()
+      hybrid = hybrid_fixture()
 
-      Oaks.Species.get_species_by_name(alba)
-      |> Ecto.Changeset.change(subsection: subsection)
-      |> Oaks.Repo.update!()
+      {:ok, view, _html} =
+        conn |> authenticated_conn() |> live(~p"/species/#{hybrid.scientific_name}/edit")
 
-      {:ok, view, html} = conn |> authenticated_conn() |> live(~p"/species/#{alba}/edit")
-      assert html =~ "#{subsection} (not in taxonomy)"
+      view
+      |> form("#species-form",
+        species: %{parent1_name: "  #{String.upcase(parent.scientific_name)}  "}
+      )
+      |> render_submit()
 
-      view |> form("#species-form", species: %{author: "L."}) |> render_submit()
-
-      species = Oaks.Species.get_species_by_name(alba)
-      assert species.author == "L."
-      assert species.subsection == subsection
+      assert Oaks.Species.get_species_by_name(hybrid.scientific_name).parent1_id == parent.id
     end
 
     test "redirects for nonexistent species", %{conn: conn} do

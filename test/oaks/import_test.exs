@@ -1,6 +1,8 @@
 defmodule Oaks.ImportTest do
   use Oaks.DataCase
 
+  import Oaks.TaxonomyFixtures
+
   alias Oaks.Import
   alias Oaks.Import.AppliedImport
   alias Oaks.Repo
@@ -51,10 +53,17 @@ defmodule Oaks.ImportTest do
           "url" => "https://example.org/flora"
         }
       ],
+      "taxa" => [
+        %{
+          "$ref" => "importsection",
+          "name" => "Importsection",
+          "level" => "section",
+          "parent_id" => %{"$find" => %{"level" => "genus", "name" => "Quercus"}}
+        }
+      ],
       "species" => [
         %{"$ref" => "imp", "scientific_name" => "importensis", "author" => "Tester 2026"}
       ],
-      "taxa" => [%{"name" => "Importsection", "level" => "section", "parent" => "Quercus"}],
       "species_sources" => [
         %{
           "species_id" => %{"$ref" => "imp"},
@@ -79,11 +88,12 @@ defmodule Oaks.ImportTest do
                "species_sources" => %{create: 1, update: 0, unchanged: 0}
              }
 
-      assert [source, species, taxon, species_source] = report.records
+      assert [source, taxon, species, species_source] = report.records
       assert %{table: "sources", index: 0, ref: "book", action: "create"} = source
       assert source.changes["name"] == "Import Test Flora"
-      assert species.changes == %{"scientific_name" => "importensis", "author" => "Tester 2026"}
       assert taxon.changes["level"] == "section"
+      assert taxon.changes["parent_id"] == Taxonomy.get_genus().id
+      assert species.changes == %{"scientific_name" => "importensis", "author" => "Tester 2026"}
 
       assert species_source.changes["species_id"] == %{"$ref" => "imp"}
       assert species_source.changes["source_id"] == %{"$ref" => "book"}
@@ -101,13 +111,17 @@ defmodule Oaks.ImportTest do
 
       species = Repo.get_by!(Species, scientific_name: "importensis")
       source = Repo.get_by!(Source, name: "Import Test Flora")
-      assert Repo.get_by!(Taxon, name: "Importsection", level: "section").parent == "Quercus"
+
+      assert Repo.get_by!(Taxon, name: "Importsection", level: "section").parent_id ==
+               Taxonomy.get_genus().id
 
       species_source = Repo.get_by!(SpeciesSource, species_id: species.id, source_id: source.id)
       assert species_source.bark == "Gray and scaly."
 
-      assert [%{id: source_id}, %{id: species_id}, %{id: _}, %{id: species_source_id}] =
+      assert [%{id: source_id}, %{id: taxon_id}, %{id: species_id}, %{id: species_source_id}] =
                report.records
+
+      assert taxon_id == Repo.get_by!(Taxon, name: "Importsection").id
 
       assert {source_id, species_id, species_source_id} ==
                {source.id, species.id, species_source.id}
@@ -151,7 +165,8 @@ defmodule Oaks.ImportTest do
 
   describe "updating records" do
     test "by id or $find, casting only the given fields; no change is unchanged" do
-      by_id = species!(%{scientific_name: "updateone", author: "Old", subgenus: "Quercus"})
+      section = taxon_fixture(level: "section", parent_id: Taxonomy.get_genus().id)
+      by_id = species!(%{scientific_name: "updateone", author: "Old", taxon_id: section.id})
       species!(%{scientific_name: "updatetwo", author: "Same"})
 
       body = %{
@@ -179,7 +194,7 @@ defmodule Oaks.ImportTest do
 
       updated = Repo.get!(Species, by_id.id)
       assert updated.author == "New"
-      assert updated.subgenus == "Quercus"
+      assert updated.taxon_id == section.id
     end
 
     test "a species_sources row found through its species and source" do
@@ -237,7 +252,11 @@ defmodule Oaks.ImportTest do
       species = species!(%{scientific_name: "norename"})
 
       {:ok, taxon} =
-        Taxonomy.create_taxon(%{name: "Norenamesection", level: "section", parent: "Quercus"})
+        Taxonomy.create_taxon(%{
+          name: "Norenamesection",
+          level: "section",
+          parent_id: Taxonomy.get_genus().id
+        })
 
       body = %{
         "species" => [%{"id" => species.id, "scientific_name" => "renamed"}],
@@ -245,9 +264,9 @@ defmodule Oaks.ImportTest do
       }
 
       assert [
-               %{table: "species", field: "scientific_name", message: message},
                %{table: "taxa", field: "level"},
-               %{table: "taxa", field: "name"}
+               %{table: "taxa", field: "name"},
+               %{table: "species", field: "scientific_name", message: message}
              ] = errors(body)
 
       assert message =~ "rename it in the app"
@@ -258,7 +277,7 @@ defmodule Oaks.ImportTest do
         Taxonomy.create_taxon(%{
           name: "Stampsection",
           level: "section",
-          parent: "Quercus",
+          parent_id: Taxonomy.get_genus().id,
           content: "Old text."
         })
 
@@ -319,16 +338,58 @@ defmodule Oaks.ImportTest do
     test "list fields take a comma list or a JSON array string" do
       body = %{
         "species" => [
-          %{"scientific_name" => "listone", "hybrids" => "×a, ×b"},
+          %{"scientific_name" => "listone", "synonyms" => "×a, ×b"},
           %{"scientific_name" => "listtwo", "synonyms" => ~s([{"name": "old name"}])}
         ]
       }
 
       apply!(body)
-      assert Repo.get_by!(Species, scientific_name: "listone").hybrids == ~s(["×a","×b"])
+      assert Repo.get_by!(Species, scientific_name: "listone").synonyms == ~s(["×a","×b"])
 
       assert Repo.get_by!(Species, scientific_name: "listtwo").synonyms ==
                ~s([{"name":"old name"}])
+    end
+  end
+
+  describe "keys" do
+    test "sets a species' taxon and parents by $find" do
+      section = taxon_fixture(level: "section", parent_id: Taxonomy.get_genus().id)
+      parent1 = species!(%{scientific_name: "keyparentone"})
+      parent2 = species!(%{scientific_name: "keyparenttwo"})
+
+      body = %{
+        "species" => [
+          %{
+            "scientific_name" => "× importkey",
+            "is_hybrid" => true,
+            "taxon_id" => %{"$find" => %{"level" => "section", "name" => section.name}},
+            "parent1_id" => %{"$find" => %{"scientific_name" => parent1.scientific_name}},
+            "parent2_id" => %{"$find" => %{"scientific_name" => parent2.scientific_name}}
+          }
+        ]
+      }
+
+      apply!(body)
+
+      hybrid = Repo.get_by!(Species, scientific_name: "× importkey")
+      assert hybrid.taxon_id == section.id
+      assert hybrid.parent1_id == parent1.id
+      assert hybrid.parent2_id == parent2.id
+    end
+
+    test "a taxon's parent must rank above it" do
+      subgenus = taxon_fixture(level: "subgenus")
+
+      body = %{
+        "taxa" => [
+          %{"name" => "Badparent", "level" => "subgenus", "parent_id" => subgenus.id}
+        ]
+      }
+
+      assert [%{table: "taxa", index: 0, field: "parent_id", message: message}] =
+               errors(body)
+
+      assert message =~ "must rank above subgenus"
     end
   end
 

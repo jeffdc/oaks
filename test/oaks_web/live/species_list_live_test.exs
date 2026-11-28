@@ -6,6 +6,7 @@ defmodule OaksWeb.SpeciesListLiveTest do
 
   import Phoenix.LiveViewTest
   import Oaks.SpeciesFixtures
+  import Oaks.TaxonomyFixtures
 
   alias Oaks.Species
 
@@ -13,28 +14,27 @@ defmodule OaksWeb.SpeciesListLiveTest do
   # (section ls) holds rubra and velutina.
   setup do
     n = System.unique_integer([:positive])
-    q = "Quercus#{n}"
-    qs = "QuercusSection#{n}"
-    l = "Lobatae#{n}"
-    ls = "LobataeSection#{n}"
+    q = taxon_fixture(name: "Quercus#{n}", level: "subgenus")
+    qs = taxon_fixture(name: "QuercusSection#{n}", level: "section", parent_id: q.id)
+    l = taxon_fixture(name: "Lobatae#{n}", level: "subgenus")
+    ls = taxon_fixture(name: "LobataeSection#{n}", level: "section", parent_id: l.id)
 
     %{
       n: n,
-      q: q,
-      qs: qs,
-      l: l,
-      ls: ls,
+      q: q.name,
+      qs: qs.name,
+      l: l.name,
+      ls: ls.name,
       alba:
         species_fixture(
           scientific_name: "alba#{n}",
-          subgenus: q,
-          section: qs,
+          taxon_id: qs.id,
           conservation_status: "LC"
         ),
-      stellata: species_fixture(scientific_name: "stellata#{n}", subgenus: q, section: qs),
-      bebbiana: hybrid_fixture(scientific_name: "×bebbiana#{n}", subgenus: q, section: qs),
-      rubra: species_fixture(scientific_name: "rubra#{n}", subgenus: l, section: ls),
-      velutina: species_fixture(scientific_name: "velutina#{n}", subgenus: l, section: ls)
+      stellata: species_fixture(scientific_name: "stellata#{n}", taxon_id: qs.id),
+      bebbiana: hybrid_fixture(scientific_name: "×bebbiana#{n}", taxon_id: qs.id),
+      rubra: species_fixture(scientific_name: "rubra#{n}", taxon_id: ls.id),
+      velutina: species_fixture(scientific_name: "velutina#{n}", taxon_id: ls.id)
     }
   end
 

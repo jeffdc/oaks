@@ -12,7 +12,8 @@ defmodule OaksWeb.API.SpeciesController do
 
   operation(:index,
     summary: "List species",
-    description: "Returns a paginated list of species with optional filters.",
+    description:
+      "Returns a paginated list of species with optional filters. Taxonomy filters include every taxon below the named one.",
     parameters: [
       limit: [in: :query, type: :integer, description: "Max results (default 50, max 500)"],
       offset: [in: :query, type: :integer, description: "Number of results to skip"],

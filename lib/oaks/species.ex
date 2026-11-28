@@ -3,7 +3,10 @@ defmodule Oaks.Species do
   The Species context.
 
   Provides functions for querying and managing species records,
-  including their relationships to sources, taxonomy, and hybrids.
+  including their relationships to sources, taxonomy, and hybrids. Links are
+  keys: a species points at its lowest taxon (`taxon_id`) and, when it is a
+  hybrid, at its two parents (`parent1_id`, `parent2_id`). The ranks above
+  its taxon come from walking `taxa.parent_id`.
   """
 
   import Ecto.Query
@@ -14,6 +17,7 @@ defmodule Oaks.Species do
   alias Oaks.Sources.{Source, SpeciesSource}
   alias Oaks.Species.References
   alias Oaks.Species.Species
+  alias Oaks.Taxonomy
 
   @default_limit 50
   @max_limit 500
@@ -27,7 +31,8 @@ defmodule Oaks.Species do
 
   ## Options
     * `"search"` - case-insensitive name search
-    * `"subgenus"`, `"section"`, `"subsection"`, `"complex"` - taxonomy filters
+    * `"subgenus"`, `"section"`, `"subsection"`, `"complex"` - include the
+      species in that taxon and every taxon below it, by name
     * `"hybrid"` - filter by hybrid status
   """
   @spec list_all_species(map()) :: [Species.t()]
@@ -40,40 +45,13 @@ defmodule Oaks.Species do
   end
 
   @doc """
-  Returns distinct non-nil subgenus values, sorted alphabetically.
-  """
-  @spec distinct_subgenera() :: [String.t()]
-  def distinct_subgenera do
-    from(s in Species,
-      select: s.subgenus,
-      distinct: true,
-      where: not is_nil(s.subgenus),
-      order_by: [asc: s.subgenus]
-    )
-    |> Repo.all()
-  end
-
-  @doc """
-  Returns distinct non-nil section values, sorted alphabetically.
-  """
-  @spec distinct_sections() :: [String.t()]
-  def distinct_sections do
-    from(s in Species,
-      select: s.section,
-      distinct: true,
-      where: not is_nil(s.section),
-      order_by: [asc: s.section]
-    )
-    |> Repo.all()
-  end
-
-  @doc """
   Returns a paginated list of species with optional filters.
 
   ## Options
     * `:limit` - max results (default 50, max 500)
     * `:offset` - skip N results (default 0)
-    * `:subgenus`, `:section`, `:subsection`, `:complex` - filter by taxonomy
+    * `:subgenus`, `:section`, `:subsection`, `:complex` - include the species
+      in that taxon and every taxon below it, by name
     * `:hybrid` - filter by hybrid status (boolean)
   """
   @spec list_species(map()) :: {[Species.t()], integer()}
@@ -103,7 +81,7 @@ defmodule Oaks.Species do
   end
 
   @doc """
-  Returns a species with all source data preloaded.
+  Returns a species with all source data and its hybrid parents preloaded.
 
   Sources are ordered with preferred source first.
   """
@@ -114,7 +92,9 @@ defmodule Oaks.Species do
         nil
 
       species ->
-        Repo.preload(species,
+        Repo.preload(species, [
+          :parent1,
+          :parent2,
           species_sources:
             from(ss in SpeciesSource,
               join: s in Source,
@@ -122,7 +102,18 @@ defmodule Oaks.Species do
               order_by: [desc: ss.is_preferred],
               preload: [source: s]
             )
-        )
+        ])
+    end
+  end
+
+  @doc """
+  Returns a species with its hybrid parents preloaded, for the edit form.
+  """
+  @spec get_species_with_parents(String.t()) :: Species.t() | nil
+  def get_species_with_parents(name) do
+    case Repo.get_by(Species, scientific_name: name) do
+      nil -> nil
+      species -> Repo.preload(species, [:parent1, :parent2])
     end
   end
 
@@ -258,40 +249,16 @@ defmodule Oaks.Species do
   end
 
   @doc """
-  Given a list of hybrid scientific names, returns a list of maps with
-  `name`, `parent1`, and `parent2` for each hybrid.
-  """
-  @spec get_hybrids_with_parents([String.t()]) :: [map()]
-  def get_hybrids_with_parents([]), do: []
-
-  def get_hybrids_with_parents(hybrid_names) do
-    parent_map =
-      from(s in Species,
-        where: s.scientific_name in ^hybrid_names,
-        select: {s.scientific_name, s.parent1, s.parent2}
-      )
-      |> Repo.all()
-      |> Map.new(fn {name, p1, p2} -> {name, {p1, p2}} end)
-
-    Enum.map(hybrid_names, fn name ->
-      {p1, p2} = Map.get(parent_map, name, {nil, nil})
-      %{name: name, parent1: p1, parent2: p2}
-    end)
-  end
-
-  @ranks ~w(subgenus section subsection complex)a
-
-  @doc """
-  Returns where a species sits under the genus, outermost first: its
-  subgenus, section, subsection and complex as stored (those it has), then,
-  for a variety or subspecies, the species it belongs to. Each entry is a
+  Returns where a species sits under the genus, outermost first: its taxon and
+  the ranks above it (subgenus, section, subsection, complex as it has them),
+  then, for a variety or subspecies, the species it belongs to. Each entry is a
   map with `level`, `name` and `hybrid` (true only for a named hybrid's
   species, as in `"× kerneri montserratii"`).
 
-  A hybrid with none of the four ranks stored sits where both its parents
-  do: the ranks the two parents share, from the subgenus down, stopping at
-  the first they don't (`"× albescens"`, `ilex × pubescens`, sits in the
-  genus only). A formula hybrid's stored ranks already are those.
+  A hybrid with no taxon sits where both its parents do: the ranks the two
+  parents share, from the subgenus down, stopping at the first they don't
+  (`"× albescens"`, `ilex × pubescens`, sits in the genus only). A formula
+  hybrid's own taxon already is that.
 
   A variety is any name of more than one word that isn't a formula
   (`"acutissima kingii"`); its species is the first word, with a named
@@ -299,28 +266,33 @@ defmodule Oaks.Species do
   """
   @spec placement(Species.t()) :: [%{level: String.t(), name: String.t(), hybrid: boolean()}]
   def placement(%Species{} = species) do
-    stored = stored_ranks(species)
-    ranks = if stored == [] and species.is_hybrid, do: shared_parent_ranks(species), else: stored
+    ranks =
+      case species.taxon_id do
+        nil -> if species.is_hybrid, do: shared_parent_ranks(species), else: []
+        taxon_id -> taxon_ranks(taxon_id)
+      end
 
-    Enum.map(ranks, fn {level, name} -> %{level: to_string(level), name: name, hybrid: false} end) ++
-      parent_species(species)
+    ranks ++ parent_species(species)
   end
 
-  defp stored_ranks(species) do
-    for level <- @ranks, (name = Map.get(species, level)) not in [nil, ""], do: {level, name}
+  defp taxon_ranks(taxon_id) do
+    taxon_id
+    |> Taxonomy.ancestry()
+    |> Enum.reject(&(&1.level == "genus"))
+    |> Enum.map(&%{level: &1.level, name: &1.name, hybrid: false})
   end
 
-  defp shared_parent_ranks(%Species{parent1: p1, parent2: p2})
-       when is_binary(p1) and is_binary(p2) do
-    case Repo.all(from(s in Species, where: s.scientific_name in ^[p1, p2])) do
-      [a, b] ->
-        @ranks
-        |> Enum.map(&{&1, Map.get(a, &1), Map.get(b, &1)})
-        |> Enum.take_while(fn {_level, x, y} -> x not in [nil, ""] and x == y end)
-        |> Enum.map(fn {level, name, _} -> {level, name} end)
-
-      _ ->
-        []
+  defp shared_parent_ranks(%Species{parent1_id: p1, parent2_id: p2})
+       when is_integer(p1) and is_integer(p2) do
+    with %Species{taxon_id: t1} when not is_nil(t1) <- Repo.get(Species, p1),
+         %Species{taxon_id: t2} when not is_nil(t2) <- Repo.get(Species, p2) do
+      t1
+      |> taxon_ranks()
+      |> Enum.zip(taxon_ranks(t2))
+      |> Enum.take_while(fn {a, b} -> a.level == b.level and a.name == b.name end)
+      |> Enum.map(fn {a, _b} -> a end)
+    else
+      _ -> []
     end
   end
 
@@ -425,22 +397,22 @@ defmodule Oaks.Species do
   @doc """
   Returns a species' hybrids, each with its other parent: maps with
   `name` and `other` (the hybrid's parent that isn't this species, without
-  its genus or sign; nil when it isn't recorded), in the stored order.
+  its genus or sign; nil when it isn't recorded), ordered by name.
   """
   @spec hybrids_with_other_parent(Species.t()) :: [%{name: String.t(), other: String.t() | nil}]
   def hybrids_with_other_parent(%Species{} = species) do
-    current = bare_name(species.scientific_name)
-
-    species.hybrids
-    |> parse_name_list()
-    |> get_hybrids_with_parents()
+    species
+    |> references_to()
+    |> Repo.preload([:parent1, :parent2])
     |> Enum.map(fn hybrid ->
       other =
-        [hybrid.parent1, hybrid.parent2]
-        |> Enum.map(&bare_name/1)
-        |> Enum.find(&(&1 != "" and String.downcase(&1) != String.downcase(current)))
+        cond do
+          hybrid.parent1_id == species.id -> hybrid.parent2
+          hybrid.parent2_id == species.id -> hybrid.parent1
+          true -> nil
+        end
 
-      %{name: hybrid.name, other: other}
+      %{name: hybrid.scientific_name, other: other && bare_name(other.scientific_name)}
     end)
   end
 
@@ -455,7 +427,7 @@ defmodule Oaks.Species do
   Returns the taxa beside a species in its group, for the siblings menu of
   the taxonomy band: `%{level: level, name: name, names: names}`, where the
   group is the last entry of `placement/1` and `names` are, for a rank
-  (subgenus to complex), the species stored at it (not hybrids, varieties
+  (subgenus to complex), the species placed at it (not hybrids, varieties
   or subspecies) and, for a variety's species, that species' varieties and
   subspecies; sorted by name. The species itself is among them unless it
   is a hybrid. Nil when it has no group, or nothing else is in it.
@@ -467,13 +439,36 @@ defmodule Oaks.Species do
       nil ->
         nil
 
-      %{level: level, name: name} ->
-        names = sibling_names(level, name)
+      %{level: "species", name: name} ->
+        species_group(species, "species", name, sibling_names("species", name))
 
-        if Enum.any?(names, &(&1 != species.scientific_name)),
-          do: %{level: level, name: name, names: names},
-          else: nil
+      %{level: level, name: name} ->
+        case Taxonomy.get_taxon(level, name) do
+          nil -> nil
+          taxon -> species_group(species, level, name, names_at(taxon))
+        end
     end
+  end
+
+  defp species_group(species, level, name, names) do
+    if Enum.any?(names, &(&1 != species.scientific_name)),
+      do: %{level: level, name: name, names: names},
+      else: nil
+  end
+
+  # The species in the taxon's subtree: as the stored rank name did, this
+  # includes the species in its child taxa, so a section lists everything in
+  # the section.
+  defp names_at(taxon) do
+    ids = Taxonomy.subtree_ids(taxon)
+
+    from(s in Species,
+      where: s.taxon_id in ^ids,
+      where: s.is_hybrid == false and not like(s.scientific_name, "% %"),
+      order_by: s.scientific_name,
+      select: s.scientific_name
+    )
+    |> Repo.all()
   end
 
   defp sibling_names("species", name) do
@@ -488,26 +483,23 @@ defmodule Oaks.Species do
     |> Repo.all()
   end
 
-  defp sibling_names(level, name) do
-    field = String.to_existing_atom(level)
-
-    from(s in Species,
-      where: field(s, ^field) == ^name,
-      where: s.is_hybrid == false and not like(s.scientific_name, "% %"),
-      order_by: s.scientific_name,
-      select: s.scientific_name
-    )
-    |> Repo.all()
-  end
-
   # -- Write operations --
 
   @doc """
   Returns a changeset for tracking species changes.
+
+  The parent fields are names as typed in the form; this resolves them to
+  `parent1_id` and `parent2_id`, adding a field error for a name that
+  matches no species.
   """
   @spec change_species(Species.t(), map()) :: Ecto.Changeset.t()
   def change_species(%Species{} = species, attrs \\ %{}) do
-    Species.changeset(species, attrs)
+    attrs = Map.new(attrs)
+
+    species
+    |> Species.changeset(attrs)
+    |> put_parent_name_defaults(species, attrs)
+    |> resolve_parent_names(attrs)
   end
 
   @doc """
@@ -518,22 +510,21 @@ defmodule Oaks.Species do
   @spec create_species(map()) :: {:ok, Species.t()} | {:error, Ecto.Changeset.t()}
   def create_species(attrs) do
     %Species{}
-    |> Species.changeset(attrs)
+    |> change_species(attrs)
     |> Repo.insert()
   end
 
   @doc """
   Updates a species.
 
-  Renaming also points every other species' mention of the old name at the
-  new one (see `Oaks.Species.References`) and keeps the old name as a
-  synonym so existing links still resolve, all in one transaction.
+  A rename changes only this row and keeps the old name as a synonym so
+  existing links still resolve. The parents' keys are untouched.
 
   Returns `{:ok, species}` on success, `{:error, changeset}` on failure.
   """
   @spec update_species(Species.t(), map()) :: {:ok, Species.t()} | {:error, Ecto.Changeset.t()}
   def update_species(%Species{} = species, attrs) do
-    changeset = Species.changeset(species, attrs)
+    changeset = change_species(species, attrs)
 
     case Ecto.Changeset.fetch_change(changeset, :scientific_name) do
       {:ok, new_name} when changeset.valid? ->
@@ -546,7 +537,7 @@ defmodule Oaks.Species do
     end
   end
 
-  defp rename_species(species, changeset, new_name) do
+  defp rename_species(species, changeset, _new_name) do
     old_name = species.scientific_name
 
     synonyms = References.decode(Ecto.Changeset.get_field(changeset, :synonyms))
@@ -564,43 +555,66 @@ defmodule Oaks.Species do
             References.encode(synonyms ++ [old_name])
           )
 
-    Multi.new()
-    |> Multi.update(:species, changeset)
-    |> References.rewrite(old_name, new_name, except: [species.id])
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{species: updated}} -> {:ok, updated}
-      {:error, :species, changeset, _} -> {:error, changeset}
-      {:error, _step, %Ecto.Changeset{} = changeset, _} -> {:error, changeset}
+    Repo.update(changeset)
+  end
+
+  @doc """
+  Returns the hybrids that name this species as a parent, ordered by name.
+  """
+  @spec references_to(Species.t()) :: [Species.t()]
+  def references_to(%Species{} = species) do
+    from(h in Species,
+      where: h.parent1_id == ^species.id or h.parent2_id == ^species.id,
+      order_by: [asc: h.scientific_name]
+    )
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the changeset for deleting a species: a species a hybrid names as
+  a parent can't be deleted, and the changeset says so instead of the
+  database raising.
+  """
+  @spec delete_changeset(Species.t()) :: Ecto.Changeset.t()
+  def delete_changeset(%Species{} = species) do
+    case references_to(species) do
+      [] ->
+        Ecto.Changeset.change(species)
+
+      hybrids ->
+        initials = Enum.map_join(hybrids, ", ", & &1.scientific_name)
+
+        species
+        |> Ecto.Changeset.change()
+        |> Ecto.Changeset.add_error(:base, "is a parent of #{initials}")
     end
   end
 
   @doc """
-  Returns the other species that mention this species by name, with the
-  fields that mention it (see `Oaks.Species.References.find/1`).
-  """
-  @spec references_to(Species.t()) :: [References.mention()]
-  def references_to(%Species{} = species), do: References.find(species.scientific_name)
-
-  @doc """
-  Deletes a species and removes its name from every other species that
-  mentions it, in one transaction.
+  Deletes a species.
 
   Species_sources records are deleted via ON DELETE CASCADE in the database.
   Its photos are removed by `Oaks.Images.delete_species_images/2` in the same
   transaction, which records their files for cleanup after it commits.
+  A species a hybrid names as a parent is refused (see `delete_changeset/1`).
+
   Returns `{:ok, species}` on success, `{:error, changeset}` on failure.
   """
   @spec delete_species(Species.t()) :: {:ok, Species.t()} | {:error, Ecto.Changeset.t()}
   def delete_species(%Species{} = species) do
-    Multi.new()
-    |> References.rewrite(species.scientific_name, nil, except: [species.id])
-    |> Images.delete_species_images(species)
-    |> Multi.delete(:species, species)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{species: deleted}} -> {:ok, deleted}
-      {:error, _step, %Ecto.Changeset{} = changeset, _} -> {:error, changeset}
+    changeset = delete_changeset(species)
+
+    if changeset.valid? do
+      Multi.new()
+      |> Images.delete_species_images(species)
+      |> Multi.delete(:species, species)
+      |> Repo.transaction()
+      |> case do
+        {:ok, %{species: deleted}} -> {:ok, deleted}
+        {:error, _step, %Ecto.Changeset{} = changeset, _} -> {:error, changeset}
+      end
+    else
+      {:error, changeset}
     end
   end
 
@@ -617,15 +631,9 @@ defmodule Oaks.Species do
       author: species.author,
       is_hybrid: species.is_hybrid,
       conservation_status: species.conservation_status,
-      subgenus: species.subgenus,
-      section: species.section,
-      subsection: species.subsection,
-      complex: species.complex,
-      parent1: species.parent1,
-      parent2: species.parent2,
-      hybrids: parse_json_array(species.hybrids),
-      closely_related_to: parse_json_array(species.closely_related_to),
-      subspecies_varieties: parse_json_array(species.subspecies_varieties),
+      taxon_id: species.taxon_id,
+      parent1_id: species.parent1_id,
+      parent2_id: species.parent2_id,
       synonyms: parse_json_array(species.synonyms),
       external_links: parse_json_array(species.external_links)
     }
@@ -667,20 +675,28 @@ defmodule Oaks.Species do
 
   defp species_filter_query(params) do
     Species
-    |> maybe_filter(:subgenus, params["subgenus"])
-    |> maybe_filter(:section, params["section"])
-    |> maybe_filter(:subsection, params["subsection"])
-    |> maybe_filter(:complex, params["complex"])
+    |> maybe_filter_taxon("subgenus", params["subgenus"])
+    |> maybe_filter_taxon("section", params["section"])
+    |> maybe_filter_taxon("subsection", params["subsection"])
+    |> maybe_filter_taxon("complex", params["complex"])
     |> maybe_filter_hybrid(params["hybrid"])
   end
 
-  defp maybe_filter(query, _field, ""), do: query
+  defp maybe_filter_taxon(query, _level, ""), do: query
+  defp maybe_filter_taxon(query, _level, nil), do: query
 
-  defp maybe_filter(query, field, value) when is_binary(value) do
-    where(query, [s], field(s, ^field) == ^value)
+  defp maybe_filter_taxon(query, level, name) when is_binary(name) do
+    case Taxonomy.get_taxon(level, name) do
+      nil ->
+        where(query, [s], false)
+
+      taxon ->
+        ids = Taxonomy.subtree_ids(taxon)
+        where(query, [s], s.taxon_id in ^ids)
+    end
   end
 
-  defp maybe_filter(query, _field, _value), do: query
+  defp maybe_filter_taxon(query, _level, _name), do: query
 
   defp maybe_filter_search(query, ""), do: query
 
@@ -703,6 +719,66 @@ defmodule Oaks.Species do
   end
 
   defp maybe_filter_hybrid(query, _value), do: query
+
+  # On the edit form the parents' names show even when the form didn't send
+  # them; the keys themselves are already loaded.
+  defp put_parent_name_defaults(changeset, species, attrs) do
+    Enum.reduce([:parent1, :parent2], changeset, fn field, changeset ->
+      name_field = :"#{field}_name"
+
+      with false <- Map.has_key?(attrs, name_field),
+           nil <- Ecto.Changeset.get_field(changeset, name_field),
+           %Species{scientific_name: name} <- Map.get(species, field) do
+        Ecto.Changeset.put_change(changeset, name_field, name)
+      else
+        _ -> changeset
+      end
+    end)
+  end
+
+  # Resolves the typed parent names to keys, matching as References.key/1
+  # does (case, spacing and the hybrid sign). A name that matches nothing is
+  # a field error, not a silent blank; a blank name clears the key. The names
+  # come from the submitted attributes, since Ecto drops an empty string
+  # before the changeset sees it.
+  defp resolve_parent_names(changeset, attrs) do
+    pairs =
+      for field <- [:parent1, :parent2],
+          name = attr(attrs, :"#{field}_name"),
+          is_binary(name),
+          do: {field, String.trim(name)}
+
+    if pairs == [] do
+      changeset
+    else
+      by_key =
+        Species
+        |> select([s], {s.id, s.scientific_name})
+        |> Repo.all()
+        |> Map.new(fn {id, name} -> {References.key(name), id} end)
+
+      Enum.reduce(pairs, changeset, fn {field, name}, changeset ->
+        resolve_parent_name(changeset, by_key, field, name)
+      end)
+    end
+  end
+
+  defp resolve_parent_name(changeset, by_key, field, name) do
+    cond do
+      name == "" ->
+        Ecto.Changeset.put_change(changeset, :"#{field}_id", nil)
+
+      id = Map.get(by_key, References.key(name)) ->
+        Ecto.Changeset.put_change(changeset, :"#{field}_id", id)
+
+      true ->
+        Ecto.Changeset.add_error(changeset, :"#{field}_name", "does not match any species")
+    end
+  end
+
+  defp attr(attrs, key) do
+    Map.get(attrs, key, Map.get(attrs, Atom.to_string(key)))
+  end
 
   @doc """
   Parses a requested page size, defaulting to #{@default_limit} and capping at #{@max_limit}.

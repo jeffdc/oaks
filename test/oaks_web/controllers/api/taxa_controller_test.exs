@@ -35,10 +35,10 @@ defmodule OaksWeb.API.TaxaControllerTest do
     end
 
     test "filters by parent", %{conn: conn, tree: tree} do
-      conn = get(conn, "/api/v1/taxa?parent=#{tree.subgenus.name}")
+      conn = get(conn, "/api/v1/taxa?parent_id=#{tree.subgenus.id}")
       assert [taxon] = json_response(conn, 200)
       assert taxon["id"] == tree.section.id
-      assert taxon["parent"] == tree.subgenus.name
+      assert taxon["parent_id"] == tree.subgenus.id
     end
   end
 

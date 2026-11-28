@@ -1,5 +1,5 @@
 defmodule OaksWeb.TaxonPathTest do
-  use ExUnit.Case, async: true
+  use Oaks.DataCase
 
   alias OaksWeb.TaxonPath
 
