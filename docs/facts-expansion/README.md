@@ -50,6 +50,7 @@ Foundations first: nothing else should write data until Jeff logs in properly an
 ## Settled with Jeff (do not reopen)
 
 - Stay on SQLite. Copy gallformers' design and its pure modules (not its Carbonite audit log).
+- The public REST API (`/api/v1`) is off the air while the Facts expansion lands (Jeff, 2026-11-27). Its code stays in the tree, runs in the tests and changes with the model, with no compatibility promise; it comes back on when the model is done. The private API stays served.
 - No audit log and no undo for now (Jeff, 2026-11-21). Add them later only if a need appears. An earlier draft had an audit log and transaction undo; that over-read Jeff's point, which was only that changes must not be pushed to SQLite by hand-run SQL. Ignore any leftover mention of auditing or "audited" writes; don't implement it or raise it. "Attributions" in Facts means a fact's sources, which stays. "Undo" in the review screens means reversing a review decision in the app, not an audit log.
 - iNaturalist is the taxonomic backbone; departures are Jeff's sourced decisions.
 - North America first for traits and the ID tool.
@@ -86,17 +87,17 @@ The model this plan builds towards, as agreed on 2026-11-21. It is the target, n
 - **Traits.** A global trait vocabulary (organ, kind: categorical, range or count, unit), values, and source-term mappings like gallformers' `trait_term_mappings`. No eastern North American or red/white oak assumptions. Jeff approves the vocabulary.
 - **Entries.** `entry_structure` (the shared sections and their purpose), entries, sections, immutable section versions, and provenance spans inside each version: inserted from material (with the material span), typed by Jeff, or agent wording (pre-existing). Entry text can only be written by Jeff's own session in the editor; the import path rejects it. Only sections Jeff marks written publish.
 - **Import.** One private endpoint for every bulk change ([docs/import.md](../import.md)): JSON shaped like the data model (one key per table, field names as in the Ecto schemas, local refs between records in one body) with a scoped token. Each record goes through its changeset, the whole body applies in one transaction or not at all, with errors reported per record. A dry run returns a token tied to the exact body, and the real call is refused without it. Re-sending an applied import is a no-op. Each model adds its tables to the endpoint as it lands. No JSON Schema contract, staging, diff screen or import undo.
-- **API.** The public read-only v1 keeps working through an adapter until the site moves. A v2 serves the new model (taxa, names, published entry sections, facts with sources) to the public. A private API serves agents.
+- **API.** The public v1 is off the air while the model changes, with no adapter keeping its JSON (Jeff, 2026-11-27). A v2 serves the new model (taxa, names, published entry sections, facts with sources) to the public. A private API serves agents.
 - **Gallformers.** Copy the proven pure modules now (standing rules, partial dates, quote locating, name normalizing, ancestry), but not its import contract. UI components (the photo viewer, then the fragment-and-reader) and the guardrails are shared as code through heartwood, a package both apps depend on ([Architecture groundwork](architecture-groundwork.md#3-sharing-with-gallformers), Jeff, 2026-11-26).
 
 ## Moving today's data
 
-- Species rows become taxa and names: hybrid names parsed (×, formula, misspellings), two-word infraspecific names become child taxa with ranks, autonyms handled, synonyms become names, `parent1`/`parent2` become parentage facts sourced as legacy data.
+- Species rows become taxa and names: hybrid names parsed (×, formula, misspellings), two-word infraspecific names become child taxa with ranks, autonyms handled, synonyms become names, the parent keys (`parent1_id`/`parent2_id`, from [Architecture groundwork](architecture-groundwork.md)) become parentage facts sourced as legacy data.
 - `species_sources` free text stays verbatim as each source's description, shown behind Jeff's facts; nothing is promoted to a field.
 - The 2026-11-20 short Oak Compendium text loads into the editor as agent wording, flagged for review. Jeff's × *fontana* edit (Laughlin's description) is kept as his.
 - Lobe and tooth counts become measure facts sourced to Jeff's counts; the research workbook's literature values become other sources' facts.
 - Jeff's notes material (kept locally in `compendium-notes/`, outside git) loads as materials: snippets, manuscript paragraphs with authorship, review notes; Jeff's keep/drop sorting maps to set-aside; other people's comments are excluded. Jeff checks a sample before it applies.
-- Every load goes through the import endpoint: dry run first, and Jeff reads the dry-run report before it applies. Schema changes are migrations; data changes are imports.
+- Every load goes through the import endpoint: dry run first, and Jeff reads the dry-run report before it applies. Schema changes are migrations; data changes are imports. A migration may move existing data into a new shape unchanged (names resolved to keys, JSON lists into rows) with the schema change it serves; anything that changes what the data says is an import (Jeff, 2026-11-27).
 
 ## Open questions
 
