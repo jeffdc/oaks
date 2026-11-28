@@ -21,8 +21,8 @@ Order (Jeff, 2026-11-26; amended 2026-11-27): the public API goes off the air fi
 **How:**
 
 - A plug at the head of the `:api` pipeline answers 410 with a JSON body pointing at the site while `config :oaks, :public_api` is false. It is false in `config.exs` (dev and production) and true in `test.exs`. The plug reads it with `Application.get_env/3` on each request, so one test can turn it off. The pipeline covers `/api/v1` and `/api/v1/docs`.
-- `OaksWeb.Plugs.ApiHost`: while off, `api.oakcompendium.org` answers 410 on every path but `/health`, including `/` (today a redirect to the docs). On, it behaves as today.
-- Removed: the `API_VERSION` file, `Oaks.Version.api_version/0` (`ApiSpec` takes the app version), the About page's "API:" text and its test, CI's API Version Check job and the `API_VERSION` path filter, and the API checks in `mix smoke_test` (the deploy's smoke test would fail on them), which keeps its page checks.
+- `OaksWeb.Plugs.ApiHost`: while off, `api.oakcompendium.org` answers 410 on every path but `/health` and the private API (`/api/private/`), including `/` (today a redirect to the docs). On, it behaves as today.
+- Removed: the `API_VERSION` file, `Oaks.Version.api_version/0` (`ApiSpec` takes the app version), the About page's "API:" text and its test, and CI's API Version Check job and the `API_VERSION` path filter. `mix smoke_test` replaces its API checks with one that `/api/v1/stats` answers 410, and keeps its page checks.
 - **GitHub, by Jeff before the PR can merge:** the `main-no-push` ruleset requires five checks, API Version Check among them. Once the job is gone it never reports, so it comes out of the ruleset's required checks first, or the PR can't merge.
 - Docs: W9 retired in rules.md (W2 stays true of the code); O2's check list and "Checks that exist" lose the job; the architecture README and AGENTS.md's Authentication section say the API is off the air.
 

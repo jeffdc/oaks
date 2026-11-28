@@ -24,6 +24,11 @@ config :oaks,
   ecto_repos: [Oaks.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+# The public REST API is off the air while the Facts expansion lands (Jeff,
+# 2026-11-27). Read on each request by OaksWeb.Plugs.PublicApi, never with
+# compile_env, so a test can turn it off. Test config turns it on.
+config :oaks, :public_api, false
+
 # Configure the endpoint
 config :oaks, OaksWeb.Endpoint,
   url: [host: "localhost"],

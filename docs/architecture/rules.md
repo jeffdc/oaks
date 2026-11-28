@@ -37,7 +37,7 @@ Baselines as of the [2026-11-26 first periodic review](reviews.md#2026-11-26-fir
 | W6 | Never log secrets or personal data. | CODING_STANDARDS.md, Logging | `log_filter_test.exs` covers request params; `user_setup_controller_test.exs` captures the request log at `:info` and checks it holds no setup token: both. Logger calls: manual. | 1: login emails aren't filtered from params (`config/config.exs:109`), logged at `:debug`, so in dev and test only. |
 | W7 | Input never becomes an atom; `raw/1` only on sanitized Markdown or component markup. | CODING_STANDARDS.md, Security | Sobelow, high confidence only: both (done-checks; CI on every PR, main and weekly) | 0 `String.to_atom`. 9 `raw(` calls, all on `Oaks.Markdown` output or component internals. |
 | W8 | The app makes no LLM calls; agents work through the API. | PRODUCT.md | Manual | 0 |
-| W9 | A change to the public API bumps `API_VERSION`. | [decisions.md](decisions.md), 2026-11-26 CI parity | API Version Check job: CI, on PRs that touch `lib/oaks_web/controllers/api/**` or `lib/oaks_web/api_spec.ex` | 0 known, but the check misses `schemas/api_schemas.ex`, the router's API routes and the contexts' `to_map` serializers. |
+| W9 | **Retired 2026-11-27.** A change to the public API bumped `API_VERSION`. The public API is off the air while the Facts expansion lands, with no compatibility promise until it returns ([decisions.md](decisions.md), 2026-11-27); the code and its tests stay, and W2 stays true of them. | [decisions.md](decisions.md), 2026-11-26 CI parity; 2026-11-27 | Retired: the API Version Check job is gone. | — |
 
 ## UI and design system
 
@@ -57,8 +57,8 @@ Baselines as of the [2026-11-26 first periodic review](reviews.md#2026-11-26-fir
 | ID | Rule | Source | Check | Baseline |
 |---|---|---|---|---|
 | O1 | One toolchain: the Nix flake, which the Dockerfile and CI match. | AGENTS.md, Tech Stack | heartwood's `check-toolchain` (`heartwood_guardrails`; in CI after `mix deps.get`): both | 0 |
-| O2 | Work is finished only when the hard checks pass (`make done-checks`), and CI requires the same checks before a PR can merge. | AGENTS.md, Before handing work over; [decisions.md](decisions.md), 2026-11-26 CI parity | `make done-checks` locally; in CI the Phoenix, Assets, Dialyzer, Elixir Security Audit and API Version Check jobs, all required by the `main-no-push` ruleset | 1: `make done-checks` doesn't run the asset build (`mix assets.deploy`) that CI's Assets job does. |
-| O3 | Main changes only through pull requests; no force pushes. | AGENTS.md, Git Workflow | GitHub's `main-no-push` ruleset (no direct pushes, deletion or force pushes; the five CI checks required): on GitHub. `dev/githooks/pre-push`, heartwood's push guard: local, per clone (`make hooks`). | 0 |
+| O2 | Work is finished only when the hard checks pass (`make done-checks`), and CI requires the same checks before a PR can merge. | AGENTS.md, Before handing work over; [decisions.md](decisions.md), 2026-11-26 CI parity | `make done-checks` locally; in CI the Phoenix, Assets, Dialyzer and Elixir Security Audit jobs, all required by the `main-no-push` ruleset | 1: `make done-checks` doesn't run the asset build (`mix assets.deploy`) that CI's Assets job does. |
+| O3 | Main changes only through pull requests; no force pushes. | AGENTS.md, Git Workflow | GitHub's `main-no-push` ruleset (no direct pushes, deletion or force pushes; the four CI checks required): on GitHub. `dev/githooks/pre-push`, heartwood's push guard: local, per clone (`make hooks`). | 0 |
 | O4 | Environment variables are read only in `config/runtime.exs`. | CODING_STANDARDS.md, Configuration | Manual | 4: `config/dev.exs` (2), `config/config.exs` (`MIX_TAILWIND_PATH`), and `mix.exs:99` (`HEARTWOOD_PATH`, accepted: it picks heartwood's checkout before config loads). |
 
 ## Tests
@@ -85,8 +85,7 @@ Every automated check today, and the rules it holds.
 | heartwood's `check-toolchain` | local, CI | O1 |
 | `mix assets.deploy` | CI | the bundles build |
 | `hex.audit`, `deps.audit`, Sobelow (`--exit high`) | local, CI (every PR, main, weekly) | dependencies; W7 in part |
-| API Version Check | CI, on PRs | W9 |
-| `main-no-push` ruleset | GitHub | O2, O3: the five CI checks required; no direct pushes, deletion or force pushes |
+| `main-no-push` ruleset | GitHub | O2, O3: the four CI checks required; no direct pushes, deletion or force pushes |
 | Dependabot (mix, GitHub Actions) and CodeQL (actions, JavaScript, Python) | GitHub | vulnerable dependencies; code scanning alerts |
 | `dev/githooks/pre-push` (heartwood's push guard) | local push | O3 |
 | `dev/githooks/pre-commit` (heartwood's commit gate: a passing reuse review by a reviewer with fresh context; AGENTS.md, Before you commit) | local commit | reuse (no rule yet) |

@@ -11,7 +11,6 @@ on:
       - 'test/**'
       - 'mix.exs'
       - 'mix.lock'
-      - 'API_VERSION'
       - 'Dockerfile'
       - 'fly.toml'
       - 'docker-entrypoint.sh'
@@ -188,39 +187,3 @@ jobs:
         run: |
           mkdir -p priv/plts
           mix dialyzer --format github --format dialyxir
-
-  # The public API's version: a pull request that changes the API's controllers or
-  # spec must bump API_VERSION (as gallformers' CI does).
-  api-version-check:
-    name: API Version Check
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Check if API files changed without version bump
-        run: |
-          BASE_SHA=${{ github.event.pull_request.base.sha }}
-          HEAD_SHA=${{ github.event.pull_request.head.sha }}
-          # Quoted, so git (not the shell) matches the pathspecs.
-          API_PATHS=('lib/oaks_web/controllers/api/**' 'lib/oaks_web/api_spec.ex')
-
-          # Check if any API controller or spec files changed
-          API_CHANGED=$(git diff --name-only $BASE_SHA $HEAD_SHA -- "${API_PATHS[@]}" | wc -l)
-
-          # Check if API_VERSION changed
-          VERSION_CHANGED=$(git diff --name-only $BASE_SHA $HEAD_SHA -- 'API_VERSION' | wc -l)
-
-          if [ "$API_CHANGED" -gt 0 ] && [ "$VERSION_CHANGED" -eq 0 ]; then
-            echo "::error::API files changed but API_VERSION was not updated!"
-            echo ""
-            echo "Changed API files:"
-            git diff --name-only $BASE_SHA $HEAD_SHA -- "${API_PATHS[@]}"
-            echo ""
-            echo "When modifying the REST API, you must bump the version in API_VERSION"
-            echo "Current version: $(cat API_VERSION)"
-            exit 1
-          fi
