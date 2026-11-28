@@ -12,8 +12,8 @@ if Code.ensure_loaded?(Req) do
 
     ## Test Suite
 
-    - Phase 1: Core health & API endpoints
-    - Phase 2: Resource discovery (species, taxon)
+    - Phase 1: Health check and the public API's 410
+    - Phase 2: Resource discovery (a species from the list)
     - Phase 3: Public pages
     - Phase 4: Search functionality
     - Phase 5: Static assets
@@ -44,19 +44,25 @@ if Code.ensure_loaded?(Req) do
 
       client = Req.new(base_url: base_url, receive_timeout: @timeout, retry: false)
 
-      # Phase 1: Core health & API
+      # Phase 1: Core health & the public API's gate
       results =
         []
         |> run_and_accumulate(client, "Health check", "/health", &check_health/1)
-        |> run_and_accumulate(client, "API stats", "/api/v1/stats", &check_stats/1)
+        |> run_and_accumulate(
+          client,
+          "API offline",
+          "/api/v1/stats",
+          &check_api_offline/1,
+          status: 410
+        )
 
-      # Phase 2: Resource discovery
+      # Phase 2: Resource discovery, from the public page
       {results, species_name} =
         run_and_accumulate_with_value(
           results,
           client,
           "Discover species",
-          "/api/v1/species?limit=1",
+          "/species",
           &discover_species/1
         )
 
@@ -65,18 +71,12 @@ if Code.ensure_loaded?(Req) do
 
       results =
         if species_name do
-          results
-          |> run_and_accumulate(
+          run_and_accumulate(
+            results,
             client,
             "Species detail page",
             "/species/#{species_name}",
             &check_species_page/1
-          )
-          |> run_and_accumulate(
-            client,
-            "Species API detail",
-            "/api/v1/species/#{species_name}",
-            &check_species_api/1
           )
         else
           results
@@ -91,9 +91,13 @@ if Code.ensure_loaded?(Req) do
 
       # Phase 4: Search
       results =
-        results
-        |> run_and_accumulate(client, "Search API", "/api/v1/search?q=alba", &check_search_api/1)
-        |> run_and_accumulate(client, "Search UI", "/search?q=alba", &check_page_not_empty/1)
+        run_and_accumulate(
+          results,
+          client,
+          "Search UI",
+          "/search?q=alba",
+          &check_page_not_empty/1
+        )
 
       # Phase 5: Static assets
       results =
@@ -107,33 +111,36 @@ if Code.ensure_loaded?(Req) do
             run_and_accumulate(results, client, "Static assets", "/", &check_has_assets/1)
         end
 
-      # Phase 6: API docs
-      results =
-        run_and_accumulate(results, client, "Swagger UI", "/api/v1/docs", &check_swagger/1)
-
       print_summary(Enum.reverse(results))
       exit_with_code(results)
     end
 
-    defp run_and_accumulate(results, client, name, path, check_fn) do
-      {result, _value} = run_check(client, name, path, check_fn)
+    defp run_and_accumulate(results, client, name, path, check_fn, opts \\ []) do
+      {result, _value} = run_check(client, name, path, check_fn, opts)
       [result | results]
     end
 
     defp run_and_accumulate_with_value(results, client, name, path, check_fn) do
-      {result, value} = run_check(client, name, path, check_fn)
+      {result, value} = run_check(client, name, path, check_fn, [])
       {[result | results], value}
     end
 
-    defp run_check(client, name, path, check_fn) do
-      case Req.get(client, url: path) do
-        {:ok, %{status: status, body: body}} when status in 200..299 ->
-          process_check_result(name, path, check_fn.(body))
+    defp run_check(client, name, path, check_fn, opts) do
+      expected =
+        case Keyword.get(opts, :status, 200..299) do
+          status when is_integer(status) -> status..status
+          statuses -> statuses
+        end
 
-        {:ok, %{status: status}} ->
-          reason = "HTTP #{status}"
-          IO.puts("x #{name} (#{path}) - #{reason}")
-          {{:fail, name, reason}, nil}
+      case Req.get(client, url: path) do
+        {:ok, %{status: status, body: body}} ->
+          if status in expected do
+            process_check_result(name, path, check_fn.(body))
+          else
+            reason = "HTTP #{status}"
+            IO.puts("x #{name} (#{path}) - #{reason}")
+            {{:fail, name, reason}, nil}
+          end
 
         {:error, error} ->
           reason = format_error(error)
@@ -165,23 +172,34 @@ if Code.ensure_loaded?(Req) do
         else: {:error, "body does not contain 'ok'"}
     end
 
-    defp check_stats(body) when is_map(body) do
+    defp check_api_offline(body) when is_map(body) do
       case body do
-        %{"species_count" => count} when is_integer(count) and count > 0 -> {:ok, nil}
-        _ -> {:error, "missing or invalid species_count"}
+        %{"error" => message} when is_binary(message) ->
+          if String.contains?(message, "https://oakcompendium.org"),
+            do: {:ok, nil},
+            else: {:error, "the error doesn't point at the site"}
+
+        _ ->
+          {:error, "missing the error message"}
       end
     end
 
-    defp check_stats(_), do: {:error, "response is not JSON"}
+    defp check_api_offline(_), do: {:error, "response is not JSON"}
 
-    defp discover_species(body) when is_map(body) do
-      case body do
-        %{"data" => [%{"scientific_name" => name} | _]} when is_binary(name) -> {:ok, name}
-        _ -> {:error, "no species found in response"}
+    defp discover_species(body) when is_binary(body) do
+      names =
+        ~r{href="/species/([^"/?#]+)"}
+        |> Regex.scan(body, capture: :all_but_first)
+        |> List.flatten()
+        |> Enum.reject(&(&1 == "new"))
+
+      case names do
+        [name | _] -> {:ok, name}
+        [] -> {:error, "no species link on the species list"}
       end
     end
 
-    defp discover_species(_), do: {:error, "response is not JSON"}
+    defp discover_species(_), do: {:error, "response is not a page"}
 
     defp check_home(body) when is_binary(body) do
       if String.contains?(body, "Oak Compendium"),
@@ -193,28 +211,9 @@ if Code.ensure_loaded?(Req) do
       if String.length(body) > 500, do: {:ok, nil}, else: {:error, "page appears empty"}
     end
 
-    defp check_species_api(body) when is_map(body) do
-      case body do
-        %{"scientific_name" => name} when is_binary(name) -> {:ok, nil}
-        _ -> {:error, "missing species name in response"}
-      end
-    end
-
-    defp check_species_api(_), do: {:error, "response is not JSON"}
-
     defp check_page_not_empty(body) when is_binary(body) do
       if String.length(body) > 100, do: {:ok, nil}, else: {:error, "page appears empty"}
     end
-
-    defp check_search_api(body) when is_map(body) do
-      if Map.has_key?(body, "species") or Map.has_key?(body, "taxa") do
-        {:ok, nil}
-      else
-        {:error, "missing expected search result keys"}
-      end
-    end
-
-    defp check_search_api(_), do: {:error, "response is not JSON"}
 
     defp check_not_empty(body) when is_binary(body) do
       if String.length(body) > 100, do: {:ok, nil}, else: {:error, "file appears empty"}
@@ -225,10 +224,6 @@ if Code.ensure_loaded?(Req) do
       has_js = body =~ ~r/\/assets\/js\/app-[a-f0-9]+\.js/
 
       if has_css and has_js, do: {:ok, nil}, else: {:error, "missing expected asset links"}
-    end
-
-    defp check_swagger(body) when is_binary(body) do
-      if String.contains?(body, "swagger"), do: {:ok, nil}, else: {:error, "not Swagger UI"}
     end
 
     defp extract_asset_paths(client) do

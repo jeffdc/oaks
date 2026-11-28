@@ -44,10 +44,11 @@ defmodule OaksWeb.AboutLiveTest do
              "The database holds #{total - hybrids} species and #{hybrids} hybrids, #{total} entries in all."
   end
 
-  test "shows the deployed app version and API version", %{conn: conn} do
+  test "shows the deployed app version", %{conn: conn} do
     {:ok, view, html} = live(conn, ~p"/about")
 
-    assert html =~ "App: #{Oaks.Version.app_version()} | API: #{Oaks.Version.api_version()}"
+    assert html =~ "App: #{Oaks.Version.app_version()}"
+    refute html =~ "API:"
     assert Oaks.Version.app_version() =~ ~r/^\d{4}\.\d{1,2}\.\d{1,2}$/
 
     assert has_element?(

@@ -14,7 +14,6 @@ defmodule OaksWeb.AboutLive do
      assign(socket,
        page_title: "About",
        app_version: Version.app_version(),
-       api_version: Version.api_version(),
        stats: %{species_count: 0, hybrid_count: 0, total: 0},
        is_loading: true
      )}
@@ -190,16 +189,6 @@ defmodule OaksWeb.AboutLive do
       </section>
 
       <section>
-        <.section_heading>API</.section_heading>
-        <div class="oc-prose">
-          <p>
-            The Oak Compendium provides a public REST API for programmatic access to species data.
-            Read operations are open to all; write operations require authentication.
-          </p>
-        </div>
-      </section>
-
-      <section>
         <.section_heading>Privacy &amp; Analytics</.section_heading>
         <div class="oc-prose">
           <p>
@@ -213,7 +202,7 @@ defmodule OaksWeb.AboutLive do
       </section>
 
       <footer class="page-foot">
-        <span>App: {@app_version} | API: {@api_version}</span>
+        <span>App: {@app_version}</span>
         <span aria-hidden="true">&middot;</span>
         <a
           href="https://github.com/jeffdc/oaks/releases"

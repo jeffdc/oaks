@@ -5,6 +5,10 @@ config :argon2_elixir, t_cost: 1, m_cost: 8
 
 config :oaks, env: :test
 
+# The public API's code and tests stay live while it is off the air in dev and
+# production (OaksWeb.Plugs.PublicApi). Tests turn it off when they need to.
+config :oaks, :public_api, true
+
 # The ratchets `mix heartwood.baseline` writes and the architecture review's
 # packet shows (both run in the test environment).
 config :heartwood_guardrails, ratchets: [OaksWeb.Conformance, Heartwood.Guardrails.DuplicateCode]

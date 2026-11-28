@@ -20,6 +20,9 @@ defmodule OaksWeb.Router do
   end
 
   pipeline :api do
+    # The public API is off the air while the Facts expansion lands; this
+    # answers 410 before anything else in the pipeline runs.
+    plug OaksWeb.Plugs.PublicApi
     plug :accepts, ["json"]
     plug OaksWeb.Plugs.CORS
     plug OpenApiSpex.Plug.PutApiSpec, module: OaksWeb.ApiSpec
