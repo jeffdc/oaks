@@ -63,8 +63,34 @@ defmodule Oaks.Species.Species do
     |> validate_length(:scientific_name, min: 2, max: 100)
     |> validate_inclusion(:conservation_status, @valid_conservation_statuses)
     |> validate_hybrid_flag()
+    |> validate_parents()
     |> unique_constraint(:scientific_name)
   end
+
+  @doc """
+  Checks a hybrid's parent keys: neither may be the species itself, and the
+  two must differ. The errors go on `fields` (the id fields by default; the
+  species form passes its name fields, which it resolves to the keys after
+  this changeset has run).
+  """
+  @spec validate_parents(Ecto.Changeset.t(), {atom(), atom()}) :: Ecto.Changeset.t()
+  def validate_parents(changeset, {field1, field2} \\ {:parent1_id, :parent2_id}) do
+    id = changeset.data.id
+    parent1 = get_field(changeset, :parent1_id)
+    parent2 = get_field(changeset, :parent2_id)
+
+    changeset
+    |> refuse_parent(id != nil and parent1 == id, field1, "can't be the species itself")
+    |> refuse_parent(id != nil and parent2 == id, field2, "can't be the species itself")
+    |> refuse_parent(
+      parent1 != nil and parent1 == parent2,
+      field2,
+      "must differ from the first parent"
+    )
+  end
+
+  defp refuse_parent(changeset, true, field, message), do: add_error(changeset, field, message)
+  defp refuse_parent(changeset, false, _field, _message), do: changeset
 
   # Pages decide whether to show the hybrid sign from the name, so a name
   # containing × must also be flagged as a hybrid.

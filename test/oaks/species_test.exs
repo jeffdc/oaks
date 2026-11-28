@@ -280,18 +280,54 @@ defmodule Oaks.SpeciesTest do
   describe "parent names" do
     test "resolve to keys, as References.key/1 compares them" do
       parent = species_fixture(scientific_name: "alba#{System.unique_integer([:positive])}")
+      other = species_fixture()
 
       changeset =
         Species.change_species(%Oaks.Species.Species{}, %{
           scientific_name: "× test-hybrid",
           is_hybrid: true,
           parent1_name: "  #{String.upcase(parent.scientific_name)}  ",
-          parent2_name: parent.scientific_name
+          parent2_name: other.scientific_name
         })
 
       assert Ecto.Changeset.get_field(changeset, :parent1_id) == parent.id
-      assert Ecto.Changeset.get_field(changeset, :parent2_id) == parent.id
+      assert Ecto.Changeset.get_field(changeset, :parent2_id) == other.id
       assert changeset.valid?
+    end
+
+    test "the same species twice is an error on the second parent's name" do
+      parent = species_fixture()
+
+      changeset =
+        Species.change_species(%Oaks.Species.Species{}, %{
+          scientific_name: "× test-hybrid",
+          is_hybrid: true,
+          parent1_name: parent.scientific_name,
+          parent2_name: parent.scientific_name
+        })
+
+      assert {"must differ from the first parent", _} = changeset.errors[:parent2_name]
+    end
+
+    test "a species can't name itself as a parent" do
+      hybrid = hybrid_fixture()
+
+      changeset = Species.change_species(hybrid, %{parent1_name: hybrid.scientific_name})
+
+      assert {"can't be the species itself", _} = changeset.errors[:parent1_name]
+    end
+
+    test "the keys are checked too, as an import sets them" do
+      parent = species_fixture()
+      hybrid = hybrid_fixture()
+
+      same =
+        Oaks.Species.Species.changeset(hybrid, %{parent1_id: parent.id, parent2_id: parent.id})
+
+      assert {"must differ from the first parent", _} = same.errors[:parent2_id]
+
+      itself = Oaks.Species.Species.changeset(hybrid, %{parent2_id: hybrid.id})
+      assert {"can't be the species itself", _} = itself.errors[:parent2_id]
     end
 
     test "an unknown name is a field error" do

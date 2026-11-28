@@ -500,6 +500,7 @@ defmodule Oaks.Species do
     |> Species.changeset(attrs)
     |> put_parent_name_defaults(species, attrs)
     |> resolve_parent_names(attrs)
+    |> Species.validate_parents({:parent1_name, :parent2_name})
   end
 
   @doc """
