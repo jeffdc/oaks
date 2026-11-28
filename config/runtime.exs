@@ -118,6 +118,18 @@ if config_env() == :prod do
 
   config :oaks, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
+  # The site's other hostnames redirect to the canonical one, so a browser
+  # keeps one set of cookies (OaksWeb.Plugs.CanonicalHost). The api. hosts
+  # stay as they are.
+  config :oaks, OaksWeb.Plugs.CanonicalHost,
+    host: host,
+    aliases: [
+      "www.oakcompendium.org",
+      "oakcompendium.com",
+      "www.oakcompendium.com",
+      "oaks.fly.dev"
+    ]
+
   config :oaks, OaksWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     check_origin: [
