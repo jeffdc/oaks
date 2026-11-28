@@ -6,6 +6,7 @@ defmodule Oaks.SpeciesTest do
 
   import Oaks.SourcesFixtures
   import Oaks.SpeciesFixtures
+  import Oaks.TaxonomyFixtures
 
   alias Oaks.Species
 
@@ -13,23 +14,18 @@ defmodule Oaks.SpeciesTest do
 
   describe "list_all_species/1" do
     setup do
-      subgenus = unique("Subgenus")
-      section = unique("Section")
-      other_subgenus = unique("Subgenus")
+      subgenus = taxon_fixture(level: "subgenus")
+      section = taxon_fixture(level: "section", parent_id: subgenus.id)
+      other_subgenus = taxon_fixture(level: "subgenus")
+      other_section = taxon_fixture(level: "section", parent_id: other_subgenus.id)
 
       %{
-        subgenus: subgenus,
-        section: section,
-        other_subgenus: other_subgenus,
-        alba:
-          species_fixture(scientific_name: unique("zalba"), subgenus: subgenus, section: section),
-        stellata:
-          species_fixture(
-            scientific_name: unique("zstellata"),
-            subgenus: subgenus,
-            section: section
-          ),
-        rubra: species_fixture(scientific_name: unique("zrubra"), subgenus: other_subgenus)
+        subgenus: subgenus.name,
+        section: section.name,
+        other_subgenus: other_subgenus.name,
+        alba: species_fixture(scientific_name: unique("zalba"), taxon_id: section.id),
+        stellata: species_fixture(scientific_name: unique("zstellata"), taxon_id: section.id),
+        rubra: species_fixture(scientific_name: unique("zrubra"), taxon_id: other_section.id)
       }
     end
 
@@ -48,7 +44,19 @@ defmodule Oaks.SpeciesTest do
     test "filters by section", ctx do
       species = Species.list_all_species(%{"section" => ctx.section})
       assert length(species) == 2
-      assert Enum.all?(species, &(&1.section == ctx.section))
+    end
+
+    test "a taxon filter includes the species in its child taxa", ctx do
+      subsection =
+        taxon_fixture(
+          level: "subsection",
+          parent_id: Oaks.Taxonomy.get_taxon("section", ctx.section).id
+        )
+
+      species_fixture(taxon_id: subsection.id)
+
+      species = Species.list_all_species(%{"subgenus" => ctx.subgenus})
+      assert length(species) == 3
     end
 
     test "filters by search term", ctx do
@@ -73,34 +81,6 @@ defmodule Oaks.SpeciesTest do
     test "returns empty list when no matches" do
       species = Species.list_all_species(%{"search" => "zzzznonexistent"})
       assert species == []
-    end
-  end
-
-  describe "distinct_subgenera/0" do
-    test "returns unique subgenus values sorted" do
-      [first, second] = Enum.sort([unique("Subgenus"), unique("Subgenus")])
-      species_fixture(subgenus: second)
-      species_fixture(subgenus: first)
-      species_fixture(subgenus: first)
-
-      subgenera = Species.distinct_subgenera()
-      assert subgenera == Enum.uniq(subgenera)
-      assert subgenera == Enum.sort(subgenera)
-      assert Enum.filter(subgenera, &(&1 in [first, second])) == [first, second]
-    end
-  end
-
-  describe "distinct_sections/0" do
-    test "returns unique section values sorted" do
-      [first, second] = Enum.sort([unique("Section"), unique("Section")])
-      species_fixture(section: second)
-      species_fixture(section: first)
-      species_fixture(section: first)
-
-      sections = Species.distinct_sections()
-      assert sections == Enum.uniq(sections)
-      assert sections == Enum.sort(sections)
-      assert Enum.filter(sections, &(&1 in [first, second])) == [first, second]
     end
   end
 
@@ -297,6 +277,80 @@ defmodule Oaks.SpeciesTest do
     end
   end
 
+  describe "parent names" do
+    test "resolve to keys, as References.key/1 compares them" do
+      parent = species_fixture(scientific_name: "alba#{System.unique_integer([:positive])}")
+      other = species_fixture()
+
+      changeset =
+        Species.change_species(%Oaks.Species.Species{}, %{
+          scientific_name: "× test-hybrid",
+          is_hybrid: true,
+          parent1_name: "  #{String.upcase(parent.scientific_name)}  ",
+          parent2_name: other.scientific_name
+        })
+
+      assert Ecto.Changeset.get_field(changeset, :parent1_id) == parent.id
+      assert Ecto.Changeset.get_field(changeset, :parent2_id) == other.id
+      assert changeset.valid?
+    end
+
+    test "the same species twice is an error on the second parent's name" do
+      parent = species_fixture()
+
+      changeset =
+        Species.change_species(%Oaks.Species.Species{}, %{
+          scientific_name: "× test-hybrid",
+          is_hybrid: true,
+          parent1_name: parent.scientific_name,
+          parent2_name: parent.scientific_name
+        })
+
+      assert {"must differ from the first parent", _} = changeset.errors[:parent2_name]
+    end
+
+    test "a species can't name itself as a parent" do
+      hybrid = hybrid_fixture()
+
+      changeset = Species.change_species(hybrid, %{parent1_name: hybrid.scientific_name})
+
+      assert {"can't be the species itself", _} = changeset.errors[:parent1_name]
+    end
+
+    test "the keys are checked too, as an import sets them" do
+      parent = species_fixture()
+      hybrid = hybrid_fixture()
+
+      same =
+        Oaks.Species.Species.changeset(hybrid, %{parent1_id: parent.id, parent2_id: parent.id})
+
+      assert {"must differ from the first parent", _} = same.errors[:parent2_id]
+
+      itself = Oaks.Species.Species.changeset(hybrid, %{parent2_id: hybrid.id})
+      assert {"can't be the species itself", _} = itself.errors[:parent2_id]
+    end
+
+    test "an unknown name is a field error" do
+      changeset =
+        Species.change_species(%Oaks.Species.Species{}, %{
+          scientific_name: "× test-hybrid",
+          is_hybrid: true,
+          parent1_name: "nowhere at all"
+        })
+
+      refute changeset.valid?
+      assert changeset.errors[:parent1_name]
+    end
+
+    test "a blank name clears the key" do
+      parent = species_fixture()
+      hybrid = hybrid_fixture(parent1_id: parent.id)
+
+      changeset = Species.change_species(hybrid, %{parent1_name: "  "})
+      assert is_nil(Ecto.Changeset.get_field(changeset, :parent1_id))
+    end
+  end
+
   describe "change_species/2 hybrid flag" do
     test "requires the hybrid flag for names containing ×" do
       changeset = Species.change_species(%Oaks.Species.Species{}, %{scientific_name: "× foo"})
@@ -315,39 +369,82 @@ defmodule Oaks.SpeciesTest do
   describe "placement/1" do
     defp steps(species), do: Enum.map(Species.placement(species), &{&1.level, &1.name})
 
-    test "lists a species' stored ranks, outermost first, skipping the ones it lacks" do
-      species =
-        species_fixture(subgenus: "Quercus", section: "Lobatae", complex: unique("coccinea"))
-
-      assert [{"subgenus", "Quercus"}, {"section", "Lobatae"}, {"complex", _}] = steps(species)
+    defp tree do
+      subgenus = taxon_fixture(level: "subgenus")
+      section = taxon_fixture(level: "section", parent_id: subgenus.id)
+      subsection = taxon_fixture(level: "subsection", parent_id: section.id)
+      complex = taxon_fixture(level: "complex", parent_id: subsection.id)
+      %{subgenus: subgenus, section: section, subsection: subsection, complex: complex}
     end
 
-    test "keeps a hybrid's stored ranks" do
-      hybrid = hybrid_fixture(subgenus: "Quercus", section: "Quercus")
-      assert steps(hybrid) == [{"subgenus", "Quercus"}, {"section", "Quercus"}]
+    test "lists a species' taxon and the ranks above it, outermost first" do
+      tree = tree()
+      species = species_fixture(taxon_id: tree.complex.id)
+
+      assert steps(species) == [
+               {"subgenus", tree.subgenus.name},
+               {"section", tree.section.name},
+               {"subsection", tree.subsection.name},
+               {"complex", tree.complex.name}
+             ]
     end
 
-    test "places a hybrid with no ranks of its own where both parents sit" do
-      a = species_fixture(subgenus: "Quercus", section: "Quercus", subsection: "Albae")
-      b = species_fixture(subgenus: "Quercus", section: "Quercus", subsection: "Stellatae")
-      c = species_fixture(subgenus: "Cerris", section: "Cerris")
+    test "skips the ranks a species does not have below its taxon" do
+      tree = tree()
+      species = species_fixture(taxon_id: tree.section.id)
 
-      shared = hybrid_fixture(parent1: a.scientific_name, parent2: b.scientific_name)
-      apart = hybrid_fixture(parent1: a.scientific_name, parent2: c.scientific_name)
-      unknown = hybrid_fixture(parent1: a.scientific_name, parent2: unique("missing"))
+      assert steps(species) == [
+               {"subgenus", tree.subgenus.name},
+               {"section", tree.section.name}
+             ]
+    end
 
-      assert steps(shared) == [{"subgenus", "Quercus"}, {"section", "Quercus"}]
+    test "keeps a hybrid's own taxon" do
+      tree = tree()
+      hybrid = hybrid_fixture(taxon_id: tree.section.id)
+
+      assert steps(hybrid) == [
+               {"subgenus", tree.subgenus.name},
+               {"section", tree.section.name}
+             ]
+    end
+
+    test "places a hybrid with no taxon of its own where both parents sit" do
+      tree = tree()
+      other_subgenus = taxon_fixture(level: "subgenus")
+      other_section = taxon_fixture(level: "section", parent_id: other_subgenus.id)
+
+      a = species_fixture(taxon_id: tree.complex.id)
+      b = species_fixture(taxon_id: tree.subsection.id)
+      c = species_fixture(taxon_id: other_section.id)
+
+      shared = hybrid_fixture(parent1_id: a.id, parent2_id: b.id)
+      apart = hybrid_fixture(parent1_id: a.id, parent2_id: c.id)
+      unknown = hybrid_fixture()
+
+      assert steps(shared) == [
+               {"subgenus", tree.subgenus.name},
+               {"section", tree.section.name},
+               {"subsection", tree.subsection.name}
+             ]
+
       assert steps(apart) == []
       assert steps(unknown) == []
     end
 
     test "places a variety under its species, after the species' ranks" do
-      species = species_fixture(subgenus: "Cerris")
+      tree = tree()
+      species = species_fixture(taxon_id: tree.section.id)
 
       variety =
-        species_fixture(scientific_name: "#{species.scientific_name} kingii", subgenus: "Cerris")
+        species_fixture(
+          scientific_name: "#{species.scientific_name} kingii",
+          taxon_id: tree.section.id
+        )
 
-      assert [_, %{level: "species", name: name, hybrid: false}] = Species.placement(variety)
+      assert %{level: "species", name: name, hybrid: false} =
+               List.last(Species.placement(variety))
+
       assert name == species.scientific_name
     end
 
@@ -467,34 +564,43 @@ defmodule Oaks.SpeciesTest do
   describe "hybrids_with_other_parent/1" do
     test "pairs each hybrid with its parent that isn't this species" do
       parent = species_fixture()
-      named = hybrid_fixture(parent1: "Quercus " <> parent.scientific_name, parent2: "rubra")
-      lone = hybrid_fixture(parent1: parent.scientific_name)
-      unknown = unique("× nowhere")
+      rubra = species_fixture(scientific_name: "rubra#{System.unique_integer([:positive])}")
+      named = hybrid_fixture(parent1_id: parent.id, parent2_id: rubra.id)
+      lone = hybrid_fixture(parent1_id: parent.id)
 
-      parent =
-        parent
-        |> Ecto.Changeset.change(
-          hybrids: Jason.encode!([named.scientific_name, lone.scientific_name, unknown])
-        )
-        |> Oaks.Repo.update!()
+      assert parent |> Species.hybrids_with_other_parent() |> Enum.sort_by(& &1.name) ==
+               Enum.sort_by(
+                 [
+                   %{name: named.scientific_name, other: rubra.scientific_name},
+                   %{name: lone.scientific_name, other: nil}
+                 ],
+                 & &1.name
+               )
+    end
 
-      assert Species.hybrids_with_other_parent(parent) == [
-               %{name: named.scientific_name, other: "rubra"},
-               %{name: lone.scientific_name, other: nil},
-               %{name: unknown, other: nil}
-             ]
+    test "is ordered by hybrid name" do
+      parent = species_fixture()
+      names = for _ <- 1..3, do: hybrid_fixture(parent1_id: parent.id).scientific_name
+
+      assert Enum.map(Species.hybrids_with_other_parent(parent), & &1.name) == Enum.sort(names)
     end
   end
 
   describe "siblings/1" do
-    test "lists the species stored at its last rank, without hybrids or varieties" do
-      complex = unique("complex")
-      a = species_fixture(scientific_name: unique("a"), complex: complex)
-      b = species_fixture(scientific_name: unique("b"), complex: complex)
-      _variety = species_fixture(scientific_name: a.scientific_name <> " minor", complex: complex)
-      hybrid = hybrid_fixture(complex: complex)
+    test "lists the species in its taxon's subtree, without hybrids or varieties" do
+      section = taxon_fixture(level: "section", parent_id: taxon_fixture(level: "subgenus").id)
+      complex = taxon_fixture(level: "complex", parent_id: section.id)
 
-      assert %{level: "complex", name: ^complex, names: names} = Species.siblings(a)
+      a = species_fixture(scientific_name: unique("a"), taxon_id: complex.id)
+      b = species_fixture(scientific_name: unique("b"), taxon_id: complex.id)
+
+      _variety =
+        species_fixture(scientific_name: a.scientific_name <> " minor", taxon_id: complex.id)
+
+      hybrid = hybrid_fixture(taxon_id: complex.id)
+
+      assert %{level: "complex", name: name, names: names} = Species.siblings(a)
+      assert name == complex.name
       assert names == Enum.sort([a.scientific_name, b.scientific_name])
       assert Species.siblings(hybrid).names == names
     end
@@ -510,7 +616,9 @@ defmodule Oaks.SpeciesTest do
 
     test "is nil with no group or no one else in it" do
       assert Species.siblings(species_fixture()) == nil
-      assert Species.siblings(species_fixture(complex: unique("alone"))) == nil
+
+      alone = taxon_fixture(level: "complex", parent_id: taxon_fixture(level: "subsection").id)
+      assert Species.siblings(species_fixture(taxon_id: alone.id)) == nil
     end
   end
 end

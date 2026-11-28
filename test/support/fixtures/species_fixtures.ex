@@ -3,15 +3,13 @@ defmodule Oaks.SpeciesFixtures do
   Species and hybrids for tests (`Oaks.Species`).
 
   Every fixture gets a unique name, so tests never depend on what the seeds
-  hold. Pass Elixir lists for the JSON-list fields (`hybrids`,
-  `closely_related_to`, `subspecies_varieties`, `synonyms`); they're
-  encoded before the insert.
+  hold. Pass an Elixir list for `synonyms`; it's encoded before the insert.
   """
 
   alias Oaks.Species
   alias Oaks.Species.Species, as: SpeciesSchema
 
-  @json_list_fields [:hybrids, :closely_related_to, :subspecies_varieties, :synonyms]
+  @json_list_fields [:synonyms]
 
   @doc "A unique species name (no ×), for fixtures and form input."
   def unique_species_name, do: "species#{System.unique_integer([:positive])}"

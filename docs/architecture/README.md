@@ -68,9 +68,9 @@ A Phoenix monolith: business logic in `lib/oaks/` as contexts, the web layer in 
 | Context | Responsibility | Owns (tables) |
 |---|---|---|
 | `Oaks.Accounts` | Users, password and TOTP or recovery-code login, session and setup tokens, agent API tokens | `users`, `users_tokens`, `users_recovery_codes`, `api_tokens` |
-| `Oaks.Species` (+ `References`) | Species, hybrids, the per-field source display rules, API maps, name-reference rewrites | `species` |
+| `Oaks.Species` (+ `References`) | Species, hybrids, placements, parent names resolved to keys, the per-field source display rules, API maps; `References` holds the name and synonym-list helpers | `species` |
 | `Oaks.Sources` | Sources and each species' per-source text | `sources`, `species_sources` |
-| `Oaks.Taxonomy` | Higher taxa (subgenus to complex); renaming a taxon renames it on species | `taxa` |
+| `Oaks.Taxonomy` | Higher taxa (genus to complex): the tree, the rank rule, ancestry, subtree species counts | `taxa` |
 | `Oaks.Articles` | Articles and guides | `articles` |
 | `Oaks.Images` (+ workers) | Species photos from iNat: durable import, caption, order, delete, cleanup | `images`, `image_import_attempts`, `image_cleanups` |
 | `Oaks.Import` (+ `Body`, `Runner`, `Tables`) | The bulk import behind the private API: dry run, then apply in one transaction | `applied_imports`; `import_metadata` (`Import.Metadata`, left from the port and unused) |
@@ -95,7 +95,7 @@ flowchart LR
   Images -.->|struct| Accounts
   Images --> Storage
   Images --> INaturalist
-  Taxonomy --> Species
+  Species <--> Taxonomy
   Search --> Species
   Search --> Sources
   Search --> Taxonomy
@@ -109,15 +109,15 @@ flowchart LR
   Release --> OaksWeb
 ```
 
-Species and Sources depend on each other (associations both ways, and each queries the other's table). Search and the import runner query and write other contexts' schemas through the Repo. Taxonomy reads species rows (species in a taxon, usage counts) and writes them on a rename. Stats uses only public functions. Nothing enforces the boundaries yet.
+Species and Sources depend on each other (associations both ways, and each queries the other's table). Search and the import runner query and write other contexts' schemas through the Repo. Taxonomy reads species rows (species in a taxon, usage and subtree counts) but no longer writes them on a rename; Species asks Taxonomy for a taxon's ancestry and subtree, so the two contexts depend on each other's public functions. Stats uses only public functions. Nothing enforces the boundaries yet.
 
 ## Data
 
 - **SQLite** through `ecto_sqlite3`; immediate transactions; `busy_timeout` 10s in prod; WAL and foreign keys on (adapter defaults). Queries must be SQLite-compatible (no `ilike`; LIKE with an ESCAPE clause).
 - **Schema is defined only by migrations** in `priv/repo/migrations`; there is no `structure.sql`. Production applies pending migrations at boot. Data changes go through the app or the import endpoint, never hand-run SQL.
-- **Links by name, not by key.** Species point at their taxa (`subgenus`, `section`, `subsection`, `complex`) and at other species (`parent1`, `parent2`, `hybrids`) by name; taxa point at their parent by name. None of these are foreign keys.
-- **Foreign keys that matter:** `species_sources` cascade with their species and refuse a source's deletion; `images` restrict a species' deletion (photos are removed through `Oaks.Images` first, so their files are cleaned up); `image_cleanups` have no foreign keys on purpose, so a cleanup outlives its image and species.
-- **JSON in TEXT columns:** species `hybrids`, `closely_related_to`, `subspecies_varieties`, `synonyms`, `external_links`; `species_sources.local_names`; `taxa.links`; `articles.tags`; arrays in `api_tokens` (scopes) and `image_cleanups` (file paths, and the ids of the import attempts the cleanup waits on).
+- **Links by key.** A species' `taxon_id` points at the lowest taxon it sits in (the ranks above come from walking `taxa.parent_id`), and a hybrid's `parent1_id` and `parent2_id` point at its parents; `taxa.parent_id` points at the rank above. All are foreign keys with restricted deletes. Only the genus (*Quercus*) has no parent. The old name-link columns (`species.subgenus`, `section`, `subsection`, `complex`, `parent1`, `parent2`, `hybrids`, `taxa.parent`) stay in the table, unread, until they are dropped.
+- **Foreign keys that matter:** `species.taxon_id` and `taxa.parent_id` restrict the deletion of a taxon still in use, and `species.parent1_id`/`parent2_id` refuse to delete a hybrid's parent; `species_sources` cascade with their species and refuse a source's deletion; `images` restrict a species' deletion (photos are removed through `Oaks.Images` first, so their files are cleaned up); `image_cleanups` have no foreign keys on purpose, so a cleanup outlives its image and species.
+- **JSON in TEXT columns:** species `synonyms`, `external_links`; `species_sources.local_names`; `taxa.links`; `articles.tags`; arrays in `api_tokens` (scopes) and `image_cleanups` (file paths, and the ids of the import attempts the cleanup waits on). The species `hybrids`, `closely_related_to` and `subspecies_varieties` columns are still there but unread; a later PR drops them.
 - **Analytics** keeps raw `page_views` for 30 days after they are rolled up; the four daily tables have no Ecto schemas and are read and written through Ecto by table name; only the rollup's pending-day select and per-day delete are SQL.
 
 ## Web layer

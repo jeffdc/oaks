@@ -41,8 +41,11 @@ A JSON object with one key per table, each a list of records, and an optional `i
   "sources": [
     {"$ref": "sibley", "source_type": "book", "name": "The Sibley Guide to Trees", "author": "David Allen Sibley", "year": 2009}
   ],
+  "taxa": [
+    {"$ref": "lobatae", "name": "Lobatae", "level": "section", "parent_id": {"$find": {"level": "subgenus", "name": "Quercus"}}}
+  ],
   "species": [
-    {"$ref": "alba", "scientific_name": "alba", "author": "L. 1753", "is_hybrid": false},
+    {"$ref": "alba", "scientific_name": "alba", "author": "L. 1753", "is_hybrid": false, "taxon_id": {"$ref": "lobatae"}},
     {"$find": {"scientific_name": "rubra"}, "author": "L. 1753"}
   ],
   "species_sources": [
@@ -52,16 +55,16 @@ A JSON object with one key per table, each a list of records, and an optional `i
 }
 ```
 
-Tables are processed in this order, whatever order the keys are in, and the records of each table in array order: `sources`, `species`, `taxa`, `species_sources`. Field names and types are exactly those of the Ecto schemas named below; unknown tables, unknown fields and unknown `$` keys are errors.
+Tables are processed in this order, whatever order the keys are in, and the records of each table in array order: `sources`, `taxa`, `species`, `species_sources`. A taxon's parent and a species' taxon and parents must therefore appear before the record that points at them, in the same table or an earlier one. Field names and types are exactly those of the Ecto schemas named below; unknown tables, unknown fields and unknown `$` keys are errors.
 
 ### Tables and fields
 
 - `sources` (`Oaks.Sources.Source`): `source_type` and `name` (required), `description`, `author`, `year` (integer), `url`, `isbn`, `doi`, `notes`, `license`, `license_url`.
-- `species` (`Oaks.Species.Species`): `scientific_name` (required, unique), `author`, `is_hybrid` (boolean, default false; must be true when the name contains ×), `conservation_status` (one of EX EW CR EN VU NT LC DD NE), `subgenus`, `section`, `subsection`, `complex`, `parent1`, `parent2`, `hybrids`, `closely_related_to`, `subspecies_varieties`, `synonyms`, `external_links`.
-- `taxa` (`Oaks.Taxonomy.Taxon`, the current taxonomy table): `name` and `level` (required; level is subgenus, section, subsection or complex; the pair is unique), `parent` (the parent taxon's name), `author`, `content`, `content_updated_at`, `links`. Changing `content` on an update stamps `content_updated_at` with today's date, as the app does.
+- `species` (`Oaks.Species.Species`): `scientific_name` (required, unique), `author`, `is_hybrid` (boolean, default false; must be true when the name contains ×), `conservation_status` (one of EX EW CR EN VU NT LC DD NE), `taxon_id` (the lowest taxon it sits in), `parent1_id` and `parent2_id` (a hybrid's parents), `synonyms`, `external_links`.
+- `taxa` (`Oaks.Taxonomy.Taxon`): `name` and `level` (required; level is genus, subgenus, section, subsection or complex; the pair is unique), `parent_id` (the parent taxon; only the genus has none, and every other taxon's parent must rank above it), `author`, `content`, `content_updated_at`, `links`. Changing `content` on an update stamps `content_updated_at` with today's date, as the app does.
 - `species_sources` (`Oaks.Sources.SpeciesSource`): `species_id` and `source_id` (required; one row per pair), `local_names`, `range`, `growth_habit`, `leaves`, `flowers`, `fruits`, `bark`, `twigs`, `buds`, `hardiness_habitat`, `miscellaneous`, `url`, `is_preferred` (boolean).
 
-List fields (`hybrids`, `closely_related_to`, `subspecies_varieties`, `synonyms`, `local_names`) are strings, as in the app's forms: a comma-separated list (`"alba, rubra"`) or a JSON array written as a string (`"[\"alba\", \"rubra\"]"`; `synonyms` entries may also be `{"name": ...}` objects). They are stored as a normalized JSON array.
+List fields (`synonyms`, `local_names`) are strings, as in the app's forms: a comma-separated list (`"alba, rubra"`) or a JSON array written as a string (`"[\"alba\", \"rubra\"]"`; `synonyms` entries may also be `{"name": ...}` objects). They are stored as a normalized JSON array.
 
 ### Create or update
 
@@ -71,12 +74,12 @@ List fields (`hybrids`, `closely_related_to`, `subspecies_varieties`, `synonyms`
 
 An update changes only the fields you give. If they already have those values, the record is reported as `unchanged` and nothing is written. There is no upsert and no delete.
 
-Renames are refused: an update can't change a species' `scientific_name` or a taxon's `name` or `level`, because the app updates every reference to the old name when it renames. Rename those in the app.
+Renames are refused: an update can't change a species' `scientific_name` or a taxon's `name` or `level`. Rename those in the app.
 
 ### Refs between records
 
 - `"$ref": "name"` names a record so later records can point at it. Names are unique across the body. Updates (`id` or `$find`) can have a `$ref` too.
-- A foreign key (`species_sources.species_id`, `species_sources.source_id`) takes an integer id, `{"$ref": "name"}` or `{"$find": {...}}` on the key's table. A `$find` can itself use refs or `$find`s for its own foreign keys, as in the example.
+- A foreign key (`taxa.parent_id`, `species.taxon_id`, `species.parent1_id`, `species.parent2_id`, `species_sources.species_id`, `species_sources.source_id`) takes an integer id, `{"$ref": "name"}` or `{"$find": {...}}` on the key's table. A `$find` can itself use refs or `$find`s for its own foreign keys, as in the example.
 - A `$ref` must name a record of the key's table that comes earlier in processing order. Refs never point forward.
 - If a record has errors, records that refer to it get the error "refers to <name>, which has errors".
 

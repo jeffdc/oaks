@@ -18,7 +18,7 @@ defmodule Oaks.SearchTest do
       species_fixture(
         scientific_name: "alba#{n}",
         author: "L. 1753 #{n}",
-        subgenus: tree.subgenus.name
+        taxon_id: tree.subgenus.id
       )
 
     rubra = species_fixture(scientific_name: "rubra#{n}", author: "L. 1753 #{n}")
@@ -83,6 +83,14 @@ defmodule Oaks.SearchTest do
       %{taxa: taxa} = Search.search(tree.subgenus.name)
       subgenus = Enum.find(taxa, &(&1.level == "subgenus" && &1.name == tree.subgenus.name))
       assert subgenus.species_count == 1
+    end
+
+    test "a taxon's count includes the species in its child taxa", %{tree: tree} do
+      species_fixture(taxon_id: tree.section.id)
+
+      %{taxa: taxa} = Search.search(tree.subgenus.name)
+      subgenus = Enum.find(taxa, &(&1.level == "subgenus" && &1.name == tree.subgenus.name))
+      assert subgenus.species_count == 2
     end
 
     test "taxa results include ancestry path", %{tree: tree} do

@@ -26,25 +26,27 @@ defmodule OaksWeb.TaxonomyLiveTest do
     st = "Stellatae#{n}"
 
     subgenus_q = taxon_fixture(name: q, level: "subgenus")
-    section_q = taxon_fixture(name: q, level: "section", parent: subgenus_q)
+    section_q = taxon_fixture(name: q, level: "section", parent_id: subgenus_q.id)
     subgenus_l = taxon_fixture(name: l, level: "subgenus")
-    taxon_fixture(name: l, level: "section", parent: subgenus_l)
-    taxon_fixture(name: st, level: "subsection", parent: section_q)
+    section_l = taxon_fixture(name: l, level: "section", parent_id: subgenus_l.id)
+    subsection = taxon_fixture(name: st, level: "subsection", parent_id: section_q.id)
 
     %{
       q: q,
       l: l,
       st: st,
       section_q: section_q,
-      alba: species_fixture(scientific_name: "alba#{n}", subgenus: q, section: q).scientific_name,
+      section_l: section_l,
+      subsection: subsection,
+      alba: species_fixture(scientific_name: "alba#{n}", taxon_id: section_q.id).scientific_name,
       stellata:
-        species_fixture(scientific_name: "stellata#{n}", subgenus: q, section: q, subsection: st).scientific_name,
+        species_fixture(scientific_name: "stellata#{n}", taxon_id: subsection.id).scientific_name,
       bebbiana:
-        hybrid_fixture(scientific_name: "×bebbiana#{n}", subgenus: q, section: q).scientific_name,
+        hybrid_fixture(scientific_name: "×bebbiana#{n}", taxon_id: section_q.id).scientific_name,
       rubra:
-        species_fixture(scientific_name: "rubra#{n}", subgenus: l, section: l).scientific_name,
+        species_fixture(scientific_name: "rubra#{n}", taxon_id: section_l.id).scientific_name,
       velutina:
-        species_fixture(scientific_name: "velutina#{n}", subgenus: l, section: l).scientific_name
+        species_fixture(scientific_name: "velutina#{n}", taxon_id: section_l.id).scientific_name
     }
   end
 
@@ -231,7 +233,7 @@ defmodule OaksWeb.TaxonomyLiveTest do
     end
 
     test "deletes an unused taxon", %{conn: conn} = ctx do
-      taxon = taxon_fixture(level: "complex", parent: ctx.st)
+      taxon = taxon_fixture(level: "complex", parent_id: ctx.subsection.id)
 
       {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.q}/#{ctx.q}/#{ctx.st}")
       render_click(view, "request_delete_taxon", %{"id" => to_string(taxon.id)})
@@ -246,10 +248,10 @@ defmodule OaksWeb.TaxonomyLiveTest do
   describe "complex directly under a section" do
     test "is listed on the section page and browsable", %{conn: conn} = ctx do
       group = "velutina-group#{ctx.l}"
-      taxon_fixture(name: group, level: "complex", parent: ctx.l)
+      complex = taxon_fixture(name: group, level: "complex", parent_id: ctx.section_l.id)
 
       Oaks.Species.get_species_by_name(ctx.velutina)
-      |> Ecto.Changeset.change(complex: group)
+      |> Ecto.Changeset.change(taxon_id: complex.id)
       |> Oaks.Repo.update!()
 
       {:ok, _view, html} = live(conn, ~p"/taxonomy/#{ctx.l}/#{ctx.l}")
@@ -263,7 +265,7 @@ defmodule OaksWeb.TaxonomyLiveTest do
 
     test "names the complex for its species, Q. abbreviated", %{conn: conn} = ctx do
       group = "velutina-group#{ctx.l}"
-      taxon_fixture(name: group, level: "complex", parent: ctx.l)
+      taxon_fixture(name: group, level: "complex", parent_id: ctx.section_l.id)
 
       {:ok, view, _html} = live(conn, ~p"/taxonomy/#{ctx.l}/#{ctx.l}")
       assert has_element?(view, ".taxon-card .oc-sci-title .oc-sci-g", "Q.")

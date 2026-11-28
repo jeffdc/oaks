@@ -14,6 +14,12 @@ Template:
 - **Source:** commit, PR or plan doc
 ```
 
+## 2026-11-28: Links by key
+
+- **Why:** species pointed at their taxa and at their parents, and taxa at their parents, by name, so keeping links intact needed code that rewrote names across rows on every rename, delete and merge, and nothing in the database stopped a dangling name. Names also repeat across ranks ("Quercus" is a subgenus and a section), so a name alone doesn't identify a taxon.
+- **Changes:** `taxa` is rebuilt with a `parent_id` (a foreign key, restricted), a `genus` rank and one *Quercus* genus row as the root; a taxon's parent must rank above it, which also rules out cycles. `species.taxon_id` points at the lowest taxon a species sits in, and a hybrid's `parent1_id` and `parent2_id` at its parents (both restricted); the ranks above come from walking `taxa.parent_id`. A species' hybrids, siblings and placement are derived by query and by walking those keys, and a species that a hybrid names as a parent can't be deleted. Renaming a species or taxon changes only its own row; merge is already gone. `Oaks.Species.References` keeps its name key and synonym-list helpers only. The old name-link columns stay in the tables, unread, until a later PR drops them; the public API's JSON changes with no compatibility promise, since it is off the air. Rule S1 loses Taxonomy's species rewrite and D2 loses its species-count subquery; D4 stays, with the three name-link JSON columns now unread. [README.md](README.md)'s links-by-key and context sections describe the result.
+- **Source:** Jeff, 2026-11-26 and 2026-11-27; [Architecture groundwork](../facts-expansion/architecture-groundwork.md#1-links-by-key-not-by-name) and its PR 3.
+
 ## 2026-11-27: Merge leaves the app until Taxonomy
 
 - **Why:** merge rewrites name links everywhere, and Taxonomy brings synonymy back properly.

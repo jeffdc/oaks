@@ -13,6 +13,8 @@ defmodule OaksWeb.TaxonPath do
 
   use OaksWeb, :verified_routes
 
+  alias Oaks.Taxonomy
+
   @type step :: %{
           required(:level) => String.t(),
           required(:name) => String.t(),
@@ -22,7 +24,7 @@ defmodule OaksWeb.TaxonPath do
 
   @doc """
   Returns the band's linked steps for a placement, outermost first: the
-  genus, then each entry of the placement (as from
+  genus row, then each entry of the placement (as from
   `Oaks.Species.placement/1`, or a taxon's ancestors) with its path. Taxa
   link to their taxonomy page, a variety's species to its species page.
 
@@ -44,7 +46,12 @@ defmodule OaksWeb.TaxonPath do
           {Map.put(step, :path, taxonomy_path(segments)), segments}
       end)
 
-    [%{level: "genus", name: "Quercus", hybrid: false, path: ~p"/taxonomy"} | steps]
+    [genus_step() | steps]
+  end
+
+  defp genus_step do
+    genus = Taxonomy.get_genus()
+    %{level: "genus", name: genus.name, hybrid: false, path: ~p"/taxonomy"}
   end
 
   @doc """

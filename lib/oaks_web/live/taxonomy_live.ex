@@ -97,7 +97,8 @@ defmodule OaksWeb.TaxonomyLive do
   # -- Data loading --
 
   defp load_genus_level(socket) do
-    child_taxa = Taxonomy.list_taxa_with_counts(%{"level" => "subgenus"})
+    genus = Taxonomy.get_genus()
+    child_taxa = if genus, do: Taxonomy.get_children(genus), else: []
     species = Taxonomy.get_species_in_taxon([])
     total = Species.count()
 
@@ -110,7 +111,7 @@ defmodule OaksWeb.TaxonomyLive do
       species: species,
       species_count: total,
       band_ranks: [],
-      band_current: %{level: "genus", name: "Quercus", hybrid: false},
+      band_current: %{level: "genus", name: genus.name, hybrid: false},
       is_genus_level: true,
       page_title: "Taxonomy"
     )
@@ -371,7 +372,7 @@ defmodule OaksWeb.TaxonomyLive do
 
     params =
       if current_taxon do
-        Map.put(params, :parent, current_taxon.name)
+        Map.put(params, :parent_id, current_taxon.id)
       else
         params
       end

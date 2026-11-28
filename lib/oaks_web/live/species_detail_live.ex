@@ -47,7 +47,6 @@ defmodule OaksWeb.SpeciesDetailLive do
        siblings: nil,
        images: [],
        hybrids: [],
-       subspecies_varieties: [],
        synonyms: [],
        external_links: [],
        sources: [],
@@ -308,15 +307,6 @@ defmodule OaksWeb.SpeciesDetailLive do
             </.comma_list>
           </section>
 
-          <section :if={@subspecies_varieties != []} id="species-subspecies">
-            <.section_heading>Subspecies and varieties</.section_heading>
-            <.ruled_rows>
-              <:row :for={{name, author} <- @subspecies_varieties}>
-                <.sci_name name={name} author={author} abbreviate size="title" />
-              </:row>
-            </.ruled_rows>
-          </section>
-
           <section :if={@hybrids != []} id="species-hybrids">
             <.section_heading>
               Hybrids<:note>{length(@hybrids)} known</:note>
@@ -400,7 +390,10 @@ defmodule OaksWeb.SpeciesDetailLive do
   defp species_title(assigns) do
     assigns =
       assign(assigns,
-        parents: Enum.reject([assigns.species.parent1, assigns.species.parent2], &blank?/1)
+        parents:
+          [assigns.species.parent1, assigns.species.parent2]
+          |> Enum.reject(&is_nil/1)
+          |> Enum.map(& &1.scientific_name)
       )
 
     ~H"""
@@ -523,36 +516,42 @@ defmodule OaksWeb.SpeciesDetailLive do
     assigns = assign(assigns, :kind, String.downcase(kind_word(assigns.species)))
 
     ~H"""
-    <.modal id="delete-confirm-modal" show on_cancel={JS.push("cancel_delete")}>
-      <:title>Delete {@kind}</:title>
-      <p>
+    <.modal
+      id="delete-confirm-modal"
+      show
+      on_cancel={JS.push("cancel_delete")}
+      cancel={if @references == [], do: "Cancel", else: "Close"}
+    >
+      <:title>
+        {if @references == [], do: "Delete #{@kind}", else: "Can't delete #{@kind}"}
+      </:title>
+      <p :if={@references == []}>
         Delete
         <.sci_name name={@species.scientific_name} hybrid={@species.is_hybrid} weight="regular" />
         from the Compendium?
       </p>
-      <:note :if={@source_count > 0}>
+      <p :if={@references != []} id="delete-references">
+        {references_lead(length(@references))}
+      </p>
+      <ul :if={@references != []}>
+        <li :for={hybrid <- @references}>
+          <.sci_name
+            name={hybrid.scientific_name}
+            hybrid={hybrid.is_hybrid}
+            abbreviate
+            weight="regular"
+          />
+        </li>
+      </ul>
+      <:note :if={@references != []}>Change their parentage first.</:note>
+      <:note :if={@references == [] && @source_count > 0}>
         Its data from {count_label(@source_count, "source")} goes with it.
       </:note>
-      <:note :if={@photo_count > 0}>
+      <:note :if={@references == [] && @photo_count > 0}>
         {photos_note(@photo_count)}
       </:note>
-      <:note :if={@references != []}>
-        <div id="delete-references">
-          <p>{references_lead(length(@references))}</p>
-          <ul>
-            <li :for={ref <- @references}>
-              <.sci_name
-                name={ref.species.scientific_name}
-                hybrid={ref.species.is_hybrid}
-                abbreviate
-                weight="regular"
-              /> ({Enum.map_join(ref.fields, ", ", &reference_field_label/1)})
-            </li>
-          </ul>
-        </div>
-      </:note>
-      <:note><strong>This can't be undone.</strong></:note>
-      <:actions>
+      <:note :if={@references == []}><strong>This can't be undone.</strong></:note>
+      <:actions :if={@references == []}>
         <.button
           type="button"
           variant="danger"
@@ -571,14 +570,8 @@ defmodule OaksWeb.SpeciesDetailLive do
   defp photos_note(n),
     do: "Its #{n} photos go with it, and their files are removed from storage."
 
-  defp references_lead(1), do: "1 other species names it; deleting takes it out of:"
-  defp references_lead(n), do: "#{n} other species name it; deleting takes it out of:"
-
-  defp reference_field_label(:parent1), do: "parent"
-  defp reference_field_label(:parent2), do: "parent"
-  defp reference_field_label(:hybrids), do: "hybrids"
-  defp reference_field_label(:closely_related_to), do: "closely related"
-  defp reference_field_label(:subspecies_varieties), do: "subspecies & varieties"
+  defp references_lead(1), do: "1 hybrid names it as a parent:"
+  defp references_lead(n), do: "#{n} hybrids name it as a parent:"
 
   # -- Delete source confirmation modal --
 
@@ -622,10 +615,6 @@ defmodule OaksWeb.SpeciesDetailLive do
       siblings: siblings_menu(species, band_ranks),
       images: Images.list_for_species(species),
       hybrids: Species.hybrids_with_other_parent(species),
-      subspecies_varieties:
-        species.subspecies_varieties
-        |> Species.parse_name_list()
-        |> Enum.map(&name_and_authority/1),
       synonyms: species.synonyms |> Species.parse_json_array() |> Enum.map(&name_and_authority/1),
       external_links: external_links(species),
       sources: sources,
@@ -811,7 +800,6 @@ defmodule OaksWeb.SpeciesDetailLive do
   end
 
   defp present?(value), do: is_binary(value) and String.trim(value) != ""
-  defp blank?(value), do: not present?(value)
 
   defp count_label(1, noun), do: "1 #{noun}"
   defp count_label(n, "species"), do: "#{n} species"

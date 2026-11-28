@@ -13,6 +13,8 @@ defmodule OaksWeb.TaxonFormLive do
   alias Oaks.Taxonomy
   alias Oaks.Taxonomy.Taxon
   alias OaksWeb.Params
+  alias OaksWeb.TaxonomyOptions
+  alias OaksWeb.TaxonPath
 
   @level_options [
     {"Subgenus", "subgenus"},
@@ -47,9 +49,9 @@ defmodule OaksWeb.TaxonFormLive do
 
   defp apply_action(socket, :new, params) do
     default_level = params["level"] || "subgenus"
-    default_parent = params["parent"]
+    default_parent = Params.int(params["parent_id"])
 
-    attrs = %{level: default_level, parent: default_parent}
+    attrs = %{level: default_level, parent_id: default_parent}
     taxon = %Taxon{}
     changeset = Taxonomy.change_taxon(taxon, attrs)
 
@@ -183,24 +185,15 @@ defmodule OaksWeb.TaxonFormLive do
     end
   end
 
-  defp taxon_path(%{level: "subgenus"} = taxon) do
-    ~p"/taxonomy/#{taxon.name}"
-  end
+  defp taxon_path(taxon) do
+    path =
+      taxon
+      |> Taxonomy.ancestors()
+      |> Enum.reject(&(&1.level == "genus"))
+      |> Enum.map(& &1.name)
 
-  defp taxon_path(%{level: "section"} = taxon) do
-    parent = taxon.parent || "unknown"
-    ~p"/taxonomy/#{parent}/#{taxon.name}"
+    TaxonPath.taxonomy_path(path)
   end
-
-  defp taxon_path(%{level: "subsection"} = taxon) do
-    parent = taxon.parent || "unknown"
-    parent_taxon = Taxonomy.get_taxon("section", parent)
-    grandparent = if parent_taxon, do: parent_taxon.parent || "unknown", else: "unknown"
-    segments = Enum.map_join([grandparent, parent, taxon.name], "/", &URI.encode_www_form/1)
-    "/taxonomy/#{segments}"
-  end
-
-  defp taxon_path(_taxon), do: ~p"/taxonomy"
 
   @impl true
   def render(assigns) do
@@ -260,7 +253,7 @@ defmodule OaksWeb.TaxonFormLive do
                 </div>
                 <div :if={show_parent?(@form)}>
                   <.input
-                    field={@form[:parent]}
+                    field={@form[:parent_id]}
                     type="select"
                     label="Parent"
                     options={@parent_options}
@@ -330,33 +323,10 @@ defmodule OaksWeb.TaxonFormLive do
 
   defp show_parent?(form) do
     level = form[:level].value
-    level && level != "" && level != "subgenus"
+    level && level != "" && level != "genus"
   end
 
-  defp parent_options_for_level("section") do
-    "subgenus"
-    |> Taxonomy.list_taxa_by_level()
-    |> Enum.map(&{&1.name, &1.name})
-    |> Enum.sort()
-  end
-
-  defp parent_options_for_level("subsection") do
-    "section"
-    |> Taxonomy.list_taxa_by_level()
-    |> Enum.map(&{&1.name, &1.name})
-    |> Enum.sort()
-  end
-
-  defp parent_options_for_level("complex") do
-    sections = Taxonomy.list_taxa_by_level("section")
-    subsections = Taxonomy.list_taxa_by_level("subsection")
-
-    (Enum.map(sections, &{&1.name, &1.name}) ++
-       Enum.map(subsections, &{&1.name, &1.name}))
-    |> Enum.sort()
-  end
-
-  defp parent_options_for_level(_), do: []
+  defp parent_options_for_level(level), do: TaxonomyOptions.above(level)
 
   defp link_display(%{"label" => label, "url" => url}), do: "#{label} — #{url}"
   defp link_display(%{"url" => url}), do: url

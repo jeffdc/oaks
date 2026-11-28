@@ -10,9 +10,11 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
   import Oaks.AccountsFixtures
   import Oaks.SourcesFixtures
   import Oaks.SpeciesFixtures
+  import Oaks.TaxonomyFixtures
 
   alias Oaks.Repo
   alias Oaks.Sources.Source
+  alias Oaks.Taxonomy
 
   # alba has two sources (the preferred one with full data) and lists
   # ×bebbiana, stellata as closely related, a synonym, a variety and a
@@ -24,24 +26,28 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
     bebbiana = "×bebbiana#{n}"
     stellata = species_fixture(scientific_name: "stellata#{n}").scientific_name
 
-    hybrid_fixture(scientific_name: bebbiana, parent1: alba, parent2: "macrocarpa")
+    subgenus = Taxonomy.get_taxon("subgenus", "Quercus")
+    section = taxon_fixture(name: "Quercus", level: "section", parent_id: subgenus.id)
+    macrocarpa = species_fixture(scientific_name: "macrocarpa")
 
     alba_species =
       species_fixture(
         scientific_name: alba,
         author: "L. 1753",
         conservation_status: "LC",
-        subgenus: "Quercus",
-        section: "Quercus",
-        hybrids: [bebbiana],
-        closely_related_to: [stellata],
+        taxon_id: section.id,
         synonyms: ["#{alba} var. repanda"],
-        subspecies_varieties: ["#{alba} var. latiloba"],
         external_links:
           Jason.encode!([
             %{name: "Flora of North America", url: "https://floranorthamerica.org/x"}
           ])
       )
+
+    hybrid_fixture(
+      scientific_name: bebbiana,
+      parent1_id: alba_species.id,
+      parent2_id: macrocarpa.id
+    )
 
     ootw = source_fixture(name: "Oaks of the World #{n}")
     inat = source_fixture(name: "iNaturalist #{n}")
@@ -62,6 +68,8 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       alba_species: alba_species,
       bebbiana: bebbiana,
       stellata: stellata,
+      subgenus: subgenus,
+      section: section,
       velutina: species_fixture(scientific_name: "velutina#{n}").scientific_name,
       ootw: ootw,
       inat: inat
@@ -127,19 +135,26 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert has_element?(view, "#taxonomy-band [aria-current]", alba)
     end
 
-    test "the band's siblings menu lists the species beside it, the species marked", %{
-      conn: conn
-    } do
-      complex = "complex#{System.unique_integer([:positive])}"
-      a = species_fixture(complex: complex)
-      b = species_fixture(complex: complex)
+    test "the band's siblings menu lists the species beside it, the species marked",
+         %{
+           conn: conn
+         } = ctx do
+      complex =
+        taxon_fixture(
+          name: "complex#{System.unique_integer([:positive])}",
+          level: "complex",
+          parent_id: ctx.section.id
+        )
+
+      a = species_fixture(taxon_id: complex.id)
+      b = species_fixture(taxon_id: complex.id)
 
       {:ok, view, _html} = live(conn, ~p"/species/#{a.scientific_name}")
 
       assert has_element?(
                view,
                "#taxonomy-band-siblings summary",
-               "#{complex} complex · 2 species"
+               "#{complex.name} complex · 2 species"
              )
 
       assert has_element?(
@@ -159,20 +174,21 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       refute has_element?(view, "#taxonomy-band-siblings")
     end
 
-    test "places a hybrid with no ranks of its own in the band where its parents sit", %{
-      conn: conn,
-      alba: alba
-    } do
-      other = species_fixture(subgenus: "Quercus", section: "Quercus")
-      hybrid = hybrid_fixture(parent1: alba, parent2: other.scientific_name)
+    test "places a hybrid with no ranks of its own in the band where its parents sit",
+         %{
+           conn: conn,
+           alba: alba
+         } = ctx do
+      other = species_fixture(taxon_id: ctx.section.id)
+      hybrid = hybrid_fixture(parent1_name: alba, parent2_id: other.id)
 
       {:ok, view, _html} = live(conn, ~p"/species/#{hybrid.scientific_name}")
       assert has_element?(view, ~s(#taxonomy-band a[href="/taxonomy/Quercus/Quercus"]), "sect.")
       assert has_element?(view, "#taxonomy-band [aria-current]", "×")
     end
 
-    test "places a variety in the band under its species", %{conn: conn, alba: alba} do
-      variety = species_fixture(scientific_name: "#{alba} latiloba", subgenus: "Quercus")
+    test "places a variety in the band under its species", %{conn: conn, alba: alba} = ctx do
+      variety = species_fixture(scientific_name: "#{alba} latiloba", taxon_id: ctx.subgenus.id)
 
       {:ok, view, _html} = live(conn, ~p"/species/#{variety.scientific_name}")
       assert has_element?(view, ~s(#taxonomy-band a[href="/species/#{alba}"]), alba)
@@ -196,7 +212,7 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
     end
 
     test "names an unrecorded parent when only one is known", %{conn: conn, alba: alba} do
-      hybrid = hybrid_fixture(parent1: alba)
+      hybrid = hybrid_fixture(parent1_name: alba)
 
       {:ok, view, _html} = live(conn, ~p"/species/#{hybrid.scientific_name}")
       assert has_element?(view, ~s(#species-parents a[href="/species/#{alba}"]))
@@ -411,8 +427,8 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
     test "follow the main content in order, each only with data", %{conn: conn} = ctx do
       {:ok, view, html} = live(conn, ~p"/species/#{ctx.alba}")
 
-      ids = ~w(species-synonyms species-subspecies species-hybrids species-external-links
-               species-sources species-cite)
+      ids = ~w(species-synonyms species-hybrids species-external-links species-sources
+               species-cite)
 
       positions = Enum.map(ids, &(:binary.match(html, ~s(id="#{&1}")) |> elem(0)))
       assert positions == Enum.sort(positions)
@@ -420,7 +436,7 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
 
       {:ok, view2, _html} = live(conn, ~p"/species/#{ctx.velutina}")
 
-      for id <- ~w(species-synonyms species-subspecies species-hybrids species-sources),
+      for id <- ~w(species-synonyms species-hybrids species-sources),
           do: refute(has_element?(view2, "##{id}"))
 
       assert has_element?(view, "#species-cite")
@@ -434,9 +450,6 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       assert has_element?(view, "#species-synonyms .oc-sci-g", "Q.")
       assert has_element?(view, "#species-synonyms .oc-sci-e", "repanda")
       assert has_element?(view, "#species-synonyms .oc-sci-r", "var.")
-
-      assert has_element?(view, "#species-subspecies .oc-sci-title .oc-sci-g", "Q.")
-      assert has_element?(view, "#species-subspecies .oc-sci-e", "latiloba")
 
       assert has_element?(view, "#species-hybrids", "1 known")
       assert has_element?(view, "#species-hybrids .oc-sci-title .oc-sci-x", "×")
@@ -660,8 +673,10 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
       render_click(view, "request_delete")
 
       "×" <> bebbiana_epithet = bebbiana
-      assert has_element?(view, "#delete-references", bebbiana_epithet)
-      assert has_element?(view, "#delete-references", "parent")
+      assert has_element?(view, "#delete-confirm-modal", "Can't delete species")
+      assert has_element?(view, "#delete-confirm-modal", bebbiana_epithet)
+      assert has_element?(view, "#delete-references", "1 hybrid names it as a parent")
+      refute has_element?(view, "#confirm-delete-btn")
     end
 
     test "says the species' photos go with it", %{conn: conn, velutina: velutina} do
@@ -702,12 +717,7 @@ defmodule OaksWeb.SpeciesDetailLiveTest do
   describe "malformed stored lists" do
     test "renders when list columns hold non-name entries", %{conn: conn} = ctx do
       Oaks.Species.get_species_by_name(ctx.alba)
-      |> Ecto.Changeset.change(
-        hybrids: ~s([1, "#{ctx.bebbiana}"]),
-        closely_related_to: ~s([{"name": "x"}, "#{ctx.stellata}"]),
-        subspecies_varieties: ~s([null]),
-        external_links: ~s([{"name": 1}, "x"])
-      )
+      |> Ecto.Changeset.change(external_links: ~s([{"name": 1}, "x"]))
       |> Oaks.Repo.update!()
 
       "×" <> bebbiana_epithet = ctx.bebbiana

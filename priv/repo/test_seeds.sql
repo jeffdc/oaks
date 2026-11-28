@@ -19,6 +19,7 @@ INSERT INTO sources (id, source_type, name, description, url) VALUES
 -- Taxa
 -- =============================================================================
 
-INSERT INTO taxa (id, name, level, parent, author) VALUES
-  (1, 'Quercus', 'subgenus', NULL, '(L.) Oerst.'),
-  (2, 'Lobatae', 'subgenus', NULL, '(Loudon) Menitsky');
+-- The genus row (id 1) is created by the taxa migration; these hang from it.
+INSERT INTO taxa (id, name, level, parent_id, parent, author) VALUES
+  (2, 'Quercus', 'subgenus', 1, NULL, '(L.) Oerst.'),
+  (3, 'Lobatae', 'subgenus', 1, NULL, '(Loudon) Menitsky');

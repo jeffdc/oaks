@@ -5,6 +5,7 @@ defmodule OaksWeb.HomeLiveTest do
   import Oaks.ImagesFixtures, only: [ready_image_fixture: 1, ready_image_fixture: 2]
   import Oaks.SourcesFixtures
   import Oaks.SpeciesFixtures
+  import Oaks.TaxonomyFixtures
 
   alias Oaks.Images.Image
   alias Oaks.Sources
@@ -58,16 +59,26 @@ defmodule OaksWeb.HomeLiveTest do
     hybrid_name = "× #{unique_species_name()}"
     formula = "#{name} × palmeri"
 
-    species_fixture(
-      scientific_name: name,
-      author: "Nutt.",
-      subgenus: "Quercus",
-      section: "Quercus",
-      hybrids: [hybrid_name, formula]
+    subgenus = Taxonomy.get_taxon("subgenus", "Quercus")
+    section = taxon_fixture(name: "Quercus", level: "section", parent_id: subgenus.id)
+    # Hybrids, so the page's featured oak is the species under test.
+    macrocarpa = hybrid_fixture(scientific_name: "macrocarpa")
+    palmeri = hybrid_fixture(scientific_name: "palmeri")
+
+    featured =
+      species_fixture(
+        scientific_name: name,
+        author: "Nutt.",
+        taxon_id: section.id
+      )
+
+    hybrid_fixture(
+      scientific_name: hybrid_name,
+      parent1_id: featured.id,
+      parent2_id: macrocarpa.id
     )
 
-    hybrid_fixture(scientific_name: hybrid_name, parent1: name, parent2: "macrocarpa")
-    hybrid_fixture(scientific_name: formula, parent1: name, parent2: "palmeri")
+    hybrid_fixture(scientific_name: formula, parent1_id: featured.id, parent2_id: palmeri.id)
 
     {:ok, view, _html} = live(conn, ~p"/")
     html = render(view)
