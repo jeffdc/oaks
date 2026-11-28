@@ -16,7 +16,7 @@ Template:
 
 ## 2026-11-27: The public API is off the air while the Facts expansion lands
 
-- **Why:** `/api/v1`'s JSON would otherwise have to stay still while the model changes underneath it, and nothing consumes it that justifies that constraint. It comes back, as v2 or a reshaped v1, when the model is done.
+- **Why:** so nothing has to keep `/api/v1`'s JSON still while the model changes underneath it. It comes back, as v2 or a reshaped v1, when the model is done.
 - **Changes:** while `config :oaks, :public_api` is false (dev and production), the `:api` pipeline answers 410 on `/api/v1` and its docs, and `api.oakcompendium.org` answers 410 on everything but `/health` and the private API. The code, spec, schemas and serializers stay in the tree and their tests run with the flag on; there is no compatibility promise until it returns. The private API (`/api/private/v1`) is unaffected. Rule W9 is retired with its `API_VERSION` check; W2 stays true of the code.
 - **Source:** Jeff, 2026-11-27; [Architecture groundwork](../facts-expansion/architecture-groundwork.md#0-the-public-api-off-the-air).
 
