@@ -61,6 +61,11 @@ defmodule OaksWeb.Endpoint do
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint], log: {__MODULE__, :log_level, []}
 
+  # The site's other hostnames redirect to the canonical one, so a login's
+  # cookies work everywhere (OaksWeb.Plugs.CanonicalHost; set in production
+  # only). Before the parsers, so a redirected request's body isn't read.
+  plug OaksWeb.Plugs.CanonicalHost
+
   # The CSP and other browser security headers on every error response,
   # including error pages no router pipeline reaches (an unmatched route, a
   # request the parsers refuse). Pages get them in the :browser pipeline.
